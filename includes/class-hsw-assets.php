@@ -141,6 +141,31 @@ class HSW_Assets {
                         true
                 );
 
+                wp_register_style(
+                        'hsw-checkout',
+                        HSW_URL . 'assets/css/hsw-checkout.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-checkout',
+                        HSW_URL . 'assets/js/hsw-checkout.js',
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
+                wp_localize_script(
+                        'hsw-checkout',
+                        'hswCheckoutData',
+                        array(
+                                'rest'       => esc_url_raw( rest_url( 'hsw/v1' ) ),
+                                'nonce'      => wp_create_nonce( 'wp_rest' ),
+                                'errorText'  => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
                 wp_register_script(
                         'hsw-product',
                         HSW_URL . 'assets/js/hsw-product.js',

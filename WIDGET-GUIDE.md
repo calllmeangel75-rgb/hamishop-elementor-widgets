@@ -528,3 +528,42 @@ CSS: `assets/css/hsw-cart.css` — JS: `assets/js/hsw-cart.js` — پایه: `in
 - چیدمان ۸/۴ طرح را با دو ستون المنتور بسازید: راست = بنر+اقلام+کوپن، چپ = خلاصه فاکتور.
 
 - آیکون‌های موجود در فونت subset: home, tune, sliders, search, close, check_circle, task_alt, help, add_shopping_cart, add, favorite, star, bolt, chevron_left/right, expand_more, filter_list.
+
+---
+
+# CHECKOUT WIDGETS — ویجت‌های اطلاعات ارسال (مرحله ۲ تسویه حساب)
+
+Faithful conversion of the supplied shipping-information design (TopAppBar +
+stepper + address + shipping methods + delivery schedule + note/invoice +
+summary aside + mobile flow with fixed bottom bar).
+
+CSS: `assets/css/hsw-checkout.css` — JS: `assets/js/hsw-checkout.js`
+پایه: `includes/class-hsw-checkout-base.php` (extends HSW_Cart_Base → money/کنترل‌های مشترک)
+REST: `includes/class-hsw-checkout-rest.php`
+فونت آیکن: `assets/fonts/material-symbols.woff2` (ساب‌ست ۶۸ آیکن — +location_on/add_circle/inventory_2/...)
+
+## ویجت‌های دسته «حامی — ویجت‌های سبد خرید و پرداخت»
+| ویجت | slug | نقش |
+|---|---|---|
+| هدر و مراحل اطلاعات ارسال | `hsw-checkout-top` | دسکتاپ: TopAppBar چسبان (بازگشت + عنوان / مرکز تماس + شماره + پشتیبانی) + ردیاب باکس‌دار ۳ مرحله (متا: مرحله اول/در حال تکمیل/مرحله بعد)؛ موبایل: هدر ساده + استپر آیکنی با خط پیشرفت |
+| آدرس تحویل سفارش | `hsw-checkout-address` | دسکتاپ: کارت با باکس انتخابی (تیک + چیپ تحویل‌گیرنده + ویرایش/تغییر + تماس/کدپستی)؛ موبایل: کارت با نوار راست + دکمه خط‌چین افزودن |
+| انتخاب روش ارسال | `hsw-checkout-shipping` | رادیوکارت‌ها (آیکن + نشان پیشنهادی + توضیح + قیمت/خط‌خورده)؛ با نرخ‌های واقعی ووکامرس live می‌شود، وگرنه ریپیتر |
+| زمان و روز تحویل | `hsw-checkout-schedule` | دسکتاپ: گرید روز (۴ستونه + وضعیت «ظرفیت تکمیل») + رادیو بازه ساعت؛ موبایل: پیل‌های روز اسکرولی + گرید ۲ستونه بازه |
+| یادداشت سفارش و فاکتور | `hsw-checkout-note` | تکست‌اریا + چک‌باکس فاکتور رسمی حقوقی (دسکتاپ)؛ نسخه موبایل جدا |
+| اقلام مرسوله | `hsw-checkout-items` | نوار اسکرولی اقلام (بندانگشتی + badge تعداد + نام + واریانت) از سبد واقعی |
+| خلاصه پرداخت اطلاعات ارسال | `hsw-checkout-summary` | دسکتاپ: آساید چسبان (پیش‌فاکتور + نوار اقلام + ردیف‌ها + CTA نارنجی + نشان‌های اعتماد)؛ موبایل: کارت «جزئیات پرداخت» + نوار پایین ثابت |
+
+## قراردادهای مهم ارسال/چک‌اوت
+- آدرس از `WC()->customer` (shipping → fallback billing)؛ نام/آدرس یک‌خطی/تلفن/کدپستی؛ ادیتور = دیتای دمو (علی حسینی/تهران).
+- روش ارسال: `WC()->shipping()->calculate_shipping( WC()->cart->get_shipping_packages() )`؛ انتخاب با REST
+  `POST /hsw/v1/checkout/shipping {rate}` (nonce wp_rest) → `chosen_shipping_methods` در سشن + `calculate_totals`
+  → JS ردیف‌های `data-hswk="subtotal|discount|shipping|taxes|total"` را patch می‌کند (بدون رفرش).
+- آیکن خودکار نرخ‌ها از کلیدواژه (پیک→two_wheeler، پست→markunread_mailbox، تیپاکس→inventory_2، اکسپرس→bolt).
+- روز/بازه تحویل: ریپیتر (ووکامرس مفهوم بومی ندارد)؛ انتخاب صرفاً ظاهری با JS. روز دارای «نشان» خودکار غیرفعال می‌شود.
+- یادداشت: CTA با keepalive به `POST /hsw/v1/checkout/note` می‌فرستد → سشن `hsw_checkout_note|hsw_checkout_invoice`
+  + اکشن `hsw_checkout_note_saved`. (فیلتر اختیاری برای افزونه‌های چک‌اوت چندمرحله‌ای.)
+- رادیوها بین دسکتاپ/موبایل هم‌گام می‌شوند: نام‌ها جدا هستند (`*_d`/`*_m`) تا گروه رادیوی بومی تداخل نکند؛ JS بر اساس value سینک می‌کند.
+- ادیتور المنتور → دیتای دمو؛ هیچ درخواست شبکه‌ای در ادیتور انجام نمی‌شود (گارد `window.parent`).
+- ریشه ویجت‌ها: `hsw-k hsw-{slug} hsw-vis-*` (+ hsw-font-inherit)؛ متغیرها `--hswk-*`.
+- چیدمان طرح: کانتینر ۱۲ستونی المنتور — راست (۸ ستون): آدرس + روش ارسال + زمان + یادداشت (+ اقلام)؛ چپ (۴ ستون): خلاصه پرداخت.
+- CTA «ادامه و ورود به مرحله پرداخت» → `wc_get_checkout_url()`؛ دکمه‌ها کلاس `hsw-k-cta` دارند (JS یادداشت را قبل از ناوبری ذخیره می‌کند).

@@ -53,12 +53,16 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
                 require_once HSW_DIR . 'includes/class-hsw-archive-query.php';
                 require_once HSW_DIR . 'includes/class-hsw-cart-actions.php';
+                require_once HSW_DIR . 'includes/class-hsw-checkout-rest.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
 
                 /* Cart form actions (empty cart button from the design). */
                 new HSW_Cart_Actions();
+
+                /* Checkout shipping endpoints (choose rate / save note). */
+                new HSW_Checkout_Rest();
         }
 
         /**
@@ -127,6 +131,16 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'widgets/class-hsw-widget-cart-coupon.php';
                 require_once HSW_DIR . 'widgets/class-hsw-widget-cart-summary.php';
 
+                /* Checkout shipping-information step (اطلاعات ارسال) — the exact supplied design. */
+                require_once HSW_DIR . 'includes/class-hsw-checkout-base.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-top.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-address.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-shipping.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-schedule.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-note.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-items.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-summary.php';
+
                 /* Elementor 3.1+: register() — older installs: register_widget_type(). */
                 if ( method_exists( $widgets_manager, 'register' ) ) {
                         $register = array( $widgets_manager, 'register' );
@@ -160,6 +174,13 @@ final class HSW_Plugin {
                         '\HSW_Widget_Cart_Items',
                         '\HSW_Widget_Cart_Coupon',
                         '\HSW_Widget_Cart_Summary',
+                        '\HSW_Widget_Checkout_Top',
+                        '\HSW_Widget_Checkout_Address',
+                        '\HSW_Widget_Checkout_Shipping',
+                        '\HSW_Widget_Checkout_Schedule',
+                        '\HSW_Widget_Checkout_Note',
+                        '\HSW_Widget_Checkout_Items',
+                        '\HSW_Widget_Checkout_Summary',
                 ) as $widget_class ) {
                         if ( class_exists( $widget_class ) ) {
                                 call_user_func( $register, new $widget_class() );
