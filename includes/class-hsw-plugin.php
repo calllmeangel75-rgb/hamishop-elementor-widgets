@@ -44,6 +44,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
                 require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
+                require_once HSW_DIR . 'includes/class-hsw-product-base.php';
         }
 
         /**
@@ -60,15 +61,37 @@ final class HSW_Plugin {
         }
 
         /**
-         * Register the loop widgets.
+         * Register widgets: product loop + single product page.
          */
         public function register_widgets( $widgets_manager ) {
                 require_once HSW_DIR . 'widgets/class-hsw-wonder-deals.php';
                 require_once HSW_DIR . 'widgets/class-hsw-best-sellers.php';
                 require_once HSW_DIR . 'widgets/class-hsw-popular.php';
 
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-breadcrumb.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-gallery.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-trust.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-title.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-variants.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-features.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-purchase.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-tabs.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php';
+
                 $widgets_manager->register( new \HSW_Widget_Wonder_Deals() );
                 $widgets_manager->register( new \HSW_Widget_Best_Sellers() );
                 $widgets_manager->register( new \HSW_Widget_Popular() );
+
+                $widgets_manager->register( new \HSW_Widget_Product_Breadcrumb() );
+                $widgets_manager->register( new \HSW_Widget_Product_Gallery() );
+                $widgets_manager->register( new \HSW_Widget_Product_Trust() );
+                $widgets_manager->register( new \HSW_Widget_Product_Title() );
+                $widgets_manager->register( new \HSW_Widget_Product_Variants() );
+                $widgets_manager->register( new \HSW_Widget_Product_Features() );
+                $widgets_manager->register( new \HSW_Widget_Product_Purchase() );
+                $widgets_manager->register( new \HSW_Widget_Product_Tabs() );
+                $widgets_manager->register( new \HSW_Widget_Product_Accordions() );
+                $widgets_manager->register( new \HSW_Widget_Product_Sticky() );
         }
 }

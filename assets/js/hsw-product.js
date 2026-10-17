@@ -1,0 +1,291 @@
+/**
+ * HamiShop Elementor Widgets — product page behavior.
+ * Vanilla JS, no dependencies, event delegation only.
+ * State engine: color/storage selection → matching variation → price/stock
+ * sync across purchase box + sticky bar → AJAX add-to-cart with fragments.
+ */
+(function () {
+	'use strict';
+
+	var D = window.hswProductData || {};
+	var FA = { '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴', '۵': '۵', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹' };
+	function fa(n) { return D.faDigits === false ? String(n) : String(n).replace(/[0-9]/g, function (d) { return FA[d]; }); }
+
+	/* ---------- per-product state ---------- */
+	var states = {};
+	function state(pid) {
+		if (!states[pid]) { states[pid] = { qty: 1, color: '', storage: '', variation: null, data: null }; }
+		return states[pid];
+	}
+	function payload(root) {
+		var raw = root.getAttribute('data-hsw-variations');
+		if (!raw) { return null; }
+		try { return JSON.parse(raw); } catch (e) { return null; }
+	}
+	function attrMap(root) {
+		var raw = root.getAttribute('data-hsw-attrs');
+		try { return raw ? JSON.parse(raw) : {}; } catch (e) { return {}; }
+	}
+	function roots(pid) {
+		return document.querySelectorAll('.hsw-p[data-hsw-product="' + pid + '"], .hsw-p[data-hsw-variants="' + pid + '"]');
+	}
+
+	/* ---------- variation matching ---------- */
+	function matchVariation(list, map, color, storage) {
+		if (!list || !list.length) { return null; }
+		var keys = [];
+		if (map.color) { keys.push(map.color); }
+		if (map.storage) { keys.push(map.storage); }
+		var sel = {};
+		if (map.color) { sel[map.color] = color; }
+		if (map.storage) { sel[map.storage] = storage; }
+		for (var i = 0; i < list.length; i++) {
+			var v = list[i], ok = true;
+			for (var k = 0; k < keys.length; k++) {
+				var want = sel[keys[k]];
+				var have = v.attrs && v.attrs[keys[k]];
+				if (want && have && have !== want) { ok = false; break; }
+			}
+			if (ok) { return v; }
+		}
+		return list[0] || null;
+	}
+
+	/* ---------- render variant-dependent fields ---------- */
+	function applyVariant(pid, variation) {
+		var st = state(pid);
+		st.variation = variation || null;
+		roots(pid).forEach(function (root) {
+			var price = root.querySelector('[data-hsw-price]');
+			var old = root.querySelector('[data-hsw-old]');
+			var save = root.querySelector('[data-hsw-save]');
+			var off = root.querySelector('[data-hsw-off]');
+			if (variation) {
+				if (price) { price.textContent = variation.price; }
+				if (old) {
+					old.textContent = variation.regular;
+					old.style.display = (variation.discount > 0) ? '' : 'none';
+				}
+				if (save) {
+					save.style.display = (variation.discount > 0) ? '' : 'none';
+				}
+				if (off) {
+					off.textContent = '٪' + fa(variation.discount) + '-';
+					off.style.display = (variation.discount > 0) ? '' : 'none';
+				}
+				root.classList.toggle('is-oos', !variation.in_stock);
+			}
+			/* gallery image swap */
+			if (variation && variation.image) {
+				var img = root.querySelector('.hsw-pgal__img');
+				if (img) { img.src = variation.image; }
+			}
+		});
+		document.dispatchEvent(new CustomEvent('hsw:variant', { detail: { product: pid, variation: variation, state: st } }));
+	}
+
+	function refreshVariant(pid) {
+		var st = state(pid);
+		var any = document.querySelector('.hsw-p[data-hsw-variations][data-hsw-product="' + pid + '"], .hsw-p[data-hsw-variations][data-hsw-variants="' + pid + '"]');
+		if (!any) { return; }
+		var list = payload(any);
+		var map = attrMap(any);
+		applyVariant(pid, matchVariation(list, map, st.color, st.storage));
+	}
+
+	/* ================= CLICK DELEGATION ================= */
+	document.addEventListener('click', function (e) {
+		var t = e.target;
+
+		/* --- tabs --- */
+		var tabBtn = t.closest('.hsw-ptabs__btn');
+		if (tabBtn) {
+			var tabsRoot = tabBtn.closest('.hsw-ptabs');
+			var id = tabBtn.getAttribute('data-hsw-tab');
+			tabsRoot.querySelectorAll('.hsw-ptabs__btn').forEach(function (b) { b.classList.toggle('is-active', b === tabBtn); });
+			tabsRoot.querySelectorAll('.hsw-ptabs__panel').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-hsw-panel') === id); });
+			return;
+		}
+
+		/* --- accordion --- */
+		var acc = t.closest('[data-hsw-acc]');
+		if (acc) {
+			acc.closest('.hsw-pacc__item').classList.toggle('is-open');
+			return;
+		}
+
+		/* --- gallery thumbs / dots --- */
+		var thumb = t.closest('.hsw-pgal__thumb, .hsw-pgal__dot');
+		if (thumb) {
+			var gal = thumb.closest('.hsw-pgal');
+			var src = thumb.getAttribute('data-hsw-src');
+			var img = gal && gal.querySelector('.hsw-pgal__img');
+			gal.querySelectorAll('.hsw-pgal__thumb, .hsw-pgal__dot').forEach(function (b) { b.classList.toggle('is-active', b === thumb); });
+			if (img && src) { img.src = src; }
+			return;
+		}
+
+		/* --- zoom --- */
+		var zoomBtn = t.closest('[data-hsw-zoom]');
+		if (zoomBtn) {
+			var scope = zoomBtn.closest('.hsw-p');
+			var main = scope && scope.querySelector('.hsw-pgal__img');
+			if (main) { openZoom(main.currentSrc || main.src); }
+			return;
+		}
+		if (t.closest('.hsw-zoom')) { closeZoom(); return; }
+
+		/* --- wishlist (visual toggle) --- */
+		var wish = t.closest('[data-hsw-wish]');
+		if (wish) {
+			var ic = wish.querySelector('.hsw-ic');
+			var on = wish.classList.toggle('is-active');
+			if (ic) { ic.style.fontVariationSettings = on ? "'FILL' 1" : "'FILL' 0"; ic.style.color = on ? 'var(--hsw-secondary)' : ''; }
+			return;
+		}
+
+		/* --- color swatch --- */
+		var sw = t.closest('.hsw-pvar__swatch, .hsw-pvar__mswatch');
+		if (sw) {
+			var vr = sw.closest('.hsw-pvar');
+			var pid = vr.getAttribute('data-hsw-variants') || vr.getAttribute('data-hsw-product');
+			vr.querySelectorAll('.hsw-pvar__swatch, .hsw-pvar__mswatch').forEach(function (b) { b.classList.toggle('is-active', b === sw); });
+			var st = state(pid);
+			st.color = sw.getAttribute('data-hsw-color') || '';
+			vr.querySelectorAll('[data-hsw-selname="color"]').forEach(function (el) { el.textContent = st.color; });
+			refreshVariant(pid);
+			return;
+		}
+
+		/* --- storage chip --- */
+		var chip = t.closest('.hsw-pvar__chip, .hsw-pvar__mchip');
+		if (chip) {
+			var vr2 = chip.closest('.hsw-pvar');
+			var pid2 = vr2.getAttribute('data-hsw-variants') || vr2.getAttribute('data-hsw-product');
+			vr2.querySelectorAll('.hsw-pvar__chip, .hsw-pvar__mchip').forEach(function (b) { b.classList.toggle('is-active', b === chip); });
+			var st2 = state(pid2);
+			st2.storage = chip.getAttribute('data-hsw-storage') || '';
+			vr2.querySelectorAll('[data-hsw-selname="storage"]').forEach(function (el) { el.textContent = st2.storage; });
+			refreshVariant(pid2);
+			return;
+		}
+
+		/* --- quantity --- */
+		var qb = t.closest('[data-hsw-qty]');
+		if (qb) {
+			var scope2 = qb.closest('.hsw-p');
+			var pid3 = scope2.getAttribute('data-hsw-product');
+			var st3 = state(pid3);
+			var delta = parseInt(qb.getAttribute('data-hsw-qty'), 10) || 0;
+			st3.qty = Math.max(1, Math.min(99, st3.qty + delta));
+			roots(pid3).forEach(function (r) {
+				r.querySelectorAll('[data-hsw-qval]').forEach(function (el) { el.textContent = fa(st3.qty); });
+			});
+			return;
+		}
+
+		/* --- add to cart / buy now --- */
+		var addBtn = t.closest('[data-hsw-add], [data-hsw-buy]');
+		if (addBtn) {
+			var scope3 = addBtn.closest('.hsw-p');
+			var pid4 = scope3.getAttribute('data-hsw-product');
+			var st4 = state(pid4);
+			addToCart(addBtn, pid4, st4, addBtn.hasAttribute('data-hsw-buy'));
+			return;
+		}
+	});
+
+	/* ================= ADD TO CART ================= */
+	function addToCart(btn, pid, st, buyNow) {
+		if (document.body.classList.contains('elementor-editor-active')) { flashAdded(btn); return; }
+		if (!pid || btn.classList.contains('is-busy')) { return; }
+		btn.classList.add('is-busy');
+
+		var body = new URLSearchParams();
+		body.set('action', 'hsw_add_to_cart'); /* unused; wc-ajax endpoint ignores action */
+		body.set('product_id', pid);
+		if (st.variation && st.variation.id) { body.set('variation_id', st.variation.id); }
+		body.set('quantity', st.qty);
+
+		var url = D.wcAjax || '/?wc-ajax=add_to_cart';
+		fetch(url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: body.toString()
+		}).then(function (r) { return r.json(); }).then(function (res) {
+			btn.classList.remove('is-busy');
+			if (res && res.error && res.product_url) { window.location = res.product_url; return; }
+			flashAdded(btn);
+			showToast(pid);
+			if (res && res.fragments) {
+				Object.keys(res.fragments).forEach(function (key) {
+					var nodes = document.querySelectorAll(key);
+					nodes.forEach(function (n) { n.outerHTML = res.fragments[key]; });
+				});
+				document.body.dispatchEvent(new Event('wc_fragment_refresh'));
+			}
+			if (buyNow) {
+				window.location = D.checkoutUrl || (D.cartUrl || '/checkout/');
+			}
+		}).catch(function () {
+			btn.classList.remove('is-busy');
+		});
+	}
+	function flashAdded(btn) {
+		btn.classList.add('is-added');
+		setTimeout(function () { btn.classList.remove('is-added'); }, 2000);
+	}
+	function showToast(pid) {
+		roots(pid).forEach(function (root) {
+			var toast = root.querySelector('[data-hsw-toast]');
+			if (toast) {
+				toast.classList.add('is-visible');
+				clearTimeout(toast._t);
+				toast._t = setTimeout(function () { toast.classList.remove('is-visible'); }, 4000);
+			}
+		});
+	}
+
+	/* ================= ZOOM OVERLAY ================= */
+	var zoomEl = null;
+	function openZoom(src) {
+		if (!zoomEl) {
+			zoomEl = document.createElement('div');
+			zoomEl.className = 'hsw-zoom';
+			zoomEl.innerHTML = '<img alt="">';
+			document.body.appendChild(zoomEl);
+		}
+		zoomEl.querySelector('img').src = src;
+		zoomEl.classList.add('is-open');
+	}
+	function closeZoom() { if (zoomEl) { zoomEl.classList.remove('is-open'); } }
+	document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeZoom(); } });
+
+	/* ================= INIT ================= */
+	function init() {
+		/* seed variation payload roots */
+		document.querySelectorAll('.hsw-p[data-hsw-variations]').forEach(function (root) {
+			var pid = root.getAttribute('data-hsw-product') || root.getAttribute('data-hsw-variants');
+			var st = state(pid);
+			st.data = payload(root);
+			/* preselect first active swatch/chip labels */
+			var sw = root.querySelector('.hsw-pvar__swatch.is-active, .hsw-pvar__mswatch.is-active');
+			var ch = root.querySelector('.hsw-pvar__chip.is-active, .hsw-pvar__mchip.is-active');
+			if (sw) { st.color = sw.getAttribute('data-hsw-color') || ''; }
+			if (ch) { st.storage = ch.getAttribute('data-hsw-storage') || ''; }
+			applyVariant(pid, matchVariation(st.data, attrMap(root), st.color, st.storage));
+		});
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+	/* Elementor editor re-renders */
+	if (window.jQuery) {
+		window.jQuery(window).on('elementor/frontend/init', function () {
+			window.elementorFrontend && window.elementorFrontend.hooks.addAction('frontend/element_ready/global', function () { init(); });
+		});
+	}
+})();

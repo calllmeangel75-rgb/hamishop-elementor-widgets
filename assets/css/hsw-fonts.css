@@ -1,0 +1,14 @@
+/**
+ * HamiShop Elementor Widgets — local fonts.
+ * وزیرمتن به‌صورت لوکال داخل افزونه پک شده (بدون درخواست خارجی).
+ * Registered in Elementor font list as: «Vazirmatn HSW».
+ */
+
+@font-face {
+        font-family: 'Vazirmatn HSW';
+        src: url('../fonts/vazirmatn.woff2') format('woff2-variations');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+0021-002F, U+0030-0039, U+003C-0040, U+005B-0060, U+007B-007E;
+}
