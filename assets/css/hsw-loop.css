@@ -73,7 +73,7 @@
 
         position: relative;
         color: var(--hsw-on-surface);
-        font-family: inherit;
+        font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
         line-height: 1.6;
 }
 .hsw-loop :where(h2, h3) { margin: 0; }

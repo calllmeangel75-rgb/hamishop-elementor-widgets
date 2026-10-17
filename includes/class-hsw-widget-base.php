@@ -17,7 +17,16 @@ use Elementor\Repeater;
 abstract class HSW_Widget_Base extends Widget_Base {
 
         public function get_categories() {
-                return array( 'hamishop' );
+                return array( 'hamishop-loop' );
+        }
+
+        /**
+         * Extra root class from the common «قالب‌سازگاری» style section.
+         * Returns ' hsw-font-inherit' when the widget must use the theme font.
+         */
+        public function hsw_font_class() {
+                $s = $this->get_settings_for_display();
+                return ( isset( $s['hsw_font_mode'] ) && 'inherit' === $s['hsw_font_mode'] ) ? ' hsw-font-inherit' : '';
         }
 
         public function get_style_depends() {

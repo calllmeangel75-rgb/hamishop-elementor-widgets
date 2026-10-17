@@ -65,11 +65,26 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                 );
 
                 $this->add_control(
+                        'recommend_mode',
+                        array(
+                                'label'   => __( 'درصد پیشنهاد خریداران', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::SELECT,
+                                'default' => 'auto',
+                                'options' => array(
+                                        'auto'   => __( 'خودکار از دیدگاه‌های واقعی (۴ ستاره و بالاتر)', 'hamishop-elementor-widgets' ),
+                                        'manual' => __( 'مقدار دستی', 'hamishop-elementor-widgets' ),
+                                ),
+                        )
+                );
+
+                $this->add_control(
                         'recommend',
                         array(
-                                'label'   => __( 'درصد پیشنهاد خریداران (دسکتاپ)', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => '۸۹',
+                                'label'       => __( 'درصد دستی (دسکتاپ)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => '۸۹',
+                                'condition'   => array( 'recommend_mode' => 'manual' ),
+                                'description' => __( 'خالی یا صفر = نمایش داده نمی‌شود', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -190,9 +205,9 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                 $d = $this->demo();
 
                 $name_en = isset( $s['title_en'] ) ? trim( (string) $s['title_en'] ) : '';
-                $rec     = ( isset( $s['recommend'] ) && '' !== trim( (string) $s['recommend'] ) ) ? trim( (string) $s['recommend'] ) : '۸۹';
                 $tag     = ( isset( $s['title_tag'] ) && 'h2' === $s['title_tag'] ) ? 'h2' : 'h1';
                 $rev_url = ( isset( $s['rev_url']['url'] ) && '' !== $s['rev_url']['url'] ) ? $s['rev_url']['url'] : '#reviews';
+                $rec_mode = ( isset( $s['recommend_mode'] ) && 'manual' === $s['recommend_mode'] ) ? 'manual' : 'auto';
 
                 if ( $demo ) {
                         $name     = $d['name'];
@@ -200,6 +215,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                         $rating   = $d['rating'];
                         $reviews  = HSW_Helpers::fa_num( $d['reviews'] );
                         $in_stock = (bool) $d['in_stock'];
+                        $rec      = 'auto' === $rec_mode ? (string) $d['recommend'] : ( isset( $s['recommend'] ) ? trim( (string) $s['recommend'] ) : '' );
                         if ( '' === $name_en ) {
                                 $name_en = $d['name_en'];
                         }
@@ -209,7 +225,16 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                         $rating   = HSW_Helpers::fa_num( number_format( (float) $product->get_average_rating(), 1 ) );
                         $reviews  = HSW_Helpers::fa_num( $product->get_review_count() );
                         $in_stock = (bool) $product->is_in_stock();
+
+                        if ( 'manual' === $rec_mode ) {
+                                $rec = ( isset( $s['recommend'] ) && '' !== trim( (string) $s['recommend'] ) ) ? trim( (string) $s['recommend'] ) : '';
+                        } else {
+                                $percent = $this->recommend_percent( $product );
+                                $rec     = $percent > 0 ? HSW_Helpers::fa_num( $percent ) : '';
+                        }
                 }
+
+                $show_rec = ( '' !== (string) $rec && '0' !== (string) $rec && '۰' !== (string) $rec );
 
                 $stock_text = $in_stock ? __( 'موجود در انبار', 'hamishop-elementor-widgets' ) : __( 'ناموجود', 'hamishop-elementor-widgets' );
                 ?>
@@ -231,8 +256,10 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                         </span>
                                         <span class="hsw-ptitle__dot" aria-hidden="true"></span>
                                         <a class="hsw-ptitle__revlink" href="<?php echo esc_url( $rev_url ); ?>"><?php echo esc_html( $reviews ); ?> <?php esc_html_e( 'دیدگاه ثبت شده کاربران', 'hamishop-elementor-widgets' ); ?></a>
-                                        <span class="hsw-ptitle__dot" aria-hidden="true"></span>
-                                        <span class="hsw-ptitle__rec"><?php echo esc_html( $rec ); ?>٪ <?php esc_html_e( 'خریداران پیشنهاد کرده‌اند', 'hamishop-elementor-widgets' ); ?></span>
+                                        <?php if ( $show_rec ) : ?>
+                                                <span class="hsw-ptitle__dot" aria-hidden="true"></span>
+                                                <span class="hsw-ptitle__rec"><?php echo esc_html( $rec ); ?>٪ <?php esc_html_e( 'خریداران پیشنهاد کرده‌اند', 'hamishop-elementor-widgets' ); ?></span>
+                                        <?php endif; ?>
                                 </div>
                         </div>
                         <div class="hsw-m">

@@ -16,6 +16,10 @@ use Elementor\Repeater;
 
 abstract class HSW_Product_Base extends HSW_Widget_Base {
 
+        public function get_categories() {
+                return array( 'hamishop-single' );
+        }
+
         public function get_style_depends() {
                 return array( 'hsw-fonts', 'hsw-product' );
         }
@@ -306,16 +310,49 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         }
 
         /**
-         * Root classes for the widget (hsw-p + per-widget + visibility).
+         * Root classes for the widget (hsw-p + per-widget + visibility + font mode).
          */
         protected function root_class( $slug, $extra = '' ) {
                 $s    = $this->get_settings_for_display();
                 $vis  = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
-                $cls  = 'hsw-p hsw-' . $slug . ' hsw-vis-' . $vis;
+                $cls  = 'hsw-p hsw-' . $slug . ' hsw-vis-' . $vis . $this->hsw_font_class();
                 if ( $extra ) {
                         $cls .= ' ' . $extra;
                 }
                 return $cls;
+        }
+
+        /**
+         * «درصد رضایت خریداران» — share of approved reviews rated 4★ or 5★.
+         * Returns 0 when the product has no reviews (widget hides the chip).
+         * Filterable: add_filter( 'hsw_recommend_percent', ... , 10, 2 ).
+         */
+        protected function recommend_percent( $product ) {
+                if ( ! $product ) {
+                        return 0;
+                }
+                $total = (int) $product->get_review_count();
+                if ( $total <= 0 ) {
+                        return 0;
+                }
+                $positive = (int) get_comments(
+                        array(
+                                'post_id'    => $product->get_id(),
+                                'status'     => 'approve',
+                                'type'       => 'review',
+                                'count'      => true,
+                                'meta_query' => array(
+                                        array(
+                                                'key'     => 'rating',
+                                                'value'   => 4,
+                                                'compare' => '>=',
+                                                'type'    => 'NUMERIC',
+                                        ),
+                                ),
+                        )
+                );
+                $percent = ( $positive > 0 ) ? (int) round( ( $positive / $total ) * 100 ) : 0;
+                return (int) apply_filters( 'hsw_recommend_percent', $percent, $product );
         }
 
         /**

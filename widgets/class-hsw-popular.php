@@ -169,7 +169,7 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
                 $count    = max( 1, (int) ( $s['count']['size'] ?? 8 ) );
                 $term_id  = isset( $s['source_term'] ) ? (int) $s['source_term'] : 0;
                 ?>
-                <section class="hsw-loop hsw-loop--box hsw-loop--pop hsw-loop--hsw-popular"
+                <section class="hsw-loop hsw-loop--box hsw-loop--pop hsw-loop--hsw-popular<?php echo esc_attr( $this->hsw_font_class() ); ?>"
                         <?php if ( $show_tabs && ! empty( $tabs ) ) : ?>
                         data-hsw-endpoint="<?php echo esc_url( add_query_arg( 'sig', $sig, $endpoint ) ); ?>"
                         <?php endif; ?>

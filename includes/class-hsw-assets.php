@@ -15,6 +15,67 @@ class HSW_Assets {
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
+                add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
+        }
+
+        /**
+         * Append the shared «قالب‌سازگاری» style section to every HSW widget
+         * (and only HSW widgets) — font mode: design / custom / theme-inherit.
+         * This is what makes the widgets reusable on any site: پوشاک، دیجیتال،
+         * هر قالبی با هر فونتی — بدون دست‌زدن به کد.
+         */
+        public function append_common_section( $element, $section_id, $args = array() ) {
+                if ( ! $element instanceof \Elementor\Widget_Base ) {
+                        return;
+                }
+                if ( 'hsw-' !== substr( $element->get_name(), 0, 4 ) ) {
+                        return;
+                }
+                $tab = isset( $args['tab'] ) ? $args['tab'] : '';
+                if ( \Elementor\Controls_Manager::TAB_STYLE !== $tab ) {
+                        return;
+                }
+                /* Fire only once per widget instance (some widgets have several style sections). */
+                if ( $element->get_controls( 'hsw_font_mode' ) ) {
+                        return;
+                }
+
+                $element->start_controls_section(
+                        'hsw_sec_common',
+                        array(
+                                'label' => __( 'سازگاری با قالب (فونت)', 'hamishop-elementor-widgets' ),
+                                'tab'   => \Elementor\Controls_Manager::TAB_STYLE,
+                        )
+                );
+
+                $element->add_control(
+                        'hsw_font_mode',
+                        array(
+                                'label'   => __( 'فونت پایه ویجت', 'hamishop-elementor-widgets' ),
+                                'type'    => \Elementor\Controls_Manager::SELECT,
+                                'default' => 'design',
+                                'options' => array(
+                                        'design'  => __( 'فونت طرح (وزیرمتن لوکال)', 'hamishop-elementor-widgets' ),
+                                        'custom'  => __( 'فونت سفارشی', 'hamishop-elementor-widgets' ),
+                                        'inherit' => __( 'ارث‌بری فونت از قالب سایت', 'hamishop-elementor-widgets' ),
+                                ),
+                        )
+                );
+
+                $element->add_control(
+                        'hsw_font_custom',
+                        array(
+                                'label'       => __( 'نام فونت سفارشی', 'hamishop-elementor-widgets' ),
+                                'type'        => \Elementor\Controls_Manager::TEXT,
+                                'description' => __( 'دقیقاً همان نام font-face که قالب لود کرده؛ مثلاً Peyda یا IRANSansX', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'hsw_font_mode' => 'custom' ),
+                                'selectors'   => array(
+                                        '{{WRAPPER}}' => "--hsw-font: '{{VALUE}}';",
+                                ),
+                        )
+                );
+
+                $element->end_controls_section();
         }
 
         /**

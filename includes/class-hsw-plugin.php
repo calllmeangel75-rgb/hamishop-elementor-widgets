@@ -53,16 +53,24 @@ final class HSW_Plugin {
         }
 
         /**
-         * Elementor category: «HamiShop».
+         * Elementor categories — one HamiShop brand, organized subcategories.
          */
         public function register_category( $elements_manager ) {
-                $elements_manager->add_category(
-                        'hamishop',
-                        array(
-                                'title' => __( 'HamiShop — حامی', 'hamishop-elementor-widgets' ),
-                                'icon'  => 'eicon-products',
-                        )
+                $categories = array(
+                        'hamishop-single'  => __( 'حامی — ویجت‌های صفحه محصول', 'hamishop-elementor-widgets' ),
+                        'hamishop-loop'    => __( 'حامی — ویجت‌های لوپ محصولات', 'hamishop-elementor-widgets' ),
+                        'hamishop-cart'    => __( 'حامی — ویجت‌های سبد خرید و پرداخت', 'hamishop-elementor-widgets' ),
+                        'hamishop-archive' => __( 'حامی — ویجت‌های آرشیو محصولات', 'hamishop-elementor-widgets' ),
                 );
+                foreach ( $categories as $slug => $title ) {
+                        $elements_manager->add_category(
+                                $slug,
+                                array(
+                                        'title' => $title . ' (HamiShop)',
+                                        'icon'  => 'eicon-products',
+                                )
+                        );
+                }
         }
 
         /**
