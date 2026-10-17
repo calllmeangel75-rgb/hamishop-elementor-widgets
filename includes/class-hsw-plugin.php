@@ -50,6 +50,11 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
+                require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
+                require_once HSW_DIR . 'includes/class-hsw-archive-query.php';
+
+                /* Archive filter/sort query wiring (real WooCommerce params). */
+                new HSW_Archive_Query();
         }
 
         /**
@@ -101,6 +106,15 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php';
                 require_once HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php';
 
+                /* Store archive (desktop + mobile) — the exact supplied design. */
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-breadcrumb.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-header.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-filters.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-toolbar.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-grid.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-pagination.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-guide.php';
+
                 /* Elementor 3.1+: register() — older installs: register_widget_type(). */
                 if ( method_exists( $widgets_manager, 'register' ) ) {
                         $register = array( $widgets_manager, 'register' );
@@ -122,6 +136,13 @@ final class HSW_Plugin {
                         '\HSW_Widget_Product_Tabs',
                         '\HSW_Widget_Product_Accordions',
                         '\HSW_Widget_Product_Sticky',
+                        '\HSW_Widget_Archive_Breadcrumb',
+                        '\HSW_Widget_Archive_Header',
+                        '\HSW_Widget_Archive_Filters',
+                        '\HSW_Widget_Archive_Toolbar',
+                        '\HSW_Widget_Archive_Grid',
+                        '\HSW_Widget_Archive_Pagination',
+                        '\HSW_Widget_Archive_Guide',
                 ) as $widget_class ) {
                         if ( class_exists( $widget_class ) ) {
                                 call_user_func( $register, new $widget_class() );

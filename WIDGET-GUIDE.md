@@ -468,3 +468,32 @@
 4. PHP 7.4-safe؛ docblocks؛ escape کامل.
 5. اعتبارسنجی: `node -e` با php-parser اگر نصب بود، وگرنه بازخوانی کامل فایل.
 6. worklog.md را append کن (Task ID خودت).
+
+---
+
+# ARCHIVE WIDGETS — ویجت‌های آرشیو فروشگاه (دسکتاپ + موبایل)
+
+منبع حقیقت: `upload/Pasted Content_1792268097645.txt` (دسکتاپ) و HTML موبایل پیام کاربر (۱۷ اکتبر).
+CSS: `assets/css/hsw-archive.css` — JS: `assets/js/hsw-archive.js` — پایه: `includes/class-hsw-archive-base.php`
+کوئری فیلترها: `includes/class-hsw-archive-query.php` (instock / express / orderby=discount)
+
+## ویجت‌های دسته «حامی — ویجت‌های آرشیو محصولات»
+| ویجت | slug | نقش |
+|---|---|---|
+| بردکرامب آرشیو | `hsw-archive-breadcrumb` | مسیر داینامیک (shop → ancestors → term) |
+| هدر و توضیحات آرشیو | `hsw-archive-header` | H1 + قرص تعداد + قرص‌های سریع + توضیح SEO + موبایل: چیپ‌ها + راهنما |
+| فیلترهای پیشرفته آرشیو | `hsw-archive-filters` | سایدبار دسکتاپ + باتم‌شیت موبایل؛ فرم GET واقعی ووکامرس |
+| نوار مرتب‌سازی و ابزار | `hsw-archive-toolbar` | مرتب‌سازی + شمارش + نمای شبکه/لیست + تگ‌های فعال + شیت مرتب‌سازی |
+| گرید محصولات آرشیو | `hsw-archive-grid` | کارت دقیق طرح (موبایل ۲ ستون / دسکتاپ ۳) + افزودن به سبد AJAX |
+| صفحه‌بندی آرشیو | `hsw-archive-pagination` | paginate_links با حفظ پارامترهای فیلتر |
+| راهنما و سوالات متداول | `hsw-archive-guide` | باکس FAQ دسکتاپ + مودال راهنمای موبایل (data-hsw-open="hsw-guide") |
+
+## قراردادهای مهم
+- منوی بازشو/باتم‌شیت: بازکردن با `data-hsw-open="hsw-filter|hsw-sort|hsw-guide"`، بستن با `data-hsw-close`. هدف: `[data-hsw-sheet="…"]`.
+- فیلترها: `min_price`، `max_price`، `filter_{taxonomy}` (برند/حافظه/رنگ) و `instock=1` (در HSW_Archive_Query).
+- مرتب‌سازی: `orderby=popularity|date|price|price-desc|discount` — «بیشترین تخفیف» سفارشی است.
+- «ارسال فوری»: پارامتر `express=1` بر اساس shipping-class (کنترل `express_slug`)؛ خالی = مخفی.
+- تگ‌های فعال از $_GET خوانده می‌شوند؛ لینک حذف هر تگ همان URL بدون آن پارامتر.
+- ریشه همه ویجت‌های آرشیو: `root_class('slug')` → `hsw-a hsw-{slug} hsw-vis-*` (+ hsw-font-inherit).
+- متغیرهای رنگ: `--hswa-*` (کپی در :root برای شیت‌های منتقل‌شده).
+- آیکون‌های موجود در فونت subset: home, tune, sliders, search, close, check_circle, task_alt, help, add_shopping_cart, add, favorite, star, bolt, chevron_left/right, expand_more, filter_list.

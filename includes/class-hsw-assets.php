@@ -111,6 +111,21 @@ class HSW_Assets {
                         HSW_VERSION
                 );
 
+                wp_register_style(
+                        'hsw-archive',
+                        HSW_URL . 'assets/css/hsw-archive.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-archive',
+                        HSW_URL . 'assets/js/hsw-archive.js',
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
                 wp_register_script(
                         'hsw-product',
                         HSW_URL . 'assets/js/hsw-product.js',
@@ -136,6 +151,16 @@ class HSW_Assets {
                                 'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
                                 'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
                                 'faDigits'    => true,
+                        )
+                );
+
+                wp_localize_script(
+                        'hsw-archive',
+                        'hswArchiveData',
+                        array(
+                                'wcAjax'   => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
+                                'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
+                                'currency' => function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol() : '',
                         )
                 );
         }
