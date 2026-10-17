@@ -141,6 +141,14 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-items.php';
                 require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-summary.php';
 
+                /* Checkout payment step (پرداخت و تایید نهایی) — the exact supplied design. */
+                require_once HSW_DIR . 'includes/class-hsw-pay-base.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-top.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-recall.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-methods.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-coupon.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-summary.php';
+
                 /* Elementor 3.1+: register() — older installs: register_widget_type(). */
                 if ( method_exists( $widgets_manager, 'register' ) ) {
                         $register = array( $widgets_manager, 'register' );
@@ -181,6 +189,11 @@ final class HSW_Plugin {
                         '\HSW_Widget_Checkout_Note',
                         '\HSW_Widget_Checkout_Items',
                         '\HSW_Widget_Checkout_Summary',
+                        '\HSW_Widget_Pay_Top',
+                        '\HSW_Widget_Pay_Recall',
+                        '\HSW_Widget_Pay_Methods',
+                        '\HSW_Widget_Pay_Coupon',
+                        '\HSW_Widget_Pay_Summary',
                 ) as $widget_class ) {
                         if ( class_exists( $widget_class ) ) {
                                 call_user_func( $register, new $widget_class() );

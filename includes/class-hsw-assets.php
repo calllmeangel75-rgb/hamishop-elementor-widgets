@@ -160,9 +160,10 @@ class HSW_Assets {
                         'hsw-checkout',
                         'hswCheckoutData',
                         array(
-                                'rest'       => esc_url_raw( rest_url( 'hsw/v1' ) ),
-                                'nonce'      => wp_create_nonce( 'wp_rest' ),
-                                'errorText'  => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
+                                'rest'        => esc_url_raw( rest_url( 'hsw/v1' ) ),
+                                'nonce'       => wp_create_nonce( 'wp_rest' ),
+                                'errorText'   => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
+                                'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
                         )
                 );
 

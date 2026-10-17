@@ -1,5 +1,5 @@
 /**
- * HamiShop Elementor Widgets — Checkout shipping-information widgets.
+ * HamiShop Elementor Widgets — Checkout widgets (اطلاعات ارسال + پرداخت نهایی).
  * Vanilla JS, no dependencies.
  *  - Syncs the custom radio cards (shipping method) + day/slot selection UI.
  *  - Pushes the chosen WooCommerce shipping rate through the plugin REST
@@ -7,6 +7,9 @@
  *    summary totals in place.
  *  - Saves the order note + legal-invoice flag to the WC session when the
  *    customer continues to payment.
+ *  - Payment step: syncs the gateway / bank / wallet selection, applies and
+ *    removes coupons through the REST endpoint (totals re-patched) and
+ *    persists chosen_payment_method + wallet flag before the final submit.
  * In the Elementor editor nothing is sent (preview stays stable).
  */
 (function () {
@@ -190,5 +193,275 @@
                 try {
                         post( '/checkout/note', payload, true ).catch( function () {} );
                 } catch ( e ) {}
+        } );
+
+        /* =====================================================================
+         * PAYMENT STEP (پرداخت نهایی)
+         * ===================================================================== */
+
+        /* Current payment selection helpers. */
+        function currentMethod() {
+                var checked = document.querySelector( 'input[name="hsw_pay_method_d"]:checked, input[name="hsw_pay_method_m"]:checked' );
+                return checked ? checked.value : '';
+        }
+        function walletOn() {
+                var cb = document.querySelector( '.hsw-pm__wallet-cb' );
+                return !!( cb && cb.checked );
+        }
+        function savePayment( keepalive ) {
+                if ( isEditor || ! CFG.rest ) {
+                        return;
+                }
+                try {
+                        post( '/checkout/payment', {
+                                method: currentMethod(),
+                                wallet: walletOn() ? 1 : 0
+                        }, !! keepalive ).catch( function () {} );
+                } catch ( e ) {}
+        }
+
+        /* Payment-method radio cards (desktop + mobile groups). */
+        function syncPayUI( selected ) {
+                var inputs = document.querySelectorAll( 'input[name^="hsw_pay_method"]' );
+                for ( var i = 0; i < inputs.length; i++ ) {
+                        var input = inputs[ i ];
+                        var on    = ( input.value === selected );
+                        if ( input.checked !== on ) {
+                                input.checked = on;
+                        }
+                        var card = input.closest( '.hsw-pm__opt' );
+                        if ( card ) {
+                                if ( on ) {
+                                        card.classList.add( 'is-sel' );
+                                } else {
+                                        card.classList.remove( 'is-sel' );
+                                }
+                        }
+                }
+        }
+
+        /* Bank-gateway highlight (desktop cards + mobile chips by index). */
+        function syncBanksUI( selectedValue ) {
+                var inputs = document.querySelectorAll( 'input[name^="hsw_pay_bank"]' );
+                var idx    = -1;
+                for ( var i = 0; i < inputs.length; i++ ) {
+                        var on = ( inputs[ i ].value === selectedValue );
+                        if ( on && idx < 0 ) {
+                                idx = i;
+                        }
+                        inputs[ i ].checked = on;
+                        var card = inputs[ i ].closest( '.hsw-pm__bank' );
+                        if ( card ) {
+                                if ( on ) {
+                                        card.classList.add( 'is-sel' );
+                                } else {
+                                        card.classList.remove( 'is-sel' );
+                                }
+                        }
+                }
+                if ( idx < 0 ) {
+                        idx = 0;
+                }
+                var chips = document.querySelectorAll( '.hsw-pm__mbank' );
+                for ( var j = 0; j < chips.length; j++ ) {
+                        if ( j === idx ) {
+                                chips[ j ].classList.add( 'is-sel' );
+                        } else {
+                                chips[ j ].classList.remove( 'is-sel' );
+                        }
+                }
+        }
+
+        /* Coupon row markup (mirrors the PHP renderer). */
+        function couponRowHTML( c ) {
+                return '<div class="hsw-pcpn__applied" data-hswk-coupon="' + escAttr( c.code ) + '">' +
+                        '<span class="hsw-pcpn__applied-l">' +
+                        '<i class="hsw-ic" aria-hidden="true">check_circle</i>' +
+                        '<span class="hsw-pcpn__applied-tx">کد تخفیف <b class="hsw-pcpn__code">' + escHtml( c.code ) + '</b> اعمال شد</span>' +
+                        ( ( c.amount_html && '۰' !== c.amount_html ) ? '<span class="hsw-pcpn__deduct"><span class="hsw-pcpn__amt">' + c.amount_html + '</span> تومان کسر شد</span>' : '' ) +
+                        '</span>' +
+                        '<button class="hsw-pcpn__remove" type="button" data-hswk-coupon-remove="' + escAttr( c.code ) + '">' +
+                        '<i class="hsw-ic" aria-hidden="true">close</i><span>حذف تخفیف</span>' +
+                        '</button>' +
+                        '</div>';
+        }
+        function summaryRowHTML( c ) {
+                return '<div class="hsw-psum__row is-discount" data-hswk-coupon-row="' + escAttr( c.code ) + '">' +
+                        '<span>تخفیف کوپن اختصاصی (' + escHtml( c.code ) + ')</span>' +
+                        '<span class="hsw-psum__v">' + ( c.minus_html || c.amount_html || '' ) + '</span>' +
+                        '</div>';
+        }
+        function escHtml( s ) {
+                return String( s ).replace( /[&<>"']/g, function ( m ) {
+                        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ m ];
+                } );
+        }
+        function escAttr( s ) {
+                return escHtml( s );
+        }
+        function renderCoupons( coupons ) {
+                var applied = '';
+                var rows    = '';
+                for ( var i = 0; i < coupons.length; i++ ) {
+                        applied += couponRowHTML( coupons[ i ] );
+                        rows    += summaryRowHTML( coupons[ i ] );
+                }
+
+                /* Desktop coupon card: rows are siblings before the form. */
+                var form = document.querySelector( '.hsw-pcpn__form' );
+                if ( form && form.parentNode ) {
+                        var box = form.parentNode;
+                        if ( box.hasAttribute && box.hasAttribute( 'data-hswk-coupons' ) ) {
+                                var old = box.querySelectorAll( '.hsw-pcpn__applied' );
+                                for ( var r = 0; r < old.length; r++ ) {
+                                        old[ r ].parentNode.removeChild( old[ r ] );
+                                }
+                                var rowsBox = document.createElement( 'div' );
+                                rowsBox.innerHTML = applied;
+                                for ( var n = rowsBox.childNodes.length - 1; n >= 0; n-- ) {
+                                        box.insertBefore( rowsBox.childNodes[ n ], box.firstChild );
+                                }
+                        }
+                }
+
+                /* Mobile coupon card. */
+                var mList = document.querySelector( '[data-hswk-coupons-m]' );
+                if ( mList ) {
+                        mList.innerHTML = applied;
+                }
+
+                /* Invoice summary coupon rows. */
+                var sRows = document.querySelectorAll( '[data-hswk="couponrows"]' );
+                for ( var q = 0; q < sRows.length; q++ ) {
+                        sRows[ q ].innerHTML = rows;
+                }
+        }
+        function couponMsg( scope, text, ok ) {
+                var root = scope.closest( '.hsw-pcpn' ) || document;
+                var msgs = root.querySelectorAll( '.hsw-pcpn__msg' );
+                for ( var i = 0; i < msgs.length; i++ ) {
+                        msgs[ i ].textContent = text || '';
+                        msgs[ i ].classList.toggle( 'is-error', ! ok );
+                        msgs[ i ].classList.toggle( 'is-ok', !! ok );
+                }
+        }
+
+        /* Change events: payment radios, bank radios, wallet toggles. */
+        document.addEventListener( 'change', function ( event ) {
+                var input = event.target;
+
+                /* Payment method */
+                if ( input.type === 'radio' && 0 === input.name.indexOf( 'hsw_pay_method' ) ) {
+                        syncPayUI( input.value );
+                        savePayment( false );
+                        return;
+                }
+
+                /* Bank gateway */
+                if ( input.type === 'radio' && 0 === input.name.indexOf( 'hsw_pay_bank' ) ) {
+                        syncBanksUI( input.value );
+                        return;
+                }
+
+                /* Wallet toggle (desktop + mobile share one state) */
+                if ( input.classList && input.classList.contains( 'hsw-pm__wallet-cb' ) ) {
+                        var all = document.querySelectorAll( '.hsw-pm__wallet-cb' );
+                        for ( var i = 0; i < all.length; i++ ) {
+                                all[ i ].checked = input.checked;
+                        }
+                        savePayment( false );
+                        return;
+                }
+        } );
+
+        /* Mobile bank chips → mirror onto the desktop radios. */
+        document.addEventListener( 'click', function ( event ) {
+                var chip = event.target.closest ? event.target.closest( '.hsw-pm__mbank' ) : null;
+                if ( ! chip ) {
+                        return;
+                }
+                var chips = chip.parentNode.querySelectorAll( '.hsw-pm__mbank' );
+                var idx   = Array.prototype.indexOf.call( chips, chip );
+                if ( idx < 0 ) {
+                        return;
+                }
+                var inputs = document.querySelectorAll( 'input[name^="hsw_pay_bank"]' );
+                if ( inputs[ idx ] ) {
+                        inputs[ idx ].checked = true;
+                        syncBanksUI( inputs[ idx ].value );
+                }
+        } );
+
+        /* Coupon apply / remove. */
+        document.addEventListener( 'click', function ( event ) {
+                var removeBtn = event.target.closest ? event.target.closest( '[data-hswk-coupon-remove]' ) : null;
+                var applyBtn  = event.target.closest ? event.target.closest( '[data-hswk-coupon-apply]' ) : null;
+                if ( ! removeBtn && ! applyBtn ) {
+                        return;
+                }
+                if ( isEditor || ! CFG.rest ) {
+                        return;
+                }
+
+                if ( removeBtn ) {
+                        var code = removeBtn.getAttribute( 'data-hswk-coupon-remove' );
+                        post( '/checkout/coupon', { remove: code } )
+                                .then( function ( json ) {
+                                        renderCoupons( ( json && json.coupons ) || [] );
+                                        patchTotals( json && json.totals );
+                                } )
+                                .catch( function ( err ) {
+                                        couponMsg( removeBtn, err && err.message ? err.message : '', false );
+                                } );
+                        return;
+                }
+
+                /* apply: pick the input inside the same widget part (desktop/mobile). */
+                var part = applyBtn.closest( '[data-hswk-coupons]' ) || applyBtn.closest( '.hsw-pcpn' ) || document;
+                var field = part.querySelector( 'input[name="hsw_coupon_code"], input[name="hsw_coupon_code_m"]' );
+                var code  = field ? field.value.trim() : '';
+                if ( '' === code ) {
+                        couponMsg( applyBtn, 'کد تخفیف را وارد کنید.', false );
+                        return;
+                }
+                var btn = applyBtn;
+                btn.disabled = true;
+                post( '/checkout/coupon', { code: code } )
+                        .then( function ( json ) {
+                                renderCoupons( ( json && json.coupons ) || [] );
+                                patchTotals( json && json.totals );
+                                if ( field ) {
+                                        field.value = '';
+                                }
+                                couponMsg( applyBtn, 'کد تخفیف با موفقیت اعمال شد.', true );
+                        } )
+                        .catch( function ( err ) {
+                                couponMsg( applyBtn, err && err.message ? err.message : 'کد تخفیف وارد شده معتبر نیست.', false );
+                        } )
+                        .then( function () { btn.disabled = false; }, function () { btn.disabled = false; } );
+        } );
+
+        /* Final pay CTA — persist the choice, then hand over to WooCommerce. */
+        document.addEventListener( 'click', function ( event ) {
+                var cta = event.target.closest ? event.target.closest( '.hsw-k-pay' ) : null;
+                if ( ! cta || isEditor || ! CFG.rest ) {
+                        return;
+                }
+                savePayment( true );
+                var form = document.querySelector( 'form.checkout' );
+                if ( form ) {
+                        /* the native checkout form picks chosen_payment_method from the session */
+                        window.setTimeout( function () {
+                                if ( typeof jQuery !== 'undefined' ) {
+                                        jQuery( 'form.checkout' ).trigger( 'submit' );
+                                } else if ( typeof form.requestSubmit === 'function' ) {
+                                        form.requestSubmit();
+                                } else {
+                                        form.submit();
+                                }
+                        }, 50 );
+                } else if ( CFG.checkoutUrl ) {
+                        window.location.href = CFG.checkoutUrl;
+                }
         } );
 })();

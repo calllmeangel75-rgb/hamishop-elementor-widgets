@@ -6,6 +6,10 @@
  *    formatted totals so the summary/bottom-bar widgets can patch themselves.
  *  - POST /hsw/v1/checkout/note     : store the design's order-note textarea +
  *    legal-invoice checkbox into the WC session before continuing to payment.
+ *  - POST /hsw/v1/checkout/payment  : persist chosen_payment_method + the
+ *    wallet-deduction flag in the WC session (payment step).
+ *  - POST /hsw/v1/checkout/coupon   : apply / remove a WooCommerce coupon and
+ *    return the fresh totals + coupon rows.
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -41,6 +45,30 @@ class HSW_Checkout_Rest {
                                 'methods'             => 'POST',
                                 'callback'            => array( $this, 'save_note' ),
                                 'permission_callback' => array( $this, 'can_checkout' ),
+                        )
+                );
+
+                register_rest_route(
+                        self::NS,
+                        '/checkout/payment',
+                        array(
+                                'methods'             => 'POST',
+                                'callback'            => array( $this, 'choose_payment' ),
+                                'permission_callback' => array( $this, 'can_checkout' ),
+                        )
+                );
+
+                register_rest_route(
+                        self::NS,
+                        '/checkout/coupon',
+                        array(
+                                'methods'             => 'POST',
+                                'callback'            => array( $this, 'coupon' ),
+                                'permission_callback' => array( $this, 'can_checkout' ),
+                                'args'                => array(
+                                        'code'   => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'remove' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                ),
                         )
                 );
         }
@@ -108,6 +136,91 @@ class HSW_Checkout_Rest {
                 do_action( 'hsw_checkout_note_saved', $note, 'yes' === $invoice );
 
                 return rest_ensure_response( array( 'ok' => true ) );
+        }
+
+        /**
+         * Choose a payment method (+ wallet flag) — WooCommerce itself reads
+         * chosen_payment_method from the session when the checkout is posted.
+         */
+        public function choose_payment( $request ) {
+                if ( ! WC()->session ) {
+                        return new WP_Error( 'hsw_no_session', __( 'نشست یافت نشد.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                }
+
+                $method = sanitize_text_field( (string) $request->get_param( 'method' ) );
+                $wallet = ( ! empty( $request->get_param( 'wallet' ) ) ) ? 'yes' : 'no';
+
+                if ( '' !== $method ) {
+                        $gateways = WC()->payment_gateways()->get_available_payment_gateways();
+                        if ( ! isset( $gateways[ $method ] ) ) {
+                                return new WP_Error( 'hsw_bad_gateway', __( 'روش پرداخت نامعتبر است.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                        }
+                        WC()->session->set( 'chosen_payment_method', $method );
+                }
+                WC()->session->set( 'hsw_use_wallet', $wallet );
+
+                do_action( 'hsw_checkout_payment_saved', $method, 'yes' === $wallet );
+
+                return rest_ensure_response( array( 'ok' => true, 'method' => $method, 'wallet' => $wallet ) );
+        }
+
+        /**
+         * Apply / remove a coupon and return the fresh totals (+ coupon rows).
+         */
+        public function coupon( $request ) {
+                $cart = WC()->cart;
+                if ( ! $cart ) {
+                        return new WP_Error( 'hsw_no_cart', __( 'سبد خرید یافت نشد.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                }
+
+                $code   = wc_format_coupon_code( wc_clean( (string) $request->get_param( 'code' ) ) );
+                $remove = wc_format_coupon_code( wc_clean( (string) $request->get_param( 'remove' ) ) );
+
+                if ( '' !== $remove ) {
+                        if ( ! WC()->cart->has_discount( $remove ) ) {
+                                return new WP_Error( 'hsw_no_coupon', __( 'این کد روی سبد اعمال نشده است.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                        }
+                        $cart->remove_coupon( $remove );
+                        $cart->calculate_totals();
+                } elseif ( '' !== $code ) {
+                        $discounts = new WC_Discounts( $cart );
+                        $valid     = $cart->is_coupon_valid( $code, $discounts );
+                        if ( is_wp_error( $valid ) ) {
+                                return new WP_Error( 'hsw_bad_coupon', wp_strip_all_tags( $valid->get_error_message() ), array( 'status' => 400 ) );
+                        }
+                        $cart->apply_coupon( $code );
+                        $cart->calculate_totals();
+                        $applied = (array) $cart->get_applied_coupons();
+                        if ( ! in_array( $code, $applied, true ) ) {
+                                return new WP_Error( 'hsw_bad_coupon', __( 'کد تخفیف وارد شده معتبر نیست.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                        }
+                } else {
+                        return new WP_Error( 'hsw_no_code', __( 'کد تخفیف را وارد کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                }
+
+                return rest_ensure_response(
+                        array(
+                                'ok'      => true,
+                                'coupons' => $this->coupons_payload(),
+                                'totals'  => $this->totals_payload(),
+                        )
+                );
+        }
+
+        /**
+         * Applied-coupon rows for the coupon widget (code + formatted amount).
+         */
+        protected function coupons_payload() {
+                $out = array();
+                foreach ( WC()->cart->get_applied_coupons() as $code ) {
+                        $amount = method_exists( WC()->cart, 'get_coupon_discount_amount' ) ? (float) WC()->cart->get_coupon_discount_amount( $code, true ) : 0;
+                        $out[]  = array(
+                                'code'        => (string) $code,
+                                'amount_html' => $this->money( $amount, true ),
+                                'minus_html'  => $this->money( -1 * $amount, true, true ),
+                        );
+                }
+                return $out;
         }
 
         /**
