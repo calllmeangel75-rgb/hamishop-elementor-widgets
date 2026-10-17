@@ -21,6 +21,30 @@ abstract class HSW_Widget_Base extends Widget_Base {
         }
 
         /**
+         * RENDER SAFETY NET — every HSW widget funnels through here.
+         * A Throwable inside render() (e.g. a null WC()->cart in an unusual
+         * context) used to fatal the whole page. Now: the error is reported
+         * to error_log + the dashboard notice, admins see a small red box
+         * with the message, and the rest of the page keeps working.
+         */
+        public function render_content() {
+                try {
+                        parent::render_content();
+                } catch ( \Throwable $e ) {
+                        if ( function_exists( 'hsw_report_fatal' ) ) {
+                                hsw_report_fatal( $e, 'render:' . $this->get_name() );
+                        }
+                        if ( function_exists( 'current_user_can' ) && current_user_can( 'manage_options' ) ) {
+                                printf(
+                                        '<div style="padding:12px;border:2px dashed #d63638;border-radius:8px;color:#8a2400;background:#fcf0f1;font:13px/1.8 sans-serif;direction:rtl">%s<br><code>%s</code></div>',
+                                        esc_html__( 'خطای رندر ویجت حامی — متن کامل خطا در پیشخوان (نوار اعلان‌ها) ثبت شد. این کادر فقط برای مدیر نمایان است.', 'hamishop-elementor-widgets' ),
+                                        esc_html( $e->getMessage() )
+                                );
+                        }
+                }
+        }
+
+        /**
          * Extra root class from the common «قالب‌سازگاری» style section.
          * Returns ' hsw-font-inherit' when the widget must use the theme font.
          */

@@ -96,58 +96,70 @@ final class HSW_Plugin {
                         return; // extra belt-and-braces guard.
                 }
 
-                require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
-                require_once HSW_DIR . 'includes/class-hsw-product-base.php';
+                /* Base classes first — any problem here is caught, not fatal. */
+                try {
+                        require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
+                        require_once HSW_DIR . 'includes/class-hsw-product-base.php';
+                } catch ( \Throwable $e ) {
+                        hsw_report_fatal( $e, 'base-load' );
+                        return;
+                }
 
-                require_once HSW_DIR . 'widgets/class-hsw-wonder-deals.php';
-                require_once HSW_DIR . 'widgets/class-hsw-best-sellers.php';
-                require_once HSW_DIR . 'widgets/class-hsw-popular.php';
+                /* One broken widget file must never white-screen the site. */
+                $widget_files = array(
+                        HSW_DIR . 'widgets/class-hsw-wonder-deals.php',
+                        HSW_DIR . 'widgets/class-hsw-best-sellers.php',
+                        HSW_DIR . 'widgets/class-hsw-popular.php',
 
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-breadcrumb.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-gallery.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-trust.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-title.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-variants.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-features.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-purchase.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-tabs.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php';
+                        HSW_DIR . 'widgets/class-hsw-widget-product-breadcrumb.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-gallery.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-trust.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-title.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-variants.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-features.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-purchase.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-tabs.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php',
 
-                /* Store archive (desktop + mobile) — the exact supplied design. */
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-breadcrumb.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-header.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-filters.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-toolbar.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-grid.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-pagination.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-archive-guide.php';
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-breadcrumb.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-header.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-filters.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-toolbar.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-grid.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-pagination.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-guide.php',
 
-                /* WooCommerce cart page (desktop + mobile) — the exact supplied design. */
-                require_once HSW_DIR . 'includes/class-hsw-cart-base.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-top.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-banner.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-items.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-coupon.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-summary.php';
+                        HSW_DIR . 'includes/class-hsw-cart-base.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-cart-top.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-cart-banner.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-cart-items.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-cart-coupon.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-cart-summary.php',
 
-                /* Checkout shipping-information step (اطلاعات ارسال) — the exact supplied design. */
-                require_once HSW_DIR . 'includes/class-hsw-checkout-base.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-top.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-address.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-shipping.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-schedule.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-note.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-items.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-summary.php';
+                        HSW_DIR . 'includes/class-hsw-checkout-base.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-top.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-address.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-shipping.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-schedule.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-note.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-items.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-summary.php',
 
-                /* Checkout payment step (پرداخت و تایید نهایی) — the exact supplied design. */
-                require_once HSW_DIR . 'includes/class-hsw-pay-base.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-top.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-recall.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-methods.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-coupon.php';
-                require_once HSW_DIR . 'widgets/class-hsw-widget-pay-summary.php';
+                        HSW_DIR . 'includes/class-hsw-pay-base.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-pay-top.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-pay-recall.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-pay-methods.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-pay-coupon.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-pay-summary.php',
+                );
+                foreach ( $widget_files as $widget_file ) {
+                        try {
+                                require_once $widget_file;
+                        } catch ( \Throwable $e ) {
+                                hsw_report_fatal( $e, 'widget-load:' . basename( $widget_file ) );
+                        }
+                }
 
                 /* Elementor 3.1+: register() — older installs: register_widget_type(). */
                 if ( method_exists( $widgets_manager, 'register' ) ) {
@@ -195,8 +207,13 @@ final class HSW_Plugin {
                         '\HSW_Widget_Pay_Coupon',
                         '\HSW_Widget_Pay_Summary',
                 ) as $widget_class ) {
-                        if ( class_exists( $widget_class ) ) {
+                        if ( ! class_exists( $widget_class ) ) {
+                                continue;
+                        }
+                        try {
                                 call_user_func( $register, new $widget_class() );
+                        } catch ( \Throwable $e ) {
+                                hsw_report_fatal( $e, 'widget-register:' . $widget_class );
                         }
                 }
         }

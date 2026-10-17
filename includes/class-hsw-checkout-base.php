@@ -176,6 +176,9 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
          * Chosen shipping cost (0 = free) for the summary rows.
          */
         protected function chosen_shipping_cost() {
+                if ( ! $this->has_cart() ) {
+                        return 0.0; // no cart context (REST/cron/editor) — never fatal.
+                }
                 $rates = $this->shipping_rates();
                 foreach ( $rates as $rate ) {
                         if ( ! empty( $rate['chosen'] ) ) {

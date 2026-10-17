@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دسته «HamiShop — حامی» را انتخاب کنید.
 
 == Changelog ==
+
+= 1.6.1 =
+* هات‌فیکس ضد خطای مرگ وردپرس (WSOD):
+* سپر نسخهٔ تکراری — اگر دو کپی از افزونه همزمان فعال باشد، کپی دوم بدون خطا غیرفعال می‌ماند (خطای Cannot declare class رخ نمی‌دهد).
+* شبکهٔ ایمنی Throwable در بوت، لود و ثبت ویجت‌ها و رندر — هیچ خطای داخلی دیگر کل سایت را نمی‌کشد.
+* نمایش «آخرین خطای ثبت‌شده» در پیشخوان با دکمهٔ پاک‌سازی — بدون نیاز به WP_DEBUG.
+* رفع فتال بالقوه chosen_shipping_cost() در کانتکست‌های بدون سبد (REST/cron).
 
 = 1.0.0 =
 * انتشار اولیه: سه ویجت لوپ محصولات.
