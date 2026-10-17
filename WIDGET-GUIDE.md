@@ -496,4 +496,35 @@ CSS: `assets/css/hsw-archive.css` — JS: `assets/js/hsw-archive.js` — پای�
 - تگ‌های فعال از $_GET خوانده می‌شوند؛ لینک حذف هر تگ همان URL بدون آن پارامتر.
 - ریشه همه ویجت‌های آرشیو: `root_class('slug')` → `hsw-a hsw-{slug} hsw-vis-*` (+ hsw-font-inherit).
 - متغیرهای رنگ: `--hswa-*` (کپی در :root برای شیت‌های منتقل‌شده).
+
+---
+
+# CART WIDGETS — ویجت‌های سبد خرید ووکامرس (دسکتاپ + موبایل)
+
+Faithful conversion of the supplied cart design (utility bar + stepper + banner +
+items + coupon + summary + mobile flow with sticky bottom bar).
+
+CSS: `assets/css/hsw-cart.css` — JS: `assets/js/hsw-cart.js` — پایه: `includes/class-hsw-cart-base.php`
+اکشن‌ها: `includes/class-hsw-cart-actions.php` (دکمه «خالی کردن سبد» با nonce)
+فونت آیکن: `assets/fonts/material-symbols.woff2` (ساب‌ست ۴۳ آیکن، شامل آیکن‌های سبد)
+
+## ویجت‌های دسته «حامی — ویجت‌های سبد خرید و پرداخت»
+| ویجت | slug | نقش |
+|---|---|---|
+| هدر و مراحل سبد خرید | `hsw-cart-top` | دسکتاپ: نوار برند/ضمانت + بردکرامب + ردیاب ۳ مرحله‌ای؛ موبایل: هدر چسبان (بازگشت/عنوان/تعداد/خالی‌کردن) + کارت مراحل |
+| بنر ارسال رایگان سبد | `hsw-cart-banner` | نوار پیشرفت داینامیک با سقف خرید ({threshold}/{remaining}/{percent})؛ ۰ = مخفی |
+| اقلام سبد خرید | `hsw-cart-items` | جدول دسکتاپ + کارت موبایل؛ برند ابرمتن، چیپ‌های واریشن (نقطه رنگ از term-meta)، گارانتی از صفت، نشان تخفیف، استپر ± |
+| کد تخفیف سبد خرید | `hsw-cart-coupon` | فرم واقعی apply_coupon ووکامرس + ردیف «ادامه خرید/یادداشت مالیات»؛ با غیرفعال بودن کوپن مخفی می‌شود |
+| خلاصه فاکتور سبد خرید | `hsw-cart-summary` | آساید چسبان (پایه/سود/ارسال/مالیات/نهایی + CTA + نشان‌های اعتماد + پشتیبانی)؛ موبایل: کارت خلاصه + نوار پرداخت پایین ثابت |
+
+## قراردادهای مهم سبد
+- داینامیک ۱۰۰٪: اقلام از `WC()->cart->get_cart()`؛ قیمت‌ها با `wc_get_price_to_display` (احترام به تنظیمات مالیات)؛ ارقام فارسی.
+- «قیمت پایه» = جمع قیمت عادی‌ها؛ «سود شما» = پایه − (جمع کل − ارسال)؛ مخفی وقتی صفر است.
+- استپر تعداد: دکمه‌ها با JS (`hsw-cart.js`) input داخلی را کم/زیاد کرده و فرم `update_cart` بومی ووکامرس را submit می‌کند (nonce `woocommerce-cart`).
+- حذف کالا: لینک واقعی `wc_get_cart_remove_url`؛ خالی کردن سبد: POST `hsw_empty_cart` (HSW_Cart_Actions).
+- سبد خالی → ویجت اقلام کارت «سبد خالی» با دکمه بازگشت به فروشگاه نشان می‌دهد؛ بقیه ویجت‌ها مخفی.
+- ادیتور المنتور → دیتا دمو (۲ کالای طرح)؛ فرم‌ها در ادیتور submit نمی‌شوند (hsw-cart.js گارد دارد).
+- ریشه ویجت‌ها: `hsw-c hsw-{slug} hsw-vis-*` (+ hsw-font-inherit)؛ متغیرها `--hswc-*`.
+- چیدمان ۸/۴ طرح را با دو ستون المنتور بسازید: راست = بنر+اقلام+کوپن، چپ = خلاصه فاکتور.
+
 - آیکون‌های موجود در فونت subset: home, tune, sliders, search, close, check_circle, task_alt, help, add_shopping_cart, add, favorite, star, bolt, chevron_left/right, expand_more, filter_list.

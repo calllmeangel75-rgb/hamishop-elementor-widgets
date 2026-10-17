@@ -52,9 +52,13 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
                 require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
                 require_once HSW_DIR . 'includes/class-hsw-archive-query.php';
+                require_once HSW_DIR . 'includes/class-hsw-cart-actions.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
+
+                /* Cart form actions (empty cart button from the design). */
+                new HSW_Cart_Actions();
         }
 
         /**
@@ -115,6 +119,14 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'widgets/class-hsw-widget-archive-pagination.php';
                 require_once HSW_DIR . 'widgets/class-hsw-widget-archive-guide.php';
 
+                /* WooCommerce cart page (desktop + mobile) — the exact supplied design. */
+                require_once HSW_DIR . 'includes/class-hsw-cart-base.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-top.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-banner.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-items.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-coupon.php';
+                require_once HSW_DIR . 'widgets/class-hsw-widget-cart-summary.php';
+
                 /* Elementor 3.1+: register() — older installs: register_widget_type(). */
                 if ( method_exists( $widgets_manager, 'register' ) ) {
                         $register = array( $widgets_manager, 'register' );
@@ -143,6 +155,11 @@ final class HSW_Plugin {
                         '\HSW_Widget_Archive_Grid',
                         '\HSW_Widget_Archive_Pagination',
                         '\HSW_Widget_Archive_Guide',
+                        '\HSW_Widget_Cart_Top',
+                        '\HSW_Widget_Cart_Banner',
+                        '\HSW_Widget_Cart_Items',
+                        '\HSW_Widget_Cart_Coupon',
+                        '\HSW_Widget_Cart_Summary',
                 ) as $widget_class ) {
                         if ( class_exists( $widget_class ) ) {
                                 call_user_func( $register, new $widget_class() );

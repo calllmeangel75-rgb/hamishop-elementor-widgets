@@ -126,6 +126,21 @@ class HSW_Assets {
                         true
                 );
 
+                wp_register_style(
+                        'hsw-cart',
+                        HSW_URL . 'assets/css/hsw-cart.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-cart',
+                        HSW_URL . 'assets/js/hsw-cart.js',
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
                 wp_register_script(
                         'hsw-product',
                         HSW_URL . 'assets/js/hsw-product.js',
