@@ -79,19 +79,31 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php';
                 require_once HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php';
 
-                $widgets_manager->register( new \HSW_Widget_Wonder_Deals() );
-                $widgets_manager->register( new \HSW_Widget_Best_Sellers() );
-                $widgets_manager->register( new \HSW_Widget_Popular() );
+                /* Elementor 3.1+: register() — older installs: register_widget_type(). */
+                if ( method_exists( $widgets_manager, 'register' ) ) {
+                        $register = array( $widgets_manager, 'register' );
+                } else {
+                        $register = array( $widgets_manager, 'register_widget_type' );
+                }
 
-                $widgets_manager->register( new \HSW_Widget_Product_Breadcrumb() );
-                $widgets_manager->register( new \HSW_Widget_Product_Gallery() );
-                $widgets_manager->register( new \HSW_Widget_Product_Trust() );
-                $widgets_manager->register( new \HSW_Widget_Product_Title() );
-                $widgets_manager->register( new \HSW_Widget_Product_Variants() );
-                $widgets_manager->register( new \HSW_Widget_Product_Features() );
-                $widgets_manager->register( new \HSW_Widget_Product_Purchase() );
-                $widgets_manager->register( new \HSW_Widget_Product_Tabs() );
-                $widgets_manager->register( new \HSW_Widget_Product_Accordions() );
-                $widgets_manager->register( new \HSW_Widget_Product_Sticky() );
+                foreach ( array(
+                        '\HSW_Widget_Wonder_Deals',
+                        '\HSW_Widget_Best_Sellers',
+                        '\HSW_Widget_Popular',
+                        '\HSW_Widget_Product_Breadcrumb',
+                        '\HSW_Widget_Product_Gallery',
+                        '\HSW_Widget_Product_Trust',
+                        '\HSW_Widget_Product_Title',
+                        '\HSW_Widget_Product_Variants',
+                        '\HSW_Widget_Product_Features',
+                        '\HSW_Widget_Product_Purchase',
+                        '\HSW_Widget_Product_Tabs',
+                        '\HSW_Widget_Product_Accordions',
+                        '\HSW_Widget_Product_Sticky',
+                ) as $widget_class ) {
+                        if ( class_exists( $widget_class ) ) {
+                                call_user_func( $register, new $widget_class() );
+                        }
+                }
         }
 }

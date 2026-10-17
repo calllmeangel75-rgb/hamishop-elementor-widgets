@@ -9,6 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Elementor\Controls_Manager;
+
 class HSW_Widget_Product_Tabs extends HSW_Product_Base {
 
         /**

@@ -9,6 +9,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Elementor\Controls_Manager;
+use Elementor\Repeater;
+
 class HSW_Widget_Product_Accordions extends HSW_Product_Base {
 
         /**
