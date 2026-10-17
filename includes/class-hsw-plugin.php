@@ -39,12 +39,17 @@ final class HSW_Plugin {
         }
 
         private function includes() {
+                /*
+                 * ONLY pure WordPress/WooCommerce classes here.
+                 * The Elementor base classes (HSW_Widget_Base, HSW_Product_Base)
+                 * are loaded lazily inside register_widgets() — loading them any
+                 * earlier fatals the whole site when Elementor is not loaded yet
+                 * (the classic white-screen-of-death).
+                 */
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
-                require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
-                require_once HSW_DIR . 'includes/class-hsw-product-base.php';
         }
 
         /**
@@ -62,8 +67,17 @@ final class HSW_Plugin {
 
         /**
          * Register widgets: product loop + single product page.
+         * Fires inside elementor/widgets/register — Elementor classes are
+         * guaranteed to exist here, so extending Widget_Base is safe.
          */
         public function register_widgets( $widgets_manager ) {
+                if ( ! class_exists( '\\Elementor\\Widget_Base' ) ) {
+                        return; // extra belt-and-braces guard.
+                }
+
+                require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
+                require_once HSW_DIR . 'includes/class-hsw-product-base.php';
+
                 require_once HSW_DIR . 'widgets/class-hsw-wonder-deals.php';
                 require_once HSW_DIR . 'widgets/class-hsw-best-sellers.php';
                 require_once HSW_DIR . 'widgets/class-hsw-popular.php';

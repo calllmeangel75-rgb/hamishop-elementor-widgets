@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات (پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محبوب‌ترین‌ها) با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک و بهینه برای Lighthouse 100.
- * Version:     1.1.1
+ * Version:     1.1.2
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -21,22 +21,54 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'HSW_VERSION', '1.1.1' );
+define( 'HSW_VERSION', '1.1.2' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
 
 /**
  * Boot the plugin once WooCommerce + Elementor are available.
- * Guarded against double-declaration when two copies of the plugin are
- * active at once (classic white-screen scenario after a failed update).
+ *
+ * SAFETY: classes that extend \Elementor\Widget_Base are NEVER loaded from
+ * here. If Elementor or WooCommerce is missing, we silently return — the
+ * admin notice below tells the user what to install. This is what prevents
+ * the white screen of death.
  */
 if ( ! function_exists( 'hsw_boot' ) ) {
         function hsw_boot() {
+                if ( ! class_exists( 'WooCommerce' ) || ! did_action( 'elementor/loaded' ) ) {
+                        return; // admin notice explains what is missing.
+                }
                 require_once HSW_DIR . 'includes/class-hsw-plugin.php';
                 HSW_Plugin::instance();
         }
         add_action( 'plugins_loaded', 'hsw_boot', 20 );
+}
+
+/**
+ * Activation guard (older WP versions ignore the "Requires Plugins" header):
+ * never stay active without the dependencies, otherwise the site white-screens.
+ */
+if ( ! function_exists( 'hsw_activation_guard' ) ) {
+        function hsw_activation_guard() {
+                $missing = array();
+                if ( ! class_exists( 'WooCommerce' ) ) {
+                        $missing[] = 'WooCommerce';
+                }
+                if ( ! did_action( 'elementor/loaded' ) ) {
+                        $missing[] = 'Elementor';
+                }
+                if ( empty( $missing ) ) {
+                        return;
+                }
+                deactivate_plugins( plugin_basename( __FILE__ ) );
+                wp_die(
+                        esc_html( 'افزونه HamiShop Elementor Widgets غیرفعال شد. ابتدا این افزونه‌ها را نصب و فعال کنید: ' . implode( ' + ', $missing ) ),
+                        'HamiShop Elementor Widgets',
+                        array( 'back_link' => true )
+                );
+        }
+        register_activation_hook( __FILE__, 'hsw_activation_guard' );
 }
 
 /**
