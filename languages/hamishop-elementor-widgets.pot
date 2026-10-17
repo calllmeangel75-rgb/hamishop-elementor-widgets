@@ -1,0 +1,1430 @@
+# Copyright (C) 2025 HamiSys
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: HamiShop Elementor Widgets 1.0.0\n"
+"Report-Msgid-Bugs-To: https://hamisys.ir/\n"
+"PO-Revision-Date: 2026-10-17 07:17+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-10-17 07:17+0000\n"
+"X-Generator: HamiShop build\n"
+"Language-Team: HamiSys\n"
+
+#. widgets/class-hsw-widget-product-loop.php:813
+#: widgets/class-hsw-widget-product-loop.php:813
+msgid "16:9"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:810
+#: widgets/class-hsw-widget-product-loop.php:810
+msgid "1:1"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:811
+#: widgets/class-hsw-widget-product-loop.php:811
+msgid "3:4"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:812
+#: widgets/class-hsw-widget-product-loop.php:812
+msgid "4:3"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:720
+#: widgets/class-hsw-widget-cart.php:720
+msgid "Action Buttons"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1582
+#: widgets/class-hsw-widget-single-product.php:1582
+msgid "Active Tab"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:458
+#. widgets/class-hsw-widget-single-product.php:1329
+#: widgets/class-hsw-widget-single-product.php:458
+msgid "Add to Cart"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:450
+#: widgets/class-hsw-widget-product-loop.php:450
+msgid "Add to Cart Button"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:466
+#: widgets/class-hsw-widget-single-product.php:466
+msgid "Add to Cart Form"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:543
+#: widgets/class-hsw-widget-single-product.php:543
+msgid "Additional Information"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:541
+#: widgets/class-hsw-widget-single-product.php:541
+msgid "Additional Information Label"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:508
+#: widgets/class-hsw-widget-single-product.php:508
+msgid "Additional Information Tab"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1286
+#: widgets/class-hsw-widget-product-loop.php:1286
+msgid "Alignment"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:598
+#: widgets/class-hsw-widget-cart.php:598
+msgid "Apply Button"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:238
+#: widgets/class-hsw-widget-shop-archive.php:238
+msgid "Archive Title"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:211
+#: widgets/class-hsw-widget-shop-archive.php:211
+msgid "Ascending"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:805
+#: widgets/class-hsw-widget-product-loop.php:805
+msgid "Aspect Ratio"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:809
+#: widgets/class-hsw-widget-product-loop.php:809
+msgid "Auto"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1603
+#. widgets/class-hsw-widget-single-product.php:1655
+#: widgets/class-hsw-widget-single-product.php:1603
+msgid "Background"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:1215
+#. widgets/class-hsw-widget-product-loop.php:523
+#: widgets/class-hsw-widget-cart.php:1215
+msgid "Background Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:238
+#. widgets/class-hsw-widget-single-product.php:810
+#: widgets/class-hsw-widget-single-product.php:238
+msgid "Badge"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:466
+#: widgets/class-hsw-widget-product-loop.php:466
+msgid "Bag"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1437
+#. widgets/class-hsw-widget-single-product.php:1614
+#: widgets/class-hsw-widget-single-product.php:1437
+msgid "Border Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1555
+#. widgets/class-hsw-widget-single-product.php:1687
+#: widgets/class-hsw-widget-single-product.php:1555
+msgid "Border Radius"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:665
+#. widgets/class-hsw-widget-single-product.php:844
+#: widgets/class-hsw-widget-product-loop.php:665
+msgid "Bottom"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1170
+#. widgets/class-hsw-widget-single-product.php:1242
+#: widgets/class-hsw-widget-single-product.php:1170
+msgid "Bottom Spacing"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:980
+#: widgets/class-hsw-widget-cart.php:980
+msgid "Box"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:218
+#. widgets/class-hsw-widget-single-product.php:746
+#: widgets/class-hsw-widget-single-product.php:218
+msgid "Breadcrumbs"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:460
+#: widgets/class-hsw-widget-product-loop.php:460
+msgid "Button Icon"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:341
+#: widgets/class-hsw-widget-shop-archive.php:341
+msgid "Button Text"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:501
+#: widgets/class-hsw-widget-product-loop.php:501
+msgid "Card"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:636
+#: widgets/class-hsw-widget-single-product.php:636
+msgid "Cards Columns"
+msgstr ""
+
+#. includes/class-hsw-settings.php:51
+#. widgets/class-hsw-widget-product-loop.php:465
+#: includes/class-hsw-settings.php:51
+msgid "Cart"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:100
+#: widgets/class-hsw-widget-cart.php:100
+msgid "Cart Sections"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:177
+#: widgets/class-hsw-widget-cart.php:177
+msgid "Cart Table"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:119
+#. widgets/class-hsw-widget-cart.php:877
+#: widgets/class-hsw-widget-cart.php:119
+msgid "Cart Totals"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:873
+#. widgets/class-hsw-widget-single-product.php:433
+#: widgets/class-hsw-widget-product-loop.php:873
+msgid "Categories"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:297
+#: widgets/class-hsw-widget-shop-archive.php:297
+msgid "Categories to Show"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:2138
+#: widgets/class-hsw-widget-single-product.php:2138
+msgid "Categories:"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:286
+#: widgets/class-hsw-widget-shop-archive.php:286
+msgid "Category Filter Pills"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:441
+#: widgets/class-hsw-widget-shop-archive.php:441
+msgid "Category Pills"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:229
+#: widgets/class-hsw-widget-cart.php:229
+msgid "Cell Padding"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1291
+#: widgets/class-hsw-widget-product-loop.php:1291
+msgid "Center"
+msgstr ""
+
+#. includes/class-hsw-settings.php:52
+#. widgets/class-hsw-widget-checkout.php:103
+#: includes/class-hsw-settings.php:52
+msgid "Checkout"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1524
+#. widgets/class-hsw-widget-single-product.php:1591
+#: widgets/class-hsw-widget-single-product.php:1524
+msgid "Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:145
+#. widgets/class-hsw-widget-shop-archive.php:595
+#: widgets/class-hsw-widget-product-loop.php:145
+msgid "Columns"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:226
+#. widgets/class-hsw-widget-single-product.php:268
+#: widgets/class-hsw-widget-product-loop.php:226
+msgid "Consider \"New\" for (days)"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1079
+#: widgets/class-hsw-widget-product-loop.php:1079
+msgid "Count Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:524
+#: widgets/class-hsw-widget-cart.php:524
+msgid "Coupon"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:582
+#: widgets/class-hsw-widget-checkout.php:582
+msgid "Coupon Button"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:108
+#: widgets/class-hsw-widget-cart.php:108
+msgid "Coupon Field"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:111
+#. widgets/class-hsw-widget-checkout.php:525
+#: widgets/class-hsw-widget-checkout.php:111
+msgid "Coupon Form"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:130
+#: widgets/class-hsw-widget-cart.php:130
+msgid "Cross-Sell Products"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:1037
+#: widgets/class-hsw-widget-cart.php:1037
+msgid "Cross-Sells"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:713
+#: widgets/class-hsw-widget-shop-archive.php:713
+msgid "Current"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:123
+#: widgets/class-hsw-widget-shop-archive.php:123
+msgid "Current Archive"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:126
+#: widgets/class-hsw-widget-shop-archive.php:126
+msgid "Current Archive renders the page's own product query (count comes from the theme / WooCommerce settings). Custom Query works anywhere."
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:113
+#: widgets/class-hsw-widget-product-loop.php:113
+msgid "Current Loop Product"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:125
+#: widgets/class-hsw-widget-single-product.php:125
+msgid "Current Product"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:124
+#: widgets/class-hsw-widget-shop-archive.php:124
+msgid "Custom Query"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:196
+#: widgets/class-hsw-widget-shop-archive.php:196
+msgid "Date"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:195
+#: widgets/class-hsw-widget-shop-archive.php:195
+msgid "Default"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:212
+#: widgets/class-hsw-widget-shop-archive.php:212
+msgid "Descending"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:533
+#: widgets/class-hsw-widget-single-product.php:533
+msgid "Description"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:531
+#: widgets/class-hsw-widget-single-product.php:531
+msgid "Description Label"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:497
+#: widgets/class-hsw-widget-single-product.php:497
+msgid "Description Tab"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:151
+#: widgets/class-hsw-widget-checkout.php:151
+msgid "Editor Placeholder Text"
+msgstr ""
+
+#. includes/class-hsw-dependencies.php:37
+#: includes/class-hsw-dependencies.php:37
+msgid "Elementor"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:1107
+#: widgets/class-hsw-widget-cart.php:1107
+msgid "Empty Cart"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1044
+#. widgets/class-hsw-widget-single-product.php:1059
+#: widgets/class-hsw-widget-product-loop.php:1044
+msgid "Empty Stars Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:141
+#: widgets/class-hsw-widget-cart.php:141
+msgid "Empty-Cart Editor Note"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:645
+#. widgets/class-hsw-widget-single-product.php:824
+#: widgets/class-hsw-widget-product-loop.php:645
+msgid "End"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:167
+#: widgets/class-hsw-widget-single-product.php:167
+msgid "End (image last)"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1047
+#: widgets/class-hsw-widget-single-product.php:1047
+msgid "Filled Stars Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:454
+#: widgets/class-hsw-widget-checkout.php:454
+msgid "Focus Border Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:195
+#: widgets/class-hsw-widget-checkout.php:195
+msgid "Form Max Width"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1273
+#. widgets/class-hsw-widget-single-product.php:1338
+#: widgets/class-hsw-widget-product-loop.php:1273
+msgid "Full Width"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:177
+#: widgets/class-hsw-widget-single-product.php:177
+msgid "Gallery Width"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:187
+#: widgets/class-hsw-widget-single-product.php:187
+msgid "Gallery column width. Applies to the \"Start\" position."
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:564
+#. widgets/class-hsw-widget-shop-archive.php:656
+#: widgets/class-hsw-widget-shop-archive.php:564
+msgid "Gap"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:587
+#: widgets/class-hsw-widget-shop-archive.php:587
+msgid "Grid"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1766
+#. widgets/class-hsw-widget-single-product.php:1832
+#: widgets/class-hsw-widget-single-product.php:1766
+msgid "Grid Gap"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:335
+#. widgets/class-hsw-widget-single-product.php:312
+#: widgets/class-hsw-widget-product-loop.php:335
+msgid "HTML Tag"
+msgstr ""
+
+#. includes/class-hsw-settings.php:34
+#: includes/class-hsw-settings.php:34
+msgid "HamiShop"
+msgstr ""
+
+#. includes/class-hsw-widgets-manager.php:32
+#. widgets/class-hsw-widget-shop-archive.php:42
+#: includes/class-hsw-widgets-manager.php:32
+msgid "HamiShop Archive"
+msgstr ""
+
+#. includes/class-hsw-widgets-manager.php:44
+#. widgets/class-hsw-widget-cart.php:42
+#: includes/class-hsw-widgets-manager.php:44
+msgid "HamiShop Cart"
+msgstr ""
+
+#. includes/class-hsw-widgets-manager.php:50
+#. widgets/class-hsw-widget-checkout.php:45
+#: includes/class-hsw-widgets-manager.php:50
+msgid "HamiShop Checkout"
+msgstr ""
+
+#. includes/class-hsw-widgets-manager.php:26
+#. widgets/class-hsw-widget-product-loop.php:42
+#: includes/class-hsw-widgets-manager.php:26
+msgid "HamiShop Loop Item"
+msgstr ""
+
+#. includes/class-hsw-settings.php:33
+#: includes/class-hsw-settings.php:33
+msgid "HamiShop Settings"
+msgstr ""
+
+#. includes/class-hsw-widgets-manager.php:38
+#. widgets/class-hsw-widget-single-product.php:44
+#: includes/class-hsw-widgets-manager.php:38
+msgid "HamiShop Single Product"
+msgstr ""
+
+#. includes/class-hsw-plugin.php:169
+#: includes/class-hsw-plugin.php:169
+msgid "HamiShop — WooCommerce"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:205
+#. widgets/class-hsw-widget-checkout.php:771
+#: widgets/class-hsw-widget-cart.php:205
+msgid "Header Background"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:791
+#: widgets/class-hsw-widget-checkout.php:791
+msgid "Header Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:216
+#: widgets/class-hsw-widget-cart.php:216
+msgid "Header Padding"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:193
+#: widgets/class-hsw-widget-cart.php:193
+msgid "Header Text Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1752
+#. widgets/class-hsw-widget-single-product.php:1818
+#: widgets/class-hsw-widget-single-product.php:1752
+msgid "Heading Bottom Spacing"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1740
+#. widgets/class-hsw-widget-single-product.php:1806
+#: widgets/class-hsw-widget-single-product.php:1740
+msgid "Heading Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:276
+#: widgets/class-hsw-widget-checkout.php:276
+msgid "Headings"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:449
+#. widgets/class-hsw-widget-checkout.php:502
+#: widgets/class-hsw-widget-cart.php:449
+msgid "Height"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:207
+#. widgets/class-hsw-widget-single-product.php:249
+#: widgets/class-hsw-widget-product-loop.php:207
+msgid "Hide"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:514
+#: widgets/class-hsw-widget-product-loop.php:514
+msgid "Horizontal"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:640
+#. widgets/class-hsw-widget-single-product.php:819
+#: widgets/class-hsw-widget-product-loop.php:640
+msgid "Horizontal Position"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:877
+#. widgets/class-hsw-widget-single-product.php:1405
+#: widgets/class-hsw-widget-shop-archive.php:877
+msgid "Hover"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:586
+#: widgets/class-hsw-widget-product-loop.php:586
+msgid "Hover Background"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:965
+#. widgets/class-hsw-widget-single-product.php:1004
+#: widgets/class-hsw-widget-product-loop.php:965
+msgid "Hover Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:260
+#. widgets/class-hsw-widget-product-loop.php:796
+#: widgets/class-hsw-widget-product-loop.php:260
+msgid "Image"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:162
+#: widgets/class-hsw-widget-single-product.php:162
+msgid "Image Position"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:378
+#: widgets/class-hsw-widget-checkout.php:378
+msgid "Inputs"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:201
+#: widgets/class-hsw-widget-single-product.php:201
+msgid "Keeps the gallery in view while scrolling the summary (desktop only)."
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:923
+#. widgets/class-hsw-widget-single-product.php:1282
+#: widgets/class-hsw-widget-cart.php:923
+msgid "Label Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:327
+#: widgets/class-hsw-widget-checkout.php:327
+msgid "Labels"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:154
+#. widgets/class-hsw-widget-single-product.php:688
+#: widgets/class-hsw-widget-single-product.php:154
+msgid "Layout"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:302
+#: widgets/class-hsw-widget-shop-archive.php:302
+msgid "Leave empty to show the first five product categories."
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:607
+#: widgets/class-hsw-widget-product-loop.php:607
+msgid "Lift Amount (px)"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:597
+#: widgets/class-hsw-widget-product-loop.php:597
+msgid "Lift on Hover"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1144
+#. widgets/class-hsw-widget-single-product.php:1222
+#: widgets/class-hsw-widget-product-loop.php:1144
+msgid "Line Clamp"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:356
+#. widgets/class-hsw-widget-checkout.php:1198
+#: widgets/class-hsw-widget-cart.php:356
+msgid "Link Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:1210
+#. widgets/class-hsw-widget-single-product.php:775
+#: widgets/class-hsw-widget-checkout.php:1210
+msgid "Link Hover Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:290
+#: widgets/class-hsw-widget-shop-archive.php:290
+msgid "Links to the category archive pages. Works in both modes."
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:343
+#. widgets/class-hsw-widget-shop-archive.php:1228
+#: widgets/class-hsw-widget-shop-archive.php:343
+msgid "Load More"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:332
+#. widgets/class-hsw-widget-shop-archive.php:817
+#: widgets/class-hsw-widget-shop-archive.php:332
+msgid "Load More Button"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:345
+#: widgets/class-hsw-widget-shop-archive.php:345
+msgid "Load More works with Custom Query; in Current Archive mode it falls back to numbered pagination."
+msgstr ""
+
+#. includes/class-hsw-assets.php:98
+#: includes/class-hsw-assets.php:98
+msgid "Loading…"
+msgstr ""
+
+#. includes/class-hsw-settings.php:48
+#: includes/class-hsw-settings.php:48
+msgid "Loop Item"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:126
+#: widgets/class-hsw-widget-single-product.php:126
+msgid "Manual Pick"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:114
+#: widgets/class-hsw-widget-product-loop.php:114
+msgid "Manual Selection"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:302
+#: widgets/class-hsw-widget-product-loop.php:302
+msgid "Max Categories"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:1123
+#: widgets/class-hsw-widget-cart.php:1123
+msgid "Message Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:933
+#: widgets/class-hsw-widget-checkout.php:933
+msgid "Method Box Border Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:959
+#: widgets/class-hsw-widget-checkout.php:959
+msgid "Method Box Padding"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:945
+#: widgets/class-hsw-widget-checkout.php:945
+msgid "Method Boxes Gap"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:993
+#: widgets/class-hsw-widget-checkout.php:993
+msgid "Method Description Background"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:981
+#: widgets/class-hsw-widget-checkout.php:981
+msgid "Method Label Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:119
+#: widgets/class-hsw-widget-shop-archive.php:119
+msgid "Mode"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1502
+#: widgets/class-hsw-widget-single-product.php:1502
+msgid "Nav Gap"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:902
+#. widgets/class-hsw-widget-single-product.php:2104
+#: widgets/class-hsw-widget-single-product.php:902
+msgid "New"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:216
+#. widgets/class-hsw-widget-single-product.php:258
+#: widgets/class-hsw-widget-product-loop.php:216
+msgid "New Badge"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:238
+#. widgets/class-hsw-widget-single-product.php:280
+#: widgets/class-hsw-widget-product-loop.php:238
+msgid "New Badge Text"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1936
+#: widgets/class-hsw-widget-single-product.php:1936
+msgid "No additional information."
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1926
+#: widgets/class-hsw-widget-single-product.php:1926
+msgid "No description provided."
+msgstr ""
+
+#. includes/class-hsw-assets.php:99
+#. includes/class-hsw-rest.php:100
+#: includes/class-hsw-assets.php:99
+msgid "No more products"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1864
+#: widgets/class-hsw-widget-single-product.php:1864
+msgid "No product found. Use this widget on a Single Product template or pick a product manually."
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:1001
+#: widgets/class-hsw-widget-shop-archive.php:1001
+msgid "No products found in the current archive."
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:1158
+#: widgets/class-hsw-widget-shop-archive.php:1158
+msgid "No products match this query."
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:464
+#. widgets/class-hsw-widget-shop-archive.php:333
+#: widgets/class-hsw-widget-product-loop.php:464
+msgid "None"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:836
+#. widgets/class-hsw-widget-single-product.php:1362
+#: widgets/class-hsw-widget-shop-archive.php:836
+msgid "Normal"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:331
+#: widgets/class-hsw-widget-shop-archive.php:331
+msgid "Numbers"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:168
+#: widgets/class-hsw-widget-shop-archive.php:168
+msgid "Only Featured Products"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:157
+#: widgets/class-hsw-widget-shop-archive.php:157
+msgid "Only On-Sale Products"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:523
+#: widgets/class-hsw-widget-single-product.php:523
+msgid "Only works in \"Current Product\" mode on real single product pages."
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:207
+#: widgets/class-hsw-widget-shop-archive.php:207
+msgid "Order"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:191
+#: widgets/class-hsw-widget-shop-archive.php:191
+msgid "Order By"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:124
+#: widgets/class-hsw-widget-checkout.php:124
+msgid "Order Notes"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:706
+#: widgets/class-hsw-widget-checkout.php:706
+msgid "Order Review"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:847
+#: widgets/class-hsw-widget-checkout.php:847
+msgid "Order Total Amount Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:955
+#: widgets/class-hsw-widget-cart.php:955
+msgid "Order Total Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:275
+#: widgets/class-hsw-widget-shop-archive.php:275
+msgid "Ordering Dropdown"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1469
+#. widgets/class-hsw-widget-single-product.php:1666
+#: widgets/class-hsw-widget-single-product.php:1469
+msgid "Padding"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:794
+#. widgets/class-hsw-widget-shop-archive.php:938
+#: widgets/class-hsw-widget-shop-archive.php:794
+msgid "Padding (Inline)"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1568
+#: widgets/class-hsw-widget-single-product.php:1568
+msgid "Padding Inline"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:319
+#. widgets/class-hsw-widget-shop-archive.php:640
+#: widgets/class-hsw-widget-shop-archive.php:319
+msgid "Pagination"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1626
+#: widgets/class-hsw-widget-single-product.php:1626
+msgid "Panel"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:868
+#: widgets/class-hsw-widget-checkout.php:868
+msgid "Payment"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:924
+#: widgets/class-hsw-widget-checkout.php:924
+msgid "Payment Methods"
+msgstr ""
+
+#. includes/class-hsw-settings.php:81
+#: includes/class-hsw-settings.php:81
+msgid "Performance"
+msgstr ""
+
+#. includes/class-hsw-settings.php:82
+#: includes/class-hsw-settings.php:82
+msgid "Persian digits in prices & numbers"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:1014
+#: widgets/class-hsw-widget-checkout.php:1014
+msgid "Place Order Button"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:989
+#: widgets/class-hsw-widget-shop-archive.php:989
+msgid "Place this widget on a Product Archive template, or switch to Custom Query."
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:370
+#. widgets/class-hsw-widget-single-product.php:1114
+#: widgets/class-hsw-widget-single-product.php:370
+msgid "Price"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1202
+#. widgets/class-hsw-widget-single-product.php:1131
+#: widgets/class-hsw-widget-product-loop.php:1202
+msgid "Price Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:134
+#. widgets/class-hsw-widget-single-product.php:134
+#: widgets/class-hsw-widget-product-loop.php:134
+msgid "Product"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:133
+#: widgets/class-hsw-widget-shop-archive.php:133
+msgid "Product Categories"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:296
+#: widgets/class-hsw-widget-cart.php:296
+msgid "Product Cell"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:412
+#. widgets/class-hsw-widget-single-product.php:1265
+#: widgets/class-hsw-widget-single-product.php:412
+msgid "Product Meta"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:803
+#: widgets/class-hsw-widget-checkout.php:803
+msgid "Product Name Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:113
+#: widgets/class-hsw-widget-single-product.php:113
+msgid "Product Source"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:145
+#: widgets/class-hsw-widget-shop-archive.php:145
+msgid "Product Tags"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:815
+#: widgets/class-hsw-widget-checkout.php:815
+msgid "Product Total Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:123
+#: widgets/class-hsw-widget-product-loop.php:123
+msgid "Products"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:179
+#: widgets/class-hsw-widget-shop-archive.php:179
+msgid "Products Per Page"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:101
+#: widgets/class-hsw-widget-product-loop.php:101
+msgid "Products Source"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:762
+#: widgets/class-hsw-widget-checkout.php:762
+msgid "Products Table"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:428
+#: widgets/class-hsw-widget-cart.php:428
+msgid "Quantity Input"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:111
+#: widgets/class-hsw-widget-shop-archive.php:111
+msgid "Query"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:198
+#: widgets/class-hsw-widget-shop-archive.php:198
+msgid "Random"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:338
+#. widgets/class-hsw-widget-single-product.php:1038
+#: widgets/class-hsw-widget-single-product.php:338
+msgid "Rating"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1228
+#. widgets/class-hsw-widget-single-product.php:1157
+#: widgets/class-hsw-widget-product-loop.php:1228
+msgid "Regular Price Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:564
+#: widgets/class-hsw-widget-single-product.php:564
+msgid "Related & Upsells"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:582
+#: widgets/class-hsw-widget-single-product.php:582
+msgid "Related Count"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:594
+#: widgets/class-hsw-widget-single-product.php:594
+msgid "Related Heading"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:596
+#. widgets/class-hsw-widget-single-product.php:1723
+#: widgets/class-hsw-widget-single-product.php:596
+msgid "Related Products"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:372
+#: widgets/class-hsw-widget-cart.php:372
+msgid "Remove Link"
+msgstr ""
+
+#. includes/class-hsw-settings.php:83
+#: includes/class-hsw-settings.php:83
+msgid "Remove WooCommerce block CSS on shop-free pages"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:355
+#: widgets/class-hsw-widget-checkout.php:355
+msgid "Required Star Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:264
+#: widgets/class-hsw-widget-shop-archive.php:264
+msgid "Result Count"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:402
+#: widgets/class-hsw-widget-shop-archive.php:402
+msgid "Result Count & Ordering"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:1137
+#: widgets/class-hsw-widget-cart.php:1137
+msgid "Return to Shop Button"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1093
+#: widgets/class-hsw-widget-single-product.php:1093
+msgid "Review Count Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:553
+#: widgets/class-hsw-widget-single-product.php:553
+msgid "Reviews"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:551
+#: widgets/class-hsw-widget-single-product.php:551
+msgid "Reviews Label"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:519
+#: widgets/class-hsw-widget-single-product.php:519
+msgid "Reviews Tab"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:967
+#. widgets/class-hsw-widget-checkout.php:827
+#: widgets/class-hsw-widget-cart.php:967
+msgid "Row Border Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1306
+#: widgets/class-hsw-widget-single-product.php:1306
+msgid "Row Gap"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:906
+#: widgets/class-hsw-widget-cart.php:906
+msgid "Rows"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:422
+#: widgets/class-hsw-widget-single-product.php:422
+msgid "SKU"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:2131
+#: widgets/class-hsw-widget-single-product.php:2131
+msgid "SKU:"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:690
+#. widgets/class-hsw-widget-single-product.php:869
+#: widgets/class-hsw-widget-product-loop.php:690
+msgid "Sale"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:204
+#. widgets/class-hsw-widget-single-product.php:246
+#: widgets/class-hsw-widget-product-loop.php:204
+msgid "Sale Badge"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1215
+#. widgets/class-hsw-widget-single-product.php:1144
+#: widgets/class-hsw-widget-product-loop.php:1215
+msgid "Sale Price Color"
+msgstr ""
+
+#. includes/controls/class-hsw-control-product-chooser.php:35
+#: includes/controls/class-hsw-control-product-chooser.php:35
+msgid "Search products…"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1447
+#: widgets/class-hsw-widget-product-loop.php:1447
+msgid "Select a product to display its card."
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:467
+#: widgets/class-hsw-widget-checkout.php:467
+msgid "Select2 Dropdowns"
+msgstr ""
+
+#. includes/class-hsw-settings.php:49
+#: includes/class-hsw-settings.php:49
+msgid "Shop Archive"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:391
+#. widgets/class-hsw-widget-single-product.php:1193
+#: widgets/class-hsw-widget-single-product.php:391
+msgid "Short Description"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:206
+#. widgets/class-hsw-widget-single-product.php:248
+#: widgets/class-hsw-widget-product-loop.php:206
+msgid "Show"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:374
+#. widgets/class-hsw-widget-single-product.php:348
+#: widgets/class-hsw-widget-product-loop.php:374
+msgid "Show Review Count"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:145
+#: widgets/class-hsw-widget-cart.php:145
+msgid "Shown in the editor only while the cart is empty. Visitors never see it."
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:142
+#: widgets/class-hsw-widget-checkout.php:142
+msgid "Single Column (stacked)"
+msgstr ""
+
+#. includes/class-hsw-settings.php:50
+#. widgets/class-hsw-widget-product-loop.php:115
+#: includes/class-hsw-settings.php:50
+msgid "Single Product"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:109
+#. widgets/class-hsw-widget-single-product.php:121
+#: widgets/class-hsw-widget-product-loop.php:109
+msgid "Source"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1056
+#: widgets/class-hsw-widget-product-loop.php:1056
+msgid "Star Size"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1032
+#: widgets/class-hsw-widget-product-loop.php:1032
+msgid "Stars Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1071
+#: widgets/class-hsw-widget-single-product.php:1071
+msgid "Stars Size"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1290
+#. widgets/class-hsw-widget-single-product.php:823
+#: widgets/class-hsw-widget-product-loop.php:1290
+msgid "Start"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:166
+#: widgets/class-hsw-widget-single-product.php:166
+msgid "Start (image first)"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:197
+#: widgets/class-hsw-widget-single-product.php:197
+msgid "Sticky Gallery"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1292
+#: widgets/class-hsw-widget-product-loop.php:1292
+msgid "Stretch"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:134
+#: widgets/class-hsw-widget-cart.php:134
+msgid "Suggested products rendered under the cart."
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:696
+#: widgets/class-hsw-widget-single-product.php:696
+msgid "Summary Padding"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:270
+#: widgets/class-hsw-widget-product-loop.php:270
+msgid "Swap Image on Hover"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:487
+#. widgets/class-hsw-widget-single-product.php:1493
+#: widgets/class-hsw-widget-single-product.php:487
+msgid "Tabs"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:444
+#: widgets/class-hsw-widget-single-product.php:444
+msgid "Tags"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:2145
+#: widgets/class-hsw-widget-single-product.php:2145
+msgid "Tags:"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:1170
+#: widgets/class-hsw-widget-checkout.php:1170
+msgid "Terms & Conditions"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1412
+#. widgets/class-hsw-widget-single-product.php:1643
+#: widgets/class-hsw-widget-single-product.php:1412
+msgid "Text Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:130
+#: widgets/class-hsw-widget-checkout.php:130
+msgid "The \"Order notes\" textarea in the additional information section."
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:117
+#: widgets/class-hsw-widget-checkout.php:117
+msgid "The coupon form above the checkout fields."
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:112
+#: widgets/class-hsw-widget-cart.php:112
+msgid "The coupon input inside the cart form."
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:144
+#. widgets/class-hsw-widget-cart.php:1290
+#: widgets/class-hsw-widget-cart.php:144
+msgid "The live cart appears here for logged-in shop visitors. Add the widget to your Cart page (set in WooCommerce → Settings → Advanced)."
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:154
+#: widgets/class-hsw-widget-checkout.php:154
+msgid "The live checkout appears here for shop visitors with items in their cart. Add this widget to your Checkout page (set in WooCommerce → Settings → Advanced)."
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:123
+#: widgets/class-hsw-widget-cart.php:123
+msgid "The totals / collaterals column next to the table."
+msgstr ""
+
+#. includes/class-hsw-rest.php:95
+#: includes/class-hsw-rest.php:95
+msgid "This listing has expired, please reload the page."
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:304
+#. widgets/class-hsw-widget-single-product.php:723
+#: widgets/class-hsw-widget-cart.php:304
+msgid "Thumbnail Size"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:208
+#: widgets/class-hsw-widget-single-product.php:208
+msgid "Thumbnails"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:709
+#: widgets/class-hsw-widget-single-product.php:709
+msgid "Thumbnails Spacing"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:302
+#. widgets/class-hsw-widget-single-product.php:975
+#: widgets/class-hsw-widget-single-product.php:302
+msgid "Title"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:390
+#: widgets/class-hsw-widget-shop-archive.php:390
+msgid "Title Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:249
+#: widgets/class-hsw-widget-shop-archive.php:249
+msgid "Title HTML Tag"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:230
+#. widgets/class-hsw-widget-shop-archive.php:374
+#: widgets/class-hsw-widget-shop-archive.php:230
+msgid "Toolbar"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:664
+#. widgets/class-hsw-widget-single-product.php:843
+#: widgets/class-hsw-widget-product-loop.php:664
+msgid "Top"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:168
+#: widgets/class-hsw-widget-single-product.php:168
+msgid "Top (stacked)"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:1700
+#: widgets/class-hsw-widget-single-product.php:1700
+msgid "Top Spacing"
+msgstr ""
+
+#. widgets/class-hsw-widget-checkout.php:141
+#: widgets/class-hsw-widget-checkout.php:141
+msgid "Two Columns (WooCommerce default)"
+msgstr ""
+
+#. widgets/class-hsw-widget-shop-archive.php:327
+#: widgets/class-hsw-widget-shop-archive.php:327
+msgid "Type"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:1151
+#. widgets/class-hsw-widget-single-product.php:1231
+#: widgets/class-hsw-widget-product-loop.php:1151
+msgid "Unlimited"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:628
+#. widgets/class-hsw-widget-single-product.php:1789
+#: widgets/class-hsw-widget-single-product.php:628
+msgid "Upsell Products"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:614
+#: widgets/class-hsw-widget-single-product.php:614
+msgid "Upsells Count"
+msgstr ""
+
+#. widgets/class-hsw-widget-single-product.php:626
+#: widgets/class-hsw-widget-single-product.php:626
+msgid "Upsells Heading"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:943
+#. widgets/class-hsw-widget-single-product.php:1294
+#: widgets/class-hsw-widget-cart.php:943
+msgid "Value Color"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:513
+#: widgets/class-hsw-widget-product-loop.php:513
+msgid "Vertical"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:660
+#. widgets/class-hsw-widget-single-product.php:839
+#: widgets/class-hsw-widget-product-loop.php:660
+msgid "Vertical Position"
+msgstr ""
+
+#. includes/class-hsw-settings.php:76
+#: includes/class-hsw-settings.php:76
+msgid "Widgets"
+msgstr ""
+
+#. widgets/class-hsw-widget-cart.php:436
+#: widgets/class-hsw-widget-cart.php:436
+msgid "Width"
+msgstr ""
+
+#. includes/class-hsw-dependencies.php:33
+#: includes/class-hsw-dependencies.php:33
+msgid "WooCommerce"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:406
+#: widgets/class-hsw-widget-product-loop.php:406
+msgid "Words Limit"
+msgstr ""
+
+#. widgets/class-hsw-widget-product-loop.php:827
+#: widgets/class-hsw-widget-product-loop.php:827
+msgid "Zoom on Hover"
+msgstr ""
+
+#. includes/class-hsw-dependencies.php:61
+#: includes/class-hsw-dependencies.php:61
+msgid "افزونه «ویجت‌های فروشگاهی حامی‌شاپ» برای کار کردن به این افزونه‌ها نیاز دارد: %s"
+msgstr ""
+

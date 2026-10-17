@@ -1,0 +1,306 @@
+/*!
+ * HamiShop Elementor Widgets — single-product widget extras.
+ * RTL-safe (logical properties only). Most visual styling is generated
+ * inline by Elementor controls; this file only holds structural rules.
+ * Palette: text #111827, muted #6B7280, accent #C0392B, border #E5E7EB.
+ */
+
+/* ---------- Breadcrumbs ---------- */
+.hsw-single__breadcrumbs {
+	font-size: 13px;
+	color: #6b7280;
+	margin-block-end: 24px;
+}
+
+.hsw-single__breadcrumbs a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.hsw-single__breadcrumbs a:hover {
+	color: #c0392b;
+}
+
+.hsw-single__breadcrumbs .woocommerce-breadcrumb {
+	margin: 0;
+}
+
+/* ---------- Two-column layout ---------- */
+.hsw-single__layout {
+	display: grid;
+	grid-template-columns: 45% minmax(0, 1fr);
+	gap: 40px;
+	align-items: start;
+}
+
+/* Stacked mode — always one column (beats the Gallery Width control). */
+.hsw-pos-top .hsw-single__layout {
+	grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* Image on the end side — mirrored columns, gallery keeps its width. */
+.hsw-pos-end .hsw-single__layout {
+	grid-template-columns: minmax(0, 1fr) 45% !important;
+}
+
+.hsw-pos-end .hsw-single__gallery {
+	order: 2;
+}
+
+@media (max-width: 1024px) {
+	.hsw-single__layout,
+	.hsw-pos-start .hsw-single__layout,
+	.hsw-pos-end .hsw-single__layout,
+	.hsw-pos-top .hsw-single__layout {
+		grid-template-columns: minmax(0, 1fr) !important;
+	}
+
+	.hsw-related-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1025px) {
+	.hsw-single__gallery.hsw-sticky {
+		position: sticky;
+		top: 80px;
+		align-self: start;
+	}
+}
+
+/* ---------- Gallery ---------- */
+.hsw-single__gallery {
+	position: relative;
+	min-width: 0;
+}
+
+.hsw-gallery__main {
+	display: block;
+	border-radius: 12px;
+	overflow: hidden;
+	margin: 0;
+}
+
+.hsw-gallery__main:focus-visible {
+	outline: 2px solid #111827;
+	outline-offset: 2px;
+}
+
+.hsw-gallery__image {
+	width: 100%;
+	height: auto;
+	display: block;
+	object-fit: cover;
+}
+
+.hsw-gallery__thumbs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-block-start: 12px;
+}
+
+.hsw-gallery__thumb {
+	width: 80px;
+	height: 80px;
+	border: 2px solid transparent;
+	border-radius: 8px;
+	padding: 0;
+	background: none;
+	cursor: pointer;
+	overflow: hidden;
+}
+
+.hsw-gallery__thumb:focus-visible {
+	outline: 2px solid #111827;
+	outline-offset: 2px;
+}
+
+.hsw-gallery__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.hsw-gallery__thumb.is-active {
+	border-color: #111827;
+}
+
+/* ---------- Summary ---------- */
+.hsw-single__summary {
+	min-width: 0;
+}
+
+.hsw-single__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-block-end: 10px;
+}
+
+.hsw-single__badge {
+	position: relative;
+	display: inline-block;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.8;
+	border-radius: 6px;
+	padding: 2px 12px;
+	white-space: nowrap;
+}
+
+.hsw-single__badge--sale {
+	background: #c0392b;
+	color: #fff;
+}
+
+.hsw-single__badge--new {
+	background: #fde68a;
+	color: #1f2937;
+}
+
+.hsw-single__title {
+	margin: 0 0 10px;
+}
+
+.hsw-single__rating {
+	margin-block-end: 10px;
+}
+
+.hsw-single__price {
+	font-size: 24px;
+	font-weight: 700;
+	color: #111827;
+	line-height: 1.6;
+	margin-block-end: 12px;
+}
+
+.hsw-single__price del {
+	color: #9ca3af;
+	font-size: 0.75em;
+	font-weight: 400;
+	opacity: 1;
+}
+
+.hsw-single__price ins {
+	color: #c0392b;
+	text-decoration: none;
+}
+
+.hsw-single__excerpt {
+	color: #6b7280;
+	font-size: 15px;
+	line-height: 1.9;
+}
+
+.hsw-single__meta {
+	margin-block: 14px;
+}
+
+.hsw-single__meta-row {
+	margin-block-end: 4px;
+	font-size: 14px;
+	color: #6b7280;
+}
+
+.hsw-single__meta-label {
+	font-weight: 600;
+	color: #111827;
+}
+
+.hsw-single__meta a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.hsw-single__meta a:hover {
+	color: #c0392b;
+}
+
+.hsw-single__cart .quantity {
+	display: inline-flex;
+}
+
+.hsw-single__cart .quantity .qty {
+	max-width: 90px;
+}
+
+/* ---------- Tabs ---------- */
+.hsw-single__tabs {
+	margin-block-start: 28px;
+}
+
+.hsw-single__tabs-nav {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+	border-block-end: 1px solid #e5e7eb;
+}
+
+.hsw-single__tabs-btn {
+	background: none;
+	border: none;
+	border-block-end: 2px solid transparent;
+	padding: 10px 18px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #6b7280;
+}
+
+.hsw-single__tabs-btn.is-active {
+	color: #111827;
+	border-block-end-color: #111827;
+	font-weight: 600;
+}
+
+.hsw-single__tab-panel {
+	display: none;
+	padding-block: 20px;
+}
+
+.hsw-single__tab-panel.is-active {
+	display: block;
+}
+
+.hsw-single__tab-panel img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* ---------- Related & upsells ---------- */
+.hsw-single__related,
+.hsw-single__upsells {
+	margin-block-start: 40px;
+}
+
+.hsw-single__related-heading {
+	font-size: 20px;
+	margin: 0 0 12px;
+}
+
+.hsw-related-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 20px;
+	margin-block-start: 16px;
+}
+
+.hsw-upsells-grid {
+	min-width: 0;
+}
+
+@media (max-width: 767px) {
+	.hsw-single__layout {
+		gap: 24px;
+	}
+
+	.hsw-related-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 14px;
+	}
+
+	.hsw-single__related-heading {
+		font-size: 18px;
+	}
+}

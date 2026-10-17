@@ -1,0 +1,86 @@
+/*!
+ * HamiShop — Elementor editor + WP admin settings styles.
+ */
+
+/* Product chooser control */
+.hsw-products-control__select {
+	width: 100%;
+}
+
+.hsw-products-control__hint {
+	margin-top: 6px;
+	color: #9ca3af;
+	font-size: 11px;
+	line-height: 1.6;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+	background: #eef2f7;
+	border-color: #e2e8f0;
+	color: #1f2937;
+}
+
+/* WP admin settings toggles */
+.hsw-switch {
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.hsw-switch input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	width: 44px;
+	height: 24px;
+	margin: 0;
+	cursor: pointer;
+}
+
+.hsw-switch__track {
+	display: inline-block;
+	width: 44px;
+	height: 24px;
+	border-radius: 24px;
+	background: #cbd5e1;
+	position: relative;
+	transition: background-color .2s ease;
+}
+
+.hsw-switch__track::before {
+	content: "";
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	top: 3px;
+	inset-inline-start: 3px;
+	transition: inset-inline-start .2s ease;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
+}
+
+.hsw-switch input[type="checkbox"]:checked + .hsw-switch__track {
+	background: #16a34a;
+}
+
+.hsw-switch input[type="checkbox"]:checked + .hsw-switch__track::before {
+	inset-inline-start: 23px;
+}
+
+.hsw-switch input[type="checkbox"]:focus-visible + .hsw-switch__track {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+.hsw-settings-wrap h1 {
+	margin-block-end: 16px;
+}
+
+.hsw-settings-wrap .form-table th {
+	width: 320px;
+}
+
+/* Preview-iframe editor notes */
+.elementor-editor-active .hsw-editor-note {
+	min-height: 80px;
+}

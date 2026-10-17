@@ -1,0 +1,74 @@
+/*!
+ * HamiShop Elementor Widgets — checkout widget extras.
+ * (Most visual styling is generated inline by Elementor controls;
+ * this file only holds structural rules.)
+ * RTL-safe: floats use logical properties (inline-start / inline-end).
+ */
+
+/* ---------- Frame (contains the floated columns) ---------- */
+.hsw-checkout .woocommerce-checkout {
+	display: flow-root;
+}
+
+/* ---------- Two-column checkout (WooCommerce default) ---------- */
+.hsw-checkout .col2-set {
+	float: inline-start;
+	width: 52%;
+}
+
+.hsw-checkout #order_review_heading,
+.hsw-checkout #order_review {
+	float: inline-end;
+	width: 44%;
+}
+
+/* Extra float safety net (flow-root above already contains them) */
+.hsw-checkout::after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+/* ---------- Single column layout ---------- */
+.hsw-checkout--one-col .col2-set,
+.hsw-checkout--one-col #order_review_heading,
+.hsw-checkout--one-col #order_review {
+	float: none;
+	width: 100%;
+}
+
+/* ---------- Stack on tablets ---------- */
+@media (max-width: 1024px) {
+	.hsw-checkout .col2-set,
+	.hsw-checkout #order_review_heading,
+	.hsw-checkout #order_review {
+		float: none;
+		width: 100%;
+	}
+}
+
+/* ---------- Structural defaults (overridable via Elementor controls) ---------- */
+.hsw-checkout #order_review {
+	background: #f9fafb;
+	border-radius: 12px;
+	padding: 20px;
+}
+
+.hsw-checkout .woocommerce-form-coupon {
+	background: #f9fafb;
+	border-radius: 12px;
+	padding: 16px;
+}
+
+.hsw-checkout #payment {
+	background: #f9fafb;
+	border-radius: 12px;
+}
+
+.hsw-checkout #payment #place_order {
+	width: 100%;
+}
+
+.hsw-checkout .select2-container {
+	width: 100% !important;
+}

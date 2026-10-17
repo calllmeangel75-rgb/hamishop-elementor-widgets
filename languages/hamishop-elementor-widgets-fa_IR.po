@@ -1,0 +1,819 @@
+# Persian translation for HamiShop Elementor Widgets.
+# Copyright (C) 2025 HamiSys
+# This file is distributed under the GPL-2.0-or-later license.
+msgid ""
+msgstr ""
+"Project-Id-Version: HamiShop Elementor Widgets 1.0.0\n"
+"Report-Msgid-Bugs-To: https://hamisys.ir/\n"
+"POT-Creation-Date: 2026-10-17 07:17+0000\n"
+"PO-Revision-Date: 2026-10-17 07:17+0000\n"
+"Last-Translator: HamiSys <info@hamisys.ir>\n"
+"Language-Team: Persian\n"
+"Language: fa_IR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n==0 || n==1) ? 0 : 1;\n"
+"X-Domain: hamishop-elementor-widgets\n"
+
+msgid "16:9"
+msgstr ""
+
+msgid "1:1"
+msgstr ""
+
+msgid "3:4"
+msgstr ""
+
+msgid "4:3"
+msgstr ""
+
+msgid "Action Buttons"
+msgstr "دکمه‌های عملیات"
+
+msgid "Active Tab"
+msgstr "تب فعال"
+
+msgid "Add to Cart"
+msgstr "افزودن به سبد"
+
+msgid "Add to Cart Button"
+msgstr "دکمه افزودن به سبد"
+
+msgid "Add to Cart Form"
+msgstr "فرم افزودن به سبد"
+
+msgid "Additional Information"
+msgstr "اطلاعات بیشتر"
+
+msgid "Additional Information Label"
+msgstr "عنوان تب اطلاعات بیشتر"
+
+msgid "Additional Information Tab"
+msgstr "تب اطلاعات بیشتر"
+
+msgid "Alignment"
+msgstr "چینش"
+
+msgid "Apply Button"
+msgstr "دکمه اعمال"
+
+msgid "Archive Title"
+msgstr "عنوان آرشیو"
+
+msgid "Ascending"
+msgstr "صعودی"
+
+msgid "Aspect Ratio"
+msgstr "نسبت تصویر"
+
+msgid "Auto"
+msgstr "خودکار"
+
+msgid "Background"
+msgstr "پس‌زمینه"
+
+msgid "Background Color"
+msgstr "رنگ پس‌زمینه"
+
+msgid "Badge"
+msgstr "نشان (برچسب)"
+
+msgid "Bag"
+msgstr "کیف خرید"
+
+msgid "Border Color"
+msgstr "رنگ حاشیه"
+
+msgid "Border Radius"
+msgstr "گردی گوشه‌ها"
+
+msgid "Bottom"
+msgstr "پایین"
+
+msgid "Bottom Spacing"
+msgstr "فاصله از پایین"
+
+msgid "Box"
+msgstr "جعبه"
+
+msgid "Breadcrumbs"
+msgstr "مسیر راهنما (بردکرامب)"
+
+msgid "Button Icon"
+msgstr "آیکون دکمه"
+
+msgid "Button Text"
+msgstr "متن دکمه"
+
+msgid "Card"
+msgstr "کارت محصول"
+
+msgid "Cards Columns"
+msgstr "تعداد ستون کارت‌ها"
+
+msgid "Cart"
+msgstr "سبد خرید"
+
+msgid "Cart Sections"
+msgstr "بخش‌های سبد خرید"
+
+msgid "Cart Table"
+msgstr "جدول سبد خرید"
+
+msgid "Cart Totals"
+msgstr "جمع کل سبد خرید"
+
+msgid "Categories"
+msgstr "دسته‌بندی‌ها"
+
+msgid "Categories to Show"
+msgstr "دسته‌بندی‌های نمایش‌داده‌شده"
+
+msgid "Categories:"
+msgstr "دسته‌بندی‌ها:"
+
+msgid "Category Filter Pills"
+msgstr "دکمه‌های فیلتر دسته‌بندی"
+
+msgid "Category Pills"
+msgstr "دکمه‌های دسته‌بندی"
+
+msgid "Cell Padding"
+msgstr "فاصله داخلی سلول‌ها"
+
+msgid "Center"
+msgstr "وسط"
+
+msgid "Checkout"
+msgstr "پرداخت"
+
+msgid "Color"
+msgstr "رنگ"
+
+msgid "Columns"
+msgstr "ستون‌ها"
+
+msgid "Consider \"New\" for (days)"
+msgstr "در نظر گرفتن «جدید» به مدت (روز)"
+
+msgid "Count Color"
+msgstr "رنگ تعداد"
+
+msgid "Coupon"
+msgstr "کد تخفیف"
+
+msgid "Coupon Button"
+msgstr "دکمه کد تخفیف"
+
+msgid "Coupon Field"
+msgstr "فیلد کد تخفیف"
+
+msgid "Coupon Form"
+msgstr "فرم کد تخفیف"
+
+msgid "Cross-Sell Products"
+msgstr "محصولات مکمل"
+
+msgid "Cross-Sells"
+msgstr "محصولات مکمل"
+
+msgid "Current"
+msgstr "فعلی"
+
+msgid "Current Archive"
+msgstr "آرشیو جاری"
+
+msgid "Current Archive renders the page's own product query (count comes from the theme / WooCommerce settings). Custom Query works anywhere."
+msgstr "آرشیو جاری همان کوئری اختصاصی صفحه را نمایش می‌دهد (تعداد محصولات از تنظیمات قالب/ووکامرس می‌آید). کوئری سفارشی در هر صفحه‌ای کار می‌کند."
+
+msgid "Current Loop Product"
+msgstr "محصول جاری حلقه"
+
+msgid "Current Product"
+msgstr "محصول جاری"
+
+msgid "Custom Query"
+msgstr "کوئری سفارشی"
+
+msgid "Date"
+msgstr "تاریخ"
+
+msgid "Default"
+msgstr "پیش‌فرض"
+
+msgid "Descending"
+msgstr "نزولی"
+
+msgid "Description"
+msgstr "توضیحات"
+
+msgid "Description Label"
+msgstr "عنوان تب توضیحات"
+
+msgid "Description Tab"
+msgstr "تب توضیحات"
+
+msgid "Editor Placeholder Text"
+msgstr "متن جای‌نگهدار ویرایشگر"
+
+msgid "Elementor"
+msgstr "Elementor"
+
+msgid "Empty Cart"
+msgstr "سبد خالی"
+
+msgid "Empty Stars Color"
+msgstr "رنگ ستاره‌های خالی"
+
+msgid "Empty-Cart Editor Note"
+msgstr "یادداشت سبد خالی در ویرایشگر"
+
+msgid "End"
+msgstr "انتها"
+
+msgid "End (image last)"
+msgstr "انتها (تصویر در انتها)"
+
+msgid "Filled Stars Color"
+msgstr "رنگ ستاره‌های پر"
+
+msgid "Focus Border Color"
+msgstr "رنگ حاشیه در حالت فوکوس"
+
+msgid "Form Max Width"
+msgstr "حداکثر عرض فرم"
+
+msgid "Full Width"
+msgstr "تمام عرض"
+
+msgid "Gallery Width"
+msgstr "عرض گالری"
+
+msgid "Gallery column width. Applies to the \"Start\" position."
+msgstr "عرض ستون گالری. در حالت «شروع» اعمال می‌شود."
+
+msgid "Gap"
+msgstr "فاصله"
+
+msgid "Grid"
+msgstr "شبکه"
+
+msgid "Grid Gap"
+msgstr "فاصله شبکه"
+
+msgid "HTML Tag"
+msgstr "تگ HTML"
+
+msgid "HamiShop"
+msgstr "حامی‌شاپ"
+
+msgid "HamiShop Archive"
+msgstr "حامی‌شاپ: آرشیو فروشگاه"
+
+msgid "HamiShop Cart"
+msgstr "حامی‌شاپ: سبد خرید"
+
+msgid "HamiShop Checkout"
+msgstr "حامی‌شاپ: پرداخت"
+
+msgid "HamiShop Loop Item"
+msgstr "حامی‌شاپ: آیتم لوپ محصولات"
+
+msgid "HamiShop Settings"
+msgstr "تنظیمات حامی‌شاپ"
+
+msgid "HamiShop Single Product"
+msgstr "حامی‌شاپ: محصول تکی"
+
+msgid "HamiShop — WooCommerce"
+msgstr "حامی‌شاپ — ووکامرس"
+
+msgid "Header Background"
+msgstr "پس‌زمینه سربرگ جدول"
+
+msgid "Header Color"
+msgstr "رنگ سربرگ"
+
+msgid "Header Padding"
+msgstr "فاصله داخلی سربرگ"
+
+msgid "Header Text Color"
+msgstr "رنگ متن سربرگ"
+
+msgid "Heading Bottom Spacing"
+msgstr "فاصله پایین عنوان"
+
+msgid "Heading Color"
+msgstr "رنگ عنوان"
+
+msgid "Headings"
+msgstr "عناوین"
+
+msgid "Height"
+msgstr "ارتفاع"
+
+msgid "Hide"
+msgstr "مخفی"
+
+msgid "Horizontal"
+msgstr "افقی"
+
+msgid "Horizontal Position"
+msgstr "موقعیت افقی"
+
+msgid "Hover"
+msgstr "هاور"
+
+msgid "Hover Background"
+msgstr "پس‌زمینه در هاور"
+
+msgid "Hover Color"
+msgstr "رنگ در هاور"
+
+msgid "Image"
+msgstr "تصویر"
+
+msgid "Image Position"
+msgstr "موقعیت تصویر"
+
+msgid "Inputs"
+msgstr "فیلدها"
+
+msgid "Keeps the gallery in view while scrolling the summary (desktop only)."
+msgstr "گالری هنگام اسکرول بخش خلاصه در دید می‌ماند (فقط دسکتاپ)."
+
+msgid "Label Color"
+msgstr "رنگ برچسب"
+
+msgid "Labels"
+msgstr "برچسب‌ها"
+
+msgid "Layout"
+msgstr "چیدمان"
+
+msgid "Leave empty to show the first five product categories."
+msgstr "برای نمایش پنج دسته‌بندی اول، خالی بگذارید."
+
+msgid "Lift Amount (px)"
+msgstr "مقدار بالا آمدن (پیکسل)"
+
+msgid "Lift on Hover"
+msgstr "بالا آمدن در هاور"
+
+msgid "Line Clamp"
+msgstr "محدودیت خطوط"
+
+msgid "Link Color"
+msgstr "رنگ لینک"
+
+msgid "Link Hover Color"
+msgstr "رنگ لینک در هاور"
+
+msgid "Links to the category archive pages. Works in both modes."
+msgstr "به صفحات آرشیو دسته‌بندی لینک می‌دهد. در هر دو حالت کار می‌کند."
+
+msgid "Load More"
+msgstr "بارگذاری بیشتر"
+
+msgid "Load More Button"
+msgstr "دکمه بارگذاری بیشتر"
+
+msgid "Load More works with Custom Query; in Current Archive mode it falls back to numbered pagination."
+msgstr "«بارگذاری بیشتر» فقط با کوئری سفارشی کار می‌کند؛ در حالت آرشیو جاری به صفحه‌بندی عددی برمی‌گردد."
+
+msgid "Loading…"
+msgstr "در حال بارگذاری…"
+
+msgid "Loop Item"
+msgstr "آیتم لوپ"
+
+msgid "Manual Pick"
+msgstr "انتخاب دستی"
+
+msgid "Manual Selection"
+msgstr "انتخاب دستی"
+
+msgid "Max Categories"
+msgstr "حداکثر دسته‌بندی‌ها"
+
+msgid "Message Color"
+msgstr "رنگ پیام"
+
+msgid "Method Box Border Color"
+msgstr "رنگ حاشیه جعبه روش"
+
+msgid "Method Box Padding"
+msgstr "فاصله داخلی جعبه روش"
+
+msgid "Method Boxes Gap"
+msgstr "فاصله جعبه‌های روش پرداخت"
+
+msgid "Method Description Background"
+msgstr "پس‌زمینه توضیحات روش"
+
+msgid "Method Label Color"
+msgstr "رنگ عنوان روش"
+
+msgid "Mode"
+msgstr "حالت"
+
+msgid "Nav Gap"
+msgstr "فاصله ناوبری"
+
+msgid "New"
+msgstr "جدید"
+
+msgid "New Badge"
+msgstr "نشان جدید"
+
+msgid "New Badge Text"
+msgstr "متن نشان جدید"
+
+msgid "No additional information."
+msgstr "اطلاعات بیشتری وجود ندارد."
+
+msgid "No description provided."
+msgstr "توضیحی ثبت نشده است."
+
+msgid "No more products"
+msgstr "محصول بیشتری وجود ندارد"
+
+msgid "No product found. Use this widget on a Single Product template or pick a product manually."
+msgstr "محصولی پیدا نشد. این ویجت را روی قالب «محصول تکی» قرار دهید یا یک محصول را به‌صورت دستی انتخاب کنید."
+
+msgid "No products found in the current archive."
+msgstr "محصولی در آرشیو جاری پیدا نشد."
+
+msgid "No products match this query."
+msgstr "محصولی با این کوئری پیدا نشد."
+
+msgid "None"
+msgstr "هیچ‌کدام"
+
+msgid "Normal"
+msgstr "عادی"
+
+msgid "Numbers"
+msgstr "شماره صفحات"
+
+msgid "Only Featured Products"
+msgstr "فقط محصولات ویژه"
+
+msgid "Only On-Sale Products"
+msgstr "فقط محصولات حراجی"
+
+msgid "Only works in \"Current Product\" mode on real single product pages."
+msgstr "فقط در حالت «محصول جاری» روی صفحات واقعی محصول کار می‌کند."
+
+msgid "Order"
+msgstr "ترتیب"
+
+msgid "Order By"
+msgstr "مرتب‌سازی بر اساس"
+
+msgid "Order Notes"
+msgstr "یادداشت سفارش"
+
+msgid "Order Review"
+msgstr "بازبینی سفارش"
+
+msgid "Order Total Amount Color"
+msgstr "رنگ مبلغ جمع کل"
+
+msgid "Order Total Color"
+msgstr "رنگ جمع کل سفارش"
+
+msgid "Ordering Dropdown"
+msgstr "منوی مرتب‌سازی"
+
+msgid "Padding"
+msgstr "فاصله داخلی"
+
+msgid "Padding (Inline)"
+msgstr "فاصله داخلی افقی"
+
+msgid "Padding Inline"
+msgstr "فاصله داخلی افقی"
+
+msgid "Pagination"
+msgstr "صفحه‌بندی"
+
+msgid "Panel"
+msgstr "پنل"
+
+msgid "Payment"
+msgstr "پرداخت"
+
+msgid "Payment Methods"
+msgstr "روش‌های پرداخت"
+
+msgid "Performance"
+msgstr "عملکرد"
+
+msgid "Persian digits in prices & numbers"
+msgstr "اعداد فارسی در قیمت‌ها و اعداد"
+
+msgid "Place Order Button"
+msgstr "دکمه ثبت سفارش"
+
+msgid "Place this widget on a Product Archive template, or switch to Custom Query."
+msgstr "این ویجت را روی قالب «آرشیو محصولات» قرار دهید یا به «کوئری سفارشی» سوئیچ کنید."
+
+msgid "Price"
+msgstr "قیمت"
+
+msgid "Price Color"
+msgstr "رنگ قیمت"
+
+msgid "Product"
+msgstr "محصول"
+
+msgid "Product Categories"
+msgstr "دسته‌بندی‌های محصول"
+
+msgid "Product Cell"
+msgstr "سلول محصول"
+
+msgid "Product Meta"
+msgstr "اطلاعات تکمیلی محصول"
+
+msgid "Product Name Color"
+msgstr "رنگ نام محصول"
+
+msgid "Product Source"
+msgstr "منبع محصول"
+
+msgid "Product Tags"
+msgstr "برچسب‌های محصول"
+
+msgid "Product Total Color"
+msgstr "رنگ جمع محصول"
+
+msgid "Products"
+msgstr "محصولات"
+
+msgid "Products Per Page"
+msgstr "تعداد محصولات در صفحه"
+
+msgid "Products Source"
+msgstr "منبع محصولات"
+
+msgid "Products Table"
+msgstr "جدول محصولات"
+
+msgid "Quantity Input"
+msgstr "ورودی تعداد"
+
+msgid "Query"
+msgstr "کوئری"
+
+msgid "Random"
+msgstr "تصادفی"
+
+msgid "Rating"
+msgstr "امتیاز"
+
+msgid "Regular Price Color"
+msgstr "رنگ قیمت اصلی"
+
+msgid "Related & Upsells"
+msgstr "مرتبط و پیشنهادی"
+
+msgid "Related Count"
+msgstr "تعداد محصولات مرتبط"
+
+msgid "Related Heading"
+msgstr "عنوان بخش محصولات مرتبط"
+
+msgid "Related Products"
+msgstr "محصولات مرتبط"
+
+msgid "Remove Link"
+msgstr "لینک حذف"
+
+msgid "Remove WooCommerce block CSS on shop-free pages"
+msgstr "حذف CSS بلوک‌های ووکامرس در صفحات بدون فروشگاه"
+
+msgid "Required Star Color"
+msgstr "رنگ ستاره اجباری"
+
+msgid "Result Count"
+msgstr "شمارش نتایج"
+
+msgid "Result Count & Ordering"
+msgstr "شمارش نتایج و مرتب‌سازی"
+
+msgid "Return to Shop Button"
+msgstr "دکمه بازگشت به فروشگاه"
+
+msgid "Review Count Color"
+msgstr "رنگ تعداد دیدگاه‌ها"
+
+msgid "Reviews"
+msgstr "دیدگاه‌ها"
+
+msgid "Reviews Label"
+msgstr "عنوان تب دیدگاه‌ها"
+
+msgid "Reviews Tab"
+msgstr "تب دیدگاه‌ها"
+
+msgid "Row Border Color"
+msgstr "رنگ حاشیه ردیف‌ها"
+
+msgid "Row Gap"
+msgstr "فاصله ردیف‌ها"
+
+msgid "Rows"
+msgstr "ردیف‌ها"
+
+msgid "SKU"
+msgstr "شناسه محصول"
+
+msgid "SKU:"
+msgstr "شناسه محصول:"
+
+msgid "Sale"
+msgstr "حراج"
+
+msgid "Sale Badge"
+msgstr "نشان حراج"
+
+msgid "Sale Price Color"
+msgstr "رنگ قیمت حراج"
+
+msgid "Search products…"
+msgstr "جستجوی محصولات…"
+
+msgid "Select a product to display its card."
+msgstr "برای نمایش کارت محصول، یک محصول انتخاب کنید."
+
+msgid "Select2 Dropdowns"
+msgstr "منوهای Select2"
+
+msgid "Shop Archive"
+msgstr "آرشیو فروشگاه"
+
+msgid "Short Description"
+msgstr "توضیح کوتاه"
+
+msgid "Show"
+msgstr "نمایش"
+
+msgid "Show Review Count"
+msgstr "نمایش تعداد دیدگاه"
+
+msgid "Shown in the editor only while the cart is empty. Visitors never see it."
+msgstr "فقط در ویرایشگر و زمانی که سبد خالی است دیده می‌شود؛ بازدیدکنندگان هرگز آن را نمی‌بینند."
+
+msgid "Single Column (stacked)"
+msgstr "تک‌ستونه (پشته‌ای)"
+
+msgid "Single Product"
+msgstr "محصول تکی"
+
+msgid "Source"
+msgstr "منبع"
+
+msgid "Star Size"
+msgstr "اندازه ستاره‌ها"
+
+msgid "Stars Color"
+msgstr "رنگ ستاره‌ها"
+
+msgid "Stars Size"
+msgstr "اندازه ستاره‌ها"
+
+msgid "Start"
+msgstr "شروع"
+
+msgid "Start (image first)"
+msgstr "شروع (تصویر در ابتدا)"
+
+msgid "Sticky Gallery"
+msgstr "گالری چسبان"
+
+msgid "Stretch"
+msgstr "کشیده"
+
+msgid "Suggested products rendered under the cart."
+msgstr "محصولات پیشنهادی زیر سبد خرید نمایش داده می‌شوند."
+
+msgid "Summary Padding"
+msgstr "فاصله داخلی بخش خلاصه"
+
+msgid "Swap Image on Hover"
+msgstr "تعویض تصویر در هاور"
+
+msgid "Tabs"
+msgstr "تب‌ها"
+
+msgid "Tags"
+msgstr "برچسب‌ها"
+
+msgid "Tags:"
+msgstr "برچسب‌ها:"
+
+msgid "Terms & Conditions"
+msgstr "قوانین و مقررات"
+
+msgid "Text Color"
+msgstr "رنگ متن"
+
+msgid "The \"Order notes\" textarea in the additional information section."
+msgstr "فیلد «یادداشت سفارش» در بخش اطلاعات بیشتر."
+
+msgid "The coupon form above the checkout fields."
+msgstr "فرم کد تخفیف بالای فیلدهای پرداخت."
+
+msgid "The coupon input inside the cart form."
+msgstr "فیلد کد تخفیف داخل فرم سبد خرید."
+
+msgid "The live cart appears here for logged-in shop visitors. Add the widget to your Cart page (set in WooCommerce → Settings → Advanced)."
+msgstr "سبد خرید واقعی اینجا برای بازدیدکنندگان فروشگاه نمایش داده می‌شود. ویجت را به صفحه «سبد خرید» اضافه کنید (تنظیم در ووکامرس ← پیکربندی ← پیشرفته)."
+
+msgid "The live checkout appears here for shop visitors with items in their cart. Add this widget to your Checkout page (set in WooCommerce → Settings → Advanced)."
+msgstr "صفحه پرداخت واقعی اینجا برای بازدیدکنندگانی که محصولی در سبد دارند نمایش داده می‌شود. ویجت را به صفحه «پرداخت» اضافه کنید (تنظیم در ووکامرس ← پیکربندی ← پیشرفته)."
+
+msgid "The totals / collaterals column next to the table."
+msgstr "ستون جمع کل / اقلام جانبی کنار جدول."
+
+msgid "This listing has expired, please reload the page."
+msgstr "این فهرست منقضی شده است؛ لطفاً صفحه را دوباره بارگذاری کنید."
+
+msgid "Thumbnail Size"
+msgstr "اندازه تصاویر بندانگشتی"
+
+msgid "Thumbnails"
+msgstr "تصاویر بندانگشتی"
+
+msgid "Thumbnails Spacing"
+msgstr "فاصله تصاویر بندانگشتی"
+
+msgid "Title"
+msgstr "عنوان"
+
+msgid "Title Color"
+msgstr "رنگ عنوان"
+
+msgid "Title HTML Tag"
+msgstr "تگ HTML عنوان"
+
+msgid "Toolbar"
+msgstr "نوار ابزار"
+
+msgid "Top"
+msgstr "بالا"
+
+msgid "Top (stacked)"
+msgstr "بالا (پشته‌ای)"
+
+msgid "Top Spacing"
+msgstr "فاصله از بالا"
+
+msgid "Two Columns (WooCommerce default)"
+msgstr "دو ستونه (پیش‌فرض ووکامرس)"
+
+msgid "Type"
+msgstr "نوع"
+
+msgid "Unlimited"
+msgstr "نامحدود"
+
+msgid "Upsell Products"
+msgstr "محصولات پیشنهادی (آپ‌سل)"
+
+msgid "Upsells Count"
+msgstr "تعداد محصولات پیشنهادی"
+
+msgid "Upsells Heading"
+msgstr "عنوان بخش محصولات پیشنهادی"
+
+msgid "Value Color"
+msgstr "رنگ مقدار"
+
+msgid "Vertical"
+msgstr "عمودی"
+
+msgid "Vertical Position"
+msgstr "موقعیت عمودی"
+
+msgid "Widgets"
+msgstr "ویجت‌ها"
+
+msgid "Width"
+msgstr "عرض"
+
+msgid "WooCommerce"
+msgstr "WooCommerce"
+
+msgid "Words Limit"
+msgstr "محدودیت کلمات"
+
+msgid "Zoom on Hover"
+msgstr "بزرگ‌نمایی در هاور"
+
+msgid "افزونه «ویجت‌های فروشگاهی حامی‌شاپ» برای کار کردن به این افزونه‌ها نیاز دارد: %s"
+msgstr "افزونه «ویجت‌های فروشگاهی حامی‌شاپ» برای کار کردن به این افزونه‌ها نیاز دارد: %s"
+

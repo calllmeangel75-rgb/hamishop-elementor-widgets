@@ -1,0 +1,298 @@
+/*!
+ * HamiShop Elementor Widgets — base card styles.
+ * RTL-safe (logical properties only). Loaded only when a HamiShop widget
+ * is actually present on the page.
+ */
+
+/* ---------- Card ---------- */
+.hsw-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        background: #fff;
+        border-radius: 12px;
+        transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease;
+}
+
+.hsw-card:hover {
+        transform: translateY(-6px);
+}
+
+.hsw-card--horizontal {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 16px;
+}
+
+.hsw-card--horizontal .hsw-card__media {
+        width: 42%;
+        flex: 0 0 auto;
+        margin-block-end: 0;
+}
+
+.hsw-card--horizontal .hsw-card__body {
+        flex: 1 1 auto;
+        min-width: 0;
+}
+
+/* ---------- Media ---------- */
+.hsw-card__media {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        height: auto;
+        overflow: hidden;
+        border-radius: 8px;
+        margin-block-end: 14px;
+}
+
+.hsw-card__media-link {
+        display: block;
+        height: 100%;
+}
+
+.hsw-card__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform .4s ease, opacity .3s ease;
+}
+
+.hsw-card__image--alt {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+}
+
+.hsw-card:hover .hsw-card__image--alt:not([src=""]) {
+        opacity: 1;
+}
+
+.hsw-card.hsw-card--zoom:hover .hsw-card__image {
+        transform: scale(1.06);
+}
+
+/* ---------- Badges ---------- */
+.hsw-card__badge {
+        position: absolute;
+        z-index: 2;
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.8;
+        border-radius: 6px;
+        padding: 2px 12px;
+        inset-inline-start: 12px;
+        inset-inline-end: auto;
+        top: 12px;
+        bottom: auto;
+        pointer-events: none;
+}
+
+.hsw-card__badge--sale {
+        background: #c0392b;
+        color: #fff;
+}
+
+.hsw-card__badge--new {
+        background: #fde68a;
+        color: #1f2937;
+        margin-block-start: 34px;
+}
+
+/* ---------- Body ---------- */
+.hsw-card__body {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-width: 0;
+}
+
+.hsw-card__cats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-block-end: 4px;
+}
+
+.hsw-card__cat {
+        color: #9ca3af;
+        font-size: 13px;
+        text-decoration: none;
+        transition: color .2s ease;
+}
+
+.hsw-card__cat:hover {
+        color: #111827;
+}
+
+.hsw-card__title {
+        margin: 0 0 6px;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.6;
+}
+
+.hsw-card__title a {
+        color: #1f2937;
+        text-decoration: none;
+        transition: color .2s ease;
+}
+
+.hsw-card__title a:hover {
+        color: #c0392b;
+}
+
+/* ---------- Rating (no icon font) ---------- */
+.hsw-card__rating {
+        margin-block-end: 6px;
+        line-height: 1;
+}
+
+.hsw-rating {
+        position: relative;
+        display: inline-block;
+        font-size: 14px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+}
+
+.hsw-rating__base,
+.hsw-rating__fill {
+        color: #d1d5db;
+}
+
+.hsw-rating__fill {
+        position: absolute;
+        inset-inline-start: 0;
+        top: 0;
+        width: var(--hsw-rating, 0%);
+        overflow: hidden;
+        color: #f59e0b;
+}
+
+.hsw-rating__count {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-inline-start: 6px;
+}
+
+/* ---------- Excerpt ---------- */
+.hsw-card__excerpt {
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.8;
+        margin-block-end: 6px;
+}
+
+/* ---------- Price ---------- */
+.hsw-card__price {
+        color: #111827;
+        font-weight: 700;
+        margin-block-end: 10px;
+        line-height: 1.6;
+}
+
+.hsw-card__price del {
+        color: #9ca3af;
+        font-weight: 400;
+        opacity: 1;
+}
+
+.hsw-card__price ins {
+        color: #c0392b;
+        text-decoration: none;
+}
+
+/* ---------- Actions ---------- */
+.hsw-card__actions {
+        margin-block-start: auto;
+}
+
+.hsw-card__actions .button,
+.hsw-card__actions .button:focus,
+.hsw-card__actions .button:visited {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        box-sizing: border-box;
+        background: #111827;
+        color: #fff;
+        border: 1px solid #111827;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.6;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.hsw-card__actions .button:hover {
+        background: #c0392b;
+        border-color: #c0392b;
+        color: #fff;
+}
+
+.hsw-card__actions .button.loading {
+        opacity: .6;
+        pointer-events: none;
+}
+
+.hsw-card__actions .button.added::after {
+        content: none;
+}
+
+.hsw-card__actions .button svg {
+        flex: 0 0 auto;
+}
+
+/* RTL: keep icons mirroring-safe */
+html[dir="rtl"] .hsw-card__actions .button svg {
+        transform: scaleX(-1);
+}
+
+/* ---------- Widget root / grids ---------- */
+.hsw-widget-root {
+        width: 100%;
+}
+
+.hsw-loop-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+}
+
+@media (max-width: 1024px) {
+        .hsw-loop-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+}
+
+@media (max-width: 767px) {
+        .hsw-loop-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+        }
+}
+
+/* ---------- Editor helpers ---------- */
+.hsw-editor-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+        padding: 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+        text-align: center;
+        line-height: 1.8;
+}

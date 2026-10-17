@@ -1,0 +1,142 @@
+/*!
+ * HamiShop Elementor Widgets — shop archive styles.
+ * RTL-safe (logical properties only). Most visual styling is generated
+ * inline by Elementor controls; this file holds structure + neutral fallbacks.
+ */
+
+/* ---------- Toolbar ---------- */
+.hsw-archive__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-block-end: 20px;
+}
+
+.hsw-archive__title {
+	margin: 0;
+}
+
+.hsw-archive__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+}
+
+/* ---------- Category pills ---------- */
+.hsw-archive__cats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-block-end: 16px;
+}
+
+.hsw-archive__cat {
+	padding-block: 6px;
+	padding-inline: 14px;
+	border-radius: 999px;
+	background: #f3f4f6;
+	color: #374151;
+	font-size: 13px;
+	text-decoration: none;
+	transition: background-color .2s ease, color .2s ease;
+}
+
+.hsw-archive__cat:hover {
+	background: #111827;
+	color: #fff;
+}
+
+/* ---------- Grid ---------- */
+.hsw-archive__grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 20px;
+}
+
+@media (max-width: 1024px) {
+	.hsw-archive__grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 767px) {
+	.hsw-archive__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 14px;
+	}
+}
+
+/* Editor note spans the whole grid row */
+.hsw-archive__grid .hsw-editor-note {
+	grid-column: 1 / -1;
+}
+
+/* ---------- Numbered pagination ---------- */
+.hsw-archive__pagination .page-numbers {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	justify-content: center;
+	padding: 0;
+	margin-block-start: 24px;
+	margin-block-end: 0;
+	margin-inline: 0;
+}
+
+.hsw-archive__pagination .page-numbers li .page-numbers {
+	display: inline-block;
+	padding-block: 8px;
+	padding-inline: 14px;
+	border-radius: 8px;
+	background: #f3f4f6;
+	color: #111827;
+	text-decoration: none;
+	transition: background-color .2s ease, color .2s ease;
+}
+
+.hsw-archive__pagination .page-numbers li .page-numbers.current {
+	background: #111827;
+	color: #fff;
+}
+
+.hsw-archive__pagination .page-numbers li a.page-numbers:hover {
+	background: #111827;
+	color: #fff;
+}
+
+/* ---------- Load more ---------- */
+.hsw-load-more {
+	display: flex;
+	justify-content: center;
+	margin-block-start: 28px;
+}
+
+.hsw-load-more__button {
+	cursor: pointer;
+	border: 1px solid #111827;
+	background: #111827;
+	color: #fff;
+	border-radius: 8px;
+	padding-block: 12px;
+	padding-inline: 32px;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.6;
+	transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.hsw-load-more__button:hover {
+	background: #c0392b;
+	border-color: #c0392b;
+	color: #fff;
+}
+
+.hsw-load-more__button.is-busy {
+	opacity: .6;
+	pointer-events: none;
+}

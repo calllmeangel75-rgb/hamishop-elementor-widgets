@@ -1,0 +1,15 @@
+/*!
+ * HamiShop Elementor Widgets — loop-item widget extras.
+ * (Most visual styling is generated inline by Elementor controls;
+ * this file only holds structural rules.)
+ */
+
+/* Horizontal layout tuning inside grids */
+.hsw-loop-grid .hsw-card--horizontal {
+	min-width: 0;
+}
+
+/* Single card mode spacing */
+.hsw-widget-root > .hsw-card {
+	max-width: 100%;
+}
