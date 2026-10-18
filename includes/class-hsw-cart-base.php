@@ -37,20 +37,26 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
         }
 
         /**
+         * True while inside the Elementor editor / preview iframe (any context).
+         */
+        protected function is_editing() {
+                if ( ! class_exists( '\Elementor\Plugin' ) ) {
+                        return false;
+                }
+                $el = \Elementor\Plugin::$instance;
+                return ( isset( $el->editor ) && $el->editor->is_edit_mode() )
+                        || ( isset( $el->preview ) && $el->preview->is_preview_mode() )
+                        || ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() && isset( $_POST['action'] ) && 'elementor_ajax' === $_POST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        }
+
+        /**
          * Editor / ajax preview without a real cart → render the design demo.
          */
         protected function is_demo() {
                 if ( $this->has_cart() ) {
                         return false;
                 }
-                if ( ! class_exists( '\Elementor\Plugin' ) ) {
-                        return false;
-                }
-                $el      = \Elementor\Plugin::$instance;
-                $editing = ( isset( $el->editor ) && $el->editor->is_edit_mode() )
-                        || ( isset( $el->preview ) && $el->preview->is_preview_mode() )
-                        || ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() && isset( $_POST['action'] ) && 'elementor_ajax' === $_POST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-                return $editing;
+                return $this->is_editing();
         }
 
         /**

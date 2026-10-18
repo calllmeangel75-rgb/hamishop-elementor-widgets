@@ -290,6 +290,23 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                 $s   = $this->effective_settings();
                 $src = $this->opt( 'source', 'live' );
 
+                /* Real WooCommerce gateways always win (editor preview included)
+                 * unless the design mock is explicitly selected. */
+                if ( 'demo' !== $src ) {
+                        $out = array();
+                        foreach ( $this->gateways() as $g ) {
+                                $out[] = array(
+                                        $g['id'], $g['title'], $g['desc'],
+                                        $g['title'], $g['desc'], '',
+                                        'gateway', $g['chosen'],
+                                        '', '', '',
+                                );
+                        }
+                        if ( ! empty( $out ) ) {
+                                return $out;
+                        }
+                }
+
                 if ( 'demo' === $src || $this->is_demo() ) {
                         $out = array();
                         foreach ( $this->demo_gateways() as $g ) {
@@ -307,16 +324,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                         return $out;
                 }
 
-                $out = array();
-                foreach ( $this->gateways() as $g ) {
-                        $out[] = array(
-                                $g['id'], $g['title'], $g['desc'],
-                                $g['title'], $g['desc'], '',
-                                'gateway', $g['chosen'],
-                                '', '', '',
-                        );
-                }
-                return $out;
+                return array();
         }
 
         /**
@@ -363,7 +371,9 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                 $options = $this->options();
                 $banks   = $this->banks();
                 $ribbon  = $this->ribbon_index( $options );
-                $show_w  = ( 'yes' === ( $s['show_wallet'] ?? 'yes' ) );
+                $wallet_bal = (float) apply_filters( 'hsw_wallet_balance', 0 );
+                $show_w     = ( 'yes' === ( $s['show_wallet'] ?? 'yes' )
+                        && ( $this->is_demo() || $this->is_editing() || 0 < $wallet_bal ) );
                 $wallet_on = $this->wallet_enabled();
                 $ribbon_t  = $this->opt( 'ribbon_text', __( 'توصیه شده', 'hamishop-elementor-widgets' ) );
                 $m_badge_t = $this->opt( 'm_badge_text', __( 'پیشنهادی', 'hamishop-elementor-widgets' ) );
@@ -390,7 +400,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                 ?>
                                                 <?php if ( 'offline' === $type ) { continue; } // desktop mock has no card-to-card row. ?>
 
-                                                <?php if ( 'online' === $type || $is_first ) : ?>
+                                                <?php if ( 'online' === $type ) : ?>
                                                         <!-- Online gateway + banks -->
                                                         <div class="hsw-pm__opt is-online<?php echo $chosen ? ' is-sel' : ''; ?>">
                                                                 <?php if ( $i === $ribbon && '' !== trim( $ribbon_t ) ) : ?>
@@ -451,6 +461,19 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                                 </label>
                                                         </div>
 
+                                                <?php else : ?>
+                                                        <!-- Real WooCommerce gateway row -->
+                                                        <div class="hsw-pm__opt<?php echo $chosen ? ' is-sel' : ''; ?>">
+                                                                <label class="hsw-pm__opt-row">
+                                                                        <input type="radio" name="hsw_pay_method_d" class="hsw-pm__radio" value="<?php echo esc_attr( $id ); ?>"<?php checked( $chosen, true ); ?> />
+                                                                        <span class="hsw-pm__opt-body">
+                                                                                <span class="hsw-pm__opt-t"><?php echo esc_html( $title ); ?></span>
+                                                                                <?php if ( '' !== trim( (string) $desc ) ) : ?>
+                                                                                        <span class="hsw-pm__opt-d"><?php echo esc_html( $desc ); ?></span>
+                                                                                <?php endif; ?>
+                                                                        </span>
+                                                                </label>
+                                                        </div>
                                                 <?php endif; ?>
                                         <?php endforeach; ?>
 
@@ -525,7 +548,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                                                                         <span class="hsw-pm__opt-badge"><?php echo esc_html( $badge_m ); ?></span>
                                                                                                 <?php endif; ?>
                                                                                         </span>
-                                                                                        <?php if ( $is_first && '' !== trim( $m_badge_t ) ) : ?>
+                                                                                        <?php if ( 'online' === $type && '' !== trim( $m_badge_t ) ) : ?>
                                                                                                 <span class="hsw-pm__opt-badge is-acc"><?php echo esc_html( $m_badge_t ); ?></span>
                                                                                         <?php elseif ( '' !== trim( (string) $chip_m ) ) : ?>
                                                                                                 <span class="hsw-pm__opt-chip"><?php echo esc_html( $chip_m ); ?></span>
@@ -540,7 +563,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                                 </span>
                                                         </span>
 
-                                                        <?php if ( ( 'online' === $type || $is_first ) && ! empty( $banks ) ) : ?>
+                                                        <?php if ( 'online' === $type && ! empty( $banks ) ) : ?>
                                                                 <?php
                                                                 $m_banks = array();
                                                                 foreach ( $banks as $b ) {

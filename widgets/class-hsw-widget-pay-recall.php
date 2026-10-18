@@ -239,11 +239,21 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                         $phone  = $cust['phone'];
                         $addr   = $cust['line'];
                 } else {
-                        $name   = $this->customer_name();
-                        $phone  = $this->customer_phone();
-                        $addr   = $this->customer_address();
+                        $name  = $this->customer_name();
+                        $phone = $this->customer_phone();
+                        $addr  = $this->customer_address();
+                        if ( $this->is_editing() && ! $this->customer_has_address() && '' === trim( $name . $phone ) ) {
+                                // Editor preview with an empty guest customer → show the design mock.
+                                $cust  = $this->demo_pay_customer();
+                                $name  = $cust['name'];
+                                $phone = $cust['phone'];
+                                $addr  = $cust['line'];
+                        }
                 }
                 $method    = $this->method_title();
+                if ( '' === trim( $method ) && ! $is_demo && $this->is_editing() ) {
+                        $method = $this->demo_pay_shipping()['method'];
+                }
                 $slot      = $this->slot_text();
                 $free      = $this->opt( 'free_text', __( 'رایگان', 'hamishop-elementor-widgets' ) );
                 $ship_free = $is_demo ? $this->demo_pay_shipping()['free'] : ( (float) $this->chosen_shipping_cost() <= 0 );

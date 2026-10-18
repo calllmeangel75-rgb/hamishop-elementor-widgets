@@ -29,7 +29,7 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
          * array( id, title, desc, icon, chosen ).
          */
         protected function gateways() {
-                if ( ! $this->has_cart() || ! function_exists( 'WC' ) || ! WC()->payment_gateways() ) {
+                if ( ! function_exists( 'WC' ) || ! WC()->payment_gateways() ) {
                         return array();
                 }
                 $all = WC()->payment_gateways()->get_available_payment_gateways();

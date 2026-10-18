@@ -82,7 +82,16 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 $city  = trim( (string) $c->get_shipping_city() );
                 $state = '';
                 if ( function_exists( 'WC' ) && WC()->countries ) {
-                        $state = (string) WC()->countries->get_state( $c->get_shipping_country(), $c->get_shipping_state() );
+                        $cc    = (string) $c->get_shipping_country();
+                        $scode = (string) $c->get_shipping_state();
+                        $list  = ( '' !== $cc ) ? WC()->countries->get_states( $cc ) : array();
+                        if ( '' !== $scode ) {
+                                if ( is_array( $list ) && isset( $list[ $scode ] ) ) {
+                                        $state = (string) $list[ $scode ];
+                                } elseif ( ! is_numeric( $scode ) ) {
+                                        $state = $scode; // Free-text state typed by the customer.
+                                }
+                        }
                 }
                 if ( '' !== $state ) {
                         $parts[] = $state;
@@ -105,6 +114,24 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                         }
                 }
                 return trim( implode( '، ', array_filter( $parts ) ) );
+        }
+
+        /**
+         * True when the customer has a real address (city or street line).
+         * Guest defaults only carry the store base country/state, which alone
+         * should not count as an address.
+         */
+        protected function customer_has_address() {
+                $c = $this->customer();
+                if ( ! $c ) {
+                        return false;
+                }
+                foreach ( array( 'get_shipping_city', 'get_shipping_address_1', 'get_billing_city', 'get_billing_address_1' ) as $g ) {
+                        if ( '' !== trim( (string) $c->$g() ) ) {
+                                return true;
+                        }
+                }
+                return false;
         }
 
         /**

@@ -207,6 +207,10 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 'phone'    => $this->customer_phone(),
                                 'postcode' => $this->customer_postcode(),
                         );
+                        if ( $this->is_editing() && ! $this->customer_has_address() && '' === trim( $addr['name'] . $addr['phone'] . $addr['postcode'] ) ) {
+                                // Editor preview with an empty guest customer → show the design mock.
+                                $addr = $this->demo_address();
+                        }
                 }
 
                 $title_d   = $this->opt( 'title_d', __( 'آدرس تحویل سفارش', 'hamishop-elementor-widgets' ) );
