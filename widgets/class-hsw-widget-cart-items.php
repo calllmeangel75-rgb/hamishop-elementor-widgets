@@ -240,7 +240,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
          * ====================================================================== */
 
         protected function render() {
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $demo  = $this->is_demo();
                 $items = $demo ? $this->demo_items() : $this->cart_items();
                 $empty = ( ! $demo && empty( $items ) );
@@ -292,7 +292,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
          * One desktop row.
          */
         protected function render_row( $item ) {
-                $s            = $this->get_settings_for_display();
+                $s            = $this->effective_settings();
                 $show_eyebrow = ( 'yes' === ( $s['show_eyebrow'] ?? 'yes' ) );
                 $show_chips   = ( 'yes' === ( $s['show_chips'] ?? 'yes' ) );
                 $show_warranty = ( 'yes' === ( $s['show_warranty'] ?? 'yes' ) );
@@ -385,7 +385,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
          * One mobile card.
          */
         protected function render_mcard( $item ) {
-                $s            = $this->get_settings_for_display();
+                $s            = $this->effective_settings();
                 $show_eyebrow = ( 'yes' === ( $s['show_eyebrow'] ?? 'yes' ) );
                 $show_chips   = ( 'yes' === ( $s['show_chips'] ?? 'yes' ) );
                 $show_warranty = ( 'yes' === ( $s['show_warranty'] ?? 'yes' ) );

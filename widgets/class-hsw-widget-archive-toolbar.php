@@ -103,10 +103,10 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
 
                 $sorts   = $this->sorts();
                 $current = $this->current_sort();
-                $tags    = ( 'yes' === ( $this->get_settings_for_display()['show_tags'] ?? 'yes' ) ) ? $this->active_filter_tags() : array();
+                $tags    = ( 'yes' === ( $this->effective_settings()['show_tags'] ?? 'yes' ) ) ? $this->active_filter_tags() : array();
                 $active  = $this->active_filter_count();
 
-                $show_view = ( 'yes' === ( $this->get_settings_for_display()['show_view'] ?? 'yes' ) );
+                $show_view = ( 'yes' === ( $this->effective_settings()['show_view'] ?? 'yes' ) );
                 $view      = isset( $this->current_params()['view'] ) ? $this->current_params()['view'] : 'grid';
 
                 $from  = 0;

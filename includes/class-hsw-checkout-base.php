@@ -28,7 +28,7 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
          * Root classes for checkout widgets (own palette root .hsw-k).
          */
         protected function root_class( $slug, $extra = '' ) {
-                $s   = $this->get_settings_for_display();
+                $s   = $this->effective_settings();
                 $vis = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
                 $cls = 'hsw-k hsw-' . $slug . ' hsw-vis-' . $vis . $this->hsw_font_class();
                 if ( $extra ) {

@@ -77,7 +77,7 @@ class HSW_Widget_Archive_Breadcrumb extends HSW_Archive_Base {
          * Breadcrumb trail: [ label, url|null ].
          */
         protected function trail() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 if ( $this->is_demo() || ! $this->is_archive_context() ) {
                         $d    = $this->demo();
                         $list = array();
@@ -111,7 +111,7 @@ class HSW_Widget_Archive_Breadcrumb extends HSW_Archive_Base {
 
         protected function render() {
                 $trail = $this->trail();
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $home_ic = ( 'yes' === ( $s['show_home_icon'] ?? 'yes' ) );
                 ?>
                 <nav class="<?php echo esc_attr( $this->root_class( 'abc' ) ); ?>" aria-label="<?php esc_attr_e( 'مسیر راهنما', 'hamishop-elementor-widgets' ); ?>">

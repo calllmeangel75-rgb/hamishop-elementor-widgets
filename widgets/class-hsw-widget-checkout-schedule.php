@@ -225,7 +225,7 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $title   = $this->opt( 'title', __( 'انتخاب زمان و روز تحویل', 'hamishop-elementor-widgets' ) );
                 $title_m = $this->opt( 'title_m', __( 'زمان‌بندی تحویل مرسوله', 'hamishop-elementor-widgets' ) );

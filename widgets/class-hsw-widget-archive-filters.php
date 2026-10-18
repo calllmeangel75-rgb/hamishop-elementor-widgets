@@ -250,7 +250,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                         return $rows;
                 }
                 $map = array();
-                $s   = $this->get_settings_for_display();
+                $s   = $this->effective_settings();
                 foreach ( (array) ( isset( $s['color_map'] ) ? $s['color_map'] : array() ) as $row ) {
                         $nm = isset( $row['name'] ) ? trim( (string) $row['name'] ) : '';
                         if ( '' !== $nm ) {
@@ -304,7 +304,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                         return;
                 }
 
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $d     = $this->demo();
                 $f_ttl = $this->opt( 'f_title', __( 'فیلترهای پیشرفته', 'hamishop-elementor-widgets' ) );
 

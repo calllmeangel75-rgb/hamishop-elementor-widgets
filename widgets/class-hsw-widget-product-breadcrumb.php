@@ -105,7 +105,7 @@ class HSW_Widget_Product_Breadcrumb extends HSW_Product_Base {
 
         protected function render() {
                 list( $product, $demo ) = $this->product_or_demo();
-                $s   = $this->get_settings_for_display();
+                $s   = $this->effective_settings();
                 $sep = isset( $s['sep_text'] ) && '' !== $s['sep_text'] ? $s['sep_text'] : '/';
 
                 // Live front-end outside a single-product context → render nothing (no mock data).

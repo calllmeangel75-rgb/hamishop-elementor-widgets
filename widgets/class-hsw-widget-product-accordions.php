@@ -222,7 +222,7 @@ class HSW_Widget_Product_Accordions extends HSW_Product_Base {
          */
         protected function render() {
                 list( $product, $demo ) = $this->product_or_demo();
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 /* Never render mock data outside the Elementor editor. */
                 if ( ! $product && ! $this->is_demo() ) {

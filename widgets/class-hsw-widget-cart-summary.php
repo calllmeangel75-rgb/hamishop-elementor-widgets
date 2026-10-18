@@ -431,7 +431,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
         }
 
         protected function render() {
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $demo  = $this->is_demo();
                 $empty = ( ! $demo && ( ! $this->has_cart() || 0 === $this->cart_count() ) );
                 if ( $empty ) {

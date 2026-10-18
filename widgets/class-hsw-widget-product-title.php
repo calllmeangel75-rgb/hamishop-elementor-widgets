@@ -196,7 +196,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
          */
         protected function render() {
                 list( $product, $demo ) = $this->product_or_demo();
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 if ( ! $product && ! $this->is_demo() ) {
                         return; // No product data outside the editor — render nothing.

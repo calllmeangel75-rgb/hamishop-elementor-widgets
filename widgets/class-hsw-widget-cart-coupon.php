@@ -169,7 +169,7 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
                         return;
                 }
 
-                $s         = $this->get_settings_for_display();
+                $s         = $this->effective_settings();
                 $show_foot = ( 'yes' === ( $s['show_foot'] ?? 'yes' ) );
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'ccoupon' ) ); ?>">

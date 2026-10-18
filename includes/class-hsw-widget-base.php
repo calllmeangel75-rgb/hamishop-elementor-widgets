@@ -49,8 +49,210 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * Returns ' hsw-font-inherit' when the widget must use the theme font.
          */
         public function hsw_font_class() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 return ( isset( $s['hsw_font_mode'] ) && 'inherit' === $s['hsw_font_mode'] ) ? ' hsw-font-inherit' : '';
+        }
+
+        /* =========================================================================
+         *  COMPOSITE SUPPORT
+         *
+         *  Whole-page composite widgets (HSW_Widget_*_Page) render the existing
+         *  single widgets as their sections through HSW_Composite. Each part
+         *  receives its own settings array injected here, so the single widgets
+         *  stay untouched and keep working exactly as before when used alone.
+         * ====================================================================== */
+
+        /** @var array|null Settings injected by a composite parent. */
+        private $hsw_injected_settings = null;
+
+        /**
+         * Inject a settings array produced by the composite's prefixed controls.
+         *
+         * @param array $settings Part settings (child-widget key space).
+         * @return $this
+         */
+        public function hsw_inject_settings( array $settings ) {
+                $this->hsw_injected_settings = $settings;
+                return $this;
+        }
+
+        /**
+         * Settings the render code must use: the injected composite settings when
+         * present, otherwise this element's own saved settings.
+         *
+         * @return array
+         */
+        public function effective_settings() {
+                return ( null !== $this->hsw_injected_settings ) ? $this->hsw_injected_settings : $this->get_settings_for_display();
+        }
+
+        /**
+         * True when the widget is rendering as a composite part.
+         */
+        protected function is_composite_part() {
+                return null !== $this->hsw_injected_settings;
+        }
+
+        /**
+         * Resolve one part's settings from the composite's prefixed controls.
+         * Every saved key starting with $prefix is forwarded with the prefix
+         * stripped (e.g. 'ttl_' + 'vis' → 'vis').
+         *
+         * @param string $prefix Part control prefix, including the separator.
+         * @return array
+         */
+        protected function part_settings( $prefix ) {
+                $s   = $this->effective_settings();
+                $out = array();
+                foreach ( $s as $key => $value ) {
+                        if ( 0 === strpos( $key, $prefix ) ) {
+                                $out[ substr( $key, strlen( $prefix ) ) ] = $value;
+                        }
+                }
+                return $out;
+        }
+
+        /**
+         * Render one part widget of a composite, with its prefixed settings.
+         *
+         * @param string $prefix       Part control prefix (with separator).
+         * @param string $widget_class Fully-qualified HSW widget class.
+         * @return string
+         */
+        protected function part( $prefix, $widget_class ) {
+                return HSW_Composite::part( $widget_class, $this->part_settings( $prefix ) );
+        }
+
+        /**
+         * Is a composite part enabled? Parts default to enabled.
+         *
+         * @param string $prefix Part control prefix (with separator).
+         * @return bool
+         */
+        protected function part_on( $prefix ) {
+                $s = $this->effective_settings();
+                return ! isset( $s[ $prefix . 'on' ] ) || 'yes' === $s[ $prefix . 'on' ];
+        }
+
+        /**
+         * Echo one enabled composite part, optionally inside a layout wrapper.
+         *
+         * @param string $prefix       Part control prefix (with separator).
+         * @param string $widget_class Fully-qualified HSW widget class.
+         * @param string $wrap_class   Optional wrapper CSS class.
+         */
+        protected function print_part( $prefix, $widget_class, $wrap_class = '' ) {
+                $html = $this->part( $prefix, $widget_class );
+                if ( '' === trim( $html ) ) {
+                        return;
+                }
+                if ( '' === $wrap_class ) {
+                        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already-escaped widget markup.
+                        return;
+                }
+                echo '<div class="' . esc_attr( $wrap_class ) . '">' . $html . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        }
+
+        /**
+         * Open a composite section: enable switcher + mirrored child controls.
+         *
+         * @param string $prefix       Part control prefix (with separator).
+         * @param string $label        Section label.
+         * @param string $widget_class Fully-qualified part widget class.
+         * @param array  $ids          Child control ids to expose.
+         */
+        protected function part_section( $prefix, $label, $widget_class, $ids = array() ) {
+                $this->start_controls_section(
+                        'sec_' . $prefix,
+                        array(
+                                'label' => $label,
+                                'tab'   => Controls_Manager::TAB_CONTENT,
+                        )
+                );
+
+                $this->add_control(
+                        $prefix . 'on',
+                        array(
+                                'label'   => __( 'نمایش این بخش', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::SWITCHER,
+                                'default' => 'yes',
+                                'separator' => 'after',
+                        )
+                );
+
+                $this->part_controls( $prefix, $widget_class, $ids );
+
+                $this->end_controls_section();
+        }
+
+        /**
+         * Mirror chosen content controls of a part widget into this composite
+         * (prefixed ids, exact types + defaults + conditions).
+         *
+         * @param string $prefix       Part control prefix (with separator).
+         * @param string $widget_class Fully-qualified part widget class.
+         * @param array  $ids          Child control ids to expose.
+         */
+        protected function part_controls( $prefix, $widget_class, $ids = array() ) {
+                $controls = HSW_Composite::controls( $widget_class );
+                $allowed  = array(
+                        Controls_Manager::TEXT,
+                        Controls_Manager::TEXTAREA,
+                        Controls_Manager::SELECT,
+                        Controls_Manager::SWITCHER,
+                        Controls_Manager::NUMBER,
+                        Controls_Manager::SLIDER,
+                        Controls_Manager::URL,
+                        Controls_Manager::REPEATER,
+                        Controls_Manager::CHOOSER,
+                        Controls_Manager::HEADING,
+                        Controls_Manager::DIVIDER,
+                );
+                $pass = array(
+                        'label', 'type', 'default', 'options', 'condition', 'description',
+                        'placeholder', 'label_block', 'label_on', 'label_off', 'separator',
+                        'size_units', 'range', 'allow_empty', 'multiple', 'rows', 'min',
+                        'max', 'step', 'fields', 'return_value', 'classes', 'selectors',
+                );
+
+                foreach ( $ids as $id ) {
+                        if ( empty( $controls[ $id ] ) || ! is_array( $controls[ $id ] ) ) {
+                                continue;
+                        }
+                        $source = $controls[ $id ];
+                        $type   = isset( $source['type'] ) ? $source['type'] : '';
+                        if ( ! in_array( $type, $allowed, true ) ) {
+                                continue;
+                        }
+
+                        $args = array();
+                        foreach ( $pass as $key ) {
+                                if ( array_key_exists( $key, $source ) ) {
+                                        $args[ $key ] = $source[ $key ];
+                                }
+                        }
+                        if ( ! isset( $args['default'] ) && isset( $source['desktop_default'] ) ) {
+                                $args['default'] = $source['desktop_default'];
+                        }
+
+                        if ( ! empty( $args['condition'] ) && is_array( $args['condition'] ) ) {
+                                $condition = array();
+                                foreach ( $args['condition'] as $ck => $cv ) {
+                                        $base = preg_replace( '/(!|\[.*\])$/', '', (string) $ck );
+                                        $base = preg_replace( '/_(tablet|mobile|widescreen|mobile_extra|tablet_extra|laptop)$/', '', $base );
+                                        if ( in_array( $base, $ids, true ) ) {
+                                                $condition[ $prefix . $ck ] = $cv;
+                                        }
+                                }
+                                if ( $condition ) {
+                                        $args['condition'] = $condition;
+                                } else {
+                                        unset( $args['condition'] );
+                                }
+                        }
+
+                        $this->add_control( $prefix . $id, $args );
+                }
         }
 
         public function get_style_depends() {
@@ -1189,7 +1391,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * Translate widget settings into renderer args.
          */
         protected function renderer_args() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 return wp_parse_args(
                         array(
                                 'show_brand'        => $s['show_brand'] ?? 'yes',
@@ -1220,7 +1422,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * Resolve products from the source controls.
          */
         protected function resolve_products() {
-                $s      = $this->get_settings_for_display();
+                $s      = $this->effective_settings();
                 $source = $s['source'] ?? 'sale';
                 $count  = max( 1, (int) ( $s['count']['size'] ?? 8 ) );
 

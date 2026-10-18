@@ -318,7 +318,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          * Root classes for the widget (hsw-p + per-widget + visibility + font mode).
          */
         protected function root_class( $slug, $extra = '' ) {
-                $s    = $this->get_settings_for_display();
+                $s    = $this->effective_settings();
                 $vis  = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
                 $cls  = 'hsw-p hsw-' . $slug . ' hsw-vis-' . $vis . $this->hsw_font_class();
                 if ( $extra ) {

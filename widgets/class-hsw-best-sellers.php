@@ -60,7 +60,7 @@ class HSW_Widget_Best_Sellers extends HSW_Widget_Base {
         }
 
         protected function render() {
-                $s        = $this->get_settings_for_display();
+                $s        = $this->effective_settings();
                 $products = $this->resolve_products();
                 $args     = $this->renderer_args();
 

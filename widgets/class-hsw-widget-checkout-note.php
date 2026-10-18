@@ -134,7 +134,7 @@ class HSW_Widget_Checkout_Note extends HSW_Checkout_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $label_d = $this->opt( 'label_d', __( 'یادداشت سفارش و توضیحات ارسال (اختیاری)', 'hamishop-elementor-widgets' ) );
                 $label_m = $this->opt( 'label_m', __( 'یادداشت و هماهنگی برای پیک (اختیاری)', 'hamishop-elementor-widgets' ) );

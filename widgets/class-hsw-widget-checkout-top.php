@@ -211,7 +211,7 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
          * Normalized steps: [ name_d, name_m, meta ].
          */
         protected function steps_list() {
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $steps = ( isset( $s['steps'] ) && is_array( $s['steps'] ) ) ? $s['steps'] : array();
                 if ( empty( $steps ) ) {
                         return array(
@@ -233,7 +233,7 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
         }
 
         protected function render() {
-                $s      = $this->get_settings_for_display();
+                $s      = $this->effective_settings();
                 $steps  = $this->steps_list();
                 $active = max( 1, min( count( $steps ), (int) $this->opt( 'active_step', '2' ) ) );
                 $sticky = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );

@@ -69,7 +69,7 @@ class HSW_Widget_Archive_Pagination extends HSW_Archive_Base {
                 }
 
                 global $wp_query;
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $total = $this->is_demo() ? 21 : ( $wp_query && $wp_query->max_num_pages ? (int) $wp_query->max_num_pages : 1 );
                 $cur   = $this->is_demo() ? 1 : max( 1, (int) get_query_var( 'paged' ) );
 

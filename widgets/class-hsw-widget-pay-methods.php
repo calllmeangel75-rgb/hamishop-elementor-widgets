@@ -287,7 +287,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
          * [ id, title, desc, title_m, desc_m, badge_m, type, chosen, badge, note, chip_m ].
          */
         protected function options() {
-                $s   = $this->get_settings_for_display();
+                $s   = $this->effective_settings();
                 $src = $this->opt( 'source', 'live' );
 
                 if ( 'demo' === $src || $this->is_demo() ) {
@@ -323,7 +323,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
          * Bank rows: [ label, label_m, icon, tag, tag_on, chosen ].
          */
         protected function banks() {
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $banks = ( isset( $s['banks'] ) && is_array( $s['banks'] ) ) ? $s['banks'] : array();
                 if ( empty( $banks ) ) {
                         return $this->demo_banks();
@@ -359,7 +359,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
         }
 
         protected function render() {
-                $s       = $this->get_settings_for_display();
+                $s       = $this->effective_settings();
                 $options = $this->options();
                 $banks   = $this->banks();
                 $ribbon  = $this->ribbon_index( $options );

@@ -241,7 +241,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
          * Step labels (desktop / mobile).
          */
         protected function steps_list() {
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $steps = ( isset( $s['steps'] ) && is_array( $s['steps'] ) ) ? $s['steps'] : array();
                 if ( empty( $steps ) ) {
                         return array(
@@ -261,7 +261,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
         }
 
         protected function render() {
-                $s      = $this->get_settings_for_display();
+                $s      = $this->effective_settings();
                 $steps  = $this->steps_list();
                 $active = max( 1, min( count( $steps ), (int) $this->opt( 'active_step', '1' ) ) );
                 $demo   = $this->is_demo();

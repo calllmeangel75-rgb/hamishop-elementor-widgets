@@ -197,7 +197,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
          * Quick pills: [ label, url, active ].
          */
         protected function pills() {
-                $s    = $this->get_settings_for_display();
+                $s    = $this->effective_settings();
                 $src  = isset( $s['pills_source'] ) ? $s['pills_source'] : 'children';
 
                 if ( $this->is_demo() || ! $this->is_archive_context() ) {
@@ -250,7 +250,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
          * SEO description (WYSIWYG override → term description → demo).
          */
         protected function desc_html() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 $custom = isset( $s['seo_desc'] ) ? trim( (string) $s['seo_desc'] ) : '';
                 if ( '' !== $custom ) {
                         return wp_kses_post( $custom );
@@ -266,7 +266,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
          * Update note with {time} replacement.
          */
         protected function update_note() {
-                $s   = $this->get_settings_for_display();
+                $s   = $this->effective_settings();
                 $txt = isset( $s['update_note'] ) ? trim( (string) $s['update_note'] ) : '';
                 if ( '' === $txt ) {
                         return '';
@@ -276,7 +276,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $title  = $this->title_text();
                 $count  = $this->count_text();

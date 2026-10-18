@@ -239,7 +239,7 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
          */
         protected function render() {
                 list( $product, $demo ) = $this->product_or_demo();
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $specs = $demo ? array() : $this->specs_rows( $product );
 
                 /* --- Desktop source: demo defaults | auto specs | repeater. --- */

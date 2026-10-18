@@ -426,7 +426,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
         }
 
         protected function render() {
-                $s       = $this->get_settings_for_display();
+                $s       = $this->effective_settings();
                 $t       = $this->totals();
                 $tm      = $this->totals_m();
                 $sticky  = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );

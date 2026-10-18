@@ -184,8 +184,8 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
          * WooCommerce «my account → addresses» URL.
          */
         protected function manage_url() {
-                if ( ! empty( $this->get_settings_for_display()['manage_url']['url'] ) ) {
-                        return $this->get_settings_for_display()['manage_url']['url'];
+                if ( ! empty( $this->effective_settings()['manage_url']['url'] ) ) {
+                        return $this->effective_settings()['manage_url']['url'];
                 }
                 if ( function_exists( 'wc_get_account_endpoint_url' ) ) {
                         return wc_get_account_endpoint_url( 'edit-address' );
@@ -194,7 +194,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $demo = $this->is_demo();
                 if ( $demo ) {

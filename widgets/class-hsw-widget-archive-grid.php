@@ -313,7 +313,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 if ( ! $this->is_demo() && ! $this->is_archive_context() ) {
                         return;
                 }

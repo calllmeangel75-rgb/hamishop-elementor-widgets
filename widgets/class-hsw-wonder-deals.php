@@ -64,7 +64,7 @@ class HSW_Widget_Wonder_Deals extends HSW_Widget_Base {
          * Countdown end timestamp per settings.
          */
         private function cd_end( $products ) {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 if ( 'yes' !== ( $s['show_cd'] ?? 'yes' ) ) {
                         return 0;
                 }
@@ -76,7 +76,7 @@ class HSW_Widget_Wonder_Deals extends HSW_Widget_Base {
         }
 
         protected function render() {
-                $s        = $this->get_settings_for_display();
+                $s        = $this->effective_settings();
                 $products = $this->resolve_products();
                 $args     = $this->renderer_args();
 

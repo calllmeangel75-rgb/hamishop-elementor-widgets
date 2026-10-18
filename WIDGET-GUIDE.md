@@ -612,3 +612,50 @@ REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / pay
   چپ (۴ ستون): خلاصه فاکتور. موبایل: ترتیب کارت‌ها مطابق موک (مرسوله → کیف پول → شیوه پرداخت →
   کد تخفیف → خلاصه فاکتور) + نوار پایین ثابت.
 - اسکرین‌شات‌های تأیید: `/hsw-preview/payment.html` (دسکتاپ 1280 + موبایل 390) — پیش‌نمایش استاتیک dev-only.
+
+---
+
+# ویجت‌های جامع (Composite) — v1.7.0
+
+هر صفحهٔ فروشگاهی با **یک ویجت** چیده می‌شود؛ داخل آن، ویجت‌های تکی موجود به‌عنوان «پارت» رندر می‌شوند.
+
+## موتور
+- `includes/class-hsw-composite.php` — `HSW_Composite::part($class, $settings)`:
+  `new $class()` → `hsw_inject_settings(defaults + part settings)` → `ob_start` → `render_content()`.
+  هر Throwable داخل یک پارت فقط همان پارت را حذف می‌کند (hsw_report_fatal) — صفحه نمی‌خوابد.
+- `HSW_Widget_Base`: `hsw_inject_settings()` / `effective_settings()` (جایگزین سراسری `get_settings_for_display()` در همهٔ ویجت‌ها) / `part_settings($prefix)` / `part_on($prefix)` / `print_part()` / `part_section()` / `part_controls()`.
+- `part_controls()` کنترل‌های کودک را با پیشوند آینه می‌کند: فقط کلیدهای مجاز (label/type/default/options/fields/condition/…)، شرایط به فضای پیشوندشده بازنویسی می‌شود و شرایط روی کنترل‌های آینه‌نشده حذف می‌گردد.
+
+## ویجت‌ها (همه در دسته‌های خانوادهٔ خودشان)
+| slug | کلاس | پارت‌ها (پیشوند) |
+|---|---|---|
+| `hsw-product-page` | HSW_Widget_Product_Page | pbc_ pga_ ptl_ pvr_ pft_ ppu_ ptr_ ptb_ pac_ pst_ |
+| `hsw-archive-page` | HSW_Widget_Archive_Page | abc_ ahd_ af_ at_ ag_ ap_ agd_ |
+| `hsw-cart-page` | HSW_Widget_Cart_Page | ctop_ cbanner_ citems_ ccoupon_ csummary_ |
+| `hsw-checkout-page` | HSW_Widget_Checkout_Page | ctop_ caddr_ cship_ csched_ cnote_ citems_ csum_ |
+| `hsw-pay-page` | HSW_Widget_Pay_Page | paytop_ prec_ pm_ pcpn_ psum_ |
+| `hsw-blog-page` | HSW_Widget_Blog_Page | bhero_ btabs_ bfeat_ bgrid_ bpop_ bnews_ btags_ |
+
+- چیدمان: `assets/css/hsw-composite.css` — `--hsw-cp-side` (عرض سایدبار) و `--hsw-cp-cols` (نسبت ستون گالری) از کنترل‌های Elementor ست می‌شوند؛ موبایل تک‌ستونه.
+- قرارداد: شناسهٔ کنترل‌های ویجت‌های تکی هرگز تغییر نمی‌کند؛ هر پارت پیش‌فرض روشن است و با `{prefix}on=no` خاموش می‌شود.
+
+# خانوادهٔ مجله و وبلاگ — v1.7.0
+
+دستهٔ المنتور: **حامی — ویجت‌های مجله و وبلاگ** (`hamishop-blog`)
+پایه: `includes/class-hsw-blog-base.php` (extends HSW_Widget_Base) — ریشه: `hsw-b hsw-{slug} hsw-vis-*`
+CSS: `assets/css/hsw-blog.css` (+ توکن‌های سرمه‌ای/نارنجی طرح)
+
+| slug | نقش | فیلتر/داده |
+|---|---|---|
+| `hsw-blog-hero` | بج + عنوان + آمار زنده (wp_count_posts/categories/comments) + فرم جستجو (`blog_s`) + برچسب داغ | `wp_count_*`, `get_tags` |
+| `hsw-blog-tabs` | پیل‌های دسته + `blog_sort` (newest/popular/oldest) — لینک سرورساید | `get_categories`, select با onchange |
+| `hsw-blog-featured` | کارت مقالهٔ ویژه (فقط صفحهٔ ۱ بدون جستجو) | `blog_query()` |
+| `hsw-blog-grid` | شبکه + صفحه‌بندی (`blog_page`) + skip_first هم‌گام با مقالهٔ ویژه | `blog_query`, `paginate_links` |
+| `hsw-blog-popular` | لیست رتبه‌دار (orderby=comment_count، بازهٔ روزه با fallback) | `popular_posts()` |
+| `hsw-blog-newsletter` | فرم با مقصد خارجی (`action_url`) یا شورت‌کد | — |
+| `hsw-blog-tags` | ابر برچسب + هایلایت اول | `get_tags` |
+| `hsw-blog-page` | ویجت جامع مجله | bhero_ btabs_ bfeat_ bgrid_ bpop_ bnews_ btags_ |
+
+- قرارداد فیلترها (public/بدون nonce): `blog_cat` / `blog_sort` / `blog_s` / `blog_page` — همه با `sanitize_*` و `blog_url()` بازساخته می‌شوند.
+- «بازدید» در وردپرس شمارندهٔ بومی ندارد → معیار پیش‌فرض دیدگاه‌هاست (`meta_label` قابل تغییر).
+- زمان مطالعه تخمینی: ۲۰۰ کلمه/دقیقه (`read_time()`).

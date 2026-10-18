@@ -383,7 +383,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $t        = $this->totals();
                 $items    = $this->is_demo() ? $this->demo_items() : $this->cart_items();

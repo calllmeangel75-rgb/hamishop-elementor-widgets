@@ -57,7 +57,7 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Value of a widget option with default fallback.
          */
         protected function opt( $key, $default = '' ) {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 return ( isset( $s[ $key ] ) && '' !== trim( (string) $s[ $key ] ) ) ? trim( (string) $s[ $key ] ) : $default;
         }
 
@@ -65,7 +65,7 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Root classes for cart widgets.
          */
         protected function root_class( $slug, $extra = '' ) {
-                $s   = $this->get_settings_for_display();
+                $s   = $this->effective_settings();
                 $vis = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
                 $cls = 'hsw-c hsw-' . $slug . ' hsw-vis-' . $vis . $this->hsw_font_class();
                 if ( $extra ) {

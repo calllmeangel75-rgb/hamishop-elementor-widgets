@@ -49,6 +49,7 @@ final class HSW_Plugin {
                  * white-screen-of-death: "Class HSW_Widget_Base not found").
                  */
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
+                require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
@@ -75,6 +76,7 @@ final class HSW_Plugin {
                         'hamishop-loop'    => __( 'حامی — ویجت‌های لوپ محصولات', 'hamishop-elementor-widgets' ),
                         'hamishop-cart'    => __( 'حامی — ویجت‌های سبد خرید و پرداخت', 'hamishop-elementor-widgets' ),
                         'hamishop-archive' => __( 'حامی — ویجت‌های آرشیو محصولات', 'hamishop-elementor-widgets' ),
+                        'hamishop-blog'    => __( 'حامی — ویجت‌های مجله و وبلاگ', 'hamishop-elementor-widgets' ),
                 );
                 foreach ( $categories as $slug => $title ) {
                         $elements_manager->add_category(
@@ -105,6 +107,7 @@ final class HSW_Plugin {
                         require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
                         require_once HSW_DIR . 'includes/class-hsw-product-base.php';
                         require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
+                        require_once HSW_DIR . 'includes/class-hsw-blog-base.php';
                 } catch ( \Throwable $e ) {
                         hsw_report_fatal( $e, 'base-load' );
                         return;
@@ -126,6 +129,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-product-tabs.php',
                         HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php',
                         HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-page.php',
 
                         HSW_DIR . 'widgets/class-hsw-widget-archive-breadcrumb.php',
                         HSW_DIR . 'widgets/class-hsw-widget-archive-header.php',
@@ -134,6 +138,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-archive-grid.php',
                         HSW_DIR . 'widgets/class-hsw-widget-archive-pagination.php',
                         HSW_DIR . 'widgets/class-hsw-widget-archive-guide.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-archive-page.php',
 
                         HSW_DIR . 'includes/class-hsw-cart-base.php',
                         HSW_DIR . 'widgets/class-hsw-widget-cart-top.php',
@@ -141,6 +146,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-cart-items.php',
                         HSW_DIR . 'widgets/class-hsw-widget-cart-coupon.php',
                         HSW_DIR . 'widgets/class-hsw-widget-cart-summary.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-cart-page.php',
 
                         HSW_DIR . 'includes/class-hsw-checkout-base.php',
                         HSW_DIR . 'widgets/class-hsw-widget-checkout-top.php',
@@ -150,6 +156,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-checkout-note.php',
                         HSW_DIR . 'widgets/class-hsw-widget-checkout-items.php',
                         HSW_DIR . 'widgets/class-hsw-widget-checkout-summary.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-checkout-page.php',
 
                         HSW_DIR . 'includes/class-hsw-pay-base.php',
                         HSW_DIR . 'widgets/class-hsw-widget-pay-top.php',
@@ -157,6 +164,16 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-pay-methods.php',
                         HSW_DIR . 'widgets/class-hsw-widget-pay-coupon.php',
                         HSW_DIR . 'widgets/class-hsw-widget-pay-summary.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-pay-page.php',
+
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-hero.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-tabs.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-featured.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-grid.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-popular.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-newsletter.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-tags.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-blog-page.php',
                 );
                 foreach ( $widget_files as $widget_file ) {
                         try {
@@ -187,6 +204,7 @@ final class HSW_Plugin {
                         '\HSW_Widget_Product_Tabs',
                         '\HSW_Widget_Product_Accordions',
                         '\HSW_Widget_Product_Sticky',
+                        '\HSW_Widget_Product_Page',
                         '\HSW_Widget_Archive_Breadcrumb',
                         '\HSW_Widget_Archive_Header',
                         '\HSW_Widget_Archive_Filters',
@@ -194,11 +212,13 @@ final class HSW_Plugin {
                         '\HSW_Widget_Archive_Grid',
                         '\HSW_Widget_Archive_Pagination',
                         '\HSW_Widget_Archive_Guide',
+                        '\HSW_Widget_Archive_Page',
                         '\HSW_Widget_Cart_Top',
                         '\HSW_Widget_Cart_Banner',
                         '\HSW_Widget_Cart_Items',
                         '\HSW_Widget_Cart_Coupon',
                         '\HSW_Widget_Cart_Summary',
+                        '\HSW_Widget_Cart_Page',
                         '\HSW_Widget_Checkout_Top',
                         '\HSW_Widget_Checkout_Address',
                         '\HSW_Widget_Checkout_Shipping',
@@ -206,11 +226,21 @@ final class HSW_Plugin {
                         '\HSW_Widget_Checkout_Note',
                         '\HSW_Widget_Checkout_Items',
                         '\HSW_Widget_Checkout_Summary',
+                        '\HSW_Widget_Checkout_Page',
                         '\HSW_Widget_Pay_Top',
                         '\HSW_Widget_Pay_Recall',
                         '\HSW_Widget_Pay_Methods',
                         '\HSW_Widget_Pay_Coupon',
                         '\HSW_Widget_Pay_Summary',
+                        '\HSW_Widget_Pay_Page',
+                        '\HSW_Widget_Blog_Hero',
+                        '\HSW_Widget_Blog_Tabs',
+                        '\HSW_Widget_Blog_Featured',
+                        '\HSW_Widget_Blog_Grid',
+                        '\HSW_Widget_Blog_Popular',
+                        '\HSW_Widget_Blog_Newsletter',
+                        '\HSW_Widget_Blog_Tags',
+                        '\HSW_Widget_Blog_Page',
                 ) as $widget_class ) {
                         if ( ! class_exists( $widget_class ) ) {
                                 continue;

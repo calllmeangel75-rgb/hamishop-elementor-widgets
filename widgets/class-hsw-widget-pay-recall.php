@@ -221,7 +221,7 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
          * Edit URL (defaults to the my-account address book).
          */
         protected function edit_url() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
                 if ( ! empty( $s['edit_url']['url'] ) ) {
                         return $s['edit_url']['url'];
                 }

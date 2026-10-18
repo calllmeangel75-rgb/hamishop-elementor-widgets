@@ -290,7 +290,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
          * Normalized step labels: desktop name (with auto number) + mobile name.
          */
         protected function steps_list() {
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $steps = ( isset( $s['prog_steps'] ) && is_array( $s['prog_steps'] ) ) ? $s['prog_steps'] : array();
                 $names = array(
                         array( __( 'بررسی سبد خرید', 'hamishop-elementor-widgets' ), __( 'سبد خرید', 'hamishop-elementor-widgets' ) ),
@@ -315,7 +315,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
         }
 
         protected function render() {
-                $s      = $this->get_settings_for_display();
+                $s      = $this->effective_settings();
                 $steps  = $this->steps_list();
                 $active = max( 1, min( count( $steps ), (int) $this->opt( 'active_step', '3' ) ) );
                 $sticky = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );

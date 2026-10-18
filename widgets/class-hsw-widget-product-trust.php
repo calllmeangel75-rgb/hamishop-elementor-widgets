@@ -154,7 +154,7 @@ class HSW_Widget_Product_Trust extends HSW_Product_Base {
         protected function render() {
                 // Base render contract — product context is resolved but unused here.
                 list( $product, $demo ) = $this->product_or_demo();
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $items = array();
                 if ( ! empty( $s['trust_items'] ) && is_array( $s['trust_items'] ) ) {

@@ -90,6 +90,20 @@ class HSW_Assets {
                 );
 
                 wp_register_style(
+                        'hsw-composite',
+                        HSW_URL . 'assets/css/hsw-composite.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_style(
+                        'hsw-blog',
+                        HSW_URL . 'assets/css/hsw-blog.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_style(
                         'hsw-loop',
                         HSW_URL . 'assets/css/hsw-loop.css',
                         array( 'hsw-fonts' ),

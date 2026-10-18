@@ -186,7 +186,7 @@ class HSW_Widget_Cart_Banner extends HSW_Cart_Base {
                                                 <span class="hsw-cbanner__ic"><i class="hsw-ic" aria-hidden="true">local_shipping</i></span>
                                                 <span class="hsw-cbanner__title"><?php echo esc_html( $state['title'] ); ?></span>
                                         </div>
-                                        <?php if ( 'yes' === ( $this->get_settings_for_display()['show_pct'] ?? 'yes' ) ) : ?>
+                                        <?php if ( 'yes' === ( $this->effective_settings()['show_pct'] ?? 'yes' ) ) : ?>
                                                 <span class="hsw-cbanner__pct"><?php echo esc_html( $state['pct'] ); ?></span>
                                         <?php endif; ?>
                                 </div>

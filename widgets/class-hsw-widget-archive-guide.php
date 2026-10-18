@@ -126,7 +126,7 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
         }
 
         protected function render() {
-                $s = $this->get_settings_for_display();
+                $s = $this->effective_settings();
 
                 $fmt   = $this->opt( 'g_title', __( 'راهنمای خرید و سوالات متداول {name}', 'hamishop-elementor-widgets' ) );
                 $name  = ( $this->is_demo() || ! $this->is_archive_context() ) ? $this->demo()['term'] : ( $this->current_term() ? $this->current_term()->name : '' );

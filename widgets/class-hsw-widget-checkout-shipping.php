@@ -236,7 +236,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                         return array( $out, true );
                 }
 
-                $s     = $this->get_settings_for_display();
+                $s     = $this->effective_settings();
                 $opts  = ( isset( $s['options'] ) && is_array( $s['options'] ) ) ? $s['options'] : array();
                 $list  = array();
                 $first = true;
