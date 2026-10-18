@@ -271,7 +271,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
         /**
          * Price cell HTML (رایگان + optional strikethrough).
          */
-        protected function price_html( $opt ) {
+        protected function shipping_price_html( $opt ) {
                 $free = $this->opt( 'free_text', __( 'رایگان', 'hamishop-elementor-widgets' ) );
                 if ( 0.0 === (float) $opt['cost'] ) {
                         $was = '';
@@ -315,7 +315,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                                                                         <span class="hsw-ckship__d"><?php echo esc_html( $opt['desc'] ); ?></span>
                                                                 <?php endif; ?>
                                                         </span>
-                                                        <span class="hsw-ckship__price"><?php echo $this->price_html( $opt ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?></span>
+                                                        <span class="hsw-ckship__price"><?php echo $this->shipping_price_html( $opt ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?></span>
                                                 </label>
                                         <?php endforeach; ?>
                                 </div>
@@ -349,7 +349,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                                                                         <span class="hsw-ckship__d"><?php echo esc_html( $opt['desc'] ); ?></span>
                                                                 <?php endif; ?>
                                                         </span>
-                                                        <span class="hsw-ckship__price hsw-ckship__price--m"><?php echo $this->price_html( $opt ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                                        <span class="hsw-ckship__price hsw-ckship__price--m"><?php echo $this->shipping_price_html( $opt ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                                 </label>
                                         <?php endforeach; ?>
                                 </div>
