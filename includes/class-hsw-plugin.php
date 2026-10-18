@@ -41,16 +41,17 @@ final class HSW_Plugin {
         private function includes() {
                 /*
                  * ONLY pure WordPress/WooCommerce classes here.
-                 * The Elementor base classes (HSW_Widget_Base, HSW_Product_Base)
-                 * are loaded lazily inside register_widgets() — loading them any
-                 * earlier fatals the whole site when Elementor is not loaded yet
-                 * (the classic white-screen-of-death).
+                 * Every class that (indirectly) extends \Elementor\Widget_Base
+                 * — HSW_Widget_Base, HSW_Product_Base, HSW_Archive_Base,
+                 * HSW_Cart_Base, HSW_Checkout_Base, HSW_Pay_Base — is loaded
+                 * LAZILY inside register_widgets(). Loading any of them here
+                 * fatals the whole site at plugins_loaded (the classic
+                 * white-screen-of-death: "Class HSW_Widget_Base not found").
                  */
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
-                require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
                 require_once HSW_DIR . 'includes/class-hsw-archive-query.php';
                 require_once HSW_DIR . 'includes/class-hsw-cart-actions.php';
                 require_once HSW_DIR . 'includes/class-hsw-checkout-rest.php';
@@ -96,10 +97,14 @@ final class HSW_Plugin {
                         return; // extra belt-and-braces guard.
                 }
 
-                /* Base classes first — any problem here is caught, not fatal. */
+                /* Base classes first — any problem here is caught, not fatal.
+                 * HSW_Archive_Base MUST load here (not in includes()): it
+                 * extends HSW_Widget_Base which only exists once Elementor is
+                 * fully booted and register_widgets() has run. */
                 try {
                         require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
                         require_once HSW_DIR . 'includes/class-hsw-product-base.php';
+                        require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
                 } catch ( \Throwable $e ) {
                         hsw_report_fatal( $e, 'base-load' );
                         return;

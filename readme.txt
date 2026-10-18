@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دسته «HamiShop — حامی» را انتخاب کنید.
 
 == Changelog ==
+
+= 1.6.2 =
+* رفع ریشه‌ای همان خطای مرگ: class-hsw-archive-base.php (که به HSW_Widget_Base وابسته به المنتور است) اشتباهاً در includes() — یعنی زمان plugins_loaded — لود می‌شد در حالی که HSW_Widget_Base هنوز تعریف نشده بود → Fatal: Class "HSW_Widget_Base" not found. اکنون فقط داخل register_widgets() و پس از تعریف HSW_Widget_Base لود می‌شود.
 
 = 1.6.1 =
 * هات‌فیکس ضد خطای مرگ وردپرس (WSOD):
