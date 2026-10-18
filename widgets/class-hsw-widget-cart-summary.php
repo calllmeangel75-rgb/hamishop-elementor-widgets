@@ -229,6 +229,15 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 );
 
                 $this->add_control(
+                        'next_url',
+                        array(
+                                'label'       => __( 'لینک مرحله بعد (خالی = صفحه تسویه ووکامرس)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::URL,
+                                'placeholder' => 'https://…',
+                        )
+                );
+
+                $this->add_control(
                         'trust_heading',
                         array( 'label' => __( 'نشان‌های اعتماد (دسکتاپ)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
                 );
@@ -447,6 +456,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 $base_lbl_d = $this->with_count( $this->opt( 'base_label_d', __( 'قیمت پایه اقلام ({count} کالا)', 'hamishop-elementor-widgets' ) ), $t['count'] );
                 $base_lbl_m = $this->with_count( $this->opt( 'base_label_m', __( 'قیمت کالاها ({count} عدد)', 'hamishop-elementor-widgets' ) ), $t['count'] );
                 $free_lbl   = $this->opt( 'free_label', __( 'رایگان', 'hamishop-elementor-widgets' ) );
+                $next_url   = ! empty( $s['next_url']['url'] ) ? (string) $s['next_url']['url'] : $this->checkout_url();
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'csummary', $extra ) ); ?>">
 
@@ -517,7 +527,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                 </div>
                                         </div>
 
-                                        <a class="hsw-csummary__cta" href="<?php echo esc_url( $this->checkout_url() ); ?>">
+                                        <a class="hsw-csummary__cta" href="<?php echo esc_url( $next_url ); ?>">
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', __( 'تکمیل سفارش و ثبت آدرس', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                 <i class="hsw-ic" aria-hidden="true">arrow_back</i>
                                         </a>
@@ -611,7 +621,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                         <span class="hsw-csummary__mbar-l"><?php echo esc_html( $this->opt( 'mbar_label', __( 'مبلغ کل پرداختی:', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         <span class="hsw-csummary__mbar-v"><?php echo esc_html( $this->money( $t['total'] ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
                                                 </div>
-                                                <a class="hsw-csummary__mcta" href="<?php echo esc_url( $this->checkout_url() ); ?>">
+                                                <a class="hsw-csummary__mcta" href="<?php echo esc_url( $next_url ); ?>">
                                                         <span><?php echo esc_html( $this->opt( 'mbar_cta', __( 'ثبت سفارش و ادامه', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         <i class="hsw-ic" aria-hidden="true">arrow_back</i>
                                                 </a>

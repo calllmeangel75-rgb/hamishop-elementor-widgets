@@ -47,7 +47,7 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
 
                 $this->part_section( 'citems_', __( '۶. اقلام سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Items', array( 'vis', 'title', 'count_tpl' ) );
 
-                $this->part_section( 'csum_', __( '۷. خلاصه سفارش و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Summary', array( 'vis', 'sticky', 'title_d', 'count_tpl', 'items_label', 'ready_label', 'rows_heading', 'subtotal_tpl', 'discount_label', 'shipping_label', 'shipping_tip', 'taxes_label', 'taxes_included', 'total_label', 'free_text', 'cta_label', 'cta_note', 'trust_heading', 'trust', 'title_m', 'subtotal_tpl_m', 'discount_label_m', 'shipping_tpl_m', 'total_label_m', 'bar_pay_lbl', 'bar_cta' ) );
+                $this->part_section( 'csum_', __( '۷. خلاصه سفارش و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Summary', array( 'vis', 'sticky', 'title_d', 'count_tpl', 'items_label', 'ready_label', 'rows_heading', 'subtotal_tpl', 'discount_label', 'shipping_label', 'shipping_tip', 'taxes_label', 'taxes_included', 'total_label', 'free_text', 'cta_label', 'next_url', 'cta_note', 'trust_heading', 'trust', 'title_m', 'subtotal_tpl_m', 'discount_label_m', 'shipping_tpl_m', 'total_label_m', 'bar_pay_lbl', 'bar_cta' ) );
 
                 $this->start_controls_section(
                         'sec_layout',

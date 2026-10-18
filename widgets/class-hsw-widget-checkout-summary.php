@@ -205,6 +205,15 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 );
 
                 $this->add_control(
+                        'next_url',
+                        array(
+                                'label'       => __( 'لینک مرحله بعد (خالی = صفحه تسویه ووکامرس)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::URL,
+                                'placeholder' => 'https://…',
+                        )
+                );
+
+                $this->add_control(
                         'cta_note',
                         array(
                                 'label'   => __( 'یادداشت زیر دکمه', 'hamishop-elementor-widgets' ),
@@ -390,7 +399,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 $count    = (int) $t['count'];
                 $sticky   = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );
                 $free     = $this->opt( 'free_text', __( 'رایگان', 'hamishop-elementor-widgets' ) );
-                $cta_url  = $this->checkout_url();
+                $cta_url  = ! empty( $s['next_url']['url'] ) ? (string) $s['next_url']['url'] : $this->checkout_url();
                 $taxes_on = ( ! $this->is_demo() ) && $this->taxes_total() > 0;
 
                 $shipping_html = ( 'free' === $t['shipping'][0] )

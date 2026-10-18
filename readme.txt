@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.5
+Stable tag: 1.7.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دسته «HamiShop — حامی» را انتخاب کنید.
 
 == Changelog ==
+
+= 1.7.6 =
+* کنترل جدید «لینک مرحله بعد» در خلاصهٔ سبد خرید و خلاصهٔ تسویه حساب: حالا می‌توانید مرحله‌ها را به هم وصل کنید (سبد خرید → اطلاعات ارسال → پرداخت نهایی). اگر خالی بماند، مثل قبل به صفحهٔ تسویه ووکامرس می‌رود.
+* این کنترل هم روی خود ویجت «خلاصه فاکتور سبد خرید»/«خلاصه سفارش تسویه» و هم داخل ویجت‌های جامع «صفحه کامل سبد خرید» و «صفحه کامل تسویه حساب» در دسترس است.
 
 = 1.7.5 =
 * رفع خطای «Call to undefined method WC_Countries::get_state()» در ویجت‌های تسویه/پرداخت (آدرس گیرنده و یادآوری سفارش): ووکامرس متد get_state ندارد؛ نام استان اکنون از نقشهٔ `get_states()` خوانده می‌شود.

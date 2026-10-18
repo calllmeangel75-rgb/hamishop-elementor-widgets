@@ -43,7 +43,7 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
 
                 $this->part_section( 'ccoupon_', __( '۴. کد تخفیف', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Coupon', array( 'vis', 'title', 'desc', 'placeholder', 'btn_label', 'm_title', 'm_placeholder', 'show_foot', 'back_label', 'tax_note' ) );
 
-                $this->part_section( 'csummary_', __( '۵. خلاصه سفارش و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Summary', array( 'vis', 'sticky', 'show_inv', 'inv_text', 'rows_heading', 'base_label_d', 'base_label_m', 'show_savings', 'savings_label', 'ship_label_d', 'ship_label_m', 'free_label', 'show_taxes', 'taxes_label', 'taxes_note', 'final_label', 'final_note', 'cta_label', 'trust_heading', 'trust', 'show_help', 'help_title', 'help_text', 'help_phone', 'show_guarantee', 'guarantee_text', 'show_mbar', 'mbar_label', 'mbar_cta' ) );
+                $this->part_section( 'csummary_', __( '۵. خلاصه سفارش و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Summary', array( 'vis', 'sticky', 'show_inv', 'inv_text', 'rows_heading', 'base_label_d', 'base_label_m', 'show_savings', 'savings_label', 'ship_label_d', 'ship_label_m', 'free_label', 'show_taxes', 'taxes_label', 'taxes_note', 'final_label', 'final_note', 'cta_label', 'next_url', 'trust_heading', 'trust', 'show_help', 'help_title', 'help_text', 'help_phone', 'show_guarantee', 'guarantee_text', 'show_mbar', 'mbar_label', 'mbar_cta' ) );
 
                 $this->start_controls_section(
                         'sec_layout',
