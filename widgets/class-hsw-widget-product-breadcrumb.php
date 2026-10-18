@@ -108,6 +108,11 @@ class HSW_Widget_Product_Breadcrumb extends HSW_Product_Base {
                 $s   = $this->get_settings_for_display();
                 $sep = isset( $s['sep_text'] ) && '' !== $s['sep_text'] ? $s['sep_text'] : '/';
 
+                // Live front-end outside a single-product context → render nothing (no mock data).
+                if ( ! $product && ! $demo ) {
+                        return;
+                }
+
                 if ( $demo ) {
                         $items = array(
                                 array( 'خانه', '#' ),

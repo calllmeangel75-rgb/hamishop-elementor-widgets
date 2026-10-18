@@ -63,11 +63,16 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         /**
          * Product for rendering + whether demo (Samsung mock) data should be used.
          *
+         * Demo data is returned ONLY inside the Elementor editor/preview when no
+         * real product exists. On the live front-end a widget placed outside a
+         * single-product context gets [ null, false ] — callers must render
+         * nothing (or their own repeater content), never the design mock.
+         *
          * @return array [ WC_Product|null $product, bool $demo ]
          */
         protected function product_or_demo() {
                 $product = $this->current_product();
-                return array( $product, ! $product );
+                return array( $product, $this->is_demo() );
         }
 
         /* =========================================================================

@@ -230,6 +230,11 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                 $s           = $this->get_settings_for_display();
                 $placeholder = HSW_URL . 'assets/img/placeholder.svg';
 
+                // Live front-end outside a single-product context → render nothing (no mock data).
+                if ( ! $product && ! $demo ) {
+                        return;
+                }
+
                 if ( $demo ) {
                         $data     = $this->demo();
                         $images   = isset( $data['gallery'] ) && ! empty( $data['gallery'] ) ? $data['gallery'] : array( $placeholder );

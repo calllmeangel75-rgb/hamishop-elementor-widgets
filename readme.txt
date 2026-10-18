@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.3
+Stable tag: 1.6.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دسته «HamiShop — حامی» را انتخاب کنید.
 
 == Changelog ==
+
+= 1.6.4 =
+* همهٔ ویجت‌ها ۱۰۰٪ داینامیک‌اند و داده را از خود سایت (ووکامرس) می‌خوانند — اما سه ویجت صفحه‌محصول (گالری، جعبهٔ خرید، مسیر راهنما) اگر بیرون از صفحهٔ محصول قرار می‌گرفتند، به‌جای دادهٔ واقعی، دادهٔ نمایشی «طرح» (Samsung mock) را در سایت زنده نشان می‌دادند. اصلاح شد: دادهٔ نمایشی فقط داخل ادیتور المنتور دیده می‌شود و در سایت زنده هیچ‌وقت رندر نمی‌شود.
+* دادهٔ واقعی ویجت‌ها: آرشیو از کوئری اصلی فروشگاه (wp_query) و ترم فعلی؛ حلقه‌های محصول (پرفروش/محبوب/شگفت‌انگیز) از wc_get_products با ۷ منبع (تخفیف‌دار، پرفروش، امتیاز، ویژه، جدیدترین، دسته/IDs دستی)؛ صفحه محصول از WC_Product واقعی؛ سبد/تسویه/پرداخت از WC()->cart و نرخ‌های واقعی ارسال.
 
 = 1.6.3 =
 * رفع فتال «Cannot make static method HSW_Widget_Base::price_html() non static in HSW_Widget_Checkout_Shipping»: متد رندر قیمت گزینه‌های ارسال در ویجت اطلاعات-ارسال همنام متد static بیس بود؛ به shipping_price_html() تغییر نام داد.

@@ -273,6 +273,11 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 list( $product, $demo ) = $this->product_or_demo();
                 $s = $this->get_settings_for_display();
 
+                // Live front-end outside a single-product context → render nothing (no mock data).
+                if ( ! $product && ! $demo ) {
+                        return;
+                }
+
                 if ( $demo ) {
                         $d        = $this->demo();
                         $pid      = 0;
