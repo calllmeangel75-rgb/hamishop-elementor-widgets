@@ -10,6 +10,20 @@ namespace Elementor;
 
 abstract class Widget_Base {
 
+        /** @var array Data handed to the constructor (mirrors Elementor's Controls_Stack::__construct). */
+        public $stub_data = array();
+
+        /**
+         * Real Elementor signature: Widget_Base::__construct( $data = [], $args = null ).
+         * Elementor's get_current_skin_id() calls get_settings('_skin') which
+         * requires data['settings'] to be an array — a bare `new $class()`
+         * leaves it null and fatals. The stub keeps the same contract so the
+         * behavior test can assert composites pass an initialized settings array.
+         */
+        public function __construct( $data = array(), $args = null ) {
+                $this->stub_data = is_array( $data ) ? $data : array();
+        }
+
         abstract public function get_name();
 
         public function get_title() { return ''; }

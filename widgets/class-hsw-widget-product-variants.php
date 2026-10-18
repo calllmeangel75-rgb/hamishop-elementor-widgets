@@ -63,7 +63,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                 'label'       => __( 'اسلاگ صفت رنگ', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::TEXT,
                                 'default'     => 'pa_color',
-                                'description' => __( 'تکسانومی صفت رنگ محصول (پیش‌فرض ووکامرس: pa_color)', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'تکسانومی صفت رنگ محصول (پیش‌فرض ووکامرس: pa_color). اگر محصول چنین صفتی نداشته باشد، اولین صفت متغیر مناسب به‌صورت خودکار انتخاب می‌شود.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -73,7 +73,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                 'label'       => __( 'اسلاگ صفت حافظه', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::TEXT,
                                 'default'     => 'pa_memory',
-                                'description' => __( 'تکسانومی صفت حافظه / رم محصول', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'تکسانومی صفت حافظه / رم محصول. اگر محصول چنین صفتی نداشته باشد، صفت متغیر بعدی به‌صورت خودکار انتخاب می‌شود.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -242,7 +242,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $lbl_storage_d = ( isset( $s['label_storage_d'] ) && '' !== trim( (string) $s['label_storage_d'] ) ) ? $s['label_storage_d'] : __( 'حافظه داخلی و رم:', 'hamishop-elementor-widgets' );
                 $lbl_storage_m = ( isset( $s['label_storage_m'] ) && '' !== trim( (string) $s['label_storage_m'] ) ) ? $s['label_storage_m'] : __( 'حافظه داخلی:', 'hamishop-elementor-widgets' );
 
-                /* Colors: product attribute terms + repeater hex map (demo fallback). */
+                /* Colors: real product attribute terms; color hex from the repeater map. */
                 $color_map = array();
                 if ( ! empty( $s['color_map'] ) && is_array( $s['color_map'] ) ) {
                         foreach ( $s['color_map'] as $row ) {
@@ -255,25 +255,54 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 }
 
                 $colors = array();
-                $terms  = $product ? $this->attribute_terms( $product, $attr_color ) : array();
-                foreach ( $terms as $term ) {
-                        $colors[] = array(
-                                'name' => $term['name'],
-                                'hex'  => isset( $color_map[ $term['name'] ] ) ? $color_map[ $term['name'] ] : '#cccccc',
-                        );
-                }
-                if ( empty( $colors ) ) {
-                        $colors = $d['colors'];
+                if ( $product ) {
+                        foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
+                                $colors[] = array(
+                                        'name' => $term['name'],
+                                        'hex'  => isset( $color_map[ $term['name'] ] ) ? $color_map[ $term['name'] ] : '#cccccc',
+                                );
+                        }
                 }
 
-                /* Storage: product attribute terms (demo fallback). */
                 $storages = array();
-                $sterms   = $product ? $this->attribute_terms( $product, $attr_storage ) : array();
-                foreach ( $sterms as $term ) {
-                        $storages[] = $term['name'];
+                if ( $product ) {
+                        foreach ( $this->attribute_terms( $product, $attr_storage ) as $term ) {
+                                $storages[] = $term['name'];
+                        }
                 }
-                if ( empty( $storages ) ) {
+
+                if ( $demo ) {
+                        /* Design mock — only when the site has no product at all. */
+                        $colors   = $d['colors'];
                         $storages = $d['storages'];
+                } elseif ( $product && $product->is_type( 'variable' ) ) {
+                        /* Auto-detect the product's own variation attributes when the
+                           configured slugs don't exist on this particular product —
+                           each product page then shows its own real options. */
+                        $pool = $this->auto_variation_attributes( $product );
+                        unset( $pool[ $attr_color ], $pool[ $attr_storage ] );
+
+                        if ( empty( $colors ) && $pool ) {
+                                $attr_color = $this->pick_attribute( $pool, 'color' );
+                                unset( $pool[ $attr_color ] );
+                                foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
+                                        $colors[] = array(
+                                                'name' => $term['name'],
+                                                'hex'  => isset( $color_map[ $term['name'] ] ) ? $color_map[ $term['name'] ] : '#cccccc',
+                                        );
+                                }
+                        }
+                        if ( empty( $storages ) && $pool ) {
+                                $attr_storage = $this->pick_attribute( $pool, 'storage' );
+                                unset( $pool[ $attr_storage ] );
+                                foreach ( $this->attribute_terms( $product, $attr_storage ) as $term ) {
+                                        $storages[] = $term['name'];
+                                }
+                        }
+                }
+
+                if ( empty( $colors ) && empty( $storages ) ) {
+                        return; // No real options on this product — render nothing (never fake data).
                 }
 
                 $first_color   = ! empty( $colors[0]['name'] ) ? $colors[0]['name'] : '';
@@ -287,6 +316,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                 data-hsw-attrs='<?php echo esc_attr( wp_json_encode( array( 'color' => $attr_color, 'storage' => $attr_storage ) ) ); ?>'
                         <?php endif; ?>>
                         <div class="hsw-d">
+                                <?php if ( ! empty( $colors ) ) : ?>
                                 <div class="hsw-pvar__group">
                                         <div class="hsw-pvar__head">
                                                 <span class="hsw-pvar__label"><?php echo esc_html( $lbl_color_d ); ?> <strong class="hsw-pvar__selname" data-hsw-selname="color"><?php echo esc_html( $first_color ); ?></strong></span>
@@ -297,6 +327,8 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
+                                <?php endif; ?>
+                                <?php if ( ! empty( $storages ) ) : ?>
                                 <div class="hsw-pvar__group">
                                         <div class="hsw-pvar__head"><span class="hsw-pvar__label"><?php echo esc_html( $lbl_storage_d ); ?></span></div>
                                         <div class="hsw-pvar__chips">
@@ -305,8 +337,10 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
+                                <?php endif; ?>
                         </div>
                         <div class="hsw-m">
+                                <?php if ( ! empty( $colors ) ) : ?>
                                 <div class="hsw-pvar__mcard">
                                         <div class="hsw-pvar__head">
                                                 <span class="hsw-pvar__label"><?php echo esc_html( $lbl_color_m ); ?></span>
@@ -318,6 +352,8 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
+                                <?php endif; ?>
+                                <?php if ( ! empty( $storages ) ) : ?>
                                 <div class="hsw-pvar__mcard">
                                         <div class="hsw-pvar__head">
                                                 <span class="hsw-pvar__label"><?php echo esc_html( $lbl_storage_m ); ?></span>
@@ -329,6 +365,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
+                                <?php endif; ?>
                         </div>
                 </div>
                 <?php

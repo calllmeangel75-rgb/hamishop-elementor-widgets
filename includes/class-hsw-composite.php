@@ -37,7 +37,7 @@ final class HSW_Composite {
                 }
 
                 try {
-                        $widget = new $widget_class();
+                        $widget = self::instance( $widget_class );
                 } catch ( \Throwable $e ) {
                         self::report( $e, $widget_class );
                         return '';
@@ -99,7 +99,7 @@ final class HSW_Composite {
                 $controls = array();
                 try {
                         if ( class_exists( $widget_class ) ) {
-                                $widget   = new $widget_class();
+                                $widget   = self::instance( $widget_class );
                                 $registry = $widget->get_controls();
                                 if ( is_array( $registry ) ) {
                                         $controls = $registry;
@@ -111,6 +111,20 @@ final class HSW_Composite {
 
                 self::$controls_cache[ $widget_class ] = $controls;
                 return $controls;
+        }
+
+        /**
+         * Create a part widget instance with an initialized (empty) settings
+         * array. Elementor's Controls_Stack::sanitize_settings() requires an
+         * array — a bare `new $class()` leaves data['settings'] null and any
+         * internal get_settings() call (e.g. get_current_skin_id() →
+         * get_settings('_skin')) then fatals with a TypeError.
+         *
+         * @param string $widget_class Fully-qualified HSW widget class.
+         * @return HSW_Widget_Base
+         */
+        private static function instance( $widget_class ) {
+                return new $widget_class( array( 'settings' => array() ) );
         }
 
         /**

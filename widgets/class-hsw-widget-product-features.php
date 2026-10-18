@@ -112,9 +112,9 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         'desk_auto',
                         array(
                                 'label'       => __( 'دسکتاپ: از مشخصات محصول', 'hamishop-elementor-widgets' ),
-                                'description' => __( '۴ مشخصه‌ی اول محصول به شکل «نام: مقدار» نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'روشن (پیش‌فرض): تا ۴ مشخصه‌ی محصول به شکل «نام: مقدار» — اگر محصول مشخصه نداشت، از آیتم‌های فهرست زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SWITCHER,
-                                'default'     => '',
+                                'default'     => 'yes',
                         )
                 );
 
@@ -143,9 +143,9 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         'mob_auto',
                         array(
                                 'label'       => __( 'موبایل: از مشخصات محصول', 'hamishop-elementor-widgets' ),
-                                'description' => __( '۴ مشخصه‌ی اول محصول با آیکون ثابت tune نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'روشن (پیش‌فرض): تا ۴ مشخصه‌ی محصول با آیکون tune — اگر محصول مشخصه نداشت، از گرید زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SWITCHER,
-                                'default'     => '',
+                                'default'     => 'yes',
                         )
                 );
 
@@ -239,20 +239,19 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
          */
         protected function render() {
                 list( $product, $demo ) = $this->product_or_demo();
-                $s     = $this->effective_settings();
-                $specs = $demo ? array() : $this->specs_rows( $product );
+                $s = $this->effective_settings();
 
-                /* --- Desktop source: demo defaults | auto specs | repeater. --- */
+                /* --- Desktop: demo defaults | auto specs/bullets | repeater. --- */
+                $desk = array();
                 if ( $demo ) {
                         $desk = $this->default_desk_items();
                 } elseif ( 'yes' === ( $s['desk_auto'] ?? '' ) ) {
-                        $desk = array();
-                        foreach ( array_slice( $specs, 0, 4 ) as $row ) {
-                                $desk[] = array( 'text' => trim( $row['k'] . ': ' . $row['v'] ) );
+                        foreach ( $this->feature_rows( $product ) as $row ) {
+                                $desk[] = array( 'text' => '' !== $row['k'] ? trim( $row['k'] . ': ' . $row['v'] ) : $row['v'] );
                         }
-                } else {
-                        $desk = array();
-                        $raw  = ( isset( $s['desk_items'] ) && is_array( $s['desk_items'] ) ) ? $s['desk_items'] : array();
+                }
+                if ( empty( $desk ) ) {
+                        $raw = ( isset( $s['desk_items'] ) && is_array( $s['desk_items'] ) ) ? $s['desk_items'] : array();
                         foreach ( $raw as $item ) {
                                 $text = isset( $item['text'] ) ? $item['text'] : '';
                                 if ( '' !== trim( (string) $text ) ) {
@@ -261,16 +260,16 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         }
                 }
 
-                /* --- Mobile source: demo defaults | auto specs (fixed tune icon) | repeater. --- */
+                /* --- Mobile: demo defaults | auto specs/bullets (tune icon) | repeater. --- */
+                $mob = array();
                 if ( $demo ) {
                         $mob = $this->default_mob_items();
                 } elseif ( 'yes' === ( $s['mob_auto'] ?? '' ) ) {
-                        $mob = array();
-                        foreach ( array_slice( $specs, 0, 4 ) as $row ) {
+                        foreach ( $this->feature_rows( $product ) as $row ) {
                                 $mob[] = array( 'icon' => 'tune', 'label' => $row['k'], 'value' => $row['v'] );
                         }
-                } else {
-                        $mob   = array();
+                }
+                if ( empty( $mob ) ) {
                         $raw_m = ( isset( $s['mob_items'] ) && is_array( $s['mob_items'] ) ) ? $s['mob_items'] : array();
                         foreach ( $raw_m as $item ) {
                                 $label = isset( $item['label'] ) ? $item['label'] : '';

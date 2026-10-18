@@ -98,6 +98,22 @@ class Fake_Part_Widget extends HSW_Widget_Base {
         }
 }
 
+/**
+ * Records the constructor data HSW_Composite::part() passes down, proving
+ * parts are instantiated with an initialized (empty) settings array — the
+ * exact contract Elementor 3.25+ requires (sanitize_settings(array)).
+ */
+class Recording_Part_Widget extends Fake_Part_Widget {
+        public static $ctor_data = null;
+        public function __construct( $data = array(), $args = null ) {
+                self::$ctor_data = $data;
+                parent::__construct( $data, $args );
+        }
+        public function get_name() {
+                return 'recording-part';
+        }
+}
+
 class Exposed_Composite extends HSW_Widget_Base {
         public $captured = array();
         public function get_name() {
@@ -168,6 +184,19 @@ check( 'part() renders child markup with injected settings', false !== strpos( $
 
 $html2 = \HSW_Composite::part( 'Fake_Part_Widget', array( 'title' => 'فقط عنوان' ) );
 check( 'part() completes missing settings from the child registry defaults', false !== strpos( $html2, 'data-mode="a"' ) );
+
+/* -----------------------------------------------------------------------
+ *  5) Constructor contract: parts must get an initialized settings array
+ *     (a bare `new` leaves data['settings'] null → Elementor's
+ *     sanitize_settings() TypeErrors on the first internal get_settings()).
+ * -------------------------------------------------------------------- */
+\HSW_Composite::part( 'Recording_Part_Widget', array( 'title' => 'ذخیره' ) );
+check(
+        'part() instantiates children with an initialized settings array',
+        is_array( Recording_Part_Widget::$ctor_data )
+                && isset( Recording_Part_Widget::$ctor_data['settings'] )
+                && is_array( Recording_Part_Widget::$ctor_data['settings'] )
+);
 
 check( 'part() soft-fails on missing class', '' === \HSW_Composite::part( 'No_Such_HSW_Class', array() ) );
 

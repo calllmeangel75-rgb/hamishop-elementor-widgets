@@ -48,31 +48,81 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         }
 
         /**
-         * True when rendering inside the Elementor editor/preview without a product.
+         * True while rendering inside the Elementor editor / preview iframe.
          */
-        protected function is_demo() {
+        protected function is_editor_context() {
                 if ( ! class_exists( '\Elementor\Plugin' ) ) {
                         return false;
                 }
                 $el = \Elementor\Plugin::$instance;
-                $editor = ( isset( $el->editor ) && $el->editor->is_edit_mode() )
+                return ( isset( $el->editor ) && $el->editor->is_edit_mode() )
                         || ( isset( $el->preview ) && $el->preview->is_preview_mode() );
-                return $editor && ! $this->current_product();
+        }
+
+        /** @var WC_Product|null|false Cached editor-preview product (false = not resolved yet). */
+        private static $preview_product_cache = false;
+
+        /**
+         * Real product used while building a template in the editor.
+         *
+         * A single-product template has no queried product in the editor, so
+         * before falling back to the Samsung design mock we resolve the latest
+         * published product — the template preview then shows 100% real data
+         * (title, price, gallery, variations, specs) instead of fake content.
+         *
+         * @return WC_Product|null
+         */
+        protected function preview_product() {
+                if ( false !== self::$preview_product_cache ) {
+                        return self::$preview_product_cache;
+                }
+                self::$preview_product_cache = null;
+
+                if ( ! $this->is_editor_context() || ! function_exists( 'wc_get_products' ) ) {
+                        return null;
+                }
+
+                $ids = wc_get_products(
+                        array(
+                                'limit'   => 1,
+                                'status'  => 'publish',
+                                'orderby' => 'date',
+                                'order'   => 'DESC',
+                                'return'  => 'ids',
+                        )
+                );
+                if ( ! empty( $ids ) ) {
+                        $product = wc_get_product( $ids[0] );
+                        if ( $product instanceof WC_Product ) {
+                                self::$preview_product_cache = $product;
+                        }
+                }
+                return self::$preview_product_cache;
+        }
+
+        /**
+         * True only when there is NO product anywhere (not even a preview one)
+         * and we are inside the editor — the design mock is a last resort.
+         */
+        protected function is_demo() {
+                return $this->is_editor_context() && ! $this->current_product() && ! $this->preview_product();
         }
 
         /**
          * Product for rendering + whether demo (Samsung mock) data should be used.
          *
-         * Demo data is returned ONLY inside the Elementor editor/preview when no
-         * real product exists. On the live front-end a widget placed outside a
-         * single-product context gets [ null, false ] — callers must render
-         * nothing (or their own repeater content), never the design mock.
+         * Editor: the queried product, else the latest published product
+         * (real preview), else the design mock. Front-end: the real queried
+         * product only — never the mock.
          *
          * @return array [ WC_Product|null $product, bool $demo ]
          */
         protected function product_or_demo() {
                 $product = $this->current_product();
-                return array( $product, $this->is_demo() );
+                if ( ! $product ) {
+                        $product = $this->preview_product();
+                }
+                return array( $product, null === $product && $this->is_editor_context() );
         }
 
         /* =========================================================================
@@ -116,11 +166,26 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         }
                         $attrs = array();
                         foreach ( $var->get_attributes() as $key => $slug ) {
-                                $label = (string) $slug;
-                                if ( $slug && taxonomy_exists( $key ) ) {
+                                $slug = (string) $slug;
+                                if ( '' === $slug ) {
+                                        continue; // "any value" — wildcard, let the JS match.
+                                }
+                                $label = $slug;
+                                if ( taxonomy_exists( $key ) ) {
                                         $term = get_term_by( 'slug', $slug, $key );
                                         if ( $term && ! is_wp_error( $term ) ) {
                                                 $label = $term->name;
+                                        }
+                                } else {
+                                        /* Custom (non-taxonomy) attribute: map the stored slug back to its display option. */
+                                        $product_attrs = $product->get_attributes();
+                                        if ( isset( $product_attrs[ $key ] ) && $product_attrs[ $key ] instanceof WC_Product_Attribute ) {
+                                                foreach ( $product_attrs[ $key ]->get_options() as $opt ) {
+                                                        if ( sanitize_title( $opt ) === $slug ) {
+                                                                $label = $opt;
+                                                                break;
+                                                        }
+                                                }
                                         }
                                 }
                                 $attrs[ $key ] = $label;
@@ -189,6 +254,111 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         $rows[] = array( 'k' => $label, 'v' => $value );
                 }
                 return $rows;
+        }
+
+        /**
+         * Dynamic feature rows for the «ویژگی‌های شاخص» widget: product
+         * attributes first, then short-description bullets as fallback.
+         *
+         * @param WC_Product|null $product Product.
+         * @param int             $limit   Max rows.
+         * @return array [ ['k' => label, 'v' => value], ... ]
+         */
+        protected function feature_rows( $product, $limit = 4 ) {
+                $rows = array();
+                foreach ( array_slice( $this->specs_rows( $product ), 0, $limit ) as $r ) {
+                        $rows[] = array( 'k' => $r['k'], 'v' => $r['v'] );
+                }
+                if ( $rows ) {
+                        return $rows;
+                }
+                foreach ( $this->short_description_bullets( $product, $limit ) as $bullet ) {
+                        $rows[] = array( 'k' => '', 'v' => $bullet );
+                }
+                return $rows;
+        }
+
+        /**
+         * Bullet lines from the product short description (list items or lines).
+         *
+         * @param WC_Product|null $product Product.
+         * @param int             $limit   Max bullets.
+         * @return string[]
+         */
+        protected function short_description_bullets( $product, $limit = 4 ) {
+                if ( ! $product ) {
+                        return array();
+                }
+                $desc = (string) $product->get_short_description();
+                if ( '' === trim( $desc ) ) {
+                        return array();
+                }
+                $out = array();
+                if ( preg_match_all( '/<li[^>]*>(.*?)<\/li>/is', $desc, $m ) ) {
+                        foreach ( $m[1] as $li ) {
+                                $txt = trim( wp_strip_all_tags( $li ) );
+                                if ( '' !== $txt ) {
+                                        $out[] = $txt;
+                                }
+                        }
+                } else {
+                        foreach ( preg_split( '/[\r\n]+/', wp_strip_all_tags( $desc ) ) as $line ) {
+                                $txt = trim( $line );
+                                if ( '' !== $txt ) {
+                                        $out[] = $txt;
+                                }
+                        }
+                }
+                return array_slice( $out, 0, $limit );
+        }
+
+        /**
+         * Variation attributes of a variable product that actually have option
+         * values (used to auto-detect color/storage attributes per product).
+         *
+         * @param WC_Product|null $product Product.
+         * @return array<string, string[]> attr name => option slugs
+         */
+        protected function auto_variation_attributes( $product ) {
+                if ( ! $product || ! $product->is_type( 'variable' ) ) {
+                        return array();
+                }
+                $out = array();
+                foreach ( $product->get_variation_attributes() as $name => $options ) {
+                        $options = array_values( array_filter( array_map( 'strval', (array) $options ), 'strlen' ) );
+                        if ( $options ) {
+                                $out[ $name ] = $options;
+                        }
+                }
+                return $out;
+        }
+
+        /**
+         * Best-matching attribute name for a role (color / storage) in a pool.
+         *
+         * @param array  $pool attr name => options.
+         * @param string $role 'color' | 'storage' | ''.
+         * @return string Attribute name or '' when the pool is empty.
+         */
+        protected function pick_attribute( array $pool, $role = '' ) {
+                if ( ! $pool ) {
+                        return '';
+                }
+                $preferred = array(
+                        'color'   => array( 'color', 'colour', 'رنگ' ),
+                        'storage' => array( 'storage', 'memory', 'capacity', 'حافظه', 'رم', 'ظرفیت' ),
+                );
+                if ( isset( $preferred[ $role ] ) ) {
+                        foreach ( array_keys( $pool ) as $name ) {
+                                $low = strtolower( $name );
+                                foreach ( $preferred[ $role ] as $needle ) {
+                                        if ( false !== strpos( $low, $needle ) ) {
+                                                return $name;
+                                        }
+                                }
+                        }
+                }
+                return (string) array_key_first( $pool );
         }
 
         /**
