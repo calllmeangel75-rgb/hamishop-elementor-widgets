@@ -121,7 +121,7 @@ class HSW_Widget_Product_Breadcrumb extends HSW_Product_Base {
                                 array( 'سامسونگ', '' ),
                         );
                 } else {
-                        $items = function_exists( 'wc_get_breadcrumb' ) ? wc_get_breadcrumb() : array();
+                        $items = $this->breadcrumb_items( $product );
                 }
 
                 if ( empty( $items ) ) {
@@ -160,5 +160,57 @@ class HSW_Widget_Product_Breadcrumb extends HSW_Product_Base {
                         <?php endforeach; ?>
                 </nav>
                 <?php
+        }
+
+        /**
+         * Real breadcrumb trail: خانه → فروشگاه → deepest product category → product name.
+         *
+         * WooCommerce has no `wc_get_breadcrumb()` helper (its breadcrumb API
+         * echoes directly), so the trail is assembled from real data here —
+         * fully dynamic per product.
+         *
+         * @param \WC_Product $product Current (or preview) product.
+         * @return array<int, array{0:string,1:string}> Label/URL pairs.
+         */
+        protected function breadcrumb_items( $product ) {
+                $items = array(
+                        array( __( 'خانه', 'hamishop-elementor-widgets' ), home_url( '/' ) ),
+                );
+
+                $shop_id = function_exists( 'wc_get_page_id' ) ? wc_get_page_id( 'shop' ) : 0;
+                if ( $shop_id > 0 ) {
+                        $items[] = array( get_the_title( $shop_id ), (string) get_permalink( $shop_id ) );
+                }
+
+                if ( function_exists( 'wc_get_product_terms' ) && taxonomy_exists( 'product_cat' ) ) {
+                        $terms = wc_get_product_terms( $product->get_id(), 'product_cat', array( 'fields' => 'all' ) );
+
+                        $deepest = null;
+                        $depth   = -1;
+                        foreach ( (array) $terms as $term ) {
+                                $term_depth = count( get_ancestors( $term->term_id, 'product_cat' ) );
+                                if ( $term_depth > $depth ) {
+                                        $depth   = $term_depth;
+                                        $deepest = $term;
+                                }
+                        }
+
+                        if ( $deepest ) {
+                                $chain   = array_reverse( get_ancestors( $deepest->term_id, 'product_cat' ) );
+                                $chain[] = $deepest->term_id;
+
+                                foreach ( $chain as $term_id ) {
+                                        $term = get_term( $term_id, 'product_cat' );
+                                        if ( $term instanceof \WP_Term ) {
+                                                $link    = get_term_link( $term );
+                                                $items[] = array( $term->name, is_wp_error( $link ) ? '' : (string) $link );
+                                        }
+                                }
+                        }
+                }
+
+                $items[] = array( $product->get_name(), '' );
+
+                return $items;
         }
 }

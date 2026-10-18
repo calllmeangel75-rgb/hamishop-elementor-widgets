@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دسته «HamiShop — حامی» را انتخاب کنید.
 
 == Changelog ==
+
+= 1.7.3 =
+* رفع ریشه‌ای خالی ماندن ویجت‌های جامع در بوم ویرایشگر روی Elementor 4.x: در نسل ۴، هر دادهٔ غیرخالی در سازنده یعنی «نمونهٔ کامل» و ویجت بدون آرگومان (`$args`) غیرnull خطای «An `$args` argument is required when initializing a full widget instance» می‌داد؛ بخش‌ها حالا هم آرایهٔ تنظیمات و هم آرگومان خالی می‌گیرند — سازگار با ۳.x و ۴.x با هم (قبلاً به‌خاطر شبکهٔ ایمنی ضدفتال، بخش‌ها بی‌صدا حذف می‌شدند و بوم خالی می‌ماند).
+* مسیر راهنما (بردکرامب) واقعاً ساخته می‌شود: تابع `wc_get_breadcrumb` در ووکامرس وجود ندارد؛ مسیر اکنون از دادهٔ واقعی «خانه → فروشگاه → عمیق‌ترین دستهٔ محصول → نام محصول» ساخته می‌شود (قبلاً بیرون از حالت نمایشی لیست خالی و ویجت نامرئی بود).
+* تست استاب‌های المنتور حالا قرارداد ۴.x را هم اعمال می‌کنند + تست جدید برای تضمین پاس‌شدن `$args` در بخش‌ها.
 
 = 1.7.2 =
 * رفع خطای «Elementor\Controls_Stack::sanitize_settings(): Argument #1 ($settings) must be of type array, null given» در ویجت‌های جامع: بخش‌ها (پارت‌ها) اکنون با آرایهٔ تنظیمات اولیه ساخته می‌شوند (همان قرارداد المنتور واقعی) تا اولین get_settings داخلیِ المنتور (مثل `_skin`) به null نخورد.

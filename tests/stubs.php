@@ -13,15 +13,36 @@ abstract class Widget_Base {
         /** @var array Data handed to the constructor (mirrors Elementor's Controls_Stack::__construct). */
         public $stub_data = array();
 
+        /** @var array|null Args handed to the constructor (4.x requires non-null for full instances). */
+        public $stub_args = null;
+
+        /** @var bool Mirrors Element_Base::is_type_instance (true until non-empty $data arrives). */
+        public $stub_is_type_instance = true;
+
         /**
          * Real Elementor signature: Widget_Base::__construct( $data = [], $args = null ).
-         * Elementor's get_current_skin_id() calls get_settings('_skin') which
-         * requires data['settings'] to be an array — a bare `new $class()`
-         * leaves it null and fatals. The stub keeps the same contract so the
-         * behavior test can assert composites pass an initialized settings array.
+         *
+         * Contract replicated from two generations:
+         * - 3.x: get_current_skin_id() → get_settings('_skin') needs
+         *   data['settings'] to be an array — a bare `new $class()` leaves it
+         *   null and fatals with a sanitize_settings() TypeError.
+         * - 4.x: ANY non-empty $data marks a full instance
+         *   (Element_Base::__construct) and Widget_Base then throws
+         *   "An `$args` argument is required..." unless $args is non-null.
+         *
+         * The stub enforces both so the behavior test catches regressions in
+         * either direction: composites must pass settings AND args.
          */
         public function __construct( $data = array(), $args = null ) {
+                if ( $data ) {
+                        $this->stub_is_type_instance = false;
+                }
                 $this->stub_data = is_array( $data ) ? $data : array();
+                $this->stub_args = $args;
+
+                if ( ! $this->stub_is_type_instance && null === $args ) {
+                        throw new \Exception( 'An `$args` argument is required when initializing a full widget instance.' );
+                }
         }
 
         abstract public function get_name();

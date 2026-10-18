@@ -113,19 +113,25 @@ final class HSW_Composite {
                 return $controls;
         }
 
-        /**
-         * Create a part widget instance with an initialized (empty) settings
-         * array. Elementor's Controls_Stack::sanitize_settings() requires an
-         * array — a bare `new $class()` leaves data['settings'] null and any
-         * internal get_settings() call (e.g. get_current_skin_id() →
-         * get_settings('_skin')) then fatals with a TypeError.
-         *
-         * @param string $widget_class Fully-qualified HSW widget class.
-         * @return HSW_Widget_Base
-         */
-        private static function instance( $widget_class ) {
-                return new $widget_class( array( 'settings' => array() ) );
-        }
+	/**
+	 * Create a part widget instance with an initialized (empty) settings
+	 * array and explicit empty arguments. Both are required to satisfy every
+	 * Elementor generation in a single call:
+	 *
+	 * - 3.x: Controls_Stack::sanitize_settings() requires data['settings'] to
+	 *   be an array — a bare `new $class()` leaves it null and any internal
+	 *   get_settings() call (e.g. get_current_skin_id() → get_settings('_skin'))
+	 *   fatals with a TypeError.
+	 * - 4.x: ANY non-empty $data marks the object as a full widget instance
+	 *   (Element_Base::__construct), and Widget_Base then throws
+	 *   "An `$args` argument is required..." unless a non-null $args is passed.
+	 *
+	 * @param string $widget_class Fully-qualified HSW widget class.
+	 * @return HSW_Widget_Base
+	 */
+	private static function instance( $widget_class ) {
+		return new $widget_class( array( 'settings' => array() ), array() );
+	}
 
         /**
          * Report a part failure through the plugin's stored-error channel.

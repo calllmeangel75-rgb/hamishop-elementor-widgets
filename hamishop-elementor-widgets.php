@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات (پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محبوب‌ترین‌ها) با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک و بهینه برای Lighthouse 100.
- * Version:     1.7.2
+ * Version:     1.7.3
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -43,7 +43,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.7.2' );
+define( 'HSW_VERSION', '1.7.3' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );

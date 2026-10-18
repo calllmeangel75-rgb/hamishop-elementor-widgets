@@ -99,14 +99,17 @@ class Fake_Part_Widget extends HSW_Widget_Base {
 }
 
 /**
- * Records the constructor data HSW_Composite::part() passes down, proving
- * parts are instantiated with an initialized (empty) settings array — the
- * exact contract Elementor 3.25+ requires (sanitize_settings(array)).
+ * Records the constructor data + args HSW_Composite::part() passes down,
+ * proving parts are instantiated with an initialized (empty) settings array
+ * AND a non-null $args — the combined contract of Elementor 3.25+
+ * (sanitize_settings(array)) and Elementor 4.x (full instances need $args).
  */
 class Recording_Part_Widget extends Fake_Part_Widget {
         public static $ctor_data = null;
+        public static $ctor_args = null;
         public function __construct( $data = array(), $args = null ) {
                 self::$ctor_data = $data;
+                self::$ctor_args = $args;
                 parent::__construct( $data, $args );
         }
         public function get_name() {
@@ -187,8 +190,10 @@ check( 'part() completes missing settings from the child registry defaults', fal
 
 /* -----------------------------------------------------------------------
  *  5) Constructor contract: parts must get an initialized settings array
- *     (a bare `new` leaves data['settings'] null → Elementor's
- *     sanitize_settings() TypeErrors on the first internal get_settings()).
+ *     (a bare `new` leaves data['settings'] null → Elementor 3.x
+ *     sanitize_settings() TypeErrors) AND a non-null $args (Elementor 4.x
+ *     turns any non-empty $data into a full instance and then throws
+ *     "An `$args` argument is required..."). The stub enforces both.
  * -------------------------------------------------------------------- */
 \HSW_Composite::part( 'Recording_Part_Widget', array( 'title' => 'ذخیره' ) );
 check(
@@ -196,6 +201,10 @@ check(
         is_array( Recording_Part_Widget::$ctor_data )
                 && isset( Recording_Part_Widget::$ctor_data['settings'] )
                 && is_array( Recording_Part_Widget::$ctor_data['settings'] )
+);
+check(
+        'part() passes non-null $args (Elementor 4.x full-instance requirement)',
+        is_array( Recording_Part_Widget::$ctor_args )
 );
 
 check( 'part() soft-fails on missing class', '' === \HSW_Composite::part( 'No_Such_HSW_Class', array() ) );
