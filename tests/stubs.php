@@ -55,7 +55,6 @@ class Controls_Manager {
         const URL = 'url';
         const MEDIA = 'media';
         const SELECT = 'select';
-        const CHOOSER = 'chooser';
         const SWITCHER = 'switcher';
         const COLOR = 'color';
         const SLIDER = 'slider';

@@ -204,7 +204,6 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         Controls_Manager::SLIDER,
                         Controls_Manager::URL,
                         Controls_Manager::REPEATER,
-                        Controls_Manager::CHOOSER,
                         Controls_Manager::HEADING,
                         Controls_Manager::DIVIDER,
                 );

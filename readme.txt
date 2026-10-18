@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دسته «HamiShop — حامی» را انتخاب کنید.
 
 == Changelog ==
+
+= 1.7.1 =
+* رفع خطای «Undefined constant Elementor\Controls_Manager::CHOOSER» در ویجت‌های جامع: ثابت CHOOSER در همهٔ نسخه‌های المنتور وجود ندارد و از فهرست انواع مجاز موتور آینه‌سازی حذف شد. (استاب‌های تست هم اصلاح شدند تا این کلاس از خطا دیگر تکرار نشود.)
 
 = 1.7.0 =
 * ویجت‌های جامع (Composite) — کل هر صفحه با یک ویجت: صفحه محصول، آرشیو، سبد خرید، تسویه حساب، پرداخت و مجله. همهٔ ویجت‌های تکی داخل صفحهٔ جامع به‌صورت بخش («پارت») رندر می‌شوند و تک‌تک از پنل جامع قابل روشن/خاموش و شخصی‌سازی‌اند؛ ویجت‌های تکی هم مستقل و مثل قبل کار می‌کنند (بدون تغییر شناسه‌های کنترل).
