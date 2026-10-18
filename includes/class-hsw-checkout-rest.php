@@ -261,9 +261,14 @@ class HSW_Checkout_Rest {
          * shop separators, currency symbol position).
          */
         protected function money( $amount, $with_symbol = true, $minus_after = false ) {
-                $decimals  = function_exists( 'wc_get_price_decimals' ) ? absint( wc_get_price_decimals() ) : 0;
-                $amount    = (float) $amount;
-                $formatted = number_format( abs( $amount ), $decimals, wc_get_price_decimal_sep(), wc_get_price_thousand_sep() );
+                $decimals = function_exists( 'wc_get_price_decimals' ) ? absint( wc_get_price_decimals() ) : 0;
+                $amount   = (float) $amount;
+
+                /* WooCommerce exposes *_separator() — the short *_sep() names
+                 * do not exist and fataled with "Call to undefined function". */
+                $dec_sep   = function_exists( 'wc_get_price_decimal_separator' ) ? wc_get_price_decimal_separator() : '.';
+                $thou_sep  = function_exists( 'wc_get_price_thousand_separator' ) ? wc_get_price_thousand_separator() : ',';
+                $formatted = number_format( abs( $amount ), $decimals, $dec_sep, $thou_sep );
                 $out       = HSW_Helpers::fa_num( $formatted );
                 if ( $minus_after && 0.0 > $amount ) {
                         $out .= '-';

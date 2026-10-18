@@ -92,9 +92,9 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                 $this->add_control(
                         'support_phone',
                         array(
-                                'label'       => __( 'شماره تماس', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'شماره تماس (خالی = بدون شماره)', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::TEXT,
-                                'default'     => __( '۰۲۱-۹۱۰۰۸۸۷۷', 'hamishop-elementor-widgets' ),
+                                'default'     => '',
                                 'description' => __( 'با dir=ltr و ارقام لاتین هم پشتیبانی می‌شود.', 'hamishop-elementor-widgets' ),
                                 'condition'   => array( 'show_support' => 'yes' ),
                         )
@@ -246,7 +246,14 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
 
                 $show_support = ( 'yes' === ( $s['show_support'] ?? 'yes' ) );
                 $support_lbl  = $this->opt( 'support_label', __( 'مرکز تماس و پشتیبانی', 'hamishop-elementor-widgets' ) );
-                $support_ph   = $this->opt( 'support_phone', $this->demo_support_phone() );
+                $support_ph   = trim( (string) $this->opt( 'support_phone', '' ) );
+                /* Legacy saves persisted the old demo number — never show it live. */
+                if ( '۰۲۱-۹۱۰۰۸۸۷۷' === $support_ph ) {
+                        $support_ph = '';
+                }
+                if ( '' === $support_ph && $this->is_demo() ) {
+                        $support_ph = $this->demo_support_phone();
+                }
                 $support_url  = ( ! empty( $s['support_url']['url'] ) ) ? $s['support_url']['url'] : '#';
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'cktop' ) ); ?>">
@@ -264,7 +271,9 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                                                 <div class="hsw-cktop__support">
                                                         <div class="hsw-cktop__support-tx">
                                                                 <span class="hsw-cktop__support-lbl"><?php echo esc_html( $support_lbl ); ?></span>
-                                                                <span class="hsw-cktop__support-ph"><?php echo esc_html( $support_ph ); ?></span>
+                                                                <?php if ( '' !== $support_ph ) : ?>
+                                                                        <span class="hsw-cktop__support-ph"><?php echo esc_html( $support_ph ); ?></span>
+                                                                <?php endif; ?>
                                                         </div>
                                                         <a class="hsw-cktop__support-btn" href="<?php echo esc_url( $support_url ); ?>" aria-label="<?php esc_attr_e( 'پشتیبانی', 'hamishop-elementor-widgets' ); ?>">
                                                                 <i class="hsw-ic" aria-hidden="true">support_agent</i>

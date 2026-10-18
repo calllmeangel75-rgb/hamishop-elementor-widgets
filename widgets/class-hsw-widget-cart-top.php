@@ -44,7 +44,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                         array(
                                 'label'   => __( 'نوار برند و ضمانت (دسکتاپ)', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::SWITCHER,
-                                'default' => 'yes',
+                                'default' => 'no',
                         )
                 );
 
@@ -53,7 +53,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                         array(
                                 'label'     => __( 'نام فروشگاه', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::TEXT,
-                                'default'   => __( 'سام‌فروش', 'hamishop-elementor-widgets' ),
+                                'default'   => get_bloginfo( 'name' ),
                                 'condition' => array( 'show_bar' => 'yes' ),
                         )
                 );
@@ -104,7 +104,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                         array(
                                 'label'   => __( 'مسیر راهنما (Breadcrumb)', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::SWITCHER,
-                                'default' => 'yes',
+                                'default' => 'no',
                         )
                 );
 
@@ -273,7 +273,11 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                 $sticky     = ( 'yes' === ( $s['sticky_bar'] ?? 'yes' ) );
                 $show_empty = ( 'yes' === ( $s['show_empty_btn'] ?? 'yes' ) );
 
-                $brand_name = $this->opt( 'brand_name', __( 'سام‌فروش', 'hamishop-elementor-widgets' ) );
+                $brand_name = $this->opt( 'brand_name', get_bloginfo( 'name' ) );
+                /* Legacy saves persisted the old demo brand — fall back to the real site name. */
+                if ( 'سام‌فروش' === $brand_name ) {
+                        $brand_name = get_bloginfo( 'name' );
+                }
                 $brand_url  = ( ! empty( $s['brand_url']['url'] ) ) ? $s['brand_url']['url'] : $this->shop_url();
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'ctop' ) ); ?>">

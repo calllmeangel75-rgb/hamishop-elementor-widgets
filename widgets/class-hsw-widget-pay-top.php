@@ -59,9 +59,10 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                 $this->add_control(
                         'brand_text',
                         array(
-                                'label'   => __( 'نام فروشگاه', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'فروشگاه آنلاین', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'نام فروشگاه (خالی = بدون نوار برند)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => '',
+                                'placeholder' => get_bloginfo( 'name' ),
                         )
                 );
 
@@ -170,10 +171,10 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                 $this->add_control(
                         'support_phone',
                         array(
-                                'label'     => __( 'متن پشتیبانی', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::TEXT,
-                                'default'   => __( 'پشتیبانی: ۰۲۱-۹۱۰۰۰۰۰۰', 'hamishop-elementor-widgets' ),
-                                'condition' => array( 'show_support' => 'yes' ),
+                                'label'       => __( 'متن پشتیبانی (خالی = بدون شماره)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => '',
+                                'condition'   => array( 'show_support' => 'yes' ),
                         )
                 );
 
@@ -320,7 +321,11 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                 $active = max( 1, min( count( $steps ), (int) $this->opt( 'active_step', '3' ) ) );
                 $sticky = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );
 
-                $brand    = $this->opt( 'brand_text', __( 'فروشگاه آنلاین', 'hamishop-elementor-widgets' ) );
+                $brand    = trim( (string) $this->opt( 'brand_text', '' ) );
+                /* Legacy saves persisted the old demo brand — treat it as empty. */
+                if ( 'فروشگاه آنلاین' === $brand ) {
+                        $brand = '';
+                }
                 $brand_ur = ( ! empty( $s['brand_url']['url'] ) ) ? $s['brand_url']['url'] : $this->shop_url();
                 $tag      = $this->opt( 'brand_tag', '' );
 
@@ -350,7 +355,14 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                 $show_ssl     = ( 'yes' === ( $s['show_ssl'] ?? 'yes' ) );
                 $ssl_text     = $this->opt( 'ssl_text', __( 'رمزنگاری ۲۵۶ بیتی SSL', 'hamishop-elementor-widgets' ) );
                 $show_support = ( 'yes' === ( $s['show_support'] ?? 'yes' ) );
-                $support_ph   = $this->opt( 'support_phone', $this->demo_pay_support_phone() );
+                $support_ph   = trim( (string) $this->opt( 'support_phone', '' ) );
+                /* Legacy saves persisted the old demo number — never show it live. */
+                if ( in_array( $support_ph, array( '۰۲۱-۹۱۰۰۰۰۰۰', 'پشتیبانی: ۰۲۱-۹۱۰۰۰۰۰۰' ), true ) ) {
+                        $support_ph = '';
+                }
+                if ( '' === $support_ph && $this->is_demo() ) {
+                        $support_ph = $this->demo_pay_support_phone();
+                }
                 $support_url  = ( ! empty( $s['support_url']['url'] ) ) ? $s['support_url']['url'] : '#';
 
                 $m_title    = $this->opt( 'm_title', __( 'اطلاعات ارسال', 'hamishop-elementor-widgets' ) );
@@ -366,16 +378,18 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                         <!-- =================== DESKTOP =================== -->
                         <header class="hsw-ptop__bar hsw-d<?php echo $sticky ? ' is-sticky' : ''; ?>">
                                 <div class="hsw-ptop__shell hsw-ptop__bar-in">
-                                        <div class="hsw-ptop__brand">
-                                                <a class="hsw-ptop__brand-a" href="<?php echo esc_url( $brand_ur ); ?>">
-                                                        <span class="hsw-ptop__logo"><i class="hsw-ic" aria-hidden="true">shopping_bag</i></span>
-                                                        <span class="hsw-ptop__brand-tx"><?php echo esc_html( $brand ); ?></span>
-                                                </a>
-                                                <?php if ( '' !== trim( (string) $tag ) ) : ?>
-                                                        <span class="hsw-ptop__sep" aria-hidden="true">|</span>
-                                                        <span class="hsw-ptop__tag"><?php echo esc_html( $tag ); ?></span>
-                                                <?php endif; ?>
-                                        </div>
+                                        <?php if ( '' !== trim( (string) $brand ) ) : ?>
+                                                <div class="hsw-ptop__brand">
+                                                        <a class="hsw-ptop__brand-a" href="<?php echo esc_url( $brand_ur ); ?>">
+                                                                <span class="hsw-ptop__logo"><i class="hsw-ic" aria-hidden="true">shopping_bag</i></span>
+                                                                <span class="hsw-ptop__brand-tx"><?php echo esc_html( $brand ); ?></span>
+                                                        </a>
+                                                        <?php if ( '' !== trim( (string) $tag ) ) : ?>
+                                                                <span class="hsw-ptop__sep" aria-hidden="true">|</span>
+                                                                <span class="hsw-ptop__tag"><?php echo esc_html( $tag ); ?></span>
+                                                        <?php endif; ?>
+                                                </div>
+                                        <?php endif; ?>
 
                                         <nav class="hsw-ptop__nav" aria-label="<?php esc_attr_e( 'مراحل خرید', 'hamishop-elementor-widgets' ); ?>">
                                                 <?php foreach ( $nav as $i => $row ) : ?>
@@ -407,7 +421,9 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                 <?php if ( $show_support ) : ?>
                                                         <a class="hsw-ptop__support" href="<?php echo esc_url( $support_url ); ?>" title="<?php esc_attr_e( 'پشتیبانی ۲۴ ساعته', 'hamishop-elementor-widgets' ); ?>">
                                                                 <i class="hsw-ic" aria-hidden="true">support_agent</i>
-                                                                <span><?php echo esc_html( $support_ph ); ?></span>
+                                                                <?php if ( '' !== $support_ph ) : ?>
+                                                                        <span><?php echo esc_html( $support_ph ); ?></span>
+                                                                <?php endif; ?>
                                                         </a>
                                                 <?php endif; ?>
                                         </div>
