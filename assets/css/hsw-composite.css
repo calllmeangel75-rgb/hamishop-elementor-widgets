@@ -35,9 +35,11 @@
 
 .hsw-cp__guide { margin-top: var(--hsw-cp-gap); }
 
-/* Archive already sits inside the theme's page gutter; avoid doubling it on phones. */
+/* Themes normally pad the archive page already. Woodmart definitely does,
+   so only there we drop the composite gutter to avoid double padding; on any
+   other theme the clamp() gutter above keeps the page off the viewport edge. */
 @media (max-width: 991px) {
-        .hsw-cp--archive { padding-inline: 0; }
+        body.theme-woodmart .hsw-cp--archive { padding-inline: 0; }
 }
 
 @media (min-width: 992px) {

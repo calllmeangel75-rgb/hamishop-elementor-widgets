@@ -96,6 +96,16 @@ final class HSW_Composite {
                         return self::$controls_cache[ $widget_class ];
                 }
 
+                /* Elementor stores controls that declare `selectors` in a separate
+                   “style controls” bucket on the frontend and hides them from
+                   get_controls() unless this flag is on. Composite mirroring needs
+                   the complete map in every context (editor, CSS, render defaults). */
+                $had_style_controls = false;
+                if ( class_exists( '\Elementor\Core\Frontend\Performance' ) ) {
+                        $had_style_controls = \Elementor\Core\Frontend\Performance::is_use_style_controls();
+                        \Elementor\Core\Frontend\Performance::set_use_style_controls( true );
+                }
+
                 $controls = array();
                 try {
                         if ( class_exists( $widget_class ) ) {
@@ -107,6 +117,10 @@ final class HSW_Composite {
                         }
                 } catch ( \Throwable $e ) {
                         $controls = array();
+                } finally {
+                        if ( class_exists( '\Elementor\Core\Frontend\Performance' ) ) {
+                                \Elementor\Core\Frontend\Performance::set_use_style_controls( $had_style_controls );
+                        }
                 }
 
                 self::$controls_cache[ $widget_class ] = $controls;
@@ -126,11 +140,20 @@ final class HSW_Composite {
 	 *   (Element_Base::__construct), and Widget_Base then throws
 	 *   "An `$args` argument is required..." unless a non-null $args is passed.
 	 *
+	 * A stable `id` is passed too: Elementor's Controls_Stack::init() reads
+	 * data['id'] unconditionally and warns when it is missing (WP_DEBUG).
+	 *
 	 * @param string $widget_class Fully-qualified HSW widget class.
 	 * @return HSW_Widget_Base
 	 */
 	private static function instance( $widget_class ) {
-		return new $widget_class( array( 'settings' => array() ), array() );
+		return new $widget_class(
+			array(
+				'id'       => 'hsw-part-' . sanitize_key( str_replace( '\\', '-', ltrim( (string) $widget_class, '\\' ) ) ),
+				'settings' => array(),
+			),
+			array()
+		);
 	}
 
         /**

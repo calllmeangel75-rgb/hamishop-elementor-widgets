@@ -187,7 +187,9 @@ abstract class HSW_Widget_Base extends Widget_Base {
 
         /**
          * Mirror chosen content controls of a part widget into this composite
-         * (prefixed ids, exact types + defaults + conditions).
+         * (prefixed ids, exact types + defaults + conditions). Responsive
+         * controls (e.g. «تعداد ستون») keep their per-device switch in the
+         * composite, whatever Elementor's responsive-control mode is.
          *
          * @param string $prefix       Part control prefix (with separator).
          * @param string $widget_class Fully-qualified part widget class.
@@ -214,6 +216,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'placeholder', 'label_block', 'label_on', 'label_off', 'separator',
                         'size_units', 'range', 'allow_empty', 'multiple', 'rows', 'min',
                         'max', 'step', 'fields', 'return_value', 'classes', 'selectors',
+                        'tablet_default', 'mobile_default',
                 );
 
                 foreach ( $ids as $id ) {
@@ -236,6 +239,39 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 $args['default'] = $source['desktop_default'];
                         }
 
+                        /* Responsive mirroring: keep the device switch
+                           (دسکتاپ / تبلت / موبایل) of the source control alive in the
+                           composite, for every Elementor responsive-control mode. */
+                        $devices       = array();
+                        $is_responsive = false;
+
+                        if ( ! empty( $source['is_responsive'] ) || ! empty( $source['responsive'] ) ) {
+                                $is_responsive = true;
+                                if ( ! empty( $source['responsive']['devices'] ) && is_array( $source['responsive']['devices'] ) ) {
+                                        $devices = array_values( array_intersect( array( 'desktop', 'tablet', 'mobile' ), $source['responsive']['devices'] ) );
+                                }
+                        }
+
+                        /* Elementor's CSS-file mode registers one control per device
+                           (cols / cols_tablet / cols_mobile): borrow their defaults
+                           even when the desktop control also carries `responsive`. */
+                        foreach ( array( 'tablet', 'mobile' ) as $device ) {
+                                $sibling = isset( $controls[ $id . '_' . $device ] ) ? $controls[ $id . '_' . $device ] : null;
+                                if ( ! is_array( $sibling ) ) {
+                                        continue;
+                                }
+                                $is_responsive = true;
+                                if ( ! in_array( $device, $devices, true ) ) {
+                                        $devices[] = $device;
+                                }
+                                if ( ! isset( $args[ $device . '_default' ] ) && array_key_exists( 'default', $sibling ) ) {
+                                        $args[ $device . '_default' ] = $sibling['default'];
+                                }
+                        }
+                        if ( $is_responsive && $devices && ! in_array( 'desktop', $devices, true ) ) {
+                                array_unshift( $devices, 'desktop' );
+                        }
+
                         if ( ! empty( $args['condition'] ) && is_array( $args['condition'] ) ) {
                                 $condition = array();
                                 foreach ( $args['condition'] as $ck => $cv ) {
@@ -250,6 +286,14 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 } else {
                                         unset( $args['condition'] );
                                 }
+                        }
+
+                        if ( $is_responsive ) {
+                                if ( count( $devices ) > 1 ) {
+                                        $args['devices'] = $devices;
+                                }
+                                $this->add_responsive_control( $prefix . $id, $args );
+                                continue;
                         }
 
                         $this->add_control( $prefix . $id, $args );

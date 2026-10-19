@@ -99,14 +99,15 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 'label'           => __( 'تعداد ستون', 'hamishop-elementor-widgets' ),
                                 'type'            => Controls_Manager::SELECT,
                                 'default'         => '3',
-                                'tablet_default'  => '2',
+                                'tablet_default'  => '3',
                                 'mobile_default'  => '2',
                                 'options'         => array( '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵' ),
+                                /* `:not(.hsw-ag--list)` keeps نمای لیستی single-column. */
                                 'selectors'       => array(
-                                        '{{WRAPPER}} .hsw-ag__grid' => 'grid-template-columns: repeat({{VALUE}}, minmax(0, 1fr));',
+                                        '{{WRAPPER}} .hsw-ag:not(.hsw-ag--list) .hsw-ag__grid' => 'grid-template-columns: repeat({{VALUE}}, minmax(0, 1fr));',
                                 ),
                                 'devices'         => array( 'desktop', 'tablet', 'mobile' ),
-                                'description'     => __( 'پیش‌فرض طرح: موبایل ۲ — دسکتاپ ۳', 'hamishop-elementor-widgets' ),
+                                'description'     => __( 'پیش‌فرض طرح: موبایل ۲ — تبلت و دسکتاپ ۳. در نمای لیستی، یک ستونه نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
