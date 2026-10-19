@@ -647,10 +647,31 @@ REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / pay
 | `hsw-cart-page` | HSW_Widget_Cart_Page | ctop_ cbanner_ citems_ ccoupon_ csummary_ |
 | `hsw-checkout-page` | HSW_Widget_Checkout_Page | ctop_ caddr_ cship_ csched_ cnote_ citems_ csum_ |
 | `hsw-pay-page` | HSW_Widget_Pay_Page | paytop_ prec_ pm_ pcpn_ psum_ |
+| `hsw-complete-page` | HSW_Widget_Complete_Page | hero_ cord_ cdel_ cstp_ cact_ |
 | `hsw-blog-page` | HSW_Widget_Blog_Page | bhero_ btabs_ bfeat_ bgrid_ bpop_ bnews_ btags_ |
 
 - چیدمان: `assets/css/hsw-composite.css` — `--hsw-cp-side` (عرض سایدبار) و `--hsw-cp-cols` (نسبت ستون گالری) از کنترل‌های Elementor ست می‌شوند؛ موبایل تک‌ستونه.
 - قرارداد: شناسهٔ کنترل‌های ویجت‌های تکی هرگز تغییر نمی‌کند؛ هر پارت پیش‌فرض روشن است و با `{prefix}on=no` خاموش می‌شود.
+
+## مجموعهٔ «تکمیل خرید» — v1.8.0
+
+`includes/class-hsw-complete-base.php` (extends HSW_Pay_Base) + `includes/class-hsw-complete-route.php` + CSS `assets/css/hsw-complete.css` (وابسته به hsw-checkout.css — همان توکن‌ها/آیکن)؛ بدون JS.
+
+| slug | نقش |
+|---|---|
+| `hsw-complete-page` (جامع) | سربرگ موفقیت → جزئیات سفارش → اطلاعات تحویل (ستون اصلی) + مراحل بعدی → دکمه‌های پایانی (ستون کناری) |
+| `hsw-complete-hero` | سربرگ موفقیت: آیکن + عنوان/زیرعنوان + چیپ‌های شمارهٔ سفارش (ارقام فارسی اختیاری)/تاریخ/وضعیت + کارت «سفارش یافت نشد» برای لینک ناقص/منقضی |
+| `hsw-complete-order` | اقلام (تصویر/نام/تعداد/مبلغ)، جمع سبد، تخفیف (قالب کوپن `{code}`)، هزینهٔ ارسال/رایگان، مالیات، مبلغ کل، روش پرداخت + نشان پرداخت، یادداشت مشتری، خروجی درگاه (`woocommerce_thankyou_{gateway}`) |
+| `hsw-complete-delivery` | تحویل‌گیرنده، تلفن، نشانی، کد پستی، روش ارسال — از سفارش (shipping → billing) |
+| `hsw-complete-steps` | ریپیتر مراحل بعدی (آیکن + عنوان + توضیح) + خط اتصال — متن سایت است، نه دادهٔ سفارش |
+| `hsw-complete-actions` | دکمهٔ اصلی هوشمند (پرداخت سفارش برای پرداخت‌نشده / مشاهدهٔ سفارش برای مالک / حساب کاربری)، دکمهٔ ادامه خرید، پیام ایمیل تأییدیه (ناشناس‌شده `a***@x.com`)، جعبهٔ پشتیبانی |
+
+قراردادهای مسیردهی (باید حفظ شوند):
+- محل تنظیم: **ووکامرس → تنظیمات → تسویه حساب → «صفحهٔ تکمیل خرید»** (`hsw_complete_page_id`، نوع `single_select_page`؛ همان چیزی که خود ووکامرس ذخیره می‌کند). خالی = رفتار پیش‌فرض (کارت `hsw-done-final` داخل صفحهٔ تسویه).
+- ریدایرکت فقط از `woocommerce_get_checkout_order_received_url` (فیلتر رسمی — همهٔ درگاه‌ها، WC core، لینک‌های پرداخت ایمیل و Store API از همین می‌خوانند) + گارد `template_redirect` روی endpoint قدیمی `order-received`؛ URL = `get_permalink(page) + ?order={id}&key={key}`.
+- گاردها: `is_admin` / AJAX / REST رد می‌شوند؛ صفحهٔ هدف اگر همان سبد/تسویه باشد نادیده گرفته می‌شود؛ بازدیدکننده فقط با کلید امن معتبر یا مالک واردشده ریدایرکت می‌شود (قانون خود ووکامرس).
+- `HSW_Complete_Base::completion_order()`: اول endpoint `order-received`، بعد `?order=&key=`؛ `complete_state()` = order | demo (فقط ادیتور) | none.
+- پارت‌های order/delivery بدون سفارش چیزی رندر نمی‌کنند؛ hero کارت «یافت نشد» و actions دکمه‌های فروشگاه/حساب را نشان می‌دهند.
 
 # خانوادهٔ مجله و وبلاگ — v1.7.0
 

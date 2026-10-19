@@ -27,6 +27,7 @@ $files = array(
 	'includes/class-hsw-cart-actions.php',
 	'includes/class-hsw-checkout-rest.php',
 	'includes/class-hsw-checkout-complete.php',
+	'includes/class-hsw-complete-route.php',
 	/* ---- elementor/widgets/register: Elementor bases first ---- */
 	'includes/class-hsw-widget-base.php',
 	'includes/class-hsw-product-base.php',
@@ -35,6 +36,7 @@ $files = array(
 	'includes/class-hsw-checkout-base.php',
 	'includes/class-hsw-pay-base.php',
 	'includes/class-hsw-blog-base.php',
+	'includes/class-hsw-complete-base.php',
 	/* ---- widget files ---- */
 	'widgets/class-hsw-wonder-deals.php',
 	'widgets/class-hsw-best-sellers.php',
@@ -78,6 +80,12 @@ $files = array(
 	'widgets/class-hsw-widget-pay-coupon.php',
 	'widgets/class-hsw-widget-pay-summary.php',
 	'widgets/class-hsw-widget-pay-page.php',
+	'widgets/class-hsw-widget-complete-hero.php',
+	'widgets/class-hsw-widget-complete-order.php',
+	'widgets/class-hsw-widget-complete-delivery.php',
+	'widgets/class-hsw-widget-complete-steps.php',
+	'widgets/class-hsw-widget-complete-actions.php',
+	'widgets/class-hsw-widget-complete-page.php',
 	'widgets/class-hsw-widget-blog-hero.php',
 	'widgets/class-hsw-widget-blog-tabs.php',
 	'widgets/class-hsw-widget-blog-featured.php',

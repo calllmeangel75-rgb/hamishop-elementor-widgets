@@ -57,6 +57,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-cart-actions.php';
                 require_once HSW_DIR . 'includes/class-hsw-checkout-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-checkout-complete.php';
+                require_once HSW_DIR . 'includes/class-hsw-complete-route.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
@@ -69,6 +70,9 @@ final class HSW_Plugin {
 
                 /* Final order placement for the design's own pay button. */
                 new HSW_Checkout_Complete();
+
+                /* Completion (thank-you) page routing + WooCommerce setting. */
+                new HSW_Complete_Route();
         }
 
         /**
@@ -170,6 +174,14 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-pay-summary.php',
                         HSW_DIR . 'widgets/class-hsw-widget-pay-page.php',
 
+                        HSW_DIR . 'includes/class-hsw-complete-base.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-complete-hero.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-complete-order.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-complete-delivery.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-complete-steps.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-complete-actions.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-complete-page.php',
+
                         HSW_DIR . 'widgets/class-hsw-widget-blog-hero.php',
                         HSW_DIR . 'widgets/class-hsw-widget-blog-tabs.php',
                         HSW_DIR . 'widgets/class-hsw-widget-blog-featured.php',
@@ -237,6 +249,12 @@ final class HSW_Plugin {
                         '\HSW_Widget_Pay_Coupon',
                         '\HSW_Widget_Pay_Summary',
                         '\HSW_Widget_Pay_Page',
+                        '\HSW_Widget_Complete_Hero',
+                        '\HSW_Widget_Complete_Order',
+                        '\HSW_Widget_Complete_Delivery',
+                        '\HSW_Widget_Complete_Steps',
+                        '\HSW_Widget_Complete_Actions',
+                        '\HSW_Widget_Complete_Page',
                         '\HSW_Widget_Blog_Hero',
                         '\HSW_Widget_Blog_Tabs',
                         '\HSW_Widget_Blog_Featured',

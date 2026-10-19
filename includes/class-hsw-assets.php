@@ -162,6 +162,13 @@ class HSW_Assets {
                         HSW_VERSION
                 );
 
+                wp_register_style(
+                        'hsw-complete',
+                        HSW_URL . 'assets/css/hsw-complete.css',
+                        array( 'hsw-checkout' ),
+                        HSW_VERSION
+                );
+
                 wp_register_script(
                         'hsw-checkout',
                         HSW_URL . 'assets/js/hsw-checkout.js',

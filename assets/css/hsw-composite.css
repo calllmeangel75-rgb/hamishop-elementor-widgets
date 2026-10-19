@@ -43,6 +43,7 @@
         .hsw-cp--cart .hsw-cp__body,
         .hsw-cp--checkout .hsw-cp__body,
         .hsw-cp--pay .hsw-cp__body,
+        .hsw-cp--complete .hsw-cp__body,
         .hsw-cp--blog .hsw-cp__body {
                 grid-template-columns: minmax(0, 1fr) var(--hsw-cp-side);
         }
