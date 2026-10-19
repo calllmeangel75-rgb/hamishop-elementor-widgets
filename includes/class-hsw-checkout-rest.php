@@ -6,6 +6,8 @@
  *    formatted totals so the summary/bottom-bar widgets can patch themselves.
  *  - POST /hsw/v1/checkout/note     : store the design's order-note textarea +
  *    legal-invoice checkbox into the WC session before continuing to payment.
+ *  - POST /hsw/v1/checkout/schedule : store the picked delivery day + time slot
+ *    in the WC session; the order bridge appends them to the order note.
  *  - POST /hsw/v1/checkout/payment  : persist chosen_payment_method + the
  *    wallet-deduction flag in the WC session (payment step).
  *  - POST /hsw/v1/checkout/coupon   : apply / remove a WooCommerce coupon and
@@ -45,6 +47,20 @@ class HSW_Checkout_Rest {
                                 'methods'             => 'POST',
                                 'callback'            => array( $this, 'save_note' ),
                                 'permission_callback' => array( $this, 'can_checkout' ),
+                        )
+                );
+
+                register_rest_route(
+                        self::NS,
+                        '/checkout/schedule',
+                        array(
+                                'methods'             => 'POST',
+                                'callback'            => array( $this, 'save_schedule' ),
+                                'permission_callback' => array( $this, 'can_checkout' ),
+                                'args'                => array(
+                                        'day'  => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'slot' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                ),
                         )
                 );
 
@@ -152,6 +168,25 @@ class HSW_Checkout_Rest {
                 do_action( 'hsw_checkout_note_saved', $note, 'yes' === $invoice );
 
                 return rest_ensure_response( array( 'ok' => true ) );
+        }
+
+        /**
+         * Store the picked delivery day + time slot in the WC session — the
+         * order bridge appends «زمان تحویل: …» to the customer order note.
+         */
+        public function save_schedule( $request ) {
+                if ( ! WC()->session ) {
+                        return new WP_Error( 'hsw_no_session', __( 'نشست یافت نشد.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                }
+
+                $day  = sanitize_text_field( (string) $request->get_param( 'day' ) );
+                $slot = sanitize_text_field( (string) $request->get_param( 'slot' ) );
+
+                WC()->session->set( 'hsw_delivery_schedule', array( 'day' => $day, 'slot' => $slot ) );
+
+                do_action( 'hsw_checkout_schedule_saved', $day, $slot );
+
+                return rest_ensure_response( array( 'ok' => true, 'day' => $day, 'slot' => $slot ) );
         }
 
         /**

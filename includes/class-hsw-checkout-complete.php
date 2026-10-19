@@ -35,7 +35,9 @@ class HSW_Checkout_Complete {
 				'callback'            => array( $this, 'complete' ),
 				'permission_callback' => array( $this, 'can_checkout' ),
 				'args'                => array(
-					'method' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+					'method'        => array( 'sanitize_callback' => 'sanitize_text_field' ),
+					'schedule_day'  => array( 'sanitize_callback' => 'sanitize_text_field' ),
+					'schedule_slot' => array( 'sanitize_callback' => 'sanitize_text_field' ),
 				),
 			)
 		);
@@ -71,6 +73,7 @@ class HSW_Checkout_Complete {
 
 		WC()->cart->calculate_totals();
 		$this->maybe_default_shipping();
+		$this->store_schedule_from_request( $request );
 
 		$data = $this->order_data( $request );
 
@@ -154,6 +157,11 @@ class HSW_Checkout_Complete {
 			$redirect = apply_filters( 'woocommerce_checkout_no_payment_needed_redirect', $order->get_checkout_order_received_url(), $order );
 		}
 
+		/* The delivery slot belongs to this order only; start the next one clean. */
+		if ( WC()->session ) {
+			WC()->session->set( 'hsw_delivery_schedule', array() );
+		}
+
 		return rest_ensure_response(
 			array(
 				'ok'       => true,
@@ -202,11 +210,74 @@ class HSW_Checkout_Complete {
 		}
 
 		$data['payment_method']            = $method;
-		$data['order_comments']            = (string) WC()->session->get( 'hsw_checkout_note' );
+		$data['order_comments']            = $this->note_with_delivery();
 		$data['ship_to_different_address'] = false;
 		$data['terms']                     = 1;
 
 		return $data;
+	}
+
+	/**
+	 * The pay page re-sends the day/slot it kept from the checkout step (the
+	 * CTA's keepalive request can be lost while the browser navigates).
+	 * Request values win over the session; re-sanitized + length-capped.
+	 */
+	protected function store_schedule_from_request( $request ) {
+		$day  = trim( sanitize_text_field( (string) $request->get_param( 'schedule_day' ) ) );
+		$slot = trim( sanitize_text_field( (string) $request->get_param( 'schedule_slot' ) ) );
+
+		if ( '' === $day && '' === $slot ) {
+			return;
+		}
+
+		$cap = static function ( $value ) {
+			$value = (string) $value;
+			return function_exists( 'mb_substr' ) ? mb_substr( $value, 0, 120 ) : substr( $value, 0, 120 );
+		};
+
+		WC()->session->set(
+			'hsw_delivery_schedule',
+			array(
+				'day'  => $cap( $day ),
+				'slot' => $cap( $slot ),
+			)
+		);
+	}
+
+	/**
+	 * Picked delivery day + time slot from the WC session ('' when the
+	 * customer never chose or the schedule section is switched off).
+	 *
+	 * @return array{day:string,slot:string}
+	 */
+	protected function delivery_schedule() {
+		$schedule = WC()->session ? WC()->session->get( 'hsw_delivery_schedule' ) : array();
+		$day      = ( is_array( $schedule ) && isset( $schedule['day'] ) ) ? trim( (string) $schedule['day'] ) : '';
+		$slot     = ( is_array( $schedule ) && isset( $schedule['slot'] ) ) ? trim( (string) $schedule['slot'] ) : '';
+
+		return array( 'day' => $day, 'slot' => $slot );
+	}
+
+	/**
+	 * The customer note with the delivery day/slot line appended, so the
+	 * picked schedule shows up inside the order note (admin + emails).
+	 */
+	protected function note_with_delivery() {
+		$note     = trim( (string) WC()->session->get( 'hsw_checkout_note' ) );
+		$schedule = $this->delivery_schedule();
+		$when     = trim( implode( ' — ', array_filter( array( $schedule['day'], $schedule['slot'] ) ) ) );
+
+		if ( '' === $when ) {
+			return $note;
+		}
+
+		$line = sprintf(
+			/* translators: %s: picked delivery day + time slot. */
+			__( 'زمان تحویل: %s', 'hamishop-elementor-widgets' ),
+			$when
+		);
+
+		return ( '' === $note ) ? $line : $note . "\n" . $line;
 	}
 
 	/**
@@ -338,6 +409,15 @@ class HSW_Checkout_Complete {
 			$order->update_meta_data( '_hsw_invoice_requested', 'yes' );
 			$order->add_order_note( __( 'درخواست فاکتور رسمی از سوی مشتری ثبت شد.', 'hamishop-elementor-widgets' ) );
 		}
+
+		$schedule = $this->delivery_schedule();
+		if ( '' !== $schedule['day'] ) {
+			$order->update_meta_data( '_hsw_delivery_day', $schedule['day'] );
+		}
+		if ( '' !== $schedule['slot'] ) {
+			$order->update_meta_data( '_hsw_delivery_slot', $schedule['slot'] );
+		}
+
 		$order->update_meta_data( '_hsw_placed_via', 'hamishop-pay' );
 		$order->save();
 	}

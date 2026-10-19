@@ -90,6 +90,100 @@
                 }
         }
 
+        /* =====================================================
+         * Delivery day/time — persisted so the final order
+         * bridge can append it to the order note.
+         * ===================================================== */
+        function schedulePayload() {
+                var root = document.querySelector( '.hsw-cksched' );
+                if ( ! root || root.classList.contains( 'hsw-vis-off' ) ) {
+                        return null;
+                }
+                var dayBtn  = root.querySelector( '.hsw-cksched__day.is-sel' ) || root.querySelector( '.hsw-cksched__mday.is-sel' );
+                var slotBox = root.querySelector( '.hsw-cksched__slot.is-sel' );
+                if ( ! dayBtn && ! slotBox ) {
+                        return null;
+                }
+                var label = function ( nodes ) {
+                        var out = [];
+                        for ( var i = 0; i < nodes.length; i++ ) {
+                                var t = ( nodes[ i ].textContent || '' ).replace( /\s+/g, ' ' ).trim();
+                                if ( t && -1 === out.indexOf( t ) ) {
+                                        out.push( t );
+                                }
+                        }
+                        return out.join( ' ' );
+                };
+                var day = dayBtn
+                        ? label( dayBtn.querySelectorAll( '.hsw-cksched__day-meta, .hsw-cksched__day-t, .hsw-cksched__day-wd' ) )
+                        : '';
+                var slot = '';
+                if ( slotBox ) {
+                        var parts = slotBox.querySelectorAll( '.hsw-cksched__slot-t, .hsw-cksched__slot-tag' );
+                        slot = label( parts.length ? parts : slotBox.querySelectorAll( 'span' ) );
+                }
+                if ( ! day && ! slot ) {
+                        return null;
+                }
+                return { day: day, slot: slot };
+        }
+
+        /* The picked day/slot also travels through sessionStorage so the pay
+         * page can hand it to /checkout/complete — the CTA's keepalive request
+         * can be lost while the browser navigates to the payment step. */
+        var SCHED_KEY = 'hswDeliverySchedule';
+        function saveScheduleDraft( payload ) {
+                try {
+                        window.sessionStorage.setItem( SCHED_KEY, JSON.stringify( { p: payload, t: Date.now() } ) );
+                } catch ( e ) {}
+        }
+        function savedSchedule() {
+                try {
+                        var raw = window.sessionStorage.getItem( SCHED_KEY );
+                        if ( ! raw ) {
+                                return null;
+                        }
+                        var box = JSON.parse( raw );
+                        if ( ! box || ! box.p || ! ( box.t > 0 ) || ( Date.now() - box.t ) > 6 * 60 * 60 * 1000 ) {
+                                window.sessionStorage.removeItem( SCHED_KEY );
+                                return null;
+                        }
+                        return box.p;
+                } catch ( e ) {
+                        return null;
+                }
+        }
+
+        var schedBusy = false;
+        var schedNext = null;
+
+        function syncSchedule( keepalive ) {
+                var payload = schedulePayload();
+                if ( ! payload ) {
+                        return;
+                }
+                saveScheduleDraft( payload );
+                if ( schedBusy ) {
+                        /* Latest selection wins: requests can finish out of order. */
+                        schedNext = payload;
+                        return;
+                }
+                schedBusy = true;
+                var done = function () {
+                        schedBusy = false;
+                        if ( schedNext ) {
+                                var next = schedNext;
+                                schedNext = null;
+                                syncSchedule();
+                        }
+                };
+                try {
+                        post( '/checkout/schedule', payload, !! keepalive ).catch( function () {} ).then( done, done );
+                } catch ( e ) {
+                        done();
+                }
+        }
+
         document.addEventListener( 'change', function ( event ) {
                 var input = event.target;
                 if ( ! input || input.type !== 'radio' ) {
@@ -140,6 +234,8 @@
                                         }
                                 }
                         }
+                        /* 3) persist the choice for the order note */
+                        syncSchedule();
                 }
         } );
 
@@ -175,6 +271,8 @@
                                 mDays[ idx ].classList.add( 'is-sel' );
                         }
                 }
+                /* Persist the choice for the order note. */
+                syncSchedule();
         } );
 
         /* =====================================================
@@ -195,6 +293,9 @@
                 try {
                         post( '/checkout/note', payload, true ).catch( function () {} );
                 } catch ( e ) {}
+                /* The delivery day/slot rides along with the same click (covers
+                   the untouched default selection too). */
+                syncSchedule( true );
         } );
 
         /* =====================================================================
@@ -554,7 +655,13 @@
                 } )
                         .catch( function () { /* keep the session default */ } )
                         .then( function () {
-                                return post( '/checkout/complete', { method: currentMethod() } );
+                                var payload = { method: currentMethod() };
+                                var sched   = savedSchedule();
+                                if ( sched && ( sched.day || sched.slot ) ) {
+                                        payload.schedule_day  = sched.day || '';
+                                        payload.schedule_slot = sched.slot || '';
+                                }
+                                return post( '/checkout/complete', payload );
                         } )
                         .then( function ( json ) {
                                 if ( json && json.redirect ) {

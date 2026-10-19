@@ -40,6 +40,22 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
 
                 $this->ctrl_visibility();
 
+                /* Master off switch: «خاموش» hides the whole delivery section
+                 * (the order note then carries no «زمان تحویل» line). */
+                if ( method_exists( $this, 'update_control' ) ) {
+                        $this->update_control(
+                                'vis',
+                                array(
+                                        'options' => array(
+                                                'auto'    => __( 'پیش‌فرض طرح', 'hamishop-elementor-widgets' ),
+                                                'desktop' => __( 'فقط دسکتاپ', 'hamishop-elementor-widgets' ),
+                                                'mobile'  => __( 'فقط موبایل', 'hamishop-elementor-widgets' ),
+                                                'off'     => __( 'خاموش (بدون نمایش)', 'hamishop-elementor-widgets' ),
+                                        ),
+                                )
+                        );
+                }
+
                 $this->add_control(
                         'title',
                         array(

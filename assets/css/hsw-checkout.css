@@ -44,6 +44,9 @@
         .hsw-k.hsw-vis-mobile { display: none !important; }
 }
 
+/* ===== Master off switch (the «خاموش (بدون نمایش)» option) ===== */
+.hsw-k.hsw-vis-off { display: none !important; }
+
 /* ===== Root palette (the design tokens) ===== */
 :root {
         --hswk-card: #ffffff;       /* surface-container-lowest */
