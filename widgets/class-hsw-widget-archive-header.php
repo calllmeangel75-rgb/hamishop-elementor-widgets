@@ -92,10 +92,12 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 $this->add_control(
                         'pills_attr',
                         array(
-                                'label'     => __( 'اسلاگ صفت', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::TEXT,
-                                'default'   => 'pa_brand',
-                                'condition' => array( 'pills_source' => 'attribute' ),
+                                'label'       => __( 'صفت (ویژگی)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT2,
+                                'options'     => self::attr_options(),
+                                'default'     => 'pa_brand',
+                                'label_block' => true,
+                                'condition'   => array( 'pills_source' => 'attribute' ),
                         )
                 );
 
@@ -173,12 +175,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
          */
         protected function title_text() {
                 $fmt = $this->opt( 'title_format', __( 'خرید و قیمت {name}', 'hamishop-elementor-widgets' ) );
-                if ( $this->is_demo() || ! $this->is_archive_context() ) {
-                        return str_replace( '{name}', $this->demo()['term'], $fmt );
-                }
-                $term = $this->current_term();
-                $name = $term ? $term->name : ( function_exists( 'woocommerce_page_title' ) ? get_the_title( wc_get_page_id( 'shop' ) ) : __( 'فروشگاه', 'hamishop-elementor-widgets' ) );
-                return str_replace( '{name}', $name, $fmt );
+                return str_replace( '{name}', $this->archive_name(), $fmt );
         }
 
         /**
@@ -236,6 +233,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                                 'parent'     => $parent,
                                 'hide_empty' => false,
                                 'number'     => 8,
+                                'exclude'    => $this->default_cat_ids(),
                         )
                 );
                 if ( ! is_wp_error( $children ) ) {
@@ -247,19 +245,11 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
         }
 
         /**
-         * SEO description (WYSIWYG override → term description → demo).
+         * SEO description (WYSIWYG override → term description → shop content → demo).
          */
         protected function desc_html() {
                 $s = $this->effective_settings();
-                $custom = isset( $s['seo_desc'] ) ? trim( (string) $s['seo_desc'] ) : '';
-                if ( '' !== $custom ) {
-                        return wp_kses_post( $custom );
-                }
-                if ( $this->is_demo() || ! $this->is_archive_context() ) {
-                        return esc_html( $this->demo()['desc'] );
-                }
-                $term = $this->current_term();
-                return $term ? wp_strip_all_tags( term_description( $term ) ) : '';
+                return $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '' );
         }
 
         /**
@@ -311,8 +301,8 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                                 </div>
                                 <?php if ( $desc ) : ?>
                                         <div class="hsw-ahd__seobox">
-                                                <p class="hsw-ahd__desc is-clamped" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized above. ?></p>
-                                                <button type="button" class="hsw-ahd__more" data-hsw-seo>
+                                                <div class="hsw-ahd__desc is-clamped" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized above. ?></div>
+                                                <button type="button" class="hsw-ahd__more" data-hsw-seo aria-expanded="false">
                                                         <span><?php esc_html_e( 'مشاهده بیشتر', 'hamishop-elementor-widgets' ); ?></span>
                                                         <i class="hsw-ic" aria-hidden="true">expand_more</i>
                                                 </button>
@@ -346,8 +336,8 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
 
                         <?php if ( $desc ) : ?>
                                 <div class="hsw-ahd__mteaser hsw-m">
-                                        <p class="hsw-ahd__mdesc is-clamped" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized above. ?></p>
-                                        <button type="button" class="hsw-ahd__mmore" data-hsw-seo>
+                                        <div class="hsw-ahd__mdesc is-clamped" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized above. ?></div>
+                                        <button type="button" class="hsw-ahd__mmore" data-hsw-seo aria-expanded="false">
                                                 <span><?php esc_html_e( 'ادامه مطلب', 'hamishop-elementor-widgets' ); ?></span>
                                         </button>
                                 </div>

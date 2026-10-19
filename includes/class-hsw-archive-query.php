@@ -14,14 +14,102 @@ defined( 'ABSPATH' ) || exit;
 class HSW_Archive_Query {
 
         public function __construct() {
+                add_action( 'init', array( $this, 'normalize_filter_params' ), 5 );
                 add_action( 'pre_get_posts', array( $this, 'apply' ) );
+                add_action( 'elementor/document/after_save', array( $this, 'sync_express_slug' ), 10, 2 );
+        }
+
+        /**
+         * Without JavaScript the filter form may submit the same `filter_*`
+         * checkbox name twice; PHP turns that into an array while WooCommerce
+         * expects a comma-separated string. Normalise before the main query.
+         */
+        public function normalize_filter_params() {
+                if ( empty( $_GET ) || ! is_array( $_GET ) ) {
+                        return;
+                }
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.
+                foreach ( $_GET as $key => $value ) {
+                        if ( ! is_string( $key ) || 0 !== strpos( $key, 'filter_' ) || ! is_array( $value ) ) {
+                                continue;
+                        }
+                        $flat = array();
+                        foreach ( $value as $item ) {
+                                if ( is_array( $item ) ) {
+                                        foreach ( $item as $sub ) {
+                                                $flat[] = $sub;
+                                        }
+                                        continue;
+                                }
+                                $flat[] = $item;
+                        }
+                        $flat = array_values( array_unique( array_filter( array_map( 'sanitize_title', array_map( 'wp_unslash', array_map( 'strval', $flat ) ) ), 'strlen' ) ) );
+                        if ( empty( $flat ) ) {
+                                unset( $_GET[ $key ] );
+                                continue;
+                        }
+                        $_GET[ $key ] = implode( ',', $flat );
+                }
+                // phpcs:enable
+        }
+
+        /**
+         * The express shipping-class slug: a site-wide option synced from the
+         * archive widgets on every Elementor save, overridable by the
+         * `hsw_express_shipping_class` filter. One source of truth for the
+         * query, the filter widgets and the product cards.
+         */
+        public static function express_slug() {
+                $slug = get_option( 'hsw_express_slug', 'express' );
+                return (string) apply_filters( 'hsw_express_shipping_class', $slug );
+        }
+
+        /**
+         * Persist the `express_slug` control value of any HSW widget inside a
+         * saved Elementor document (template/page) as the site-wide option.
+         *
+         * @param \Elementor\Core\Base\Document $document Saved document.
+         * @param array                          $data     Saved data.
+         */
+        public function sync_express_slug( $document, $data = array() ) {
+                if ( ! is_object( $document ) || ! method_exists( $document, 'get_elements_data' ) ) {
+                        return;
+                }
+                $slug = $this->find_express_slug( (array) $document->get_elements_data() );
+                if ( $slug ) {
+                        update_option( 'hsw_express_slug', $slug );
+                }
+        }
+
+        /**
+         * Recursively walk Elementor element data for an express_slug setting.
+         *
+         * @param array $elements Elementor elements tree.
+         * @return string
+         */
+        private function find_express_slug( $elements ) {
+                foreach ( $elements as $el ) {
+                        if ( ! is_array( $el ) ) {
+                                continue;
+                        }
+                        if ( ! empty( $el['settings']['express_slug'] ) && is_string( $el['settings']['express_slug'] ) ) {
+                                return sanitize_title( $el['settings']['express_slug'] );
+                        }
+                        if ( ! empty( $el['elements'] ) && is_array( $el['elements'] ) ) {
+                                $found = $this->find_express_slug( $el['elements'] );
+                                if ( $found ) {
+                                        return $found;
+                                }
+                        }
+                }
+                return '';
         }
 
         /**
          * Only touch the frontend product archive main query.
          */
         public function apply( $q ) {
-                if ( is_admin() || ! $q->is_main_query() ) {
+                if ( is_admin() || ( ! $q->is_main_query() && ! apply_filters( 'hsw_archive_query_allow', false, $q ) ) ) {
                         return;
                 }
                 if ( ! function_exists( 'is_woocommerce' ) || ! ( $q->is_post_type_archive( 'product' ) || $q->is_tax( get_object_taxonomies( 'product' ) ) ) ) {
@@ -32,6 +120,8 @@ class HSW_Archive_Query {
                 $instock = isset( $_GET['instock'] ) ? sanitize_key( wp_unslash( $_GET['instock'] ) ) : '';
                 $express = isset( $_GET['express'] ) ? sanitize_key( wp_unslash( $_GET['express'] ) ) : '';
                 $orderby = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '';
+                $onsale  = isset( $_GET['onsale'] ) ? sanitize_key( wp_unslash( $_GET['onsale'] ) ) : '';
+                $rating  = isset( $_GET['rating_filter'] ) ? (int) wp_unslash( $_GET['rating_filter'] ) : 0;
                 // phpcs:enable
 
                 if ( '1' === $instock ) {
@@ -44,8 +134,32 @@ class HSW_Archive_Query {
                         $q->set( 'meta_query', $meta );
                 }
 
+                if ( '1' === $onsale && function_exists( 'wc_get_product_ids_on_sale' ) ) {
+                        $sale_ids = wc_get_product_ids_on_sale();
+                        $sale_ids = is_array( $sale_ids ) ? array_map( 'intval', $sale_ids ) : array();
+                        $current  = array_map( 'intval', (array) $q->get( 'post__in' ) );
+                        if ( empty( $current ) ) {
+                                $q->set( 'post__in', $sale_ids ? $sale_ids : array( 0 ) );
+                        } else {
+                                $intersect = array_values( array_intersect( $current, $sale_ids ) );
+                                $q->set( 'post__in', $intersect ? $intersect : array( 0 ) );
+                        }
+                }
+
+                if ( $rating > 0 ) {
+                        $meta = $q->get( 'meta_query' );
+                        $meta = is_array( $meta ) ? $meta : array();
+                        $meta[] = array(
+                                'key'     => '_wc_average_rating',
+                                'value'   => min( 5, $rating ),
+                                'compare' => '>=',
+                                'type'    => 'DECIMAL',
+                        );
+                        $q->set( 'meta_query', $meta );
+                }
+
                 if ( '1' === $express ) {
-                        $slug = apply_filters( 'hsw_express_shipping_class', 'express' );
+                        $slug = self::express_slug();
                         if ( $slug && taxonomy_exists( 'product_shipping_class' ) ) {
                                 $tax = $q->get( 'tax_query' );
                                 $tax = is_array( $tax ) ? $tax : array();

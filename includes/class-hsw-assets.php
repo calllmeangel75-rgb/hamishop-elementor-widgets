@@ -12,10 +12,82 @@ class HSW_Assets {
 
         public function __construct() {
                 add_action( 'wp_enqueue_scripts', array( $this, 'register' ) );
+                add_filter( 'elementor/frontend/print_google_fonts', array( $this, 'filter_google_fonts' ) );
+                add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
                 add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
+        }
+
+        /**
+         * Whether the current request is a WooCommerce product archive screen
+         * handled by the HSW archive widgets.
+         */
+        private function is_archive_screen() {
+                return function_exists( 'is_shop' ) && ( is_shop() || is_product_category() || is_product_tag() );
+        }
+
+        /**
+         * Keep the archive page free of the theme's accessibility blockers,
+         * with surgical overrides that never leak to other screens:
+         * - scalable viewport (Woodmart's default `user-scalable=no` fails audits),
+         * - a single valid skip link (the nav one points to a hidden target on mobile),
+         * - sequential heading levels for the footer info boxes,
+         * - readable footer text (Woodmart's #767676 is 4.23:1 on light surfaces).
+         */
+        public function tweak_theme_a11y() {
+                if ( ! $this->is_archive_screen() ) {
+                        return;
+                }
+                if ( function_exists( 'woodmart_meta_viewport' ) ) {
+                        remove_action( 'wp_head', 'woodmart_meta_viewport', 10 );
+                        add_action( 'wp_head', array( $this, 'print_viewport' ), 10 );
+                }
+                if ( function_exists( 'woodmart_get_skip_main_content_button' ) ) {
+                        add_action( 'wp_body_open', array( $this, 'replace_skip_links' ), 1 );
+                }
+                add_filter( 'elementor/widget/render_content', array( $this, 'footer_info_heading' ), 10, 2 );
+        }
+
+        /**
+         * Scalable viewport for archive pages.
+         */
+        public function print_viewport() {
+                echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
+        }
+
+        /**
+         * Replace the theme skip links with the one link whose target really
+         * exists and is visible on every breakpoint (`#main-content`).
+         */
+        public function replace_skip_links() {
+                remove_action( 'wp_body_open', 'woodmart_get_skip_main_content_button', 10 );
+                echo '<div class="wd-skip-links wd-deferred"><a href="#main-content" class="wd-skip-content btn">' . esc_html__( 'پرش به محتوای اصلی', 'hamishop-elementor-widgets' ) . '</a></div>';
+        }
+
+        /**
+         * Woodmart renders footer info-box titles as `h4`, which breaks the
+         * heading order after the archive `h2` sections. Render them as `h3`;
+         * the visual size comes from the `wd-fontsize-*` class, not the tag.
+         *
+         * @param string $content Widget HTML.
+         * @param mixed  $widget  Widget instance.
+         * @return string
+         */
+        public function footer_info_heading( $content, $widget ) {
+                if ( ! $this->is_archive_screen() || ! is_object( $widget ) || ! method_exists( $widget, 'get_name' ) ) {
+                        return $content;
+                }
+                if ( 'wd_infobox' !== $widget->get_name() || false === strpos( $content, 'info-box-title' ) ) {
+                        return $content;
+                }
+                $count  = 0;
+                $content = preg_replace( '/<h4(\s[^>]*class="[^"]*info-box-title[^"]*")/', '<h3$1', $content, 1, $count );
+                if ( $count ) {
+                        $content = preg_replace( '/<\/h4>/', '</h3>', $content, 1 );
+                }
+                return $content;
         }
 
         /**
@@ -225,6 +297,23 @@ class HSW_Assets {
                                 'currency' => function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol() : '',
                         )
                 );
+        }
+
+        /**
+         * Product archives must make zero third-party font requests. Elementor
+         * prints its global kit fonts (often Roboto/Roboto Slab) even though the
+         * archive widgets use the locally bundled Vazirmatn. Keep the kit fonts
+         * on other screens, but suppress the remote Google Fonts request on the
+         * WooCommerce archive screens this plugin powers.
+         *
+         * @param bool $print Whether Elementor should print Google Fonts.
+         * @return bool
+         */
+        public function filter_google_fonts( $print ) {
+                if ( function_exists( 'is_shop' ) && ( is_shop() || is_product_category() || is_product_tag() ) ) {
+                        return false;
+                }
+                return $print;
         }
 
         /**

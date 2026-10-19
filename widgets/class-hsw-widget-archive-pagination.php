@@ -83,13 +83,28 @@ class HSW_Widget_Archive_Pagination extends HSW_Archive_Base {
                                 'mid_size'  => 2,
                                 'type'      => 'array',
                                 'prev_next' => true,
-                                'prev_text' => '<i class="hsw-ic" aria-hidden="true">chevron_right</i>',
-                                'next_text' => '<i class="hsw-ic" aria-hidden="true">chevron_left</i>',
+                                'prev_text' => '<span class="hsw-sr-only">' . esc_html__( 'صفحه قبل', 'hamishop-elementor-widgets' ) . '</span><i class="hsw-ic" aria-hidden="true">chevron_right</i>',
+                                'next_text' => '<span class="hsw-sr-only">' . esc_html__( 'صفحه بعد', 'hamishop-elementor-widgets' ) . '</span><i class="hsw-ic" aria-hidden="true">chevron_left</i>',
                                 'format'    => '?paged=%#%',
                                 'add_args'  => $params,
                                 'base'      => str_replace( PHP_INT_MAX, '%#%', esc_url( add_query_arg( 'paged', PHP_INT_MAX, $this->archive_url() ) ) ),
                         )
                 );
+
+                if ( is_array( $links ) ) {
+                        $links = array_map(
+                                static function ( $link ) {
+                                        if ( false !== strpos( $link, 'next page-numbers' ) ) {
+                                                return str_replace( '<a ', '<a aria-label="' . esc_attr__( 'صفحه بعد', 'hamishop-elementor-widgets' ) . '" ', $link );
+                                        }
+                                        if ( false !== strpos( $link, 'prev page-numbers' ) ) {
+                                                return str_replace( '<a ', '<a aria-label="' . esc_attr__( 'صفحه قبل', 'hamishop-elementor-widgets' ) . '" ', $link );
+                                        }
+                                        return $link;
+                                },
+                                $links
+                        );
+                }
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'ap' ) ); ?>">
                         <?php if ( $total > 1 || $this->is_demo() ) : ?>

@@ -60,7 +60,16 @@ class HSW_Helpers {
                 }
                 $terms = get_the_terms( $product->get_id(), 'product_cat' );
                 if ( $terms && ! is_wp_error( $terms ) ) {
-                        return $terms[0]->name;
+                        $default_id = (int) get_option( 'default_product_cat', 0 );
+                        foreach ( $terms as $term ) {
+                                if ( $default_id && (int) $term->term_id === $default_id ) {
+                                        continue;
+                                }
+                                if ( 'بدون دسته‌بندی' === $term->name || 'Uncategorized' === $term->name ) {
+                                        continue;
+                                }
+                                return $term->name;
+                        }
                 }
                 return '';
         }
@@ -101,20 +110,46 @@ class HSW_Helpers {
         }
 
         /**
-         * Safe image markup with lazy loading + decoding hints.
+         * Safe image markup with srcset/sizes + lazy loading.
          */
         public static function image( $product, $size = 'woocommerce_thumbnail' ) {
                 $image_id = $product->get_image_id();
                 if ( ! $image_id ) {
                         return '<span class="hsw-media__placeholder"></span>';
                 }
+                $html = wp_get_attachment_image(
+                        $image_id,
+                        $size,
+                        false,
+                        array(
+                                'class'    => 'hsw-media__img',
+                                'alt'      => trim( wp_strip_all_tags( $product->get_name() ) ),
+                                'loading'  => 'lazy',
+                                'decoding' => 'async',
+                        )
+                );
+                if ( $html ) {
+                        return $html;
+                }
                 $src = wp_get_attachment_image_url( $image_id, $size );
-                $alt = trim( wp_strip_all_tags( $product->get_name() ) );
                 return sprintf(
                         '<img class="hsw-media__img" src="%s" alt="%s" loading="lazy" decoding="async">',
                         esc_url( $src ),
-                        esc_attr( $alt )
+                        esc_attr( trim( wp_strip_all_tags( $product->get_name() ) ) )
                 );
+        }
+
+        /**
+         * Store currency label for display (decoded WooCommerce symbol).
+         */
+        public static function currency_label() {
+                if ( function_exists( 'get_woocommerce_currency_symbol' ) ) {
+                        $symbol = wp_specialchars_decode( get_woocommerce_currency_symbol(), ENT_QUOTES );
+                        if ( '' !== trim( (string) $symbol ) ) {
+                                return trim( (string) $symbol );
+                        }
+                }
+                return __( 'تومان', 'hamishop-elementor-widgets' );
         }
 
         /**

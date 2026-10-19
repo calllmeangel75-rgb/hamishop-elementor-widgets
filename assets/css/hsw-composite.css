@@ -35,11 +35,19 @@
 
 .hsw-cp__guide { margin-top: var(--hsw-cp-gap); }
 
+/* Archive already sits inside the theme's page gutter; avoid doubling it on phones. */
+@media (max-width: 991px) {
+        .hsw-cp--archive { padding-inline: 0; }
+}
+
 @media (min-width: 992px) {
         .hsw-cp--product .hsw-cp__hero {
                 grid-template-columns: var(--hsw-cp-cols) minmax(0, 1fr);
         }
-        .hsw-cp--archive .hsw-cp__body,
+        /* Archive DOM order: sidebar first, main second → tracks must match. */
+        .hsw-cp--archive .hsw-cp__body {
+                grid-template-columns: var(--hsw-cp-side) minmax(0, 1fr);
+        }
         .hsw-cp--cart .hsw-cp__body,
         .hsw-cp--checkout .hsw-cp__body,
         .hsw-cp--pay .hsw-cp__body,
@@ -47,5 +55,5 @@
         .hsw-cp--blog .hsw-cp__body {
                 grid-template-columns: minmax(0, 1fr) var(--hsw-cp-side);
         }
-        .hsw-cp--archive .hsw-cp__col--side { position: sticky; top: 16px; }
+        .hsw-cp--archive .hsw-cp__col--side { position: sticky; top: 16px; align-self: start; }
 }

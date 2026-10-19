@@ -100,17 +100,61 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          */
         protected function current_params() {
                 $params = array();
+                $ignore = array( 'preview', 'preview_id', 'preview_nonce', '_thumbnail_id', 'elementor-preview' );
                 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.
                 if ( ! empty( $_GET ) && is_array( $_GET ) ) {
                         foreach ( $_GET as $k => $v ) {
-                                $k = sanitize_key( wp_unslash( $k ) );
-                                if ( 0 !== strpos( $k, 'hsw_' ) && 'paged' !== $k ) {
-                                        $params[ $k ] = sanitize_text_field( wp_unslash( $v ) );
+                                if ( ! is_string( $k ) ) {
+                                        continue;
+                                }
+                                /* Keep Unicode attribute slugs such as filter_pa_جنس intact. */
+                                $k = preg_replace( '/[^\p{L}\p{N}_\-]/u', '', wp_unslash( $k ) );
+                                if ( '' === (string) $k || 0 === strpos( $k, 'hsw_' ) || in_array( $k, $ignore, true ) ) {
+                                        continue;
+                                }
+                                if ( is_array( $v ) ) {
+                                        /* Duplicate checkbox names arrive as arrays; WooCommerce expects CSV. */
+                                        $flat = array();
+                                        foreach ( $v as $item ) {
+                                                if ( is_array( $item ) ) {
+                                                        foreach ( $item as $sub ) {
+                                                                $flat[] = $this->clean_param_value( $sub, $k );
+                                                        }
+                                                        continue;
+                                                }
+                                                $flat[] = $this->clean_param_value( $item, $k );
+                                        }
+                                        $flat = array_values( array_unique( array_filter( $flat, 'strlen' ) ) );
+                                        if ( ! empty( $flat ) ) {
+                                                $params[ $k ] = implode( ',', $flat );
+                                        }
+                                        continue;
+                                }
+                                $value = $this->clean_param_value( wp_unslash( (string) $v ), $k );
+                                if ( '' !== $value ) {
+                                        $params[ $k ] = $value;
                                 }
                         }
                 }
                 // phpcs:enable
                 return $params;
+        }
+
+        /**
+         * Sanitize one GET value. Attribute slugs can legitimately contain
+         * percent-encoded UTF-8 (e.g. %d9%be…) which sanitize_text_field strips,
+         * so filter_* values use the slug-safe sanitizer instead.
+         *
+         * @param mixed  $value Raw value.
+         * @param string $key   Param name.
+         */
+        protected function clean_param_value( $value, $key = '' ) {
+                $value = (string) $value;
+                if ( 0 === strpos( (string) $key, 'filter_' ) ) {
+                        $parts = array_filter( array_map( 'sanitize_title', explode( ',', $value ) ), 'strlen' );
+                        return implode( ',', array_unique( $parts ) );
+                }
+                return sanitize_text_field( $value );
         }
 
         /**
@@ -139,9 +183,10 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          * Count of active filter params (badges + mobile apply count).
          */
         protected function active_filter_count() {
-                $count = 0;
+                $count  = 0;
+                $ignore = array( 'paged', 'orderby', 'view' );
                 foreach ( array_keys( $this->current_params() ) as $k ) {
-                        if ( 'orderby' === $k || 'view' === $k || 0 === strpos( $k, 'query_type_' ) ) {
+                        if ( in_array( $k, $ignore, true ) || 0 === strpos( $k, 'query_type_' ) ) {
                                 continue;
                         }
                         $count++;
@@ -229,6 +274,23 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
                                                 'url'   => add_query_arg( $params, $this->archive_url() ),
                                         );
                                         break;
+                                case 'rating_filter':
+                                        $params = $this->current_params();
+                                        unset( $params['paged'], $params['rating_filter'] );
+                                        $tags[] = array(
+                                                /* translators: %s: rating value */
+                                                'label' => sprintf( __( 'امتیاز %s و بالاتر', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( (int) $v ) ),
+                                                'url'   => add_query_arg( $params, $this->archive_url() ),
+                                        );
+                                        break;
+                                case 'onsale':
+                                        $params = $this->current_params();
+                                        unset( $params['paged'], $params['onsale'] );
+                                        $tags[] = array(
+                                                'label' => __( 'فقط تخفیف‌دارها', 'hamishop-elementor-widgets' ),
+                                                'url'   => add_query_arg( $params, $this->archive_url() ),
+                                        );
+                                        break;
                         }
                 }
 
@@ -280,22 +342,336 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
         }
 
         /**
-         * Terms of an attribute taxonomy (for brand checkboxes, memory chips, colors).
+         * Price slider bounds + the current request selection.
+         *
+         * Bounds are snapped to a human step so the range input never produces
+         * fractional values (e.g. 96,760,560.5) and the number inputs can stay
+         * empty until the visitor actually narrows the range.
+         *
+         * @return array{min: float, max: float, from: float, to: float, step: int, has_from: bool, has_to: bool}
          */
-        protected function filter_terms( $taxonomy ) {
+        protected function price_state() {
+                $b    = $this->price_bounds();
+                $step = $this->price_step( $b['min'], $b['max'] );
+                $min  = floor( (float) $b['min'] / $step ) * $step;
+                $max  = ceil( (float) $b['max'] / $step ) * $step;
+                if ( $max <= $min ) {
+                        $max = $min + $step;
+                }
+
+                $p        = $this->current_params();
+                $has_from = isset( $p['min_price'] ) && '' !== $p['min_price'];
+                $has_to   = isset( $p['max_price'] ) && '' !== $p['max_price'];
+                $from     = $has_from ? max( $min, min( $max, (float) $p['min_price'] ) ) : $min;
+                $to       = $has_to ? max( $min, min( $max, (float) $p['max_price'] ) ) : $max;
+                if ( $from > $to ) {
+                        $swap = $from;
+                        $from = $to;
+                        $to   = $swap;
+                }
+
+                return array(
+                        'min'      => (float) $min,
+                        'max'      => (float) $max,
+                        'from'     => (float) $from,
+                        'to'       => (float) $to,
+                        'step'     => (int) $step,
+                        'has_from' => $has_from,
+                        'has_to'   => $has_to,
+                );
+        }
+
+        /**
+         * Human-friendly price step for a store's real price span.
+         */
+        protected function price_step( $min, $max ) {
+                $span = max( 1.0, (float) $max - (float) $min );
+                $raw  = $span / 1000;
+                $step = (int) pow( 10, floor( log10( max( 1.0, $raw ) ) ) );
+                $step = (int) apply_filters( 'hsw_archive_price_step', $step, array( 'min' => $min, 'max' => $max ) );
+                return max( 1, $step );
+        }
+
+        /**
+         * Terms of an attribute taxonomy (for brand checkboxes, memory chips, colors).
+         *
+         * @param string $taxonomy Taxonomy.
+         * @param int    $limit    Max terms (0 = all).
+         * @param string $orderby  get_terms orderby.
+         * @param string $order    ASC|DESC.
+         * @param bool   $hide_empty Hide terms without products.
+         * @return WP_Term[]
+         */
+        protected function filter_terms( $taxonomy, $limit = 0, $orderby = 'name', $order = 'ASC', $hide_empty = true ) {
                 if ( ! $taxonomy || ! taxonomy_exists( $taxonomy ) ) {
                         return array();
                 }
-                $terms = get_terms(
-                        array(
-                                'taxonomy'   => $taxonomy,
-                                'hide_empty' => true,
-                        )
+                $args = array(
+                        'taxonomy'   => $taxonomy,
+                        'hide_empty' => (bool) $hide_empty,
+                        'orderby'    => $orderby,
+                        'order'      => $order,
                 );
+                if ( $limit > 0 ) {
+                        $args['number'] = (int) $limit;
+                }
+                $terms = get_terms( $args );
                 if ( is_wp_error( $terms ) ) {
                         return array();
                 }
                 return $terms;
+        }
+
+        /**
+         * WooCommerce's default "uncategorised" product category (hidden from
+         * category trees; it is never a real store category).
+         *
+         * @return int[]
+         */
+        protected function default_cat_ids() {
+                $id = (int) get_option( 'default_product_cat' );
+                return $id > 0 ? array( $id ) : array();
+        }
+
+        /**
+         * Express shipping-class slug: widget option → site option (synced
+         * from Elementor saves) → hsw_express_shipping_class filter.
+         * One source of truth for every archive widget.
+         */
+        protected function express_slug() {
+                $opt  = $this->opt( 'express_slug', '' );
+                $slug = '' !== $opt ? $opt : ( class_exists( 'HSW_Archive_Query' ) ? HSW_Archive_Query::express_slug() : 'express' );
+                return (string) apply_filters( 'hsw_express_shipping_class', $slug );
+        }
+
+        /**
+         * Does this store have the express shipping class (for showing the toggle)?
+         */
+        protected function has_express() {
+                if ( $this->is_demo() ) {
+                        return true;
+                }
+                $slug = $this->express_slug();
+                if ( '' === $slug || ! taxonomy_exists( 'product_shipping_class' ) ) {
+                        return false;
+                }
+                $term = get_term_by( 'slug', $slug, 'product_shipping_class' );
+                return ( $term && ! is_wp_error( $term ) );
+        }
+
+        /**
+         * Attribute taxonomy options for SELECT controls (dynamic per store).
+         *
+         * @return array<string, string> taxonomy => "label (pa_x)"
+         */
+        public static function attr_options() {
+                $out = array();
+                if ( function_exists( 'wc_get_attribute_taxonomies' ) ) {
+                        foreach ( wc_get_attribute_taxonomies() as $a ) {
+                                $tax         = wc_attribute_taxonomy_name( $a->attribute_name );
+                                $out[ $tax ] = $a->attribute_label . ' (' . $tax . ')';
+                        }
+                }
+                if ( empty( $out ) ) {
+                        $out = array(
+                                'pa_brand'  => __( 'برند (pa_brand)', 'hamishop-elementor-widgets' ),
+                                'pa_color'  => __( 'رنگ (pa_color)', 'hamishop-elementor-widgets' ),
+                                'pa_memory' => __( 'حافظه (pa_memory)', 'hamishop-elementor-widgets' ),
+                        );
+                }
+                return $out;
+        }
+
+        /**
+         * Shipping-class options for express-shipping SELECT controls.
+         *
+         * @return array<string, string>
+         */
+        protected function shipping_class_options() {
+                $out   = array( '' => __( '— خودکار —', 'hamishop-elementor-widgets' ) );
+                $terms = get_terms(
+                        array(
+                                'taxonomy'   => 'product_shipping_class',
+                                'hide_empty' => false,
+                        )
+                );
+                if ( ! is_wp_error( $terms ) ) {
+                        foreach ( $terms as $t ) {
+                                $out[ $t->slug ] = $t->name . ' (' . $t->slug . ')';
+                        }
+                }
+                return $out;
+        }
+
+        /**
+         * Attribute taxonomies the store can actually filter on: global
+         * attributes that have at least one term with products. Brand-like
+         * attributes come first so auto-generated filter boxes feel right.
+         *
+         * @return string[] taxonomy names.
+         */
+        protected function filterable_attributes() {
+                $out = array();
+                if ( ! function_exists( 'wc_get_attribute_taxonomies' ) ) {
+                        return $out;
+                }
+                $rows = array();
+                foreach ( wc_get_attribute_taxonomies() as $a ) {
+                        $tax   = wc_attribute_taxonomy_name( $a->attribute_name );
+                        $terms = $this->filter_terms( $tax );
+                        if ( empty( $terms ) ) {
+                                continue;
+                        }
+                        $brandish = ( false !== strpos( $a->attribute_name, 'brand' ) || false !== strpos( $a->attribute_label, 'برند' ) ) ? 0 : 1;
+                        $rows[]   = array(
+                                'tax'   => $tax,
+                                'brand' => $brandish,
+                                'sort'  => count( $terms ),
+                        );
+                }
+                usort(
+                        $rows,
+                        function ( $a, $b ) {
+                                if ( $a['brand'] !== $b['brand'] ) {
+                                        return $a['brand'] - $b['brand'];
+                                }
+                                return $b['sort'] - $a['sort'];
+                        }
+                );
+                foreach ( $rows as $row ) {
+                        $out[] = $row['tax'];
+                }
+                return $out;
+        }
+
+        /**
+         * Default visual style for an attribute box based on its terms/types.
+         */
+        protected function attribute_kind( $tax ) {
+                if ( function_exists( 'wc_get_attribute_taxonomy_names' ) && in_array( $tax, wc_get_attribute_taxonomy_names(), true ) ) {
+                        $attribute = wc_get_attribute( wc_attribute_taxonomy_id_by_name( $tax ) );
+                        if ( $attribute && isset( $attribute->type ) && 'color' === $attribute->type ) {
+                                return 'color';
+                        }
+                }
+                return 'select';
+        }
+
+        /**
+         * Dynamic description of the current archive/term (+ {name} aware).
+         * Custom (WYSIWYG) wins; otherwise the current term description; on
+         * the shop root the shop page description (WooCommerce «آرشیو» page).
+         *
+         * @param string $custom Custom HTML from a widget control.
+         * @return string Safe HTML.
+         */
+        protected function archive_desc_html( $custom = '' ) {
+                $custom = trim( (string) $custom );
+                if ( '' !== $custom ) {
+                        return wp_kses_post( $custom );
+                }
+                if ( $this->is_demo() || ! $this->is_archive_context() ) {
+                        return esc_html( $this->demo()['desc'] );
+                }
+                $term = $this->current_term();
+                if ( $term ) {
+                        $desc = term_description( $term );
+                        if ( $desc && '' !== trim( wp_strip_all_tags( $desc ) ) ) {
+                                return wp_kses_post( $desc );
+                        }
+                        return $this->auto_archive_desc();
+                }
+                $shop_id = function_exists( 'wc_get_page_id' ) ? wc_get_page_id( 'shop' ) : 0;
+                if ( $shop_id > 0 ) {
+                        $content = get_post_field( 'post_content', $shop_id );
+                        if ( is_string( $content ) && '' !== trim( $content ) ) {
+                                return wp_kses_post( wpautop( $content ) );
+                        }
+                }
+                return $this->auto_archive_desc();
+        }
+
+        /**
+         * Auto-generated, store-specific description used when the current
+         * term/shop has no description of its own. Built from the archive name,
+         * the real product count and the store's own attributes/price range so
+         * every archive gets relevant, unique copy — never hard-coded data.
+         *
+         * @return string Safe HTML ('' when nothing meaningful can be built).
+         */
+        protected function auto_archive_desc() {
+                $name = $this->archive_name();
+                if ( '' === trim( (string) $name ) ) {
+                        return '';
+                }
+
+                $count = 0;
+                if ( function_exists( 'wc_get_loop_prop' ) ) {
+                        global $wp_query;
+                        if ( $wp_query && isset( $wp_query->found_posts ) ) {
+                                $count = (int) $wp_query->found_posts;
+                        }
+                }
+
+                $lines   = array();
+                $lines[] = sprintf(
+                        /* translators: 1: archive name, 2: number of products */
+                        __( 'در آرشیو «%1$s» تلاش کرده‌ایم بهترین گزینه‌ها را با قیمت مناسب و اطلاعات کامل در اختیار شما بگذاریم. در حال حاضر %2$s کالا در این بخش برای مقایسه و انتخاب موجود است.', 'hamishop-elementor-widgets' ),
+                        $name,
+                        HSW_Helpers::fa_num( max( 1, $count ) )
+                );
+
+                /* Real attributes of this archive (dynamic per store). */
+                $facts = array();
+                foreach ( array_slice( $this->filterable_attributes(), 0, 3 ) as $tax ) {
+                        $terms = $this->filter_terms( $tax );
+                        if ( empty( $terms ) ) {
+                                continue;
+                        }
+                        $names = array();
+                        foreach ( array_slice( $terms, 0, 4 ) as $term ) {
+                                $names[] = $term->name;
+                        }
+                        $facts[] = $this->taxonomy_label( $tax ) . ': ' . implode( '، ', $names );
+                }
+                if ( ! empty( $facts ) ) {
+                        $lines[] = __( 'برای انتخاب دقیق‌تر می‌توانید با فیلترهای همین صفحه، نتایج را بر اساس ویژگی‌های واقعی محصولات محدود کنید:', 'hamishop-elementor-widgets' ) . ' ' . implode( ' — ', $facts ) . '.';
+                }
+
+                /* Real price range of this store. */
+                $price = $this->price_state();
+                if ( ! empty( $price['min'] ) && ! empty( $price['max'] ) && $price['max'] > $price['min'] ) {
+                        $lines[] = sprintf(
+                                /* translators: 1: min price, 2: max price, 3: currency */
+                                __( 'محدوده قیمت کالاهای این آرشیو از %1$s تا %2$s %3$s است؛ با اسلایدر قیمت می‌توانید بودجه خود را دقیق‌تر تعیین کنید.', 'hamishop-elementor-widgets' ),
+                                HSW_Helpers::price_num( $price['min'] ),
+                                HSW_Helpers::price_num( $price['max'] ),
+                                HSW_Helpers::currency_label()
+                        );
+                }
+
+                $lines[] = __( 'همه سفارش‌ها با ضمانت اصالت کالا، امکان مرجوعی و پشتیبانی ارسال سریع ثبت می‌شوند. اگر در انتخاب تردید دارید، از بخش «راهنمای خرید و سوالات متداول» پایین همین صفحه استفاده کنید.', 'hamishop-elementor-widgets' );
+
+                $html = '';
+                foreach ( $lines as $line ) {
+                        $html .= '<p>' . esc_html( $line ) . '</p>';
+                }
+                return $html;
+        }
+
+        /**
+         * Current archive name (term name / shop title / demo).
+         */
+        protected function archive_name() {
+                if ( $this->is_demo() || ! $this->is_archive_context() ) {
+                        return $this->demo()['term'];
+                }
+                $term = $this->current_term();
+                if ( $term ) {
+                        return $term->name;
+                }
+                $shop_id = function_exists( 'wc_get_page_id' ) ? wc_get_page_id( 'shop' ) : 0;
+                return $shop_id > 0 ? get_the_title( $shop_id ) : __( 'فروشگاه', 'hamishop-elementor-widgets' );
         }
 
         /**

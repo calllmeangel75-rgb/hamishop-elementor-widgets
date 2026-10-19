@@ -76,12 +76,16 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                                 'title_field' => '{{{ q }}}',
                                 'default'     => array(
                                         array(
-                                                'q' => __( 'تفاوت پک‌های گلوبال، هند و ویتنام چیست؟', 'hamishop-elementor-widgets' ),
-                                                'a' => __( 'از نظر کیفیت ساخت قطعات سخت‌افزاری و پردازنده هیچ تفاوتی وجود ندارد و تنها تفاوت در آداپتور شارژر و دفترچه راهنمای منطقه است.', 'hamishop-elementor-widgets' ),
+                                                'q' => __( 'هزینه ارسال چقدر است و چند روزه به دستم می‌رسد؟', 'hamishop-elementor-widgets' ),
+                                                'a' => __( 'هزینه و زمان ارسال براساس آدرس شما در مرحله پرداخت شفاف نمایش داده می‌شود. سفارش‌های دارای نشان «ارسال فوری» همان روز و سایر سفارش‌ها حداکثر طی ۱ تا ۳ روز کاری تحویل می‌شوند.', 'hamishop-elementor-widgets' ),
                                         ),
                                         array(
-                                                'q' => __( 'فرآیند رجیستری و گارانتی چگونه است؟', 'hamishop-elementor-widgets' ),
-                                                'a' => __( 'تمامی کالاهای خریداری شده دارای کد فعال‌سازی سامانه همتا بوده و ۱۸ ماه گارانتی رسمی شرکت‌های واردکننده معتبر را دارا هستند.', 'hamishop-elementor-widgets' ),
+                                                'q' => __( 'اصالت و گارانتی کالاها چگونه تضمین می‌شود؟', 'hamishop-elementor-widgets' ),
+                                                'a' => __( 'همه کالاها با فاکتور رسمی و ضمانت اصالت عرضه می‌شوند. مدت و نوع گارانتی در جدول مشخصات هر محصول درج شده است.', 'hamishop-elementor-widgets' ),
+                                        ),
+                                        array(
+                                                'q' => __( 'شرایط مرجوعی و تعویض کالا چیست؟', 'hamishop-elementor-widgets' ),
+                                                'a' => __( 'تا ۷ روز پس از تحویل، در صورت سالم بودن بسته‌بندی و کالا، امکان مرجوعی یا تعویض وجود دارد؛ کافی است از بخش سفارش‌های حساب کاربری درخواست خود را ثبت کنید.', 'hamishop-elementor-widgets' ),
                                         ),
                                 ),
                         )
@@ -102,7 +106,51 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                         array(
                                 'label'   => __( 'نکته آبی مودال', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::TEXTAREA,
-                                'default' => __( 'نکته انتخاب کالا: برای کاربری گیمینگ به ظرفیت رم و پردازنده و برای کاربری روزمره به باتری و کیفیت نمایشگر توجه نمایید.', 'hamishop-elementor-widgets' ),
+                                'default' => __( 'نکته انتخاب کالا: پیش از خرید، مشخصات، گارانتی و شرایط ارسال محصول را با نیاز خود مقایسه کنید.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'desc_on',
+                        array(
+                                'label'     => __( 'نمایش بلوک «توضیحات آرشیو» در پایین صفحه', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SWITCHER,
+                                'default'   => 'yes',
+                                'separator' => 'before',
+                                'description' => __( 'متن مرتبط با همین دسته‌بندی به‌صورت خودکار از توضیحات دسته (یا برگه فروشگاه) خوانده می‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'desc_title',
+                        array(
+                                'label'       => __( 'عنوان بخش توضیحات', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ),
+                                'description' => __( '{name} با نام دسته‌بندی/آرشیو جایگزین می‌شود.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'desc_on' => 'yes' ),
+                        )
+                );
+
+                $this->add_control(
+                        'desc_custom',
+                        array(
+                                'label'       => __( 'متن توضیحات (خالی = توضیح دسته/برگه فروشگاه)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::WYSIWYG,
+                                'default'     => '',
+                                'description' => __( 'برای هر آرشیو، متن همان دسته استفاده می‌شود؛ فقط اگر می‌خواهید همه آرشیوها یک متن ثابت داشته باشند اینجا بنویسید.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'desc_on' => 'yes' ),
+                        )
+                );
+
+                $this->add_control(
+                        'faq_schema',
+                        array(
+                                'label'     => __( 'اسکیمای سوالات متداول (FAQ JSON-LD)', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SWITCHER,
+                                'default'   => 'yes',
+                                'separator' => 'before',
+                                'description' => __( 'برای گوگل، سوال و پاسخ‌های همین بخش را به‌صورت داده ساخت‌یافته اضافه می‌کند.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -121,6 +169,9 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                 $this->a_color( 'gd_qt', __( 'متن سوال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-agd__q' );
                 $this->a_color( 'gd_qa', __( 'متن پاسخ', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-agd__a' );
                 $this->a_color( 'gd_tipbg', __( 'پس‌زمینه نکته (موبایل)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-agd__tip', 'background-color' );
+                $this->a_box( 'gdd', '{{WRAPPER}} .hsw-agd__descbox', array( 'border' => false ) );
+                $this->a_text( 'gdd_t', '{{WRAPPER}} .hsw-agd__dtitle', array( 'default' => 16 ) );
+                $this->a_text( 'gdd_b', '{{WRAPPER}} .hsw-agd__dbody', array( 'default' => 13, 'weight' => false ) );
 
                 $this->end_controls_section();
         }
@@ -129,12 +180,31 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                 $s = $this->effective_settings();
 
                 $fmt   = $this->opt( 'g_title', __( 'راهنمای خرید و سوالات متداول {name}', 'hamishop-elementor-widgets' ) );
-                $name  = ( $this->is_demo() || ! $this->is_archive_context() ) ? $this->demo()['term'] : ( $this->current_term() ? $this->current_term()->name : '' );
+                $name  = $this->archive_name();
                 $title = str_replace( '{name}', $name, $fmt );
 
                 $faqs = ( isset( $s['faqs'] ) && is_array( $s['faqs'] ) ) ? $s['faqs'] : array();
+                $rows = array();
+                foreach ( $faqs as $faq ) {
+                        $q = isset( $faq['q'] ) ? trim( (string) $faq['q'] ) : '';
+                        $a = isset( $faq['a'] ) ? trim( (string) $faq['a'] ) : '';
+                        if ( '' === $q && '' === $a ) {
+                                continue;
+                        }
+                        $rows[] = array( 'q' => $q, 'a' => $a );
+                }
+
                 $intro = isset( $s['m_intro'] ) ? wp_strip_all_tags( $s['m_intro'] ) : '';
                 $tip   = isset( $s['m_tip'] ) ? wp_strip_all_tags( $s['m_tip'] ) : '';
+
+                /* Bottom archive description (dynamic per category/archive). */
+                $desc_on    = ! isset( $s['desc_on'] ) || 'yes' === $s['desc_on'];
+                $desc       = $desc_on ? $this->archive_desc_html( isset( $s['desc_custom'] ) ? (string) $s['desc_custom'] : '' ) : '';
+                $desc_plain = trim( wp_strip_all_tags( $desc ) );
+                $desc_long  = mb_strlen( $desc_plain ) > 200;
+                $desc_title = str_replace( '{name}', $name, $this->opt( 'desc_title', __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ) ) );
+
+                $schema = ( ! isset( $s['faq_schema'] ) || 'yes' === $s['faq_schema'] ) && ! $this->is_demo() && ! empty( $rows );
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'agd' ) ); ?>">
 
@@ -142,17 +212,10 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                         <section class="hsw-agd__box hsw-d">
                                 <h3 class="hsw-agd__title"><i class="hsw-ic" aria-hidden="true">help</i><?php echo esc_html( $title ); ?></h3>
                                 <div class="hsw-agd__grid">
-                                        <?php foreach ( $faqs as $faq ) : ?>
-                                                <?php
-                                                $q = isset( $faq['q'] ) ? trim( (string) $faq['q'] ) : '';
-                                                $a = isset( $faq['a'] ) ? trim( (string) $faq['a'] ) : '';
-                                                if ( '' === $q && '' === $a ) {
-                                                        continue;
-                                                }
-                                                ?>
+                                        <?php foreach ( $rows as $row ) : ?>
                                                 <div class="hsw-agd__item">
-                                                        <?php if ( $q ) : ?><h4 class="hsw-agd__q"><?php echo esc_html( $q ); ?></h4><?php endif; ?>
-                                                        <?php if ( $a ) : ?><p class="hsw-agd__a"><?php echo esc_html( $a ); ?></p><?php endif; ?>
+                                                        <?php if ( $row['q'] ) : ?><h4 class="hsw-agd__q"><?php echo esc_html( $row['q'] ); ?></h4><?php endif; ?>
+                                                        <?php if ( $row['a'] ) : ?><p class="hsw-agd__a"><?php echo esc_html( $row['a'] ); ?></p><?php endif; ?>
                                                 </div>
                                         <?php endforeach; ?>
                                 </div>
@@ -172,24 +235,76 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                                         <?php if ( $tip ) : ?>
                                                 <div class="hsw-agd__tip"><?php echo esc_html( $tip ); ?></div>
                                         <?php endif; ?>
-                                        <?php foreach ( $faqs as $faq ) : ?>
-                                                <?php
-                                                $q = isset( $faq['q'] ) ? trim( (string) $faq['q'] ) : '';
-                                                $a = isset( $faq['a'] ) ? trim( (string) $faq['a'] ) : '';
-                                                if ( '' === $q ) {
-                                                        continue;
-                                                }
-                                                ?>
+                                        <?php foreach ( $rows as $row ) : ?>
+                                                <?php if ( '' === $row['q'] ) : ?>
+                                                        <?php continue; ?>
+                                                <?php endif; ?>
                                                 <div class="hsw-agd__mfaq">
-                                                        <b><?php echo esc_html( $q ); ?></b>
-                                                        <?php if ( $a ) : ?><span><?php echo esc_html( $a ); ?></span><?php endif; ?>
+                                                        <b><?php echo esc_html( $row['q'] ); ?></b>
+                                                        <?php if ( $row['a'] ) : ?><span><?php echo esc_html( $row['a'] ); ?></span><?php endif; ?>
                                                 </div>
                                         <?php endforeach; ?>
                                         <button type="button" class="hsw-agd__ok" data-hsw-close><?php esc_html_e( 'متوجه شدم', 'hamishop-elementor-widgets' ); ?></button>
                                 </div>
                         </div>
 
+                        <?php if ( $desc_on && '' !== trim( $desc ) ) : ?>
+                                <!-- =================== ARCHIVE DESCRIPTION (SEO) =================== -->
+                                <section class="hsw-agd__descbox">
+                                        <h2 class="hsw-agd__dtitle"><?php echo esc_html( $desc_title ); ?></h2>
+                                        <div class="hsw-agd__dbody<?php echo $desc_long ? ' is-clamped' : ''; ?>" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized by archive_desc_html(). ?></div>
+                                        <?php if ( $desc_long ) : ?>
+                                                <button type="button" class="hsw-agd__dmore" data-hsw-seo>
+                                                        <span><?php esc_html_e( 'مشاهده بیشتر', 'hamishop-elementor-widgets' ); ?></span>
+                                                        <i class="hsw-ic" aria-hidden="true">expand_more</i>
+                                                </button>
+                                        <?php endif; ?>
+                                </section>
+                        <?php endif; ?>
+
+                        <?php if ( $schema ) : ?>
+                                <?php $json = $this->faq_schema_json( $rows ); ?>
+                                <?php if ( '' !== $json ) : ?>
+                                        <script type="application/ld+json"><?php echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- encoded JSON-LD. ?></script>
+                                <?php endif; ?>
+                        <?php endif; ?>
+
                 </div>
                 <?php
+        }
+
+        /**
+         * FAQPage JSON-LD for the rendered questions.
+         *
+         * @param array $rows [ q, a ] rows.
+         * @return string
+         */
+        protected function faq_schema_json( $rows ) {
+                $items = array();
+                foreach ( $rows as $row ) {
+                        if ( '' === $row['q'] || '' === $row['a'] ) {
+                                continue;
+                        }
+                        $items[] = array(
+                                '@type'          => 'Question',
+                                'name'           => wp_strip_all_tags( $row['q'] ),
+                                'acceptedAnswer' => array(
+                                        '@type' => 'Answer',
+                                        'text'  => wp_strip_all_tags( $row['a'] ),
+                                ),
+                        );
+                }
+                if ( empty( $items ) ) {
+                        return '';
+                }
+                $json = wp_json_encode(
+                        array(
+                                '@context'   => 'https://schema.org',
+                                '@type'      => 'FAQPage',
+                                'mainEntity' => $items,
+                        ),
+                        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                );
+                return $json ? str_replace( '</', '<\/', $json ) : '';
         }
 }

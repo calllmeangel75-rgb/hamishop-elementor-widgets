@@ -69,12 +69,13 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 );
 
                 $this->add_control(
-                        'express_class',
+                        'express_slug',
                         array(
-                                'label'       => __( 'کلاس ارسال اکسپرس', 'hamishop-elementor-widgets' ),
-                                'type'        => Controls_Manager::TEXT,
-                                'default'     => 'express',
-                                'description' => __( 'اسلاگ shipping-class؛ محصولات این کلاس آیکون برق می‌گیرند.', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'کلاس ارسال فوری', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'options'     => $this->shipping_class_options(),
+                                'default'     => '',
+                                'description' => __( 'کالاهای دارای این کلاس ارسال، یادداشت «ارسال فوری» می‌گیرند. خالی = خودکار (express).', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -173,7 +174,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 $city     = isset( $s['city'] ) ? trim( (string) $s['city'] ) : '';
                 $in_stock = isset( $s['stock_text'] ) && '' !== trim( (string) $s['stock_text'] ) ? trim( (string) $s['stock_text'] ) : __( 'موجود در انبار', 'hamishop-elementor-widgets' );
                 $express  = isset( $s['express_note'] ) && '' !== trim( (string) $s['express_note'] ) ? trim( (string) $s['express_note'] ) : __( 'ارسال اکسپرس امروز', 'hamishop-elementor-widgets' );
-                $e_class  = isset( $s['express_class'] ) && '' !== trim( (string) $s['express_class'] ) ? trim( (string) $s['express_class'] ) : 'express';
+                $e_class  = $this->express_slug();
 
                 if ( ! $product->is_in_stock() ) {
                         return array( __( 'ناموجود', 'hamishop-elementor-widgets' ), false, 'close' );
@@ -186,11 +187,38 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
         }
 
         /**
+         * Card media markup for a product (responsive srcset via core).
+         *
+         * @param WC_Product $product Product.
+         * @param string     $alt     Alt text.
+         * @return string
+         */
+        protected function image_html( $product, $alt ) {
+                $img_id = $product->get_image_id();
+                if ( $img_id ) {
+                        $html = wp_get_attachment_image(
+                                $img_id,
+                                'woocommerce_thumbnail',
+                                false,
+                                array(
+                                        'alt'      => $alt,
+                                        'loading'  => 'lazy',
+                                        'decoding' => 'async',
+                                )
+                        );
+                        if ( $html ) {
+                                return $html;
+                        }
+                }
+                return '<img src="' . esc_url( HSW_URL . 'assets/img/placeholder.svg' ) . '" alt="' . esc_attr( $alt ) . '" loading="lazy" decoding="async" width="300" height="300">';
+        }
+
+        /**
          * Card markup for one row.
          */
         protected function card( $kind, $item, $s ) {
                 $is_demo   = ( 'demo' === $kind );
-                $img       = '';
+                $img_html  = '';
                 $name      = '';
                 $brand     = '';
                 $rating    = '';
@@ -217,7 +245,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                         $discount = (int) $p['discount'];
                         $note     = $p['note'];
                         $note_ic  = $p['note_icon'];
-                        $img      = $p['img'];
+                        $img_html = '<img src="' . esc_url( $p['img'] ) . '" alt="' . esc_attr( $name ) . '" loading="lazy" decoding="async" width="300" height="300">';
                         $badge    = $p['badge'];
                         $url      = '#';
                 } else {
@@ -235,12 +263,11 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                         $discount = HSW_Helpers::discount_percent( $product );
                         $badge    = ( $discount > 0 ) ? 'sale' : ( $product->is_featured() ? 'featured' : '' );
                         list( $note, $note_ok, $note_ic ) = $this->status_note( $product, $s );
-                        $img_id   = $product->get_image_id();
-                        $img      = $img_id ? wp_get_attachment_image_url( $img_id, 'woocommerce_thumbnail' ) : HSW_URL . 'assets/img/placeholder.svg';
+                        $img_html = $this->image_html( $product, $name );
                         $addable  = $product->is_type( 'simple' ) && $product->is_in_stock() && $product->is_purchasable();
                 }
 
-                $cur      = isset( $s['currency'] ) && '' !== trim( (string) $s['currency'] ) ? trim( (string) $s['currency'] ) : __( 'تومان', 'hamishop-elementor-widgets' );
+                $cur      = isset( $s['currency'] ) && '' !== trim( (string) $s['currency'] ) ? trim( (string) $s['currency'] ) : HSW_Helpers::currency_label();
                 $wish     = ( 'yes' === ( $s['show_wishlist'] ?? 'yes' ) );
                 ?>
                 <article class="hsw-ag__card">
@@ -262,7 +289,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                         <?php endif; ?>
 
                         <a class="hsw-ag__media" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
-                                <img src="<?php echo esc_url( $img ); ?>" alt="<?php echo esc_attr( $name ); ?>" loading="lazy" decoding="async">
+                                <?php echo $img_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe image markup. ?>
                         </a>
 
                         <div class="hsw-ag__body">

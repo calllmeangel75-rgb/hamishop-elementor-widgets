@@ -42,17 +42,17 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
         protected function register_controls() {
                 $this->part_section( 'abc_', __( '۱. مسیر راهنما (بردکرامب)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Breadcrumb', array( 'vis', 'show_home_icon', 'home_label' ) );
 
-                $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'label', 'show_count', 'seo_desc', 'pills_source', 'pills_attr', 'pills_heading', 'show_guide_btn', 'update_note' ) );
+                $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'show_count', 'seo_desc', 'pills_source', 'pills_attr', 'pills_manual', 'pills_heading', 'show_guide_btn', 'update_note' ) );
 
-                $this->part_section( 'af_', __( '۳. فیلترها (سایدبار + موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Filters', array( 'vis', 'sec_cats', 'sec_brand', 'sec_memory', 'sec_color', 'sec_price', 'sec_switches', 'attr_brand', 'attr_memory', 'attr_color', 'express_note', 'color_map' ) );
+                $this->part_section( 'af_', __( '۳. فیلترها (سایدبار + موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Filters', array( 'vis', 'f_title', 'boxes', 'auto_attrs', 'express_slug', 'color_map' ) );
 
                 $this->part_section( 'at_', __( '۴. نوار ابزار و تگ‌های فیلتر', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Toolbar', array( 'vis', 'show_tags', 'show_view' ) );
 
-                $this->part_section( 'ag_', __( '۵. شبکه محصولات', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Grid', array( 'vis', 'cols', 'currency', 'show_wishlist', 'express_note', 'express_class', 'city', 'stock_text' ) );
+                $this->part_section( 'ag_', __( '۵. شبکه محصولات', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Grid', array( 'vis', 'cols', 'currency', 'show_wishlist', 'express_note', 'express_slug', 'city', 'stock_text' ) );
 
                 $this->part_section( 'ap_', __( '۶. صفحه‌بندی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Pagination', array( 'vis', 'show_state' ) );
 
-                $this->part_section( 'agd_', __( '۷. راهنمای خرید (سوالات متداول)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Guide', array( 'vis', 'g_title', 'm_intro', 'm_tip', 'faqs' ) );
+                $this->part_section( 'agd_', __( '۷. راهنمای خرید (سوالات متداول + توضیحات)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Guide', array( 'vis', 'g_title', 'faqs', 'm_intro', 'm_tip', 'desc_on', 'desc_title', 'desc_custom', 'faq_schema' ) );
 
                 $this->start_controls_section(
                         'sec_layout',

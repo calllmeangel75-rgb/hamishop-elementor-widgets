@@ -56,15 +56,15 @@
         --hswa-primary-light: #f0f6ff;
         --hswa-ink: #1e293b;
         --hswa-strong: #0f172a;
-        --hswa-body: #64748b;
-        --hswa-soft: #94a3b8;
+        --hswa-body: #475569;
+        --hswa-soft: #64748b;
         --hswa-faint: #cbd5e1;
         --hswa-line: #e2e8f0;
         --hswa-line-soft: #f1f5f9;
         --hswa-card: #ffffff;
         --hswa-page: #f8fafc;
-        --hswa-rose: #f43f5e;
-        --hswa-emerald: #059669;
+        --hswa-rose: #be123c;
+        --hswa-emerald: #047857;
         --hswa-amber: #f59e0b;
         --hswa-r-xl: 12px;
         --hswa-r-2xl: 16px;
@@ -80,15 +80,15 @@
         --hswa-primary-light: #f0f6ff;
         --hswa-ink: #1e293b;
         --hswa-strong: #0f172a;
-        --hswa-body: #64748b;
-        --hswa-soft: #94a3b8;
+        --hswa-body: #475569;
+        --hswa-soft: #64748b;
         --hswa-faint: #cbd5e1;
         --hswa-line: #e2e8f0;
         --hswa-line-soft: #f1f5f9;
         --hswa-card: #ffffff;
         --hswa-page: #f8fafc;
-        --hswa-rose: #f43f5e;
-        --hswa-emerald: #059669;
+        --hswa-rose: #be123c;
+        --hswa-emerald: #047857;
         --hswa-amber: #f59e0b;
         --hswa-r-xl: 12px;
         --hswa-r-2xl: 16px;
@@ -113,6 +113,17 @@
         overflow: hidden;
 }
 .hsw-a .is-clamped.is-open { -webkit-line-clamp: unset; display: block; }
+.hsw-a .hsw-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+}
 
 /* ============================== BREADCRUMB ============================== */
 .hsw-abc__bar {
@@ -199,6 +210,18 @@
 }
 .hsw-ahd__seobox { color: var(--hswa-body); font-size: 14px; }
 .hsw-ahd__desc { text-align: justify; line-height: 1.9; }
+/* Inline paragraphs keep the clamp on whole line boxes; block <p> margins
+   otherwise leave a half-clipped line at the bottom of the excerpt. */
+.hsw-ahd__desc > p { display: inline; margin: 0; }
+.hsw-ahd__desc > p + p::before { content: " "; }
+.hsw-a .hsw-ahd__desc.is-clamped {
+        display: -webkit-box;
+        max-height: 5.7em;
+        overflow: hidden;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+}
+.hsw-a .hsw-ahd__desc.is-clamped.is-open { display: block; max-height: none; overflow: visible; -webkit-line-clamp: unset; }
 .hsw-ahd__more, .hsw-ahd__mmore {
         display: inline-flex;
         align-items: center;
@@ -277,6 +300,16 @@
         border-radius: var(--hswa-r-xl);
 }
 .hsw-ahd__mdesc { font-size: 12px; color: var(--hswa-body); text-align: justify; line-height: 1.9; }
+.hsw-ahd__mdesc > p { display: inline; margin: 0; }
+.hsw-ahd__mdesc > p + p::before { content: " "; }
+.hsw-a .hsw-ahd__mdesc.is-clamped {
+        display: -webkit-box;
+        max-height: 5.7em;
+        overflow: hidden;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+}
+.hsw-a .hsw-ahd__mdesc.is-clamped.is-open { display: block; max-height: none; overflow: visible; -webkit-line-clamp: unset; }
 .hsw-ahd__mmore {
         background: none;
         border: 0;
@@ -292,7 +325,8 @@
 .hsw-asheet {
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        /* Above Woodmart's chat FAB (99998) and bottom toolbar. */
+        z-index: 100000;
         transform: translateY(100%);
         visibility: hidden;
         transition: transform .3s ease-out, visibility .3s;
@@ -306,6 +340,32 @@
         visibility: visible;
         pointer-events: auto;
 }
+
+/* ===== Progressive enhancement: keep filters/sort usable without JS ===== */
+html:not(.hsw-js) .hsw-a .hsw-at__mrow,
+html:not(.hsw-js) .hsw-a .hsw-ahd__guide { display: none !important; }
+html:not(.hsw-js) .hsw-a .hsw-asheet--filter,
+html:not(.hsw-js) .hsw-a .hsw-asheet--sort {
+        position: static;
+        transform: none;
+        visibility: visible;
+        pointer-events: auto;
+        display: block;
+        z-index: auto;
+}
+html:not(.hsw-js) .hsw-a .hsw-asheet--filter .hsw-asheet__backdrop,
+html:not(.hsw-js) .hsw-a .hsw-asheet--sort .hsw-asheet__backdrop,
+html:not(.hsw-js) .hsw-a .hsw-asheet--filter .hsw-asheet__head,
+html:not(.hsw-js) .hsw-a .hsw-asheet--sort .hsw-asheet__head { display: none !important; }
+html:not(.hsw-js) .hsw-a .hsw-asheet--filter .hsw-asheet__panel,
+html:not(.hsw-js) .hsw-a .hsw-asheet--sort .hsw-asheet__panel {
+        position: static;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+}
+html:not(.hsw-js) .hsw-a .hsw-asheet--filter .hsw-asheet__body { overflow: visible; padding: 0; }
+html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 .hsw-asheet__backdrop, .hsw-agd__backdrop {
         position: fixed;
         inset: 0;
@@ -420,16 +480,47 @@
         margin-bottom: 12px;
         text-align: right;
 }
+/* Theme button styles (Woodmart/Elementor) bleed into the collapse title. */
+.hsw-a .hsw-af__boxhead,
+.hsw-a .hsw-af__boxhead:hover,
+.hsw-a .hsw-af__boxhead:focus {
+        display: flex !important;
+        width: 100%;
+        justify-content: space-between !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        min-height: 0;
+        height: auto;
+        color: var(--hswa-ink);
+        font-family: inherit;
+        line-height: 1.5;
+        text-align: right;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+}
+.hsw-a .hsw-af__boxhead:focus-visible {
+        outline: 2px solid var(--hswa-primary);
+        outline-offset: 3px;
+        border-radius: 4px;
+}
 .hsw-af__boxtitle { font-weight: 700; color: var(--hswa-ink); font-size: 14px; }
 .hsw-af__chev { color: var(--hswa-soft); font-size: 15px; transition: transform .2s; }
 .hsw-af__box.is-collapsed .hsw-af__chev { transform: rotate(180deg); }
 .hsw-af__box.is-collapsed .hsw-af__tree,
 .hsw-af__box.is-collapsed .hsw-af__checks,
 .hsw-af__box.is-collapsed .hsw-af__search { display: none; }
-.hsw-af__unit { font-size: 11px; color: var(--hswa-primary); font-weight: 500; }
+.hsw-af__unit { font-size: 10px; color: var(--hswa-primary); font-weight: 500; margin-inline-start: 2px; }
 
 /* Tree */
 .hsw-af__tree, .hsw-af__branch, .hsw-af__leafs { list-style: none; }
+.hsw-a .hsw-af__tree li,
+.hsw-a .hsw-af__branch li,
+.hsw-a .hsw-af__leafs li { margin: 0; padding: 0; }
+.hsw-a .hsw-af__link { text-decoration: none; }
 .hsw-af__tree { display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
 .hsw-af__link { display: flex; align-items: center; justify-content: space-between; color: var(--hswa-body); transition: color .15s; padding: 2px 0; }
 .hsw-af__link:hover { color: var(--hswa-primary); }
@@ -500,6 +591,7 @@
 }
 .hsw-af__pricetwo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 12px; }
 .hsw-af__pricecell { background: var(--hswa-page); border: 1px solid var(--hswa-line); border-radius: 8px; padding: 8px; }
+.hsw-a .hsw-af__pricecell { display: block; margin: 0; padding: 8px; }
 .hsw-af__plabel { display: block; font-size: 10px; color: var(--hswa-soft); }
 .hsw-af__pnum {
         width: 100%;
@@ -511,6 +603,18 @@
         text-align: right;
         padding: 0;
         font-size: 12px;
+}
+.hsw-af__pnum::placeholder { color: #94a3b8; font-weight: 600; opacity: 1; }
+.hsw-af__pnum:focus { outline: none; }
+.hsw-a .hsw-af__pnum {
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        height: auto;
+        min-height: 0;
+        line-height: 1.4;
+        border-radius: 0;
 }
 .hsw-af__pricecell.is-end { text-align: left; }
 .hsw-af__pricecell.is-end .hsw-af__pnum { text-align: left; }
@@ -581,6 +685,28 @@
         padding: 0;
         box-shadow: var(--hswa-shadow-xs);
         transition: box-shadow .15s;
+}
+/* Neutralise theme button skins that otherwise turn swatches into gray pills. */
+.hsw-a .hsw-af__swatch {
+        display: inline-block;
+        flex: 0 0 auto;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 0;
+        min-height: 0;
+        padding: 0 !important;
+        border-radius: 999px !important;
+        background: var(--sw, #ccc) !important;
+        background-color: var(--sw, #ccc) !important;
+        border: 1px solid rgba(15, 23, 42, .14) !important;
+        box-shadow: var(--hswa-shadow-xs) !important;
+        color: transparent;
+        font-size: 0;
+        line-height: 0;
+}
+.hsw-a .hsw-af__swatch:hover { background: var(--sw, #ccc) !important; }
+.hsw-a .hsw-af__swatch.is-active {
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--hswa-primary) !important;
 }
 .hsw-af__swatch.is-active {
         box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--hswa-primary);
@@ -946,7 +1072,7 @@
 .hsw-agd__modal {
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        z-index: 100000;
         display: none;
         align-items: center;
         justify-content: center;
@@ -996,4 +1122,364 @@
         border: 0;
         border-radius: var(--hswa-r-xl);
         font-size: 12px;
+}
+/* ============================== v1.9.0 — REBUILT FILTERS ============================== */
+/* Higher-specificity additions for the rebuilt filter widget (dynamic boxes). */
+.hsw-a .hsw-af__form { margin: 0; }
+.hsw-a .hsw-af__side { display: flex; flex-direction: column; gap: 16px; }
+.hsw-a .hsw-af__box--head { padding: 12px 16px; }
+.hsw-a .hsw-af__boxhead { margin-bottom: 12px; }
+.hsw-a .hsw-af__boxbody { min-width: 0; }
+.hsw-a .hsw-af__box.is-collapsed .hsw-af__boxbody { display: none; }
+.hsw-a .hsw-af__apply--side { width: 100%; }
+.hsw-js .hsw-a .hsw-nojs { display: none !important; }
+html:not(.hsw-js) .hsw-a .hsw-af__chipsbox,
+html:not(.hsw-js) .hsw-a .hsw-af__swatches { display: none !important; }
+.hsw-a .hsw-af__unit { display: inline; text-align: end; margin: 0 0 0 2px; font-size: 10px; color: var(--hswa-soft); }
+
+/* Attribute chips */
+.hsw-a .hsw-af__chipsbox { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.hsw-a .hsw-af__chip {
+        height: auto;
+        min-height: 0;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid var(--hswa-line);
+        background: var(--hswa-card);
+        color: #475569;
+        text-align: center;
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: border-color .15s, background-color .15s, color .15s;
+}
+.hsw-a .hsw-af__chip:hover { border-color: #cbd5e1; }
+.hsw-a .hsw-af__chip.is-active {
+        border-color: var(--hswa-primary);
+        background: var(--hswa-primary-50);
+        color: var(--hswa-primary-dark);
+        font-weight: 700;
+}
+
+/* Rating rows */
+.hsw-a .hsw-af__stars { display: inline-flex; align-items: center; gap: 1px; color: var(--hswa-faint); }
+.hsw-a .hsw-af__stars .hsw-ic { font-size: 12px; }
+.hsw-a .hsw-af__stars .hsw-ic.is-on { color: var(--hswa-amber); font-variation-settings: 'FILL' 1; }
+
+/* Search icon RTL-safe */
+.hsw-a .hsw-af__search .hsw-ic { inset-inline-end: 10px; inset-inline-start: auto; right: auto; }
+.hsw-a .hsw-af__searchinput { padding-inline: 28px 12px; }
+
+/* Checkbox focus ring */
+.hsw-a .hsw-af__check:focus-visible { outline: 2px solid var(--hswa-primary); outline-offset: 2px; }
+
+/* Mobile sheet: boxes are plain groups */
+.hsw-a .hsw-asheet__body .hsw-af__box {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        padding: 0;
+}
+.hsw-a .hsw-asheet__body .hsw-af__box--head { display: none; }
+.hsw-a .hsw-asheet__body .hsw-af__boxhead { margin-bottom: 8px; }
+.hsw-a .hsw-asheet__body .hsw-af__checks { max-height: none; padding-inline-start: 0; }
+.hsw-a .hsw-asheet__body .hsw-af__chipsbox { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* Body scroll lock while a sheet is open */
+body.hsw-noscroll { overflow: hidden; }
+
+/* ============================== v1.9.0 — ARCHIVE DESCRIPTION ============================== */
+.hsw-a .hsw-agd__descbox {
+        margin-top: 16px;
+        background: var(--hswa-card);
+        border: 1px solid var(--hswa-line);
+        border-radius: var(--hswa-r-2xl);
+        box-shadow: var(--hswa-shadow-xs);
+        padding: 20px 24px;
+}
+.hsw-a .hsw-agd__dtitle { font-size: 16px; font-weight: 800; color: var(--hswa-ink); margin-bottom: 10px; }
+.hsw-a .hsw-agd__dbody { color: var(--hswa-body); font-size: 13px; line-height: 1.95; text-align: justify; }
+.hsw-a .hsw-agd__dbody :where(p, ul, ol) { margin: 0 0 10px; }
+.hsw-a .hsw-agd__dbody :where(p:last-child, ul:last-child, ol:last-child) { margin-bottom: 0; }
+.hsw-a .hsw-agd__dbody :where(h2, h3, h4) { color: var(--hswa-ink); font-size: 14px; margin: 14px 0 6px; }
+.hsw-a .hsw-agd__dbody :where(ul, ol) { padding-inline-start: 20px; }
+.hsw-a .hsw-agd__dbody :where(li) { margin-bottom: 4px; }
+.hsw-a .hsw-agd__dmore {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: none;
+        border: 0;
+        padding: 0;
+        margin-top: 8px;
+        color: var(--hswa-primary);
+        font-size: 12px;
+        font-weight: 600;
+}
+.hsw-a .hsw-agd__dmore:hover { text-decoration: underline; }
+.hsw-a .hsw-agd__dmore .hsw-ic { font-size: 14px; transition: transform .2s; }
+.hsw-a .hsw-agd__dmore.is-open .hsw-ic { transform: rotate(180deg); }
+@media (max-width: 767.98px) {
+        .hsw-a .hsw-agd__descbox { margin: 12px; padding: 16px; }
+        .hsw-a .hsw-agd__dtitle { font-size: 14px; }
+}
+
+/* ============================== THEME BUTTON BLEED ==============================
+ * Woodmart adds its `.btn` class to every <button> at runtime and its stylesheet
+ * loads after this one. Single-class rules such as `.hsw-at__mbtn` therefore
+ * lose the cascade and buttons grow a gray theme skin. Re-assert every archive
+ * button with a two-class scope; no !important needed (Woodmart has no
+ * !important on these properties).
+ * ============================================================================ */
+.hsw-a .hsw-ahd__guide {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--hswa-primary-50);
+        color: var(--hswa-primary);
+        border: 0;
+        padding: 8px;
+        border-radius: var(--hswa-r-xl);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.5;
+        height: auto;
+        min-height: 0;
+        box-shadow: none;
+}
+.hsw-a .hsw-ahd__guide:hover { background: var(--hswa-primary-100); }
+
+.hsw-a .hsw-ahd__more,
+.hsw-a .hsw-ahd__mmore,
+.hsw-a .hsw-agd__dmore {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 4px;
+        width: auto;
+        height: auto;
+        min-height: 0;
+        margin-top: 8px;
+        padding: 0;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        color: var(--hswa-primary);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.6;
+        text-align: start;
+}
+.hsw-a .hsw-ahd__mmore { margin-top: 6px; font-size: 11px; font-weight: 700; }
+.hsw-a .hsw-ahd__more:hover,
+.hsw-a .hsw-ahd__mmore:hover,
+.hsw-a .hsw-agd__dmore:hover { background: none; text-decoration: underline; }
+
+.hsw-a .hsw-asheet__close {
+        width: 32px;
+        height: 32px;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+        background: var(--hswa-line-soft);
+        border: 0;
+        border-radius: 999px;
+        box-shadow: none;
+        color: var(--hswa-body);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+}
+
+.hsw-a .hsw-at__mbtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: auto;
+        min-height: 0;
+        padding: 10px 12px;
+        background: var(--hswa-card);
+        border: 1px solid var(--hswa-line);
+        border-radius: var(--hswa-r-xl);
+        box-shadow: var(--hswa-shadow-xs);
+        color: var(--hswa-ink);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.4;
+        text-align: center;
+}
+.hsw-a .hsw-at__mbtn:hover { background: var(--hswa-page); }
+.hsw-a .hsw-at__mbtn .hsw-ic { color: var(--hswa-primary); font-size: 16px; }
+
+.hsw-a .hsw-asheet__opt {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: auto;
+        min-height: 0;
+        padding: 10px 12px;
+        background: transparent;
+        border: 0;
+        border-radius: var(--hswa-r-xl);
+        box-shadow: none;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: start;
+}
+.hsw-a .hsw-asheet__opt:hover { background: var(--hswa-page); }
+.hsw-a .hsw-asheet__opt.is-active { background: var(--hswa-primary-50); color: var(--hswa-primary-dark); font-weight: 700; }
+
+.hsw-a .hsw-af__clear {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: auto;
+        min-height: 0;
+        padding: 12px;
+        background: var(--hswa-line-soft);
+        border: 0;
+        border-radius: var(--hswa-r-xl);
+        box-shadow: none;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+}
+.hsw-a .hsw-af__clear:hover { background: var(--hswa-line); }
+
+.hsw-a .hsw-af__apply {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: auto;
+        min-height: 0;
+        padding: 12px;
+        background: var(--hswa-primary);
+        border: 0;
+        border-radius: var(--hswa-r-xl);
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, .4);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+}
+
+.hsw-a .hsw-ag__cta,
+.hsw-a .hsw-ag__cta--m {
+        width: 28px;
+        height: 28px;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+        background: var(--hswa-primary);
+        border: 0;
+        border-radius: 8px;
+        box-shadow: var(--hswa-shadow-xs);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0;
+        line-height: 0;
+}
+.hsw-a .hsw-ag__cta:hover,
+.hsw-a .hsw-ag__cta--m:hover { background: var(--hswa-primary-dark); }
+.hsw-a .hsw-ag__cta.is-added { background: var(--hswa-emerald); }
+
+.hsw-a .hsw-ag__wish {
+        width: 30px;
+        height: 30px;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+        background: rgba(255, 255, 255, .92);
+        border: 0;
+        border-radius: 999px;
+        box-shadow: var(--hswa-shadow-xs);
+        color: var(--hswa-faint);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+}
+.hsw-a .hsw-ag__wish:hover,
+.hsw-a .hsw-ag__wish.is-active { color: var(--hswa-rose); }
+
+.hsw-a .hsw-agd__mclose {
+        width: 28px;
+        height: 28px;
+        min-width: 0;
+        min-height: 0;
+        padding: 2px;
+        background: none;
+        border: 0;
+        border-radius: 999px;
+        box-shadow: none;
+        color: var(--hswa-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+}
+
+.hsw-a .hsw-agd__ok {
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        padding: 10px;
+        background: var(--hswa-primary);
+        border: 0;
+        border-radius: var(--hswa-r-xl);
+        box-shadow: none;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+}
+
+.hsw-a .hsw-af__chip {
+        box-shadow: none;
+        font-weight: 600;
+}
+
+@media (max-width: 480px) {
+        .hsw-a .hsw-at__mcur { display: none; }
+}
+@media (max-width: 991.98px) {
+        .hsw-a .hsw-ag__cta,
+        .hsw-a .hsw-ag__cta--m { width: 36px; height: 36px; }
+        /* The toolbar sits in its own short Elementor container, so making the
+           inner `.hsw-at` sticky would end at that container's edge. Stick the
+           widget container itself, which spans the whole grid in the column. */
+        .hsw-cp--archive .hsw-cp__col--main > .elementor-widget-container:has(.hsw-at) {
+                position: sticky;
+                top: 0;
+                z-index: 30;
+                background: var(--hswa-page);
+        }
+        /* The sort sheet lives inside this sticky stacking context, so it can
+           only rise above the theme toolbar/chat while the sheet is open. */
+        .hsw-cp--archive .hsw-cp__col--main > .elementor-widget-container:has(.hsw-asheet--sort.is-open) {
+                z-index: 100001;
+        }
+        .hsw-a .hsw-at {
+                position: static;
+        }
+        .hsw-a .hsw-at__mrow {
+                position: static;
+                top: auto;
+                z-index: auto;
+        }
+}
+
+/* ===== Archive pages: keep the Woodmart footer readable =====
+   The theme prints #767676 on light surfaces (4.23:1). Only the archive
+   screens load this file, so the override never leaks elsewhere. */
+footer.wd-footer .color-500,
+footer.wd-footer .wd-text-block p,
+footer.wd-footer .wd-list-content {
+        color: #5f6368 !important;
 }

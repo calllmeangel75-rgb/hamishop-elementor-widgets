@@ -1,28 +1,50 @@
 /**
- * HamiShop Elementor Widgets — Archive frontend behavior.
- * Vanilla JS, no dependencies. Event delegation only.
- * Sheets, SEO toggle, collapse boxes, brand search, price slider sync,
- * memory/color chip inputs, add-to-cart AJAX, wishlist toggle.
+ * HamiShop Elementor Widgets — Archive frontend behavior (v1.9.0).
+ * Vanilla JS, no dependencies, event delegation only.
+ *
+ * Sheets/modals, SEO description toggle, filter box collapse, in-list search,
+ * price slider sync, chips/swatches → one hidden input per taxonomy,
+ * desktop auto-submit (with a no-JS submit fallback), checkbox mirroring
+ * between the desktop sidebar and the mobile sheet, add-to-cart, wishlist.
  */
 (function () {
         'use strict';
+
+        /* Marks the document as JS-capable so no-JS fallbacks can hide. */
+        document.documentElement.classList.add('hsw-js');
 
         var FA = { '0': '۰', '1': '۱', '2': '۲', '3': '۳', '4': '۴', '5': '۵', '6': '۶', '7': '۷', '8': '۸', '9': '۹' };
         function fa(n) { return String(n).replace(/[0-9]/g, function (d) { return FA[d]; }); }
         function fmt(n) { return fa(Number(n).toLocaleString('en-US').replace(/,/g, ',')); }
 
-        /* ---------- Sheets & modals (bottom sheets + guide modal) ---------- */
+        /* ======================= SHEETS & MODALS ======================= */
+
+        var lastFocus = null;
+
         function openSheet(name) {
                 var el = document.querySelector('[data-hsw-sheet="' + name + '"]');
                 if (!el) { return; }
+                lastFocus = document.activeElement;
                 el.classList.add('is-open');
                 el.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('hsw-noscroll');
+                var first = el.querySelector('button, a, input, [tabindex]');
+                if (first) { first.focus({ preventScroll: true }); }
         }
+
         function closeSheet(sheet) {
                 if (!sheet) { return; }
                 sheet.classList.remove('is-open');
                 sheet.setAttribute('aria-hidden', 'true');
+                if (!document.querySelector('.hsw-asheet.is-open, .hsw-agd__modal.is-open')) {
+                        document.body.classList.remove('hsw-noscroll');
+                }
+                if (lastFocus && typeof lastFocus.focus === 'function') {
+                        lastFocus.focus({ preventScroll: true });
+                        lastFocus = null;
+                }
         }
+
         document.addEventListener('click', function (e) {
                 var opener = e.target.closest('[data-hsw-open]');
                 if (opener) {
@@ -32,112 +54,252 @@
                 }
                 var closer = e.target.closest('[data-hsw-close]');
                 if (closer) {
+                        e.preventDefault();
                         closeSheet(closer.closest('.hsw-asheet, .hsw-agd__modal'));
                 }
         });
+
         document.addEventListener('keydown', function (e) {
                 if ('Escape' !== e.key) { return; }
                 document.querySelectorAll('.hsw-asheet.is-open, .hsw-agd__modal.is-open').forEach(closeSheet);
         });
 
-        /* ---------- SEO description toggle (header widget) ---------- */
+        /* ======================= SEO DESCRIPTION TOGGLE ======================= */
+
         document.addEventListener('click', function (e) {
                 var btn = e.target.closest('[data-hsw-seo]');
                 if (!btn) { return; }
-                var target = btn.parentElement ? btn.parentElement.querySelector('[data-hsw-seo-target]') : null;
+                var box = btn.parentElement;
+                var target = box ? box.querySelector('[data-hsw-seo-target]') : null;
                 if (!target) { return; }
                 var open = target.classList.toggle('is-open');
+                target.classList.toggle('is-clamped', !open);
                 var label = btn.querySelector('span');
                 if (label) {
-                        var openTxt = btn.hasAttribute('data-hsw-open-txt') ? btn.getAttribute('data-hsw-open-txt') : 'بستن';
-                        var closeTxt = btn.hasAttribute('data-hsw-close-txt') ? btn.getAttribute('data-hsw-close-txt') : label.textContent;
-                        label.textContent = open ? openTxt : closeTxt;
+                        var closeTxt = btn.getAttribute('data-hsw-close-txt') || 'بستن';
+                        if (!btn.hasAttribute('data-hsw-label')) {
+                                btn.setAttribute('data-hsw-label', label.textContent);
+                        }
+                        label.textContent = open ? closeTxt : btn.getAttribute('data-hsw-label');
                 }
                 btn.classList.toggle('is-open', open);
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
 
-        /* ---------- Collapse boxes (desktop sidebar) ---------- */
+        /* ======================= FILTER BOX COLLAPSE ======================= */
+
         document.addEventListener('click', function (e) {
                 var head = e.target.closest('.hsw-af__boxhead');
                 if (!head) { return; }
                 var box = head.closest('[data-hsw-collapse]');
-                if (box) { box.classList.toggle('is-collapsed'); }
+                if (!box) { return; }
+                var collapsed = box.classList.toggle('is-collapsed');
+                head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
         });
 
-        /* ---------- Brand search filter ---------- */
+        /* ======================= IN-LIST SEARCH ======================= */
+
         document.addEventListener('input', function (e) {
-                var input = e.target.closest('[data-hsw-brandsearch]');
+                var input = e.target.closest('[data-hsw-search]');
                 if (!input) { return; }
                 var box = input.closest('.hsw-af__box');
-                var list = box ? box.querySelector('[data-hsw-brandlist]') : null;
+                var list = box ? box.querySelector('[data-hsw-termlist]') : null;
                 if (!list) { return; }
                 var q = input.value.trim().toLowerCase();
                 list.querySelectorAll('.hsw-af__checkrow').forEach(function (row) {
-                        var name = row.textContent.trim().toLowerCase();
+                        var name = (row.textContent || '').trim().toLowerCase();
                         row.style.display = (!q || -1 !== name.indexOf(q)) ? '' : 'none';
                 });
         });
 
-        /* ---------- Price slider sync (max slider ↔ تا input ↔ label) ---------- */
-        function updatePriceUI(range) {
-                var root = range.closest('.hsw-af__form');
-                if (!root) { return; }
-                var num = root.querySelector('[data-hsw-pricemaxinput]');
-                var label = root.querySelector('[data-hsw-mprice]');
-                if (num && !num.disabled) { num.value = range.value; }
-                if (label) {
-                        var cur = (window.hswArchiveData && hswArchiveData.currency) ? ' ' + hswArchiveData.currency : '';
-                        label.textContent = 'تا ' + fmt(range.value) + cur;
+        /* ======================= PRICE SLIDER ======================= */
+
+        function priceRoot(el) {
+                return el.closest('.hsw-af__form');
+        }
+
+        function syncRange(form) {
+                var range = form.querySelector('[data-hsw-pricemax]');
+                var num = form.querySelector('[data-hsw-pricemaxinput]');
+                if (!range || !num) { return; }
+                /* At the slider ceiling the value is the bound, not a filter. */
+                num.value = Number(range.value) >= Number(range.max) ? '' : range.value;
+        }
+
+        function syncNumber(el) {
+                var form = priceRoot(el);
+                if (!form) { return; }
+                var range = form.querySelector('[data-hsw-pricemax]');
+                var num = form.querySelector('[data-hsw-pricemaxinput]');
+                if (!range || !num) { return; }
+                var value = String(num.value).trim();
+                if ('' === value) {
+                        range.value = range.max;
+                        return;
+                }
+                if (Number(value) >= Number(range.min) && Number(value) <= Number(range.max)) {
+                        range.value = value;
                 }
         }
+
         document.addEventListener('input', function (e) {
-                var range = e.target.closest('[data-hsw-pricemax]');
-                if (range) { updatePriceUI(range); }
+                if (e.target.closest('[data-hsw-pricemax]')) {
+                        syncRange(priceRoot(e.target));
+                        queueAutoSubmit(e.target);
+                        return;
+                }
+                if (e.target.closest('[data-hsw-pricemaxinput]')) {
+                        syncNumber(e.target);
+                }
+        });
+        document.addEventListener('change', function (e) {
+                if (e.target.closest('[data-hsw-pricemaxinput]')) {
+                        queueAutoSubmit(e.target);
+                }
         });
 
-        /* ---------- Memory chips + color swatches → hidden filter inputs ---------- */
-        function multiTaxInput(form, tax) {
-                return form.querySelector('[data-hsw-meminput="' + tax + '"], [data-hsw-colorinput="' + tax + '"]');
+        /* ======================= CHIPS / SWATCHES → HIDDEN INPUT ======================= */
+
+        function taxInput(form, tax) {
+                return form.querySelector('[data-hsw-taxinput="' + tax + '"]');
         }
-        function toggleMulti(btn, cls) {
-                var form = btn.closest('.hsw-af__form');
+
+        function paintChips(form, tax, slugs) {
+                form.querySelectorAll('[data-hsw-tax="' + tax + '"]').forEach(function (el) {
+                        el.classList.toggle('is-active', -1 !== slugs.indexOf(el.getAttribute('data-hsw-value')));
+                });
+        }
+
+        document.addEventListener('click', function (e) {
+                var chip = e.target.closest('[data-hsw-tax][data-hsw-value]');
+                if (!chip) { return; }
+                var form = chip.closest('.hsw-af__form');
                 if (!form) { return; }
-                var tax = btn.getAttribute('data-hsw-tax') || '';
-                var value = btn.getAttribute(cls) || '';
-                if (!tax || !value) { return; }
-                var input = multiTaxInput(form, tax);
+                var tax = chip.getAttribute('data-hsw-tax');
+                var value = chip.getAttribute('data-hsw-value');
+                var input = taxInput(form, tax);
                 if (!input) { return; }
                 var slugs = input.value ? input.value.split(',').filter(Boolean) : [];
                 var i = slugs.indexOf(value);
                 if (-1 === i) { slugs.push(value); } else { slugs.splice(i, 1); }
                 input.value = slugs.join(',');
-                btn.classList.toggle('is-active', -1 !== slugs.indexOf(value));
-                /* keep all sibling chips (desktop + mobile) in sync */
-                var same = form.querySelectorAll('[' + cls.replace('data-hsw-', 'data-hsw-') + '="' + value + '"][data-hsw-tax="' + tax + '"]');
-                same.forEach(function (el) { el.classList.toggle('is-active', -1 !== slugs.indexOf(value)); });
-        }
-        document.addEventListener('click', function (e) {
-                var mem = e.target.closest('[data-hsw-mem]');
-                if (mem) { toggleMulti(mem, 'data-hsw-mem'); return; }
-                var col = e.target.closest('[data-hsw-color]');
-                if (col) { toggleMulti(col, 'data-hsw-color'); }
+                paintChips(form, tax, slugs);
+                if (!chip.closest('.hsw-asheet')) { queueAutoSubmit(chip); }
         });
 
-        /* ---------- Filter form: drop empty params on submit ---------- */
+        /* ======================= CHECKBOX MIRRORING ======================= */
+
+        function mirror(form, cb) {
+                var name = cb.getAttribute('name');
+                var value = cb.getAttribute('value');
+                if (!name) { return; }
+                form.querySelectorAll('input[type="checkbox"][name="' + name + '"][value="' + value + '"]').forEach(function (other) {
+                        if (other !== cb) { other.checked = cb.checked; }
+                });
+        }
+
+        /* ======================= AUTO-SUBMIT (desktop) ======================= */
+
+        var autoTimer = null;
+        var autoForm = null;
+
+        function queueAutoSubmit(el) {
+                if (el.closest('.hsw-asheet')) { return; }
+                var form = el.closest('.hsw-af__form');
+                if (!form) { return; }
+                autoForm = form;
+                if (autoTimer) { clearTimeout(autoTimer); }
+                autoTimer = setTimeout(function () {
+                        if (!autoForm) { return; }
+                        var f = autoForm;
+                        autoForm = null;
+                        submitForm(f);
+                }, 650);
+        }
+
+        function submitForm(form) {
+                if (form.requestSubmit) {
+                        form.requestSubmit();
+                } else {
+                        form.submit();
+                }
+        }
+
+        document.addEventListener('change', function (e) {
+                var cb = e.target.closest('.hsw-af__check, .hsw-af__switchinput');
+                if (!cb) { return; }
+                var form = cb.closest('.hsw-af__form');
+                if (form) { mirror(form, cb); }
+                if (!cb.closest('.hsw-asheet')) { queueAutoSubmit(cb); }
+        });
+
+        /* ======================= SUBMIT: drop empty params ======================= */
+
         document.addEventListener('submit', function (e) {
                 var form = e.target.closest('.hsw-af__form');
                 if (!form) { return; }
-                form.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
-                        if (!cb.checked) { cb.disabled = true; }
+                if (autoTimer) { clearTimeout(autoTimer); }
+
+                /* Price fields equal to the slider bounds are not a filter. */
+                var range = form.querySelector('[data-hsw-pricemax]');
+                if (range) {
+                        var rmin = Number(range.min);
+                        var rmax = Number(range.max);
+                        form.querySelectorAll('input[name="min_price"]').forEach(function (inp) {
+                                if ('' === String(inp.value).trim() || Number(inp.value) <= rmin) { inp.value = ''; }
+                        });
+                        form.querySelectorAll('input[name="max_price"]').forEach(function (inp) {
+                                if ('' === String(inp.value).trim() || Number(inp.value) >= rmax) { inp.value = ''; }
+                        });
+                }
+
+                /* Duplicate checkbox names → single CSV field (WooCommerce contract). */
+                var groups = {};
+                form.querySelectorAll('input[type="checkbox"][name^="filter_"]').forEach(function (cb) {
+                        var name = cb.getAttribute('name');
+                        if (!groups[name]) { groups[name] = []; }
+                        if (cb.checked && -1 === groups[name].indexOf(cb.value)) { groups[name].push(cb.value); }
                 });
-                form.querySelectorAll('input[type="number"], input[type="hidden"]').forEach(function (inp) {
+                Object.keys(groups).forEach(function (name) {
+                        form.querySelectorAll('input[type="checkbox"][name="' + name.replace(/"/g, '\\"') + '"]').forEach(function (cb) {
+                                cb.disabled = true;
+                        });
+                        if (!groups[name].length) { return; }
+                        var hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = name.replace(/\[\]$/, '');
+                        hidden.value = groups[name].join(',');
+                        form.appendChild(hidden);
+                });
+
+                form.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                        cb.disabled = !cb.checked;
+                });
+                form.querySelectorAll('input[type="number"], input[type="range"], input[type="hidden"]').forEach(function (inp) {
                         if ('' === String(inp.value).trim()) { inp.disabled = true; }
                 });
                 var sheet = form.querySelector('.hsw-asheet.is-open');
                 if (sheet) { closeSheet(sheet); }
         });
 
-        /* ---------- Add to cart (AJAX, same contract as the loop widgets) ---------- */
+        /* ======================= STORE INPUTS (template → form) ======================= */
+
+        function initStore() {
+                document.querySelectorAll('.hsw-af__form template[data-hsw-store]').forEach(function (tpl) {
+                        var form = tpl.parentElement;
+                        if (!form) { return; }
+                        var wrap = document.createElement('div');
+                        wrap.className = 'hsw-af__store';
+                        wrap.hidden = true;
+                        wrap.innerHTML = tpl.innerHTML;
+                        form.insertBefore(wrap, form.firstChild);
+                        tpl.remove();
+                });
+        }
+        if ('loading' !== document.readyState) { initStore(); } else { document.addEventListener('DOMContentLoaded', initStore); }
+
+        /* ======================= ADD TO CART (AJAX) ======================= */
+
         function addToCart(btn) {
                 var pid = parseInt(btn.getAttribute('data-hsw-add'), 10) || 0;
                 if (!pid) { return; }
@@ -160,7 +322,6 @@
                                 if (ic) { ic.textContent = 'check_circle'; }
                                 btn.setAttribute('title', data.addedText);
                         }
-                        /* WooCommerce cart fragments refresh (jQuery event). */
                         if (window.jQuery) { window.jQuery(document.body).trigger('wc_fragment_refresh'); }
                         setTimeout(function () {
                                 btn.classList.remove('is-added', 'is-busy');
@@ -173,6 +334,7 @@
                         btn.style.pointerEvents = '';
                 });
         }
+
         document.addEventListener('click', function (e) {
                 var btn = e.target.closest('[data-hsw-add]');
                 if (!btn) { return; }
@@ -180,7 +342,8 @@
                 addToCart(btn);
         });
 
-        /* ---------- Wishlist (visual + localStorage) ---------- */
+        /* ======================= WISHLIST ======================= */
+
         var WISH_KEY = 'hsw_wishlist';
         function wishList() {
                 try { return JSON.parse(localStorage.getItem(WISH_KEY) || '[]'); } catch (err) { return []; }

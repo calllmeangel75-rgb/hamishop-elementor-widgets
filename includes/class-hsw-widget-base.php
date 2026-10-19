@@ -199,6 +199,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         Controls_Manager::TEXT,
                         Controls_Manager::TEXTAREA,
                         Controls_Manager::SELECT,
+                        Controls_Manager::SELECT2,
                         Controls_Manager::SWITCHER,
                         Controls_Manager::NUMBER,
                         Controls_Manager::SLIDER,
@@ -206,6 +207,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         Controls_Manager::REPEATER,
                         Controls_Manager::HEADING,
                         Controls_Manager::DIVIDER,
+                        Controls_Manager::WYSIWYG,
                 );
                 $pass = array(
                         'label', 'type', 'default', 'options', 'condition', 'description',

@@ -106,6 +106,21 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                 $tags    = ( 'yes' === ( $this->effective_settings()['show_tags'] ?? 'yes' ) ) ? $this->active_filter_tags() : array();
                 $active  = $this->active_filter_count();
 
+                /* Clear-all: every known filter param + every filter_* param present. */
+                $clear = array(
+                        'instock'       => null,
+                        'express'       => null,
+                        'onsale'        => null,
+                        'rating_filter' => null,
+                        'min_price'     => null,
+                        'max_price'     => null,
+                );
+                foreach ( array_keys( $this->current_params() ) as $key ) {
+                        if ( 0 === strpos( $key, 'filter_' ) ) {
+                                $clear[ $key ] = null;
+                        }
+                }
+
                 $show_view = ( 'yes' === ( $this->effective_settings()['show_view'] ?? 'yes' ) );
                 $view      = isset( $this->current_params()['view'] ) ? $this->current_params()['view'] : 'grid';
 
@@ -195,7 +210,7 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                                                         <i class="hsw-ic" aria-hidden="true">close</i>
                                                 </a>
                                         <?php endforeach; ?>
-                                        <a class="hsw-at__tagclear" href="<?php echo esc_url( $this->filter_url( array( 'instock' => null, 'express' => null, 'min_price' => null, 'max_price' => null ) ) ); ?>"><?php esc_html_e( 'پاک‌کردن', 'hamishop-elementor-widgets' ); ?></a>
+                                        <a class="hsw-at__tagclear" href="<?php echo esc_url( $this->filter_url( $clear ) ); ?>"><?php esc_html_e( 'پاک‌کردن', 'hamishop-elementor-widgets' ); ?></a>
                                 </div>
                         <?php endif; ?>
 
