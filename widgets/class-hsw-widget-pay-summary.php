@@ -508,6 +508,8 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', '' ) ); ?></span>
                                         </button>
 
+                                        <p class="hsw-psum__msg" data-hswk-paymsg hidden></p>
+
                                         <?php $badges = ( isset( $s['badges'] ) && is_array( $s['badges'] ) ) ? $s['badges'] : array(); ?>
                                         <?php if ( ! empty( $badges ) ) : ?>
                                                 <div class="hsw-psum__badges">
@@ -604,6 +606,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 <span><?php echo esc_html( $this->opt( 'bar_cta', '' ) ); ?></span>
                                         </button>
                                 </div>
+                                <p class="hsw-psum__msg is-m" data-hswk-paymsg hidden></p>
                                 <?php $trust = ( isset( $s['bar_trust'] ) && is_array( $s['bar_trust'] ) ) ? $s['bar_trust'] : array(); ?>
                                 <?php if ( ! empty( $trust ) ) : ?>
                                         <div class="hsw-psum__mtrust">

@@ -34,7 +34,9 @@
                 } ).then( function ( res ) {
                         return res.json().then( function ( json ) {
                                 if ( ! res.ok ) {
-                                        throw new Error( json && json.message ? json.message : 'request failed' );
+                                        var err = new Error( json && json.message ? json.message : 'request failed' );
+                                        err.payload = json || {};
+                                        throw err;
                                 }
                                 return json;
                         } );
@@ -441,16 +443,88 @@
                         .then( function () { btn.disabled = false; }, function () { btn.disabled = false; } );
         } );
 
-        /* Final pay CTA — persist the choice, then hand over to WooCommerce. */
+        /* =====================================================================
+         * FINAL CTA — place the order through the plugin's checkout bridge and
+         * follow WooCommerce's redirect (gateway page or order-received).
+         * A native form.checkout (legacy pages) still wins when present.
+         * ===================================================================== */
+
+        /* Inline feedback near the pay CTA (desktop card + mobile bar). */
+        function payMsg( text, isError, link ) {
+                var nodes = document.querySelectorAll( '[data-hswk-paymsg]' );
+                for ( var i = 0; i < nodes.length; i++ ) {
+                        var box = nodes[ i ];
+                        box.textContent = '';
+                        box.hidden = true;
+                        box.classList.remove( 'is-error' );
+                        if ( ! text ) {
+                                continue;
+                        }
+                        box.hidden = false;
+                        if ( isError ) {
+                                box.classList.add( 'is-error' );
+                        }
+                        box.appendChild( document.createTextNode( text ) );
+                        if ( link && link.url ) {
+                                var a = document.createElement( 'a' );
+                                a.className = 'hsw-psum__msg-a';
+                                a.href = link.url;
+                                a.textContent = link.label ? link.label : link.url;
+                                box.appendChild( document.createTextNode( ' ' ) );
+                                box.appendChild( a );
+                        }
+                }
+        }
+
+        /* Busy state while the server builds the order / redirects to a gateway. */
+        function payBusy( btn, busy ) {
+                if ( ! btn ) {
+                        return;
+                }
+                btn.disabled = !! busy;
+                if ( busy ) {
+                        btn.classList.add( 'is-busy' );
+                } else {
+                        btn.classList.remove( 'is-busy' );
+                }
+                var label = btn.querySelector( 'span' );
+                if ( ! label ) {
+                        return;
+                }
+                if ( busy ) {
+                        if ( ! btn.getAttribute( 'data-hswk-label' ) ) {
+                                btn.setAttribute( 'data-hswk-label', label.textContent );
+                        }
+                        label.textContent = 'در حال ثبت سفارش…';
+                } else if ( btn.getAttribute( 'data-hswk-label' ) ) {
+                        label.textContent = btn.getAttribute( 'data-hswk-label' );
+                }
+        }
+
+        /* Terms must be accepted wherever the design renders the checkbox. */
+        function termsAccepted() {
+                var boxes = document.querySelectorAll( '.hsw-k-terms' );
+                if ( ! boxes.length ) {
+                        return true;
+                }
+                for ( var i = 0; i < boxes.length; i++ ) {
+                        if ( boxes[ i ].checked ) {
+                                return true;
+                        }
+                }
+                return false;
+        }
+
         document.addEventListener( 'click', function ( event ) {
                 var cta = event.target.closest ? event.target.closest( '.hsw-k-pay' ) : null;
                 if ( ! cta || isEditor || ! CFG.rest ) {
                         return;
                 }
-                savePayment( true );
+
                 var form = document.querySelector( 'form.checkout' );
                 if ( form ) {
                         /* the native checkout form picks chosen_payment_method from the session */
+                        savePayment( true );
                         window.setTimeout( function () {
                                 if ( typeof jQuery !== 'undefined' ) {
                                         jQuery( 'form.checkout' ).trigger( 'submit' );
@@ -460,8 +534,44 @@
                                         form.submit();
                                 }
                         }, 50 );
-                } else if ( CFG.checkoutUrl ) {
-                        window.location.href = CFG.checkoutUrl;
+                        return;
                 }
+
+                /* Design flow: the server creates the order and hands the customer
+                 * over to the gateway (or straight to order-received). */
+                event.preventDefault();
+                if ( ! termsAccepted() ) {
+                        payMsg( 'برای ادامه، قوانین و مقررات را بپذیرید.', true );
+                        return;
+                }
+
+                payMsg( '', false );
+                payBusy( cta, true );
+
+                post( '/checkout/payment', {
+                        method: currentMethod(),
+                        wallet: walletOn() ? 1 : 0
+                } )
+                        .catch( function () { /* keep the session default */ } )
+                        .then( function () {
+                                return post( '/checkout/complete', { method: currentMethod() } );
+                        } )
+                        .then( function ( json ) {
+                                if ( json && json.redirect ) {
+                                        window.location.href = json.redirect;
+                                        return;
+                                }
+                                throw new Error( 'پاسخی از درگاه پرداخت دریافت نشد؛ دوباره تلاش کنید.' );
+                        } )
+                        .catch( function ( err ) {
+                                var payload = ( err && err.payload ) || {};
+                                var data    = payload.data || {};
+                                payBusy( cta, false );
+                                payMsg(
+                                        ( err && err.message ) ? err.message : 'ثبت سفارش انجام نشد؛ دوباره تلاش کنید.',
+                                        true,
+                                        data.hsw_link
+                                );
+                        } );
         } );
 })();

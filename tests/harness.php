@@ -26,6 +26,7 @@ $files = array(
 	'includes/class-hsw-archive-query.php',
 	'includes/class-hsw-cart-actions.php',
 	'includes/class-hsw-checkout-rest.php',
+	'includes/class-hsw-checkout-complete.php',
 	/* ---- elementor/widgets/register: Elementor bases first ---- */
 	'includes/class-hsw-widget-base.php',
 	'includes/class-hsw-product-base.php',

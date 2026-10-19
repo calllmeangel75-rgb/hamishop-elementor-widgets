@@ -56,6 +56,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-archive-query.php';
                 require_once HSW_DIR . 'includes/class-hsw-cart-actions.php';
                 require_once HSW_DIR . 'includes/class-hsw-checkout-rest.php';
+                require_once HSW_DIR . 'includes/class-hsw-checkout-complete.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
@@ -65,6 +66,9 @@ final class HSW_Plugin {
 
                 /* Checkout shipping endpoints (choose rate / save note). */
                 new HSW_Checkout_Rest();
+
+                /* Final order placement for the design's own pay button. */
+                new HSW_Checkout_Complete();
         }
 
         /**

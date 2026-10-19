@@ -149,6 +149,101 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
         }
 
         /* =========================================================================
+         *  ORDER-RECEIVED (THANK-YOU) STATE OF THE PAY PAGE
+         * ====================================================================== */
+
+        /**
+         * The order behind WooCommerce's order-received endpoint — only when the
+         * visitor may see it (the logged-in owner or a valid order key).
+         *
+         * @return WC_Order|false
+         */
+        protected function order_received_order() {
+                if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-received' ) || ! function_exists( 'wc_get_order' ) ) {
+                        return false;
+                }
+                $order_id = absint( get_query_var( 'order-received' ) );
+                $order    = $order_id ? wc_get_order( $order_id ) : false;
+                if ( ! $order instanceof WC_Order ) {
+                        return false;
+                }
+                $key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                if ( '' !== $key ) {
+                        return $order->key_is_valid( $key ) ? $order : false;
+                }
+                if ( is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id() ) {
+                        return $order;
+                }
+                return false;
+        }
+
+        /**
+         * Confirmation card rendered instead of the pay UI on order-received.
+         */
+        protected function render_order_received( $order ) {
+                $shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+
+                echo '<section class="hsw-done-final">';
+                echo '<div class="hsw-done-final__card">';
+                echo '<i class="hsw-ic hsw-done-final__ic" aria-hidden="true">check_circle</i>';
+                echo '<h2 class="hsw-done-final__t">' . esc_html__( 'سفارش شما ثبت شد', 'hamishop-elementor-widgets' ) . '</h2>';
+
+                if ( $order ) {
+                        echo '<p class="hsw-done-final__s">' . esc_html__( 'از خرید شما سپاسگزاریم؛ جزئیات سفارش برای شما ثبت شد.', 'hamishop-elementor-widgets' ) . '</p>';
+
+                        $rows = array(
+                                array(
+                                        'label' => __( 'شمارهٔ سفارش', 'hamishop-elementor-widgets' ),
+                                        'value' => '#' . $order->get_order_number(),
+                                ),
+                                array(
+                                        'label' => __( 'وضعیت سفارش', 'hamishop-elementor-widgets' ),
+                                        'value' => function_exists( 'wc_get_order_status_name' ) ? wc_get_order_status_name( $order->get_status() ) : $order->get_status(),
+                                ),
+                                array(
+                                        'label' => __( 'مبلغ کل', 'hamishop-elementor-widgets' ),
+                                        'value' => $this->money( (float) $order->get_total(), true ),
+                                ),
+                        );
+
+                        $method_title = (string) $order->get_payment_method_title();
+                        if ( '' !== $method_title ) {
+                                $rows[] = array(
+                                        'label' => __( 'روش پرداخت', 'hamishop-elementor-widgets' ),
+                                        'value' => $method_title,
+                                );
+                        }
+
+                        echo '<div class="hsw-done-final__rows">';
+                        foreach ( $rows as $row ) {
+                                echo '<div class="hsw-done-final__row"><span>' . esc_html( $row['label'] ) . '</span><b>' . wp_kses_post( $row['value'] ) . '</b></div>';
+                        }
+                        echo '</div>';
+
+                        /* Gateway thank-you output (e.g. bank-transfer instructions),
+                         * exactly like WooCommerce's own thank-you template. */
+                        ob_start();
+                        do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
+                        $extra = trim( (string) ob_get_clean() );
+                        if ( '' !== $extra ) {
+                                echo '<div class="hsw-done-final__extra">' . $extra . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- gateway markup, mirrors WooCommerce core.
+                        }
+                } else {
+                        echo '<p class="hsw-done-final__s">' . esc_html__( 'سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است.', 'hamishop-elementor-widgets' ) . '</p>';
+                }
+
+                echo '<div class="hsw-done-final__acts">';
+                if ( $order && is_user_logged_in() ) {
+                        echo '<a class="hsw-done-final__btn is-primary" href="' . esc_url( $order->get_view_order_url() ) . '">' . esc_html__( 'مشاهدهٔ سفارش', 'hamishop-elementor-widgets' ) . '</a>';
+                } elseif ( ! $order && function_exists( 'wc_get_page_permalink' ) && function_exists( 'wc_get_page_id' ) && 0 < (int) wc_get_page_id( 'myaccount' ) ) {
+                        echo '<a class="hsw-done-final__btn is-primary" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . esc_html__( 'حساب کاربری من', 'hamishop-elementor-widgets' ) . '</a>';
+                }
+                echo '<a class="hsw-done-final__btn is-ghost" href="' . esc_url( $shop ) . '">' . esc_html__( 'ادامه خرید', 'hamishop-elementor-widgets' ) . '</a>';
+                echo '</div>';
+                echo '</div></section>';
+        }
+
+        /* =========================================================================
          *  DEMO DATA (editor preview only — mirrors the supplied payment mocks)
          * ====================================================================== */
 

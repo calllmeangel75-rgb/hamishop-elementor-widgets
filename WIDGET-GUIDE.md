@@ -578,7 +578,8 @@ coupon + invoice aside + mobile flow with fixed bottom bar).
 
 CSS/JS: همان `assets/css/hsw-checkout.css` + `assets/js/hsw-checkout.js`
 پایه: `includes/class-hsw-pay-base.php` (extends HSW_Checkout_Base)
-REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / payment / coupon)
+REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / payment / coupon) +
+`includes/class-hsw-checkout-complete.php` (ثبت نهایی سفارش: `POST /hsw/v1/checkout/complete`)
 فونت آیکن: ساب‌ست ۷۷ آیکن (+done/pin_drop/rocket_launch/account_balance/account_balance_wallet/loyalty/history/contact_support/published_with_changes)
 
 ## ویجت‌های جدید دسته «حامی — ویجت‌های سبد خرید و پرداخت»
@@ -602,10 +603,22 @@ REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / pay
   `coupons` (code/amount_html/minus_html) + `totals` → JS بدون رفرش ردیف‌های
   `[data-hswk-coupons]`، `[data-hswk-coupons-m]` و `[data-hswk="couponrows"]` را بازسازی و
   همان هوک‌های `data-hswk="subtotal|discount|shipping|taxes|total"` را patch می‌کند.
-- CTA نهایی: کلاس `hsw-k-pay` → ذخیرهٔ keepalive انتخاب‌ها، سپس submit فرم `form.checkout`
-  قالب (یا پرش به `checkoutUrl`). کلید کیف پول دسکتاپ⇄موبایل هم‌گام است.
+- CTA نهایی: کلاس `hsw-k-pay` → اگر فرم `form.checkout` قالب وجود داشته باشد، انتخاب‌ها
+  keepalive ذخیره و همان فرم submit می‌شود (رفتار قبلی). در صفحهٔ طرح (بدون فرم)، ابتدا
+  `POST /hsw/v1/checkout/payment` و سپس `POST /hsw/v1/checkout/complete {method}` سفارش را
+  با API خود ووکامرس می‌سازد (`WC_Checkout::create_order` + `$gateway->process_payment()`)
+  و مرورگر را به `redirect` برمی‌گرداند (درگاه یا `order-received`)؛ خطاها زیر دکمه با کلاس
+  `hsw-psum__msg` و لینک راهنما (`hsw_link`) نمایش داده می‌شوند.
+- آدرس تحویل از حساب کاربری خوانده می‌شود (bill→ship). اگر آدرس نباشد یا کاربر مهمان باشد،
+  سفارش ساخته نمی‌شود و پیام فارسی + لینک «ورود / تکمیل آدرس» برمی‌گردد (کد `hsw_no_address`).
+  روش ارسال اگر انتخاب نشده باشد، مثل خود ووکامرس = اولین نرخ هر بسته.
+- روی endpoint «سفارش دریافت شد» (`order-received`) ویجت جامع به جای فرم پرداخت، کارت تأیید
+  (`hsw-done-final`: شماره/وضعیت/مبلغ/روش پرداخت + خروجی `woocommerce_thankyou_{gateway}`)
+  را رندر می‌کند؛ روی `order-pay` (لینک پرداخت ایمیل/حساب) شورت‌کد `[woocommerce_checkout]`
+  ووکامرس نمایش داده می‌شود تا پرداخت قابل انجام بماند.
 - رادیوهای پرداخت دسکتاپ/موبایل: نام‌های جدا (`hsw_pay_method_d` / `hsw_pay_method_m`)،
   سینک value-based؛ چیپ‌های بانکی موبایل با کلیک روی ایندکس به رادیوهای دسکتاپ آینه می‌شوند.
+  کلید کیف پول دسکتاپ⇄موبایل هم‌گام است.
 - دیتای دمو دسکتاپ: ۶۷,۳۴۰,۰۰۰ − ۲,۹۰۰,۰۰۰ − ۵۰,۰۰۰ (کوپن WELCOME) = ۶۴,۳۹۰,۰۰۰ (۳ قلم)؛
   دیتای دمو موبایل: ۱۰,۹۰۰,۰۰۰ − ۸۵۰,۰۰۰ − ۳۵۰,۰۰۰ (کیف پول) = ۹,۷۰۰,۰۰۰ — دقیقاً مطابق دو موک.
 - چیدمان طرح: کانتینر ۱۲ستونی — راست (۸ ستون): مشخصات تحویل + روش‌های پرداخت + کد تخفیف؛
