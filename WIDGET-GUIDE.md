@@ -653,7 +653,7 @@ REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / pay
 - چیدمان: `assets/css/hsw-composite.css` — `--hsw-cp-side` (عرض سایدبار) و `--hsw-cp-cols` (نسبت ستون گالری) از کنترل‌های Elementor ست می‌شوند؛ موبایل تک‌ستونه.
 - قرارداد: شناسهٔ کنترل‌های ویجت‌های تکی هرگز تغییر نمی‌کند؛ هر پارت پیش‌فرض روشن است و با `{prefix}on=no` خاموش می‌شود.
 
-## مجموعهٔ «تکمیل خرید» — v1.8.0
+## مجموعهٔ «تکمیل خرید» — v1.8.0/v1.8.1
 
 `includes/class-hsw-complete-base.php` (extends HSW_Pay_Base) + `includes/class-hsw-complete-route.php` + CSS `assets/css/hsw-complete.css` (وابسته به hsw-checkout.css — همان توکن‌ها/آیکن)؛ بدون JS.
 
@@ -672,6 +672,9 @@ REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / pay
 - گاردها: `is_admin` / AJAX / REST رد می‌شوند؛ صفحهٔ هدف اگر همان سبد/تسویه باشد نادیده گرفته می‌شود؛ بازدیدکننده فقط با کلید امن معتبر یا مالک واردشده ریدایرکت می‌شود (قانون خود ووکامرس).
 - `HSW_Complete_Base::completion_order()`: اول endpoint `order-received`، بعد `?order=&key=`؛ `complete_state()` = order | demo (فقط ادیتور) | none.
 - پارت‌های order/delivery بدون سفارش چیزی رندر نمی‌کنند؛ hero کارت «یافت نشد» و actions دکمه‌های فروشگاه/حساب را نشان می‌دهند.
+- `hsw_pay_page_id` (ووکامرس → تنظیمات → تسویه حساب → «صفحهٔ پرداخت (مرحلهٔ ۳)»): مقصد پیش‌فرض دکمهٔ «ادامه و ورود به مرحله پرداخت» در خلاصهٔ تسویه — `HSW_Checkout_Base::pay_step_url()` → `HSW_Complete_Route::pay_step_url()`؛ اولویت اول کنترل `next_url` خود ویجت است، خالی = `checkout_url()`. گاردها: صفحه باید منتشرشده باشد و سبد/تسویه/تکمیل خرید نباشد.
+- قرارداد REST (v1.8.1): همهٔ مسیرهای `/hsw/v1/checkout/*` اول `HSW_Checkout_Rest::ensure_cart()` را صدا می‌زنند — ووکامرس در درخواست‌های REST سبد/نشست را لود نمی‌کند. هر مسیر تازه‌ای هم باید همین را اول کارش بگذارد.
+- مقدار رادیوهای «روش ارسال» = کلید واقعی نرخ ووکامرس (`$opt['id']` در `HSW_Widget_Checkout_Shipping::options_list()`)؛ هرگز به ایندکس آرایه برنگردد — وگرنه انتخاب روش ارسال در نشست/سفارش ذخیره نمی‌شود.
 
 # خانوادهٔ مجله و وبلاگ — v1.7.0
 

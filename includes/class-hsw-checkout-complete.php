@@ -45,6 +45,9 @@ class HSW_Checkout_Complete {
 	 * Any visitor with a valid wp_rest nonce and a cart session.
 	 */
 	public function can_checkout( $request ) {
+		if ( class_exists( 'HSW_Checkout_Rest' ) ) {
+			HSW_Checkout_Rest::ensure_cart();
+		}
 		$nonce = (string) $request->get_header( 'X-WP-Nonce' );
 		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return new WP_Error( 'hsw_rest_nonce', __( 'نشست منقضی شده؛ صفحه را دوباره بارگذاری کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 403 ) );

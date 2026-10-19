@@ -74,9 +74,25 @@ class HSW_Checkout_Rest {
         }
 
         /**
+         * WooCommerce loads the cart/session only for frontend requests; inside
+         * REST they stay null until wc_load_cart() runs (the same trick the
+         * Store API uses). Every checkout route calls this before touching
+         * WC()->cart.
+         */
+        public static function ensure_cart() {
+                if ( ! function_exists( 'WC' ) || ! function_exists( 'wc_load_cart' ) ) {
+                        return;
+                }
+                if ( ! WC()->cart || ! WC()->session ) {
+                        wc_load_cart();
+                }
+        }
+
+        /**
          * Any visitor with a valid wp_rest nonce and a cart session.
          */
         public function can_checkout( $request ) {
+                self::ensure_cart();
                 $nonce = (string) $request->get_header( 'X-WP-Nonce' );
                 if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
                         return new WP_Error( 'hsw_rest_nonce', __( 'نشست منقضی شده؛ صفحه را دوباره بارگذاری کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 403 ) );

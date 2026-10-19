@@ -1,6 +1,6 @@
 <?php
 /**
- * Completion-page routing + the native WooCommerce setting.
+ * Completion-page routing + the native WooCommerce settings.
  *
  * «تکمیل خرید» is a real, designable Elementor page. Every order-received
  * redirect — WC core, every gateway's return URL, pay-links and the Store API
@@ -9,9 +9,11 @@
  * WooCommerce configuration (any permalink structure, any endpoint slug).
  * Requests that still hit /checkout/order-received/… are redirected too.
  *
- * The page itself is picked inside WooCommerce → Settings → Checkout
- * (native `single_select_page` field), stored as `hsw_complete_page_id`.
- * Empty = untouched WooCommerce behavior (the pay-page fallback card).
+ * The pages themselves are picked inside WooCommerce → Settings → Checkout
+ * (native `single_select_page` fields):
+ *  - `hsw_pay_page_id`      — payment step (مسیر: دکمهٔ «ادامه و ورود به مرحله پرداخت»).
+ *  - `hsw_complete_page_id` — completion page (after payment).
+ * Empty = untouched WooCommerce behavior (checkout URL / pay-page fallback card).
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -20,7 +22,8 @@ defined( 'ABSPATH' ) || exit;
 
 final class HSW_Complete_Route {
 
-    const OPTION = 'hsw_complete_page_id';
+    const OPTION     = 'hsw_complete_page_id';
+    const PAY_OPTION = 'hsw_pay_page_id';
 
     public function __construct() {
         add_filter( 'woocommerce_get_settings_checkout', array( $this, 'settings_field' ), 20, 2 );
@@ -75,6 +78,42 @@ final class HSW_Complete_Route {
             ),
             $url
         );
+    }
+
+    /**
+     * The configured payment-step page id (the page the shipping/checkout
+     * summary CTA leads to), or 0 (disabled / guard tripped).
+     */
+    public static function pay_page_id() {
+        $id = (int) get_option( self::PAY_OPTION, 0 );
+        if ( $id <= 0 || 'publish' !== get_post_status( $id ) ) {
+            return 0;
+        }
+        /* Never send the customer into the cart, the checkout page itself or
+           the completion page. */
+        if ( function_exists( 'wc_get_page_id' ) ) {
+            $blocked = array( (int) wc_get_page_id( 'cart' ), (int) wc_get_page_id( 'checkout' ) );
+            if ( self::page_id() ) {
+                $blocked[] = self::page_id();
+            }
+            if ( in_array( $id, $blocked, true ) ) {
+                return 0;
+            }
+        }
+        return $id;
+    }
+
+    /**
+     * Payment-step URL, '' when unconfigured (callers fall back to the
+     * WooCommerce checkout URL = old behavior).
+     */
+    public static function pay_step_url() {
+        $id = self::pay_page_id();
+        if ( ! $id ) {
+            return '';
+        }
+        $url = get_permalink( $id );
+        return $url ? (string) $url : '';
     }
 
     /* =========================================================================
@@ -145,8 +184,8 @@ final class HSW_Complete_Route {
      * ====================================================================== */
 
     /**
-     * Add «صفحهٔ تکمیل خرید» after the checkout page option — the setting
-     * lives in WooCommerce's own configuration, saved by WC itself.
+     * Add «صفحهٔ پرداخت» + «صفحهٔ تکمیل خرید» after the checkout page option —
+     * the settings live in WooCommerce's own configuration, saved by WC itself.
      *
      * @param array  $settings        Settings rows.
      * @param string $current_section Current settings section.
@@ -159,13 +198,23 @@ final class HSW_Complete_Route {
 
         $custom = array(
             array(
-                'title' => __( 'تکمیل خرید (حامی)', 'hamishop-elementor-widgets' ),
+                'title' => __( 'مسیر خرید (حامی)', 'hamishop-elementor-widgets' ),
                 'type'  => 'title',
                 'id'    => 'hsw_complete_options',
-                'desc'  => __( 'صفحه‌ای که مشتری بعد از پرداخت می‌بیند. یک صفحه بسازید و ویجت «صفحه کامل تکمیل خرید — حامی» را در آن قرار دهید.', 'hamishop-elementor-widgets' ),
+                'desc'  => __( 'مسیر خرید با ویجت‌های جامع حامی: سبد خرید → تسویه حساب (اطلاعات ارسال) → پرداخت → تکمیل خرید. برای هر مرحله یک صفحه بسازید و ویجت جامع همان مرحله را داخل آن قرار دهید.', 'hamishop-elementor-widgets' ),
             ),
             array(
-                'title'    => __( 'صفحهٔ تکمیل خرید', 'hamishop-elementor-widgets' ),
+                'title'    => __( 'صفحهٔ پرداخت (مرحلهٔ ۳)', 'hamishop-elementor-widgets' ),
+                'desc'     => __( 'صفحه‌ای که ویجت «صفحه کامل پرداخت — حامی» دارد. دکمهٔ «ادامه و ورود به مرحله پرداخت» در صفحهٔ تسویه به این صفحه می‌رود. خالی = همان صفحهٔ تسویه ووکامرس.', 'hamishop-elementor-widgets' ),
+                'desc_tip' => true,
+                'id'       => self::PAY_OPTION,
+                'type'     => 'single_select_page',
+                'default'  => '',
+                'class'    => 'wc-enhanced-select-nostd',
+                'css'      => 'min-width:300px;',
+            ),
+            array(
+                'title'    => __( 'صفحهٔ تکمیل خرید (مرحلهٔ ۴)', 'hamishop-elementor-widgets' ),
                 'desc'     => __( 'بعد از پرداخت (و بازگشت از درگاه)، مشتری به این صفحه هدایت می‌شود و شماره و جزئیات سفارش را می‌بیند. خالی = رفتار پیش‌فرض ووکامرس.', 'hamishop-elementor-widgets' ),
                 'desc_tip' => true,
                 'id'       => self::OPTION,

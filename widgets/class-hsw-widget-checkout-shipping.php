@@ -224,6 +224,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                         $out   = array();
                         foreach ( $rates as $rate ) {
                                 $out[] = array(
+                                        'id'     => (string) ( isset( $rate['id'] ) ? $rate['id'] : '' ),
                                         'title'  => $rate['title'],
                                         'desc'   => '',
                                         'icon'   => $this->icon_for_rate( $rate['title'] ),

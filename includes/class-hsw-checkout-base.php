@@ -37,6 +37,21 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 return $cls;
         }
 
+        /**
+         * Next stop after this shipping-information page: the payment page
+         * picked in WooCommerce → Settings → Checkout («صفحهٔ پرداخت»).
+         * Falls back to the WooCommerce checkout URL when unset.
+         */
+        protected function pay_step_url() {
+                if ( class_exists( 'HSW_Complete_Route' ) ) {
+                        $url = HSW_Complete_Route::pay_step_url();
+                        if ( '' !== $url ) {
+                                return $url;
+                        }
+                }
+                return $this->checkout_url();
+        }
+
         /* =========================================================================
          *  LIVE CHECKOUT RESOLVERS
          * ====================================================================== */
