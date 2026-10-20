@@ -292,4 +292,36 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
                         'oldest'  => __( 'قدیمی‌ترین', 'hamishop-elementor-widgets' ),
                 );
         }
+
+        /**
+         * Blog palette (--hswb-* design tokens).
+         */
+        protected function palette_map() {
+                return array(
+                        'primary' => array(
+                                'label' => __( 'رنگ اصلی (تیره)', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswb-primary: {{VALUE}}; --hswb-navy: color-mix(in srgb, {{VALUE}}, #fff 14%);',
+                        ),
+                        'accent'  => array(
+                                'label' => __( 'رنگ تاکید (نارنجی)', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswb-accent: {{VALUE}}; --hswb-accent2: color-mix(in srgb, {{VALUE}}, #000 18%); --hswb-accent-bg: color-mix(in srgb, {{VALUE}}, #fff 82%);',
+                        ),
+                        'text'    => array(
+                                'label' => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswb-text: {{VALUE}}; --hswb-text2: color-mix(in srgb, {{VALUE}}, #fff 26%); --hswb-muted: color-mix(in srgb, {{VALUE}}, #fff 42%);',
+                        ),
+                        'border'  => array(
+                                'label' => __( 'رنگ حاشیه‌ها', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswb-border: {{VALUE}}; --hswb-border2: color-mix(in srgb, {{VALUE}}, #000 12%);',
+                        ),
+                        'card'    => array(
+                                'label' => __( 'رنگ کارت‌ها', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswb-card: {{VALUE}}; --hswb-card2: color-mix(in srgb, {{VALUE}}, #000 4%);',
+                        ),
+                        'bg'      => array(
+                                'label' => __( 'پس‌زمینه صفحه', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswb-bg: {{VALUE}};',
+                        ),
+                );
+        }
 }

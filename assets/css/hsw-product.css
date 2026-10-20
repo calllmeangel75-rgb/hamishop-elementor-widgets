@@ -59,7 +59,7 @@
 .hsw-p *::before,
 .hsw-p *::after { box-sizing: border-box; }
 
-.hsw-p {
+:root {
         --hsw-primary: #000922;
         --hsw-on-primary: #ffffff;
         --hsw-primary-container: #0f2042;
@@ -83,7 +83,9 @@
         --hsw-emerald: #059669;
         --hsw-emerald-bg: #ecfdf5;
         --hsw-card-shadow: 0 1px 3px 0 rgba(15, 32, 66, .04), 0 1px 2px -1px rgba(15, 32, 66, .02);
+}
 
+.hsw-p {
         color: var(--hsw-on-surface);
         font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
         line-height: 1.6;

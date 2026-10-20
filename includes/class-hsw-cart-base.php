@@ -462,6 +462,10 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Single color control bound to a selector.
          */
         protected function a_color( $id, $label, $selector, $prop = 'color', $args = array() ) {
+                // Accept both a single property ("color") and a full declaration
+                // block ("--var: {{VALUE}}; …") without appending a second value.
+                $decls = false !== strpos( $prop, '{{VALUE}}' ) ? $prop : $prop . ': {{VALUE}};';
+
                 $this->add_control(
                         $id,
                         wp_parse_args(
@@ -469,7 +473,7 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                                 array(
                                         'label'     => $label,
                                         'type'      => Controls_Manager::COLOR,
-                                        'selectors' => array( $selector => $prop . ': {{VALUE}};' ),
+                                        'selectors' => array( $selector => $decls ),
                                 )
                         )
                 );
@@ -544,5 +548,44 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                                 )
                         );
                 }
+        }
+
+        /**
+         * Cart palette (--hswc-* design tokens).
+         */
+        protected function palette_map() {
+                return array(
+                        'primary' => array(
+                                'label' => __( 'رنگ اصلی (برند)', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-primary: {{VALUE}}; --hswc-btn: color-mix(in srgb, {{VALUE}}, #fff 12%);',
+                        ),
+                        'accent'  => array(
+                                'label' => __( 'رنگ تاکید (CTA)', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-accent: {{VALUE}}; --hswc-accent2: color-mix(in srgb, {{VALUE}}, #000 18%); --hswc-fixed: color-mix(in srgb, {{VALUE}}, #fff 82%);',
+                        ),
+                        'text'    => array(
+                                'label' => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-text: {{VALUE}}; --hswc-text2: color-mix(in srgb, {{VALUE}}, #fff 26%); --hswc-muted: color-mix(in srgb, {{VALUE}}, #fff 42%);',
+                        ),
+                        'border'  => array(
+                                'label' => __( 'رنگ حاشیه‌ها', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-border: {{VALUE}}; --hswc-border2: color-mix(in srgb, {{VALUE}}, #000 12%);',
+                        ),
+                        'card'    => array(
+                                'label' => __( 'رنگ کارت‌ها', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-card: {{VALUE}}; --hswc-card2: color-mix(in srgb, {{VALUE}}, #000 3%); --hswc-card3: color-mix(in srgb, {{VALUE}}, #000 5%);',
+                        ),
+                        'status_head' => array(
+                                'heading' => __( 'رنگ‌های وضعیت', 'hamishop-elementor-widgets' ),
+                        ),
+                        'ok'      => array(
+                                'label' => __( 'سبز / موفق', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-ok: {{VALUE}}; --hswc-ok-bg: color-mix(in srgb, {{VALUE}}, #fff 92%);',
+                        ),
+                        'error'   => array(
+                                'label' => __( 'قرمز / خطا', 'hamishop-elementor-widgets' ),
+                                'decls' => '--hswc-error: {{VALUE}}; --hswc-error-bg: color-mix(in srgb, {{VALUE}}, #fff 92%);',
+                        ),
+                );
         }
 }

@@ -89,44 +89,6 @@
 }
 
 .hsw-k {
-        --hswk-card: #ffffff;
-        --hswk-card2: #f3f4f6;
-        --hswk-card3: #edeef0;
-        --hswk-card-high: #e7e8ea;
-        --hswk-surface: #f8f9fb;
-        --hswk-border: #e1e2e4;
-        --hswk-border2: #c5c6cf;
-        --hswk-text: #191c1e;
-        --hswk-text2: #45464e;
-        --hswk-muted: #75777f;
-        --hswk-primary: #000922;
-        --hswk-btn: #0f2042;
-        --hswk-on-btn: #ffffff;
-        --hswk-on-btn2: #7389b0;
-        --hswk-fixed: #d9e2ff;
-        --hswk-accent: #fc593a;
-        --hswk-on-accent: #ffffff;
-        --hswk-accent2: #b5260b;
-        --hswk-accentbg: #ffdad3;
-        --hswk-on-accentbg: #3e0400;
-        --hswk-on-accentbg2: #8e1500;
-        --hswk-ok: #15803d;
-        --hswk-ok-strong: #16a34a;
-        --hswk-ok-bg: #f0fdf4;
-        --hswk-ok2: #166534;
-        --hswk-ok-bg2: #dcfce7;
-        --hswk-error: #ba1a1a;
-        --hswk-r: 0.75rem;
-        --hswk-r-s: 0.5rem;
-        --hswk-shell: 80rem;
-        --hswk-mshell: 28rem;
-        --hswk-pad: 1.5rem;
-        --hswk-bd: 1px solid rgba(197, 198, 207, 0.3);
-        --hswk-bd-soft: 1px solid rgba(197, 198, 207, 0.2);
-        --hswk-shadow: 0 1px 3px 0 rgba(15, 32, 66, .04), 0 1px 2px -1px rgba(15, 32, 66, .02);
-        --hswk-shadow-up: 0 -4px 20px -2px rgba(15, 32, 66, .06);
-        --hswk-shadow-up-m: 0 -4px 16px -2px rgba(15, 32, 66, .08);
-
         color: var(--hswk-text);
         font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
         line-height: 1.6;

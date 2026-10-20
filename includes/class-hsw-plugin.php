@@ -121,6 +121,15 @@ final class HSW_Plugin {
                         return;
                 }
 
+                /*
+                 * Inject the family palette into every HSW widget right after
+                 * its first section. This keeps Elementor's Content tab first
+                 * and gives all widget families the same Style-tab palette.
+                 */
+                if ( class_exists( '\HSW_Widget_Base' ) ) {
+                        add_action( 'elementor/element/after_section_end', array( '\HSW_Widget_Base', 'maybe_add_palette' ), 10, 3 );
+                }
+
                 /* One broken widget file must never white-screen the site. */
                 $widget_files = array(
                         HSW_DIR . 'widgets/class-hsw-wonder-deals.php',

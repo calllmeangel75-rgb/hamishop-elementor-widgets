@@ -40,8 +40,6 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
         }
 
         protected function register_controls() {
-                $this->ctrl_palette();
-
                 $this->part_section( 'abc_', __( '۱. مسیر راهنما (بردکرامب)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Breadcrumb', array( 'vis', 'show_home_icon', 'home_label' ) );
 
                 $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'show_count', 'seo_desc', 'desc_pos', 'desc_title', 'desc_clamp', 'more_text', 'less_text', 'pills_source', 'pills_attr', 'pills_manual', 'pills_heading', 'show_guide_btn', 'update_note' ) );
@@ -109,7 +107,15 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
         protected function render() {
                 $root = $this->root_class( 'carchive', 'hsw-cp hsw-cp--archive' );
 
-                echo '<div class="' . esc_attr( $root ) . '">';
+                /*
+                 * The Elementor full-width archive template replaces the
+                 * theme's #content wrapper, which breaks the theme skip link
+                 * and leaves the page without a main landmark. The composite
+                 * is the archive's main content, so provide both here. Skip
+                 * this in the editor demo, where the theme wrapper may exist.
+                 */
+                $main_attrs = $this->is_demo() ? '' : ' id="content" role="main" tabindex="-1"';
+                echo '<div class="' . esc_attr( $root ) . '"' . $main_attrs . '>';
 
                 if ( $this->part_on( 'abc_' ) ) {
                         $this->print_part( 'abc_', '\HSW_Widget_Archive_Breadcrumb' );

@@ -24,7 +24,7 @@
 }
 
 /* ===== Root palette (design tokens) ===== */
-.hsw-b {
+:root {
         --hswb-bg: #f7f8fa;
         --hswb-card: #ffffff;
         --hswb-card2: #f3f4f6;
@@ -42,7 +42,9 @@
         --hswb-r-s: 0.5rem;
         --hswb-shadow: 0 1px 3px 0 rgba(15, 32, 66, .05), 0 1px 2px -1px rgba(15, 32, 66, .03);
         --hswb-shadow-up: 0 10px 24px -12px rgba(15, 32, 66, .18);
+}
 
+.hsw-b {
         font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
         color: var(--hswb-text);
         line-height: 1.8;

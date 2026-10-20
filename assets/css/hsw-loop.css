@@ -45,7 +45,7 @@
 .hsw-loop *::before,
 .hsw-loop *::after { box-sizing: border-box; }
 
-.hsw-loop {
+:root {
         --hsw-primary: #000922;
         --hsw-on-primary: #ffffff;
         --hsw-primary-container: #0f2042;
@@ -70,7 +70,9 @@
         --hsw-slate: #1e293b;
         --hsw-card-shadow: 0 1px 3px 0 rgba(15, 32, 66, .04), 0 1px 2px -1px rgba(15, 32, 66, .02);
         --hsw-card-shadow-hover: 0 10px 25px -5px rgba(15, 32, 66, .08), 0 8px 10px -6px rgba(15, 32, 66, .04);
+}
 
+.hsw-loop {
         position: relative;
         color: var(--hsw-on-surface);
         font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;

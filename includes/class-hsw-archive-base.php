@@ -901,6 +901,12 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          * Single color control bound to a selector.
          */
         protected function a_color( $id, $label, $selector, $prop = 'color', $args = array() ) {
+                // $prop may be a single property ("color") or a full declaration
+                // block for palette tokens ("--var: {{VALUE}}; …"). Only append
+                // the value placeholder when it is not already part of $prop;
+                // otherwise the generated CSS gets a stray ": value;" fragment.
+                $decls = false !== strpos( $prop, '{{VALUE}}' ) ? $prop : $prop . ': {{VALUE}};';
+
                 $this->add_control(
                         $id,
                         wp_parse_args(
@@ -908,7 +914,7 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
                                 array(
                                         'label'     => $label,
                                         'type'      => Controls_Manager::COLOR,
-                                        'selectors' => array( $selector => $prop . ': {{VALUE}};' ),
+                                        'selectors' => array( $selector => $decls ),
                                 )
                         )
                 );

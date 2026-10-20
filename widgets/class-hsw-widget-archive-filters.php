@@ -45,8 +45,6 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
          * ====================================================================== */
 
         protected function register_controls() {
-                $this->ctrl_palette();
-
                 /* ------------------------- CONTENT ------------------------- */
                 $this->start_controls_section(
                         'sec_content',
@@ -118,6 +116,97 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 'type'      => Controls_Manager::SWITCHER,
                                 'default'   => 'yes',
                                 'condition' => array( 'kind' => 'attr', 'style' => 'checks' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_heading',
+                        array(
+                                'label'     => __( 'درخت دسته‌بندی', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::HEADING,
+                                'condition' => array( 'kind' => 'cats' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_counts',
+                        array(
+                                'label'     => __( 'نمایش تعداد محصولات', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SWITCHER,
+                                'default'   => 'yes',
+                                'condition' => array( 'kind' => 'cats' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_inclusive',
+                        array(
+                                'label'       => __( 'شمارش شامل زیرشاخه‌ها', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SWITCHER,
+                                'default'     => 'yes',
+                                'description' => __( 'تعداد هر شاخه = محصولات خودش + همه زیرشاخه‌ها.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'kind' => 'cats', 'cats_counts' => 'yes' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_empty',
+                        array(
+                                'label'     => __( 'نمایش دسته‌های خالی', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SWITCHER,
+                                'default'   => '',
+                                'condition' => array( 'kind' => 'cats' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_search',
+                        array(
+                                'label'     => __( 'جستجوی داخل درخت', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SWITCHER,
+                                'default'   => 'yes',
+                                'condition' => array( 'kind' => 'cats' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_expand',
+                        array(
+                                'label'     => __( 'وضعیت باز شدن شاخه‌ها', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'default'   => 'current',
+                                'options'   => array(
+                                        'current' => __( 'فقط مسیر دسته فعلی', 'hamishop-elementor-widgets' ),
+                                        'none'    => __( 'همه بسته', 'hamishop-elementor-widgets' ),
+                                        'all'     => __( 'همه باز', 'hamishop-elementor-widgets' ),
+                                ),
+                                'condition' => array( 'kind' => 'cats' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_top',
+                        array(
+                                'label'       => __( 'حداکثر شاخه‌های اصلی', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::NUMBER,
+                                'default'     => 10,
+                                'min'         => 0,
+                                'max'         => 50,
+                                'description' => __( 'بقیه با دکمه «نمایش بیشتر» باز می‌شوند. ۰ = بدون محدودیت.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'kind' => 'cats' ),
+                        )
+                );
+
+                $repeater->add_control(
+                        'cats_depth',
+                        array(
+                                'label'       => __( 'حداکثر عمق زیرشاخه‌ها', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::NUMBER,
+                                'default'     => 0,
+                                'min'         => 0,
+                                'max'         => 10,
+                                'description' => __( '۰ = نمایش همه سطوح.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'kind' => 'cats' ),
                         )
                 );
 
@@ -269,6 +358,14 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 'style'  => isset( $row['style'] ) && '' !== $row['style'] ? (string) $row['style'] : 'checks',
                                 'search' => ! isset( $row['search'] ) || 'yes' === $row['search'],
                                 'open'   => ! isset( $row['open'] ) || 'yes' === $row['open'],
+                                /* Category tree options. */
+                                'cats_counts'    => ! isset( $row['cats_counts'] ) || 'yes' === $row['cats_counts'],
+                                'cats_inclusive' => ! isset( $row['cats_inclusive'] ) || 'yes' === $row['cats_inclusive'],
+                                'cats_empty'     => isset( $row['cats_empty'] ) && 'yes' === $row['cats_empty'],
+                                'cats_search'    => ! isset( $row['cats_search'] ) || 'yes' === $row['cats_search'],
+                                'cats_expand'    => ( isset( $row['cats_expand'] ) && in_array( $row['cats_expand'], array( 'current', 'none', 'all' ), true ) ) ? $row['cats_expand'] : 'current',
+                                'cats_top'       => isset( $row['cats_top'] ) ? max( 0, (int) $row['cats_top'] ) : 10,
+                                'cats_depth'     => isset( $row['cats_depth'] ) ? max( 0, (int) $row['cats_depth'] ) : 0,
                         );
                 }
 
@@ -284,7 +381,21 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
          */
         protected function auto_boxes() {
                 $boxes   = array();
-                $boxes[] = array( 'kind' => 'cats', 'title' => '', 'attr' => '', 'style' => 'checks', 'search' => true, 'open' => true );
+                $boxes[] = array(
+                        'kind'           => 'cats',
+                        'title'          => '',
+                        'attr'           => '',
+                        'style'          => 'checks',
+                        'search'         => true,
+                        'open'           => true,
+                        'cats_counts'    => true,
+                        'cats_inclusive' => true,
+                        'cats_empty'     => false,
+                        'cats_search'    => true,
+                        'cats_expand'    => 'current',
+                        'cats_top'       => 10,
+                        'cats_depth'     => 0,
+                );
 
                 $boxes[] = array( 'kind' => 'stock', 'title' => '', 'attr' => '', 'style' => 'checks', 'search' => false, 'open' => true );
                 if ( $this->has_express() ) {
@@ -637,85 +748,314 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
         }
 
         /**
-         * Categories tree: root → current (+ badge) → children, or top-level
-         * categories on the shop root.
+         * Category tree: full product_cat hierarchy (any depth), counts,
+         * collapsible branches and live search. Handles stores with 100+
+         * categories without a flat wall of terms.
          */
         protected function box_cats( $box ) {
-                $term = $this->current_term();
-                $body = '';
-
                 if ( $this->is_demo() || ! $this->is_archive_context() ) {
-                        $d     = $this->demo();
-                        $d     = $d['cats'];
-                        $body  = '<ul class="hsw-af__tree">';
-                        $body .= '<li><a class="hsw-af__link" href="#"><span>' . esc_html( $d['root']['name'] ) . '</span><span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( $d['root']['count'] ) ) . ')</span></a>';
-                        $body .= '<ul class="hsw-af__branch"><li>';
-                        $body .= '<a class="hsw-af__link is-active" href="#"><span>' . esc_html( $d['mid']['name'] ) . '</span><span class="hsw-af__badge">' . esc_html( HSW_Helpers::fa_num( $d['mid']['count'] ) ) . '</span></a>';
-                        $body .= '<ul class="hsw-af__leafs">';
-                        foreach ( $d['leafs'] as $leaf ) {
-                                $body .= '<li><a class="hsw-af__link" href="#"><span>' . esc_html( $leaf['name'] ) . '</span><span class="hsw-af__cnt">' . esc_html( HSW_Helpers::fa_num( $leaf['count'] ) ) . '</span></a></li>';
-                        }
-                        $body .= '</ul></li></ul></li></ul>';
-                        return $this->box_shell( $this->box_title( $box ), $body, $box['open'] );
+                        return $this->box_shell( $this->box_title( $box ), $this->cats_demo_html( $box ), $box['open'] );
                 }
 
-                if ( $term ) {
-                        $root_id   = 0;
-                        $ancestors = get_ancestors( $term->term_id, 'product_cat', 'taxonomy' );
-                        if ( ! empty( $ancestors ) ) {
-                                $root_id = (int) end( $ancestors );
-                        }
-                        $root = $root_id ? get_term( $root_id, 'product_cat' ) : null;
-                        $kids = get_terms(
-                                array(
-                                        'taxonomy'   => 'product_cat',
-                                        'parent'     => $term->term_id,
-                                        'hide_empty' => false,
-                                        'number'     => 10,
-                                        'exclude'    => $this->default_cat_ids(),
-                                )
-                        );
+                $terms = get_terms(
+                        array(
+                                'taxonomy'   => 'product_cat',
+                                'hide_empty' => false,
+                                'exclude'    => $this->default_cat_ids(),
+                                'orderby'    => 'name',
+                                'order'      => 'ASC',
+                                'number'     => 0,
+                        )
+                );
+                if ( is_wp_error( $terms ) || empty( $terms ) ) {
+                        return '';
+                }
 
-                        $body .= '<ul class="hsw-af__tree">';
-                        if ( $root && ! is_wp_error( $root ) ) {
-                                $body .= '<li><a class="hsw-af__link" href="' . esc_url( get_term_link( $root ) ) . '"><span>' . esc_html( $root->name ) . '</span><span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( (int) $root->count ) ) . ')</span></a>';
-                                $body .= '<ul class="hsw-af__branch"><li>';
-                        }
-                        $body .= '<a class="hsw-af__link is-active" href="' . esc_url( get_term_link( $term ) ) . '"><span>' . esc_html( $term->name ) . '</span><span class="hsw-af__badge">' . esc_html( HSW_Helpers::fa_num( (int) $term->count ) ) . '</span></a>';
-                        if ( ! is_wp_error( $kids ) && ! empty( $kids ) ) {
-                                $body .= '<ul class="hsw-af__leafs">';
-                                foreach ( $kids as $kid ) {
-                                        $body .= '<li><a class="hsw-af__link" href="' . esc_url( get_term_link( $kid ) ) . '"><span>' . esc_html( $kid->name ) . '</span><span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( (int) $kid->count ) ) . ')</span></a></li>';
+                $by_id    = array();
+                $children = array();
+                foreach ( $terms as $t ) {
+                        $id                             = (int) $t->term_id;
+                        $by_id[ $id ]                   = $t;
+                        $children[ (int) $t->parent ][] = $id;
+                }
+
+                $inclusive = array();
+                $this->cat_counts( 0, $children, $by_id, $inclusive );
+
+                $term       = $this->current_term();
+                $current_id = $term ? (int) $term->term_id : 0;
+                $path       = array();
+                if ( $current_id ) {
+                        $ancestors = get_ancestors( $current_id, 'product_cat', 'taxonomy' );
+                        if ( ! is_wp_error( $ancestors ) ) {
+                                foreach ( $ancestors as $aid ) {
+                                        $path[ (int) $aid ] = true;
                                 }
-                                $body .= '</ul>';
                         }
-                        if ( $root && ! is_wp_error( $root ) ) {
-                                $body .= '</li></ul></li>';
-                        }
-                        $body .= '</ul>';
-                } else {
-                        /* Shop root: top-level categories. */
-                        $cats = get_terms(
-                                array(
-                                        'taxonomy'   => 'product_cat',
-                                        'parent'     => 0,
-                                        'hide_empty' => true,
-                                        'number'     => 10,
-                                        'exclude'    => $this->default_cat_ids(),
-                                )
-                        );
-                        if ( is_wp_error( $cats ) || empty( $cats ) ) {
-                                return '';
-                        }
-                        $body .= '<ul class="hsw-af__tree">';
-                        foreach ( $cats as $cat ) {
-                                $body .= '<li><a class="hsw-af__link" href="' . esc_url( get_term_link( $cat ) ) . '"><span>' . esc_html( $cat->name ) . '</span><span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( (int) $cat->count ) ) . ')</span></a></li>';
-                        }
-                        $body .= '</ul>';
+                        $path[ $current_id ] = true;
                 }
+
+                $ctx = array(
+                        'by_id'          => $by_id,
+                        'children'       => $children,
+                        'inclusive'      => $inclusive,
+                        'path'           => $path,
+                        'current'        => $current_id,
+                        'counts_on'      => ! empty( $box['cats_counts'] ),
+                        'counts_include' => ! empty( $box['cats_inclusive'] ),
+                        'show_empty'     => ! empty( $box['cats_empty'] ),
+                        'expand'         => isset( $box['cats_expand'] ) ? (string) $box['cats_expand'] : 'current',
+                        'max_top'        => isset( $box['cats_top'] ) ? (int) $box['cats_top'] : 10,
+                        'max_depth'      => isset( $box['cats_depth'] ) ? (int) $box['cats_depth'] : 0,
+                );
+
+                $top_total = 0;
+                if ( ! empty( $children[0] ) ) {
+                        foreach ( $children[0] as $id ) {
+                                $total = isset( $inclusive[ $id ] ) ? (int) $inclusive[ $id ] : 0;
+                                if ( $ctx['show_empty'] || $total > 0 ) {
+                                        $top_total++;
+                                }
+                        }
+                }
+
+                /*
+                 * The active category must stay visible even when its top-level
+                 * branch is beyond the «حداکثر شاخه‌های اصلی» limit. Reveal only
+                 * the current path (at most one top-level node) and discount it
+                 * from the «نمایش همه» counter.
+                 */
+                $revealed = 0;
+                if ( $ctx['max_top'] > 0 && $current_id && ! empty( $children[0] ) ) {
+                        $top_ancestor = $current_id;
+                        $ancestors    = get_ancestors( $current_id, 'product_cat', 'taxonomy' );
+                        if ( ! is_wp_error( $ancestors ) && ! empty( $ancestors ) ) {
+                                $top_ancestor = (int) end( $ancestors );
+                        }
+                        $idx = 0;
+                        foreach ( $children[0] as $id ) {
+                                $total = isset( $inclusive[ $id ] ) ? (int) $inclusive[ $id ] : 0;
+                                if ( ! $ctx['show_empty'] && $total <= 0 ) {
+                                        continue;
+                                }
+                                if ( (int) $id === $top_ancestor ) {
+                                        if ( $idx >= $ctx['max_top'] ) {
+                                                $revealed = 1;
+                                        }
+                                        break;
+                                }
+                                $idx++;
+                        }
+                }
+
+                $body = '';
+                if ( ! empty( $box['cats_search'] ) && count( $terms ) > 6 ) {
+                        $body .= '<div class="hsw-af__search hsw-af__catsearch">';
+                        $body .= '<input type="text" class="hsw-af__searchinput" placeholder="' . esc_attr__( 'جستجوی دسته...', 'hamishop-elementor-widgets' ) . '" data-hsw-catsearch aria-label="' . esc_attr__( 'جستجوی دسته‌بندی', 'hamishop-elementor-widgets' ) . '">';
+                        $body .= '<i class="hsw-ic" aria-hidden="true">search</i>';
+                        $body .= '</div>';
+                }
+
+                $top_index = 0;
+                $body     .= '<ul class="hsw-af__tree hsw-af__cattree" data-hsw-cattree role="tree">';
+                $body     .= $this->cats_branch_html( 0, $ctx, 0, $top_index );
+                $body     .= '</ul>';
+
+                $hidden_top = max( 0, $top_total - $ctx['max_top'] - $revealed );
+                if ( $ctx['max_top'] > 0 && $hidden_top > 0 ) {
+                        $body .= '<button type="button" class="hsw-af__catmore" data-hsw-catmore>';
+                        $body .= esc_html__( 'نمایش همه دسته‌ها', 'hamishop-elementor-widgets' );
+                        $body .= ' <span>(' . esc_html( HSW_Helpers::fa_num( $hidden_top ) ) . ')</span>';
+                        $body .= '</button>';
+                }
+
+                $body .= '<div class="hsw-af__noresult" data-hsw-catempty hidden>' . esc_html__( 'دسته‌ای پیدا نشد.', 'hamishop-elementor-widgets' ) . '</div>';
 
                 return $this->box_shell( $this->box_title( $box ), $body, $box['open'] );
         }
+
+        /**
+         * Inclusive product count of every category (own products + children).
+         *
+         * @param int   $parent   Parent term id (0 = root).
+         * @param array $children Parent id → child ids map.
+         * @param array $by_id    Term id → WP_Term map.
+         * @param array $counts   Output counts (by reference).
+         * @return int
+         */
+        protected function cat_counts( $parent, $children, $by_id, &$counts ) {
+                $sum = 0;
+                if ( ! empty( $children[ $parent ] ) ) {
+                        foreach ( $children[ $parent ] as $id ) {
+                                $sum += $this->cat_counts( $id, $children, $by_id, $counts );
+                        }
+                }
+                if ( $parent > 0 && isset( $by_id[ $parent ] ) ) {
+                        $sum += (int) $by_id[ $parent ]->count;
+                        $counts[ $parent ] = $sum;
+                }
+                return $sum;
+        }
+
+        /**
+         * One level of the category tree (recursive).
+         *
+         * @param int   $parent    Parent term id.
+         * @param array $ctx       Tree context.
+         * @param int   $depth     Current depth.
+         * @param int   $top_index Rendered top-level counter (by reference).
+         * @return string
+         */
+        protected function cats_branch_html( $parent, $ctx, $depth = 0, &$top_index = 0 ) {
+                if ( empty( $ctx['children'][ $parent ] ) ) {
+                        return '';
+                }
+                if ( $ctx['max_depth'] > 0 && $depth >= $ctx['max_depth'] ) {
+                        return '';
+                }
+
+                $html = '';
+                foreach ( $ctx['children'][ $parent ] as $id ) {
+                        if ( ! isset( $ctx['by_id'][ $id ] ) ) {
+                                continue;
+                        }
+                        $term  = $ctx['by_id'][ $id ];
+                        $total = isset( $ctx['inclusive'][ $id ] ) ? (int) $ctx['inclusive'][ $id ] : (int) $term->count;
+                        if ( ! $ctx['show_empty'] && $total <= 0 ) {
+                                continue;
+                        }
+
+                        $is_top   = ( 0 === $depth );
+                        $is_extra = $is_top && $ctx['max_top'] > 0 && $top_index >= $ctx['max_top'] && ! isset( $ctx['path'][ $id ] );
+                        if ( $is_top ) {
+                                $top_index++;
+                        }
+
+                        $has_children = ! empty( $ctx['children'][ $id ] ) && ( 0 === $ctx['max_depth'] || $depth + 1 < $ctx['max_depth'] );
+                        $is_current   = ( (int) $id === (int) $ctx['current'] );
+                        $is_ancestor  = ! $is_current && isset( $ctx['path'][ $id ] );
+                        $is_open      = $has_children && ( 'all' === $ctx['expand'] || ( 'current' === $ctx['expand'] && isset( $ctx['path'][ $id ] ) ) );
+
+                        $display = null;
+                        if ( $ctx['counts_on'] ) {
+                                $display = $ctx['counts_include'] ? $total : (int) $term->count;
+                        }
+
+                        $classes = array( 'hsw-af__catnode' );
+                        if ( $is_open ) {
+                                $classes[] = 'is-open';
+                        }
+                        if ( $is_current ) {
+                                $classes[] = 'is-current';
+                        } elseif ( $is_ancestor ) {
+                                $classes[] = 'is-ancestor';
+                        }
+                        if ( $is_extra ) {
+                                $classes[] = 'is-extra';
+                        }
+
+                        $html .= '<li class="' . esc_attr( implode( ' ', $classes ) ) . '"' . ( $is_extra ? ' hidden' : '' ) . '>';
+
+                        $html .= '<div class="hsw-af__catrow">';
+                        if ( $has_children ) {
+                                $html .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="' . ( $is_open ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '"><i class="hsw-ic" aria-hidden="true">expand_more</i></button>';
+                        } else {
+                                $html .= '<span class="hsw-af__catspacer" aria-hidden="true"></span>';
+                        }
+
+                        $link = get_term_link( $term );
+                        if ( is_wp_error( $link ) ) {
+                                $link = '#';
+                        }
+                        $link_class = 'hsw-af__catlink';
+                        if ( $is_current ) {
+                                $link_class .= ' is-active';
+                        } elseif ( $is_ancestor ) {
+                                $link_class .= ' is-ancestor';
+                        }
+
+                        $html .= '<a class="' . esc_attr( $link_class ) . '" href="' . esc_url( $link ) . '" data-hsw-catname="' . esc_attr( mb_strtolower( $term->name . ' ' . $term->slug ) ) . '"' . ( $is_current ? ' aria-current="page"' : '' ) . '><span class="hsw-af__catname">' . esc_html( $term->name ) . '</span></a>';
+
+                        if ( null !== $display ) {
+                                if ( $is_current ) {
+                                        $html .= '<span class="hsw-af__badge">' . esc_html( HSW_Helpers::fa_num( $display ) ) . '</span>';
+                                } else {
+                                        $html .= '<span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( $display ) ) . ')</span>';
+                                }
+                        }
+
+                        $html .= '</div>';
+
+                        if ( $has_children ) {
+                                $html .= '<ul class="hsw-af__catbranch" data-hsw-catbranch role="group"' . ( $is_open ? '' : ' hidden' ) . '>';
+                                $html .= $this->cats_branch_html( $id, $ctx, $depth + 1, $top_index );
+                                $html .= '</ul>';
+                        }
+
+                        $html .= '</li>';
+                }
+
+                return $html;
+        }
+
+        /**
+         * Editor demo of the category tree (root → current → children).
+         *
+         * @param array $box Box model.
+         * @return string
+         */
+        protected function cats_demo_html( $box ) {
+                $d = $this->demo();
+                if ( empty( $d['cats'] ) ) {
+                        return '';
+                }
+                $d      = $d['cats'];
+                $root   = $d['root'];
+                $mid    = $d['mid'];
+                $leafs  = $d['leafs'];
+                $counts = ! empty( $box['cats_counts'] );
+
+                $body = '';
+                if ( ! empty( $box['cats_search'] ) ) {
+                        $body .= '<div class="hsw-af__search hsw-af__catsearch">';
+                        $body .= '<input type="text" class="hsw-af__searchinput" placeholder="' . esc_attr__( 'جستجوی دسته...', 'hamishop-elementor-widgets' ) . '" data-hsw-catsearch aria-label="' . esc_attr__( 'جستجوی دسته‌بندی', 'hamishop-elementor-widgets' ) . '">';
+                        $body .= '<i class="hsw-ic" aria-hidden="true">search</i>';
+                        $body .= '</div>';
+                }
+
+                $body .= '<ul class="hsw-af__tree hsw-af__cattree" data-hsw-cattree role="tree">';
+                $body .= '<li class="hsw-af__catnode is-open">';
+                $body .= '<div class="hsw-af__catrow">';
+                $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '"><i class="hsw-ic" aria-hidden="true">expand_more</i></button>';
+                $body .= '<a class="hsw-af__catlink" href="#" data-hsw-catname="' . esc_attr( mb_strtolower( $root['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $root['name'] ) . '</span></a>';
+                if ( $counts ) {
+                        $body .= '<span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( (int) $root['count'] ) ) . ')</span>';
+                }
+                $body .= '</div>';
+                $body .= '<ul class="hsw-af__catbranch" data-hsw-catbranch>';
+                $body .= '<li class="hsw-af__catnode is-open is-current">';
+                $body .= '<div class="hsw-af__catrow">';
+                $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '"><i class="hsw-ic" aria-hidden="true">expand_more</i></button>';
+                $body .= '<a class="hsw-af__catlink is-active" href="#" aria-current="page" data-hsw-catname="' . esc_attr( mb_strtolower( $mid['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $mid['name'] ) . '</span></a>';
+                if ( $counts ) {
+                        $body .= '<span class="hsw-af__badge">' . esc_html( HSW_Helpers::fa_num( (int) $mid['count'] ) ) . '</span>';
+                }
+                $body .= '</div>';
+                $body .= '<ul class="hsw-af__catbranch" data-hsw-catbranch>';
+                foreach ( $leafs as $leaf ) {
+                        $body .= '<li class="hsw-af__catnode">';
+                        $body .= '<div class="hsw-af__catrow"><span class="hsw-af__catspacer" aria-hidden="true"></span>';
+                        $body .= '<a class="hsw-af__catlink" href="#" data-hsw-catname="' . esc_attr( mb_strtolower( $leaf['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $leaf['name'] ) . '</span></a>';
+                        if ( $counts ) {
+                                $body .= '<span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( (int) $leaf['count'] ) ) . ')</span>';
+                        }
+                        $body .= '</div></li>';
+                }
+                $body .= '</ul></li></ul></li></ul>';
+
+                return $body;
+        }
+
 
         /**
          * Attribute box: checks / chips / swatches.

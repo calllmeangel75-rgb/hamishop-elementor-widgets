@@ -30,8 +30,6 @@ class HSW_Widget_Archive_Breadcrumb extends HSW_Archive_Base {
         }
 
         protected function register_controls() {
-                $this->ctrl_palette();
-
                 /* ------------------------- CONTENT ------------------------- */
                 $this->start_controls_section(
                         'sec_content',

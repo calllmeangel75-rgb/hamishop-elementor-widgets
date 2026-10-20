@@ -97,9 +97,106 @@
                 head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
         });
 
+        /* ======================= CATEGORY TREE ======================= */
+
+        function setCatNodeOpen(li, open) {
+                if (!li) { return; }
+                var branch = li.querySelector('[data-hsw-catbranch]');
+                var toggle = li.querySelector('[data-hsw-cattoggle]');
+                li.classList.toggle('is-open', open);
+                if (branch) { branch.hidden = !open; }
+                if (toggle) { toggle.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+        }
+
+        function filterCatTree(input) {
+                var box = input.closest('.hsw-af__box');
+                var tree = box ? box.querySelector('[data-hsw-cattree]') : null;
+                if (!tree) { return; }
+                var empty = box.querySelector('[data-hsw-catempty]');
+                var q = input.value.trim().toLowerCase();
+                var nodes = tree.querySelectorAll('.hsw-af__catnode');
+                var links = tree.querySelectorAll('[data-hsw-catname]');
+                var showAll = tree.getAttribute('data-hsw-showall') === '1';
+
+                if (!q) {
+                        nodes.forEach(function (node) {
+                                node.hidden = false;
+                                node.classList.remove('is-search-hit');
+                        });
+                        if (!showAll) {
+                                tree.querySelectorAll('.hsw-af__catnode.is-extra').forEach(function (node) {
+                                        node.hidden = true;
+                                });
+                        }
+                        nodes.forEach(function (node) {
+                                var branch = node.querySelector('[data-hsw-catbranch]');
+                                if (branch) { branch.hidden = !node.classList.contains('is-open'); }
+                        });
+                        if (empty) { empty.hidden = true; }
+                        return;
+                }
+
+                nodes.forEach(function (node) {
+                        node.hidden = true;
+                        node.classList.remove('is-search-hit');
+                });
+
+                var hits = 0;
+                links.forEach(function (link) {
+                        var name = link.getAttribute('data-hsw-catname') || '';
+                        if (-1 === name.indexOf(q)) { return; }
+                        hits++;
+                        var li = link.closest('.hsw-af__catnode');
+                        while (li) {
+                                li.hidden = false;
+                                li.classList.add('is-search-hit');
+                                var parentUl = li.parentElement;
+                                if (!parentUl || !parentUl.hasAttribute('data-hsw-catbranch')) {
+                                        li = null;
+                                        continue;
+                                }
+                                parentUl.hidden = false;
+                                var parentLi = parentUl.parentElement ? parentUl.parentElement.closest('.hsw-af__catnode') : null;
+                                setCatNodeOpen(parentLi, true);
+                                li = parentLi;
+                        }
+                });
+
+                if (empty) { empty.hidden = hits > 0; }
+        }
+
+        document.addEventListener('click', function (e) {
+                var toggle = e.target.closest('[data-hsw-cattoggle]');
+                if (toggle) {
+                        var node = toggle.closest('.hsw-af__catnode');
+                        if (node) {
+                                setCatNodeOpen(node, !node.classList.contains('is-open'));
+                        }
+                        return;
+                }
+                var more = e.target.closest('[data-hsw-catmore]');
+                if (!more) { return; }
+                var box = more.closest('.hsw-af__box');
+                var tree = box ? box.querySelector('[data-hsw-cattree]') : null;
+                if (!tree) { return; }
+                tree.querySelectorAll('.hsw-af__catnode.is-extra').forEach(function (extra) {
+                        extra.hidden = false;
+                });
+                tree.setAttribute('data-hsw-showall', '1');
+                more.hidden = true;
+        });
+
+        document.addEventListener('input', function (e) {
+                var catInput = e.target.closest('[data-hsw-catsearch]');
+                if (catInput) {
+                        filterCatTree(catInput);
+                }
+        });
+
         /* ======================= IN-LIST SEARCH ======================= */
 
         document.addEventListener('input', function (e) {
+                if (e.target.closest('[data-hsw-catsearch]')) { return; }
                 var input = e.target.closest('[data-hsw-search]');
                 if (!input) { return; }
                 var box = input.closest('.hsw-af__box');
