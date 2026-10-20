@@ -104,6 +104,24 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 		$this->end_controls_section();
 
 		$this->start_controls_section(
+			'sec_menu_items',
+			array(
+				'label' => __( 'آیتم‌های منوی حساب', 'hamishop-elementor-widgets' ),
+				'tab'   => Controls_Manager::TAB_CONTENT,
+			)
+		);
+		$this->add_switch_control( 'ac_menu_orders', __( 'سفارش‌ها', 'hamishop-elementor-widgets' ), __( 'با غیرفعال کردن هر بخش، لینک آن از منو حذف می‌شود و باز کردن مستقیم آدرس آن نیز پیام «بخش غیرفعال است» نشان می‌دهد.', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_downloads', __( 'دانلودها', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_addresses', __( 'آدرس‌ها', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_wishlist', __( 'علاقه‌مندی‌ها', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_wallet', __( 'کیف پول', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_support', __( 'پشتیبانی', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_notifications', __( 'اعلان‌ها', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_payments', __( 'روش‌های پرداخت', 'hamishop-elementor-widgets' ) );
+		$this->add_switch_control( 'ac_menu_account', __( 'اطلاعات حساب', 'hamishop-elementor-widgets' ) );
+		$this->end_controls_section();
+
+		$this->start_controls_section(
 			'sec_dashboard',
 			array(
 				'label' => __( 'بخش‌های پیشخوان', 'hamishop-elementor-widgets' ),
@@ -261,14 +279,15 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 		$this->end_controls_section();
 	}
 
-	private function add_switch_control( $key, $label ) {
+	private function add_switch_control( $key, $label, $description = '' ) {
 		$this->add_control(
 			$key,
 			array(
-				'label'   => $label,
-				'type'    => Controls_Manager::SELECT,
-				'default' => '',
-				'options' => array(
+				'label'       => $label,
+				'type'        => Controls_Manager::SELECT,
+				'default'     => '',
+				'description' => $description,
+				'options'     => array(
 					''    => __( 'پیش‌فرض تنظیمات', 'hamishop-elementor-widgets' ),
 					'yes' => __( 'فعال', 'hamishop-elementor-widgets' ),
 					'no'  => __( 'غیرفعال', 'hamishop-elementor-widgets' ),
@@ -351,6 +370,26 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 			if ( isset( $s[ $key ] ) && in_array( $s[ $key ], array( 'yes', 'no' ), true ) ) {
 				$args[ $map[0] ][ $map[1] ] = $s[ $key ];
 			}
+		}
+
+		$menu_switches = array(
+			'ac_menu_orders'        => 'orders',
+			'ac_menu_downloads'     => 'downloads',
+			'ac_menu_addresses'     => 'edit-address',
+			'ac_menu_wishlist'      => 'wishlist',
+			'ac_menu_wallet'        => 'wallet',
+			'ac_menu_support'       => 'support',
+			'ac_menu_notifications' => 'notifications',
+			'ac_menu_payments'      => 'payment-methods',
+			'ac_menu_account'       => 'edit-account',
+		);
+		foreach ( $menu_switches as $key => $item_key ) {
+			if ( isset( $s[ $key ] ) && in_array( $s[ $key ], array( 'yes', 'no' ), true ) ) {
+				$args['menu']['items'][ $item_key ] = array( 'enabled' => $s[ $key ] );
+			}
+		}
+		if ( empty( $args['menu']['items'] ) ) {
+			unset( $args['menu'] );
 		}
 
 		$texts = array(

@@ -424,7 +424,9 @@ final class HSW_Account_Admin {
 			<p class="hsw-admin-desc">این شورت‌کد را در برگهٔ حساب کاربری ووکامرس یا هر برگهٔ دیگری قرار دهید. ویجت «پنل حساب کاربری HamiShop» در المنتور دقیقاً همین خروجی را می‌سازد.</p>
 			<code class="hsw-code" id="hsw-account-shortcode">[hamishop_account]</code>
 			<button type="button" class="button" data-hsw-copy="#hsw-account-shortcode">کپی شورت‌کد</button>
-			<p class="description">پارامترهای اختیاری: <code>layout="left|right"</code>، <code>show_header="yes|no"</code>، <code>show_menu="yes|no"</code>، <code>show_stats="yes|no"</code>، <code>class="..."</code></p>
+			<p class="description">پارامترهای اختیاری: <code>layout="left|right"</code>، <code>show_header="yes|no"</code>، <code>show_menu="yes|no"</code>، <code>show_stats="yes|no"</code>، <code>hide="downloads,wallet"</code>، <code>class="..."</code></p>
+			<p class="description">با <code>hide</code> می‌توانید هر بخش را مستقیم از شورت‌کد مخفی کنید: <code>downloads</code>، <code>orders</code>، <code>address</code>، <code>wishlist</code>، <code>wallet</code>، <code>support</code>، <code>notifications</code>، <code>payments</code>، <code>account</code>.</p>
+			<p class="description">اگر افزونهٔ ورود پیامکی فعال باشد، فرم ورود و ثبت‌نام این پنل به‌صورت خودکار نمایش داده نمی‌شود و ورود به‌طور کامل به افزونهٔ پیامکی واگذار می‌شود.</p>
 		</div>
 		<div class="hsw-admin-card">
 			<h2>وضعیت صفحهٔ حساب</h2>
@@ -432,6 +434,7 @@ final class HSW_Account_Admin {
 				<li><span>برگهٔ حساب ووکامرس</span><a href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener">مشاهده</a></li>
 				<li><span>شناسهٔ برگه</span><code><?php echo esc_html( HSW_Helpers::fa_num( $account_id ) ); ?></code></li>
 				<li><span>وضعیت شورت‌کد</span><code><?php echo $native ? 'شورت‌کد پیش‌فرض ووکامرس' : 'آماده'; ?></code></li>
+				<li><span>ورود پیامکی</span><code><?php echo HSW_Account::instance()->sms_login_active() ? 'فعال — فرم پنل غیرفعال است' : 'غیرفعال / شناسایی نشد'; ?></code></li>
 				<li><span>تیکت‌های پشتیبانی</span><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hsw_ticket' ) ); ?>">مدیریت تیکت‌ها</a></li>
 			</ul>
 			<?php if ( $native ) : ?>
@@ -441,7 +444,8 @@ final class HSW_Account_Admin {
 		</div>
 		<div class="hsw-admin-card">
 			<h2>راهنمای ویجت المنتور</h2>
-			<p>در ویرایشگر المنتور، دستهٔ «HamiShop Account» را باز کنید و ویجت «پنل حساب کاربری HamiShop» را بکشید. تب Content برای هدر، بخش‌ها، فرم ورود و پیش‌نمایش است؛ تب Style شامل پالت رنگ، چیدمان و تایپوگرافی است.</p>
+			<p>در ویرایشگر المنتور، دستهٔ «حامی — پنل حساب کاربری» را باز کنید و ویجت «پنل حساب کاربری HamiShop» را بکشید. تب Content برای هدر، منوی حساب (فعال/غیرفعال کردن دانلودها، سفارش‌ها و...)، بخش‌ها، فرم ورود و پیش‌نمایش است؛ تب Style شامل پالت رنگ، چیدمان و تایپوگرافی است.</p>
+			<p>اگر از بلوک شورت‌کد استفاده می‌کنید، برای شخصی‌سازی سریع همان پارامتر <code>hide</code> را به شورت‌کد اضافه کنید؛ برای کنترل کامل بصری، ویجت المنتور را جایگزین بلوک شورت‌کد کنید.</p>
 		</div>
 		<script>
 			document.addEventListener('click', function (e) {

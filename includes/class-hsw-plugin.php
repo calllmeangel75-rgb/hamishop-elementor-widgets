@@ -89,7 +89,7 @@ final class HSW_Plugin {
                         'hamishop-loop'    => __( 'حامی — ویجت‌های لوپ محصولات', 'hamishop-elementor-widgets' ),
                         'hamishop-cart'    => __( 'حامی — ویجت‌های سبد خرید و پرداخت', 'hamishop-elementor-widgets' ),
                         'hamishop-archive' => __( 'حامی — ویجت‌های آرشیو محصولات', 'hamishop-elementor-widgets' ),
-                        'hamishop-account' => __( 'HamiShop - پنل حساب کاربری', 'hamishop-elementor-widgets' ),
+                        'hamishop-account' => __( 'حامی — پنل حساب کاربری', 'hamishop-elementor-widgets' ),
                         'hamishop-blog'    => __( 'حامی — ویجت‌های مجله و وبلاگ', 'hamishop-elementor-widgets' ),
                 );
                 foreach ( $categories as $slug => $title ) {

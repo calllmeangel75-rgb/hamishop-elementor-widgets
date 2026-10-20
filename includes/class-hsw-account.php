@@ -512,6 +512,7 @@ final class HSW_Account {
 				'show_header'  => '',
 				'show_menu'    => '',
 				'show_stats'   => '',
+				'hide'         => '',
 				'class'        => '',
 			),
 			$atts,
@@ -533,6 +534,26 @@ final class HSW_Account {
 		}
 		if ( 'yes' === $atts['show_stats'] || 'no' === $atts['show_stats'] ) {
 			$args['dashboard']['show_stats'] = $atts['show_stats'];
+		}
+		if ( ! empty( $atts['hide'] ) && is_string( $atts['hide'] ) ) {
+			$defaults = self::defaults();
+			$known    = array_keys( $defaults['menu']['items'] );
+			$aliases  = array(
+				'address'   => 'edit-address',
+				'addresses' => 'edit-address',
+				'payments'  => 'payment-methods',
+				'payment'   => 'payment-methods',
+				'account'   => 'edit-account',
+				'profile'   => 'edit-account',
+				'logout'    => 'customer-logout',
+			);
+			foreach ( explode( ',', $atts['hide'] ) as $key ) {
+				$key = sanitize_key( trim( $key ) );
+				$key = isset( $aliases[ $key ] ) ? $aliases[ $key ] : $key;
+				if ( in_array( $key, $known, true ) ) {
+					$args['menu']['items'][ $key ]['enabled'] = 'no';
+				}
+			}
 		}
 		if ( ! empty( $atts['class'] ) ) {
 			$args['extra_class'] = sanitize_html_class( $atts['class'] );
@@ -638,8 +659,19 @@ final class HSW_Account {
 
 	private function resolve_args( $args ) {
 		$base = $this->settings();
-		foreach ( array( 'general', 'dashboard', 'support', 'notifications', 'wallet', 'loyalty', 'auth', 'design' ) as $group ) {
-			if ( isset( $args[ $group ] ) && is_array( $args[ $group ] ) ) {
+		foreach ( array( 'general', 'dashboard', 'support', 'notifications', 'wallet', 'loyalty', 'auth', 'design', 'menu' ) as $group ) {
+			if ( ! isset( $args[ $group ] ) || ! is_array( $args[ $group ] ) ) {
+				continue;
+			}
+			if ( isset( $base[ $group ] ) && is_array( $base[ $group ] ) ) {
+				if ( 'menu' === $group && isset( $args[ $group ]['items'] ) && is_array( $args[ $group ]['items'] ) ) {
+					foreach ( $args[ $group ]['items'] as $key => $item ) {
+						if ( is_array( $item ) && isset( $base[ $group ]['items'][ $key ] ) ) {
+							$base[ $group ]['items'][ $key ] = array_replace( $base[ $group ]['items'][ $key ], $item );
+						}
+					}
+					unset( $args[ $group ]['items'] );
+				}
 				$base[ $group ] = array_replace( $base[ $group ], $args[ $group ] );
 			}
 		}
@@ -903,6 +935,9 @@ final class HSW_Account {
 		$out = array();
 		foreach ( $raw as $key => $label ) {
 			if ( 'customer-logout' === $key && 'yes' !== $ctx['opts']['general']['show_logout'] ) {
+				continue;
+			}
+			if ( isset( $ctx['opts']['menu']['items'][ $key ]['enabled'] ) && 'yes' !== $ctx['opts']['menu']['items'][ $key ]['enabled'] ) {
 				continue;
 			}
 			$badge = '';
@@ -1675,7 +1710,7 @@ final class HSW_Account {
 		if ( 'dashboard' === $endpoint ) {
 			return '<div class="hsw-ac__content">' . $this->dashboard_cards( $ctx ) . '</div>';
 		}
-		if ( 'customer-logout' !== $endpoint && ! $this->endpoint_enabled( $endpoint ) ) {
+		if ( 'customer-logout' !== $endpoint && ! $this->endpoint_enabled_for_context( $endpoint, $ctx ) ) {
 			return '<div class="hsw-ac__content">' . $this->disabled_card( $ctx['current_label'] ) . '</div>';
 		}
 		if ( 'support' === $endpoint ) {
@@ -1705,6 +1740,37 @@ final class HSW_Account {
 		do_action( 'woocommerce_account_content' );
 		echo '</div></div>';
 		return (string) ob_get_clean();
+	}
+
+	private function endpoint_enabled_for_context( $endpoint, $ctx ) {
+		if ( in_array( $endpoint, array( 'dashboard', 'customer-logout' ), true ) ) {
+			return true;
+		}
+
+		$map = array(
+			'view-order'                 => 'orders',
+			'order-pay'                  => 'orders',
+			'order-received'             => 'orders',
+			'add-payment-method'         => 'payment-methods',
+			'delete-payment-method'      => 'payment-methods',
+			'set-default-payment-method' => 'payment-methods',
+		);
+		$key = isset( $map[ $endpoint ] ) ? $map[ $endpoint ] : $endpoint;
+
+		if ( isset( $ctx['opts']['menu']['items'][ $key ]['enabled'] ) && 'yes' !== $ctx['opts']['menu']['items'][ $key ]['enabled'] ) {
+			return false;
+		}
+		if ( 'support' === $key && 'yes' !== $ctx['opts']['support']['enabled'] ) {
+			return false;
+		}
+		if ( 'notifications' === $key && 'yes' !== $ctx['opts']['notifications']['enabled'] ) {
+			return false;
+		}
+		if ( 'wallet' === $key && 'yes' !== $ctx['opts']['wallet']['enabled'] ) {
+			return false;
+		}
+
+		return $this->endpoint_enabled( $endpoint );
 	}
 
 	public function endpoint_enabled( $endpoint ) {
@@ -2096,7 +2162,112 @@ final class HSW_Account {
 	 * Authentication
 	 * ------------------------------------------------------------------ */
 
+	/**
+	 * Whether authentication is handled by an SMS/OTP login plugin.
+	 *
+	 * The check is deliberately conservative: SMS notification plugins are
+	 * ignored, while Digits/OTP/mobile-login integrations are detected by
+	 * plugin slug or their public API. A site can override the result with
+	 * the `hsw_sms_login_active` filter.
+	 */
+	public function sms_login_active() {
+		$active  = false;
+		$plugins = (array) get_option( 'active_plugins', array() );
+		if ( is_multisite() ) {
+			$network = (array) get_site_option( 'active_sitewide_plugins', array() );
+			$plugins = array_merge( $plugins, array_keys( $network ) );
+		}
+
+		$pattern = '/(digits|otp[-_ ]?(?:login|auth|sms|woocommerce|account|user|mobile|phone)|(?:woocommerce|wp|wordpress)[-_ ]?otp|sms[-_ ]?otp|otp[-_ ]?sms|login[-_ ]?(?:with[-_ ]?)?(?:sms|otp|mobile|phone)|(?:sms|mobile|phone)[-_ ]?(?:login|auth|authentication)|(?:ورود|ثبت\s*نام|لاگین).{0,16}پیامک|پیامک.{0,16}(?:ورود|ثبت\s*نام|لاگین))/iu';
+		foreach ( $plugins as $plugin ) {
+			if ( ! is_string( $plugin ) ) {
+				continue;
+			}
+			$haystack = $plugin;
+			$file     = WP_PLUGIN_DIR . '/' . $plugin;
+			if ( is_readable( $file ) ) {
+				$headers  = get_file_data( $file, array( 'name' => 'Plugin Name' ) );
+				$haystack .= ' ' . ( isset( $headers['name'] ) ? $headers['name'] : '' );
+			}
+			if ( preg_match( $pattern, $haystack ) ) {
+				$active = true;
+				break;
+			}
+		}
+
+		if ( ! $active ) {
+			foreach ( array( 'Digits', 'DIGITS_OTP', 'WP_OTP_Login', 'WooCommerce_OTP_Login', 'SMS_Login', 'OTP_Login', 'Mobile_Login' ) as $class ) {
+				if ( class_exists( $class ) ) {
+					$active = true;
+					break;
+				}
+			}
+		}
+
+		if ( ! $active ) {
+			foreach ( array( 'digits_login_form', 'sms_login_form', 'otp_login_form', 'wp_sms_login_form', 'woocommerce_sms_login_form' ) as $function ) {
+				if ( function_exists( $function ) ) {
+					$active = true;
+					break;
+				}
+			}
+		}
+
+		if ( ! $active ) {
+			foreach ( array( 'digits_login', 'digits_otp', 'sms_login', 'otp_login', 'wp_sms_login', 'woocommerce_sms_login' ) as $shortcode ) {
+				if ( shortcode_exists( $shortcode ) ) {
+					$active = true;
+					break;
+				}
+			}
+		}
+
+		return (bool) apply_filters( 'hsw_sms_login_active', $active );
+	}
+
+	private function delegated_auth_output( $opts ) {
+		if ( ! empty( $opts['editor'] ) ) {
+			return '<div class="hsw-ac hsw-ac--auth hsw-ac--editor"><div class="hsw-ac__editor-note">' . $this->icon( 'info' ) . '<span>' . esc_html__( 'افزونه ورود پیامکی فعال است؛ فرم ورود و ثبت‌نام این پنل نمایش داده نمی‌شود و ورود به‌صورت کامل توسط افزونه پیامکی مدیریت می‌شود.', 'hamishop-elementor-widgets' ) . '</span></div></div>';
+		}
+
+		$shortcode = (string) apply_filters( 'hsw_delegated_auth_shortcode', '' );
+		if ( '' !== trim( $shortcode ) ) {
+			$html = trim( (string) do_shortcode( $shortcode ) );
+			if ( '' !== $html ) {
+				return $html;
+			}
+		}
+
+		$candidates = (array) apply_filters(
+			'hsw_sms_login_shortcodes',
+			array( 'sms_login', 'otp_login', 'digits_login', 'woocommerce_sms_login', 'wp_sms_login', 'mobile_login', 'phone_login', 'digits_otp' )
+		);
+		foreach ( $candidates as $candidate ) {
+			$candidate = sanitize_key( $candidate );
+			if ( '' === $candidate || ! shortcode_exists( $candidate ) ) {
+				continue;
+			}
+			$html = trim( (string) do_shortcode( '[' . $candidate . ']' ) );
+			if ( '' !== $html ) {
+				return $html;
+			}
+		}
+
+		if ( function_exists( 'WC' ) && shortcode_exists( 'woocommerce_my_account' ) ) {
+			$html = trim( (string) do_shortcode( '[woocommerce_my_account]' ) );
+			if ( '' !== $html ) {
+				return $html;
+			}
+		}
+
+		return '<div class="hsw-ac hsw-ac--notice"><p>' . esc_html__( 'ورود و ثبت‌نام از طریق افزونه ورود پیامکی انجام می‌شود.', 'hamishop-elementor-widgets' ) . '</p></div>';
+	}
+
 	private function render_auth_view( $lost, $opts ) {
+		if ( $this->sms_login_active() ) {
+			return $this->delegated_auth_output( $opts );
+		}
+
 		$lost          = (bool) $lost;
 		$show_register = ! $lost && 'yes' === get_option( 'woocommerce_enable_myaccount_registration' ) && 'yes' === $opts['auth']['show_register'];
 		$active        = 'login';
