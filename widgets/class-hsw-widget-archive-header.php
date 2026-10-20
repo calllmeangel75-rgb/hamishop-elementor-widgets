@@ -33,6 +33,8 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
         }
 
         protected function register_controls() {
+                $this->ctrl_palette();
+
                 /* ------------------------- CONTENT ------------------------- */
                 $this->start_controls_section(
                         'sec_content',
@@ -139,6 +141,65 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 );
 
                 $this->add_control(
+                        'desc_pos',
+                        array(
+                                'label'       => __( 'محل نمایش توضیحات آرشیو', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'header',
+                                'separator'   => 'before',
+                                'options'     => array(
+                                        'header' => __( 'بالا — داخل سربرگ', 'hamishop-elementor-widgets' ),
+                                        'bottom' => __( 'پایین محصولات (بالای راهنمای خرید)', 'hamishop-elementor-widgets' ),
+                                        'off'    => __( 'مخفی', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'در «ویجت جامع» گزینه «پایین محصولات» توضیحات را بعد از گرید و قبل از راهنمای خرید نشان می‌دهد؛ یک بار بیشتر رندر نمی‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'desc_title',
+                        array(
+                                'label'       => __( 'عنوان توضیحات (حالت پایین محصولات)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ),
+                                'description' => __( '{name} با نام دسته جایگزین می‌شود.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'desc_pos' => 'bottom' ),
+                        )
+                );
+
+                $this->add_control(
+                        'desc_clamp',
+                        array(
+                                'label'       => __( 'تعداد خطوط پیش از «مشاهده بیشتر»', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::NUMBER,
+                                'default'     => 3,
+                                'min'         => 1,
+                                'max'         => 12,
+                                'condition'   => array( 'desc_pos!' => 'off' ),
+                        )
+                );
+
+                $this->add_control(
+                        'more_text',
+                        array(
+                                'label'     => __( 'متن دکمه بسته', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::TEXT,
+                                'default'   => __( 'مشاهده بیشتر', 'hamishop-elementor-widgets' ),
+                                'condition' => array( 'desc_pos!' => 'off' ),
+                        )
+                );
+
+                $this->add_control(
+                        'less_text',
+                        array(
+                                'label'     => __( 'متن دکمه باز', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::TEXT,
+                                'default'   => __( 'بستن', 'hamishop-elementor-widgets' ),
+                                'condition' => array( 'desc_pos!' => 'off' ),
+                        )
+                );
+
+                $this->add_control(
                         'show_guide_btn',
                         array(
                                 'label'        => __( 'دکمه راهنما (موبایل)', 'hamishop-elementor-widgets' ),
@@ -156,6 +217,25 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                         array( 'label' => __( 'استایل', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
                 );
 
+                $this->add_control(
+                        'hd_grad_head',
+                        array( 'label' => __( 'گرادیانت سربرگ', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING )
+                );
+                $this->a_color( 'hd_grad_a', __( 'گرادیانت — رنگ شروع', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__hero', '--hswa-hero-a' );
+                $this->a_color( 'hd_grad_b', __( 'گرادیانت — رنگ پایان', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__hero', '--hswa-hero-b' );
+                $this->add_control(
+                        'hd_grad_angle',
+                        array(
+                                'label'       => __( 'زاویه گرادیانت (deg)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::NUMBER,
+                                'min'         => 0,
+                                'max'         => 360,
+                                'step'        => 1,
+                                'placeholder' => '270',
+                                'selectors'   => array( '{{WRAPPER}} .hsw-ahd__hero' => '--hswa-hero-angle: {{VALUE}}deg;' ),
+                        )
+                );
+
                 $this->a_box( 'hd', '{{WRAPPER}} .hsw-ahd__hero' );
                 $this->a_text( 'hd_h1', '{{WRAPPER}} .hsw-ahd__h1', array( 'default' => 24 ) );
                 $this->a_color( 'hd_count_bg', __( 'پس‌زمینه قرص تعداد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__count', 'background-color' );
@@ -166,6 +246,100 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 $this->a_color( 'hd_pill2_bg', __( 'پس‌زمینه قرص عادی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__pill, {{WRAPPER}} .hsw-ahd__chip', 'background-color' );
                 $this->a_color( 'hd_pill2_bd', __( 'حاشیه قرص عادی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__pill, {{WRAPPER}} .hsw-ahd__chip', 'border-color' );
                 $this->a_text( 'hd_desc', '{{WRAPPER}} .hsw-ahd__desc', array( 'default' => 14 ) );
+
+                $this->add_control(
+                        'hd_desc_align',
+                        array(
+                                'label'     => __( 'چینش متن توضیحات', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'default'   => '',
+                                'options'   => array(
+                                        ''        => __( 'پیش‌فرض (دوطرفه)', 'hamishop-elementor-widgets' ),
+                                        'start'   => __( 'شروع (راست)', 'hamishop-elementor-widgets' ),
+                                        'center'  => __( 'وسط', 'hamishop-elementor-widgets' ),
+                                        'left'    => __( 'چپ', 'hamishop-elementor-widgets' ),
+                                        'justify' => __( 'دوطرفه (justify)', 'hamishop-elementor-widgets' ),
+                                ),
+                                'selectors' => array(
+                                        '{{WRAPPER}} .hsw-ahd__desc, {{WRAPPER}} .hsw-ahd__mdesc' => 'text-align: {{VALUE}};',
+                                ),
+                        )
+                );
+                $this->add_control(
+                        'hd_desc_lh',
+                        array(
+                                'label'       => __( 'ارتفاع خط توضیحات', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::NUMBER,
+                                'min'         => 1,
+                                'max'         => 3,
+                                'step'        => 0.05,
+                                'placeholder' => '1.9',
+                                'selectors'   => array(
+                                        '{{WRAPPER}} .hsw-ahd__desc, {{WRAPPER}} .hsw-ahd__mdesc' => 'line-height: {{VALUE}};',
+                                ),
+                        )
+                );
+
+                $this->add_control(
+                        'hd_dbox_head',
+                        array( 'label' => __( 'باکس توضیحات (حالت پایین محصولات)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
+                );
+                $this->a_box( 'hd_dbox', '{{WRAPPER}} .hsw-ahd__descbox' );
+                $this->add_responsive_control(
+                        'hd_dbox_pad',
+                        array(
+                                'label'      => __( 'فاصله داخلی', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 48 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-ahd__descbox' => 'padding: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->a_text( 'hd_dtitle', '{{WRAPPER}} .hsw-ahd__dtitle', array( 'default' => 16 ) );
+
+                $this->add_control(
+                        'hd_more_head',
+                        array( 'label' => __( 'دکمه «مشاهده بیشتر»', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
+                );
+                $more_sel = '{{WRAPPER}} .hsw-ahd__more, {{WRAPPER}} .hsw-ahd__mmore';
+                $this->a_color( 'hd_more_tx', __( 'رنگ متن', 'hamishop-elementor-widgets' ), $more_sel );
+                $this->a_color( 'hd_more_bg', __( 'پس‌زمینه', 'hamishop-elementor-widgets' ), $more_sel, 'background-color' );
+                $this->a_color( 'hd_more_bd', __( 'رنگ حاشیه', 'hamishop-elementor-widgets' ), $more_sel, 'border-color' );
+                $this->add_control(
+                        'hd_more_br',
+                        array(
+                                'label'      => __( 'گردی گوشه‌ها', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'selectors'  => array( $more_sel => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->add_control(
+                        'hd_more_fs',
+                        array(
+                                'label'      => __( 'اندازه فونت', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 8, 'max' => 24 ) ),
+                                'selectors'  => array( $more_sel => 'font-size: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->add_control(
+                        'hd_more_pad',
+                        array(
+                                'label'      => __( 'فاصله داخلی', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 24 ) ),
+                                'selectors'  => array( $more_sel => 'padding: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->a_color( 'hd_more_tx_h', __( 'متن (هاور)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__more:hover, {{WRAPPER}} .hsw-ahd__more:focus-visible, {{WRAPPER}} .hsw-ahd__mmore:hover, {{WRAPPER}} .hsw-ahd__mmore:focus-visible' );
+                $this->a_color( 'hd_more_bg_h', __( 'پس‌زمینه (هاور)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__more:hover, {{WRAPPER}} .hsw-ahd__mmore:hover', 'background-color' );
+                $this->a_color( 'hd_more_bd_h', __( 'حاشیه (هاور)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__more:hover, {{WRAPPER}} .hsw-ahd__mmore:hover', 'border-color' );
+                $this->a_color( 'hd_more_tx_o', __( 'متن (باز / فعال)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__more.is-open, {{WRAPPER}} .hsw-ahd__mmore.is-open' );
+                $this->a_color( 'hd_more_bg_o', __( 'پس‌زمینه (باز / فعال)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__more.is-open, {{WRAPPER}} .hsw-ahd__mmore.is-open', 'background-color' );
 
                 $this->end_controls_section();
         }
@@ -245,14 +419,6 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
         }
 
         /**
-         * SEO description (WYSIWYG override → term description → shop content → demo).
-         */
-        protected function desc_html() {
-                $s = $this->effective_settings();
-                return $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '' );
-        }
-
-        /**
          * Update note with {time} replacement.
          */
         protected function update_note() {
@@ -268,10 +434,17 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
         protected function render() {
                 $s = $this->effective_settings();
 
+                $pos = isset( $s['desc_pos'] ) ? (string) $s['desc_pos'] : 'header';
+                if ( 'bottom' === $pos && ! $this->is_composite_part() ) {
+                        $pos = 'header'; // The composite is the only place that can render the bottom box.
+                }
+                $desc_top    = ( 'header' === $pos );
+                $desc_header = $desc_top ? $this->archive_desc_block_html( $s, 'header' ) : '';
+                $desc_mobile = $desc_top ? $this->archive_desc_block_html( $s, 'mobile' ) : '';
+
                 $title  = $this->title_text();
                 $count  = $this->count_text();
                 $pills  = $this->pills();
-                $desc   = $this->desc_html();
                 $note   = $this->update_note();
                 $guide  = ( 'yes' === ( $s['show_guide_btn'] ?? 'yes' ) );
                 ?>
@@ -299,15 +472,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                                                 </div>
                                         <?php endif; ?>
                                 </div>
-                                <?php if ( $desc ) : ?>
-                                        <div class="hsw-ahd__seobox">
-                                                <div class="hsw-ahd__desc is-clamped" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized above. ?></div>
-                                                <button type="button" class="hsw-ahd__more" data-hsw-seo aria-expanded="false">
-                                                        <span><?php esc_html_e( 'مشاهده بیشتر', 'hamishop-elementor-widgets' ); ?></span>
-                                                        <i class="hsw-ic" aria-hidden="true">expand_more</i>
-                                                </button>
-                                        </div>
-                                <?php endif; ?>
+                                <?php echo $desc_header; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe HTML from archive_desc_block_html(). ?>
                         </header>
 
                         <!-- =================== MOBILE =================== -->
@@ -334,14 +499,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                                 </div>
                         <?php endif; ?>
 
-                        <?php if ( $desc ) : ?>
-                                <div class="hsw-ahd__mteaser hsw-m">
-                                        <div class="hsw-ahd__mdesc is-clamped" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized above. ?></div>
-                                        <button type="button" class="hsw-ahd__mmore" data-hsw-seo aria-expanded="false">
-                                                <span><?php esc_html_e( 'ادامه مطلب', 'hamishop-elementor-widgets' ); ?></span>
-                                        </button>
-                                </div>
-                        <?php endif; ?>
+                        <?php echo $desc_mobile; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe HTML from archive_desc_block_html(). ?>
 
                 </section>
                 <?php

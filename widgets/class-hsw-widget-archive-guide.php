@@ -32,6 +32,8 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
         }
 
         protected function register_controls() {
+                $this->ctrl_palette();
+
                 /* ------------------------- CONTENT ------------------------- */
                 $this->start_controls_section(
                         'sec_content',
@@ -111,39 +113,6 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                 );
 
                 $this->add_control(
-                        'desc_on',
-                        array(
-                                'label'     => __( 'نمایش بلوک «توضیحات آرشیو» در پایین صفحه', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::SWITCHER,
-                                'default'   => 'yes',
-                                'separator' => 'before',
-                                'description' => __( 'متن مرتبط با همین دسته‌بندی به‌صورت خودکار از توضیحات دسته (یا برگه فروشگاه) خوانده می‌شود.', 'hamishop-elementor-widgets' ),
-                        )
-                );
-
-                $this->add_control(
-                        'desc_title',
-                        array(
-                                'label'       => __( 'عنوان بخش توضیحات', 'hamishop-elementor-widgets' ),
-                                'type'        => Controls_Manager::TEXT,
-                                'default'     => __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ),
-                                'description' => __( '{name} با نام دسته‌بندی/آرشیو جایگزین می‌شود.', 'hamishop-elementor-widgets' ),
-                                'condition'   => array( 'desc_on' => 'yes' ),
-                        )
-                );
-
-                $this->add_control(
-                        'desc_custom',
-                        array(
-                                'label'       => __( 'متن توضیحات (خالی = توضیح دسته/برگه فروشگاه)', 'hamishop-elementor-widgets' ),
-                                'type'        => Controls_Manager::WYSIWYG,
-                                'default'     => '',
-                                'description' => __( 'برای هر آرشیو، متن همان دسته استفاده می‌شود؛ فقط اگر می‌خواهید همه آرشیوها یک متن ثابت داشته باشند اینجا بنویسید.', 'hamishop-elementor-widgets' ),
-                                'condition'   => array( 'desc_on' => 'yes' ),
-                        )
-                );
-
-                $this->add_control(
                         'faq_schema',
                         array(
                                 'label'     => __( 'اسکیمای سوالات متداول (FAQ JSON-LD)', 'hamishop-elementor-widgets' ),
@@ -169,9 +138,6 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                 $this->a_color( 'gd_qt', __( 'متن سوال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-agd__q' );
                 $this->a_color( 'gd_qa', __( 'متن پاسخ', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-agd__a' );
                 $this->a_color( 'gd_tipbg', __( 'پس‌زمینه نکته (موبایل)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-agd__tip', 'background-color' );
-                $this->a_box( 'gdd', '{{WRAPPER}} .hsw-agd__descbox', array( 'border' => false ) );
-                $this->a_text( 'gdd_t', '{{WRAPPER}} .hsw-agd__dtitle', array( 'default' => 16 ) );
-                $this->a_text( 'gdd_b', '{{WRAPPER}} .hsw-agd__dbody', array( 'default' => 13, 'weight' => false ) );
 
                 $this->end_controls_section();
         }
@@ -196,13 +162,6 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
 
                 $intro = isset( $s['m_intro'] ) ? wp_strip_all_tags( $s['m_intro'] ) : '';
                 $tip   = isset( $s['m_tip'] ) ? wp_strip_all_tags( $s['m_tip'] ) : '';
-
-                /* Bottom archive description (dynamic per category/archive). */
-                $desc_on    = ! isset( $s['desc_on'] ) || 'yes' === $s['desc_on'];
-                $desc       = $desc_on ? $this->archive_desc_html( isset( $s['desc_custom'] ) ? (string) $s['desc_custom'] : '' ) : '';
-                $desc_plain = trim( wp_strip_all_tags( $desc ) );
-                $desc_long  = mb_strlen( $desc_plain ) > 200;
-                $desc_title = str_replace( '{name}', $name, $this->opt( 'desc_title', __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ) ) );
 
                 $schema = ( ! isset( $s['faq_schema'] ) || 'yes' === $s['faq_schema'] ) && ! $this->is_demo() && ! empty( $rows );
                 ?>
@@ -247,20 +206,6 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                                         <button type="button" class="hsw-agd__ok" data-hsw-close><?php esc_html_e( 'متوجه شدم', 'hamishop-elementor-widgets' ); ?></button>
                                 </div>
                         </div>
-
-                        <?php if ( $desc_on && '' !== trim( $desc ) ) : ?>
-                                <!-- =================== ARCHIVE DESCRIPTION (SEO) =================== -->
-                                <section class="hsw-agd__descbox">
-                                        <h2 class="hsw-agd__dtitle"><?php echo esc_html( $desc_title ); ?></h2>
-                                        <div class="hsw-agd__dbody<?php echo $desc_long ? ' is-clamped' : ''; ?>" data-hsw-seo-target><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized by archive_desc_html(). ?></div>
-                                        <?php if ( $desc_long ) : ?>
-                                                <button type="button" class="hsw-agd__dmore" data-hsw-seo>
-                                                        <span><?php esc_html_e( 'مشاهده بیشتر', 'hamishop-elementor-widgets' ); ?></span>
-                                                        <i class="hsw-ic" aria-hidden="true">expand_more</i>
-                                                </button>
-                                        <?php endif; ?>
-                                </section>
-                        <?php endif; ?>
 
                         <?php if ( $schema ) : ?>
                                 <?php $json = $this->faq_schema_json( $rows ); ?>

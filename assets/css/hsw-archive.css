@@ -72,30 +72,13 @@
         --hswa-shadow-xs: 0 1px 2px rgba(15, 23, 42, .05);
         --hswa-shadow-sm: 0 1px 3px rgba(15, 23, 42, .08);
 }
+/*
+ * The design tokens live on :root only. Widget roots intentionally do NOT
+ * redeclare them: a palette set on an ancestor (the composite page, a column,
+ * a section…) then cascades into every part, while a palette set on a single
+ * widget only affects that widget.
+ */
 .hsw-a {
-        --hswa-primary: #2563eb;
-        --hswa-primary-dark: #1d4ed8;
-        --hswa-primary-50: #eff6ff;
-        --hswa-primary-100: #dbeafe;
-        --hswa-primary-light: #f0f6ff;
-        --hswa-ink: #1e293b;
-        --hswa-strong: #0f172a;
-        --hswa-body: #475569;
-        --hswa-soft: #64748b;
-        --hswa-faint: #cbd5e1;
-        --hswa-line: #e2e8f0;
-        --hswa-line-soft: #f1f5f9;
-        --hswa-card: #ffffff;
-        --hswa-page: #f8fafc;
-        --hswa-rose: #be123c;
-        --hswa-emerald: #047857;
-        --hswa-amber: #f59e0b;
-        --hswa-r-xl: 12px;
-        --hswa-r-2xl: 16px;
-        --hswa-r-3xl: 24px;
-        --hswa-shadow-xs: 0 1px 2px rgba(15, 23, 42, .05);
-        --hswa-shadow-sm: 0 1px 3px rgba(15, 23, 42, .08);
-
         color: var(--hswa-ink);
         font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
         line-height: 1.6;
@@ -152,7 +135,13 @@
 .hsw-ahd__hero {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(to left, var(--hswa-card) 0%, var(--hswa-card) 55%, var(--hswa-primary-50) 100%);
+        /* Gradient colors/angle are editable from Style («گرادیانت سربرگ»). */
+        background: linear-gradient(
+                var(--hswa-hero-angle, 270deg),
+                var(--hswa-hero-a, var(--hswa-card)) 0%,
+                var(--hswa-hero-a, var(--hswa-card)) 55%,
+                var(--hswa-hero-b, var(--hswa-primary-50)) 100%
+        );
         border: 1px solid var(--hswa-line);
         border-radius: var(--hswa-r-2xl);
         box-shadow: var(--hswa-shadow-sm);
@@ -174,7 +163,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-direction: row-reverse;
+        /* RTL page: title block first (right), pills at the end (left). */
         gap: 16px;
         border-bottom: 1px solid var(--hswa-line-soft);
         padding-bottom: 16px;
@@ -208,7 +197,7 @@
         color: #fff;
         box-shadow: var(--hswa-shadow-xs);
 }
-.hsw-ahd__seobox { color: var(--hswa-body); font-size: 14px; }
+.hsw-ahd__seobox { color: var(--hswa-body); font-size: 14px; text-align: start; }
 .hsw-ahd__desc { text-align: justify; line-height: 1.9; }
 /* Inline paragraphs keep the clamp on whole line boxes; block <p> margins
    otherwise leave a half-clipped line at the bottom of the excerpt. */
@@ -216,9 +205,8 @@
 .hsw-ahd__desc > p + p::before { content: " "; }
 .hsw-a .hsw-ahd__desc.is-clamped {
         display: -webkit-box;
-        max-height: 5.7em;
         overflow: hidden;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: var(--hswa-seo-lines, 3);
         -webkit-box-orient: vertical;
 }
 .hsw-a .hsw-ahd__desc.is-clamped.is-open { display: block; max-height: none; overflow: visible; -webkit-line-clamp: unset; }
@@ -237,6 +225,26 @@
 .hsw-ahd__more:hover { text-decoration: underline; }
 .hsw-ahd__more .hsw-ic { font-size: 14px; transition: transform .2s; }
 .hsw-ahd__more.is-open .hsw-ic { transform: rotate(180deg); }
+
+/* Bottom description box (position «پایین محصولات» in the header widget). */
+.hsw-ahd__descbox {
+        background: var(--hswa-card);
+        border: 1px solid var(--hswa-line);
+        border-radius: var(--hswa-r-2xl);
+        box-shadow: var(--hswa-shadow-xs);
+        padding: 20px 24px;
+        text-align: start;
+}
+.hsw-ahd__descbox .hsw-ahd__dtitle {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--hswa-ink);
+        margin-bottom: 10px;
+}
+.hsw-ahd__descbox .hsw-ahd__desc {
+        color: var(--hswa-body);
+        font-size: 14px;
+}
 
 /* Mobile header */
 .hsw-ahd__mhead {
@@ -298,15 +306,15 @@
         background: linear-gradient(270deg, var(--hswa-page) 0%, var(--hswa-primary-light) 100%);
         border: 1px solid var(--hswa-primary-100);
         border-radius: var(--hswa-r-xl);
+        text-align: start;
 }
 .hsw-ahd__mdesc { font-size: 12px; color: var(--hswa-body); text-align: justify; line-height: 1.9; }
 .hsw-ahd__mdesc > p { display: inline; margin: 0; }
 .hsw-ahd__mdesc > p + p::before { content: " "; }
 .hsw-a .hsw-ahd__mdesc.is-clamped {
         display: -webkit-box;
-        max-height: 5.7em;
         overflow: hidden;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: var(--hswa-seo-lines, 3);
         -webkit-box-orient: vertical;
 }
 .hsw-a .hsw-ahd__mdesc.is-clamped.is-open { display: block; max-height: none; overflow: visible; -webkit-line-clamp: unset; }
@@ -1189,40 +1197,13 @@ html:not(.hsw-js) .hsw-a .hsw-af__swatches { display: none !important; }
 /* Body scroll lock while a sheet is open */
 body.hsw-noscroll { overflow: hidden; }
 
-/* ============================== v1.9.0 — ARCHIVE DESCRIPTION ============================== */
-.hsw-a .hsw-agd__descbox {
-        margin-top: 16px;
-        background: var(--hswa-card);
-        border: 1px solid var(--hswa-line);
-        border-radius: var(--hswa-r-2xl);
-        box-shadow: var(--hswa-shadow-xs);
-        padding: 20px 24px;
-}
-.hsw-a .hsw-agd__dtitle { font-size: 16px; font-weight: 800; color: var(--hswa-ink); margin-bottom: 10px; }
-.hsw-a .hsw-agd__dbody { color: var(--hswa-body); font-size: 13px; line-height: 1.95; text-align: justify; }
-.hsw-a .hsw-agd__dbody :where(p, ul, ol) { margin: 0 0 10px; }
-.hsw-a .hsw-agd__dbody :where(p:last-child, ul:last-child, ol:last-child) { margin-bottom: 0; }
-.hsw-a .hsw-agd__dbody :where(h2, h3, h4) { color: var(--hswa-ink); font-size: 14px; margin: 14px 0 6px; }
-.hsw-a .hsw-agd__dbody :where(ul, ol) { padding-inline-start: 20px; }
-.hsw-a .hsw-agd__dbody :where(li) { margin-bottom: 4px; }
-.hsw-a .hsw-agd__dmore {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: none;
-        border: 0;
-        padding: 0;
-        margin-top: 8px;
-        color: var(--hswa-primary);
-        font-size: 12px;
-        font-weight: 600;
-}
-.hsw-a .hsw-agd__dmore:hover { text-decoration: underline; }
-.hsw-a .hsw-agd__dmore .hsw-ic { font-size: 14px; transition: transform .2s; }
-.hsw-a .hsw-agd__dmore.is-open .hsw-ic { transform: rotate(180deg); }
+/* ============================== ARCHIVE DESCRIPTION (SEO) ==============================
+ * Rendered once by the header widget: inside the hero when the position is
+ * «بالا»، or as a box above the buying guide when it is «پایین محصولات».
+ * ==================================================================================== */
 @media (max-width: 767.98px) {
-        .hsw-a .hsw-agd__descbox { margin: 12px; padding: 16px; }
-        .hsw-a .hsw-agd__dtitle { font-size: 14px; }
+        .hsw-ahd__descbox { padding: 16px; }
+        .hsw-ahd__descbox .hsw-ahd__dtitle { font-size: 15px; }
 }
 
 /* ============================== THEME BUTTON BLEED ==============================
@@ -1251,8 +1232,7 @@ body.hsw-noscroll { overflow: hidden; }
 .hsw-a .hsw-ahd__guide:hover { background: var(--hswa-primary-100); }
 
 .hsw-a .hsw-ahd__more,
-.hsw-a .hsw-ahd__mmore,
-.hsw-a .hsw-agd__dmore {
+.hsw-a .hsw-ahd__mmore {
         display: inline-flex;
         align-items: center;
         justify-content: flex-start;
@@ -1274,8 +1254,7 @@ body.hsw-noscroll { overflow: hidden; }
 }
 .hsw-a .hsw-ahd__mmore { margin-top: 6px; font-size: 11px; font-weight: 700; }
 .hsw-a .hsw-ahd__more:hover,
-.hsw-a .hsw-ahd__mmore:hover,
-.hsw-a .hsw-agd__dmore:hover { background: none; text-decoration: underline; }
+.hsw-a .hsw-ahd__mmore:hover { background: none; text-decoration: underline; }
 
 .hsw-a .hsw-asheet__close {
         width: 32px;

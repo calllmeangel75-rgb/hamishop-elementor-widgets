@@ -592,6 +592,61 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
         }
 
         /**
+         * Shared archive-description block — one source of truth for the
+         * header widget and the composite (so the same copy never renders
+         * twice). Modes: «header» (desktop hero box), «mobile» teaser and
+         * «box» (bottom-of-products box with a customizable title).
+         *
+         * @param array  $s    Effective settings (seo_desc, desc_title, desc_clamp, more_text, less_text).
+         * @param string $mode header|mobile|box.
+         * @return string Safe HTML ('' when there is nothing to show).
+         */
+        protected function archive_desc_block_html( array $s, $mode = 'header' ) {
+                $desc = $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '' );
+                if ( '' === trim( wp_strip_all_tags( $desc ) ) ) {
+                        return '';
+                }
+
+                $lines = ( isset( $s['desc_clamp'] ) && '' !== (string) $s['desc_clamp'] ) ? (int) $s['desc_clamp'] : 3;
+                $lines = max( 1, min( 12, $lines ) );
+
+                $more = isset( $s['more_text'] ) ? trim( (string) $s['more_text'] ) : '';
+                $more = '' !== $more ? $more : __( 'مشاهده بیشتر', 'hamishop-elementor-widgets' );
+                $less = isset( $s['less_text'] ) ? trim( (string) $s['less_text'] ) : '';
+                $less = '' !== $less ? $less : __( 'بستن', 'hamishop-elementor-widgets' );
+
+                $is_box    = ( 'box' === $mode );
+                $is_mobile = ( 'mobile' === $mode );
+                $wrap      = $is_box ? 'hsw-ahd__descbox' : ( $is_mobile ? 'hsw-ahd__mteaser hsw-m' : 'hsw-ahd__seobox' );
+                $body      = $is_mobile ? 'hsw-ahd__mdesc' : 'hsw-ahd__desc';
+                $button    = $is_mobile ? 'hsw-ahd__mmore' : 'hsw-ahd__more';
+
+                $title = '';
+                if ( $is_box ) {
+                        $fmt   = isset( $s['desc_title'] ) ? trim( (string) $s['desc_title'] ) : '';
+                        $fmt   = '' !== $fmt ? $fmt : __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' );
+                        $title = str_replace( '{name}', $this->archive_name(), $fmt );
+                }
+
+                ob_start();
+                ?>
+                <div class="<?php echo esc_attr( $wrap ); ?>">
+                        <?php if ( '' !== $title ) : ?>
+                                <h2 class="hsw-ahd__dtitle"><?php echo esc_html( $title ); ?></h2>
+                        <?php endif; ?>
+                        <div class="<?php echo esc_attr( $body ); ?> is-clamped" data-hsw-seo-target style="--hswa-seo-lines: <?php echo (int) $lines; ?>"><?php echo $desc; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized by archive_desc_html(). ?></div>
+                        <button type="button" class="<?php echo esc_attr( $button ); ?>" data-hsw-seo data-hsw-close-txt="<?php echo esc_attr( $less ); ?>" aria-expanded="false">
+                                <span><?php echo esc_html( $more ); ?></span>
+                                <?php if ( ! $is_mobile ) : ?>
+                                        <i class="hsw-ic" aria-hidden="true">expand_more</i>
+                                <?php endif; ?>
+                        </button>
+                </div>
+                <?php
+                return trim( (string) ob_get_clean() );
+        }
+
+        /**
          * Auto-generated, store-specific description used when the current
          * term/shop has no description of its own. Built from the archive name,
          * the real product count and the store's own attributes/price range so
@@ -775,6 +830,56 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
         /* =========================================================================
          *  SHARED CONTROLS
          * ====================================================================== */
+
+        /**
+         * Widget palette (Style tab). Overrides the archive design tokens on
+         * the widget root so every inner element — header gradient, pills,
+         * cards, buttons, boxes… — can be recolored from Style like the other
+         * HamiShop widgets. Leaving a color empty keeps the design default.
+         */
+        protected function ctrl_palette() {
+                $this->start_controls_section(
+                        'sec_palette',
+                        array( 'label' => __( 'پالت رنگ ویجت', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->a_color(
+                        'pal_primary',
+                        __( 'رنگ اصلی (لینک، دکمه، قرص فعال)', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}}',
+                        '--hswa-primary: {{VALUE}}; --hswa-primary-dark: color-mix(in srgb, {{VALUE}}, #000 14%); --hswa-primary-50: color-mix(in srgb, {{VALUE}}, #fff 92%); --hswa-primary-100: color-mix(in srgb, {{VALUE}}, #fff 82%); --hswa-primary-light: color-mix(in srgb, {{VALUE}}, #fff 96%);'
+                );
+                $this->a_color(
+                        'pal_ink',
+                        __( 'رنگ عنوان‌ها', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}}',
+                        '--hswa-ink: {{VALUE}}; --hswa-strong: color-mix(in srgb, {{VALUE}}, #000 12%);'
+                );
+                $this->a_color(
+                        'pal_body',
+                        __( 'رنگ متن‌ها', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}}',
+                        '--hswa-body: {{VALUE}}; --hswa-soft: color-mix(in srgb, {{VALUE}}, #fff 22%);'
+                );
+                $this->a_color(
+                        'pal_line',
+                        __( 'رنگ خطوط و حاشیه‌ها', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}}',
+                        '--hswa-line: {{VALUE}}; --hswa-line-soft: color-mix(in srgb, {{VALUE}}, #fff 55%); --hswa-faint: color-mix(in srgb, {{VALUE}}, #000 12%);'
+                );
+                $this->a_color( 'pal_card', __( 'رنگ کارت‌ها و باکس‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-card: {{VALUE}};' );
+                $this->a_color( 'pal_page', __( 'رنگ پس‌زمینه ملایم (نوارها)', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-page: {{VALUE}};' );
+
+                $this->add_control(
+                        'pal_status_head',
+                        array( 'label' => __( 'رنگ‌های وضعیت', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
+                );
+                $this->a_color( 'pal_ok', __( 'موجود / موفق', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-emerald: {{VALUE}};' );
+                $this->a_color( 'pal_warn', __( 'امتیاز / هشدار', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-amber: {{VALUE}};' );
+                $this->a_color( 'pal_danger', __( 'تخفیف / ناموجود', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-rose: {{VALUE}};' );
+
+                $this->end_controls_section();
+        }
 
         protected function ctrl_visibility( $default = 'auto' ) {
                 $this->add_control(

@@ -40,9 +40,11 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
         }
 
         protected function register_controls() {
+                $this->ctrl_palette();
+
                 $this->part_section( 'abc_', __( '۱. مسیر راهنما (بردکرامب)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Breadcrumb', array( 'vis', 'show_home_icon', 'home_label' ) );
 
-                $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'show_count', 'seo_desc', 'pills_source', 'pills_attr', 'pills_manual', 'pills_heading', 'show_guide_btn', 'update_note' ) );
+                $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'show_count', 'seo_desc', 'desc_pos', 'desc_title', 'desc_clamp', 'more_text', 'less_text', 'pills_source', 'pills_attr', 'pills_manual', 'pills_heading', 'show_guide_btn', 'update_note' ) );
 
                 $this->part_section( 'af_', __( '۳. فیلترها (سایدبار + موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Filters', array( 'vis', 'f_title', 'boxes', 'auto_attrs', 'express_slug', 'color_map' ) );
 
@@ -52,7 +54,7 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
 
                 $this->part_section( 'ap_', __( '۶. صفحه‌بندی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Pagination', array( 'vis', 'show_state' ) );
 
-                $this->part_section( 'agd_', __( '۷. راهنمای خرید (سوالات متداول + توضیحات)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Guide', array( 'vis', 'g_title', 'faqs', 'm_intro', 'm_tip', 'desc_on', 'desc_title', 'desc_custom', 'faq_schema' ) );
+                $this->part_section( 'agd_', __( '۷. راهنمای خرید (سوالات متداول)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Guide', array( 'vis', 'g_title', 'faqs', 'm_intro', 'm_tip', 'faq_schema' ) );
 
                 $this->start_controls_section(
                         'sec_layout',
@@ -82,11 +84,23 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
                                 'selectors'  => array(
                                         '{{WRAPPER}} .hsw-cp__body'  => 'gap: {{SIZE}}{{UNIT}};',
                                         '{{WRAPPER}} .hsw-cp__guide' => 'margin-top: {{SIZE}}{{UNIT}};',
+                                        '{{WRAPPER}} .hsw-cp__desc'  => 'margin-top: {{SIZE}}{{UNIT}};',
                                 ),
                         )
                 );
 
                 $this->end_controls_section();
+
+                /* Every part's full Style tab, mirrored here so the complete
+                   archive page is editable from one place (colors, gradient,
+                   buttons, hover/active states…) — like the single widgets. */
+                $this->part_style_section( 'ahd_', __( 'استایل سربرگ و توضیحات', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header' );
+                $this->part_style_section( 'af_', __( 'استایل فیلترها', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Filters' );
+                $this->part_style_section( 'at_', __( 'استایل نوار ابزار', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Toolbar' );
+                $this->part_style_section( 'ag_', __( 'استایل کارت محصول', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Grid' );
+                $this->part_style_section( 'ap_', __( 'استایل صفحه‌بندی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Pagination' );
+                $this->part_style_section( 'agd_', __( 'استایل راهنمای خرید', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Guide' );
+                $this->part_style_section( 'abc_', __( 'استایل مسیر راهنما', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Breadcrumb' );
         }
 
         /**
@@ -125,6 +139,17 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
                 echo '</div>';
 
                 echo '</div>'; // .hsw-cp__body
+
+                /* Archive description at the bottom — same copy as the header,
+                   never rendered twice. Sits before the guide so the buying
+                   guide stays the last widget on the page. */
+                $ahd = $this->part_settings( 'ahd_' );
+                if ( $this->part_on( 'ahd_' ) && isset( $ahd['desc_pos'] ) && 'bottom' === $ahd['desc_pos'] ) {
+                        $desc_box = $this->archive_desc_block_html( $ahd, 'box' );
+                        if ( '' !== $desc_box ) {
+                                echo '<div class="hsw-cp__desc">' . $desc_box . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe HTML from archive_desc_block_html().
+                        }
+                }
 
                 if ( $this->part_on( 'agd_' ) ) {
                         echo '<div class="hsw-cp__guide">';

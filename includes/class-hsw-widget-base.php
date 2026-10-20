@@ -186,23 +186,66 @@ abstract class HSW_Widget_Base extends Widget_Base {
         }
 
         /**
+         * Open a composite STYLE section: mirrors the child widget's style
+         * controls (colors, sliders, headings…) so the whole page can be
+         * recolored from the composite's Style tab, exactly like editing the
+         * single widget. Controls are identified by their section id (the
+         * child's `sec_style` by default).
+         *
+         * @param string $prefix     Part control prefix (with separator).
+         * @param string $label      Section label.
+         * @param string $widget_class Fully-qualified part widget class.
+         * @param string $section_id Child style section id.
+         */
+        protected function part_style_section( $prefix, $label, $widget_class, $section_id = 'sec_style' ) {
+                $this->start_controls_section(
+                        'hsw_style_' . $prefix,
+                        array(
+                                'label' => $label,
+                                'tab'   => Controls_Manager::TAB_STYLE,
+                        )
+                );
+
+                $this->part_controls( $prefix, $widget_class, array(), $section_id );
+
+                $this->end_controls_section();
+        }
+
+        /**
          * Mirror chosen content controls of a part widget into this composite
          * (prefixed ids, exact types + defaults + conditions). Responsive
          * controls (e.g. «تعداد ستون») keep their per-device switch in the
          * composite, whatever Elementor's responsive-control mode is.
          *
+         * When $section_id is given, every control registered inside that
+         * child section is mirrored instead ($ids is then ignored).
+         *
          * @param string $prefix       Part control prefix (with separator).
          * @param string $widget_class Fully-qualified part widget class.
          * @param array  $ids          Child control ids to expose.
+         * @param string $section_id   Child section id whose controls to mirror.
          */
-        protected function part_controls( $prefix, $widget_class, $ids = array() ) {
+        protected function part_controls( $prefix, $widget_class, $ids = array(), $section_id = '' ) {
                 $controls = HSW_Composite::controls( $widget_class );
+
+                if ( '' !== $section_id ) {
+                        $ids = array();
+                        foreach ( $controls as $control_id => $control_data ) {
+                                if ( is_array( $control_data ) && isset( $control_data['section'] ) && $section_id === $control_data['section'] ) {
+                                        if ( preg_match( '/_(tablet|mobile)$/', $control_id ) ) {
+                                                continue; // Auto-generated variants of a responsive control.
+                                        }
+                                        $ids[] = $control_id;
+                                }
+                        }
+                }
                 $allowed  = array(
                         Controls_Manager::TEXT,
                         Controls_Manager::TEXTAREA,
                         Controls_Manager::SELECT,
                         Controls_Manager::SELECT2,
                         Controls_Manager::SWITCHER,
+                        Controls_Manager::COLOR,
                         Controls_Manager::NUMBER,
                         Controls_Manager::SLIDER,
                         Controls_Manager::URL,
