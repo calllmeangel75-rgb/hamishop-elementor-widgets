@@ -183,6 +183,277 @@
 		button.setAttribute('aria-label', show ? (data().hidePassword || 'پنهان کردن رمز عبور') : (data().showPassword || 'نمایش رمز عبور'));
 	}
 
+	function ajax(action, payload, nonce) {
+		var body = new URLSearchParams();
+		body.append('action', action);
+		body.append('nonce', nonce || '');
+		Object.keys(payload || {}).forEach(function (key) {
+			body.append(key, payload[key] == null ? '' : payload[key]);
+		});
+		return fetch(data().ajax || '/wp-admin/admin-ajax.php', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: body.toString()
+		}).then(function (response) {
+			return response.json();
+		});
+	}
+
+	function setMessage(element, message, type, link, linkText) {
+		if (!element) {
+			return;
+		}
+		element.textContent = '';
+		element.classList.remove('is-error', 'is-success');
+		if (type) {
+			element.classList.add('is-' + type);
+		}
+		if (message) {
+			var text = document.createElement('span');
+			text.textContent = message;
+			element.appendChild(text);
+		}
+		if (link) {
+			var anchor = document.createElement('a');
+			anchor.href = link;
+			anchor.target = '_blank';
+			anchor.rel = 'noopener noreferrer';
+			anchor.textContent = linkText || (data().openLink || 'باز کردن لینک');
+			element.appendChild(document.createTextNode(' '));
+			element.appendChild(anchor);
+		}
+	}
+
+	function activeOtpChannel(box) {
+		var active = box.querySelector('[data-hsw-otp-channel].is-active');
+		return active ? active.getAttribute('data-hsw-otp-channel') : (box.getAttribute('data-channel') || '');
+	}
+
+	function setOtpChannel(box, channel) {
+		box.setAttribute('data-channel', channel);
+		box.querySelectorAll('[data-hsw-otp-channel]').forEach(function (button) {
+			var on = button.getAttribute('data-hsw-otp-channel') === channel;
+			button.classList.toggle('is-active', on);
+			button.setAttribute('aria-pressed', on ? 'true' : 'false');
+		});
+		var step = box.querySelector('[data-hsw-otp-code-step]');
+		if (step) {
+			setHidden(step, true);
+		}
+		setMessage(box.querySelector('[data-hsw-otp-message]'), '');
+	}
+
+	function sendOtp(box) {
+		var button = box.querySelector('[data-hsw-otp-send]');
+		var message = box.querySelector('[data-hsw-otp-message]');
+		var phone = box.querySelector('[data-hsw-otp-phone]');
+		var channel = activeOtpChannel(box);
+		var context = box.getAttribute('data-context') || 'login';
+		if (!phone || !phone.value.trim()) {
+			setMessage(message, data().phoneRequired || 'شماره موبایل را وارد کنید.', 'error');
+			if (phone) {
+				phone.focus();
+			}
+			return;
+		}
+		if (!channel) {
+			setMessage(message, data().channelRequired || 'روش دریافت کد را انتخاب کنید.', 'error');
+			return;
+		}
+		if (button) {
+			button.disabled = true;
+		}
+		setMessage(message, data().sending || 'در حال ارسال کد...');
+		ajax('hsw_otp_send', { phone: phone.value.trim(), channel: channel, context: context }, data().otpNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().sendError || 'ارسال کد ناموفق بود.'), 'error', error.link, error.link_text);
+					if (error.switch_tab) {
+						var authRoot = box.closest('[data-hsw-auth]');
+						var tabButton = authRoot ? authRoot.querySelector('[data-hsw-auth-tab="' + error.switch_tab + '"]') : null;
+						if (tabButton) {
+							tabButton.click();
+						}
+					}
+					return;
+				}
+				var step = box.querySelector('[data-hsw-otp-code-step]');
+				setHidden(step, false);
+				setMessage(message, payload.data.message || (data().sent || 'کد ارسال شد.'), 'success');
+				var code = box.querySelector('[data-hsw-otp-code]');
+				if (code) {
+					code.value = '';
+					code.focus();
+				}
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			})
+			.finally(function () {
+				if (button) {
+					button.disabled = false;
+				}
+			});
+	}
+
+	function verifyOtp(box) {
+		var button = box.querySelector('[data-hsw-otp-verify]');
+		var message = box.querySelector('[data-hsw-otp-message]');
+		var phone = box.querySelector('[data-hsw-otp-phone]');
+		var code = box.querySelector('[data-hsw-otp-code]');
+		var name = box.querySelector('[data-hsw-otp-name]');
+		var email = box.querySelector('[data-hsw-otp-email]');
+		var channel = activeOtpChannel(box);
+		var context = box.getAttribute('data-context') || 'login';
+		if (!code || !code.value.trim()) {
+			setMessage(message, data().codeRequired || 'کد تأیید را وارد کنید.', 'error');
+			if (code) {
+				code.focus();
+			}
+			return;
+		}
+		if (button) {
+			button.disabled = true;
+		}
+		setMessage(message, data().verifying || 'در حال بررسی کد...');
+		ajax('hsw_otp_verify', {
+			phone: phone ? phone.value.trim() : '',
+			channel: channel,
+			context: context,
+			code: code.value.trim(),
+			name: name ? name.value.trim() : '',
+			email: email ? email.value.trim() : ''
+		}, data().otpNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().verifyError || 'کد تأیید نامعتبر است.'), 'error');
+					if (error.switch_tab) {
+						var authRoot = box.closest('[data-hsw-auth]');
+						var tabButton = authRoot ? authRoot.querySelector('[data-hsw-auth-tab="' + error.switch_tab + '"]') : null;
+						if (tabButton) {
+							tabButton.click();
+						}
+					}
+					return;
+				}
+				setMessage(message, payload.data.message || (data().verified || 'تأیید شد.'), 'success');
+				window.location.href = payload.data.redirect || window.location.href;
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			})
+			.finally(function () {
+				if (button) {
+					button.disabled = false;
+				}
+			});
+	}
+
+	function send2faSetup(panel) {
+		var button = panel.querySelector('[data-hsw-2fa-setup]');
+		var message = panel.querySelector('[data-hsw-2fa-message]');
+		var active = panel.querySelector('[data-hsw-2fa-channel].is-active');
+		var channel = active ? active.getAttribute('data-hsw-2fa-channel') : '';
+		if (!channel) {
+			setMessage(message, data().channelRequired || 'روش دریافت کد را انتخاب کنید.', 'error');
+			return;
+		}
+		if (button) {
+			button.disabled = true;
+		}
+		setMessage(message, data().sending || 'در حال ارسال کد...');
+		ajax('hsw_2fa_setup_send', { channel: channel }, data().twoFactorNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().sendError || 'ارسال کد ناموفق بود.'), 'error', error.link, error.link_text);
+					return;
+				}
+				var step = panel.querySelector('[data-hsw-2fa-code-step]');
+				setHidden(step, false);
+				setMessage(message, payload.data.message || (data().sent || 'کد ارسال شد.'), 'success');
+				var code = panel.querySelector('[data-hsw-2fa-code]');
+				if (code) {
+					code.value = '';
+					code.focus();
+				}
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			})
+			.finally(function () {
+				if (button) {
+					button.disabled = false;
+				}
+			});
+	}
+
+	function verify2faSetup(panel) {
+		var message = panel.querySelector('[data-hsw-2fa-message]');
+		var code = panel.querySelector('[data-hsw-2fa-code]');
+		if (!code || !code.value.trim()) {
+			setMessage(message, data().codeRequired || 'کد تأیید را وارد کنید.', 'error');
+			return;
+		}
+		ajax('hsw_2fa_setup_verify', { code: code.value.trim() }, data().twoFactorNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().verifyError || 'کد تأیید نامعتبر است.'), 'error');
+					return;
+				}
+				setMessage(message, payload.data.message || (data().verified || 'تأیید شد.'), 'success');
+				window.setTimeout(function () {
+					window.location.reload();
+				}, 500);
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			});
+	}
+
+	function verify2faChallenge(challenge) {
+		var message = challenge.querySelector('[data-hsw-2fa-message]');
+		var code = challenge.querySelector('[data-hsw-2fa-code]');
+		var token = challenge.getAttribute('data-token');
+		if (!code || !code.value.trim()) {
+			setMessage(message, data().codeRequired || 'کد تأیید را وارد کنید.', 'error');
+			return;
+		}
+		ajax('hsw_2fa_verify', { token: token, code: code.value.trim() }, data().twoFactorNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().verifyError || 'کد تأیید نامعتبر است.'), 'error');
+					return;
+				}
+				setMessage(message, payload.data.message || (data().verified || 'تأیید شد.'), 'success');
+				window.location.href = payload.data.redirect || window.location.href;
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			});
+	}
+
+	function resend2faChallenge(challenge) {
+		var message = challenge.querySelector('[data-hsw-2fa-message]');
+		ajax('hsw_2fa_resend', { token: challenge.getAttribute('data-token') }, data().twoFactorNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().sendError || 'ارسال کد ناموفق بود.'), 'error');
+					return;
+				}
+				setMessage(message, payload.data.message || (data().sent || 'کد ارسال شد.'), 'success');
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			});
+	}
+
 	function removeWish(id, button) {
 		var list = wishList().filter(function (item) {
 			return String(item) !== String(id);
@@ -200,6 +471,127 @@
 	}
 
 	document.addEventListener('click', function (event) {
+		var otpChannel = event.target.closest('[data-hsw-otp-channel]');
+		if (otpChannel) {
+			event.preventDefault();
+			var otpBox = otpChannel.closest('[data-hsw-otp]');
+			if (otpBox) {
+				setOtpChannel(otpBox, otpChannel.getAttribute('data-hsw-otp-channel'));
+			}
+			return;
+		}
+
+		var otpSend = event.target.closest('[data-hsw-otp-send]');
+		if (otpSend) {
+			event.preventDefault();
+			var sendBox = otpSend.closest('[data-hsw-otp]');
+			if (sendBox) {
+				sendOtp(sendBox);
+			}
+			return;
+		}
+
+		var otpResend = event.target.closest('[data-hsw-otp-resend]');
+		if (otpResend) {
+			event.preventDefault();
+			var resendBox = otpResend.closest('[data-hsw-otp]');
+			if (resendBox) {
+				sendOtp(resendBox);
+			}
+			return;
+		}
+
+		var otpVerify = event.target.closest('[data-hsw-otp-verify]');
+		if (otpVerify) {
+			event.preventDefault();
+			var verifyBox = otpVerify.closest('[data-hsw-otp]');
+			if (verifyBox) {
+				verifyOtp(verifyBox);
+			}
+			return;
+		}
+
+		var challengeVerify = event.target.closest('[data-hsw-2fa-challenge] [data-hsw-2fa-verify]');
+		if (challengeVerify) {
+			event.preventDefault();
+			verify2faChallenge(challengeVerify.closest('[data-hsw-2fa-challenge]'));
+			return;
+		}
+
+		var challengeResend = event.target.closest('[data-hsw-2fa-challenge] [data-hsw-2fa-resend]');
+		if (challengeResend) {
+			event.preventDefault();
+			resend2faChallenge(challengeResend.closest('[data-hsw-2fa-challenge]'));
+			return;
+		}
+
+		var setupChannel = event.target.closest('[data-hsw-2fa-channel]');
+		if (setupChannel) {
+			event.preventDefault();
+			var setupPanel = setupChannel.closest('[data-hsw-2fa]');
+			var setupChannelName = setupChannel.getAttribute('data-hsw-2fa-channel');
+			if (setupPanel) {
+				setupPanel.setAttribute('data-channel', setupChannelName);
+				setupPanel.querySelectorAll('[data-hsw-2fa-channel]').forEach(function (button) {
+					var on = button.getAttribute('data-hsw-2fa-channel') === setupChannelName;
+					button.classList.toggle('is-active', on);
+					button.setAttribute('aria-pressed', on ? 'true' : 'false');
+				});
+				setHidden(setupPanel.querySelector('[data-hsw-2fa-code-step]'), true);
+				setMessage(setupPanel.querySelector('[data-hsw-2fa-message]'), '');
+			}
+			return;
+		}
+
+		var setupSend = event.target.closest('[data-hsw-2fa-setup]');
+		if (setupSend) {
+			event.preventDefault();
+			var setupBox = setupSend.closest('[data-hsw-2fa]');
+			if (setupBox) {
+				send2faSetup(setupBox);
+			}
+			return;
+		}
+
+		var setupResend = event.target.closest('[data-hsw-2fa-setup-resend]');
+		if (setupResend) {
+			event.preventDefault();
+			var resendPanel = setupResend.closest('[data-hsw-2fa]');
+			if (resendPanel) {
+				send2faSetup(resendPanel);
+			}
+			return;
+		}
+
+		var setupVerify = event.target.closest('[data-hsw-2fa-setup-verify], [data-hsw-2fa] [data-hsw-2fa-verify]');
+		if (setupVerify) {
+			event.preventDefault();
+			verify2faSetup(setupVerify.closest('[data-hsw-2fa]'));
+			return;
+		}
+
+		var setupDisable = event.target.closest('[data-hsw-2fa-disable]');
+		if (setupDisable) {
+			event.preventDefault();
+			var disablePanel = setupDisable.closest('[data-hsw-2fa]');
+			if (disablePanel) {
+				var disableMessage = disablePanel.querySelector('[data-hsw-2fa-message]');
+				ajax('hsw_2fa_disable', {}, data().twoFactorNonce)
+					.then(function (payload) {
+						if (!payload || !payload.success) {
+							setMessage(disableMessage, payload && payload.data ? payload.data.message : (data().verifyError || 'عملیات ناموفق بود.'), 'error');
+							return;
+						}
+						setMessage(disableMessage, payload.data.message, 'success');
+						window.location.reload();
+					})
+					.catch(function () {
+						setMessage(disableMessage, data().networkError || 'خطا در ارتباط با سرور.', 'error');
+					});
+			}
+			return;
+		}
+
 		var authTab = event.target.closest('[data-hsw-auth-tab]');
 		if (authTab) {
 			event.preventDefault();

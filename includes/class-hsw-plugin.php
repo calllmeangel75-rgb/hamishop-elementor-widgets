@@ -61,6 +61,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-checkout-complete.php';
                 require_once HSW_DIR . 'includes/class-hsw-complete-route.php';
                 require_once HSW_DIR . 'includes/class-hsw-account.php';
+                require_once HSW_DIR . 'includes/class-hsw-account-auth.php';
                 require_once HSW_DIR . 'includes/class-hsw-account-support.php';
                 require_once HSW_DIR . 'includes/class-hsw-account-admin.php';
 

@@ -28,6 +28,9 @@ final class HSW_Account {
 	/** @var HSW_Account_Support|null */
 	public $support = null;
 
+	/** @var HSW_Account_Auth|null */
+	public $auth = null;
+
 	/** @var HSW_Account_Admin|null */
 	public $admin = null;
 
@@ -49,6 +52,9 @@ final class HSW_Account {
 
 		if ( class_exists( 'HSW_Account_Support' ) ) {
 			$this->support = new HSW_Account_Support( $this );
+		}
+		if ( class_exists( 'HSW_Account_Auth' ) ) {
+			$this->auth = new HSW_Account_Auth( $this );
 		}
 		if ( is_admin() && class_exists( 'HSW_Account_Admin' ) ) {
 			$this->admin = new HSW_Account_Admin( $this );
@@ -131,6 +137,7 @@ final class HSW_Account {
 				'shortcut_note'       => 'برای پیگیری سریع‌تر، شماره سفارش را در تیکت پشتیبانی بنویسید.',
 			),
 			'menu' => array(
+				'extra' => array(),
 				'items' => array(
 					'dashboard'        => array( 'enabled' => 'yes', 'label' => 'پیشخوان', 'order' => 10 ),
 					'orders'           => array( 'enabled' => 'yes', 'label' => 'سفارش‌ها', 'order' => 20 ),
@@ -184,6 +191,26 @@ final class HSW_Account {
 				'show_benefits'     => 'yes',
 				'benefits'          => array( 'پیگیری لحظه‌ای سفارش‌ها', 'مدیریت آسان آدرس‌ها', 'پشتیبانی مستقیم و سریع' ),
 				'show_register'     => 'yes',
+				'otp_enabled'       => 'no',
+				'otp_login'         => 'yes',
+				'otp_register'      => 'yes',
+				'otp_2fa'           => 'yes',
+				'otp_bale'          => 'no',
+				'otp_whatsapp'      => 'no',
+				'otp_default_channel' => 'bale',
+				'otp_ttl'           => 300,
+				'otp_resend'        => 60,
+				'otp_max_attempts'  => 5,
+				'otp_message'       => "کد ورود شما به {site}: {code}\nاین کد را در اختیار دیگران قرار ندهید.",
+				'bale_token'        => '',
+				'bale_bot'          => '',
+				'bale_secret'       => '',
+				'whatsapp_provider' => 'cloud',
+				'whatsapp_token'    => '',
+				'whatsapp_phone_id' => '',
+				'whatsapp_bridge_url' => '',
+				'whatsapp_bridge_token' => '',
+				'whatsapp_sender'   => '',
 			),
 			'design' => array(
 				'primary'      => '#0e2a47',
@@ -226,6 +253,7 @@ final class HSW_Account {
 						$defaults[ $group ]['items'][ $key ] = array_merge( $item, $items[ $key ] );
 					}
 				}
+				$defaults[ $group ]['extra'] = isset( $saved[ $group ]['extra'] ) && is_array( $saved[ $group ]['extra'] ) ? $saved[ $group ]['extra'] : array();
 				continue;
 			}
 			$defaults[ $group ] = array_merge( $values, $saved[ $group ] );
@@ -302,6 +330,10 @@ final class HSW_Account {
 			}
 		}
 
+		if ( isset( $input['menu']['extra'] ) ) {
+			$out['menu']['extra'] = $this->parse_extra_menu( $input['menu']['extra'] );
+		}
+
 		if ( isset( $input['support'] ) && is_array( $input['support'] ) ) {
 			$s = $input['support'];
 			$out['support']['enabled']             = $this->yes_no( $s['enabled'] ?? $out['support']['enabled'] );
@@ -358,6 +390,27 @@ final class HSW_Account {
 			$out['auth']['show_benefits'] = $this->yes_no( $a['show_benefits'] ?? $out['auth']['show_benefits'] );
 			$out['auth']['benefits']      = $this->clean_lines( $a['benefits'] ?? '', $out['auth']['benefits'] );
 			$out['auth']['show_register'] = $this->yes_no( $a['show_register'] ?? $out['auth']['show_register'] );
+
+			foreach ( array( 'otp_enabled', 'otp_login', 'otp_register', 'otp_2fa', 'otp_bale', 'otp_whatsapp' ) as $key ) {
+				$out['auth'][ $key ] = $this->yes_no( $a[ $key ] ?? $out['auth'][ $key ] );
+			}
+			$out['auth']['otp_default_channel'] = in_array( ( $a['otp_default_channel'] ?? '' ), array( 'bale', 'whatsapp' ), true ) ? $a['otp_default_channel'] : $out['auth']['otp_default_channel'];
+			$out['auth']['otp_ttl']             = $this->clean_int( $a['otp_ttl'] ?? $out['auth']['otp_ttl'], 60, 900, 300 );
+			$out['auth']['otp_resend']          = $this->clean_int( $a['otp_resend'] ?? $out['auth']['otp_resend'], 20, 900, 60 );
+			$out['auth']['otp_max_attempts']    = $this->clean_int( $a['otp_max_attempts'] ?? $out['auth']['otp_max_attempts'], 1, 20, 5 );
+			$out['auth']['otp_message']         = $this->clean_textarea( $a['otp_message'] ?? '', $out['auth']['otp_message'] );
+			$out['auth']['bale_token']          = sanitize_text_field( wp_unslash( (string) ( $a['bale_token'] ?? '' ) ) );
+			$out['auth']['bale_bot']            = preg_replace( '/[^a-zA-Z0-9_]/', '', sanitize_text_field( wp_unslash( (string) ( $a['bale_bot'] ?? '' ) ) ) );
+			$out['auth']['bale_secret']         = sanitize_text_field( wp_unslash( (string) ( $a['bale_secret'] ?? '' ) ) );
+			if ( '' === $out['auth']['bale_secret'] ) {
+				$out['auth']['bale_secret'] = wp_generate_password( 40, false, false );
+			}
+			$out['auth']['whatsapp_provider'] = in_array( ( $a['whatsapp_provider'] ?? '' ), array( 'cloud', 'bridge' ), true ) ? $a['whatsapp_provider'] : 'cloud';
+			$out['auth']['whatsapp_token']    = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_token'] ?? '' ) ) );
+			$out['auth']['whatsapp_phone_id'] = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_phone_id'] ?? '' ) ) );
+			$out['auth']['whatsapp_bridge_url']   = esc_url_raw( wp_unslash( (string) ( $a['whatsapp_bridge_url'] ?? '' ) ) );
+			$out['auth']['whatsapp_bridge_token'] = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_bridge_token'] ?? '' ) ) );
+			$out['auth']['whatsapp_sender']       = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_sender'] ?? '' ) ) );
 		}
 
 		if ( isset( $input['design'] ) && is_array( $input['design'] ) ) {
@@ -368,6 +421,56 @@ final class HSW_Account {
 		}
 
 		$out['version'] = defined( 'HSW_VERSION' ) ? HSW_VERSION : self::VERSION;
+		return $out;
+	}
+
+	/**
+	 * Parse the simple one-line-per-item custom menu field.
+	 * Format: label | url | icon | order | new
+	 */
+	private function parse_extra_menu( $value ) {
+		$lines = is_array( $value ) ? $value : preg_split( '/\r\n|\r|\n/', (string) $value );
+		$out   = array();
+		$index = 0;
+		$icons = array( 'grid', 'receipt', 'download', 'location', 'heart', 'wallet', 'support', 'bell', 'credit-card', 'user', 'external', 'play', 'book', 'star', 'video', 'course' );
+
+		foreach ( (array) $lines as $line ) {
+			if ( is_array( $line ) ) {
+				$parts = $line;
+			} else {
+				$line = trim( (string) $line );
+				if ( '' === $line ) {
+					continue;
+				}
+				$parts = array_map( 'trim', explode( '|', $line ) );
+			}
+			$label = isset( $parts[0] ) ? sanitize_text_field( $parts[0] ) : '';
+			$url   = isset( $parts[1] ) ? esc_url_raw( $parts[1] ) : '';
+			if ( ! $url && isset( $parts[1] ) ) {
+				$raw = trim( (string) $parts[1] );
+				if ( $raw && '/' === $raw[0] ) {
+					$url = esc_url_raw( home_url( $raw ) );
+				} elseif ( $raw && ! preg_match( '#^[a-z][a-z0-9+.-]*:#i', $raw ) ) {
+					$url = esc_url_raw( 'https://' . $raw );
+				}
+			}
+			if ( ! $url ) {
+				continue;
+			}
+			$icon = isset( $parts[2] ) ? sanitize_key( $parts[2] ) : 'external';
+			$icon = in_array( $icon, $icons, true ) ? $icon : 'external';
+			$order = isset( $parts[3] ) ? $this->clean_int( $parts[3], 0, 1000, 500 + $index ) : 500 + $index;
+			$new   = isset( $parts[4] ) && in_array( strtolower( (string) $parts[4] ), array( 'new', 'blank', '_blank', '1', 'yes' ), true );
+			$out[] = array(
+				'key'    => 'custom_' . ( $index + 1 ),
+				'label'  => $label ? $label : wp_parse_url( $url, PHP_URL_HOST ),
+				'url'    => $url,
+				'icon'   => $icon,
+				'order'  => $order,
+				'new'    => $new,
+			);
+			$index++;
+		}
 		return $out;
 	}
 
@@ -774,6 +877,18 @@ final class HSW_Account {
 			}
 		}
 
+		// WooCommerce only knows its own endpoints. Course builders and other
+		// plugins often register a WordPress endpoint without adding it to
+		// WC_Query. Treat any account-menu key present in the request as the
+		// current endpoint so their native endpoint hook can render.
+		if ( function_exists( 'wc_get_account_menu_items' ) ) {
+			foreach ( array_keys( (array) wc_get_account_menu_items() ) as $key ) {
+				if ( isset( $wp->query_vars[ $key ] ) ) {
+					return (string) $key;
+				}
+			}
+		}
+
 		$keys = array( 'support', 'notifications', 'wishlist', 'wallet', 'orders', 'view-order', 'downloads', 'edit-address', 'payment-methods', 'edit-account', 'lost-password' );
 		foreach ( $keys as $key ) {
 			if ( isset( $wp->query_vars[ $key ] ) ) {
@@ -958,14 +1073,41 @@ final class HSW_Account {
 				'wish_count' => ( 'wishlist' === $key ),
 				'active'     => ( $key === $ctx['menu_key'] ),
 				'logout'     => ( 'customer-logout' === $key ),
+				'order'      => $this->menu_order( $key ),
+				'new'        => false,
+			);
+		}
+
+		// Extra dashboard links (for example SpotPlayer or a custom endpoint
+		// exposed by a course-builder plugin). These are deliberately not
+		// forced through WooCommerce so external dashboards work too.
+		foreach ( (array) $ctx['opts']['menu']['extra'] as $extra ) {
+			if ( empty( $extra['url'] ) || empty( $extra['key'] ) ) {
+				continue;
+			}
+			$key = sanitize_key( $extra['key'] );
+			if ( isset( $out[ $key ] ) ) {
+				continue;
+			}
+			$out[ $key ] = array(
+				'key'        => $key,
+				'label'      => isset( $extra['label'] ) ? $extra['label'] : $key,
+				'url'        => $extra['url'],
+				'icon'       => isset( $extra['icon'] ) ? $extra['icon'] : 'external',
+				'badge'      => '',
+				'wish_count' => false,
+				'active'     => false,
+				'logout'     => false,
+				'order'      => isset( $extra['order'] ) ? (int) $extra['order'] : 500,
+				'new'        => ! empty( $extra['new'] ),
 			);
 		}
 
 		uasort(
 			$out,
 			function ( $a, $b ) {
-				$oa = $this->menu_order( $a['key'] );
-				$ob = $this->menu_order( $b['key'] );
+				$oa = isset( $a['order'] ) ? (int) $a['order'] : 500;
+				$ob = isset( $b['order'] ) ? (int) $b['order'] : 500;
 				if ( $oa === $ob ) {
 					return strcmp( $a['key'], $b['key'] );
 				}
@@ -1150,6 +1292,7 @@ final class HSW_Account {
 				. '<div class="hsw-ac__member-points"><strong>' . esc_html( HSW_Helpers::fa_num( $loyalty['points'] ) ) . '</strong><span>' . esc_html( $ctx['opts']['loyalty']['label'] ) . '</span></div>'
 				. '<div class="hsw-ac__member-tier"><span>' . esc_html( $loyalty['tier'] ) . '</span><small>' . esc_html( $loyalty['progress_text'] ) . '</small></div>'
 				. '<div class="hsw-ac__progress" aria-hidden="true"><span style="width:' . esc_attr( $loyalty['progress'] ) . '%"></span></div>'
+				. '<p class="hsw-ac__member-note">' . esc_html( sprintf( 'هر %s تومان خرید معتبر = ۱ امتیاز. امتیازها سطح شما را تعیین می‌کنند و فعلاً به کیف پول تبدیل نمی‌شوند.', HSW_Helpers::fa_num( (int) $ctx['opts']['loyalty']['rate'] ) ) ) . '</p>'
 				. '</div>';
 			$html   .= '<div class="hsw-ac__member-panel" id="' . esc_attr( $id . '-loyal' ) . '" role="tabpanel" data-hsw-member-panel="loyal" hidden>'
 				. '<div class="hsw-ac__member-points"><strong>' . esc_html( HSW_Helpers::fa_num( $loyalty['completed'] ) ) . '</strong><span>' . esc_html__( 'سفارش تحویل‌شده', 'hamishop-elementor-widgets' ) . '</span></div>'
@@ -1202,7 +1345,7 @@ final class HSW_Account {
 			} elseif ( '' !== (string) $item['badge'] ) {
 				$badge = '<span class="hsw-ac__badge">' . esc_html( $item['badge'] ) . '</span>';
 			}
-			$html .= '<li><a class="' . esc_attr( $classes ) . '" href="' . esc_url( $item['url'] ) . '"' . ( $item['active'] ? ' aria-current="page"' : '' ) . '>'
+			$html .= '<li><a class="' . esc_attr( $classes ) . '" href="' . esc_url( $item['url'] ) . '"' . ( $item['active'] ? ' aria-current="page"' : '' ) . ( ! empty( $item['new'] ) ? ' target="_blank" rel="noopener noreferrer"' : '' ) . '>'
 				. '<span class="hsw-ac__menu-ic">' . $this->icon( $item['icon'] ) . '</span>'
 				. '<span class="hsw-ac__menu-label">' . esc_html( $item['label'] ) . '</span>'
 				. $badge
@@ -1663,6 +1806,203 @@ final class HSW_Account {
 		return $html;
 	}
 
+	/**
+	 * Modern order history. The native WooCommerce order actions and URLs are
+	 * preserved; only the list presentation is ours.
+	 */
+	private function orders_content( $ctx ) {
+		if ( ! function_exists( 'wc_get_orders' ) || ! function_exists( 'wc_get_account_orders_actions' ) ) {
+			return $this->disabled_card( __( 'سفارش‌ها', 'hamishop-elementor-widgets' ) );
+		}
+
+		$paged  = max( 1, absint( get_query_var( 'paged' ) ) );
+		$result = wc_get_orders(
+			array(
+				'customer' => $ctx['user_id'],
+				'limit'    => 8,
+				'page'     => $paged,
+				'paginate' => true,
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+			)
+		);
+		$orders = $result && isset( $result->orders ) ? (array) $result->orders : array();
+		$pages  = $result && isset( $result->max_num_pages ) ? (int) $result->max_num_pages : 1;
+
+		$html  = '<section class="hsw-ac__orders" aria-labelledby="hsw-ac-orders-title">';
+		$html .= '<header class="hsw-ac__section-head"><div><h2 id="hsw-ac-orders-title">' . esc_html__( 'سفارش‌های من', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'وضعیت، اقلام و جزئیات هر سفارش را از اینجا پیگیری کنید.', 'hamishop-elementor-widgets' ) . '</p></div><span class="hsw-ac__count-pill">' . esc_html( HSW_Helpers::fa_num( $result && isset( $result->total ) ? $result->total : count( $orders ) ) ) . ' ' . esc_html__( 'سفارش', 'hamishop-elementor-widgets' ) . '</span></header>';
+
+		if ( empty( $orders ) ) {
+			$html .= '<div class="hsw-ac__card hsw-ac__empty hsw-ac__orders-empty">'
+				. '<span class="hsw-ac__empty-ic">' . $this->icon( 'package' ) . '</span>'
+				. '<h3>' . esc_html__( 'هنوز سفارشی ثبت نکرده‌اید', 'hamishop-elementor-widgets' ) . '</h3>'
+				. '<p>' . esc_html__( 'اولین خرید خود را ثبت کنید تا وضعیت آن را در همین بخش ببینید.', 'hamishop-elementor-widgets' ) . '</p>'
+				. ( $ctx['shop_url'] ? '<a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( $ctx['shop_url'] ) . '">' . esc_html__( 'رفتن به فروشگاه', 'hamishop-elementor-widgets' ) . $this->icon( 'arrow-left' ) . '</a>' : '' )
+				. '</div>';
+			return $html . '</section>';
+		}
+
+		$html .= '<div class="hsw-ac__order-list">';
+		foreach ( $orders as $order ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+			$html .= $this->order_card( $order );
+		}
+		$html .= '</div>';
+
+		if ( $pages > 1 ) {
+			$html .= '<nav class="hsw-ac__pagination" aria-label="' . esc_attr__( 'صفحه‌بندی سفارش‌ها', 'hamishop-elementor-widgets' ) . '">';
+			for ( $page = 1; $page <= $pages; $page++ ) {
+				$html .= '<a class="' . ( $page === $paged ? 'is-active' : '' ) . '" href="' . esc_url( wc_get_endpoint_url( 'orders', $page ) ) . '"' . ( $page === $paged ? ' aria-current="page"' : '' ) . '>' . esc_html( HSW_Helpers::fa_num( $page ) ) . '</a>';
+			}
+			$html .= '</nav>';
+		}
+
+		return $html . '</section>';
+	}
+
+	private function order_card( $order ) {
+		$status      = $order->get_status();
+		$status_name = wc_get_order_status_name( $status );
+		$status_tone = $this->order_status_tone( $status );
+		$created     = $order->get_date_created();
+		$date        = $created ? $this->format_order_date( $created->getTimestamp() ) : '';
+		$items       = $order->get_items();
+		$count       = 0;
+		foreach ( $items as $item ) {
+			$count += (int) $item->get_quantity();
+		}
+		$actions = wc_get_account_orders_actions( $order );
+		$actions = is_array( $actions ) ? $actions : array();
+		$icons   = array(
+			'view'   => 'eye',
+			'pay'    => 'credit-card',
+			'cancel' => 'x',
+		);
+
+		$html  = '<article class="hsw-ac__order-card hsw-ac__order-card--' . esc_attr( $status_tone ) . '">';
+		$html .= '<header class="hsw-ac__order-card-head">';
+		$html .= '<div class="hsw-ac__order-id"><span class="hsw-ac__order-kicker">' . esc_html__( 'سفارش', 'hamishop-elementor-widgets' ) . '</span><strong>#' . esc_html( HSW_Helpers::fa_num( $order->get_order_number() ) ) . '</strong><span class="hsw-ac__order-date">' . esc_html( $date ) . '</span></div>';
+		$html .= '<span class="hsw-ac__status-pill is-' . esc_attr( $status_tone ) . '"><i aria-hidden="true"></i>' . esc_html( $status_name ) . '</span>';
+		$html .= '</header>';
+
+		$html .= '<div class="hsw-ac__order-card-body"><div class="hsw-ac__order-thumbs">';
+		$shown = 0;
+		foreach ( $items as $item ) {
+			$product = $item->get_product();
+			if ( ! $product ) {
+				continue;
+			}
+			$html .= '<a href="' . esc_url( $product->get_permalink() ) . '" title="' . esc_attr( $product->get_name() ) . '">' . $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy', 'decoding' => 'async' ) ) . '</a>';
+			$shown++;
+			if ( $shown >= 3 ) {
+				break;
+			}
+		}
+		if ( 0 === $shown ) {
+			$html .= '<span class="hsw-ac__order-thumb-empty">' . $this->icon( 'package' ) . '</span>';
+		}
+		if ( count( $items ) > 3 ) {
+			$html .= '<span class="hsw-ac__order-thumb-more">+' . esc_html( HSW_Helpers::fa_num( count( $items ) - 3 ) ) . '</span>';
+		}
+		$html .= '</div><div class="hsw-ac__order-summary-line"><span>' . esc_html( sprintf( '%s کالا', HSW_Helpers::fa_num( $count ) ) ) . '</span><strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong></div></div>';
+
+		if ( ! empty( $actions ) ) {
+			$html .= '<footer class="hsw-ac__order-actions">';
+			foreach ( $actions as $key => $action ) {
+				$url   = isset( $action['url'] ) ? $action['url'] : '';
+				$label = isset( $action['name'] ) ? $action['name'] : $key;
+				if ( ! $url ) {
+					continue;
+				}
+				$icon  = isset( $icons[ $key ] ) ? $icons[ $key ] : 'arrow-left';
+				$class = 'pay' === $key ? ' hsw-ac__btn--primary' : ' hsw-ac__btn--ghost';
+				$html .= '<a class="hsw-ac__btn' . $class . '" href="' . esc_url( $url ) . '">' . $this->icon( $icon ) . esc_html( $label ) . '</a>';
+			}
+			$html .= '</footer>';
+		}
+
+		return $html . '</article>';
+	}
+
+	/**
+	 * Address list page. The native billing/shipping forms are still rendered
+	 * by WooCommerce when the customer opens an address editor.
+	 */
+	private function addresses_content( $ctx ) {
+		$types = array(
+			'billing' => __( 'آدرس صورتحساب', 'hamishop-elementor-widgets' ),
+		);
+		if ( function_exists( 'wc_shipping_enabled' ) && wc_shipping_enabled() && ( ! function_exists( 'wc_ship_to_billing_address_only' ) || ! wc_ship_to_billing_address_only() ) ) {
+			$types['shipping'] = __( 'آدرس حمل و نقل', 'hamishop-elementor-widgets' );
+		}
+
+		$html  = '<section class="hsw-ac__addresses" aria-labelledby="hsw-ac-addresses-title">';
+		$html .= '<header class="hsw-ac__section-head"><div><h2 id="hsw-ac-addresses-title">' . esc_html__( 'آدرس‌های من', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'آدرس پیش‌فرض صورتحساب و تحویل سفارش را مدیریت کنید.', 'hamishop-elementor-widgets' ) . '</p></div><span class="hsw-ac__card-head-ic">' . $this->icon( 'location' ) . '</span></header>';
+		$html .= '<div class="hsw-ac__addr-grid">';
+
+		foreach ( $types as $type => $label ) {
+			$formatted = function_exists( 'wc_get_account_formatted_address' ) ? wc_get_account_formatted_address( $type ) : '';
+			$edit_url  = wc_get_endpoint_url( 'edit-address', $type, wc_get_page_permalink( 'myaccount' ) );
+			$has       = '' !== trim( wp_strip_all_tags( (string) $formatted ) );
+
+			$html .= '<article class="hsw-ac__card hsw-ac__addr-card' . ( $has ? '' : ' is-empty' ) . '">';
+			$html .= '<header class="hsw-ac__addr-head"><div><span class="hsw-ac__addr-kicker">' . esc_html__( 'آدرس', 'hamishop-elementor-widgets' ) . '</span><h3>' . esc_html( $label ) . '</h3></div>' . ( $has ? '<span class="hsw-ac__addr-badge">' . $this->icon( 'check' ) . esc_html__( 'ثبت شده', 'hamishop-elementor-widgets' ) . '</span>' : '' ) . '</header>';
+
+			if ( $has ) {
+				$html .= '<address class="hsw-ac__addr-body">' . wp_kses_post( $formatted ) . '</address>';
+				$html .= '<a class="hsw-ac__addr-edit" href="' . esc_url( $edit_url ) . '">' . $this->icon( 'edit' ) . esc_html__( 'ویرایش آدرس', 'hamishop-elementor-widgets' ) . '</a>';
+			} else {
+				$html .= '<div class="hsw-ac__addr-empty"><span class="hsw-ac__empty-ic">' . $this->icon( 'location' ) . '</span><p>' . esc_html__( 'هنوز آدرسی برای این بخش ثبت نشده است.', 'hamishop-elementor-widgets' ) . '</p><a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( $edit_url ) . '">' . $this->icon( 'plus' ) . esc_html__( 'افزودن آدرس', 'hamishop-elementor-widgets' ) . '</a></div>';
+			}
+			$html .= '</article>';
+		}
+
+		$html .= '</div></section>';
+		return $html;
+	}
+
+	/**
+	 * Account details page: profile summary + native WooCommerce edit form.
+	 */
+	private function account_content( $ctx ) {
+		$user  = $ctx['user'] instanceof WP_User ? $ctx['user'] : get_user_by( 'id', $ctx['user_id'] );
+		$name  = $user ? $user->display_name : '';
+		$email = $user ? $user->user_email : '';
+		$phone = $user ? (string) get_user_meta( $user->ID, 'billing_phone', true ) : '';
+		$since = $user ? $this->format_date( strtotime( $user->user_registered . ' UTC' ), 'F Y' ) : '';
+
+		ob_start();
+		echo '<div class="hsw-ac__wc-wrap"><div class="woocommerce">';
+		do_action( 'woocommerce_account_content' );
+		echo '</div></div>';
+		$native = (string) ob_get_clean();
+
+		$html  = '<section class="hsw-ac__account-page">';
+		$html .= '<div class="hsw-ac__account-aside"><article class="hsw-ac__card hsw-ac__account-profile">';
+		$html .= '<div class="hsw-ac__account-avatar">' . $this->avatar_html( $ctx['user_id'], $name, 88 ) . '</div>';
+		$html .= '<h2>' . esc_html( $name ) . '</h2><span class="hsw-ac__verified">' . $this->icon( 'check-circle' ) . esc_html__( 'حساب فعال', 'hamishop-elementor-widgets' ) . '</span>';
+		$html .= '<div class="hsw-ac__account-meta">';
+		if ( $email ) {
+			$html .= '<a href="mailto:' . esc_attr( $email ) . '">' . $this->icon( 'mail' ) . '<span dir="ltr">' . esc_html( $email ) . '</span></a>';
+		}
+		if ( $phone ) {
+			$html .= '<a href="tel:' . esc_attr( preg_replace( '/[^0-9+]/', '', $phone ) ) . '">' . $this->icon( 'phone' ) . '<span dir="ltr">' . esc_html( $phone ) . '</span></a>';
+		}
+		if ( $since ) {
+			$html .= '<span>' . $this->icon( 'calendar' ) . esc_html( sprintf( 'عضو از %s', $since ) ) . '</span>';
+		}
+		$html .= '</div></article>';
+		if ( $this->auth && method_exists( $this->auth, 'security_panel' ) ) {
+			$html .= $this->auth->security_panel( $ctx );
+		}
+		$html .= '</div>';
+		$html .= '<article class="hsw-ac__card hsw-ac__account-form"><header class="hsw-ac__card-head"><div><h2 class="hsw-ac__card-title">' . esc_html__( 'اطلاعات حساب', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'نام، ایمیل و اطلاعات ورود خود را به‌روز کنید.', 'hamishop-elementor-widgets' ) . '</p></div><span class="hsw-ac__card-head-ic">' . $this->icon( 'user' ) . '</span></header>' . $native . '</article>';
+		$html .= '</section>';
+		return $html;
+	}
+
 	private function loyalty_data( $user_id, $opts ) {
 		$points = 'yes' === $opts['loyalty']['enabled'] ? $this->loyalty_points( $user_id, $opts ) : 0;
 		$silver = max( 1, (int) $opts['loyalty']['silver'] );
@@ -1724,6 +2064,15 @@ final class HSW_Account {
 		}
 		if ( 'wallet' === $endpoint ) {
 			return '<div class="hsw-ac__content">' . $this->wallet_content( $ctx ) . '</div>';
+		}
+		if ( 'orders' === $endpoint ) {
+			return '<div class="hsw-ac__content">' . $this->orders_content( $ctx ) . '</div>';
+		}
+		if ( 'edit-address' === $endpoint && '' === trim( (string) $this->endpoint_value( 'edit-address' ) ) ) {
+			return '<div class="hsw-ac__content">' . $this->addresses_content( $ctx ) . '</div>';
+		}
+		if ( 'edit-account' === $endpoint ) {
+			return '<div class="hsw-ac__content">' . $this->account_content( $ctx ) . '</div>';
 		}
 		if ( 'customer-logout' === $endpoint ) {
 			$html  = '<section class="hsw-ac__card hsw-ac__empty">';
@@ -2264,7 +2613,10 @@ final class HSW_Account {
 	}
 
 	private function render_auth_view( $lost, $opts ) {
-		if ( $this->sms_login_active() ) {
+		if ( $this->auth && $this->auth->is_2fa_challenge() && ! $lost ) {
+			return $this->auth->render_2fa_challenge( $opts );
+		}
+		if ( ( ! $this->auth || ! $this->auth->enabled() ) && $this->sms_login_active() ) {
 			return $this->delegated_auth_output( $opts );
 		}
 
@@ -2284,18 +2636,21 @@ final class HSW_Account {
 			$html .= '<div class="hsw-ac__editor-note">' . $this->icon( 'info' ) . '<span>' . esc_html__( 'پیش‌نمایش فرم ورود؛ در سایت واقعی، کاربران واردشده پنل حساب را می‌بینند.', 'hamishop-elementor-widgets' ) . '</span></div>';
 		}
 		$html .= $notices;
+		if ( isset( $_GET['hsw_2fa_error'] ) ) {
+			$html .= '<div class="hsw-ac-auth__notice is-error">' . $this->icon( 'info' ) . '<span>' . esc_html__( 'ارسال کد دوعاملی ناموفق بود. لطفاً دوباره وارد شوید یا با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) . '</span></div>';
+		}
 		$html .= '<div class="hsw-ac-auth__panel">';
 		$html .= '<a class="hsw-ac-auth__home" href="' . esc_url( home_url( '/' ) ) . '">' . $this->icon( 'arrow-right' ) . esc_html__( 'بازگشت به فروشگاه', 'hamishop-elementor-widgets' ) . '</a>';
 
 		if ( $lost ) {
-			$html .= '<div class="hsw-ac-auth__heading"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'بازیابی حساب', 'hamishop-elementor-widgets' ) . '</span><h1>' . esc_html__( 'بازیابی رمز عبور', 'hamishop-elementor-widgets' ) . '</h1><p>' . esc_html__( 'ایمیل حساب خود را وارد کنید تا لینک تنظیم رمز عبور برایتان ارسال شود.', 'hamishop-elementor-widgets' ) . '</p></div>';
+			$html .= '<div class="hsw-ac-auth__heading"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'بازیابی حساب', 'hamishop-elementor-widgets' ) . '</span><h1>' . esc_html__( 'بازیابی رمز عبور', 'hamishop-elementor-widgets' ) . '</h1><p>' . esc_html__( 'ایمیل یا نام کاربری خود را وارد کنید تا لینک تنظیم رمز عبور برایتان ارسال شود.', 'hamishop-elementor-widgets' ) . '</p></div>';
 			$html .= '<div class="hsw-ac-auth__native woocommerce">';
-			if ( class_exists( 'WC_Shortcode_My_Account' ) && method_exists( 'WC_Shortcode_My_Account', 'lost_password' ) ) {
+			if ( class_exists( 'WC_Shortcode_My_Account' ) && method_exists( 'WC_Shortcode_My_Account', 'lost_password' ) && ( isset( $_GET['reset-link-sent'] ) || isset( $_GET['show-reset-form'] ) ) ) {
 				ob_start();
 				WC_Shortcode_My_Account::lost_password();
 				$html .= ob_get_clean();
 			} else {
-				$html .= '<p><a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( wp_lostpassword_url( wc_get_page_permalink( 'myaccount' ) ) ) . '">' . esc_html__( 'دریافت لینک بازیابی', 'hamishop-elementor-widgets' ) . '</a></p>';
+				$html .= $this->lost_password_form();
 			}
 			$html .= '</div>';
 			$html .= '<a class="hsw-ac-auth__back" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . $this->icon( 'arrow-right' ) . esc_html__( 'بازگشت به ورود', 'hamishop-elementor-widgets' ) . '</a>';
@@ -2310,11 +2665,18 @@ final class HSW_Account {
 			}
 
 			$html .= '<div class="hsw-ac-auth__forms">';
-			$html .= '<div class="hsw-ac-auth__form-panel' . ( 'login' === $active ? ' is-active' : '' ) . '" data-hsw-auth-panel="login" role="tabpanel">' . $this->auth_login_form() . '</div>';
+			$html .= '<div class="hsw-ac-auth__form-panel' . ( 'login' === $active ? ' is-active' : '' ) . '" data-hsw-auth-panel="login" role="tabpanel">' . $this->auth_login_form();
+			if ( $this->auth && $this->auth->enabled() ) {
+				$html .= $this->auth->otp_box( 'login' );
+			}
+			$html .= '</div>';
 			if ( $show_register ) {
 				$html .= '<div class="hsw-ac-auth__form-panel' . ( 'register' === $active ? ' is-active' : '' ) . '" data-hsw-auth-panel="register" role="tabpanel">';
 				$html .= '<div class="hsw-ac-auth__form-title"><h2>' . esc_html( $opts['auth']['register_title'] ) . '</h2><p>' . esc_html( $opts['auth']['register_subtitle'] ) . '</p></div>';
 				$html .= $this->auth_register_form();
+				if ( $this->auth && $this->auth->enabled() ) {
+					$html .= $this->auth->otp_box( 'register' );
+				}
 				$html .= '</div>';
 			}
 			$html .= '</div>';
@@ -2346,6 +2708,28 @@ final class HSW_Account {
 		$html .= '<div class="hsw-ac-auth__brand-foot"><span>' . esc_html__( 'پشتیبانی واقعی، پاسخگویی سریع', 'hamishop-elementor-widgets' ) . '</span><span class="hsw-ac-auth__brand-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>';
 		$html .= '</aside>';
 		return $html;
+	}
+
+	private function lost_password_form() {
+		$account = wc_get_page_permalink( 'myaccount' );
+		ob_start();
+		?>
+		<form method="post" class="woocommerce-ResetPassword lost_reset_password hsw-ac-form hsw-ac-lost-form" action="<?php echo esc_url( $account ); ?>">
+			<?php do_action( 'woocommerce_before_lost_password_form' ); ?>
+			<div class="hsw-ac-field">
+				<label for="user_login"><?php esc_html_e( 'نام کاربری یا ایمیل', 'hamishop-elementor-widgets' ); ?></label>
+				<div class="hsw-ac-input-wrap"><?php echo $this->icon( 'user' ); ?>
+					<input class="woocommerce-Input woocommerce-Input--text input-text" type="text" name="user_login" id="user_login" autocomplete="username" required aria-required="true" placeholder="<?php esc_attr_e( 'مثلاً 0912... یا name@example.com', 'hamishop-elementor-widgets' ); ?>">
+				</div>
+			</div>
+			<?php do_action( 'woocommerce_lostpassword_form' ); ?>
+			<input type="hidden" name="wc_reset_password" value="true">
+			<?php wp_nonce_field( 'lost_password', 'woocommerce-lost-password-nonce' ); ?>
+			<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary hsw-ac-auth__submit"><?php esc_html_e( 'ارسال لینک بازیابی', 'hamishop-elementor-widgets' ); ?><?php echo $this->icon( 'arrow-left' ); ?></button>
+		</form>
+		<?php do_action( 'woocommerce_after_lost_password_form' ); ?>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	private function auth_login_form() {

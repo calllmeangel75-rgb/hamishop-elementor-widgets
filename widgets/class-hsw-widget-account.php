@@ -227,27 +227,21 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 			)
 		);
 		$colors = array(
-			'ac_primary'      => __( 'رنگ اصلی', 'hamishop-elementor-widgets' ),
-			'ac_primary_dark' => __( 'رنگ اصلی تیره', 'hamishop-elementor-widgets' ),
-			'ac_accent'       => __( 'رنگ تاکیدی', 'hamishop-elementor-widgets' ),
-			'ac_bg'           => __( 'پس‌زمینه', 'hamishop-elementor-widgets' ),
-			'ac_card'         => __( 'کارت‌ها', 'hamishop-elementor-widgets' ),
-			'ac_ink'          => __( 'متن اصلی', 'hamishop-elementor-widgets' ),
-			'ac_muted'        => __( 'متن ثانویه', 'hamishop-elementor-widgets' ),
-			'ac_line'         => __( 'خطوط', 'hamishop-elementor-widgets' ),
-			'ac_success'      => __( 'موفقیت', 'hamishop-elementor-widgets' ),
-			'ac_warning'      => __( 'هشدار', 'hamishop-elementor-widgets' ),
-			'ac_danger'       => __( 'خطا', 'hamishop-elementor-widgets' ),
-			'ac_hero_a'       => __( 'گرادیان هدر ۱', 'hamishop-elementor-widgets' ),
-			'ac_hero_b'       => __( 'گرادیان هدر ۲', 'hamishop-elementor-widgets' ),
+			'ac_primary' => array( __( 'رنگ اصلی', 'hamishop-elementor-widgets' ), __( 'هدر، منوی کناری، دکمه‌های اصلی و لینک‌های فعال.', 'hamishop-elementor-widgets' ) ),
+			'ac_accent'  => array( __( 'رنگ تاکیدی', 'hamishop-elementor-widgets' ), __( 'دکمه‌های ثانویه، وضعیت‌های فعال و جزئیات برجسته.', 'hamishop-elementor-widgets' ) ),
+			'ac_bg'      => array( __( 'پس‌زمینه صفحه', 'hamishop-elementor-widgets' ), __( 'رنگ زمینهٔ کلی پنل حساب.', 'hamishop-elementor-widgets' ) ),
+			'ac_card'    => array( __( 'پس‌زمینه کارت‌ها', 'hamishop-elementor-widgets' ), __( 'کارت آمار، سفارش‌ها، آدرس‌ها و فرم‌ها.', 'hamishop-elementor-widgets' ) ),
+			'ac_ink'     => array( __( 'رنگ متن', 'hamishop-elementor-widgets' ), __( 'متن اصلی؛ رنگ خطوط و متن ثانویه به‌صورت خودکار از آن ساخته می‌شود.', 'hamishop-elementor-widgets' ) ),
 		);
-		foreach ( $colors as $key => $label ) {
+		foreach ( $colors as $key => $item ) {
 			$this->add_control(
 				$key,
 				array(
-					'label'   => $label,
-					'type'    => Controls_Manager::COLOR,
-					'default' => '',
+					'label'       => $item[0],
+					'type'        => Controls_Manager::COLOR,
+					'default'     => '',
+					'description' => $item[1],
+					'label_block' => true,
 				)
 			);
 		}
@@ -440,19 +434,11 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 			}
 		}
 		$colors = array(
-			'ac_primary'      => '--hsw-ac-primary',
-			'ac_primary_dark' => '--hsw-ac-primary-dark',
-			'ac_accent'       => '--hsw-ac-accent',
-			'ac_bg'           => '--hsw-ac-bg',
-			'ac_card'         => '--hsw-ac-card',
-			'ac_ink'          => '--hsw-ac-ink',
-			'ac_muted'        => '--hsw-ac-muted',
-			'ac_line'         => '--hsw-ac-line',
-			'ac_success'      => '--hsw-ac-success',
-			'ac_warning'      => '--hsw-ac-warning',
-			'ac_danger'       => '--hsw-ac-danger',
-			'ac_hero_a'       => '--hsw-ac-hero-a',
-			'ac_hero_b'       => '--hsw-ac-hero-b',
+			'ac_primary' => '--hsw-ac-primary',
+			'ac_accent'  => '--hsw-ac-accent',
+			'ac_bg'      => '--hsw-ac-bg',
+			'ac_card'    => '--hsw-ac-card',
+			'ac_ink'     => '--hsw-ac-ink',
 		);
 		foreach ( $colors as $key => $var ) {
 			if ( ! empty( $s[ $key ] ) ) {
@@ -463,6 +449,82 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 				}
 			}
 		}
+
+		// Keep the interface to five meaningful colors and derive the rest.
+		if ( ! empty( $vars['--hsw-ac-primary'] ) ) {
+			$primary_dark = self::adjust_hex_color( $vars['--hsw-ac-primary'], -0.36 );
+			$hero_a       = self::adjust_hex_color( $vars['--hsw-ac-primary'], -0.22 );
+			$hero_b       = self::adjust_hex_color( $vars['--hsw-ac-primary'], 0.10 );
+			if ( $primary_dark ) {
+				$vars['--hsw-ac-primary-dark'] = $primary_dark;
+			}
+			if ( $hero_a ) {
+				$vars['--hsw-ac-hero-a'] = $hero_a;
+			}
+			if ( $hero_b ) {
+				$vars['--hsw-ac-hero-b'] = $hero_b;
+			}
+		}
+		if ( ! empty( $vars['--hsw-ac-ink'] ) ) {
+			$muted = self::mix_hex_color( $vars['--hsw-ac-ink'], '#ffffff', 0.52 );
+			$line  = self::mix_hex_color( $vars['--hsw-ac-ink'], '#ffffff', 0.87 );
+			if ( $muted ) {
+				$vars['--hsw-ac-muted'] = $muted;
+			}
+			if ( $line ) {
+				$vars['--hsw-ac-line'] = $line;
+			}
+		}
+
 		return $vars;
+	}
+
+	/**
+	 * Lighten/darken a hexadecimal color. $amount is between -1 and 1.
+	 */
+	private static function adjust_hex_color( $hex, $amount ) {
+		$hex = ltrim( (string) $hex, '#' );
+		if ( 3 === strlen( $hex ) ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+		if ( ! preg_match( '/^[0-9a-f]{6}$/i', $hex ) ) {
+			return '';
+		}
+		$amount = max( -1, min( 1, (float) $amount ) );
+		$target = $amount < 0 ? 0 : 255;
+		$ratio  = abs( $amount );
+		$out    = '#';
+		for ( $i = 0; $i < 3; $i++ ) {
+			$channel = hexdec( substr( $hex, $i * 2, 2 ) );
+			$value   = (int) round( $channel + ( $target - $channel ) * $ratio );
+			$out    .= str_pad( dechex( max( 0, min( 255, $value ) ) ), 2, '0', STR_PAD_LEFT );
+		}
+		return $out;
+	}
+
+	/**
+	 * Mix two hexadecimal colors. $weight is the amount of $second (0..1).
+	 */
+	private static function mix_hex_color( $first, $second, $weight ) {
+		$first  = ltrim( (string) $first, '#' );
+		$second = ltrim( (string) $second, '#' );
+		if ( 3 === strlen( $first ) ) {
+			$first = $first[0] . $first[0] . $first[1] . $first[1] . $first[2] . $first[2];
+		}
+		if ( 3 === strlen( $second ) ) {
+			$second = $second[0] . $second[0] . $second[1] . $second[1] . $second[2] . $second[2];
+		}
+		if ( ! preg_match( '/^[0-9a-f]{6}$/i', $first ) || ! preg_match( '/^[0-9a-f]{6}$/i', $second ) ) {
+			return '';
+		}
+		$weight = max( 0, min( 1, (float) $weight ) );
+		$out    = '#';
+		for ( $i = 0; $i < 3; $i++ ) {
+			$a     = hexdec( substr( $first, $i * 2, 2 ) );
+			$b     = hexdec( substr( $second, $i * 2, 2 ) );
+			$value = (int) round( $a + ( $b - $a ) * $weight );
+			$out  .= str_pad( dechex( max( 0, min( 255, $value ) ) ), 2, '0', STR_PAD_LEFT );
+		}
+		return $out;
 	}
 }

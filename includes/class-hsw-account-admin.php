@@ -70,6 +70,7 @@ final class HSW_Account_Admin {
 			'sections'      => 'بخش‌ها و منو',
 			'support'       => 'پشتیبانی',
 			'notifications' => 'اعلان‌ها',
+			'auth'          => 'ورود و امنیت',
 			'design'        => 'رنگ و چیدمان',
 			'shortcode'     => 'شورت‌کد و راهنما',
 		);
@@ -101,6 +102,8 @@ final class HSW_Account_Admin {
 					<?php $this->tab_support( $s ); ?>
 				<?php elseif ( 'notifications' === $tab ) : ?>
 					<?php $this->tab_notifications( $s ); ?>
+				<?php elseif ( 'auth' === $tab ) : ?>
+					<?php $this->tab_auth( $s ); ?>
 				<?php elseif ( 'design' === $tab ) : ?>
 					<?php $this->tab_design( $s ); ?>
 				<?php endif; ?>
@@ -320,6 +323,45 @@ final class HSW_Account_Admin {
 					<?php endforeach; ?>
 				</tbody>
 			</table>
+			<p class="hsw-admin-desc" style="margin-top:14px">اندپوینت‌هایی که افزونه‌های دیگر (مثل دوره‌ساز نیاس) به ووکامرس اضافه می‌کنند، به‌صورت خودکار در منو نمایش داده می‌شوند و محتوای آن‌ها هم از خود ووکامرس/افزونه render می‌شود. برای داشبوردهای بیرونی مثل SpotPlayer از لینک‌های اختصاصی زیر استفاده کنید.</p>
+			<?php $this->extra_menu_field( $s ); ?>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>باشگاه مشتریان و امتیاز</h2>
+			<p class="hsw-admin-desc">امتیاز هر کاربر از مجموع خریدهای معتبر (total spent ووکامرس) تقسیم بر «مبلغ هر امتیاز» محاسبه می‌شود. امتیازها سطح کاربر را تعیین می‌کنند و فعلاً به کیف پول تبدیل نمی‌شوند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'loyalty', 'enabled', 'فعال‌سازی باشگاه مشتریان' ); ?>
+				<?php $this->text_field( $s, 'loyalty', 'label', 'نام امتیازها' ); ?>
+				<?php $this->number_field( $s, 'loyalty', 'rate', 'مبلغ هر امتیاز (تومان)', 1, 10000000, 'مثلاً ۱۰۰۰۰ یعنی هر ۱۰,۰۰۰ تومان خرید = ۱ امتیاز.' ); ?>
+				<?php $this->number_field( $s, 'loyalty', 'silver', 'حد امتیاز سطح نقره‌ای', 1, 10000000 ); ?>
+				<?php $this->number_field( $s, 'loyalty', 'gold', 'حد امتیاز سطح طلایی', 1, 10000000 ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function extra_menu_field( $s ) {
+		$lines = array();
+		foreach ( (array) $s['menu']['extra'] as $item ) {
+			if ( empty( $item['url'] ) ) {
+				continue;
+			}
+			$lines[] = implode(
+				' | ',
+				array(
+					$item['label'] ?? '',
+					$item['url'],
+					$item['icon'] ?? 'external',
+					$item['order'] ?? 500,
+					! empty( $item['new'] ) ? 'new' : '',
+				)
+			);
+		}
+		?>
+		<div class="hsw-field">
+			<label for="hsw-menu-extra">لینک‌های اختصاصی منو</label>
+			<textarea id="hsw-menu-extra" name="<?php echo esc_attr( $this->name( 'menu', 'extra' ) ); ?>" rows="5" placeholder="SpotPlayer | https://spotplayer.ir/panel | play | 110 | new"><?php echo esc_textarea( implode( "\n", $lines ) ); ?></textarea>
+			<p class="description">هر خط: عنوان | آدرس | آیکون | ترتیب | new (اختیاری). آیکون‌ها: grid, receipt, download, location, heart, wallet, support, bell, credit-card, user, external, play, book, star, video, course.</p>
 		</div>
 		<?php
 	}
@@ -382,6 +424,71 @@ final class HSW_Account_Admin {
 		<?php
 	}
 
+	private function tab_auth( $s ) {
+		$secret  = $this->val( $s, 'auth', 'bale_secret' );
+		$webhook = $secret ? add_query_arg( array( 'hsw_bale_webhook' => 1, 'secret' => $secret ), home_url( '/' ) ) : '';
+		$bot     = $this->val( $s, 'auth', 'bale_bot' );
+		?>
+		<div class="hsw-admin-card">
+			<h2>ورود با کد یکبارمصرف</h2>
+			<p class="hsw-admin-desc">ورود و ثبت‌نام با شماره موبایل از طریق بله (رایگان) یا واتساپ. کدها ۶ رقمی، یکبارمصرف و دارای محدودیت تلاش هستند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'auth', 'otp_enabled', 'فعال‌سازی ورود با کد یکبارمصرف', 'در صورت فعال بودن، فرم ورود سریع در کنار فرم رمز عبور نمایش داده می‌شود.' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_login', 'اجازهٔ ورود با کد' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_register', 'اجازهٔ ثبت‌نام با کد' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_2fa', 'امکان ورود دوعاملی برای کاربران' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_bale', 'فعال‌سازی کانال بله' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_whatsapp', 'فعال‌سازی کانال واتساپ' ); ?>
+				<?php $this->select_field( $s, 'auth', 'otp_default_channel', 'کانال پیش‌فرض', array( 'bale' => 'بله', 'whatsapp' => 'واتساپ' ) ); ?>
+			</div>
+		</div>
+
+		<div class="hsw-admin-card">
+			<h2>ربات بله (رایگان)</h2>
+			<p class="hsw-admin-desc">یک ربات در بله بسازید، توکن را از BotFather بله دریافت کنید و آدرس وبهوک زیر را در پنل ربات ثبت کنید. کاربر برای دریافت کد باید یک‌بار ربات را باز کند و شماره خود را ارسال کند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->text_field( $s, 'auth', 'bale_bot', 'نام کاربری ربات (بدون @)', 'مثلاً hamishop_bot' ); ?>
+				<?php $this->text_field( $s, 'auth', 'bale_token', 'توکن ربات بله', 'توکن را در صفحهٔ عمومی قرار ندهید.' ); ?>
+				<?php $this->text_field( $s, 'auth', 'bale_secret', 'کلید امنیتی وبهوک' ); ?>
+			</div>
+			<?php if ( $webhook ) : ?>
+				<p><strong>آدرس وبهوک بله:</strong></p>
+				<code class="hsw-code"><?php echo esc_html( $webhook ); ?></code>
+				<p class="description">این آدرس را در متد setWebhook ربات بله تنظیم کنید. اگر آدرس سایت HTTPS نیست، بله ممکن است وبهوک را نپذیرد.</p>
+			<?php else : ?>
+				<p class="hsw-notice">پس از ذخیرهٔ تنظیمات، کلید امنیتی و آدرس وبهوک ساخته می‌شود.</p>
+			<?php endif; ?>
+			<?php if ( $bot ) : ?>
+				<p class="description">لینک ربات: <code>https://ble.ir/<?php echo esc_html( $bot ); ?></code></p>
+			<?php endif; ?>
+		</div>
+
+		<div class="hsw-admin-card">
+			<h2>واتساپ</h2>
+			<p class="hsw-admin-desc">واتساپ رسمی متا رایگان نیست و به قالب/توکن نیاز دارد. برای استفادهٔ رایگان، یک پل self-hosted (مانند WPPConnect یا Baileys) روی سرور خود راه‌اندازی کنید و آدرس آن را اینجا وارد کنید. پل باید JSON شامل phone و message را بپذیرد و در صورت موفقیت کد 2xx برگرداند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->select_field( $s, 'auth', 'whatsapp_provider', 'نوع اتصال', array( 'cloud' => 'WhatsApp Cloud API (متا)', 'bridge' => 'پل self-hosted (رایگان)' ) ); ?>
+				<?php $this->text_field( $s, 'auth', 'whatsapp_phone_id', 'Phone Number ID (Cloud API)' ); ?>
+				<?php $this->text_field( $s, 'auth', 'whatsapp_token', 'Access Token (Cloud API)' ); ?>
+				<?php $this->text_field( $s, 'auth', 'whatsapp_bridge_url', 'آدرس پل واتساپ', '', 'url' ); ?>
+				<?php $this->text_field( $s, 'auth', 'whatsapp_bridge_token', 'توکن پل' ); ?>
+				<?php $this->text_field( $s, 'auth', 'whatsapp_sender', 'شمارهٔ فرستنده (اختیاری)' ); ?>
+			</div>
+			<p class="description">در حالت Cloud API، کاربر باید پیش از دریافت پیام با شمارهٔ شما تعامل کرده باشد یا قالب تأییدشده داشته باشید. برای ورود عمومی، پل self-hosted کنترل بیشتری می‌دهد.</p>
+		</div>
+
+		<div class="hsw-admin-card">
+			<h2>کد و پیام</h2>
+			<div class="hsw-admin-grid">
+				<?php $this->number_field( $s, 'auth', 'otp_ttl', 'اعتبار کد (ثانیه)', 60, 900 ); ?>
+				<?php $this->number_field( $s, 'auth', 'otp_resend', 'فاصلهٔ ارسال دوباره (ثانیه)', 20, 900 ); ?>
+				<?php $this->number_field( $s, 'auth', 'otp_max_attempts', 'حداکثر تلاش برای هر کد', 1, 20 ); ?>
+			</div>
+			<?php $this->textarea_field( $s, 'auth', 'otp_message', 'متن پیام کد', 'از {code} برای کد و {site} برای نام سایت استفاده کنید.' ); ?>
+		</div>
+		<?php
+	}
+
 	private function tab_design( $s ) {
 		?>
 		<div class="hsw-admin-card">
@@ -418,6 +525,8 @@ final class HSW_Account_Admin {
 		$account_url = wc_get_page_permalink( 'myaccount' );
 		$content     = $account_id ? get_post_field( 'post_content', $account_id ) : '';
 		$native      = $content && has_shortcode( $content, 'woocommerce_my_account' );
+		$otp_enabled = 'yes' === $this->val( $s, 'auth', 'otp_enabled' );
+		$sms_active  = HSW_Account::instance()->sms_login_active();
 		?>
 		<div class="hsw-admin-card">
 			<h2>شورت‌کد پنل حساب</h2>
@@ -426,7 +535,8 @@ final class HSW_Account_Admin {
 			<button type="button" class="button" data-hsw-copy="#hsw-account-shortcode">کپی شورت‌کد</button>
 			<p class="description">پارامترهای اختیاری: <code>layout="left|right"</code>، <code>show_header="yes|no"</code>، <code>show_menu="yes|no"</code>، <code>show_stats="yes|no"</code>، <code>hide="downloads,wallet"</code>، <code>class="..."</code></p>
 			<p class="description">با <code>hide</code> می‌توانید هر بخش را مستقیم از شورت‌کد مخفی کنید: <code>downloads</code>، <code>orders</code>، <code>address</code>، <code>wishlist</code>، <code>wallet</code>، <code>support</code>، <code>notifications</code>، <code>payments</code>، <code>account</code>.</p>
-			<p class="description">اگر افزونهٔ ورود پیامکی فعال باشد، فرم ورود و ثبت‌نام این پنل به‌صورت خودکار نمایش داده نمی‌شود و ورود به‌طور کامل به افزونهٔ پیامکی واگذار می‌شود.</p>
+			<p class="description">اگر افزونهٔ ورود پیامکی فعال باشد و ورود با کد HamiShop روشن نباشد، فرم ورود و ثبت‌نام این پنل به‌صورت خودکار نمایش داده نمی‌شود و ورود به‌طور کامل به افزونهٔ پیامکی واگذار می‌شود.</p>
+			<p class="description">برای فعال‌کردن ورود/ثبت‌نام با بله یا واتساپ به تب <strong>ورود و امنیت</strong> بروید. بله رایگان است؛ برای واتساپ به Meta Cloud API یا پل self-hosted نیاز دارید.</p>
 		</div>
 		<div class="hsw-admin-card">
 			<h2>وضعیت صفحهٔ حساب</h2>
@@ -434,7 +544,8 @@ final class HSW_Account_Admin {
 				<li><span>برگهٔ حساب ووکامرس</span><a href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener">مشاهده</a></li>
 				<li><span>شناسهٔ برگه</span><code><?php echo esc_html( HSW_Helpers::fa_num( $account_id ) ); ?></code></li>
 				<li><span>وضعیت شورت‌کد</span><code><?php echo $native ? 'شورت‌کد پیش‌فرض ووکامرس' : 'آماده'; ?></code></li>
-				<li><span>ورود پیامکی</span><code><?php echo HSW_Account::instance()->sms_login_active() ? 'فعال — فرم پنل غیرفعال است' : 'غیرفعال / شناسایی نشد'; ?></code></li>
+				<li><span>ورود پیامکی</span><code><?php echo $otp_enabled ? 'HamiShop OTP فعال' : ( $sms_active ? 'فعال — فرم پنل غیرفعال است' : 'غیرفعال / شناسایی نشد' ); ?></code></li>
+				<li><span>ورود با بله / واتساپ</span><code><?php echo $otp_enabled ? 'فعال' : 'غیرفعال'; ?></code></li>
 				<li><span>تیکت‌های پشتیبانی</span><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hsw_ticket' ) ); ?>">مدیریت تیکت‌ها</a></li>
 			</ul>
 			<?php if ( $native ) : ?>

@@ -276,6 +276,20 @@ class HSW_Assets {
                                 'clearConfirm' => __( 'همهٔ محصولات از علاقه‌مندی‌ها حذف شوند؟', 'hamishop-elementor-widgets' ),
                                 'showPassword' => __( 'نمایش رمز عبور', 'hamishop-elementor-widgets' ),
                                 'hidePassword' => __( 'پنهان کردن رمز عبور', 'hamishop-elementor-widgets' ),
+                                'ajax'         => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+                                'otpNonce'     => wp_create_nonce( 'hsw_otp' ),
+                                'twoFactorNonce' => wp_create_nonce( 'hsw_2fa' ),
+                                'phoneRequired' => __( 'شماره موبایل را وارد کنید.', 'hamishop-elementor-widgets' ),
+                                'channelRequired' => __( 'روش دریافت کد را انتخاب کنید.', 'hamishop-elementor-widgets' ),
+                                'codeRequired' => __( 'کد تأیید را وارد کنید.', 'hamishop-elementor-widgets' ),
+                                'sending'      => __( 'در حال ارسال کد...', 'hamishop-elementor-widgets' ),
+                                'verifying'    => __( 'در حال بررسی کد...', 'hamishop-elementor-widgets' ),
+                                'sent'         => __( 'کد تأیید ارسال شد.', 'hamishop-elementor-widgets' ),
+                                'verified'     => __( 'تأیید شد.', 'hamishop-elementor-widgets' ),
+                                'sendError'    => __( 'ارسال کد ناموفق بود.', 'hamishop-elementor-widgets' ),
+                                'verifyError'  => __( 'کد تأیید نامعتبر است.', 'hamishop-elementor-widgets' ),
+                                'networkError' => __( 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
+                                'openLink'     => __( 'باز کردن لینک', 'hamishop-elementor-widgets' ),
                         )
                 );
 

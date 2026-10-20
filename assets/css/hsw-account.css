@@ -3274,6 +3274,846 @@ a.hsw-ac__stat:hover {
 	}
 }
 
+/* -------------------------------------------------------------------------
+ * Modern endpoint views: orders, addresses and account details
+ * ---------------------------------------------------------------------- */
+
+.hsw-ac__section-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 0 0 14px;
+}
+
+.hsw-ac__section-head h2 {
+	margin: 0 0 3px;
+	font-size: 18px;
+	font-weight: 800;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac__section-head p {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.8;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__order-list {
+	display: grid;
+	gap: 12px;
+}
+
+.hsw-ac__order-card {
+	background: var(--hsw-ac-card);
+	border: 1px solid var(--hsw-ac-line);
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 6px 18px rgba(15, 23, 42, .035);
+}
+
+.hsw-ac__order-card-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 13px 16px;
+	background: linear-gradient(135deg, rgba(248, 250, 252, .95), rgba(243, 246, 250, .65));
+	border-bottom: 1px solid var(--hsw-ac-line);
+}
+
+.hsw-ac__order-id {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 5px 9px;
+	min-width: 0;
+}
+
+.hsw-ac__order-kicker {
+	font-size: 10px;
+	font-weight: 700;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__order-id strong {
+	font-size: 15px;
+	color: var(--hsw-ac-ink);
+	letter-spacing: -.2px;
+}
+
+.hsw-ac__order-date {
+	font-size: 10.5px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__status-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex: 0 0 auto;
+	border-radius: 999px;
+	padding: 5px 10px;
+	font-size: 10.5px;
+	font-weight: 700;
+	background: #eef2f7;
+	color: #334155;
+}
+
+.hsw-ac__status-pill i {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.hsw-ac__status-pill.is-success { background: #e9f9f2; color: #087a55; }
+.hsw-ac__status-pill.is-warning { background: #fff5e8; color: #a85a08; }
+.hsw-ac__status-pill.is-danger { background: #fdecee; color: #b42331; }
+.hsw-ac__status-pill.is-info { background: #eaf3ff; color: #1e5b9a; }
+
+.hsw-ac__order-card-body {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	padding: 13px 16px 9px;
+}
+
+.hsw-ac__order-thumbs {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	min-width: 0;
+}
+
+.hsw-ac__order-thumbs > a,
+.hsw-ac__order-thumb-empty {
+	width: 43px;
+	height: 43px;
+	border-radius: 10px;
+	overflow: hidden;
+	border: 1px solid var(--hsw-ac-line);
+	background: #f8fafc;
+	display: grid;
+	place-items: center;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__order-thumbs img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.hsw-ac__order-thumb-empty {
+	font-size: 20px;
+}
+
+.hsw-ac__order-thumb-more {
+	font-size: 10px;
+	font-weight: 800;
+	color: var(--hsw-ac-muted);
+	background: #f1f5f9;
+	border-radius: 999px;
+	padding: 4px 7px;
+}
+
+.hsw-ac__order-summary-line {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	font-size: 11.5px;
+	color: var(--hsw-ac-muted);
+	white-space: nowrap;
+}
+
+.hsw-ac__order-summary-line strong {
+	font-size: 13px;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac__order-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+	padding: 7px 16px 14px;
+	border-top: 1px dashed var(--hsw-ac-line);
+	margin-top: 2px;
+}
+
+.hsw-ac__order-actions .hsw-ac__btn {
+	min-height: 31px;
+	padding: 6px 10px;
+	font-size: 10.5px;
+}
+
+.hsw-ac__pagination {
+	display: flex;
+	justify-content: center;
+	gap: 6px;
+	margin: 18px 0 0;
+}
+
+.hsw-ac__pagination a {
+	min-width: 32px;
+	height: 32px;
+	border-radius: 9px;
+	border: 1px solid var(--hsw-ac-line);
+	background: var(--hsw-ac-card);
+	color: var(--hsw-ac-ink);
+	display: inline-grid;
+	place-items: center;
+	font-size: 11px;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.hsw-ac__pagination a.is-active,
+.hsw-ac__pagination a:hover {
+	background: var(--hsw-ac-primary);
+	border-color: var(--hsw-ac-primary);
+	color: #fff;
+}
+
+/* Address list */
+.hsw-ac__addr-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.hsw-ac__addr-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.hsw-ac__addr-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 15px 17px 10px;
+	border-bottom: 1px solid var(--hsw-ac-line);
+}
+
+.hsw-ac__addr-kicker {
+	display: block;
+	font-size: 10px;
+	font-weight: 700;
+	color: var(--hsw-ac-muted);
+	margin-bottom: 2px;
+}
+
+.hsw-ac__addr-head h3 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 800;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac__addr-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 9.5px;
+	font-weight: 700;
+	color: #087a55;
+	background: #e9f9f2;
+	border-radius: 999px;
+	padding: 4px 8px;
+	white-space: nowrap;
+}
+
+.hsw-ac__addr-body {
+	margin: 0;
+	padding: 14px 17px;
+	font-style: normal;
+	font-size: 12.5px;
+	line-height: 2;
+	color: var(--hsw-ac-muted);
+	word-break: break-word;
+	flex: 1;
+}
+
+.hsw-ac__addr-edit {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	align-self: flex-start;
+	margin: 0 17px 15px;
+	padding: 7px 10px;
+	border-radius: 8px;
+	background: #f8fafc;
+	border: 1px solid var(--hsw-ac-line);
+	font-size: 10.5px;
+	font-weight: 700;
+	color: var(--hsw-ac-primary);
+	text-decoration: none;
+}
+
+.hsw-ac__addr-edit:hover {
+	background: var(--hsw-ac-primary);
+	border-color: var(--hsw-ac-primary);
+	color: #fff;
+}
+
+.hsw-ac__addr-empty {
+	padding: 18px 17px 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.hsw-ac__addr-empty .hsw-ac__empty-ic {
+	margin: 0;
+	width: 38px;
+	height: 38px;
+	font-size: 18px;
+}
+
+.hsw-ac__addr-empty p {
+	margin: 0;
+	font-size: 11.5px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__addr-empty .hsw-ac__btn {
+	margin-top: 3px;
+	padding: 7px 10px;
+	font-size: 10.5px;
+}
+
+/* Native address editor (still WooCommerce native) */
+.hsw-ac__wc-wrap .woocommerce-Addresses {
+	display: grid !important;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	width: 100%;
+	float: none !important;
+}
+
+.hsw-ac__wc-wrap .woocommerce-Addresses::before,
+.hsw-ac__wc-wrap .woocommerce-Addresses::after {
+	display: none !important;
+	content: none !important;
+}
+
+.hsw-ac__wc-wrap .woocommerce-Addresses > .woocommerce-Address {
+	float: none !important;
+	clear: none !important;
+	width: auto !important;
+	max-width: none !important;
+	min-width: 0;
+	margin: 0 !important;
+	background: var(--hsw-ac-card);
+	border: 1px solid var(--hsw-ac-line);
+	border-radius: 14px;
+	padding: 16px;
+}
+
+.hsw-ac__wc-wrap .woocommerce-Address-title {
+	display: flex !important;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 0 0 8px !important;
+}
+
+.hsw-ac__wc-wrap .woocommerce-Address-title h2,
+.hsw-ac__wc-wrap .woocommerce-Address-title h3 {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.hsw-ac__wc-wrap .woocommerce-Address-title a {
+	flex: 0 0 auto;
+	white-space: nowrap;
+	font-size: 10.5px;
+	font-weight: 700;
+	color: var(--hsw-ac-accent);
+}
+
+/* Account details page */
+.hsw-ac__account-page {
+	display: grid;
+	grid-template-columns: minmax(0, .8fr) minmax(0, 1.35fr);
+	gap: 16px;
+	align-items: start;
+}
+
+.hsw-ac__account-aside {
+	display: grid;
+	gap: 14px;
+	min-width: 0;
+}
+
+.hsw-ac__account-profile {
+	text-align: center;
+	padding: 22px 18px 18px;
+}
+
+.hsw-ac__account-avatar {
+	width: 72px;
+	height: 72px;
+	margin: 0 auto 10px;
+	border-radius: 22px;
+	overflow: hidden;
+	display: grid;
+	place-items: center;
+	background: linear-gradient(135deg, var(--hsw-ac-primary), var(--hsw-ac-primary-dark));
+	color: #fff;
+	font-size: 26px;
+	font-weight: 800;
+}
+
+.hsw-ac__account-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.hsw-ac__account-profile h2 {
+	margin: 0 0 5px;
+	font-size: 17px;
+	font-weight: 800;
+}
+
+.hsw-ac__account-profile .hsw-ac__verified {
+	font-size: 10px;
+}
+
+.hsw-ac__account-meta {
+	display: grid;
+	gap: 6px;
+	margin: 15px 0 0;
+	padding-top: 13px;
+	border-top: 1px solid var(--hsw-ac-line);
+	text-align: start;
+}
+
+.hsw-ac__account-meta a,
+.hsw-ac__account-meta span {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	font-size: 11px;
+	color: var(--hsw-ac-muted);
+	text-decoration: none;
+	overflow-wrap: anywhere;
+}
+
+.hsw-ac__account-meta a:hover {
+	color: var(--hsw-ac-accent);
+}
+
+.hsw-ac__account-form {
+	padding: 18px 20px;
+	min-width: 0;
+}
+
+.hsw-ac__account-form .hsw-ac__card-head {
+	align-items: flex-start;
+}
+
+.hsw-ac__account-form .hsw-ac__card-head p {
+	margin: 3px 0 0;
+	font-size: 11.5px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__account-form form.woocommerce-EditAccountForm {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0 14px;
+	margin: 0;
+}
+
+.hsw-ac__account-form form.woocommerce-EditAccountForm > p:not(.form-row),
+.hsw-ac__account-form form.woocommerce-EditAccountForm > fieldset,
+.hsw-ac__account-form form.woocommerce-EditAccountForm > .clear,
+.hsw-ac__account-form form.woocommerce-EditAccountForm > .woocommerce-Button,
+.hsw-ac__account-form form.woocommerce-EditAccountForm > .form-row:not(.form-row-first):not(.form-row-last) {
+	grid-column: 1 / -1;
+}
+
+.hsw-ac__account-form form.woocommerce-EditAccountForm .form-row-first,
+.hsw-ac__account-form form.woocommerce-EditAccountForm .form-row-last {
+	width: 100% !important;
+	float: none !important;
+	clear: none !important;
+}
+
+.hsw-ac__account-form form.woocommerce-EditAccountForm fieldset {
+	border: 1px solid var(--hsw-ac-line);
+	border-radius: 12px;
+	padding: 12px 14px;
+	margin: 4px 0 14px;
+}
+
+.hsw-ac__account-form form.woocommerce-EditAccountForm legend {
+	font-size: 12px;
+	font-weight: 800;
+	padding: 0 6px;
+}
+
+.hsw-ac__account-form form.woocommerce-EditAccountForm .woocommerce-Button {
+	justify-self: start;
+	width: auto;
+}
+
+/* Lost password form */
+.hsw-ac-auth__native .lost_reset_password {
+	margin: 0;
+}
+
+.hsw-ac-auth__native .lost_reset_password p {
+	font-size: 12px;
+	line-height: 1.9;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac-auth__native .lost_reset_password .form-row {
+	margin: 0 0 14px;
+}
+
+.hsw-ac-auth__native .lost_reset_password label {
+	display: block;
+	font-size: 11.5px;
+	font-weight: 700;
+	color: var(--hsw-ac-ink);
+	margin-bottom: 5px;
+}
+
+.hsw-ac-auth__native .lost_reset_password input.input-text {
+	width: 100%;
+	min-height: 42px;
+	border: 1px solid #d7dee8;
+	border-radius: 10px;
+	background: #fff;
+	padding: 9px 11px;
+	font-size: 12.5px;
+	color: var(--hsw-ac-ink);
+	box-shadow: none;
+}
+
+.hsw-ac-auth__native .lost_reset_password input.input-text:focus {
+	border-color: var(--hsw-ac-accent);
+	box-shadow: 0 0 0 3px rgba(249, 115, 22, .1);
+	outline: 0;
+}
+
+.hsw-ac-auth__native .lost_reset_password .button {
+	width: 100%;
+	min-height: 44px;
+	border: 0;
+	border-radius: 11px;
+	background: var(--hsw-ac-primary);
+	color: #fff;
+	font-size: 12.5px;
+	font-weight: 800;
+	padding: 9px 14px;
+	cursor: pointer;
+}
+
+.hsw-ac-auth__native .lost_reset_password .button:hover {
+	background: var(--hsw-ac-accent);
+}
+
+.hsw-ac-auth__native .woocommerce-ResetPassword .clear {
+	display: none;
+}
+
+@media (max-width: 900px) {
+	.hsw-ac__account-page,
+	.hsw-ac__addr-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 640px) {
+	.hsw-ac__order-card-body {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.hsw-ac__order-summary-line {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.hsw-ac__order-card-head {
+		padding: 11px 13px;
+	}
+
+	.hsw-ac__order-card-body,
+	.hsw-ac__order-actions {
+		padding-inline: 13px;
+	}
+
+	.hsw-ac__account-form form.woocommerce-EditAccountForm {
+		grid-template-columns: 1fr;
+	}
+
+	.hsw-ac__account-form form.woocommerce-EditAccountForm > p,
+	.hsw-ac__account-form form.woocommerce-EditAccountForm > fieldset,
+	.hsw-ac__account-form form.woocommerce-EditAccountForm > .clear,
+	.hsw-ac__account-form form.woocommerce-EditAccountForm > .woocommerce-Button {
+		grid-column: auto;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * OTP login, security and two-factor challenge
+ * ---------------------------------------------------------------------- */
+
+.hsw-ac-otp {
+\tdisplay: block;
+\tmargin-top: 20px;
+\tpadding-top: 18px;
+\tborder-top: 1px dashed var(--hsw-ac-line);
+}
+
+.hsw-ac-otp__head {
+\tmargin-bottom: 12px;
+}
+
+.hsw-ac-otp__eyebrow {
+\tdisplay: block;
+\tfont-size: 10px;
+\tfont-weight: 800;
+\tcolor: var(--hsw-ac-accent);
+\tmargin-bottom: 3px;
+}
+
+.hsw-ac-otp__head h2 {
+\tmargin: 0 0 4px;
+\tfont-size: 15px;
+\tfont-weight: 800;
+\tcolor: var(--hsw-ac-ink);
+}
+
+.hsw-ac-otp__head p {
+\tmargin: 0;
+\tfont-size: 11px;
+\tline-height: 1.8;
+\tcolor: var(--hsw-ac-muted);
+}
+
+.hsw-ac-otp__channels {
+\tdisplay: flex;
+\tgap: 7px;
+\tflex-wrap: wrap;
+\tmargin: 0 0 13px;
+}
+
+.hsw-ac-otp__channel {
+\tdisplay: inline-flex;
+\talign-items: center;
+\tgap: 6px;
+\tborder: 1px solid var(--hsw-ac-line);
+\tbackground: #f8fafc;
+\tcolor: var(--hsw-ac-muted);
+\tborder-radius: 9px;
+\tpadding: 8px 11px;
+\tfont: inherit;
+\tfont-size: 11px;
+\tfont-weight: 700;
+\tcursor: pointer;
+}
+
+.hsw-ac-otp__channel svg {
+\twidth: 14px;
+\theight: 14px;
+}
+
+.hsw-ac-otp__channel:hover,
+.hsw-ac-otp__channel.is-active {
+\tborder-color: var(--hsw-ac-primary);
+\tbackground: var(--hsw-ac-primary);
+\tcolor: #fff;
+}
+
+.hsw-ac-otp__form .hsw-ac-field {
+\tmargin-bottom: 10px;
+}
+
+.hsw-ac-otp__send {
+\twidth: 100%;
+\tjustify-content: center;
+}
+
+.hsw-ac-otp__code-step {
+\tmargin-top: 14px;
+\tpadding: 12px;
+\tborder: 1px solid #fde3c7;
+\tbackground: #fffaf3;
+\tborder-radius: 11px;
+}
+
+.hsw-ac-otp__code-step > label {
+\tdisplay: block;
+\tfont-size: 11px;
+\tfont-weight: 800;
+\tcolor: var(--hsw-ac-ink);
+\tmargin-bottom: 5px;
+}
+
+.hsw-ac-otp__actions {
+\tdisplay: flex;
+\talign-items: center;
+\tgap: 10px;
+\tmargin-top: 9px;
+\tflex-wrap: wrap;
+}
+
+.hsw-ac-otp__actions .hsw-ac__btn {
+\twidth: auto;
+\tflex: 0 0 auto;
+}
+
+.hsw-ac-otp__resend {
+\tborder: 0;
+\tbackground: none;
+\tcolor: var(--hsw-ac-accent);
+\tfont: inherit;
+\tfont-size: 10.5px;
+\tfont-weight: 700;
+\tcursor: pointer;
+\tpadding: 3px;
+}
+
+.hsw-ac-otp__message {
+\tmargin: 9px 0 0;
+\tmin-height: 17px;
+\tfont-size: 11px;
+\tline-height: 1.8;
+\tcolor: var(--hsw-ac-muted);
+}
+
+.hsw-ac-otp__message.is-error {
+\tcolor: #b42331;
+}
+
+.hsw-ac-otp__message.is-success {
+\tcolor: #087a55;
+}
+
+.hsw-ac-otp__message a {
+\tcolor: inherit;
+\tfont-weight: 800;
+\ttext-decoration: underline;
+}
+
+/* Account security card */
+.hsw-ac__security {
+\tpadding: 17px 18px;
+}
+
+.hsw-ac__security .hsw-ac__card-head {
+\tmargin-bottom: 10px;
+}
+
+.hsw-ac__security-desc,
+.hsw-ac__security-note {
+\tmargin: 0 0 10px;
+\tfont-size: 11px;
+\tline-height: 1.8;
+\tcolor: var(--hsw-ac-muted);
+}
+
+.hsw-ac__security-note a {
+\tcolor: var(--hsw-ac-accent);
+\tfont-weight: 800;
+}
+
+.hsw-ac__security-active {
+\tdisplay: flex;
+\talign-items: flex-start;
+\tgap: 9px;
+\tbackground: #e9f9f2;
+\tborder: 1px solid #c8f0df;
+\tborder-radius: 10px;
+\tpadding: 10px 11px;
+\tmargin-bottom: 10px;
+}
+
+.hsw-ac__security-dot {
+\twidth: 8px;
+\theight: 8px;
+\tborder-radius: 50%;
+\tbackground: #0f9f6e;
+\tmargin-top: 6px;
+\tflex: 0 0 auto;
+\tbox-shadow: 0 0 0 3px rgba(15, 159, 110, .12);
+}
+
+.hsw-ac__security-active strong {
+\tdisplay: block;
+\tfont-size: 11.5px;
+\tcolor: #087a55;
+}
+
+.hsw-ac__security-active p {
+\tmargin: 3px 0 0;
+\tfont-size: 10.5px;
+\tcolor: #23745d;
+}
+
+.hsw-ac__security .hsw-ac__btn {
+\twidth: 100%;
+\tjustify-content: center;
+}
+
+/* Standalone 2FA challenge */
+.hsw-ac-auth--slim {
+\tgrid-template-columns: minmax(0, 480px);
+\tjustify-content: center;
+}
+
+.hsw-ac-auth--slim .hsw-ac-auth__panel {
+\twidth: 100%;
+}
+
+.hsw-ac-otp--challenge {
+\tmargin-top: 4px;
+\tpadding-top: 0;
+\tborder-top: 0;
+}
+
+.hsw-ac-otp--challenge .hsw-ac__btn {
+\twidth: 100%;
+\tjustify-content: center;
+}
+
+.hsw-ac-auth__notice {
+\tdisplay: flex;
+\talign-items: flex-start;
+\tgap: 8px;
+\tborder: 1px solid #f5c2c7;
+\tbackground: #fff1f2;
+\tcolor: #9f1239;
+\tborder-radius: 10px;
+\tpadding: 9px 11px;
+\tmargin: 0 0 12px;
+\tfont-size: 11px;
+\tline-height: 1.8;
+}
+
+.hsw-ac-auth__notice svg {
+\tflex: 0 0 auto;
+\tmargin-top: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.hsw-ac *,
 	.hsw-ac *::before,
