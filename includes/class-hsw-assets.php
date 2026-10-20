@@ -249,6 +249,36 @@ class HSW_Assets {
                         true
                 );
 
+                wp_register_style(
+                        'hsw-account',
+                        HSW_URL . 'assets/css/hsw-account.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-account',
+                        HSW_URL . 'assets/js/hsw-account.js',
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
+                wp_localize_script(
+                        'hsw-account',
+                        'hswAccountData',
+                        array(
+                                'rest'         => esc_url_raw( rest_url( 'hsw/v1' ) ),
+                                'nonce'        => wp_create_nonce( 'wp_rest' ),
+                                'faDigits'     => true,
+                                'errorText'    => __( 'خطا در بارگذاری علاقه‌مندی‌ها', 'hamishop-elementor-widgets' ),
+                                'retryText'    => __( 'اتصال را بررسی کنید و صفحه را دوباره باز کنید.', 'hamishop-elementor-widgets' ),
+                                'clearConfirm' => __( 'همهٔ محصولات از علاقه‌مندی‌ها حذف شوند؟', 'hamishop-elementor-widgets' ),
+                                'showPassword' => __( 'نمایش رمز عبور', 'hamishop-elementor-widgets' ),
+                                'hidePassword' => __( 'پنهان کردن رمز عبور', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
                 wp_localize_script(
                         'hsw-checkout',
                         'hswCheckoutData',
@@ -311,6 +341,9 @@ class HSW_Assets {
          */
         public function filter_google_fonts( $print ) {
                 if ( function_exists( 'is_shop' ) && ( is_shop() || is_product_category() || is_product_tag() ) ) {
+                        return false;
+                }
+                if ( function_exists( 'is_account_page' ) && is_account_page() ) {
                         return false;
                 }
                 return $print;

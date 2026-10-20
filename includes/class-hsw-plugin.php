@@ -31,6 +31,8 @@ final class HSW_Plugin {
                 $this->helpers  = new HSW_Helpers();
                 $this->products = new HSW_Products();
 
+                HSW_Account::instance();
+
                 new HSW_Rest();
                 new HSW_Assets();
 
@@ -58,6 +60,9 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-checkout-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-checkout-complete.php';
                 require_once HSW_DIR . 'includes/class-hsw-complete-route.php';
+                require_once HSW_DIR . 'includes/class-hsw-account.php';
+                require_once HSW_DIR . 'includes/class-hsw-account-support.php';
+                require_once HSW_DIR . 'includes/class-hsw-account-admin.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
@@ -84,6 +89,7 @@ final class HSW_Plugin {
                         'hamishop-loop'    => __( 'حامی — ویجت‌های لوپ محصولات', 'hamishop-elementor-widgets' ),
                         'hamishop-cart'    => __( 'حامی — ویجت‌های سبد خرید و پرداخت', 'hamishop-elementor-widgets' ),
                         'hamishop-archive' => __( 'حامی — ویجت‌های آرشیو محصولات', 'hamishop-elementor-widgets' ),
+                        'hamishop-account' => __( 'HamiShop - پنل حساب کاربری', 'hamishop-elementor-widgets' ),
                         'hamishop-blog'    => __( 'حامی — ویجت‌های مجله و وبلاگ', 'hamishop-elementor-widgets' ),
                 );
                 foreach ( $categories as $slug => $title ) {
@@ -191,6 +197,8 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-complete-actions.php',
                         HSW_DIR . 'widgets/class-hsw-widget-complete-page.php',
 
+                        HSW_DIR . 'widgets/class-hsw-widget-account.php',
+
                         HSW_DIR . 'widgets/class-hsw-widget-blog-hero.php',
                         HSW_DIR . 'widgets/class-hsw-widget-blog-tabs.php',
                         HSW_DIR . 'widgets/class-hsw-widget-blog-featured.php',
@@ -264,6 +272,7 @@ final class HSW_Plugin {
                         '\HSW_Widget_Complete_Steps',
                         '\HSW_Widget_Complete_Actions',
                         '\HSW_Widget_Complete_Page',
+                        '\HSW_Widget_Account',
                         '\HSW_Widget_Blog_Hero',
                         '\HSW_Widget_Blog_Tabs',
                         '\HSW_Widget_Blog_Featured',

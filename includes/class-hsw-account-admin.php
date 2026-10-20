@@ -1,0 +1,504 @@
+<?php
+/**
+ * HamiShop account settings screen.
+ *
+ * One native WordPress admin page (under the HamiShop menu) that owns every
+ * account option: layout, sections, menu, support, notifications and colors.
+ * No external UI libraries, no jQuery dependency, RTL by default.
+ *
+ * @package HamiShop_Elementor_Widgets
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+final class HSW_Account_Admin {
+
+	/** @var HSW_Account */
+	private $account;
+
+	public function __construct( $account ) {
+		$this->account = $account;
+
+		add_action( 'admin_menu', array( $this, 'menu' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( HSW_FILE ), array( $this, 'plugin_action_links' ) );
+
+		add_action( 'show_user_profile', array( $this, 'user_fields' ) );
+		add_action( 'edit_user_profile', array( $this, 'user_fields' ) );
+		add_action( 'personal_options_update', array( $this, 'save_user_fields' ) );
+		add_action( 'edit_user_profile_update', array( $this, 'save_user_fields' ) );
+	}
+
+	public function menu() {
+		add_menu_page(
+			'حساب کاربری HamiShop',
+			'HamiShop',
+			'manage_options',
+			'hamishop',
+			array( $this, 'render_page' ),
+			'dashicons-store',
+			56
+		);
+	}
+
+	public function register_settings() {
+		register_setting(
+			'hsw_account_group',
+			HSW_Account::OPTION,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this->account, 'sanitize_settings' ),
+				'default'           => HSW_Account::defaults(),
+			)
+		);
+	}
+
+	public function plugin_action_links( $links ) {
+		$url = admin_url( 'admin.php?page=hamishop' );
+		array_unshift( $links, '<a href="' . esc_url( $url ) . '">تنظیمات حساب کاربری</a>' );
+		return $links;
+	}
+
+	public function render_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$s    = $this->account->settings( true );
+		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+		$tabs = array(
+			'general'       => 'عمومی',
+			'sections'      => 'بخش‌ها و منو',
+			'support'       => 'پشتیبانی',
+			'notifications' => 'اعلان‌ها',
+			'design'        => 'رنگ و چیدمان',
+			'shortcode'     => 'شورت‌کد و راهنما',
+		);
+		if ( ! isset( $tabs[ $tab ] ) ) {
+			$tab = 'general';
+		}
+		$this->page_styles();
+		?>
+		<div class="wrap hsw-admin" dir="rtl">
+			<div class="hsw-admin-head">
+				<div class="hsw-admin-brand"><span class="hsw-admin-logo">HamiShop</span><div><h1>پنل حساب کاربری</h1><p>تنظیمات یکپارچهٔ داشبورد، منو، پشتیبانی، اعلان‌ها و ظاهر حساب مشتریان.</p></div></div>
+				<a class="button button-primary" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" target="_blank" rel="noopener">مشاهده صفحه حساب</a>
+			</div>
+
+			<nav class="hsw-admin-tabs" role="tablist">
+				<?php foreach ( $tabs as $key => $label ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'hamishop', 'tab' => $key ), admin_url( 'admin.php' ) ) ); ?>" class="<?php echo $tab === $key ? 'is-active' : ''; ?>" role="tab"><?php echo esc_html( $label ); ?></a>
+				<?php endforeach; ?>
+			</nav>
+
+			<?php settings_errors(); ?>
+			<form method="post" action="options.php" class="hsw-admin-form">
+				<?php settings_fields( 'hsw_account_group' ); ?>
+				<?php if ( 'general' === $tab ) : ?>
+					<?php $this->tab_general( $s ); ?>
+				<?php elseif ( 'sections' === $tab ) : ?>
+					<?php $this->tab_sections( $s ); ?>
+				<?php elseif ( 'support' === $tab ) : ?>
+					<?php $this->tab_support( $s ); ?>
+				<?php elseif ( 'notifications' === $tab ) : ?>
+					<?php $this->tab_notifications( $s ); ?>
+				<?php elseif ( 'design' === $tab ) : ?>
+					<?php $this->tab_design( $s ); ?>
+				<?php endif; ?>
+				<?php if ( 'shortcode' !== $tab ) : ?>
+					<p class="hsw-admin-submit"><?php submit_button( 'ذخیره تنظیمات', 'primary', 'submit', false ); ?></p>
+				<?php endif; ?>
+			</form>
+			<?php if ( 'shortcode' === $tab ) : ?>
+				<?php $this->tab_shortcode( $s ); ?>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	private function page_styles() {
+		?>
+		<style>
+			.hsw-admin{--hsw-a:#0e2a47;--hsw-b:#f3f6fa;--hsw-line:#e6ebf2;--hsw-muted:#5b6b80;max-width:1280px}
+			.hsw-admin-head{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#0b2036,#173b5c);color:#fff;border-radius:18px;padding:22px 24px;margin:12px 0 18px;flex-wrap:wrap}
+			.hsw-admin-brand{display:flex;align-items:center;gap:14px}
+			.hsw-admin-logo{font-weight:800;font-size:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:8px 14px;border-radius:12px}
+			.hsw-admin-head h1{color:#fff;margin:0 0 4px;font-size:22px}
+			.hsw-admin-head p{margin:0;color:rgba(255,255,255,.75)}
+			.hsw-admin-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+			.hsw-admin-tabs a{background:#fff;border:1px solid var(--hsw-line);border-radius:999px;padding:8px 16px;text-decoration:none;color:#1d2327;font-weight:600}
+			.hsw-admin-tabs a.is-active{background:var(--hsw-a);border-color:var(--hsw-a);color:#fff}
+			.hsw-admin-card{background:#fff;border:1px solid var(--hsw-line);border-radius:16px;padding:20px 22px;margin:0 0 16px;box-shadow:0 1px 2px rgba(15,23,42,.03)}
+			.hsw-admin-card h2{margin:0 0 4px;font-size:16px}
+			.hsw-admin-card .hsw-admin-desc{color:var(--hsw-muted);margin:0 0 16px}
+			.hsw-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px}
+			.hsw-admin-grid.is-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+			.hsw-field label{display:block;font-weight:600;margin-bottom:6px}
+			.hsw-field input[type=text],.hsw-field input[type=url],.hsw-field input[type=email],.hsw-field input[type=number],.hsw-field select,.hsw-field textarea{width:100%;max-width:none;border-radius:10px;border-color:#cfd6df}
+			.hsw-field textarea{min-height:90px}
+			.hsw-field .description{margin-top:5px;color:var(--hsw-muted)}
+			.hsw-switch{display:flex;align-items:center;gap:8px;background:#f6f8fb;border:1px solid var(--hsw-line);border-radius:10px;padding:9px 12px;margin:0 0 6px}
+			.hsw-switch input{margin:0}
+			.hsw-colors{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+			.hsw-color{display:flex;align-items:center;gap:8px;border:1px solid var(--hsw-line);border-radius:10px;padding:8px}
+			.hsw-color input[type=color]{width:38px;height:32px;padding:0;border:0;background:none}
+			.hsw-color code{font-size:11px;color:var(--hsw-muted)}
+			.hsw-admin table.menu-table{width:100%;border-collapse:collapse}
+			.hsw-admin table.menu-table th,.hsw-admin table.menu-table td{border-bottom:1px solid var(--hsw-line);padding:10px 8px;text-align:right}
+			.hsw-admin table.menu-table input[type=text]{width:100%}
+			.hsw-admin table.menu-table input[type=number]{width:80px}
+			.hsw-badge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;background:#eef2f7;color:#334155}
+			.hsw-badge.is-native{background:#e0f2fe;color:#075985}
+			.hsw-badge.is-custom{background:#fef3c7;color:#92400e}
+			.hsw-admin-submit{margin:0;position:sticky;bottom:12px;background:rgba(243,246,250,.92);padding:12px 0;backdrop-filter:blur(4px)}
+			.hsw-code{direction:ltr;text-align:left;background:#0f172a;color:#e2e8f0;padding:14px 16px;border-radius:12px;font-family:Consolas,monospace;display:block;margin:8px 0 14px;overflow:auto}
+			.hsw-status-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
+			.hsw-status-list li{background:var(--hsw-b);border:1px solid var(--hsw-line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px}
+			.hsw-notice{border-inline-start:4px solid #dba617;background:#fef8e7;padding:10px 14px;border-radius:8px;margin:0 0 14px}
+			@media(max-width:900px){.hsw-admin-grid,.hsw-admin-grid.is-3,.hsw-colors,.hsw-status-list{grid-template-columns:1fr}}
+		</style>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Field helpers
+	 * ------------------------------------------------------------------ */
+
+	private function name( $group, $key = null ) {
+		return null === $key ? 'hsw_account_settings[' . $group . ']' : 'hsw_account_settings[' . $group . '][' . $key . ']';
+	}
+
+	private function val( $s, $group, $key, $default = '' ) {
+		return isset( $s[ $group ][ $key ] ) ? $s[ $group ][ $key ] : $default;
+	}
+
+	private function text_field( $s, $group, $key, $label, $desc = '', $type = 'text' ) {
+		?>
+		<div class="hsw-field">
+			<label for="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>"><?php echo esc_html( $label ); ?></label>
+			<input type="<?php echo esc_attr( $type ); ?>" id="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>" name="<?php echo esc_attr( $this->name( $group, $key ) ); ?>" value="<?php echo esc_attr( $this->val( $s, $group, $key ) ); ?>">
+			<?php if ( $desc ) : ?><p class="description"><?php echo esc_html( $desc ); ?></p><?php endif; ?>
+		</div>
+		<?php
+	}
+
+	private function textarea_field( $s, $group, $key, $label, $desc = '', $lines = false ) {
+		$value = $this->val( $s, $group, $key );
+		if ( $lines && is_array( $value ) ) {
+			$value = implode( "\n", $value );
+		}
+		?>
+		<div class="hsw-field">
+			<label for="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>"><?php echo esc_html( $label ); ?></label>
+			<textarea id="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>" name="<?php echo esc_attr( $this->name( $group, $key ) ); ?>" rows="5"><?php echo esc_textarea( $value ); ?></textarea>
+			<?php if ( $desc ) : ?><p class="description"><?php echo esc_html( $desc ); ?></p><?php endif; ?>
+		</div>
+		<?php
+	}
+
+	private function number_field( $s, $group, $key, $label, $min, $max, $desc = '' ) {
+		?>
+		<div class="hsw-field">
+			<label for="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>"><?php echo esc_html( $label ); ?></label>
+			<input type="number" min="<?php echo esc_attr( $min ); ?>" max="<?php echo esc_attr( $max ); ?>" id="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>" name="<?php echo esc_attr( $this->name( $group, $key ) ); ?>" value="<?php echo esc_attr( $this->val( $s, $group, $key ) ); ?>">
+			<?php if ( $desc ) : ?><p class="description"><?php echo esc_html( $desc ); ?></p><?php endif; ?>
+		</div>
+		<?php
+	}
+
+	private function select_field( $s, $group, $key, $label, $options, $desc = '' ) {
+		?>
+		<div class="hsw-field">
+			<label for="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>"><?php echo esc_html( $label ); ?></label>
+			<select id="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>" name="<?php echo esc_attr( $this->name( $group, $key ) ); ?>">
+				<?php foreach ( $options as $value => $text ) : ?>
+					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( (string) $this->val( $s, $group, $key ), (string) $value ); ?>><?php echo esc_html( $text ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<?php if ( $desc ) : ?><p class="description"><?php echo esc_html( $desc ); ?></p><?php endif; ?>
+		</div>
+		<?php
+	}
+
+	private function switch_field( $s, $group, $key, $label, $desc = '' ) {
+		$value    = 'yes' === $this->val( $s, $group, $key ) ? 'yes' : 'no';
+		$name     = $this->name( $group, $key );
+		?>
+		<label class="hsw-switch">
+			<input type="hidden" name="<?php echo esc_attr( $name ); ?>" value="no">
+			<input type="checkbox" name="<?php echo esc_attr( $name ); ?>" value="yes" <?php checked( $value, 'yes' ); ?>>
+			<span><strong><?php echo esc_html( $label ); ?></strong><?php if ( $desc ) : ?><br><small><?php echo esc_html( $desc ); ?></small><?php endif; ?></span>
+		</label>
+		<?php
+	}
+
+	private function color_field( $s, $group, $key, $label ) {
+		$value = $this->val( $s, $group, $key );
+		?>
+		<div class="hsw-color">
+			<input type="color" id="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>" name="<?php echo esc_attr( $this->name( $group, $key ) ); ?>" value="<?php echo esc_attr( $value ); ?>">
+			<div><label for="hsw-<?php echo esc_attr( $group . '-' . $key ); ?>"><?php echo esc_html( $label ); ?></label><br><code><?php echo esc_html( $value ); ?></code></div>
+		</div>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Tabs
+	 * ------------------------------------------------------------------ */
+
+	private function tab_general( $s ) {
+		?>
+		<div class="hsw-admin-card">
+			<h2>فعال‌سازی و چیدمان</h2>
+			<p class="hsw-admin-desc">این تنظیمات پایهٔ پنل حساب در شورت‌کد و ویجت المنتور است.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'general', 'enabled', 'فعال‌سازی پنل حساب HamiShop', 'در صورت غیرفعال بودن، شورت‌کد به پنل پیش‌فرض ووکامرس برمی‌گردد.' ); ?>
+				<?php $this->select_field( $s, 'general', 'side_position', 'جای منوی کناری', array( 'right' => 'سمت راست', 'left' => 'سمت چپ' ) ); ?>
+				<?php $this->number_field( $s, 'general', 'side_width', 'عرض ستون کناری (پیکسل)', 240, 420 ); ?>
+				<?php $this->number_field( $s, 'general', 'gap', 'فاصلهٔ ستون‌ها (پیکسل)', 0, 64 ); ?>
+				<?php $this->number_field( $s, 'general', 'max_width', 'حداکثر عرض پنل (پیکسل)', 960, 1600 ); ?>
+				<?php $this->number_field( $s, 'general', 'radius', 'گردی گوشه‌ها (پیکسل)', 0, 40 ); ?>
+			</div>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>هدر، خوش‌آمد و پروفایل</h2>
+			<p class="hsw-admin-desc">در متن خوش‌آمد می‌توانید از جای‌نگهدار <code>{name}</code> برای نام کاربر استفاده کنید.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'general', 'show_breadcrumb', 'نمایش مسیر صفحه' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_hero', 'نمایش هدر خوش‌آمد' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_badge', 'نمایش نشان هدر' ); ?>
+				<?php $this->text_field( $s, 'general', 'badge_text', 'متن نشان هدر' ); ?>
+				<?php $this->text_field( $s, 'general', 'greeting', 'متن خوش‌آمدگویی' ); ?>
+				<?php $this->textarea_field( $s, 'general', 'subtitle', 'زیرعنوان هدر' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_catalog_button', 'نمایش دکمهٔ کاتالوگ' ); ?>
+				<?php $this->text_field( $s, 'general', 'catalog_label', 'متن دکمهٔ کاتالوگ' ); ?>
+				<?php $this->text_field( $s, 'general', 'catalog_url', 'لینک دکمهٔ کاتالوگ', '', 'url' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_profile', 'نمایش کارت پروفایل' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_membership', 'نمایش باشگاه مشتریان' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_menu', 'نمایش منوی حساب' ); ?>
+				<?php $this->switch_field( $s, 'general', 'show_logout', 'نمایش گزینهٔ خروج' ); ?>
+				<?php $this->text_field( $s, 'general', 'menu_title', 'عنوان منوی حساب' ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function tab_sections( $s ) {
+		$native = array( 'dashboard', 'orders', 'downloads', 'edit-address', 'payment-methods', 'edit-account', 'customer-logout' );
+		?>
+		<div class="hsw-admin-card">
+			<h2>بخش‌های داشبورد</h2>
+			<p class="hsw-admin-desc">هر بخش را می‌توانید مستقل از دیگر بخش‌ها خاموش کنید.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'dashboard', 'show_stats', 'کارت‌های آماری' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'show_recent_order', 'کارت سفارش اخیر' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'show_shortcuts', 'میانبرهای پرکاربرد' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'show_address', 'کارت نشانی پیش‌فرض' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'stat_orders', 'آمار سفارش‌های جاری' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'stat_completed', 'آمار سفارش‌های تحویل‌شده' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'stat_wallet', 'آمار کیف پول' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'stat_loyalty', 'آمار امتیاز باشگاه' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'shortcut_support', 'میانبر پشتیبانی' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'shortcut_returns', 'میانبر درخواست مرجوعی' ); ?>
+				<?php $this->switch_field( $s, 'dashboard', 'shortcut_downloads', 'میانبر دانلودها' ); ?>
+			</div>
+			<?php $this->textarea_field( $s, 'dashboard', 'shortcut_note', 'یادداشت پایین میانبرها' ); ?>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>منوی حساب کاربری</h2>
+			<p class="hsw-admin-desc">ترتیب، نام و فعال/غیرفعال بودن هر آیتم را مدیریت کنید. اندپوینت‌های غیرفعال در تنظیمات ووکامرس به‌صورت خودکار حذف می‌شوند.</p>
+			<table class="menu-table">
+				<thead><tr><th>فعال</th><th>عنوان</th><th>ترتیب</th><th>شناسه</th><th>نوع</th></tr></thead>
+				<tbody>
+					<?php foreach ( $s['menu']['items'] as $key => $item ) : ?>
+						<tr>
+							<td><input type="hidden" name="<?php echo esc_attr( $this->name( 'menu', 'items' ) . '[' . $key . '][enabled]' ); ?>" value="no"><input type="checkbox" name="<?php echo esc_attr( $this->name( 'menu', 'items' ) . '[' . $key . '][enabled]' ); ?>" value="yes" <?php checked( 'yes', $item['enabled'] ); ?>></td>
+							<td><input type="text" name="<?php echo esc_attr( $this->name( 'menu', 'items' ) . '[' . $key . '][label]' ); ?>" value="<?php echo esc_attr( $item['label'] ); ?>"></td>
+							<td><input type="number" min="0" max="1000" name="<?php echo esc_attr( $this->name( 'menu', 'items' ) . '[' . $key . '][order]' ); ?>" value="<?php echo esc_attr( $item['order'] ); ?>"></td>
+							<td><code><?php echo esc_html( $key ); ?></code></td>
+							<td><span class="hsw-badge <?php echo in_array( $key, $native, true ) ? 'is-native' : 'is-custom'; ?>"><?php echo in_array( $key, $native, true ) ? 'ووکامرس' : 'اختصاصی'; ?></span></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<?php
+	}
+
+	private function tab_support( $s ) {
+		?>
+		<div class="hsw-admin-card">
+			<h2>تیکت‌های پشتیبانی</h2>
+			<p class="hsw-admin-desc">تیکت‌ها در منوی HamiShop > تیکت‌های پشتیبانی قابل مدیریت هستند. کاربر فقط تیکت‌های خودش را می‌بیند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'support', 'enabled', 'فعال‌سازی تیکت پشتیبانی' ); ?>
+				<?php $this->number_field( $s, 'support', 'max_open', 'حداکثر تیکت باز هر کاربر', 1, 20 ); ?>
+				<?php $this->number_field( $s, 'support', 'max_message', 'حداکثر طول پیام (کاراکتر)', 200, 10000 ); ?>
+				<?php $this->switch_field( $s, 'support', 'email_notifications', 'ارسال ایمیل به مدیر', 'با هر تیکت جدید یا پاسخ کاربر، یک ایمیل اطلاع‌رسانی ارسال می‌شود.' ); ?>
+				<?php $this->text_field( $s, 'support', 'support_email', 'ایمیل پشتیبانی', 'اگر خالی باشد، ایمیل مدیر وردپرس استفاده می‌شود.', 'email' ); ?>
+				<?php $this->select_field( $s, 'support', 'priority_default', 'اولویت پیش‌فرض', $s['support']['priorities'] ); ?>
+			</div>
+			<?php $this->textarea_field( $s, 'support', 'departments', 'دپارتمان‌ها', 'هر دپارتمان در یک خط.', true ); ?>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>وضعیت اندپوینت‌ها</h2>
+			<ul class="hsw-status-list">
+				<li><span>پشتیبانی</span><code><?php echo esc_html( wc_get_account_endpoint_url( 'support' ) ); ?></code></li>
+				<li><span>اعلان‌ها</span><code><?php echo esc_html( wc_get_account_endpoint_url( 'notifications' ) ); ?></code></li>
+				<li><span>علاقه‌مندی‌ها</span><code><?php echo esc_html( wc_get_account_endpoint_url( 'wishlist' ) ); ?></code></li>
+				<li><span>کیف پول</span><code><?php echo esc_html( wc_get_account_endpoint_url( 'wallet' ) ); ?></code></li>
+			</ul>
+		</div>
+		<?php
+	}
+
+	private function tab_notifications( $s ) {
+		$statuses = array();
+		if ( function_exists( 'wc_get_order_statuses' ) ) {
+			foreach ( wc_get_order_statuses() as $key => $label ) {
+				$statuses[ 0 === strpos( $key, 'wc-' ) ? substr( $key, 3 ) : $key ] = $label;
+			}
+		}
+		$selected = (array) $this->val( $s, 'notifications', 'order_statuses', array() );
+		?>
+		<div class="hsw-admin-card">
+			<h2>اعلان‌های داخلی</h2>
+			<p class="hsw-admin-desc">اعلان‌ها در زنگ بالای پنل و صفحهٔ اعلان‌ها نمایش داده می‌شوند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->switch_field( $s, 'notifications', 'enabled', 'فعال‌سازی اعلان‌های داخلی' ); ?>
+				<?php $this->switch_field( $s, 'notifications', 'welcome', 'اعلان خوش‌آمد پس از ثبت‌نام' ); ?>
+				<?php $this->switch_field( $s, 'notifications', 'ticket_reply', 'اعلان پاسخ جدید پشتیبانی' ); ?>
+				<?php $this->number_field( $s, 'notifications', 'max', 'حداکثر تعداد اعلان نگهداری‌شده', 10, 200 ); ?>
+			</div>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>اعلان تغییر وضعیت سفارش</h2>
+			<p class="hsw-admin-desc">برای هر تغییر وضعیت انتخاب‌شده، یک اعلان داخلی برای مشتری ساخته می‌شود.</p>
+			<div class="hsw-admin-grid is-3">
+				<?php foreach ( $statuses as $key => $label ) : ?>
+					<label class="hsw-check"><input type="checkbox" name="<?php echo esc_attr( $this->name( 'notifications', 'order_statuses' ) ); ?>[]" value="<?php echo esc_attr( $key ); ?>" <?php checked( in_array( $key, $selected, true ) ); ?>> <?php echo esc_html( $label ); ?></label>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function tab_design( $s ) {
+		?>
+		<div class="hsw-admin-card">
+			<h2>پالت رنگ</h2>
+			<p class="hsw-admin-desc">این رنگ‌ها به‌عنوان مقدار پایه اعمال می‌شوند. در ویجت المنتور می‌توانید هر نمونه را مستقل تغییر دهید.</p>
+			<div class="hsw-colors">
+				<?php
+				$colors = array(
+					'primary'      => 'اصلی (سرمه‌ای)',
+					'primary_dark' => 'سرمه‌ای تیره',
+					'accent'       => 'رنگ تاکیدی',
+					'bg'           => 'پس‌زمینه',
+					'card'         => 'کارت‌ها',
+					'ink'          => 'متن اصلی',
+					'muted'        => 'متن ثانویه',
+					'line'         => 'خطوط',
+					'success'      => 'موفقیت',
+					'warning'      => 'هشدار',
+					'danger'       => 'خطا',
+					'hero_a'       => 'گرادیان هدر ۱',
+					'hero_b'       => 'گرادیان هدر ۲',
+				);
+				foreach ( $colors as $key => $label ) {
+					$this->color_field( $s, 'design', $key, $label );
+				}
+				?>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function tab_shortcode( $s ) {
+		$account_id  = wc_get_page_id( 'myaccount' );
+		$account_url = wc_get_page_permalink( 'myaccount' );
+		$content     = $account_id ? get_post_field( 'post_content', $account_id ) : '';
+		$native      = $content && has_shortcode( $content, 'woocommerce_my_account' );
+		?>
+		<div class="hsw-admin-card">
+			<h2>شورت‌کد پنل حساب</h2>
+			<p class="hsw-admin-desc">این شورت‌کد را در برگهٔ حساب کاربری ووکامرس یا هر برگهٔ دیگری قرار دهید. ویجت «پنل حساب کاربری HamiShop» در المنتور دقیقاً همین خروجی را می‌سازد.</p>
+			<code class="hsw-code" id="hsw-account-shortcode">[hamishop_account]</code>
+			<button type="button" class="button" data-hsw-copy="#hsw-account-shortcode">کپی شورت‌کد</button>
+			<p class="description">پارامترهای اختیاری: <code>layout="left|right"</code>، <code>show_header="yes|no"</code>، <code>show_menu="yes|no"</code>، <code>show_stats="yes|no"</code>، <code>class="..."</code></p>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>وضعیت صفحهٔ حساب</h2>
+			<ul class="hsw-status-list">
+				<li><span>برگهٔ حساب ووکامرس</span><a href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener">مشاهده</a></li>
+				<li><span>شناسهٔ برگه</span><code><?php echo esc_html( HSW_Helpers::fa_num( $account_id ) ); ?></code></li>
+				<li><span>وضعیت شورت‌کد</span><code><?php echo $native ? 'شورت‌کد پیش‌فرض ووکامرس' : 'آماده'; ?></code></li>
+				<li><span>تیکت‌های پشتیبانی</span><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hsw_ticket' ) ); ?>">مدیریت تیکت‌ها</a></li>
+			</ul>
+			<?php if ( $native ) : ?>
+				<p class="hsw-notice">در برگهٔ حساب فعلی، شورت‌کد <code>[woocommerce_my_account]</code> قرار دارد. برای استفاده از طراحی جدید، آن را با <code>[hamishop_account]</code> جایگزین کنید یا برگه را با ویجت المنتور بسازید. تا زمانی که این کار انجام نشود، منوی سفارشی و اندپوینت‌های تیکت/اعلان به صفحهٔ بومی ووکامرس هم اضافه می‌شوند.</p>
+				<a class="button button-primary" href="<?php echo esc_url( get_edit_post_link( $account_id ) ); ?>">ویرایش برگهٔ حساب</a>
+			<?php endif; ?>
+		</div>
+		<div class="hsw-admin-card">
+			<h2>راهنمای ویجت المنتور</h2>
+			<p>در ویرایشگر المنتور، دستهٔ «HamiShop Account» را باز کنید و ویجت «پنل حساب کاربری HamiShop» را بکشید. تب Content برای هدر، بخش‌ها، فرم ورود و پیش‌نمایش است؛ تب Style شامل پالت رنگ، چیدمان و تایپوگرافی است.</p>
+		</div>
+		<script>
+			document.addEventListener('click', function (e) {
+				var btn = e.target.closest('[data-hsw-copy]');
+				if (!btn) return;
+				var target = document.querySelector(btn.getAttribute('data-hsw-copy'));
+				if (!target) return;
+				if (navigator.clipboard) navigator.clipboard.writeText(target.textContent.trim());
+				btn.textContent = 'کپی شد';
+			});
+		</script>
+		<?php
+	}
+
+	/* ---------------------------------------------------------------------
+	 * User profile fields
+	 * ------------------------------------------------------------------ */
+
+	public function user_fields( $user ) {
+		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
+			return;
+		}
+		$balance = (float) get_user_meta( $user->ID, '_hsw_wallet_balance', true );
+		wp_nonce_field( 'hsw_account_user_' . $user->ID, 'hsw_account_user_nonce' );
+		?>
+		<h2>حساب HamiShop</h2>
+		<table class="form-table" role="presentation">
+			<tr>
+				<th><label for="hsw-wallet-balance">موجودی کیف پول</label></th>
+				<td>
+					<input type="number" step="0.01" min="0" class="regular-text" id="hsw-wallet-balance" name="hsw_wallet_balance" value="<?php echo esc_attr( number_format( $balance, 2, '.', '' ) ); ?>">
+					<p class="description">موجودی کیف پول مشتری در پنل حساب نمایش داده می‌شود. برای تنظیم موجودی از این فیلد استفاده کنید.</p>
+				</td>
+			</tr>
+			<tr>
+				<th>اعلان‌ها و تیکت‌ها</th>
+				<td>
+					<a class="button" href="<?php echo esc_url( admin_url( 'edit.php?post_type=hsw_ticket&author=' . $user->ID ) ); ?>">مشاهده تیکت‌های این کاربر</a>
+					<p class="description">اعلان‌های داخلی در پروفایل کاربر ذخیره می‌شوند و از صفحهٔ اعلان‌ها قابل مشاهده‌اند.</p>
+				</td>
+			</tr>
+		</table>
+		<?php
+	}
+
+	public function save_user_fields( $user_id ) {
+		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+			return;
+		}
+		if ( ! isset( $_POST['hsw_account_user_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hsw_account_user_nonce'] ) ), 'hsw_account_user_' . $user_id ) ) {
+			return;
+		}
+		if ( isset( $_POST['hsw_wallet_balance'] ) ) {
+			$balance = (float) wc_format_decimal( wp_unslash( $_POST['hsw_wallet_balance'] ) );
+			update_user_meta( $user_id, '_hsw_wallet_balance', max( 0, $balance ) );
+		}
+	}
+
+}
+
