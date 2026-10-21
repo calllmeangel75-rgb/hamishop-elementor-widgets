@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک و بهینه برای Lighthouse 100.
- * Version:     1.11.8
+ * Version:     1.11.9
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -43,7 +43,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.8' );
+define( 'HSW_VERSION', '1.11.9' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
@@ -65,13 +65,27 @@ if ( ! function_exists( 'hsw_report_fatal' ) ) {
                 error_log( $msg );
                 $prev = get_option( 'hsw_last_error' );
                 if ( ! is_array( $prev ) || ! isset( $prev['msg'] ) || $prev['msg'] !== $msg ) {
-                        update_option( 'hsw_last_error', array( 'msg' => $msg, 'time' => time() ), false );
+                        update_option(
+                                'hsw_last_error',
+                                array(
+                                        'msg'     => $msg,
+                                        'time'    => time(),
+                                        'version' => defined( 'HSW_VERSION' ) ? HSW_VERSION : '',
+                                ),
+                                false
+                        );
                 }
                 if ( is_admin() ) {
                         add_action( 'admin_notices', function () use ( $msg ) {
                                 if ( ! current_user_can( 'manage_options' ) ) {
                                         return;
                                 }
+                                /*
+                                 * Mark the message as already shown so the stored
+                                 * notice below does not print the same error a
+                                 * second time in the same request.
+                                 */
+                                $GLOBALS['hsw_error_shown'] = true;
                                 printf(
                                         '<div class="notice notice-error"><p><strong>HamiShop Elementor Widgets:</strong> <code>%s</code></p></div>',
                                         esc_html( $msg )
@@ -168,8 +182,26 @@ if ( ! function_exists( 'hsw_last_error_notice' ) ) {
                 if ( ! current_user_can( 'manage_options' ) ) {
                         return;
                 }
+
+                /* Already printed by hsw_report_fatal() in this very request. */
+                if ( ! empty( $GLOBALS['hsw_error_shown'] ) ) {
+                        return;
+                }
+
                 $err = get_option( 'hsw_last_error' );
                 if ( ! is_array( $err ) || empty( $err['msg'] ) ) {
+                        return;
+                }
+
+                /*
+                 * An error recorded by an older plugin version is almost always
+                 * a bug that the update fixed. Keeping it on screen forever made
+                 * admins report already-solved problems, so a version change
+                 * clears the record instead of nagging.
+                 */
+                $stored_version = isset( $err['version'] ) ? (string) $err['version'] : '';
+                if ( defined( 'HSW_VERSION' ) && $stored_version !== HSW_VERSION ) {
+                        delete_option( 'hsw_last_error' );
                         return;
                 }
                 $clear = wp_nonce_url( add_query_arg( 'hsw_clear_error', '1', admin_url( 'index.php' ) ), 'hsw_clear_error' );
