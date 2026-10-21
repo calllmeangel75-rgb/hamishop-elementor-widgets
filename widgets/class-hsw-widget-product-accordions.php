@@ -275,7 +275,7 @@ class HSW_Widget_Product_Accordions extends HSW_Product_Base {
                         <?php endif; ?>
 
                         <?php if ( 'yes' === ( $s['acc_reviews'] ?? 'yes' ) ) : ?>
-                                <div class="hsw-pacc__item">
+                                <div class="hsw-pacc__item" data-hsw-acc-item="reviews">
                                         <button type="button" class="hsw-pacc__head" data-hsw-acc>
                                                 <span class="hsw-pacc__title">
                                                         <?php echo HSW_Helpers::icon( 'rate_review' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
@@ -284,27 +284,37 @@ class HSW_Widget_Product_Accordions extends HSW_Product_Base {
                                                 <?php echo HSW_Helpers::icon( 'expand_more', 'hsw-pacc__chev' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                         </button>
                                         <div class="hsw-pacc__body">
-                                                <?php if ( empty( $reviews ) ) : ?>
-                                                        <p class="hsw-pacc__rvtext"><?php esc_html_e( 'هنوز دیدگاهی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
-                                                <?php else : ?>
-                                                        <?php foreach ( $reviews as $rv ) : ?>
-                                                                <?php
-                                                                $name   = isset( $rv['name'] ) ? $rv['name'] : '';
-                                                                $text   = isset( $rv['text'] ) ? $rv['text'] : '';
-                                                                $rating = max( 0, min( 5, (int) ( isset( $rv['rating'] ) ? $rv['rating'] : 0 ) ) );
-                                                                ?>
-                                                                <div class="hsw-pacc__rvitem">
-                                                                        <div class="hsw-pacc__rvtop">
-                                                                                <span class="hsw-pacc__rvname"><?php echo esc_html( $name ); ?></span>
-                                                                                <span class="hsw-pacc__rvstars">
-                                                                                        <?php for ( $star = 1; $star <= 5; $star++ ) : ?>
-                                                                                                <?php echo HSW_Helpers::icon( 'star', $star <= $rating ? 'hsw-ic--fill' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                                                        <?php endfor; ?>
-                                                                                </span>
+                                                <?php if ( $demo ) : ?>
+                                                        <?php if ( empty( $reviews ) ) : ?>
+                                                                <p class="hsw-pacc__rvtext"><?php esc_html_e( 'هنوز دیدگاهی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
+                                                        <?php else : ?>
+                                                                <?php foreach ( $reviews as $rv ) : ?>
+                                                                        <?php
+                                                                        $name   = isset( $rv['name'] ) ? $rv['name'] : '';
+                                                                        $text   = isset( $rv['text'] ) ? $rv['text'] : '';
+                                                                        $rating = max( 0, min( 5, (int) ( isset( $rv['rating'] ) ? $rv['rating'] : 0 ) ) );
+                                                                        ?>
+                                                                        <div class="hsw-pacc__rvitem">
+                                                                                <div class="hsw-pacc__rvtop">
+                                                                                        <span class="hsw-pacc__rvname"><?php echo esc_html( $name ); ?></span>
+                                                                                        <span class="hsw-pacc__rvstars">
+                                                                                                <?php for ( $star = 1; $star <= 5; $star++ ) : ?>
+                                                                                                        <?php echo HSW_Helpers::icon( 'star', $star <= $rating ? 'hsw-ic--fill' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                                                                <?php endfor; ?>
+                                                                                        </span>
+                                                                                </div>
+                                                                                <p class="hsw-pacc__rvtext"><?php echo esc_html( $text ); ?></p>
                                                                         </div>
-                                                                        <p class="hsw-pacc__rvtext"><?php echo esc_html( $text ); ?></p>
-                                                                </div>
-                                                        <?php endforeach; ?>
+                                                                <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                <?php else : ?>
+                                                        <?php if ( isset( $_GET['unapproved'] ) && absint( $_GET['unapproved'] ) > 0 ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag from WordPress. ?>
+                                                                <p class="hsw-review-pending"><?php esc_html_e( 'دیدگاه شما ثبت شد و پس از تأیید مدیر نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
+                                                        <?php endif; ?>
+                                                        <?php echo $this->review_cards_html( $product, 0 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+                                                        <div class="hsw-pacc__rvform">
+                                                                <?php echo $this->review_form_html( $product, 'mobile' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native comment_form markup. ?>
+                                                        </div>
                                                 <?php endif; ?>
                                         </div>
                                 </div>

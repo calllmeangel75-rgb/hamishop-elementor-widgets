@@ -32,6 +32,12 @@ class HSW_Helpers {
          * Material Symbols icon markup (bundled subset font, zero external requests).
          */
         public static function icon( $name, $class = '', $fill = false ) {
+                $aliases = array(
+                        'discount' => 'percent',
+                );
+                if ( isset( $aliases[ $name ] ) ) {
+                        $name = $aliases[ $name ];
+                }
                 $style = $fill ? ' style="font-variation-settings:\'FILL\' 1;"' : '';
                 return '<span class="hsw-ic ' . esc_attr( $class ) . '"' . $style . '>' . esc_html( $name ) . '</span>';
         }
@@ -40,6 +46,9 @@ class HSW_Helpers {
          * Discount percentage of a product (0 when not on sale).
          */
         public static function discount_percent( $product ) {
+                if ( self::is_call_for_price( $product ) ) {
+                        return 0;
+                }
                 $regular = (float) $product->get_regular_price();
                 $sale    = (float) $product->get_price();
                 if ( $regular <= 0 || $sale <= 0 || $sale >= $regular ) {
@@ -164,5 +173,139 @@ class HSW_Helpers {
                         }
                 }
                 return $latest;
+        }
+
+        /* =========================================================================
+         *  HAMI CALL FOR PRICE ADAPTER
+         *
+         *  HamiShop renders its own price markup, so WooCommerce's
+         *  `woocommerce_get_price_html` filter never runs inside these widgets.
+         *  This small adapter reads the public Hami CFP API instead of guessing
+         *  from raw product prices, keeping both plugins independent.
+         * ====================================================================== */
+
+        /**
+         * Is the Hami Call for Price plugin active with its public API available?
+         */
+        public static function cfp_supported() {
+                return class_exists( 'Hami_Helpers' )
+                        && method_exists( 'Hami_Helpers', 'is_call_for_price' )
+                        && method_exists( 'Hami_Helpers', 'get_contact' );
+        }
+
+        /**
+         * Whether a product is flagged "call for price" by Hami CFP.
+         */
+        public static function is_call_for_price( $product ) {
+                return $product instanceof WC_Product
+                        && self::cfp_supported()
+                        && (bool) Hami_Helpers::is_call_for_price( $product );
+        }
+
+        /**
+         * Normalized contact data for a CFP product.
+         *
+         * @return array{url:string,channel:string,external:bool,label:string,icon:string}|null
+         */
+        public static function cfp_contact( $product ) {
+                if ( ! self::is_call_for_price( $product ) ) {
+                        return null;
+                }
+
+                $contact = Hami_Helpers::get_contact( $product );
+
+                if ( ! is_array( $contact ) ) {
+                        return null;
+                }
+
+                $contact = wp_parse_args(
+                        $contact,
+                        array(
+                                'url'      => '',
+                                'channel'  => 'tel',
+                                'external' => false,
+                                'label'    => __( 'تماس بگیرید', 'hamishop-elementor-widgets' ),
+                                'icon'     => '📞',
+                        )
+                );
+
+                if ( '' === trim( (string) $contact['label'] ) ) {
+                        $contact['label'] = __( 'تماس بگیرید', 'hamishop-elementor-widgets' );
+                }
+                if ( '' === trim( (string) $contact['icon'] ) ) {
+                        $contact['icon'] = '📞';
+                }
+
+                return $contact;
+        }
+
+        /**
+         * Inline CFP label (used where the price would normally sit).
+         *
+         * @param WC_Product $product Product.
+         * @param bool       $link    Render a contact link instead of plain text.
+         * @param string     $class   Extra class names.
+         */
+        public static function cfp_inline_html( $product, $link = false, $class = '' ) {
+                $contact = self::cfp_contact( $product );
+
+                if ( ! $contact ) {
+                        return '';
+                }
+
+                $inner = '<span class="hsw-cfp__icon" aria-hidden="true">' . esc_html( $contact['icon'] ) . '</span>' .
+                        '<span class="hsw-cfp__label">' . esc_html( $contact['label'] ) . '</span>';
+
+                $classes = trim( 'hsw-cfp hsw-cfp--inline hsw-cfp--' . sanitize_html_class( (string) $contact['channel'] ) . ( $class ? ' ' . $class : '' ) );
+
+                if ( $link && '' !== (string) $contact['url'] ) {
+                        $target = ! empty( $contact['external'] ) ? ' target="_blank" rel="noopener"' : '';
+                        return sprintf(
+                                '<a class="%1$s hsw-cfp--link" href="%2$s"%3$s>%4$s</a>',
+                                esc_attr( $classes ),
+                                esc_url( $contact['url'] ),
+                                $target,
+                                $inner
+                        );
+                }
+
+                return '<span class="' . esc_attr( $classes ) . '">' . $inner . '</span>';
+        }
+
+        /**
+         * CFP action link/button (archive CTA, purchase box, sticky bar).
+         *
+         * @param WC_Product $product    Product.
+         * @param string     $classes    Extra class names.
+         * @param bool       $show_label Show the contact label next to the icon.
+         */
+        public static function cfp_action_html( $product, $classes = '', $show_label = false ) {
+                $contact = self::cfp_contact( $product );
+
+                if ( ! $contact ) {
+                        return '';
+                }
+
+                $inner = '<span class="hsw-cfp__icon" aria-hidden="true">' . esc_html( $contact['icon'] ) . '</span>';
+                if ( $show_label ) {
+                        $inner .= '<span class="hsw-cfp__label">' . esc_html( $contact['label'] ) . '</span>';
+                }
+
+                $classes = trim( $classes . ' hsw-cfp-link hsw-cfp-link--' . sanitize_html_class( (string) $contact['channel'] ) );
+
+                if ( '' === (string) $contact['url'] ) {
+                        return '<span class="' . esc_attr( $classes . ' hsw-cfp-link--disabled' ) . '">' . $inner . '</span>';
+                }
+
+                $target = ! empty( $contact['external'] ) ? ' target="_blank" rel="noopener"' : '';
+
+                return sprintf(
+                        '<a class="%1$s" href="%2$s"%3$s aria-label="%4$s">%5$s</a>',
+                        esc_attr( $classes ),
+                        esc_url( $contact['url'] ),
+                        $target,
+                        esc_attr( $contact['label'] ),
+                        $inner
+                );
         }
 }

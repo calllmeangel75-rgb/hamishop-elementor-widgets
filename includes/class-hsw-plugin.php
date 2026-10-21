@@ -33,11 +33,40 @@ final class HSW_Plugin {
 
                 HSW_Account::instance();
 
+                new HSW_Widget_Manager();
                 new HSW_Rest();
                 new HSW_Assets();
 
                 add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
                 add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
+                add_filter( 'woocommerce_product_tabs', array( $this, 'localize_product_tabs' ), 50 );
+        }
+
+        /**
+         * Keep the native WooCommerce product tabs Persian even when the
+         * active theme/Elementor Product Tabs widget prints their default
+         * English labels. Our own composite tabs are already Persian; this
+         * covers themes that still output the native tab strip elsewhere on
+         * the product page.
+         *
+         * @param array $tabs WooCommerce tabs.
+         * @return array
+         */
+        public function localize_product_tabs( $tabs ) {
+                if ( ! is_array( $tabs ) ) {
+                        return $tabs;
+                }
+                $labels = array(
+                        'description'            => __( 'توضیحات محصول', 'hamishop-elementor-widgets' ),
+                        'additional_information' => __( 'مشخصات فنی', 'hamishop-elementor-widgets' ),
+                        'reviews'                => __( 'دیدگاه‌ها و نظرات', 'hamishop-elementor-widgets' ),
+                );
+                foreach ( $labels as $key => $label ) {
+                        if ( isset( $tabs[ $key ] ) && is_array( $tabs[ $key ] ) ) {
+                                $tabs[ $key ]['title'] = $label;
+                        }
+                }
+                return $tabs;
         }
 
         private function includes() {
@@ -64,6 +93,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-account-auth.php';
                 require_once HSW_DIR . 'includes/class-hsw-account-support.php';
                 require_once HSW_DIR . 'includes/class-hsw-account-admin.php';
+                require_once HSW_DIR . 'includes/class-hsw-widget-manager.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
@@ -86,6 +116,7 @@ final class HSW_Plugin {
          */
         public function register_category( $elements_manager ) {
                 $categories = array(
+                        'hamishop-header'  => __( 'حامی — هدر و ناوبری', 'hamishop-elementor-widgets' ),
                         'hamishop-single'  => __( 'حامی — ویجت‌های صفحه محصول', 'hamishop-elementor-widgets' ),
                         'hamishop-loop'    => __( 'حامی — ویجت‌های لوپ محصولات', 'hamishop-elementor-widgets' ),
                         'hamishop-cart'    => __( 'حامی — ویجت‌های سبد خرید و پرداخت', 'hamishop-elementor-widgets' ),
@@ -94,6 +125,9 @@ final class HSW_Plugin {
                         'hamishop-blog'    => __( 'حامی — ویجت‌های مجله و وبلاگ', 'hamishop-elementor-widgets' ),
                 );
                 foreach ( $categories as $slug => $title ) {
+                        if ( class_exists( 'HSW_Widget_Manager' ) && ! HSW_Widget_Manager::category_has_enabled( $slug ) ) {
+                                continue;
+                        }
                         $elements_manager->add_category(
                                 $slug,
                                 array(
@@ -123,6 +157,7 @@ final class HSW_Plugin {
                         require_once HSW_DIR . 'includes/class-hsw-product-base.php';
                         require_once HSW_DIR . 'includes/class-hsw-archive-base.php';
                         require_once HSW_DIR . 'includes/class-hsw-blog-base.php';
+                        require_once HSW_DIR . 'includes/class-hsw-header-base.php';
                 } catch ( \Throwable $e ) {
                         hsw_report_fatal( $e, 'base-load' );
                         return;
@@ -139,6 +174,9 @@ final class HSW_Plugin {
 
                 /* One broken widget file must never white-screen the site. */
                 $widget_files = array(
+                        HSW_DIR . 'widgets/class-hsw-widget-header-store.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-header-minimal.php',
+
                         HSW_DIR . 'widgets/class-hsw-wonder-deals.php',
                         HSW_DIR . 'widgets/class-hsw-best-sellers.php',
                         HSW_DIR . 'widgets/class-hsw-popular.php',
@@ -225,6 +263,8 @@ final class HSW_Plugin {
                 }
 
                 foreach ( array(
+                        '\HSW_Widget_Header_Store',
+                        '\HSW_Widget_Header_Minimal',
                         '\HSW_Widget_Wonder_Deals',
                         '\HSW_Widget_Best_Sellers',
                         '\HSW_Widget_Popular',
@@ -287,7 +327,11 @@ final class HSW_Plugin {
                                 continue;
                         }
                         try {
-                                call_user_func( $register, new $widget_class() );
+                                $widget = new $widget_class();
+                                if ( class_exists( 'HSW_Widget_Manager' ) && ! HSW_Widget_Manager::is_enabled( $widget->get_name() ) ) {
+                                        continue;
+                                }
+                                call_user_func( $register, $widget );
                         } catch ( \Throwable $e ) {
                                 hsw_report_fatal( $e, 'widget-register:' . $widget_class );
                         }

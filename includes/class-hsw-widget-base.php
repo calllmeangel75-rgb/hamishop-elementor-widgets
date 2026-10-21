@@ -387,7 +387,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 $oos    = ! $product->is_in_stock();
                 $images = HSW_Helpers::image( $product );
 
-                if ( ! $oos ) {
+                if ( ! $oos && ! HSW_Helpers::is_call_for_price( $product ) ) {
                         $percent = HSW_Helpers::discount_percent( $product );
                         if ( 'pop' === $type && ! empty( $args['show_badge'] ) ) {
                                 $text_full = '';
@@ -452,6 +452,16 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * Pricing block.
          */
         protected static function price_html( $product, $args, $oos ) {
+                $label = '';
+                if ( ! empty( $args['price_label'] ) ) {
+                        $label = '<span class="hsw-price-label">' . esc_html( $args['price_label'] ) . '</span>';
+                }
+
+                if ( HSW_Helpers::is_call_for_price( $product ) ) {
+                        return '<div class="hsw-pricing hsw-pricing--cfp">' . $label .
+                                HSW_Helpers::cfp_inline_html( $product, false, 'hsw-price-cfp' ) . '</div>';
+                }
+
                 $regular = (float) $product->get_regular_price();
                 $sale    = (float) $product->get_price();
                 $on_sale = $sale > 0 && $regular > 0 && $sale < $regular;
@@ -479,6 +489,14 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * Add-to-cart actions (desktop + mobile variants) or notify button.
          */
         protected static function actions_html( $product, $args, $type ) {
+                if ( HSW_Helpers::is_call_for_price( $product ) ) {
+                        $label = ( 'best' === $type );
+                        return '<div class="hsw-actions hsw-actions--cfp">' .
+                                HSW_Helpers::cfp_action_html( $product, 'hsw-add hsw-add--d hsw-d', $label ) .
+                                HSW_Helpers::cfp_action_html( $product, 'hsw-add hsw-add--m hsw-m', false ) .
+                                '</div>';
+                }
+
                 if ( ! $product->is_in_stock() ) {
                         return '<button type="button" class="hsw-notify">' . HSW_Helpers::icon( 'notifications' ) . '<span>' . esc_html( $args['txt_notify'] ) . '</span></button>';
                 }

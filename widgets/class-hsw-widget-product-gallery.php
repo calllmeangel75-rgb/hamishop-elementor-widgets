@@ -280,13 +280,15 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                         <img class="hsw-pgal__img" src="<?php echo esc_url( $images[0] ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="eager" fetchpriority="high" decoding="async">
                                 </div>
 
-                                <div class="hsw-pgal__thumbs hsw-d">
-                                        <?php foreach ( $thumbs as $i => $url ) : ?>
-                                                <button type="button" class="hsw-pgal__thumb<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>">
-                                                        <img src="<?php echo esc_url( $url ); ?>" alt="" loading="lazy" decoding="async">
-                                                </button>
-                                        <?php endforeach; ?>
-                                </div>
+                                <?php if ( count( $images ) > 1 ) : ?>
+                                        <div class="hsw-pgal__thumbs hsw-d">
+                                                <?php foreach ( $thumbs as $i => $url ) : ?>
+                                                        <button type="button" class="hsw-pgal__thumb<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>">
+                                                                <img src="<?php echo esc_url( $url ); ?>" alt="" loading="lazy" decoding="async">
+                                                        </button>
+                                                <?php endforeach; ?>
+                                        </div>
+                                <?php endif; ?>
 
                                 <?php if ( $discount > 0 || $show_auth ) : ?>
                                         <div class="hsw-pgal__mbadges hsw-m">
@@ -299,11 +301,13 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                         </div>
                                 <?php endif; ?>
 
-                                <div class="hsw-pgal__dots hsw-m">
-                                        <?php foreach ( $images as $i => $url ) : ?>
-                                                <button type="button" class="hsw-pgal__dot<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>"></button>
-                                        <?php endforeach; ?>
-                                </div>
+                                <?php if ( count( $images ) > 1 ) : ?>
+                                        <div class="hsw-pgal__dots hsw-m">
+                                                <?php foreach ( $images as $i => $url ) : ?>
+                                                        <button type="button" class="hsw-pgal__dot<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>"></button>
+                                                <?php endforeach; ?>
+                                        </div>
+                                <?php endif; ?>
                         </div>
                 </section>
                 <?php

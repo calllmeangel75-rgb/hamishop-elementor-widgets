@@ -53,7 +53,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 $this->part_section( 'pft_', __( '۵. ویژگی‌های کلیدی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Features', array( 'vis', 'desk_title', 'mob_title', 'desk_auto', 'mob_auto', 'desk_items', 'mob_items' ) );
 
-                $this->part_section( 'ppu_', __( '۶. جعبه خرید (قیمت و دکمه‌ها)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Purchase', array( 'vis', 'type', 'cart_text', 'buy_text', 'qty_max', 'assure_items' ) );
+                $this->part_section( 'ppu_', __( '۶. جعبه خرید (قیمت و دکمه‌ها)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Purchase', array( 'vis', 'type', 'cart_text', 'qty_max', 'assure_items' ) );
 
                 $this->part_section( 'ptr_', __( '۷. سیگنال‌های اعتماد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Trust', array( 'vis', 'trust_items' ) );
 

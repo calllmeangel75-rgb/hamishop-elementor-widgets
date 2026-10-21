@@ -24,7 +24,8 @@
 ## API مشترک کلاس پایه
 - `product_or_demo()` → `[?WC_Product, bool $demo]`
 - `display_prices($product)` → `['sale'=>float,'regular'=>float,'discount'=>int]`
-- `variations_payload($product)` → آرایه JSON-able (attrs با label نمایشی)
+- `variations_payload($product)` → آرایه JSON-able (attrs با label نمایشی)؛ برای محصولات CFP، فیلدهای `price/regular` خالی و `discount=0` هستند.
+- `HSW_Helpers::is_call_for_price($product)` / `cfp_inline_html()` / `cfp_action_html()` → آداپتور Hami Call for Price؛ متن/آیکون/لینک را از API عمومی CFP می‌خواند. برای CFP هیچ‌وقت قیمت خام، تخفیف، تعداد یا `data-hsw-add` رندر نکن.
 - `attribute_terms($product, $taxonomy)` → `[['name','slug'],...]`
 - `specs_rows($product)` → `[['k','v'],...]`
 - `reviews_list($product, $limit)` → `[['name','initials','rating','text','verified'],...]`
@@ -36,14 +37,21 @@
 ## data-attributeهای قراردادی JS (عیناً)
 - خرید/نوار: ریشه `data-hsw-product="{ID}"` (در demo: `data-hsw-product="0"`).
 - ارزش تعداد: `data-hsw-qval` روی span تعداد؛ دکمه‌ها `data-hsw-qty="1"` و `data-hsw-qty="-1"`.
-- افزودن به سبد: `data-hsw-add` روی دکمه؛ خرید فوری: `data-hsw-buy`.
+- افزودن به سبد: `data-hsw-add` روی دکمه.
 - فیلدهای قیمت پویا: `data-hsw-price` (قیمت اصلی)، `data-hsw-old` (قیمت قبلی)، `data-hsw-save` (چیپ «X تومان تخفیف» دسکتاپ)، `data-hsw-off` (قرص «٪X-» موبایل).
 - توست موبایل: `data-hsw-toast` روی `.hsw-psticky__toast` + لینک «مشاهده سبد» به cart url.
 - وضعیت ناموجود: JS کلاس `is-oos` را روی ریشه می‌گذارد — دکمه‌های cart قواعد CSS دارند.
+- CFP: ریشهٔ جعبه خرید/نوار چسبان `data-hsw-cfp="1"` می‌گیرد؛ JS در این حالت قیمت و `is-oos` را دست نمی‌زند و اکشن تماس همیشه فعال می‌ماند. مارک‌آپ CFP نباید کلاس `hami-price-link` داشته باشد تا باکس تکراری CFP به آن اضافه نشود.
 - گالری: ریشه `data-hsw-product` ندارد؛ به‌جایش هر thumb/dot `data-hsw-src="{url}"` دارد و تصویر اصلی کلاس `.hsw-pgal__img`.
 - زوم: دکمه `data-hsw-zoom`.
 - علاقه‌مندی (ویژوال): `data-hsw-wish` روی دکمه.
 - انتخاب رنگ/حافظه: ریشه `.hsw-pvar` → `data-hsw-variants="{ID}"` + `data-hsw-variations='{JSON}'` (فقط وقتی محصول variable است) + `data-hsw-attrs='{"color":"pa_color","storage":"pa_memory"}'` (اسلاگ taxانتری از کنترل‌ها). دکمه‌ها: `.hsw-pvar__swatch/.hsw-pvar__mswatch` با `data-hsw-color="{label}"` و `.hsw-pvar__chip/.hsw-pvar__mchip` با `data-hsw-storage="{label}"`. برچسب انتخاب‌شده: `data-hsw-selname="color"` و `data-hsw-selname="storage"`.
+
+## مدیریت ثبت ویجت‌ها
+- `includes/class-hsw-widget-manager.php` تنها منبع فهرست ویجت‌ها، گروه‌ها و وضعیت پیش‌فرض است (`general` یا `part`).
+- گزینهٔ `hsw_enabled_widgets` با Settings API و صفحهٔ **HamiShop → کنترل ویجت‌ها** ذخیره می‌شود.
+- `HSW_Plugin::register_widgets()` فقط ویجت‌های فعال را در Elementor ثبت می‌کند؛ همهٔ فایل‌ها لود می‌شوند تا ویجت‌های جامع بتوانند بخش‌های داخلی را رندر کنند.
+- ویجت جدیدی که در فهرست manager نباشد، برای سازگاری به‌صورت پیش‌فرض فعال می‌ماند؛ بهتر است هنگام افزودن ویجت، آن را در گروه مناسب فهرست هم ثبت کنید.
 
 ---
 
@@ -285,7 +293,6 @@
   </div>
   <div class="hsw-ppurch__ctas">
     <button type="button" class="hsw-ppurch__cart" data-hsw-add><span class="hsw-ic">shopping_cart</span><span>افزودن به سبد خرید</span></button>
-    <button type="button" class="hsw-ppurch__buynow" data-hsw-buy><span class="hsw-ic">flash_on</span><span>خرید فوری</span></button>
   </div>
   <div class="hsw-ppurch__assure">
     <div class="hsw-ppurch__as hsw-ppurch__as--shield"><span class="hsw-ic">shield</span><span>{گارانتی}</span></div>
@@ -296,12 +303,12 @@
 - قیمت‌ها: `display_prices($product)`؛ sale/regular با price_num؛ save = regular-sale با price_num؛ اگر discount==0: old و save مخفی (style="display:none").
 - demo: sale=۶۲,۹۹۰,۰۰۰ / regular=۶۷,۰۰۰,۰۰۰ / save=۴,۰۱۰,۰۰۰ (از demo()).
 - موجودی متن سطر دوم: اگر in_stock «موجود در انبار تهران - آماده پردازش و ارسال» وگرنه «فعلاً ناموجود»؛ به ریشه کلاس `is-oos` اضافه شود وقتی ناموجود.
-- متن دکمه‌ها: کنترل TEXT `cart_text` (default «افزودن به سبد خرید») و `buy_text` («خرید فوری»).
+- متن دکمه: کنترل TEXT `cart_text` (default «افزودن به سبد خرید»).
 - خطوط assure: Repeater `assure_items` (فیلدها `icon` SELECT، `text`، `type` SELECT shield/stock)؛ پیش‌فرض دو آیتم طرح.
 
 ### کنترل‌ها
-- CONTENT: `ctrl_visibility` (default desktop)؛ `cart_text`,`buy_text`؛ `qty_max` (NUMBER default 99؛ به data Attribute ریشه `data-hsw-max` — JS فعلاً 99 سخت دارد؛ فقط کنترل ثبت شود)؛ Repeater `assure_items`.
-- STYLE: `ctrl_box('pb','{{WRAPPER}} .hsw-ppurch')`؛ قیمت اصلی: `{{WRAPPER}} .hsw-ppurch__main` → `--hsw-price-c` + `ctrl_text('pp_price','{{WRAPPER}} .hsw-ppurch__main')`؛ رنگ واحد: `{{WRAPPER}} .hsw-ppurch__unit` → `--hsw-unit-c`؛ `ctrl_text('pp_old','{{WRAPPER}} .hsw-ppurch__old')`؛ رنگ چیپ تخفیف: `{{WRAPPER}} .hsw-ppurch__save` → `--hsw-save-c` + background-color؛ دکمه سبد: `{{WRAPPER}} .hsw-ppurch__cart` → `--hsw-cart-bg`,`--hsw-cart-c` + `ctrl_text('pp_cart','{{WRAPPER}} .hsw-ppurch__cart')` + radius SLIDER `--hsw-pb-radius`? — radius دکمه: SLIDER مستقیم `border-radius` روی `.hsw-ppurch__cart`؛ دکمه فوری: `{{WRAPPER}} .hsw-ppurch__buynow` → `--hsw-bn-bc`,`--hsw-bn-c` + ctrl_text؛ `ctrl_text('pp_as','{{WRAPPER}} .hsw-ppurch__as')`؛ `ctrl_icon('pp_as_ic','{{WRAPPER}} .hsw-ppurch__as .hsw-ic')`.
+- CONTENT: `ctrl_visibility` (default desktop)؛ `cart_text`؛ `qty_max` (NUMBER default 99؛ به data Attribute ریشه `data-hsw-max` — JS فعلاً 99 سخت دارد؛ فقط کنترل ثبت شود)؛ Repeater `assure_items`.
+- STYLE: `ctrl_box('pb','{{WRAPPER}} .hsw-ppurch')`؛ قیمت اصلی: `{{WRAPPER}} .hsw-ppurch__main` → `--hsw-price-c` + `ctrl_text('pp_price','{{WRAPPER}} .hsw-ppurch__main')`؛ رنگ واحد: `{{WRAPPER}} .hsw-ppurch__unit` → `--hsw-unit-c`؛ `ctrl_text('pp_old','{{WRAPPER}} .hsw-ppurch__old')`؛ رنگ چیپ تخفیف: `{{WRAPPER}} .hsw-ppurch__save` → `--hsw-save-c` + background-color؛ دکمه سبد: `{{WRAPPER}} .hsw-ppurch__cart` → `--hsw-cart-bg`,`--hsw-cart-c` + `ctrl_text('pp_cart','{{WRAPPER}} .hsw-ppurch__cart')` + radius SLIDER `--hsw-pb-radius`? — radius دکمه: SLIDER مستقیم `border-radius` روی `.hsw-ppurch__cart`؛ `ctrl_text('pp_as','{{WRAPPER}} .hsw-ppurch__as')`؛ `ctrl_icon('pp_as_ic','{{WRAPPER}} .hsw-ppurch__as .hsw-ic')`.
 
 ---
 
@@ -450,7 +457,7 @@
   </div>
 </aside>
 ```
-- قیمت‌ها مثل purchase (display_prices / demo). دکمه فقط افزودن (بدون خرید فوری) — دقیقاً طرح.
+- قیمت‌ها مثل purchase (display_prices / demo). دکمه فقط افزودن به سبد — دقیقاً طرح.
 - cart_url با `wc_get_cart_url()` (demo: '#').
 - اگر OOS: کلاس is-oos روی ریشه.
 - `cart_text` TEXT default «افزودن به سبد».
@@ -699,3 +706,56 @@ CSS: `assets/css/hsw-blog.css` (+ توکن‌های سرمه‌ای/نارنجی
 - قرارداد فیلترها (public/بدون nonce): `blog_cat` / `blog_sort` / `blog_s` / `blog_page` — همه با `sanitize_*` و `blog_url()` بازساخته می‌شوند.
 - «بازدید» در وردپرس شمارندهٔ بومی ندارد → معیار پیش‌فرض دیدگاه‌هاست (`meta_label` قابل تغییر).
 - زمان مطالعه تخمینی: ۲۰۰ کلمه/دقیقه (`read_time()`).
+
+# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.2)
+
+دستهٔ المنتور: **حامی — هدر و ناوبری** (`hamishop-header`)
+پایه: `includes/class-hsw-header-base.php` → `HSW_Header_Base` (abstract، extends `HSW_Widget_Base`)
+CSS: `assets/css/hsw-header.css` (وابسته به `hsw-fonts`) — JS: `assets/js/hsw-header.js` (بدون وابستگی، `in_footer`)
+ریشه: `.hsw-h.hsw-hd.hsw-hd--{store|minimal}` + `hsw-hd--sticky` (اگر روشن) + `hsw-vis-{mode}` + کلاس فونت
+
+| slug | کلاس | نقش |
+|---|---|---|
+| `hsw-header-store` | `HSW_Widget_Header_Store` | نوار اعلان + ردیف ناوبری با لوگو، دکمهٔ دسته‌بندی + مگامنو، جستجو، حساب، سبد، پشتیبانی |
+| `hsw-header-minimal` | `HSW_Widget_Header_Minimal` | پیل شیشه‌ای شناور + پنل جستجوی اورلی + دکمهٔ CTA |
+
+## قراردادهای الزامی
+
+- **هیچ مارک‌آپ هدر قالبی مصرف نمی‌شود.** هدر مستقل است تا با هر قالب کار کند.
+- **منو فقط از `wp_nav_menu`** (`menu` کنترل از `menu_options()` = `wp_get_nav_menus()`). اگر منو انتخاب نشده یا خالی بود، `fallback_menu()` صفحه‌های اصلی را نشان می‌دهد — هرگز منوی هاردکد.
+- **جستجو فرم بومی ووکامرس است**: `method="get"` به `home_url('/')` با `post_type=product` + `s` (+ `product_cat` اختیاری). هیچ اندپوینت AJAX اختصاصی برای جستجو ساخته نشده.
+- **آدرس‌ها فقط بومی**: `wc_get_cart_url()`، `wc_get_page_permalink('myaccount')`، `wc_get_page_permalink('shop')`، `wc_get_endpoint_url('orders', ...)`. هیچ مسیر هاردکد مثل `/cart/` در کد نیست.
+- **سبد فقط خوانده می‌شود**: `WC()->cart->get_cart_contents_count()` / `get_cart_subtotal()`. هیچ‌جا سبد دست‌کاری نمی‌شود.
+- **آیکون‌ها**: `HSW_Helpers::icon( $name, $class, $fill )` → `<span class="hsw-ic ...">name</span>` از فونت لوکال `hsw-fonts`. هیچ تصویر یا فونت خارجی.
+- **CFP**: هدر قیمت محصول نمایش نمی‌دهد، پس آداپتور CFP در آن دخالت ندارد؛ اما جمع سبد از خود ووکامرس خوانده می‌شود و رفتار CFP دست‌نخورده می‌ماند.
+
+## data-attributeهای قراردادی JS (عیناً)
+
+| attribute | روی | کار |
+|---|---|---|
+| `data-hsw-header` | ریشه | محدودهٔ هر نمونهٔ هدر (چند هدر در یک صفحه پشتیبانی می‌شود) |
+| `data-hsw-fragments` | ریشه | آدرس فرگمنت‌های بومی ووکامرس (`fragments_url()`) |
+| `data-hsw-init` | ریشه | نشانهٔ مقداردهی‌شده (جلوگیری از دوبار bind) |
+| `data-hsw-hd-drawer` | پنل دراور | خود پنل |
+| `data-hsw-hd-drawer-open` / `-close` | دکمه‌ها | باز/بستن دراور |
+| `data-hsw-hd-mega` / `data-hsw-hd-mega-toggle` | مگامنو | باز/بستن مگامنو |
+| `data-hsw-hd-search-panel` / `data-hsw-hd-search-toggle` | پنل جستجو | اورلی جستجوی مینیمال |
+| `data-hsw-cart-count` | span شمارنده | تعداد اقلام سبد |
+| `data-hsw-cart-total` | span جمع | جمع سبد |
+
+- JS بدون jQuery است و روی `document` delegate می‌کند؛ فرگمنت‌ها را از رویداد بومی `wc_fragments_refreshed` / `wc_fragments_loaded` ووکامرس می‌خواند، نه از یک اندپوینت اختصاصی.
+- قفل اسکرول دراور با کلاس `hsw-hd-lock` روی `<body>` انجام می‌شود؛ بستن با کلیک بیرون و کلید `Escape`.
+- `aria-expanded` و `aria-hidden` باید هم‌گام با کلاس `is-open` به‌روز شوند (دسترس‌پذیری).
+
+## کنترل‌ها
+
+مشترک (`HSW_Header_Base`): `content_brand()` (لوگو/نام/شعار/عرض)، `content_nav()` (منو، نمایش منو، دسته‌بندی در منوی موبایل، sticky)، `content_search()` (نمایش، placeholder، دسته‌بندی کنار جستجو، متن دکمه)، `content_actions()` (حساب، سبد، شمارهٔ پشتیبانی + برچسب‌ها)، `content_style($variant)` (پالت + تایپوگرافی + عرض محتوا + گردی).
+اختصاصی store: نوار اعلان (برچسب، متن، زبان/واحد پول، دو لینک) + مگامنو (عنوان، ۳/۴ ستون، متن اعتماد).
+اختصاصی minimal: دکمهٔ اقدام (متن/لینک) + پیل شیشه‌ای (سایه، بلور).
+
+## ثبت و پیش‌فرض‌ها
+
+- `HSW_Plugin::register_widgets()` هر دو کلاس را در آرایهٔ ثبت دارد و دستهٔ `hamishop-header` را می‌سازد.
+- `HSW_Assets::register()` فقط `wp_register_*` می‌کند؛ المنتور با `get_style_depends()` / `get_script_depends()` خودش لود می‌کند (بارگذاری شرطی).
+- در `HSW_Widget_Manager::catalog()` گروه `header` با هر دو ویجت در `general` است → پیش‌فرض فعال.
+- مهاجرت یک‌بارهٔ `maybe_add_header_widgets()`: اگر `hsw_enabled_widgets` از قبل ذخیره شده باشد، هر دو slug به آن اضافه می‌شود و `hsw_header_widgets_migrated` ست می‌شود. ویجت تازه نباید برای سایت‌های موجود نامرئی بماند.

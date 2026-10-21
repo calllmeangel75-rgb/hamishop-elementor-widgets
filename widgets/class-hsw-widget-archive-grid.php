@@ -234,6 +234,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 $pid       = 0;
                 $url       = '#';
                 $addable   = false;
+                $cfp       = false;
 
                 if ( $is_demo ) {
                         $p        = $item;
@@ -257,15 +258,23 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                         $rating   = HSW_Helpers::fa_num( number_format( (float) $product->get_average_rating(), 1 ) );
                         $reviews  = HSW_Helpers::fa_num( $product->get_review_count() );
                         $brand    = HSW_Helpers::brand_label( $product );
-                        $sale     = (float) wc_get_price_to_display( $product );
-                        $reg      = (float) wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) );
-                        $price    = HSW_Helpers::price_num( $sale > 0 ? $sale : $reg );
-                        $regular  = ( $reg > 0 && $sale > 0 && $sale < $reg ) ? HSW_Helpers::price_num( $reg ) : '';
-                        $discount = HSW_Helpers::discount_percent( $product );
-                        $badge    = ( $discount > 0 ) ? 'sale' : ( $product->is_featured() ? 'featured' : '' );
+                        $cfp      = HSW_Helpers::is_call_for_price( $product );
+                        if ( $cfp ) {
+                                $price    = '';
+                                $regular  = '';
+                                $discount = 0;
+                                $badge    = $product->is_featured() ? 'featured' : '';
+                        } else {
+                                $sale     = (float) wc_get_price_to_display( $product );
+                                $reg      = (float) wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) );
+                                $price    = HSW_Helpers::price_num( $sale > 0 ? $sale : $reg );
+                                $regular  = ( $reg > 0 && $sale > 0 && $sale < $reg ) ? HSW_Helpers::price_num( $reg ) : '';
+                                $discount = HSW_Helpers::discount_percent( $product );
+                                $badge    = ( $discount > 0 ) ? 'sale' : ( $product->is_featured() ? 'featured' : '' );
+                                $addable  = $product->is_type( 'simple' ) && $product->is_in_stock() && $product->is_purchasable();
+                        }
                         list( $note, $note_ok, $note_ic ) = $this->status_note( $product, $s );
                         $img_html = $this->image_html( $product, $name );
-                        $addable  = $product->is_type( 'simple' ) && $product->is_in_stock() && $product->is_purchasable();
                 }
 
                 $cur      = isset( $s['currency'] ) && '' !== trim( (string) $s['currency'] ) ? trim( (string) $s['currency'] ) : HSW_Helpers::currency_label();
@@ -311,29 +320,37 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 </div>
                         </div>
 
-                        <div class="hsw-ag__pricing">
-                                <div class="hsw-ag__prices">
-                                        <?php if ( $regular ) : ?>
-                                                <del class="hsw-ag__old"><?php echo esc_html( $regular ); ?></del>
-                                        <?php else : ?>
-                                                <span class="hsw-ag__old hsw-ag__old--ph">&nbsp;</span>
-                                        <?php endif; ?>
-                                        <span class="hsw-ag__price"><?php echo esc_html( $price ); ?> <small><?php echo esc_html( $cur ); ?></small></span>
-                                </div>
-                                <?php if ( $is_demo || $addable ) : ?>
-                                        <button type="button" class="hsw-ag__cta hsw-d" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>" title="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">add_shopping_cart</i>
-                                        </button>
-                                        <button type="button" class="hsw-ag__cta--m hsw-m" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">add</i>
-                                        </button>
+                        <div class="hsw-ag__pricing<?php echo $cfp ? ' hsw-ag__pricing--cfp' : ''; ?>">
+                                <?php if ( $cfp ) : ?>
+                                        <div class="hsw-ag__prices hsw-ag__prices--cfp">
+                                                <?php echo HSW_Helpers::cfp_inline_html( $product, false, 'hsw-ag__cfp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
+                                        </div>
+                                        <?php echo HSW_Helpers::cfp_action_html( $product, 'hsw-ag__cta hsw-ag__cta--cfp hsw-d', false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
+                                        <?php echo HSW_Helpers::cfp_action_html( $product, 'hsw-ag__cta--m hsw-ag__cta--m--cfp hsw-m', false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
                                 <?php else : ?>
-                                        <a class="hsw-ag__cta hsw-d" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">shopping_cart</i>
-                                        </a>
-                                        <a class="hsw-ag__cta--m hsw-m" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">shopping_cart</i>
-                                        </a>
+                                        <div class="hsw-ag__prices">
+                                                <?php if ( $regular ) : ?>
+                                                        <del class="hsw-ag__old"><?php echo esc_html( $regular ); ?></del>
+                                                <?php else : ?>
+                                                        <span class="hsw-ag__old hsw-ag__old--ph">&nbsp;</span>
+                                                <?php endif; ?>
+                                                <span class="hsw-ag__price"><?php echo esc_html( $price ); ?> <small><?php echo esc_html( $cur ); ?></small></span>
+                                        </div>
+                                        <?php if ( $is_demo || $addable ) : ?>
+                                                <button type="button" class="hsw-ag__cta hsw-d" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>" title="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
+                                                        <i class="hsw-ic" aria-hidden="true">add_shopping_cart</i>
+                                                </button>
+                                                <button type="button" class="hsw-ag__cta--m hsw-m" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
+                                                        <i class="hsw-ic" aria-hidden="true">add</i>
+                                                </button>
+                                        <?php else : ?>
+                                                <a class="hsw-ag__cta hsw-d" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
+                                                        <i class="hsw-ic" aria-hidden="true">shopping_cart</i>
+                                                </a>
+                                                <a class="hsw-ag__cta--m hsw-m" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
+                                                        <i class="hsw-ic" aria-hidden="true">shopping_cart</i>
+                                                </a>
+                                        <?php endif; ?>
                                 <?php endif; ?>
                         </div>
                 </article>

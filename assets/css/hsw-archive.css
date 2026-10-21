@@ -11,7 +11,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.2') format('woff2-variations');
 }
 
 .hsw-ic {
@@ -700,18 +700,35 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 
 /* Brand search + checks */
 .hsw-af__search { position: relative; margin-bottom: 12px; }
-.hsw-af__search .hsw-ic { position: absolute; right: 10px; top: 9px; color: var(--hswa-soft); font-size: 14px; }
-.hsw-af__searchinput {
-        width: 100%;
-        font-size: 12px;
-        background: var(--hswa-page);
-        border: 1px solid var(--hswa-line);
-        border-radius: 8px;
-        padding: 6px 28px 6px 12px;
-        outline: none;
-        transition: border-color .15s;
+.hsw-af__search .hsw-ic {
+        position: absolute;
+        top: 9px;
+        right: 11px;
+        left: auto;
+        z-index: 1;
+        color: var(--hswa-soft);
+        font-size: 15px;
+        pointer-events: none;
 }
-.hsw-af__searchinput:focus { border-color: #60a5fa; }
+.hsw-a .hsw-af__searchinput {
+        width: 100%;
+        height: 38px;
+        font-size: 12px;
+        color: var(--hswa-ink);
+        background: var(--hswa-page);
+        border: 0 !important;
+        border-radius: 10px;
+        padding: 8px 34px 8px 12px;
+        outline: none;
+        box-shadow: none;
+        transition: background-color .15s, box-shadow .15s;
+        appearance: none;
+}
+.hsw-a .hsw-af__searchinput::placeholder { color: var(--hswa-soft); opacity: .82; }
+.hsw-a .hsw-af__searchinput:focus {
+        background: var(--hswa-card);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
 .hsw-af__checks {
         display: flex;
         flex-direction: column;
@@ -1024,6 +1041,23 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 .hsw-ag__old--ph { text-decoration: none; }
 .hsw-ag__price { display: block; font-weight: 800; color: var(--hswa-strong); font-size: 12px; white-space: nowrap; }
 .hsw-ag__price small { font-size: 9px; font-weight: 400; color: var(--hswa-body); }
+.hsw-ag__prices--cfp { display: flex; flex-direction: column; gap: 2px; }
+.hsw-ag__cfp {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 3px;
+        max-width: 100%;
+        font-size: 11px;
+        line-height: 18px;
+        font-weight: 800;
+        color: var(--hswa-primary);
+        white-space: normal;
+}
+.hsw-ag__cfp .hsw-cfp__icon { font-size: 14px; }
+.hsw-ag__cfp .hsw-cfp__label { min-width: 0; overflow-wrap: anywhere; }
+.hsw-ag__cta--cfp, .hsw-ag__cta--m--cfp { text-decoration: none; }
+.hsw-ag__cta--cfp .hsw-cfp__icon,
+.hsw-ag__cta--m--cfp .hsw-cfp__icon { font-size: 14px; }
 .hsw-ag__cta, .hsw-ag__cta--m {
         width: 28px;
         height: 28px;
@@ -1076,6 +1110,8 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         .hsw-ag__old { font-size: 12px; }
         .hsw-ag__price { font-size: 18px; font-weight: 900; }
         .hsw-ag__price small { font-size: 11px; }
+        .hsw-ag__cfp { font-size: 13px; line-height: 20px; }
+        .hsw-ag__cfp .hsw-cfp__icon { font-size: 16px; }
         .hsw-ag__cta { width: 36px; height: 36px; border-radius: var(--hswa-r-xl); }
         .hsw-ag__cta .hsw-ic { font-size: 16px; }
 
@@ -1246,9 +1282,8 @@ html:not(.hsw-js) .hsw-a .hsw-af__swatches { display: none !important; }
 .hsw-a .hsw-af__stars .hsw-ic { font-size: 12px; }
 .hsw-a .hsw-af__stars .hsw-ic.is-on { color: var(--hswa-amber); font-variation-settings: 'FILL' 1; }
 
-/* Search icon RTL-safe */
-.hsw-a .hsw-af__search .hsw-ic { inset-inline-end: 10px; inset-inline-start: auto; right: auto; }
-.hsw-a .hsw-af__searchinput { padding-inline: 28px 12px; }
+/* Search icon: physically inside the field on both LTR/RTL themes. */
+.hsw-a .hsw-af__search .hsw-ic { inset-inline-start: auto; inset-inline-end: auto; right: 11px; left: auto; }
 
 /* Checkbox focus ring */
 .hsw-a .hsw-af__check:focus-visible { outline: 2px solid var(--hswa-primary); outline-offset: 2px; }

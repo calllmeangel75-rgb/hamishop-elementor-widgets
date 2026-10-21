@@ -162,6 +162,21 @@ class HSW_Assets {
                 );
 
                 wp_register_style(
+                        'hsw-header',
+                        HSW_URL . 'assets/css/hsw-header.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-header',
+                        HSW_URL . 'assets/js/hsw-header.js',
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
+                wp_register_style(
                         'hsw-composite',
                         HSW_URL . 'assets/css/hsw-composite.css',
                         array( 'hsw-fonts' ),
@@ -300,7 +315,6 @@ class HSW_Assets {
                                 'rest'        => esc_url_raw( rest_url( 'hsw/v1' ) ),
                                 'nonce'       => wp_create_nonce( 'wp_rest' ),
                                 'errorText'   => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
-                                'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
                         )
                 );
 
@@ -326,8 +340,6 @@ class HSW_Assets {
                         'hswProductData',
                         array(
                                 'wcAjax'      => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
-                                'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
-                                'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
                                 'faDigits'    => true,
                         )
                 );

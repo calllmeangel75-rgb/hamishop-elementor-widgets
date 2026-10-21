@@ -258,8 +258,11 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 if ( $product ) {
                         foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
                                 $colors[] = array(
-                                        'name' => $term['name'],
-                                        'hex'  => isset( $color_map[ $term['name'] ] ) ? $color_map[ $term['name'] ] : '#cccccc',
+                                        'name'  => $term['name'],
+                                        'label' => isset( $term['label'] ) && '' !== $term['label'] ? $term['label'] : $term['name'],
+                                        'hex'   => isset( $color_map[ $term['name'] ] )
+                                                ? $color_map[ $term['name'] ]
+                                                : ( isset( $term['label'], $color_map[ $term['label'] ] ) ? $color_map[ $term['label'] ] : ( ! empty( $term['color'] ) ? $term['color'] : '#cccccc' ) ),
                                 );
                         }
                 }
@@ -287,8 +290,11 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                 unset( $pool[ $attr_color ] );
                                 foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
                                         $colors[] = array(
-                                                'name' => $term['name'],
-                                                'hex'  => isset( $color_map[ $term['name'] ] ) ? $color_map[ $term['name'] ] : '#cccccc',
+                                                'name'  => $term['name'],
+                                                'label' => isset( $term['label'] ) && '' !== $term['label'] ? $term['label'] : $term['name'],
+                                                'hex'   => isset( $color_map[ $term['name'] ] )
+                                                        ? $color_map[ $term['name'] ]
+                                                        : ( isset( $term['label'], $color_map[ $term['label'] ] ) ? $color_map[ $term['label'] ] : ( ! empty( $term['color'] ) ? $term['color'] : '#cccccc' ) ),
                                         );
                                 }
                         }
@@ -305,12 +311,12 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                         return; // No real options on this product — render nothing (never fake data).
                 }
 
-                $first_color   = ! empty( $colors[0]['name'] ) ? $colors[0]['name'] : '';
+                $first_color   = ! empty( $colors[0]['label'] ) ? $colors[0]['label'] : ( ! empty( $colors[0]['name'] ) ? $colors[0]['name'] : '' );
                 $first_storage = ! empty( $storages[0] ) ? $storages[0] : '';
 
                 $pid = $product ? $product->get_id() : 0;
                 ?>
-                <div class="<?php echo esc_attr( $this->root_class( 'pvar' ) ); ?>" data-hsw-variants="<?php echo esc_attr( $pid ); ?>"
+                <div class="<?php echo esc_attr( $this->root_class( 'pvar' ) ); ?>" data-hsw-variants="<?php echo esc_attr( $pid ); ?>"<?php echo ( $product && HSW_Helpers::is_call_for_price( $product ) ) ? ' data-hsw-cfp="1"' : ''; ?>
                         <?php if ( $product && $product->is_type( 'variable' ) ) : ?>
                                 data-hsw-variations='<?php echo esc_attr( wp_json_encode( $this->variations_payload( $product ) ) ); ?>'
                                 data-hsw-attrs='<?php echo esc_attr( wp_json_encode( array( 'color' => $attr_color, 'storage' => $attr_storage ) ) ); ?>'
@@ -323,7 +329,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         </div>
                                         <div class="hsw-pvar__swatches">
                                                 <?php foreach ( $colors as $i => $c ) : ?>
-                                                        <button type="button" class="hsw-pvar__swatch<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" style="--sw:<?php echo esc_attr( $c['hex'] ); ?>" aria-label="<?php echo esc_attr( $c['name'] ); ?>"><span class="hsw-pvar__swdot"></span></button>
+                                                        <button type="button" class="hsw-pvar__swatch<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" data-hsw-label="<?php echo esc_attr( $c['label'] ); ?>" style="--sw:<?php echo esc_attr( $c['hex'] ); ?>" aria-label="<?php echo esc_attr( $c['label'] ); ?>"><span class="hsw-pvar__swdot"></span></button>
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
@@ -348,7 +354,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         </div>
                                         <div class="hsw-pvar__swatches">
                                                 <?php foreach ( $colors as $i => $c ) : ?>
-                                                        <button type="button" class="hsw-pvar__mswatch<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" style="--sw:<?php echo esc_attr( $c['hex'] ); ?>" aria-label="<?php echo esc_attr( $c['name'] ); ?>"><span class="hsw-pvar__swdot"></span></button>
+                                                        <button type="button" class="hsw-pvar__mswatch<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" data-hsw-label="<?php echo esc_attr( $c['label'] ); ?>" style="--sw:<?php echo esc_attr( $c['hex'] ); ?>" aria-label="<?php echo esc_attr( $c['label'] ); ?>"><span class="hsw-pvar__swdot"></span></button>
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>

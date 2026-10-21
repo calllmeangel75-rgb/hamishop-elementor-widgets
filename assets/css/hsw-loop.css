@@ -11,7 +11,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.2') format('woff2-variations');
 }
 
 .hsw-ic {
@@ -629,6 +629,26 @@
 .hsw-currency { font-size: 10px; font-weight: 400; color: var(--hsw-on-surface-variant); }
 @media (min-width: 768px) { .hsw-currency { font-size: 11px; } }
 .hsw-card--oos .hsw-price-new { --hsw-price-c: var(--hsw-outline); }
+
+/* Hami Call for Price — replaces the whole price/action pair. */
+.hsw-pricing--cfp { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hsw-price-cfp {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 4px;
+        max-width: 100%;
+        font-size: 12px;
+        line-height: 20px;
+        font-weight: 700;
+        color: var(--hsw-price-c, var(--hsw-primary));
+        white-space: normal;
+}
+.hsw-loop--deal .hsw-price-cfp { --hsw-price-c: var(--hsw-secondary); }
+.hsw-cfp__icon { display: inline-flex; align-items: center; justify-content: center; font-size: 1.1em; line-height: 1; flex: 0 0 auto; }
+.hsw-cfp__label { min-width: 0; overflow-wrap: anywhere; }
+.hsw-cfp-link { text-decoration: none; }
+.hsw-add.hsw-cfp-link .hsw-cfp__icon { font-size: 16px; }
+.hsw-loop--best .hsw-add.hsw-cfp-link .hsw-cfp__icon { font-size: 14px; }
 
 /* Add-to-cart / notify buttons */
 .hsw-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }

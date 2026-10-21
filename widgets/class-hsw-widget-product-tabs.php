@@ -286,7 +286,11 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                         <?php endif; ?>
 
                         <?php if ( $show_comments ) : ?>
-                                <div class="hsw-ptabs__panel" data-hsw-panel="comments" id="reviews-section">
+                                <?php
+                                $review_form_id = $product ? 'hsw-review-form-' . (int) $product->get_id() : '';
+                                $can_review     = ! $demo && $product && $this->review_form_allowed( $product );
+                                ?>
+                                <div class="hsw-ptabs__panel" data-hsw-panel="comments" id="reviews">
                                         <div class="hsw-ptabs__rvhead">
                                                 <div>
                                                         <h2 class="hsw-ptabs__h2"><?php esc_html_e( 'دیدگاه‌های تاییدشده خریداران', 'hamishop-elementor-widgets' ); ?></h2>
@@ -298,40 +302,54 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                                                 ) ); ?>
                                                         </span>
                                                 </div>
-                                                <a class="hsw-ptabs__newrv" href="<?php echo esc_url( '#reviews' ); ?>" data-hsw-add-review><?php esc_html_e( 'ثبت دیدگاه جدید', 'hamishop-elementor-widgets' ); ?></a>
+                                                <?php if ( $can_review ) : ?>
+                                                        <a class="hsw-ptabs__newrv" href="<?php echo esc_url( '#' . $review_form_id ); ?>" data-hsw-add-review><?php esc_html_e( 'ثبت دیدگاه جدید', 'hamishop-elementor-widgets' ); ?></a>
+                                                <?php endif; ?>
                                         </div>
-                                        <?php if ( empty( $reviews ) ) : ?>
-                                                <p class="hsw-ptabs__rvtext"><?php esc_html_e( 'هنوز دیدگاهی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
-                                        <?php else : ?>
-                                                <div class="hsw-ptabs__rvlist">
-                                                        <?php foreach ( $reviews as $rv ) : ?>
-                                                                <?php
-                                                                $name     = isset( $rv['name'] ) ? $rv['name'] : '';
-                                                                $initials = isset( $rv['initials'] ) ? $rv['initials'] : '';
-                                                                $text     = isset( $rv['text'] ) ? $rv['text'] : '';
-                                                                $verified = ! empty( $rv['verified'] );
-                                                                $rating   = max( 0, min( 5, (int) ( isset( $rv['rating'] ) ? $rv['rating'] : 0 ) ) );
-                                                                ?>
-                                                                <div class="hsw-ptabs__rvitem">
-                                                                        <div class="hsw-ptabs__rvtop">
-                                                                                <div class="hsw-ptabs__rvwho">
-                                                                                        <span class="hsw-ptabs__rvav"><?php echo esc_html( $initials ); ?></span>
-                                                                                        <span class="hsw-ptabs__rvname"><?php echo esc_html( $name ); ?></span>
-                                                                                        <?php if ( $verified ) : ?>
-                                                                                                <span class="hsw-ptabs__rvtag"><?php esc_html_e( 'خریدار این کالا', 'hamishop-elementor-widgets' ); ?></span>
-                                                                                        <?php endif; ?>
+                                        <?php if ( $demo ) : ?>
+                                                <?php if ( empty( $reviews ) ) : ?>
+                                                        <p class="hsw-ptabs__rvtext"><?php esc_html_e( 'هنوز دیدگاهی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
+                                                <?php else : ?>
+                                                        <div class="hsw-ptabs__rvlist">
+                                                                <?php foreach ( $reviews as $rv ) : ?>
+                                                                        <?php
+                                                                        $name     = isset( $rv['name'] ) ? $rv['name'] : '';
+                                                                        $initials = isset( $rv['initials'] ) ? $rv['initials'] : '';
+                                                                        $text     = isset( $rv['text'] ) ? $rv['text'] : '';
+                                                                        $verified = ! empty( $rv['verified'] );
+                                                                        $rating   = max( 0, min( 5, (int) ( isset( $rv['rating'] ) ? $rv['rating'] : 0 ) ) );
+                                                                        ?>
+                                                                        <div class="hsw-ptabs__rvitem">
+                                                                                <div class="hsw-ptabs__rvtop">
+                                                                                        <div class="hsw-ptabs__rvwho">
+                                                                                                <span class="hsw-ptabs__rvav"><?php echo esc_html( $initials ); ?></span>
+                                                                                                <span class="hsw-ptabs__rvname"><?php echo esc_html( $name ); ?></span>
+                                                                                                <?php if ( $verified ) : ?>
+                                                                                                        <span class="hsw-ptabs__rvtag"><?php esc_html_e( 'خریدار این کالا', 'hamishop-elementor-widgets' ); ?></span>
+                                                                                                <?php endif; ?>
+                                                                                        </div>
+                                                                                        <div class="hsw-ptabs__rvstars">
+                                                                                                <?php for ( $star = 1; $star <= 5; $star++ ) : ?>
+                                                                                                        <?php echo HSW_Helpers::icon( 'star', $star <= $rating ? 'hsw-ic--fill' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                                                                <?php endfor; ?>
+                                                                                                <span class="hsw-ptabs__rvval"><?php echo esc_html( HSW_Helpers::fa_num( $rating ) . '.۰' ); ?></span>
+                                                                                        </div>
                                                                                 </div>
-                                                                                <div class="hsw-ptabs__rvstars">
-                                                                                        <?php for ( $star = 1; $star <= 5; $star++ ) : ?>
-                                                                                                <?php echo HSW_Helpers::icon( 'star', $star <= $rating ? 'hsw-ic--fill' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                                                        <?php endfor; ?>
-                                                                                        <span class="hsw-ptabs__rvval"><?php echo esc_html( HSW_Helpers::fa_num( $rating ) . '.۰' ); ?></span>
-                                                                                </div>
+                                                                                <p class="hsw-ptabs__rvtext"><?php echo esc_html( $text ); ?></p>
                                                                         </div>
-                                                                        <p class="hsw-ptabs__rvtext"><?php echo esc_html( $text ); ?></p>
-                                                                </div>
-                                                        <?php endforeach; ?>
-                                                </div>
+                                                                <?php endforeach; ?>
+                                                        </div>
+                                                <?php endif; ?>
+                                        <?php else : ?>
+                                                <?php if ( isset( $_GET['unapproved'] ) && absint( $_GET['unapproved'] ) > 0 ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag from WordPress. ?>
+                                                        <p class="hsw-review-pending"><?php esc_html_e( 'دیدگاه شما ثبت شد و پس از تأیید مدیر نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
+                                                <?php endif; ?>
+                                                <?php echo $this->review_cards_html( $product, 0 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper. ?>
+                                                <?php if ( $review_form_id ) : ?>
+                                                        <div class="hsw-ptabs__rvform" id="<?php echo esc_attr( $review_form_id ); ?>">
+                                                                <?php echo $this->review_form_html( $product, 'tabs' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native comment_form markup. ?>
+                                                        </div>
+                                                <?php endif; ?>
                                         <?php endif; ?>
                                 </div>
                         <?php endif; ?>

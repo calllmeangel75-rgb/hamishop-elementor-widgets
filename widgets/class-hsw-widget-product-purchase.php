@@ -2,12 +2,12 @@
 /**
  * Widget: جعبه خرید و قیمت — faithful conversion of the supplied design.
  * Price block (old row + save chip + main price), quantity stepper,
- * add-to-cart / buy-now CTAs and the assurance rows.
+ * add-to-cart CTA and the assurance rows.
  *
  * JS contract: data-hsw-product (+ data-hsw-max) on the root,
  * data-hsw-old / data-hsw-save / data-hsw-price on the price fields,
- * data-hsw-qty / data-hsw-qval on the stepper, data-hsw-add / data-hsw-buy
- * on the buttons. Out-of-stock products get the is-oos root class.
+ * data-hsw-qty / data-hsw-qval on the stepper, data-hsw-add on the button.
+ * Out-of-stock products get the is-oos root class.
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -44,7 +44,7 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
          * Widget keywords.
          */
         public function get_keywords() {
-                return array( 'purchase', 'add to cart', 'buy now', 'خرید', 'قیمت', 'سبد خرید', 'hamishop', 'hamisys' );
+                return array( 'purchase', 'add to cart', 'خرید', 'قیمت', 'سبد خرید', 'hamishop', 'hamisys' );
         }
 
         /**
@@ -86,18 +86,9 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 $this->add_control(
                         'cart_text',
                         array(
-                                'label'   => __( 'متن دکمه سبد خرید', 'hamishop-elementor-widgets' ),
+                                'label'   => __( 'متن دکمه خرید آنلاین', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ),
-                        )
-                );
-
-                $this->add_control(
-                        'buy_text',
-                        array(
-                                'label'   => __( 'متن دکمه خرید فوری', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'خرید فوری', 'hamishop-elementor-widgets' ),
+                                'default' => __( 'خرید آنلاین', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -239,24 +230,6 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 );
 
                 $this->add_control(
-                        'pp_bn_bc',
-                        array(
-                                'label'     => __( 'رنگ حاشیه خرید فوری', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}} .hsw-ppurch__buynow' => '--hsw-bn-bc: {{VALUE}};' ),
-                        )
-                );
-                $this->add_control(
-                        'pp_bn_c',
-                        array(
-                                'label'     => __( 'رنگ متن خرید فوری', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}} .hsw-ppurch__buynow' => '--hsw-bn-c: {{VALUE}};' ),
-                        )
-                );
-                $this->ctrl_text( 'pp_buy', '{{WRAPPER}} .hsw-ppurch__buynow' );
-
-                $this->add_control(
                         'pp_as_heading',
                         array( 'label' => __( 'خطوط اطمینان', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
                 );
@@ -277,6 +250,8 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 if ( ! $product && ! $demo ) {
                         return;
                 }
+
+                $cfp = ( ! $demo && $product ) ? HSW_Helpers::is_call_for_price( $product ) : false;
 
                 if ( $demo ) {
                         $d        = $this->demo();
@@ -300,8 +275,7 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 $has_discount = ( $discount > 0 );
                 $hide_attr    = $has_discount ? '' : ' style="display:none"';
 
-                $cart_text = ( isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ) ? $s['cart_text'] : __( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' );
-                $buy_text  = ( isset( $s['buy_text'] ) && '' !== trim( (string) $s['buy_text'] ) ) ? $s['buy_text'] : __( 'خرید فوری', 'hamishop-elementor-widgets' );
+                $cart_text = ( isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ) ? $s['cart_text'] : __( 'خرید آنلاین', 'hamishop-elementor-widgets' );
                 $qty_max   = isset( $s['qty_max'] ) ? max( 1, (int) $s['qty_max'] ) : 99;
 
                 /* Assurance rows: repeater (type stock follows live stock status). */
@@ -323,38 +297,50 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                         $assure = $this->default_assure_items( $in_stock );
                 }
 
-                $root_extra = $in_stock ? '' : 'is-oos';
+                $root_extra = ( $in_stock || $cfp ) ? '' : 'is-oos';
+                if ( $cfp ) {
+                        $root_extra .= ' hsw-ppurch--cfp';
+                }
                 ?>
-                <div class="<?php echo esc_attr( $this->root_class( 'ppurch', $root_extra ) ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>" data-hsw-max="<?php echo esc_attr( $qty_max ); ?>">
-                        <div class="hsw-ppurch__top">
-                                <div>
-                                        <div class="hsw-ppurch__oldrow">
-                                                <span class="hsw-ppurch__old" data-hsw-old<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $regular ); ?></span>
-                                                <span class="hsw-ppurch__save" data-hsw-save<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $save ); ?> <?php esc_html_e( 'تومان تخفیف ویژه', 'hamishop-elementor-widgets' ); ?></span>
-                                        </div>
-                                        <div class="hsw-ppurch__row">
-                                                <span class="hsw-ppurch__main" data-hsw-price><?php echo esc_html( $sale ); ?></span>
-                                                <span class="hsw-ppurch__unit"><?php esc_html_e( 'تومان', 'hamishop-elementor-widgets' ); ?></span>
+                <div class="<?php echo esc_attr( $this->root_class( 'ppurch', $root_extra ) ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>" data-hsw-max="<?php echo esc_attr( $qty_max ); ?>"<?php echo $cfp ? ' data-hsw-cfp="1"' : ''; ?>>
+                        <?php if ( $cfp ) : ?>
+                                <div class="hsw-ppurch__top hsw-ppurch__top--cfp">
+                                        <div class="hsw-ppurch__cfp">
+                                                <span class="hsw-ppurch__cfp-kicker"><?php esc_html_e( 'قیمت', 'hamishop-elementor-widgets' ); ?></span>
+                                                <?php echo HSW_Helpers::cfp_inline_html( $product, false, 'hsw-ppurch__cfp-value' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
                                         </div>
                                 </div>
-                                <div class="hsw-ppurch__qty">
-                                        <span class="hsw-ppurch__qtylabel"><?php esc_html_e( 'تعداد:', 'hamishop-elementor-widgets' ); ?></span>
-                                        <div class="hsw-ppurch__stepper">
-                                                <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">add</span></button>
-                                                <span class="hsw-ppurch__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
-                                                <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">remove</span></button>
+                        <?php else : ?>
+                                <div class="hsw-ppurch__top">
+                                        <div>
+                                                <div class="hsw-ppurch__oldrow">
+                                                        <span class="hsw-ppurch__old" data-hsw-old<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $regular ); ?></span>
+                                                        <span class="hsw-ppurch__save" data-hsw-save<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $save ); ?> <?php esc_html_e( 'تومان تخفیف ویژه', 'hamishop-elementor-widgets' ); ?></span>
+                                                </div>
+                                                <div class="hsw-ppurch__row">
+                                                        <span class="hsw-ppurch__main" data-hsw-price><?php echo esc_html( $sale ); ?></span>
+                                                        <span class="hsw-ppurch__unit"><?php esc_html_e( 'تومان', 'hamishop-elementor-widgets' ); ?></span>
+                                                </div>
+                                        </div>
+                                        <div class="hsw-ppurch__qty">
+                                                <span class="hsw-ppurch__qtylabel"><?php esc_html_e( 'تعداد:', 'hamishop-elementor-widgets' ); ?></span>
+                                                <div class="hsw-ppurch__stepper">
+                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">add</span></button>
+                                                        <span class="hsw-ppurch__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
+                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">remove</span></button>
+                                                </div>
                                         </div>
                                 </div>
-                        </div>
+                        <?php endif; ?>
                         <div class="hsw-ppurch__ctas">
-                                <button type="button" class="hsw-ppurch__cart" data-hsw-add>
-                                        <span class="hsw-ic">shopping_cart</span>
-                                        <span><?php echo esc_html( $cart_text ); ?></span>
-                                </button>
-                                <button type="button" class="hsw-ppurch__buynow" data-hsw-buy>
-                                        <span class="hsw-ic">flash_on</span>
-                                        <span><?php echo esc_html( $buy_text ); ?></span>
-                                </button>
+                                <?php if ( $cfp ) : ?>
+                                        <?php echo HSW_Helpers::cfp_action_html( $product, 'hsw-ppurch__cart hsw-ppurch__cart--cfp', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
+                                <?php else : ?>
+                                        <button type="button" class="hsw-ppurch__cart" data-hsw-add>
+                                                <span class="hsw-ic">shopping_cart</span>
+                                                <span><?php echo esc_html( $cart_text ); ?></span>
+                                        </button>
+                                <?php endif; ?>
                         </div>
                         <div class="hsw-ppurch__assure">
                                 <?php foreach ( $assure as $item ) : ?>

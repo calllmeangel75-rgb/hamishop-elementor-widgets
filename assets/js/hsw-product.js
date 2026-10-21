@@ -56,11 +56,12 @@
 		var st = state(pid);
 		st.variation = variation || null;
 		roots(pid).forEach(function (root) {
+			var cfp = root.hasAttribute('data-hsw-cfp') || root.getAttribute('data-hsw-cfp') === '1';
 			var price = root.querySelector('[data-hsw-price]');
 			var old = root.querySelector('[data-hsw-old]');
 			var save = root.querySelector('[data-hsw-save]');
 			var off = root.querySelector('[data-hsw-off]');
-			if (variation) {
+			if (variation && !cfp) {
 				if (price) { price.textContent = variation.price; }
 				if (old) {
 					old.textContent = variation.regular;
@@ -93,6 +94,45 @@
 		applyVariant(pid, matchVariation(list, map, st.color, st.storage));
 	}
 
+	/* ---------- reviews ---------- */
+	function openReviews() {
+		var tabs = document.querySelector('.hsw-ptabs');
+		if (tabs && window.getComputedStyle(tabs).display !== 'none') {
+			var btn = tabs.querySelector('.hsw-ptabs__btn[data-hsw-tab="comments"]');
+			var panel = tabs.querySelector('.hsw-ptabs__panel[data-hsw-panel="comments"]');
+			if (btn && panel) {
+				tabs.querySelectorAll('.hsw-ptabs__btn').forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+				tabs.querySelectorAll('.hsw-ptabs__panel').forEach(function (p) { p.classList.toggle('is-active', p === panel); });
+				scrollTo(panel);
+				return;
+			}
+		}
+		var item = document.querySelector('.hsw-pacc [data-hsw-acc-item="reviews"]');
+		if (item) {
+			item.classList.add('is-open');
+			scrollTo(item);
+			return;
+		}
+		var fallback = document.querySelector('#reviews');
+		if (fallback) { scrollTo(fallback); }
+	}
+	function focusReviewForm(trigger) {
+		var scope = trigger.closest('[data-hsw-panel="comments"], [data-hsw-acc-item="reviews"]') || document;
+		var form = scope.querySelector('.hsw-review-form');
+		if (!form) { openReviews(); return; }
+		scrollTo(form);
+		var textarea = form.querySelector('textarea[name="comment"]');
+		if (textarea) {
+			setTimeout(function () {
+				try { textarea.focus({ preventScroll: true }); } catch (e) { textarea.focus(); }
+			}, 250);
+		}
+	}
+	function scrollTo(el) {
+		if (!el) { return; }
+		if (el.scrollIntoView) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+	}
+
 	/* ================= CLICK DELEGATION ================= */
 	document.addEventListener('click', function (e) {
 		var t = e.target;
@@ -104,6 +144,22 @@
 			var id = tabBtn.getAttribute('data-hsw-tab');
 			tabsRoot.querySelectorAll('.hsw-ptabs__btn').forEach(function (b) { b.classList.toggle('is-active', b === tabBtn); });
 			tabsRoot.querySelectorAll('.hsw-ptabs__panel').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-hsw-panel') === id); });
+			return;
+		}
+
+		/* --- product rating link → open the reviews tab / accordion --- */
+		var reviewLink = t.closest('a[href="#reviews"], .hsw-ptitle__revlink');
+		if (reviewLink) {
+			e.preventDefault();
+			openReviews();
+			return;
+		}
+
+		/* --- "add a review" link → scroll to the real form --- */
+		var addReview = t.closest('[data-hsw-add-review]');
+		if (addReview) {
+			e.preventDefault();
+			focusReviewForm(addReview);
 			return;
 		}
 
@@ -152,7 +208,8 @@
 			vr.querySelectorAll('.hsw-pvar__swatch, .hsw-pvar__mswatch').forEach(function (b) { b.classList.toggle('is-active', b === sw); });
 			var st = state(pid);
 			st.color = sw.getAttribute('data-hsw-color') || '';
-			vr.querySelectorAll('[data-hsw-selname="color"]').forEach(function (el) { el.textContent = st.color; });
+			var colorLabel = sw.getAttribute('data-hsw-label') || st.color;
+			vr.querySelectorAll('[data-hsw-selname="color"]').forEach(function (el) { el.textContent = colorLabel; });
 			refreshVariant(pid);
 			return;
 		}
@@ -184,26 +241,27 @@
 			return;
 		}
 
-		/* --- add to cart / buy now --- */
-		var addBtn = t.closest('[data-hsw-add], [data-hsw-buy]');
+		/* --- add to cart --- */
+		var addBtn = t.closest('[data-hsw-add]');
 		if (addBtn) {
 			var scope3 = addBtn.closest('.hsw-p');
+			if (!scope3 || scope3.hasAttribute('data-hsw-cfp')) { return; }
 			var pid4 = scope3.getAttribute('data-hsw-product');
 			var st4 = state(pid4);
-			addToCart(addBtn, pid4, st4, addBtn.hasAttribute('data-hsw-buy'));
+			addToCart(addBtn, pid4, st4);
 			return;
 		}
 	});
 
 	/* ================= ADD TO CART ================= */
-	function addToCart(btn, pid, st, buyNow) {
+	function addToCart(btn, pid, st) {
 		if (document.body.classList.contains('elementor-editor-active')) { flashAdded(btn); return; }
 		if (!pid || btn.classList.contains('is-busy')) { return; }
 		btn.classList.add('is-busy');
 
 		var body = new URLSearchParams();
 		body.set('action', 'hsw_add_to_cart'); /* unused; wc-ajax endpoint ignores action */
-		body.set('product_id', pid);
+		body.set('product_id', st.variation && st.variation.id ? st.variation.id : pid);
 		if (st.variation && st.variation.id) { body.set('variation_id', st.variation.id); }
 		body.set('quantity', st.qty);
 
@@ -224,9 +282,6 @@
 					nodes.forEach(function (n) { n.outerHTML = res.fragments[key]; });
 				});
 				document.body.dispatchEvent(new Event('wc_fragment_refresh'));
-			}
-			if (buyNow) {
-				window.location = D.checkoutUrl || (D.cartUrl || '/checkout/');
 			}
 		}).catch(function () {
 			btn.classList.remove('is-busy');

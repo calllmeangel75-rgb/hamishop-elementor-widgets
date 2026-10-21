@@ -56,9 +56,9 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                 $this->add_control(
                         'cart_text',
                         array(
-                                'label'   => __( 'متن دکمه سبد', 'hamishop-elementor-widgets' ),
+                                'label'   => __( 'متن دکمه خرید', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'افزودن به سبد', 'hamishop-elementor-widgets' ),
+                                'default' => __( 'خرید آنلاین', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -157,6 +157,8 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                         return;
                 }
 
+                $cfp = ( ! $demo && $product ) ? HSW_Helpers::is_call_for_price( $product ) : false;
+
                 if ( $demo ) {
                         $d        = $this->demo();
                         $sale     = $d['sale'];
@@ -173,54 +175,68 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                         $pid      = $product->get_id();
                 }
 
-                $cart_text = isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ? $s['cart_text'] : __( 'افزودن به سبد', 'hamishop-elementor-widgets' );
+                $cart_text = isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ? $s['cart_text'] : __( 'خرید آنلاین', 'hamishop-elementor-widgets' );
                 $cart_url  = $demo ? '#' : ( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '#' );
 
                 $classes = $this->root_class( 'psticky', 'hsw-m' );
-                if ( ! $in_stock ) {
+                if ( ! $in_stock && ! $cfp ) {
                         $classes .= ' is-oos';
+                }
+                if ( $cfp ) {
+                        $classes .= ' hsw-psticky--cfp';
                 }
 
                 $hidden   = ( 0 === $discount ) ? ' style="display:none"' : '';
                 $is_fixed = ( 'yes' === ( $s['sticky_fixed'] ?? 'yes' ) );
                 $static   = $is_fixed ? '' : ' style="position:static"';
                 ?>
-                <aside class="<?php echo esc_attr( $classes ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>"<?php echo $static; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>>
+                <aside class="<?php echo esc_attr( $classes ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>"<?php echo $cfp ? ' data-hsw-cfp="1"' : ''; ?><?php echo $static; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>>
                         <div class="hsw-psticky__inner">
                                 <div class="hsw-psticky__main">
-                                        <div class="hsw-psticky__price">
-                                                <div class="hsw-psticky__oldrow">
-                                                        <span class="hsw-psticky__old" data-hsw-old<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>><?php echo esc_html( $regular ); ?></span>
-                                                        <span class="hsw-psticky__off" data-hsw-off<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>>٪<?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>-</span>
+                                        <?php if ( $cfp ) : ?>
+                                                <div class="hsw-psticky__cfp">
+                                                        <?php echo HSW_Helpers::cfp_inline_html( $product, false, 'hsw-psticky__cfp-value' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
                                                 </div>
-                                                <div class="hsw-psticky__prow">
-                                                        <span class="hsw-psticky__pval" data-hsw-price><?php echo esc_html( $sale ); ?></span>
-                                                        <span class="hsw-psticky__unit"><?php esc_html_e( 'تومان', 'hamishop-elementor-widgets' ); ?></span>
+                                                <div class="hsw-psticky__side">
+                                                        <?php echo HSW_Helpers::cfp_action_html( $product, 'hsw-psticky__cart hsw-psticky__cart--cfp', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
                                                 </div>
-                                        </div>
-                                        <div class="hsw-psticky__side">
-                                                <div class="hsw-psticky__stepper">
-                                                        <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--plus" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>">
-                                                                <?php echo HSW_Helpers::icon( 'add' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                        <?php else : ?>
+                                                <div class="hsw-psticky__price">
+                                                        <div class="hsw-psticky__oldrow">
+                                                                <span class="hsw-psticky__old" data-hsw-old<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>><?php echo esc_html( $regular ); ?></span>
+                                                                <span class="hsw-psticky__off" data-hsw-off<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>>٪<?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>-</span>
+                                                        </div>
+                                                        <div class="hsw-psticky__prow">
+                                                                <span class="hsw-psticky__pval" data-hsw-price><?php echo esc_html( $sale ); ?></span>
+                                                                <span class="hsw-psticky__unit"><?php esc_html_e( 'تومان', 'hamishop-elementor-widgets' ); ?></span>
+                                                        </div>
+                                                </div>
+                                                <div class="hsw-psticky__side">
+                                                        <div class="hsw-psticky__stepper">
+                                                                <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--plus" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>">
+                                                                        <?php echo HSW_Helpers::icon( 'add' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                                </button>
+                                                                <span class="hsw-psticky__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
+                                                                <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>">
+                                                                        <?php echo HSW_Helpers::icon( 'remove' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                                </button>
+                                                        </div>
+                                                        <button type="button" class="hsw-psticky__cart" data-hsw-add>
+                                                                <?php echo HSW_Helpers::icon( 'shopping_cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                                <span><?php echo esc_html( $cart_text ); ?></span>
                                                         </button>
-                                                        <span class="hsw-psticky__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
-                                                        <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>">
-                                                                <?php echo HSW_Helpers::icon( 'remove' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                        </button>
                                                 </div>
-                                                <button type="button" class="hsw-psticky__cart" data-hsw-add>
-                                                        <?php echo HSW_Helpers::icon( 'shopping_cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                        <span><?php echo esc_html( $cart_text ); ?></span>
-                                                </button>
+                                        <?php endif; ?>
+                                </div>
+                                <?php if ( ! $cfp ) : ?>
+                                        <div class="hsw-psticky__toast" data-hsw-toast>
+                                                <span class="hsw-psticky__toastmsg">
+                                                        <?php echo HSW_Helpers::icon( 'check_circle' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                        <span><?php esc_html_e( 'محصول با موفقیت به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ); ?></span>
+                                                </span>
+                                                <a class="hsw-psticky__toastlink" href="<?php echo esc_url( $cart_url ); ?>"><?php esc_html_e( 'مشاهده سبد', 'hamishop-elementor-widgets' ); ?></a>
                                         </div>
-                                </div>
-                                <div class="hsw-psticky__toast" data-hsw-toast>
-                                        <span class="hsw-psticky__toastmsg">
-                                                <?php echo HSW_Helpers::icon( 'check_circle' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                <span><?php esc_html_e( 'محصول با موفقیت به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ); ?></span>
-                                        </span>
-                                        <a class="hsw-psticky__toastlink" href="<?php echo esc_url( $cart_url ); ?>"><?php esc_html_e( 'مشاهده سبد', 'hamishop-elementor-widgets' ); ?></a>
-                                </div>
+                                <?php endif; ?>
                         </div>
                 </aside>
                 <?php

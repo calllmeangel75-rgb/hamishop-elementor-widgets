@@ -39,6 +39,18 @@ final class HSW_Account_Admin {
 			'dashicons-store',
 			56
 		);
+
+		/* A visible submenu entry for the account screen. The top-level page
+		 * slug stays «hamishop» so old links and the plugin action link keep
+		 * working; this second slug is only the friendly menu target. */
+		add_submenu_page(
+			'hamishop',
+			'پنل حساب کاربری',
+			'پنل حساب کاربری',
+			'manage_options',
+			'hamishop-account',
+			array( $this, 'render_page' )
+		);
 	}
 
 	public function register_settings() {
@@ -82,7 +94,10 @@ final class HSW_Account_Admin {
 		<div class="wrap hsw-admin" dir="rtl">
 			<div class="hsw-admin-head">
 				<div class="hsw-admin-brand"><span class="hsw-admin-logo">HamiShop</span><div><h1>پنل حساب کاربری</h1><p>تنظیمات یکپارچهٔ داشبورد، منو، پشتیبانی، اعلان‌ها و ظاهر حساب مشتریان.</p></div></div>
-				<a class="button button-primary" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" target="_blank" rel="noopener">مشاهده صفحه حساب</a>
+				<div class="hsw-admin-headactions">
+					<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=hamishop-widgets' ) ); ?>">کنترل ویجت‌ها</a>
+					<a class="button button-primary" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" target="_blank" rel="noopener">مشاهده صفحه حساب</a>
+				</div>
 			</div>
 
 			<nav class="hsw-admin-tabs" role="tablist">
@@ -127,6 +142,7 @@ final class HSW_Account_Admin {
 			.hsw-admin-logo{font-weight:800;font-size:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:8px 14px;border-radius:12px}
 			.hsw-admin-head h1{color:#fff;margin:0 0 4px;font-size:22px}
 			.hsw-admin-head p{margin:0;color:rgba(255,255,255,.75)}
+			.hsw-admin-headactions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 			.hsw-admin-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 			.hsw-admin-tabs a{background:#fff;border:1px solid var(--hsw-line);border-radius:999px;padding:8px 16px;text-decoration:none;color:#1d2327;font-weight:600}
 			.hsw-admin-tabs a.is-active{background:var(--hsw-a);border-color:var(--hsw-a);color:#fff}
