@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.2
+Stable tag: 1.11.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.3 =
+* رفع تداخل کنترل «هدر چسبان» با کنترل Sticky خود المنتور پرو: المنتور پرو روی هر المنت کنترلی به نام `sticky` تزریق می‌کند و پیش‌فرض کنترل ما را خالی می‌کرد، به همین دلیل کلاس `hsw-hd--sticky` هیچ‌وقت رندر نمی‌شد و هدر چسبان بی‌اثر بود. نام کنترل به `hd_sticky` تغییر کرد و حالت چسبان حالا درست کار می‌کند.
+* تکمیل فونت آیکون‌ها: `menu`، `language`، `grid_view`، `arrow_left_alt`، `login` و `inventory_2` به زیرمجموعهٔ Material Symbols اضافه شدند. قبلاً این آیکون‌ها به‌صورت متن خام (مثل MENU یا GRID_VIEW) دیده می‌شدند. هیچ گلیف قبلی حذف نشد و محورهای FILL/GRAD/opsz/wght بدون تغییر ماندند.
+* به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۳ برای دورزدن کش قبلی فونت و CSS.
 
 = 1.11.2 =
 * دو ویجت **هدر** جدید در دستهٔ «حامی — هدر و ناوبری»: «هدر فروشگاهی» (نوار اعلان، مگامنوی دسته‌بندی، جستجوی محصول، حساب و سبد) و «هدر مینیمال شیشه‌ای» (پیل شیشه‌ای شناور، منوی واقعی، پنل جستجوی سبک). هر دو روی کلاس پایهٔ مشترک `HSW_Header_Base` ساخته شده‌اند و `hsw-header.css` / `hsw-header.js` مشترک دارند.

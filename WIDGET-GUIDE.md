@@ -707,7 +707,7 @@ CSS: `assets/css/hsw-blog.css` (+ توکن‌های سرمه‌ای/نارنجی
 - «بازدید» در وردپرس شمارندهٔ بومی ندارد → معیار پیش‌فرض دیدگاه‌هاست (`meta_label` قابل تغییر).
 - زمان مطالعه تخمینی: ۲۰۰ کلمه/دقیقه (`read_time()`).
 
-# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.2)
+# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.3)
 
 دستهٔ المنتور: **حامی — هدر و ناوبری** (`hamishop-header`)
 پایه: `includes/class-hsw-header-base.php` → `HSW_Header_Base` (abstract، extends `HSW_Widget_Base`)
