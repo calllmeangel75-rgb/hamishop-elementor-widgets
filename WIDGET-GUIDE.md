@@ -707,7 +707,7 @@ CSS: `assets/css/hsw-blog.css` (+ توکن‌های سرمه‌ای/نارنجی
 - «بازدید» در وردپرس شمارندهٔ بومی ندارد → معیار پیش‌فرض دیدگاه‌هاست (`meta_label` قابل تغییر).
 - زمان مطالعه تخمینی: ۲۰۰ کلمه/دقیقه (`read_time()`).
 
-# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.3)
+# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.4)
 
 دستهٔ المنتور: **حامی — هدر و ناوبری** (`hamishop-header`)
 پایه: `includes/class-hsw-header-base.php` → `HSW_Header_Base` (abstract، extends `HSW_Widget_Base`)
@@ -759,3 +759,61 @@ CSS: `assets/css/hsw-header.css` (وابسته به `hsw-fonts`) — JS: `assets
 - `HSW_Assets::register()` فقط `wp_register_*` می‌کند؛ المنتور با `get_style_depends()` / `get_script_depends()` خودش لود می‌کند (بارگذاری شرطی).
 - در `HSW_Widget_Manager::catalog()` گروه `header` با هر دو ویجت در `general` است → پیش‌فرض فعال.
 - مهاجرت یک‌بارهٔ `maybe_add_header_widgets()`: اگر `hsw_enabled_widgets` از قبل ذخیره شده باشد، هر دو slug به آن اضافه می‌شود و `hsw_header_widgets_migrated` ست می‌شود. ویجت تازه نباید برای سایت‌های موجود نامرئی بماند.
+
+## مگامنو — بازطراحی v1.11.4
+
+ساختار: `.hsw-hd__megapanel` → `.hsw-hd__megainner` (عرض حداکثر ۱۱۲۰px) → `.hsw-hd__megalayout`
+(شبکهٔ `360px | 1fr`؛ در ≤۱۱۸۰px به `300px | 1fr`) → ستون دسته‌ها `.hsw-hd__meganav` + پیش‌نمایش
+`.hsw-hd__megapreview`.
+
+- دسته‌ها **عمودی و آکاردئونی**اند: هر ردیف یک `button.hsw-hd__megatoggle` است و بدنهٔ تو در تو
+  (`.hsw-hd__megabody` → `.hsw-hd__megachildren`) با ترفند `grid-template-rows: 0fr → 1fr` باز می‌شود
+  (بدون اندازه‌گیری ارتفاع در JS).
+- **تک‌بازشو**: باز کردن یک دسته، دستهٔ باز قبلی را می‌بندد تا ارتفاع پنل ثابت بماند.
+- **بدون پرش**: پنل با `visibility`/`opacity`/`transform` باز و بسته می‌شود، هرگز با `display`.
+  `:hover` و `:focus-within` عمداً حذف شده‌اند؛ فقط کلاس `is-open` (کلیک) و `Escape` کنترل می‌کنند.
+- ارتفاع ستون‌ها قفل است (`max-height` برای لیست، `min-height` برای پیش‌نمایش) تا سوییچ دسته‌ها
+  باعث تغییر ارتفاع پنل نشود.
+
+### data-attributeها
+
+| attribute | روی | کار |
+|---|---|---|
+| `data-hsw-hd-mega` | ریشه | محدودهٔ مگامنو |
+| `data-hsw-hd-mega-toggle` | دکمهٔ «دسته‌بندی محصولات» | باز/بستن پنل |
+| `data-hsw-hd-mega-panel` | پنل | هدف باز/بستن |
+| `data-hsw-hd-mega-item` | `li` هر دسته | وضعیت `is-open` |
+| `data-hsw-hd-mega-cat` | دکمهٔ دسته | شناسهٔ `product_cat` برای REST |
+| `data-hsw-hd-mega-url` / `-name` | دکمهٔ دسته | آدرس و نام برای سرستون پیش‌نمایش |
+| `data-hsw-hd-mega-body` | بدنهٔ آکاردئون | `aria-hidden` |
+| `data-hsw-hd-mega-products` | شبکهٔ محصولات | مقصد رندر + `data-limit` |
+| `data-hsw-hd-mega-hint` | پیام خالی | `data-empty` متن جایگزین |
+| `data-hsw-hd-mega-title` / `-all` | سرستون پیش‌نمایش | عنوان دسته و لینک «مشاهده همه» |
+| `data-hsw-rest` | ریشهٔ هدر | آدرس `rest_url('hsw/v1/header-products')` |
+
+### اندپوینت REST
+
+`GET /wp-json/hsw/v1/header-products?cat={term_id}&limit={3|4|6}` — عمومی و فقط‌خواندنی
+(`permission_callback => __return_true`، مثل `/loop`). خروجی: `{ html, found }` که `html` همان
+تایل‌های `.hsw-hd__megathumb` است.
+
+- فقط محصولات `publish` همان ترم برمی‌گردند؛ عمداً بدون پارامتر `visibility` تا شمارندهٔ دسته
+  (که از term count می‌آید و محصولات مخفی را هم می‌شمارد) با پیش‌نمایش ناسازگار نشود.
+- تصویر با `woocommerce_gallery_thumbnail` و `loading="lazy"`؛ اگر قالب/ووکامرس نسخهٔ قدیمی
+  اتریبیوت را نگذارد، به‌صورت صریح تزریق می‌شود.
+- CFP: `HSW_Helpers::is_call_for_price()` → `cfp_inline_html()`؛ هیچ قیمتی برای آن محصولات چاپ نمی‌شود.
+- JS نتیجه را در `megaCache` نگه می‌دارد؛ هر دسته فقط یک‌بار درخواست می‌زند.
+
+### قرارداد CSS مهم
+
+رزروهای عمومی با `:where()` نوشته شده‌اند:
+
+```css
+.hsw-h :where(a) { color: inherit; text-decoration: none; }
+.hsw-h :where(button, input, select) { font: inherit; color: inherit; }
+```
+
+دلیل: نسخهٔ قبلی `.hsw-h a` (ویژگی ۰,۱,۱) از کلاس‌های کامپوننت (۰,۱,۰) قوی‌تر بود و رنگ سفید
+دکمه‌های روی پس‌زمینهٔ اصلی را خنثی می‌کرد. همین مشکل با `.elementor a { box-shadow: none }`
+برای سایه تکرار می‌شود؛ سایهٔ دکمهٔ سبد دراور با انتخابگر `.hsw-hd .hsw-hd__drawercart` (۰,۲,۰)
+دوباره اعمال شده است.

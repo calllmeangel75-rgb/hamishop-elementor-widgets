@@ -271,7 +271,13 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= '<span class="hsw-hd__searchicon hsw-ic" aria-hidden="true">search</span>';
 		$out .= '<input type="search" name="s" value="' . esc_attr( get_search_query() ) . '" placeholder="' . esc_attr( $placeholder ) . '" aria-label="' . esc_attr__( 'جستجو در محصولات', 'hamishop-elementor-widgets' ) . '" autocomplete="off">';
 		$out .= '</div>';
-		$out .= '<button class="hsw-hd__searchbtn" type="submit">' . HSW_Helpers::icon( 'search' ) . '<span class="hsw-hd__searchbtnlabel">' . esc_html( $button ) . '</span></button>';
+		/*
+		 * One magnifier only: the field already carries a search icon, so the
+		 * submit button shows the text label in the full form and the icon
+		 * only in the compact (mobile/drawer) variant where the label is hidden.
+		 */
+		$btn_icon = $compact ? HSW_Helpers::icon( 'search' ) : '';
+		$out .= '<button class="hsw-hd__searchbtn" type="submit">' . $btn_icon . '<span class="hsw-hd__searchbtnlabel">' . esc_html( $button ) . '</span></button>';
 		$out .= '</form>';
 
 		return $out;
@@ -482,34 +488,40 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 * @return string
 	 */
 	protected function mega_html( $s ) {
-		$cats = $this->product_categories( 24 );
+		$cats = $this->product_categories( 8 );
 		if ( ! $cats ) {
 			return '';
 		}
-		$cols      = isset( $s['mega_cols'] ) ? absint( $s['mega_cols'] ) : 4;
-		$cols      = max( 2, min( 4, $cols ) );
-		$cat_slots = max( 1, $cols - 1 );
-		$cats      = array_slice( $cats, 0, $cat_slots );
+
+		$per = isset( $s['mega_products'] ) ? absint( $s['mega_products'] ) : 4;
+		$per = in_array( $per, array( 3, 4, 6 ), true ) ? $per : 4;
 
 		$out  = '<div class="hsw-hd__megapanel" data-hsw-hd-mega-panel>';
 		$out .= '<div class="hsw-hd__megainner">';
-		$out .= '<div class="hsw-hd__megagrid" style="--hsw-hd-mega-cols:' . esc_attr( (string) $cols ) . '">';
+		$out .= '<div class="hsw-hd__megalayout">';
+
+		/* ---- vertical, nested category list ---- */
+		$out .= '<div class="hsw-hd__meganav">';
+		$out .= '<ul class="hsw-hd__megatree">';
 
 		foreach ( $cats as $cat ) {
 			$url = get_term_link( $cat );
 			if ( is_wp_error( $url ) ) {
 				continue;
 			}
-			$children = $this->product_categories( 4, $cat->term_id );
+			$children = $this->product_categories( 8, $cat->term_id );
 
-			$out .= '<div class="hsw-hd__megacol">';
-			$out .= '<a class="hsw-hd__megahead" href="' . esc_url( $url ) . '">';
+			$out .= '<li class="hsw-hd__megaitem" data-hsw-hd-mega-item>';
+			$out .= '<button class="hsw-hd__megatoggle" type="button" data-hsw-hd-mega-cat="' . esc_attr( (string) $cat->term_id ) . '" data-hsw-hd-mega-url="' . esc_url( $url ) . '" data-hsw-hd-mega-name="' . esc_attr( $cat->name ) . '" aria-expanded="false">';
 			$out .= '<span class="hsw-hd__megaicon">' . HSW_Helpers::icon( 'category' ) . '</span>';
 			$out .= '<span class="hsw-hd__meganame">' . esc_html( $cat->name ) . '</span>';
 			$out .= '<span class="hsw-hd__megacount">' . esc_html( HSW_Helpers::fa_num( $cat->count ) ) . '</span>';
-			$out .= '</a>';
-			$out .= '<ul class="hsw-hd__megalist">';
+			$out .= '<span class="hsw-hd__megachev">' . HSW_Helpers::icon( 'expand_more' ) . '</span>';
+			$out .= '</button>';
+
+			$out .= '<div class="hsw-hd__megabody" data-hsw-hd-mega-body aria-hidden="true"><div class="hsw-hd__megabodyinner">';
 			if ( $children ) {
+				$out .= '<ul class="hsw-hd__megachildren">';
 				foreach ( $children as $child ) {
 					$child_url = get_term_link( $child );
 					if ( is_wp_error( $child_url ) ) {
@@ -517,20 +529,34 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 					}
 					$out .= '<li><a href="' . esc_url( $child_url ) . '"><span>' . esc_html( $child->name ) . '</span><span class="hsw-hd__megacount">' . esc_html( HSW_Helpers::fa_num( $child->count ) ) . '</span></a></li>';
 				}
-			} else {
-				$out .= '<li><a href="' . esc_url( $url ) . '"><span>' . esc_html__( 'مشاهده محصولات', 'hamishop-elementor-widgets' ) . '</span>' . HSW_Helpers::icon( 'arrow_left_alt' ) . '</a></li>';
+				$out .= '</ul>';
 			}
-			$out .= '</ul></div>';
+			$out .= '<a class="hsw-hd__megaall" href="' . esc_url( $url ) . '">' . esc_html__( 'مشاهده همهٔ محصولات این دسته', 'hamishop-elementor-widgets' ) . HSW_Helpers::icon( 'arrow_left_alt' ) . '</a>';
+			$out .= '</div></div>';
+			$out .= '</li>';
 		}
 
-		$out .= '<a class="hsw-hd__megapromo" href="' . esc_url( $this->shop_url() ) . '">';
-		$out .= '<span class="hsw-hd__megapromoicon">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
-		$out .= '<strong>' . esc_html__( 'همه محصولات', 'hamishop-elementor-widgets' ) . '</strong>';
-		$out .= '<span>' . esc_html__( 'دسترسی سریع به تمام دسته‌بندی‌ها و محصولات فروشگاه', 'hamishop-elementor-widgets' ) . '</span>';
-		$out .= '<span class="hsw-hd__megapromobtn">' . esc_html__( 'مشاهده فروشگاه', 'hamishop-elementor-widgets' ) . HSW_Helpers::icon( 'arrow_left_alt' ) . '</span>';
+		$out .= '</ul></div>';
+
+		/* ---- product preview (filled lazily by hsw-header.js) ---- */
+		$out .= '<aside class="hsw-hd__megapreview" data-hsw-hd-mega-preview>';
+		$out .= '<div class="hsw-hd__megapreviewhead">';
+		$out .= '<span class="hsw-hd__megapreviewtitle" data-hsw-hd-mega-title>' . esc_html__( 'محصولات دسته', 'hamishop-elementor-widgets' ) . '</span>';
+		$out .= '<a class="hsw-hd__megapreviewall" data-hsw-hd-mega-all href="' . esc_url( $this->shop_url() ) . '">' . esc_html__( 'مشاهده همه', 'hamishop-elementor-widgets' ) . '</a>';
+		$out .= '</div>';
+		$out .= '<div class="hsw-hd__megathumbs" data-hsw-hd-mega-products data-limit="' . esc_attr( (string) $per ) . '"></div>';
+		$out .= '<p class="hsw-hd__megahint" data-hsw-hd-mega-hint data-empty="' . esc_attr__( 'محصولی برای نمایش در این دسته نیست.', 'hamishop-elementor-widgets' ) . '">' . esc_html__( 'برای دیدن محصولات، یک دسته را باز کنید.', 'hamishop-elementor-widgets' ) . '</p>';
+		$out .= '</aside>';
+
+		$out .= '</div>';
+
+		$out .= '<a class="hsw-hd__megafoot" href="' . esc_url( $this->shop_url() ) . '">';
+		$out .= HSW_Helpers::icon( 'storefront' );
+		$out .= '<span>' . esc_html__( 'مشاهده همهٔ محصولات فروشگاه', 'hamishop-elementor-widgets' ) . '</span>';
+		$out .= HSW_Helpers::icon( 'arrow_left_alt' );
 		$out .= '</a>';
 
-		$out .= '</div></div></div>';
+		$out .= '</div></div>';
 
 		return $out;
 	}
@@ -1105,6 +1131,6 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$vis = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
 		$classes .= ' hsw-vis-' . $vis . $this->hsw_font_class();
 
-		return '<div class="' . esc_attr( $classes ) . '" data-hsw-header data-hsw-fragments="' . esc_url( $this->fragments_url() ) . '">';
+		return '<div class="' . esc_attr( $classes ) . '" data-hsw-header data-hsw-fragments="' . esc_url( $this->fragments_url() ) . '" data-hsw-rest="' . esc_url( rest_url( 'hsw/v1/header-products' ) ) . '">';
 	}
 }

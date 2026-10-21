@@ -37,6 +37,26 @@ class HSW_Rest {
                                 'permission_callback' => '__return_true',
                         )
                 );
+
+                /*
+                 * Header mega-menu product preview.
+                 * Public and read-only, like /loop: it only exposes already
+                 * published products of a public product_cat term, and the
+                 * mega menu calls it lazily the first time a category opens.
+                 */
+                register_rest_route(
+                        self::NS,
+                        '/header-products',
+                        array(
+                                'methods'             => 'GET',
+                                'callback'            => array( $this, 'header_products' ),
+                                'permission_callback' => '__return_true',
+                                'args'                => array(
+                                        'cat'   => array( 'sanitize_callback' => 'absint' ),
+                                        'limit' => array( 'sanitize_callback' => 'absint' ),
+                                ),
+                        )
+                );
         }
 
         public function can_edit() {
@@ -119,5 +139,107 @@ class HSW_Rest {
                                 'found' => count( $products ),
                         )
                 );
+        }
+
+        /**
+         * Compact product tiles for one product category (mega menu preview).
+         *
+         * Only public, already-published products are exposed, so the route is
+         * open like /loop. The mega menu calls it on first expand so a header
+         * with six categories costs zero product queries until it is opened.
+         *
+         * @param WP_REST_Request $request Request.
+         * @return WP_REST_Response
+         */
+        public function header_products( $request ) {
+                $term_id = absint( $request->get_param( 'cat' ) );
+                $limit   = (int) $request->get_param( 'limit' );
+                $limit   = $limit > 0 ? min( 8, $limit ) : 4;
+
+                if ( ! $term_id || ! function_exists( 'wc_get_products' ) ) {
+                        return rest_ensure_response( array( 'html' => '', 'found' => 0 ) );
+                }
+
+                $term = get_term( $term_id, 'product_cat' );
+                if ( ! $term instanceof WP_Term ) {
+                        return rest_ensure_response( array( 'html' => '', 'found' => 0 ) );
+                }
+
+                /*
+                 * No `visibility` arg on purpose: the category counter in the
+                 * menu comes from term counts, which include hidden products.
+                 * Filtering by catalog visibility here produced empty previews
+                 * for categories the menu advertised as non-empty.
+                 */
+                $products = wc_get_products(
+                        array(
+                                'status'  => 'publish',
+                                'limit'   => $limit,
+                                'category' => array( $term->slug ),
+                                'orderby' => 'date',
+                                'order'   => 'DESC',
+                                'return'  => 'objects',
+                        )
+                );
+
+                $html = '';
+                foreach ( $products as $product ) {
+                        $html .= $this->mini_product_html( $product );
+                }
+
+                return rest_ensure_response(
+                        array(
+                                'html'  => $html,
+                                'found' => count( $products ),
+                        )
+                );
+        }
+
+        /**
+         * One 64px tile: thumbnail + name + price (or the CFP contact text).
+         *
+         * @param WC_Product $product Product.
+         * @return string
+         */
+        private function mini_product_html( $product ) {
+                if ( ! $product instanceof WC_Product ) {
+                        return '';
+                }
+
+                $name = $product->get_name();
+                $url  = $product->get_permalink();
+
+                $img = $product->get_image(
+                        'woocommerce_gallery_thumbnail',
+                        array(
+                                'class'   => 'hsw-hd__megathumbimg',
+                                'alt'     => $name,
+                                'loading' => 'lazy',
+                        )
+                );
+                // Some themes/older WC drop the attribute; make it explicit.
+                if ( false === strpos( $img, 'loading=' ) ) {
+                        $img = str_replace( '<img ', '<img loading="lazy" decoding="async" ', $img );
+                }
+
+                $meta = '';
+                if ( HSW_Helpers::is_call_for_price( $product ) ) {
+                        $meta = HSW_Helpers::cfp_inline_html( $product, false, 'hsw-hd__megacfp' );
+                } else {
+                        $meta = $product->get_price_html();
+                }
+                if ( '' === trim( (string) $meta ) ) {
+                        $meta = '<span class="hsw-hd__megaprice">' . esc_html__( 'مشاهده', 'hamishop-elementor-widgets' ) . '</span>';
+                }
+
+                $out  = '<a class="hsw-hd__megathumb" href="' . esc_url( $url ) . '">';
+                $out .= '<span class="hsw-hd__megathumbpic">' . $img . '</span>';
+                $out .= '<span class="hsw-hd__megathumbtext">';
+                $out .= '<span class="hsw-hd__megathumbname">' . esc_html( $name ) . '</span>';
+                $out .= '<span class="hsw-hd__megathumbmeta">' . $meta . '</span>';
+                $out .= '</span>';
+                $out .= '</a>';
+
+                return $out;
         }
 }

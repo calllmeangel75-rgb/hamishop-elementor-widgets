@@ -167,15 +167,152 @@
 		});
 
 		if (mega && megaButton) {
+			var megaPanel = mega.querySelector('[data-hsw-hd-mega-panel]');
+			var megaProducts = mega.querySelector('[data-hsw-hd-mega-products]');
+			var megaHint = mega.querySelector('[data-hsw-hd-mega-hint]');
+			var megaTitle = mega.querySelector('[data-hsw-hd-mega-title]');
+			var megaAll = mega.querySelector('[data-hsw-hd-mega-all]');
+			var megaItems = all(mega, '[data-hsw-hd-mega-item]');
+			var megaCache = {};
+			var megaBooted = false;
+
+			var renderMegaProducts = function (html) {
+				if (!megaProducts) {
+					return;
+				}
+				megaProducts.classList.remove('is-loading');
+				megaProducts.innerHTML = html || '';
+				if (megaHint) {
+					if (html) {
+						megaHint.classList.add('is-hidden');
+					} else {
+						megaHint.classList.remove('is-hidden');
+						var empty = megaHint.getAttribute('data-empty');
+						if (empty) {
+							megaHint.textContent = empty;
+						}
+					}
+				}
+			};
+
+			var loadMegaProducts = function (button) {
+				if (!megaProducts) {
+					return;
+				}
+				var catId = button.getAttribute('data-hsw-hd-mega-cat');
+				var name = button.getAttribute('data-hsw-hd-mega-name') || '';
+				var url = button.getAttribute('data-hsw-hd-mega-url') || '';
+
+				if (megaTitle) {
+					megaTitle.textContent = name;
+				}
+				if (megaAll && url) {
+					megaAll.href = url;
+				}
+				if (!catId) {
+					return;
+				}
+
+				if (Object.prototype.hasOwnProperty.call(megaCache, catId)) {
+					renderMegaProducts(megaCache[catId]);
+					return;
+				}
+
+				var endpoint = root.getAttribute('data-hsw-rest') || '';
+				if (!endpoint) {
+					return;
+				}
+
+				var limit = megaProducts.getAttribute('data-limit') || '4';
+				if (megaHint) {
+					megaHint.classList.add('is-hidden');
+				}
+				megaProducts.classList.add('is-loading');
+
+				fetch(endpoint + (endpoint.indexOf('?') === -1 ? '?' : '&') +
+					'cat=' + encodeURIComponent(catId) + '&limit=' + encodeURIComponent(limit), {
+					credentials: 'same-origin',
+					headers: { Accept: 'application/json' },
+				})
+					.then(function (response) {
+						return response.ok ? response.json() : null;
+					})
+					.then(function (data) {
+						var html = data && data.html ? data.html : '';
+						megaCache[catId] = html;
+						renderMegaProducts(html);
+					})
+					.catch(function () {
+						renderMegaProducts('');
+					});
+			};
+
+			var openMegaItem = function (button, open) {
+				var item = button.closest('[data-hsw-hd-mega-item]');
+				if (!item) {
+					return;
+				}
+				item.classList.toggle('is-open', open);
+				setExpanded(button, open);
+				var body = item.querySelector('[data-hsw-hd-mega-body]');
+				if (body) {
+					body.setAttribute('aria-hidden', open ? 'false' : 'true');
+				}
+				if (open) {
+					loadMegaProducts(button);
+				}
+			};
+
+			megaItems.forEach(function (item) {
+				var button = item.querySelector('[data-hsw-hd-mega-cat]');
+				if (!button) {
+					return;
+				}
+				button.addEventListener('click', function (event) {
+					event.preventDefault();
+					var willOpen = !item.classList.contains('is-open');
+
+					// Single-open accordion: keeps the panel height stable.
+					megaItems.forEach(function (other) {
+						if (other === item) {
+							return;
+						}
+						var otherButton = other.querySelector('[data-hsw-hd-mega-cat]');
+						if (otherButton && other.classList.contains('is-open')) {
+							openMegaItem(otherButton, false);
+						}
+					});
+
+					openMegaItem(button, willOpen);
+				});
+			});
+
 			megaButton.addEventListener('click', function (event) {
 				event.preventDefault();
 				var open = !mega.classList.contains('is-open');
 				mega.classList.toggle('is-open', open);
 				setExpanded(megaButton, open);
+
+				// First open: show the first category straight away so the
+				// panel is never an empty shell.
+				if (open && !megaBooted && megaItems.length) {
+					megaBooted = true;
+					var first = megaItems[0].querySelector('[data-hsw-hd-mega-cat]');
+					if (first) {
+						openMegaItem(first, true);
+					}
+				}
 			});
 
 			document.addEventListener('click', function (event) {
 				if (mega.classList.contains('is-open') && !mega.contains(event.target)) {
+					mega.classList.remove('is-open');
+					setExpanded(megaButton, false);
+				}
+			});
+
+			document.addEventListener('keydown', function (event) {
+				if ('Escape' === event.key && mega.classList.contains('is-open')) {
 					mega.classList.remove('is-open');
 					setExpanded(megaButton, false);
 				}

@@ -157,15 +157,17 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		);
 
 		$this->add_control(
-			'mega_cols',
+			'mega_products',
 			array(
-				'label'     => __( 'تعداد ستون‌های مگامنو', 'hamishop-elementor-widgets' ),
+				'label'     => __( 'تعداد محصول در پیش‌نمایش مگامنو', 'hamishop-elementor-widgets' ),
 				'type'      => Controls_Manager::SELECT,
 				'default'   => '4',
 				'options'   => array(
-					'3' => __( '۳ ستون', 'hamishop-elementor-widgets' ),
-					'4' => __( '۴ ستون', 'hamishop-elementor-widgets' ),
+					'3' => __( '۳ محصول', 'hamishop-elementor-widgets' ),
+					'4' => __( '۴ محصول', 'hamishop-elementor-widgets' ),
+					'6' => __( '۶ محصول', 'hamishop-elementor-widgets' ),
 				),
+				'description' => __( 'تصاویر کوچک فقط بار اولی که دسته باز می‌شود بارگذاری می‌شوند.', 'hamishop-elementor-widgets' ),
 				'condition' => array( 'show_mega' => 'yes' ),
 			)
 		);
