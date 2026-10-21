@@ -14,7 +14,7 @@
 	font-style: normal;
 	font-weight: 100 700;
 	font-display: block;
-	src: url('../fonts/material-symbols.woff2?ver=1.11.5') format('woff2-variations');
+	src: url('../fonts/material-symbols.woff2?ver=1.11.6') format('woff2-variations');
 }
 
 .hsw-h,
@@ -26,12 +26,12 @@
 
 .hsw-h {
 	--hsw-hd-primary: var(--hsw-primary, #1d4ed8);
-	--hsw-hd-bg: #fff;
+	--hsw-hd-bg: var(--hsw-pal-surface, #fff);
 	--hsw-hd-text: var(--hsw-on-surface, #0f172a);
-	--hsw-hd-muted: #64748b;
-	--hsw-hd-border: #e2e8f0;
-	--hsw-hd-search: #f1f5f9;
-	--hsw-hd-topbar: #0f172a;
+	--hsw-hd-muted: var(--hsw-pal-muted, #64748b);
+	--hsw-hd-border: var(--hsw-pal-border, #e2e8f0);
+	--hsw-hd-search: var(--hsw-pal-surface-alt, #f1f5f9);
+	--hsw-hd-topbar: var(--hsw-primary-dark, #0f172a);
 	--hsw-hd-navbg: #f8fafc;
 	--hsw-hd-radius: 14px;
 	--hsw-hd-width: 1320px;

@@ -10,7 +10,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.5') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.6') format('woff2-variations');
 }
 
 /* ===== Responsive toggles ===== */
@@ -26,15 +26,15 @@
 /* ===== Root palette (design tokens) ===== */
 :root {
         --hswb-bg: #f7f8fa;
-        --hswb-card: #ffffff;
+        --hswb-card: var(--hsw-pal-surface, #ffffff);
         --hswb-card2: #f3f4f6;
-        --hswb-border: #e1e2e4;
+        --hswb-border: var(--hsw-pal-border, #e1e2e4);
         --hswb-border2: #c5c6cf;
-        --hswb-text: #191c1e;
+        --hswb-text: var(--hsw-on-surface, #191c1e);
         --hswb-text2: #45464e;
-        --hswb-muted: #75777f;
-        --hswb-primary: #000922;
-        --hswb-navy: #0f2042;
+        --hswb-muted: var(--hsw-pal-muted, #75777f);
+        --hswb-primary: var(--hsw-primary, #000922);
+        --hswb-navy: var(--hsw-primary-dark, #0f2042);
         --hswb-accent: #fc593a;
         --hswb-accent-bg: #ffdad3;
         --hswb-accent2: #b5260b;

@@ -11,7 +11,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.5') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.6') format('woff2-variations');
 }
 
 .hsw-ic {
@@ -49,15 +49,15 @@
 /* :root copy keeps bottom-sheets/modals styled even when Elementor's
    frontend moves them outside the widget root (z-index edge cases). */
 :root {
-        --hswa-primary: #2563eb;
-        --hswa-primary-dark: #1d4ed8;
-        --hswa-primary-50: #eff6ff;
-        --hswa-primary-100: #dbeafe;
-        --hswa-primary-light: #f0f6ff;
-        --hswa-ink: #1e293b;
+        --hswa-primary: var(--hsw-primary, #2563eb);
+        --hswa-primary-dark: var(--hsw-primary-dark, #1d4ed8);
+        --hswa-primary-50: var(--hsw-pal-primary-50, #eff6ff);
+        --hswa-primary-100: var(--hsw-pal-primary-100, #dbeafe);
+        --hswa-primary-light: var(--hsw-pal-primary-light, #f0f6ff);
+        --hswa-ink: var(--hsw-on-surface, #1e293b);
         --hswa-strong: #0f172a;
         --hswa-body: #475569;
-        --hswa-soft: #64748b;
+        --hswa-soft: var(--hsw-pal-muted, #64748b);
         --hswa-faint: #cbd5e1;
         --hswa-line: #e2e8f0;
         --hswa-line-soft: #f1f5f9;

@@ -707,7 +707,7 @@ CSS: `assets/css/hsw-blog.css` (+ توکن‌های سرمه‌ای/نارنجی
 - «بازدید» در وردپرس شمارندهٔ بومی ندارد → معیار پیش‌فرض دیدگاه‌هاست (`meta_label` قابل تغییر).
 - زمان مطالعه تخمینی: ۲۰۰ کلمه/دقیقه (`read_time()`).
 
-# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.5)
+# HEADER WIDGETS — ویجت‌های هدر و ناوبری (v1.11.6)
 
 دستهٔ المنتور: **حامی — هدر و ناوبری** (`hamishop-header`)
 پایه: `includes/class-hsw-header-base.php` → `HSW_Header_Base` (abstract، extends `HSW_Widget_Base`)
@@ -851,3 +851,36 @@ CSS: `assets/css/hsw-header.css` (وابسته به `hsw-fonts`) — JS: `assets
 که روی آیتم‌های فیلتر اعمال می‌شود باید این دو سلکتور را هم شامل شود، وگرنه فقط ردیف‌های
 غیردسته‌بندی تغییر می‌کنند. `.hsw-af__cattree` یک `font-size: 12px` پایه دارد که با سلکتور
 تولیدی المنتور (`.elementor-element-X .hsw-af__catlink`) بازنویسی می‌شود.
+
+## پالت رنگی سراسری — v1.11.6
+
+`HSW_Palette` (`includes/class-hsw-palette.php`) مالک توکن‌های رنگ است.
+
+- گزینه: `hsw_palette` (آرایهٔ کلید → hex). پیش‌فرض‌ها در `HSW_Palette::defaults()`.
+- خروجی CSS روی `html:root` چاپ می‌شود (specificity ۰,۱,۱) تا از بلوک‌های `:root` داخل فایل‌های خانواده
+  (که ۰,۱,۰ هستند) قوی‌تر باشد و ترتیب لود استایل‌ها اهمیتی نداشته باشد.
+- دو گروه نام:
+  - `--hsw-primary`, `--hsw-primary-dark`, `--hsw-primary-container`, `--hsw-secondary-container`,
+    `--hsw-accent`, `--hsw-on-primary`, `--hsw-on-surface` — همان واژگانی که `hsw-loop.css` و
+    `hsw-product.css` از قبل روی `:root` تعریف می‌کنند، پس این دو خانواده بدون دست‌زدن به استایل‌شان
+    پالت را دنبال می‌کنند.
+  - `--hsw-pal-surface`, `-surface-alt`, `-border`, `-muted`, `-success`, `-warning`, `-danger`
+    به‌همراه تینت‌های `-primary-50/100/light/ring` و `-accent-soft`. نام `--hsw-pal-*` عمداً جداست
+    چون `--hsw-surface` در خانوادهٔ محصول معنی «پس‌زمینهٔ صفحه» دارد و نباید بازتعریف شود.
+- هر خانواده توکن محلی خود را با fallback به مقدار قبلی می‌گیرد، مثلاً:
+  `--hswb-primary: var(--hsw-primary, #000922);` — اگر پالت چاپ نشود، ظاهر قبلی برمی‌گردد.
+
+### قاعده
+
+هر رنگ **برند** تازه در CSS باید `var(--hsw-primary|--hsw-accent|--hsw-pal-*, <مقدار قبلی>)` بنویسد،
+نه hex خام. رنگ‌های دستیِ المنتور روی wrapper ویجت اعمال می‌شوند و همیشه برنده‌اند.
+
+## دو باگ v1.11.6
+
+1. `HSW_Blog_Base::blog_base_url()` قبلاً `get_permalink()` بدون آرگومان صدا می‌زد؛ روی آرشیو یا
+   صفحهٔ نوشته‌ها `$post` گلوبال اولین نوشتهٔ حلقه است، پس همهٔ لینک‌های فیلتر/مرتب‌سازی به همان
+   مقاله می‌رفتند. حالا آدرس از `REQUEST_URI` ساخته و فیلترهای خودمان از آن حذف می‌شوند.
+2. `HSW_Widget_Base::actions_html()` قالب دکمه را با `sprintf( $open, ... )` پر می‌کرد؛ `$open` برای
+   محصول غیرساده شامل پرمالینک URL-encoded فارسی است (`%d8%af…`) و sprintf هر `%XX` را مشخصهٔ فرمت
+   می‌شمرد → `ArgumentCountError`. جایش `str_replace( '%s', ... )` گذاشته شد. **هرگز sprintf را روی
+   رشته‌ای که URL یا متن کاربر دارد اجرا نکنید.**

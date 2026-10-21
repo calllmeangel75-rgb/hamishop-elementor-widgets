@@ -11,7 +11,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.5') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.6') format('woff2-variations');
 }
 
 .hsw-c .hsw-ic {
@@ -44,16 +44,16 @@
 
 /* ===== Root palette (from the design tokens) ===== */
 :root {
-        --hswc-card: #ffffff;           /* surface-container-lowest */
+        --hswc-card: var(--hsw-pal-surface, #ffffff);           /* surface-container-lowest */
         --hswc-card2: #f3f4f6;          /* surface-container-low */
         --hswc-card3: #edeef0;          /* surface-container */
-        --hswc-border: #e1e2e4;         /* surface-variant */
+        --hswc-border: var(--hsw-pal-border, #e1e2e4);         /* surface-variant */
         --hswc-border2: #c5c6cf;        /* outline-variant */
-        --hswc-text: #191c1e;           /* on-surface */
+        --hswc-text: var(--hsw-on-surface, #191c1e);           /* on-surface */
         --hswc-text2: #45464e;          /* on-surface-variant */
-        --hswc-muted: #75777f;          /* outline */
-        --hswc-primary: #000922;        /* primary */
-        --hswc-accent: #fc593a;         /* secondary-container */
+        --hswc-muted: var(--hsw-pal-muted, #75777f);          /* outline */
+        --hswc-primary: var(--hsw-primary, #000922);        /* primary */
+        --hswc-accent: var(--hsw-accent, #fc593a);         /* secondary-container */
         --hswc-on-accent: #ffffff;      /* on-secondary */
         --hswc-accent2: #b5260b;        /* secondary */
         --hswc-fixed: #ffdad3;          /* secondary-fixed */

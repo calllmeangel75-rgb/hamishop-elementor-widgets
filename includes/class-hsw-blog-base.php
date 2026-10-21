@@ -62,11 +62,52 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
          * ------------------------------------------------------------------ */
 
         /**
-         * Base URL of the page hosting the blog (current permalink).
+         * Base URL of the page hosting the blog.
+         *
+         * Never call `get_permalink()` without an argument here: on an archive
+         * or on the posts page the global $post is the FIRST POST of the loop,
+         * so every filter link (category pills, sort options, pagination)
+         * pointed at that single article — clicking "پربحث‌ترین" opened a post
+         * instead of re-sorting the archive.
+         *
+         * The current request path is the only reliable source: it is correct
+         * for a static page, the posts page, a category archive and a search.
+         *
+         * @return string
          */
         protected function blog_base_url() {
-                $url = get_permalink();
-                return $url ? $url : home_url( '/' );
+                $base = '';
+
+                $request = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed below, never echoed raw.
+                if ( '' !== $request ) {
+                        $path  = (string) wp_parse_url( $request, PHP_URL_PATH );
+                        $query = (string) wp_parse_url( $request, PHP_URL_QUERY );
+                        $home  = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+
+                        /* home_url() already carries the subdirectory, so strip it
+                           from the request path before re-attaching. */
+                        if ( '' !== $home && '/' !== $home && 0 === strpos( $path, $home ) ) {
+                                $path = substr( $path, strlen( $home ) );
+                        }
+
+                        $base = home_url( '/' . ltrim( $path, '/' ) );
+                        if ( '' !== $query ) {
+                                $base .= '?' . $query;
+                        }
+                }
+
+                if ( '' === $base ) {
+                        $object_id = (int) get_queried_object_id();
+                        $base      = $object_id ? (string) get_permalink( $object_id ) : home_url( '/' );
+                }
+
+                /* Drop our own filters and pagination; blog_url() re-adds them. */
+                $base = remove_query_arg(
+                        array( 'blog_cat', 'blog_sort', 'blog_s', 'blog_page', 'blog_search', 'paged', 'page' ),
+                        $base
+                );
+
+                return '' !== $base ? $base : home_url( '/' );
         }
 
         /**

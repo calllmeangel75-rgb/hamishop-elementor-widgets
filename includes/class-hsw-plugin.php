@@ -34,6 +34,7 @@ final class HSW_Plugin {
                 HSW_Account::instance();
 
                 new HSW_Widget_Manager();
+                HSW_Palette::instance();
                 new HSW_Rest();
                 new HSW_Assets();
 
@@ -94,6 +95,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-account-support.php';
                 require_once HSW_DIR . 'includes/class-hsw-account-admin.php';
                 require_once HSW_DIR . 'includes/class-hsw-widget-manager.php';
+                require_once HSW_DIR . 'includes/class-hsw-palette.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();

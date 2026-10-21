@@ -512,13 +512,19 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         $close = '</a>';
                 }
 
-                $d = sprintf( $open, 'hsw-add--d hsw-d' ) . HSW_Helpers::icon( $args['ico_add'] );
+                /*
+                 * str_replace, NOT sprintf: $open can contain a percent-encoded
+                 * permalink (Persian slugs are full of %d8/%af/%db), and sprintf
+                 * reads every %XX as a format specifier — the widget died with
+                 * "28 arguments are required, 2 given" on every variable product.
+                 */
+                $d = str_replace( '%s', 'hsw-add--d hsw-d', $open ) . HSW_Helpers::icon( $args['ico_add'] );
                 if ( 'best' === $type ) {
                         $d .= '<span>' . esc_html( $args['txt_buy'] ) . '</span>';
                 }
                 $d .= $close;
 
-                $m = sprintf( $open, 'hsw-add--m hsw-m' ) . HSW_Helpers::icon( 'add' ) . $close;
+                $m = str_replace( '%s', 'hsw-add--m hsw-m', $open ) . HSW_Helpers::icon( 'add' ) . $close;
 
                 return '<div class="hsw-actions">' . $d . $m . '</div>';
         }

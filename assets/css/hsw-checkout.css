@@ -10,7 +10,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.5') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.6') format('woff2-variations');
 }
 
 /* ===== Icon font ===== */
@@ -49,22 +49,22 @@
 
 /* ===== Root palette (the design tokens) ===== */
 :root {
-        --hswk-card: #ffffff;       /* surface-container-lowest */
+        --hswk-card: var(--hsw-pal-surface, #ffffff);       /* surface-container-lowest */
         --hswk-card2: #f3f4f6;      /* surface-container-low */
         --hswk-card3: #edeef0;      /* surface-container */
         --hswk-card-high: #e7e8ea;  /* surface-container-high */
         --hswk-surface: #f8f9fb;    /* surface / surface-bright */
-        --hswk-border: #e1e2e4;     /* surface-variant */
+        --hswk-border: var(--hsw-pal-border, #e1e2e4);     /* surface-variant */
         --hswk-border2: #c5c6cf;    /* outline-variant */
-        --hswk-text: #191c1e;       /* on-surface */
+        --hswk-text: var(--hsw-on-surface, #191c1e);       /* on-surface */
         --hswk-text2: #45464e;      /* on-surface-variant */
-        --hswk-muted: #75777f;      /* outline */
-        --hswk-primary: #000922;    /* primary */
+        --hswk-muted: var(--hsw-pal-muted, #75777f);      /* outline */
+        --hswk-primary: var(--hsw-primary, #000922);    /* primary */
         --hswk-btn: #0f2042;        /* primary-container */
         --hswk-on-btn: #ffffff;     /* on-primary */
         --hswk-on-btn2: #7389b0;    /* on-primary-container */
         --hswk-fixed: #d9e2ff;      /* primary-fixed */
-        --hswk-accent: #fc593a;     /* secondary-container (CTA) */
+        --hswk-accent: var(--hsw-accent, #fc593a);     /* secondary-container (CTA) */
         --hswk-on-accent: #ffffff;  /* on-secondary */
         --hswk-accent2: #b5260b;    /* secondary */
         --hswk-accentbg: #ffdad3;   /* secondary-fixed */
