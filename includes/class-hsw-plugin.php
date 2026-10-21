@@ -248,6 +248,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-blog-newsletter.php',
                         HSW_DIR . 'widgets/class-hsw-widget-blog-tags.php',
                         HSW_DIR . 'widgets/class-hsw-widget-blog-page.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-post-page.php',
                 );
                 foreach ( $widget_files as $widget_file ) {
                         try {
@@ -324,6 +325,7 @@ final class HSW_Plugin {
                         '\HSW_Widget_Blog_Newsletter',
                         '\HSW_Widget_Blog_Tags',
                         '\HSW_Widget_Blog_Page',
+                        '\HSW_Widget_Post_Page',
                 ) as $widget_class ) {
                         if ( ! class_exists( $widget_class ) ) {
                                 continue;

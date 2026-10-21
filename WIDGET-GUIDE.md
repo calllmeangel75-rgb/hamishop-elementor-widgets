@@ -884,3 +884,53 @@ CSS: `assets/css/hsw-header.css` (وابسته به `hsw-fonts`) — JS: `assets
    محصول غیرساده شامل پرمالینک URL-encoded فارسی است (`%d8%af…`) و sprintf هر `%XX` را مشخصهٔ فرمت
    می‌شمرد → `ArgumentCountError`. جایش `str_replace( '%s', ... )` گذاشته شد. **هرگز sprintf را روی
    رشته‌ای که URL یا متن کاربر دارد اجرا نکنید.**
+
+## صفحه کامل نوشته — v1.11.7
+
+ویجت `hsw-post-page` (`widgets/class-hsw-widget-post-page.php`) از `HSW_Blog_Base` ارث می‌برد.
+CSS: `assets/css/hsw-post.css` · JS: `assets/js/hsw-post.js` · دسته: `hamishop-blog`.
+ریشه: `.hsw-pp` با `data-hsw-pp` و `data-post-id`.
+
+### داده‌ها
+
+| بخش | منبع |
+|---|---|
+| عنوان/محتوا | `$post->post_title` + `apply_filters('the_content')` |
+| دسته/برچسب | `get_the_category` / `get_the_tags` |
+| نویسنده | `get_the_author_meta` (اگر `display_name` خالی باشد بلوک نویسنده اصلاً رندر نمی‌شود) |
+| زمان مطالعه | `HSW_Blog_Base::read_time()` |
+| بازدید | متای `hsw_post_views` (یک‌بار در هر نشست) |
+| فهرست مطالب | regex روی `h2`/`h3` + تزریق `id="hsw-h-N"` |
+| محصول مقاله | `product_id` کنترل → اولین محصول دستهٔ نوشته → جدیدترین محصول |
+| دیدگاه | `wp_list_comments` + `comment_form` بومی |
+| مرتبط | `WP_Query` روی `category__in` |
+
+### نکات پیاده‌سازی (باگ‌هایی که یک‌بار خوردیم)
+
+- **کالبک کامنت نباید `</div>` ریشه را ببندد.** `Walker_Comment::end_el()` برای `style => 'div'`
+  خودش `</div><!-- #comment-## -->` می‌گذارد؛ بستن دوباره یعنی دو `</div>` اضافه در هر دیدگاه،
+  `.hsw-pp` زودتر بسته می‌شود و نوار پایین موبایل به `<body>` می‌پرد. برای تست ساختار:
+  تعداد `<div` و `</div>` بین ریشه و داک باید برابر باشد.
+- **لنگر هدینگ‌ها را با شمارنده بسازید، نه `sanitize_title()`** — دومی برای فارسی رشتهٔ
+  percent-encoded (`%d9%81…`) می‌دهد که هم زشت است هم شکننده.
+- داک موبایل `position: fixed` است و `.hsw-pp` یک `padding-bottom: 62px` جبرانی دارد؛ در ≥۱۰۲۴px
+  هر دو حذف می‌شوند.
+- **Elementor element cache:** بعد از افزودن ویجت تازه یا تغییر تنظیمات صفحه، متای
+  `_elementor_element_cache` را پاک کنید وگرنه خروجی قدیمی سرو می‌شود.
+
+### بازسازی ساب‌ست فونت آیکون
+
+فونت `assets/fonts/material-symbols.woff2` یک ساب‌ست است. برای افزودن آیکون تازه:
+
+1. فونت کامل را از گوگل بگیرید:
+   `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200`
+   و آدرس `fonts.gstatic.com/...woff2` را دانلود کنید (حدود ۴MB).
+2. فهرست نام‌ها را از کد استخراج کنید (`icon( 'x' )` / `the_icon( 'x' )`) و آیکون تازه را اضافه کنید.
+3. ساب‌ست با **`--no-layout-closure`** و فیتچرهای `rclt,rlig` (نه `liga`):
+   ```
+   pyftsubset full.woff2 --text-file=icons.txt --flavor=woff2 --no-hinting \
+     --layout-features=rclt,rlig --no-layout-closure --output-file=subset.woff2
+   ```
+   بدون `--no-layout-closure` خروجی ۳.۷MB می‌شود؛ با `liga` هم لیگاتورها می‌پرند و همهٔ آیکون‌ها
+   متن خام می‌شوند. محورهای `FILL/GRAD/opsz/wght` باید در خروجی بمانند (`fvar`/`gvar`).
+4. تست: هر `.hsw-ic` که عرضش > ۴۰px باشد یعنی گلیفش نیست و متن خام رندر شده.

@@ -37,6 +37,7 @@ final class HSW_Widget_Manager {
 		add_action( 'admin_post_hsw_widgets_reset', array( $this, 'handle_reset' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( HSW_FILE ), array( $this, 'plugin_action_links' ) );
 		$this->maybe_add_header_widgets();
+		$this->maybe_add_post_widget();
 	}
 
 	/**
@@ -66,6 +67,30 @@ final class HSW_Widget_Manager {
 		}
 
 		update_option( 'hsw_header_widgets_migrated', 1, false );
+	}
+	/**
+	 * Enable the single-post template widget on sites that already saved the
+	 * widget option (it shipped in 1.11.7, after most installs were configured).
+	 * Same one-shot guard idea as the header migration: a later deliberate
+	 * opt-out is preserved because this never runs again.
+	 */
+	private function maybe_add_post_widget() {
+		if ( get_option( 'hsw_post_widget_migrated' ) ) {
+			return;
+		}
+
+		$saved = get_option( self::OPTION, null );
+		if ( is_array( $saved ) ) {
+			$valid = array_keys( self::all_widgets() );
+			$saved = array_values( array_unique( array_intersect( array_map( 'sanitize_key', $saved ), $valid ) ) );
+			if ( isset( self::all_widgets()['hsw-post-page'] ) && ! in_array( 'hsw-post-page', $saved, true ) ) {
+				$saved[] = 'hsw-post-page';
+			}
+			update_option( self::OPTION, $saved );
+			self::$enabled_cache = null;
+		}
+
+		update_option( 'hsw_post_widget_migrated', 1, false );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -380,6 +405,10 @@ final class HSW_Widget_Manager {
 					'hsw-blog-page' => array(
 						'label' => __( 'صفحه کامل مجله', 'hamishop-elementor-widgets' ),
 						'desc'  => __( 'مجله کامل با مقاله ویژه، شبکه و خبرنامه.', 'hamishop-elementor-widgets' ),
+					),
+					'hsw-post-page' => array(
+						'label' => __( 'صفحه کامل نوشته', 'hamishop-elementor-widgets' ),
+						'desc'  => __( 'قالب تکی مقاله: سربرگ، فهرست مطالب، بدنه، کارت محصول، دیدگاه‌ها و مقالات مرتبط.', 'hamishop-elementor-widgets' ),
 					),
 				),
 				'parts'       => array(

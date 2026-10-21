@@ -191,6 +191,21 @@ class HSW_Assets {
                 );
 
                 wp_register_style(
+                        'hsw-post',
+                        HSW_URL . 'assets/css/hsw-post.css',
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-post',
+                        HSW_URL . 'assets/js/hsw-post.js',
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
+                wp_register_style(
                         'hsw-loop',
                         HSW_URL . 'assets/css/hsw-loop.css',
                         array( 'hsw-fonts' ),

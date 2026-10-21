@@ -43,6 +43,17 @@ class HSW_Helpers {
         }
 
         /**
+         * Echo variant of icon() — keeps templates readable.
+         *
+         * @param string $name  Glyph name.
+         * @param string $class Extra class.
+         * @param bool   $fill  Filled variant.
+         */
+        public static function the_icon( $name, $class = '', $fill = false ) {
+                echo self::icon( $name, $class, $fill ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr/esc_html inside icon().
+        }
+
+        /**
          * Discount percentage of a product (0 when not on sale).
          */
         public static function discount_percent( $product ) {
