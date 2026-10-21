@@ -285,6 +285,13 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			)
 		);
 
+		$this->a_align(
+			'body',
+			__( 'تراز و جهت متن مقاله', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-pp__body',
+			array( 'align' => 'justify', 'lh' => 2 )
+		);
+
 		$this->end_controls_section();
 	}
 

@@ -1682,4 +1682,110 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
         }
+
+        /**
+         * Alignment + text direction (+ optional line-height) for long copy.
+         *
+         * The palette owns colours; this owns the reading experience of
+         * descriptions and article bodies: start / center / end / justify,
+         * an explicit RTL or LTR override, and a line-height slider.
+         *
+         * `text-align: start|end` follows the document direction, so «شروع»
+         * means right on an RTL site and left on an LTR one — that is why the
+         * choices are labelled by position, not by left/right.
+         *
+         * @param string $id       Control id prefix (must be unique per widget).
+         * @param string $label    Section heading.
+         * @param string $selector CSS selector (usually `{{WRAPPER}} .foo`).
+         * @param array  $args     align (default justify), dir (inherit), lh (1.9|false).
+         */
+        protected function a_align( $id, $label, $selector, $args = array() ) {
+                $args = wp_parse_args(
+                        $args,
+                        array(
+                                'align' => 'justify',
+                                'dir'   => 'inherit',
+                                'lh'    => 1.9,
+                        )
+                );
+
+                $this->add_control(
+                        $id . '_al_h',
+                        array(
+                                'label'     => $label,
+                                'type'      => Controls_Manager::HEADING,
+                                'separator' => 'before',
+                        )
+                );
+
+                $this->add_responsive_control(
+                        $id . '_al',
+                        array(
+                                'label'     => __( 'تراز متن', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::CHOOSE,
+                                'options'   => array(
+                                        'start'   => array(
+                                                'title' => __( 'شروع سطر (راست در RTL)', 'hamishop-elementor-widgets' ),
+                                                'icon'  => 'eicon-text-align-left',
+                                        ),
+                                        'center'  => array(
+                                                'title' => __( 'وسط‌چین', 'hamishop-elementor-widgets' ),
+                                                'icon'  => 'eicon-text-align-center',
+                                        ),
+                                        'end'     => array(
+                                                'title' => __( 'پایان سطر (چپ در RTL)', 'hamishop-elementor-widgets' ),
+                                                'icon'  => 'eicon-text-align-right',
+                                        ),
+                                        'justify' => array(
+                                                'title' => __( 'هم‌تراز دو طرف', 'hamishop-elementor-widgets' ),
+                                                'icon'  => 'eicon-text-align-justify',
+                                        ),
+                                ),
+                                'default'   => $args['align'],
+                                'selectors' => array( $selector => 'text-align: {{VALUE}};' ),
+                        )
+                );
+
+                $this->add_control(
+                        $id . '_dir',
+                        array(
+                                'label'     => __( 'جهت متن', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'options'   => array(
+                                        'inherit' => __( 'مطابق قالب سایت', 'hamishop-elementor-widgets' ),
+                                        'rtl'     => __( 'راست به چپ (RTL)', 'hamishop-elementor-widgets' ),
+                                        'ltr'     => __( 'چپ به راست (LTR)', 'hamishop-elementor-widgets' ),
+                                ),
+                                'default'   => $args['dir'],
+                                'selectors' => array( $selector => 'direction: {{VALUE}};' ),
+                        )
+                );
+
+                if ( false !== $args['lh'] ) {
+                        $this->add_responsive_control(
+                                $id . '_lh',
+                                array(
+                                        'label'      => __( 'ارتفاع خط', 'hamishop-elementor-widgets' ),
+                                        'type'       => Controls_Manager::SLIDER,
+                                        'size_units' => array( 'em', 'px' ),
+                                        'range'      => array(
+                                                'em' => array(
+                                                        'min'  => 1,
+                                                        'max'  => 3,
+                                                        'step' => 0.05,
+                                                ),
+                                                'px' => array(
+                                                        'min' => 14,
+                                                        'max' => 64,
+                                                ),
+                                        ),
+                                        'default'    => array(
+                                                'size' => $args['lh'],
+                                                'unit' => 'em',
+                                        ),
+                                        'selectors'  => array( $selector => 'line-height: {{SIZE}}{{UNIT}};' ),
+                                )
+                        );
+                }
+        }
 }

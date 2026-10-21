@@ -245,6 +245,22 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 $this->a_color( 'hd_pill2_bd', __( 'حاشیه قرص عادی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ahd__pill, {{WRAPPER}} .hsw-ahd__chip', 'border-color' );
                 $this->a_text( 'hd_desc', '{{WRAPPER}} .hsw-ahd__desc', array( 'default' => 14 ) );
 
+                $this->a_align(
+                        'hd_desc',
+                        __( 'تراز و جهت متن توضیحات', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-ahd__desc',
+                        array( 'align' => 'justify', 'lh' => 1.9 )
+                );
+
+                $this->a_text( 'hd_mdesc', '{{WRAPPER}} .hsw-ahd__mdesc', array( 'default' => 12, 'weight' => false ) );
+
+                $this->a_align(
+                        'hd_mdesc',
+                        __( 'تراز و جهت متن توضیحات (موبایل)', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-ahd__mdesc',
+                        array( 'align' => 'justify', 'lh' => 1.9 )
+                );
+
                 $this->add_control(
                         'hd_desc_align',
                         array(

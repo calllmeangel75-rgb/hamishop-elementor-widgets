@@ -89,10 +89,59 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
 
                 $this->end_controls_section();
 
+                /* ---- archive description typography (shop + category archives) ---- */
+                $this->start_controls_section(
+                        'sec_desc_typo',
+                        array( 'label' => __( 'متن توضیحات آرشیو', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->add_responsive_control(
+                        'desc_fs',
+                        array(
+                                'label'      => __( 'اندازهٔ فونت توضیحات', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 10, 'max' => 26 ) ),
+                                'default'    => array( 'size' => 14, 'unit' => 'px' ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-ahd__desc' => 'font-size: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->a_align(
+                        'desc',
+                        __( 'تراز، جهت و ارتفاع خط (دسکتاپ)', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-ahd__desc',
+                        array( 'align' => 'justify', 'lh' => 1.9 )
+                );
+
+                $this->add_responsive_control(
+                        'mdesc_fs',
+                        array(
+                                'label'      => __( 'اندازهٔ فونت توضیحات (موبایل)', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 10, 'max' => 22 ) ),
+                                'default'    => array( 'size' => 12, 'unit' => 'px' ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-ahd__mdesc' => 'font-size: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->a_align(
+                        'mdesc',
+                        __( 'تراز، جهت و ارتفاع خط (موبایل)', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-ahd__mdesc',
+                        array( 'align' => 'justify', 'lh' => 1.9 )
+                );
+
+                $this->end_controls_section();
+
                 /* Every part's full Style tab, mirrored here so the complete
                    archive page is editable from one place (colors, gradient,
                    buttons, hover/active states…) — like the single widgets. */
-                $this->part_style_section( 'ahd_', __( 'استایل سربرگ و توضیحات', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header' );
                 $this->part_style_section( 'af_', __( 'استایل فیلترها', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Filters' );
                 $this->part_style_section( 'at_', __( 'استایل نوار ابزار', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Toolbar' );
                 $this->part_style_section( 'ag_', __( 'استایل کارت محصول', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Grid' );

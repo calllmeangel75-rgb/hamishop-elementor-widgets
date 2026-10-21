@@ -79,6 +79,35 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                 );
 
                 $this->end_controls_section();
+
+                /* ---- hero description typography (native: mirroring drops CHOOSE controls) ---- */
+                $this->start_controls_section(
+                        'sec_bsub_typo',
+                        array( 'label' => __( 'متن توضیح سربرگ مجله', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->add_responsive_control(
+                        'bsub_fs',
+                        array(
+                                'label'      => __( 'اندازهٔ فونت توضیح', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 10, 'max' => 24 ) ),
+                                'default'    => array( 'size' => 13, 'unit' => 'px' ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-bhero__sub' => 'font-size: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->a_align(
+                        'bsub',
+                        __( 'تراز، جهت و ارتفاع خط', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-bhero__sub',
+                        array( 'align' => 'start', 'lh' => 1.9 )
+                );
+
+                $this->end_controls_section();
         }
 
         /**

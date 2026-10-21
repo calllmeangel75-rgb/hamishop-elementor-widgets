@@ -934,3 +934,35 @@ CSS: `assets/css/hsw-post.css` · JS: `assets/js/hsw-post.js` · دسته: `hami
    بدون `--no-layout-closure` خروجی ۳.۷MB می‌شود؛ با `liga` هم لیگاتورها می‌پرند و همهٔ آیکون‌ها
    متن خام می‌شوند. محورهای `FILL/GRAD/opsz/wght` باید در خروجی بمانند (`fvar`/`gvar`).
 4. تست: هر `.hsw-ic` که عرضش > ۴۰px باشد یعنی گلیفش نیست و متن خام رندر شده.
+
+## شخصی‌سازی متن — v1.11.8
+
+هلپر مشترک در `HSW_Widget_Base::a_align( $id, $label, $selector, $args )`:
+
+```php
+$this->a_align( 'desc', __( 'تراز و جهت متن', 'hamishop-elementor-widgets' ),
+    '{{WRAPPER}} .hsw-ahd__desc', array( 'align' => 'justify', 'lh' => 1.9 ) );
+```
+
+- `align` → `start|center|end|justify` (پاسخ‌گو) با `text-align`.
+- `dir` → `inherit|rtl|ltr` با `direction` (مقدار `inherit` معتبر است، پس پیش‌فرض بی‌خطر است).
+- `lh` → اسلایدر `em/px`؛ برای حذف این کنترل `'lh' => false` بدهید.
+
+**چرا `start/end` و نه `right/left`:** تراز باید در سایت RTL و LTR هر دو درست باشد؛ `start` در RTL
+راست و در LTR چپ می‌شود.
+
+**هشدار دربارهٔ ویجت‌های جامع:** `part_style_section()` فقط کنترل‌های ساده را آینه می‌کند؛
+`Controls_Manager::CHOOSE` در فهرست `$allowed` نیست و رزولوشن‌های `_al/_dir/_lh` آینه نمی‌شوند
+(در تست فقط HEADINGها منتقل شدند). برای همین کنترل‌های تایپوگرافی به‌صورت **بومی** داخل خودِ
+ویجت‌های جامع (`hsw-archive-page`, `hsw-blog-page`) هم اضافه شده‌اند. اگر روزی CHOOSE را به
+`$allowed` اضافه کردید، این کنترل‌های بومی را حذف نکنید — تست واقعی نشان داد آینه‌سازی کامل نیست.
+
+### جای کنترل‌ها
+
+| متن | ویجت | id |
+|---|---|---|
+| توضیحات آرشیو (دسکتاپ/موبایل) | `hsw-archive-page` | `desc_fs`, `desc_al/dir/lh`, `mdesc_*` |
+| توضیحات آرشیو (ویجت سربرگ) | `hsw-archive-header` | `hd_desc_al/dir/lh`, `hd_mdesc_*` |
+| متن مقاله | `hsw-post-page` | `body_size`, `body_al/dir/lh` |
+| توضیح سربرگ مجله | `hsw-blog-page` / `hsw-blog-hero` | `bsub_fs/al/dir/lh` · `sub_size/al/dir/lh` |
+| توضیحات محصول | `hsw-product-tabs` | `pdesc_fs`, `pdesc_al/dir/lh` |

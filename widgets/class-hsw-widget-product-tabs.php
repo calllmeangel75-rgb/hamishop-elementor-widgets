@@ -187,6 +187,27 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                         )
                 );
 
+                $this->a_align(
+                        'pdesc',
+                        __( 'تراز، جهت و ارتفاع خط توضیحات محصول', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-ptabs__panel',
+                        array( 'align' => 'start', 'lh' => 1.9 )
+                );
+
+                $this->add_responsive_control(
+                        'pdesc_fs',
+                        array(
+                                'label'      => __( 'اندازهٔ فونت توضیحات محصول', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 11, 'max' => 22 ) ),
+                                'default'    => array( 'size' => 14, 'unit' => 'px' ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-ptabs__panel' => 'font-size: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+
                 $this->end_controls_section();
         }
 

@@ -115,6 +115,47 @@ class HSW_Widget_Blog_Hero extends HSW_Blog_Base {
                 ) );
 
                 $this->end_controls_section();
+
+                /* ---- style ---- */
+                $this->start_controls_section(
+                        'sec_style',
+                        array( 'label' => __( 'استایل', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->add_control(
+                        'palette_note',
+                        array(
+                                'label' => '',
+                                'type'  => Controls_Manager::RAW_HTML,
+                                'raw'   => '<div style="font-size:11px;line-height:1.8;color:#646970">' .
+                                        esc_html__( 'رنگ‌ها از «HamiShop → پالت رنگی» می‌آید. برای تغییر، همان صفحه را باز کنید.', 'hamishop-elementor-widgets' ) .
+                                        '</div>',
+                                'separator' => 'after',
+                        )
+                );
+
+                $this->add_responsive_control(
+                        'sub_size',
+                        array(
+                                'label'      => __( 'اندازهٔ متن توضیح', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 11, 'max' => 24 ) ),
+                                'default'    => array( 'size' => 13, 'unit' => 'px' ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-bhero__sub' => 'font-size: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->a_align(
+                        'sub',
+                        __( 'تراز و جهت متن توضیح', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-bhero__sub',
+                        array( 'align' => 'start', 'lh' => 1.9 )
+                );
+
+                $this->end_controls_section();
         }
 
         protected function render() {
