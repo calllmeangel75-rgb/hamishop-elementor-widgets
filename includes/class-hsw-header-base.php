@@ -199,9 +199,14 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	protected function brand_html( $s ) {
 		$name    = isset( $s['brand_name'] ) ? trim( (string) $s['brand_name'] ) : '';
 		$tagline = isset( $s['brand_tagline'] ) ? trim( (string) $s['brand_tagline'] ) : '';
-		$name    = '' !== $name ? $name : get_bloginfo( 'name' );
-		$logo_id = isset( $s['logo']['id'] ) ? absint( $s['logo']['id'] ) : 0;
-		$logo    = '';
+		/*
+		 * No runtime fallback to the site name: the control already defaults
+		 * to get_bloginfo( 'name' ), so an empty value means the user cleared
+		 * it on purpose and the name must really disappear (logo-only brand).
+		 */
+		$aria_name = '' !== $name ? $name : get_bloginfo( 'name' );
+		$logo_id   = isset( $s['logo']['id'] ) ? absint( $s['logo']['id'] ) : 0;
+		$logo      = '';
 
 		if ( ! $logo_id ) {
 			$logo_id = (int) get_theme_mod( 'custom_logo' );
@@ -213,19 +218,19 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 				false,
 				array(
 					'class' => 'hsw-hd__logoimg',
-					'alt'   => $name,
+					'alt'   => $aria_name,
 				)
 			);
 		}
 		if ( ! $logo && ! empty( $s['logo']['url'] ) ) {
-			$logo = '<img class="hsw-hd__logoimg" src="' . esc_url( $s['logo']['url'] ) . '" alt="' . esc_attr( $name ) . '" loading="lazy" decoding="async">';
+			$logo = '<img class="hsw-hd__logoimg" src="' . esc_url( $s['logo']['url'] ) . '" alt="' . esc_attr( $aria_name ) . '" loading="lazy" decoding="async">';
 		}
 
 		$mark = $logo
 			? '<span class="hsw-hd__logomark hsw-hd__logomark--image">' . $logo . '</span>'
 			: '<span class="hsw-hd__logomark">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
 
-		$out  = '<a class="hsw-hd__brand" href="' . esc_url( home_url( '/' ) ) . '" aria-label="' . esc_attr( $name ) . '">';
+		$out  = '<a class="hsw-hd__brand" href="' . esc_url( home_url( '/' ) ) . '" aria-label="' . esc_attr( $aria_name ) . '">';
 		$out .= $mark;
 		$out .= '<span class="hsw-hd__brandtext">';
 		if ( '' !== $name ) {
@@ -292,14 +297,17 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 */
 	protected function account_html( $s, $minimal = false ) {
 		$label = isset( $s['account_label'] ) ? trim( (string) $s['account_label'] ) : '';
-		$label = '' !== $label ? $label : __( 'حساب کاربری', 'hamishop-elementor-widgets' );
 		$sub   = $this->is_logged_in() ? __( 'حساب من', 'hamishop-elementor-widgets' ) : __( 'ورود / ثبت‌نام', 'hamishop-elementor-widgets' );
+		// Empty label = the user cleared it, so no text is printed at all.
+		$aria = '' !== $label ? $label : __( 'حساب کاربری', 'hamishop-elementor-widgets' );
 
-		$out  = '<a class="hsw-hd__action hsw-hd__account' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . '" href="' . esc_url( $this->account_url() ) . '" aria-label="' . esc_attr( $label ) . '">';
+		$out  = '<a class="hsw-hd__action hsw-hd__account' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . '" href="' . esc_url( $this->account_url() ) . '" aria-label="' . esc_attr( $aria ) . '">';
 		$out .= '<span class="hsw-hd__actionicon">' . HSW_Helpers::icon( 'person' ) . '</span>';
 		if ( $minimal ) {
-			$out .= '<span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span>';
-		} else {
+			if ( '' !== $label ) {
+				$out .= '<span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span>';
+			}
+		} elseif ( '' !== $label ) {
 			$out .= '<span class="hsw-hd__actionmeta"><span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span><span class="hsw-hd__actionsub">' . esc_html( $sub ) . '</span></span>';
 		}
 		$out .= '</a>';
@@ -318,13 +326,14 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	protected function cart_html( $s, $minimal = false ) {
 		$count    = $this->cart_count();
 		$label    = isset( $s['cart_label'] ) ? trim( (string) $s['cart_label'] ) : '';
-		$label    = '' !== $label ? $label : __( 'سبد خرید', 'hamishop-elementor-widgets' );
 		$subtotal = $this->cart_subtotal();
 		$total    = $count && $subtotal ? $subtotal : __( 'خالی', 'hamishop-elementor-widgets' );
+		// Empty label = cleared on purpose: icon only, no text fallback.
+		$aria     = '' !== $label ? $label : __( 'سبد خرید', 'hamishop-elementor-widgets' );
 
-		$out  = '<a class="hsw-hd__action hsw-hd__cart' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . ( $count ? '' : ' is-empty' ) . '" href="' . esc_url( $this->cart_url() ) . '" aria-label="' . esc_attr( $label ) . '">';
+		$out  = '<a class="hsw-hd__action hsw-hd__cart' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . ( $count ? '' : ' is-empty' ) . '" href="' . esc_url( $this->cart_url() ) . '" aria-label="' . esc_attr( $aria ) . '">';
 		$out .= '<span class="hsw-hd__carticon">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span class="hsw-hd__badge" data-hsw-cart-count>' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></span>';
-		if ( ! $minimal ) {
+		if ( ! $minimal && '' !== $label ) {
 			$out .= '<span class="hsw-hd__actionmeta"><span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span><span class="hsw-hd__actionsub hsw-hd__carttotal" data-hsw-cart-total>' . wp_kses_post( $total ) . '</span></span>';
 		}
 		$out .= '</a>';
@@ -575,7 +584,9 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			return '<a class="hsw-hd__catbtn" href="' . esc_url( $this->shop_url() ) . '">' . HSW_Helpers::icon( 'grid_view' ) . '<span>' . esc_html( $title ) . '</span></a>';
 		}
 
-		$out  = '<div class="hsw-hd__mega" data-hsw-hd-mega>';
+		$trigger = isset( $s['mega_trigger'] ) && 'click' === $s['mega_trigger'] ? 'click' : 'hover';
+
+		$out  = '<div class="hsw-hd__mega' . ( 'hover' === $trigger ? ' hsw-hd__mega--hover' : '' ) . '" data-hsw-hd-mega>';
 		$out .= '<button class="hsw-hd__catbtn" type="button" data-hsw-hd-mega-toggle aria-expanded="false">';
 		$out .= HSW_Helpers::icon( 'grid_view' );
 		$out .= '<span>' . esc_html( $title ) . '</span>';

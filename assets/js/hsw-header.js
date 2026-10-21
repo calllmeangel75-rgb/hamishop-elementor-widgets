@@ -287,9 +287,7 @@
 				});
 			});
 
-			megaButton.addEventListener('click', function (event) {
-				event.preventDefault();
-				var open = !mega.classList.contains('is-open');
+			var setMegaOpen = function (open) {
 				mega.classList.toggle('is-open', open);
 				setExpanded(megaButton, open);
 
@@ -302,7 +300,46 @@
 						openMegaItem(first, true);
 					}
 				}
+			};
+
+			megaButton.addEventListener('click', function (event) {
+				event.preventDefault();
+				setMegaOpen(!mega.classList.contains('is-open'));
 			});
+
+			/*
+			 * Hover mode (widget setting "با هاور"). A short grace period
+			 * bridges the gap between the trigger row and the panel, which
+			 * sits under the whole nav bar, so the menu does not snap shut
+			 * while the pointer travels down into it.
+			 */
+			if (mega.classList.contains('hsw-hd__mega--hover')) {
+				var hoverTimer = null;
+				var openOnHover = function () {
+					clearTimeout(hoverTimer);
+					setMegaOpen(true);
+				};
+				var closeOnHover = function () {
+					clearTimeout(hoverTimer);
+					hoverTimer = setTimeout(function () {
+						setMegaOpen(false);
+					}, 160);
+				};
+
+				[megaButton, megaPanel].forEach(function (node) {
+					if (!node) {
+						return;
+					}
+					node.addEventListener('mouseenter', openOnHover);
+					node.addEventListener('mouseleave', closeOnHover);
+				});
+
+				mega.addEventListener('focusout', function (event) {
+					if (!mega.contains(event.relatedTarget)) {
+						setMegaOpen(false);
+					}
+				});
+			}
 
 			document.addEventListener('click', function (event) {
 				if (mega.classList.contains('is-open') && !mega.contains(event.target)) {

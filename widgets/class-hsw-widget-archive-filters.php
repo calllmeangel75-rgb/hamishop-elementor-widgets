@@ -320,7 +320,13 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
 
                 $this->a_box( 'fb', '{{WRAPPER}} .hsw-af__box' );
                 $this->a_text( 'fb_t', '{{WRAPPER}} .hsw-af__boxtitle', array( 'default' => 14 ) );
-                $this->a_text( 'fb_i', '{{WRAPPER}} .hsw-af__link, {{WRAPPER}} .hsw-af__row', array( 'default' => 12, 'weight' => false ) );
+                /*
+                 * The category tree renders `.hsw-af__catlink` / `.hsw-af__catname`,
+                 * not `.hsw-af__link`, so those selectors must be listed here too —
+                 * otherwise the font-size control never reached the sidebar
+                 * category rows.
+                 */
+                $this->a_text( 'fb_i', '{{WRAPPER}} .hsw-af__link, {{WRAPPER}} .hsw-af__row, {{WRAPPER}} .hsw-af__catlink, {{WRAPPER}} .hsw-af__catname', array( 'default' => 12, 'weight' => false ) );
                 $this->a_color( 'fb_active', __( 'رنگ فیلتر فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .is-active, {{WRAPPER}} .hsw-af__link.is-active' );
                 $this->a_color( 'fb_ic', __( 'رنگ آیکون‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-af__headic, {{WRAPPER}} .hsw-af__apply .hsw-ic' );
                 $this->a_color( 'fb_switch', __( 'رنگ سوییچ روشن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-af__switch input:checked ~ .hsw-af__track', 'background-color' );

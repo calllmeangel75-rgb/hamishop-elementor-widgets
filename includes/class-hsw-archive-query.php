@@ -68,17 +68,46 @@ class HSW_Archive_Query {
          * Persist the `express_slug` control value of any HSW widget inside a
          * saved Elementor document (template/page) as the site-wide option.
          *
+         * IMPORTANT: never call `$document->get_elements_data()` in here.
+         * Elementor fires this action from inside `Document::save()`, and
+         * `get_elements_data()` walks the document again, which re-enters the
+         * save pipeline and recurses until the PHP process dies (Apache child
+         * exits with status 255 and the editor request is reset). The hook
+         * already hands us the saved data, so use that.
+         *
          * @param \Elementor\Core\Base\Document $document Saved document.
-         * @param array                          $data     Saved data.
+         * @param array                          $data     Saved elements data.
          */
         public function sync_express_slug( $document, $data = array() ) {
-                if ( ! is_object( $document ) || ! method_exists( $document, 'get_elements_data' ) ) {
+                static $busy = false;
+
+                if ( $busy ) {
                         return;
                 }
-                $slug = $this->find_express_slug( (array) $document->get_elements_data() );
-                if ( $slug ) {
+
+                if ( is_string( $data ) ) {
+                        $data = json_decode( $data, true );
+                }
+                if ( ! is_array( $data ) ) {
+                        return;
+                }
+
+                /*
+                 * Elementor passes the whole document payload here
+                 * (`['settings' => …, 'elements' => …]`), not the elements
+                 * array itself.
+                 */
+                $elements = isset( $data['elements'] ) && is_array( $data['elements'] ) ? $data['elements'] : array();
+                if ( empty( $elements ) ) {
+                        return;
+                }
+
+                $busy = true;
+                $slug = $this->find_express_slug( $elements );
+                if ( $slug && get_option( 'hsw_express_slug' ) !== $slug ) {
                         update_option( 'hsw_express_slug', $slug );
                 }
+                $busy = false;
         }
 
         /**

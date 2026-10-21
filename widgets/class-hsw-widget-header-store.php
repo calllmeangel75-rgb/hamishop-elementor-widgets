@@ -157,6 +157,20 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		);
 
 		$this->add_control(
+			'mega_trigger',
+			array(
+				'label'     => __( 'نحوه باز شدن مگامنو', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => 'hover',
+				'options'   => array(
+					'hover' => __( 'با هاور (مشابه دیجی‌کالا)', 'hamishop-elementor-widgets' ),
+					'click' => __( 'با کلیک', 'hamishop-elementor-widgets' ),
+				),
+				'condition' => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'mega_products',
 			array(
 				'label'     => __( 'تعداد محصول در پیش‌نمایش مگامنو', 'hamishop-elementor-widgets' ),
