@@ -244,10 +244,11 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
                                 $post,
                                 $size,
                                 array(
-                                        'class'         => 'hsw-blog__img',
-                                        /* The leading card is the LCP candidate. */
+                                        /* skip-lazy / data-no-lazy opt out of LiteSpeed + WP Rocket lazy load. */
+                                        'class'         => $priority ? 'hsw-blog__img skip-lazy' : 'hsw-blog__img',
                                         'loading'       => $priority ? 'eager' : 'lazy',
                                         'fetchpriority' => $priority ? 'high' : 'auto',
+                                        'data-no-lazy'  => $priority ? '1' : '',
                                 )
                         );
                 }

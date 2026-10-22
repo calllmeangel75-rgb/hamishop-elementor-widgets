@@ -466,7 +466,13 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
         protected function render() {
                 $s = $this->effective_settings();
 
-                $pos = isset( $s['desc_pos'] ) ? (string) $s['desc_pos'] : 'header';
+                /*
+                 * An empty string is what a mirrored control can end up with when
+                 * the composite saved its settings before this control existed —
+                 * treating it as «header» keeps the description visible instead
+                 * of silently dropping it.
+                 */
+                $pos = isset( $s['desc_pos'] ) && '' !== (string) $s['desc_pos'] ? (string) $s['desc_pos'] : 'header';
                 if ( 'bottom' === $pos && ! $this->is_composite_part() ) {
                         $pos = 'header'; // The composite is the only place that can render the bottom box.
                 }

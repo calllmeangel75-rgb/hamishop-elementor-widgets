@@ -42,7 +42,7 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
         protected function register_controls() {
                 $this->part_section( 'abc_', __( '۱. مسیر راهنما (بردکرامب)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Breadcrumb', array( 'vis', 'show_home_icon', 'home_label' ) );
 
-                $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'show_count', 'seo_desc', 'desc_pos', 'desc_title', 'desc_clamp', 'more_text', 'less_text', 'pills_source', 'pills_attr', 'pills_manual', 'pills_heading', 'show_guide_btn', 'update_note' ) );
+                $this->part_section( 'ahd_', __( '۲. سربرگ آرشیو', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Header', array( 'vis', 'title_format', 'show_count', 'desc_source', 'seo_desc', 'desc_pos', 'desc_title', 'desc_clamp', 'more_text', 'less_text', 'pills_source', 'pills_attr', 'pills_manual', 'pills_heading', 'show_guide_btn', 'update_note' ) );
 
                 $this->part_section( 'af_', __( '۳. فیلترها (سایدبار + موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Archive_Filters', array( 'vis', 'f_title', 'boxes', 'auto_attrs', 'express_slug', 'color_map' ) );
 

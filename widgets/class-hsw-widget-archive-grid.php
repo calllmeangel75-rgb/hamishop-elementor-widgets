@@ -203,9 +203,15 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 false,
                                 array(
                                         'alt'           => $alt,
-                                        /* The first card is the LCP candidate: never lazy-load it. */
+                                        /*
+                                         * The first card is the LCP candidate: never lazy-load it.
+                                         * data-no-lazy / skip-lazy keep LiteSpeed Cache and
+                                         * WP Rocket from replacing it with a lazy placeholder.
+                                         */
                                         'loading'       => $priority ? 'eager' : 'lazy',
                                         'fetchpriority' => $priority ? 'high' : 'auto',
+                                        'class'         => $priority ? 'skip-lazy' : '',
+                                        'data-no-lazy'  => $priority ? '1' : '',
                                         'decoding'      => 'async',
                                 )
                         );

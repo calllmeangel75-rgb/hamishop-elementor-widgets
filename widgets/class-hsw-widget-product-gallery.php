@@ -277,7 +277,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                 <?php endif; ?>
 
                                 <div class="hsw-pgal__frame">
-                                        <img class="hsw-pgal__img" src="<?php echo esc_url( $images[0] ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="eager" fetchpriority="high" decoding="async">
+                                        <img class="hsw-pgal__img skip-lazy" src="<?php echo esc_url( $images[0] ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="eager" fetchpriority="high" data-no-lazy="1" decoding="async">
                                 </div>
 
                                 <?php if ( count( $images ) > 1 ) : ?>

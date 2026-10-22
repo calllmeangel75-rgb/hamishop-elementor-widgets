@@ -729,8 +729,10 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 									$post,
 									'large',
 									array(
-										'class'   => 'hsw-pp__heroimg',
-										'loading' => 'eager',
+										'class'         => 'hsw-pp__heroimg skip-lazy',
+										'loading'       => 'eager',
+										'fetchpriority' => 'high',
+										'data-no-lazy'  => '1',
 									)
 								);
 								?>

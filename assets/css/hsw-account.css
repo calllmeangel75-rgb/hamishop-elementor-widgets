@@ -1499,6 +1499,19 @@ a.hsw-ac__stat:hover {
 	box-shadow: 0 4px 14px rgba(15, 23, 42, .03);
 }
 
+/*
+ * Keep notices above the panel decorations: the hero/hero::before layers used
+ * to paint over the first notice, which read as the message being "masked".
+ */
+.hsw-ac .woocommerce-message,
+.hsw-ac .woocommerce-info,
+.hsw-ac .woocommerce-error,
+.hsw-ac .woocommerce-NoticeGroup {
+	position: relative;
+	z-index: 20;
+	overflow: visible;
+}
+
 .hsw-ac .woocommerce-message {
 	border-inline-start-color: var(--hsw-ac-success);
 }
