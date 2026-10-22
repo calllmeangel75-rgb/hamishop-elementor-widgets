@@ -452,8 +452,52 @@
 	content: '–';
 }
 
+/*
+ * «بدون لینک لنگر» mode renders buttons instead of fragment links, so no
+ * `…/#heading` URL exists for Google to index. Same look as the links.
+ */
+.hsw-pp__tocbtn {
+	display: flex;
+	align-items: baseline;
+	gap: 7px;
+	width: 100%;
+	padding: 5px 0;
+	border: 0;
+	background: none;
+	color: var(--hsw-pp-muted);
+	font: inherit;
+	font-size: 12px;
+	text-align: start;
+	cursor: pointer;
+	transition: color .15s;
+}
+
+.hsw-pp__tocbtn::before {
+	content: counter(hsw-pp-toc) '.';
+	flex-shrink: 0;
+	color: var(--hsw-pp-brand);
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.hsw-pp__tocitem--h3 .hsw-pp__tocbtn::before {
+	content: '–';
+}
+
+.hsw-pp__tocbtn:hover,
+.hsw-pp__tocbtn.is-active {
+	color: var(--hsw-pp-brand);
+}
+
+/* Sidebar buttons reuse .hsw-pp__sidelink — only the counter must go. */
+.hsw-pp__sidelink.hsw-pp__tocbtn::before {
+	content: none;
+}
+
 .hsw-pp__tocitem a:hover,
-.hsw-pp__tocitem a.is-active {
+.hsw-pp__tocitem a.is-active,
+.hsw-pp__tocitem .hsw-pp__tocbtn:hover,
+.hsw-pp__tocitem .hsw-pp__tocbtn.is-active {
 	color: var(--hsw-pp-brand);
 }
 

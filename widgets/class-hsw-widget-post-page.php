@@ -133,6 +133,22 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		);
 
 		$this->add_control(
+			'toc_anchor',
+			array(
+				'label'       => __( 'لنگر سرفصل‌ها', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'slug',
+				'options'     => array(
+					'slug'  => __( 'از متن تیتر (پیشنهادی)', 'hamishop-elementor-widgets' ),
+					'index' => __( 'شماره‌ای (hsw-h-1، hsw-h-2 …)', 'hamishop-elementor-widgets' ),
+					'none'  => __( 'بدون لینک لنگر (فقط اسکرول)', 'hamishop-elementor-widgets' ),
+				),
+				'description' => __( 'گوگل می‌تواند آدرس‌های لنگر (…/#heading) را جداگانه ایندکس کند. «از متن تیتر» آدرس خوانا و باثبات می‌سازد و «بدون لینک لنگر» هیچ آدرس اضافه‌ای تولید نمی‌کند.', 'hamishop-elementor-widgets' ),
+				'condition'   => array( 'show_toc' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'show_tags',
 			array(
 				'label'   => __( 'برچسب‌ها', 'hamishop-elementor-widgets' ),
@@ -346,7 +362,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 	 * @param WP_Post $post Post.
 	 * @return array{html:string,toc:array<int,array{level:int,id:string,text:string}>}
 	 */
-	protected function prepared_content( $post ) {
+	protected function prepared_content( $post, $mode = 'slug' ) {
 		$html = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter.
 
 		$toc  = array();
@@ -354,7 +370,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 
 		$html = preg_replace_callback(
 			'#<h([23])([^>]*)>(.*?)</h\1>#is',
-			static function ( $m ) use ( &$toc, &$used ) {
+			static function ( $m ) use ( &$toc, &$used, $mode ) {
 				$level = (int) $m[1];
 				$attrs = $m[2];
 				$inner = $m[3];
@@ -369,16 +385,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 					$id = $found[1];
 				}
 				if ( '' === $id ) {
-					/*
-					 * Stable ASCII anchor. sanitize_title() percent-encodes Persian
-					 * ("%d9%81…"), which makes the ids unreadable and brittle, so a
-					 * counter is used instead — the TOC and the heading always agree.
-					 */
-					$n = 1;
-					do {
-						$id = 'hsw-h-' . $n;
-						$n++;
-					} while ( isset( $used[ $id ] ) );
+					$id     = self::heading_id( $text, $mode, $used );
 					$attrs .= ' id="' . esc_attr( $id ) . '"';
 				}
 				$used[ $id ] = true;
@@ -395,6 +402,74 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		);
 
 		return array( 'html' => (string) $html, 'toc' => $toc );
+	}
+
+	/**
+	 * Anchor id for one heading.
+	 *
+	 * `slug` keeps the Persian letters so the fragment is readable and stable
+	 * (`#فناوری-حذف-نویز`). sanitize_title() is deliberately avoided: with the
+	 * default 'save' context it percent-encodes non-ASCII, producing
+	 * `%d9%81…` ids that are unreadable in a shared link.
+	 *
+	 * `index` and `none` fall back to `hsw-h-N` — `none` still needs an id so
+	 * the scroll handler has a target, it just never exposes it as a URL.
+	 *
+	 * @param string $text Heading text.
+	 * @param string $mode slug|index|none.
+	 * @param array  $used Already used ids (by reference).
+	 * @return string
+	 */
+	protected static function heading_id( $text, $mode, &$used ) {
+		if ( 'slug' === $mode ) {
+			$slug = preg_replace( '/[\x{200C}\x{200D}]+/u', '', (string) $text ); // ZWNJ / ZWJ.
+			$slug = preg_replace( '/[\s]+/u', '-', (string) $slug );
+			$slug = preg_replace( '/[^\p{L}\p{N}\-]+/u', '', (string) $slug );
+			$slug = trim( preg_replace( '/-+/', '-', (string) $slug ), '-' );
+
+			if ( '' !== $slug ) {
+				$slug = function_exists( 'mb_strtolower' ) ? mb_strtolower( $slug, 'UTF-8' ) : strtolower( $slug );
+				$base = $slug;
+				$i    = 2;
+				while ( isset( $used[ $slug ] ) ) {
+					$slug = $base . '-' . $i;
+					$i++;
+				}
+				return $slug;
+			}
+		}
+
+		$n = 1;
+		do {
+			$id = 'hsw-h-' . $n;
+			$n++;
+		} while ( isset( $used[ $id ] ) );
+
+		return $id;
+	}
+
+	/**
+	 * One TOC entry: a real fragment link, or a button in «بدون لینک» mode.
+	 *
+	 * @param array  $item    level/id/text.
+	 * @param string $mode    slug|index|none.
+	 * @param string $variant main|side.
+	 * @return string
+	 */
+	protected function toc_link_html( $item, $mode, $variant = 'main' ) {
+		$is_main = 'main' === $variant;
+		$class   = $is_main ? '' : 'hsw-pp__sidelink hsw-pp__sidelink--h' . (int) $item['level'];
+		$inner   = $is_main
+			? '<i class="hsw-pp__tocdot" aria-hidden="true"></i><span>' . esc_html( $item['text'] ) . '</span>'
+			: esc_html( $item['text'] );
+
+		if ( 'none' === $mode ) {
+			return '<button type="button" class="' . esc_attr( trim( $class . ' hsw-pp__tocbtn' ) ) . '"'
+				. ' data-hsw-pp-toclink data-target="' . esc_attr( $item['id'] ) . '">' . $inner . '</button>';
+		}
+
+		return '<a' . ( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ''
+			. ' href="#' . esc_attr( $item['id'] ) . '" data-hsw-pp-toclink>' . $inner . '</a>';
 	}
 
 	/**
@@ -495,7 +570,8 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		$on       = static function ( $key, $default = 'yes' ) use ( $s ) {
 			return ! isset( $s[ $key ] ) ? ( 'yes' === $default ) : ( 'yes' === $s[ $key ] );
 		};
-		$content  = $this->prepared_content( $post );
+		$toc_mode = isset( $s['toc_anchor'] ) && in_array( $s['toc_anchor'], array( 'slug', 'index', 'none' ), true ) ? $s['toc_anchor'] : 'slug';
+		$content  = $this->prepared_content( $post, $toc_mode );
 		$category = $this->post_category( $post );
 		$author   = (int) $post->post_author;
 		$product  = $on( 'show_product' ) ? $this->article_product( $post ) : null;
@@ -623,10 +699,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 								<ol class="hsw-pp__toclist">
 									<?php foreach ( $content['toc'] as $item ) : ?>
 										<li class="hsw-pp__tocitem hsw-pp__tocitem--h<?php echo (int) $item['level']; ?>">
-											<a href="#<?php echo esc_attr( $item['id'] ); ?>" data-hsw-pp-toclink>
-												<i class="hsw-pp__tocdot" aria-hidden="true"></i>
-												<span><?php echo esc_html( $item['text'] ); ?></span>
-											</a>
+											<?php echo $this->toc_link_html( $item, $toc_mode, 'main' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside the helper. ?>
 										</li>
 									<?php endforeach; ?>
 								</ol>
@@ -703,7 +776,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 					</article>
 
 					<aside class="hsw-pp__side">
-						<?php $this->render_sidebar( $post, $author, $content['toc'] ); ?>
+						<?php $this->render_sidebar( $post, $author, $content['toc'], $toc_mode ); ?>
 					</aside>
 				</div>
 			</div>
@@ -1038,8 +1111,9 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 	 * @param WP_Post $post   Post.
 	 * @param int     $author Author ID.
 	 * @param array   $toc    TOC items.
+	 * @param string  $mode   Anchor mode (slug|index|none).
 	 */
-	protected function render_sidebar( $post, $author, $toc ) {
+	protected function render_sidebar( $post, $author, $toc, $mode = 'slug' ) {
 		$popular = $this->popular_posts( 3 );
 		?>
 		<?php if ( ! empty( $toc ) ) : ?>
@@ -1050,9 +1124,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 				</div>
 				<nav class="hsw-pp__sidenav">
 					<?php foreach ( $toc as $item ) : ?>
-						<a class="hsw-pp__sidelink hsw-pp__sidelink--h<?php echo (int) $item['level']; ?>" href="#<?php echo esc_attr( $item['id'] ); ?>" data-hsw-pp-toclink>
-							<?php echo esc_html( $item['text'] ); ?>
-						</a>
+						<?php echo $this->toc_link_html( $item, $mode, 'side' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside the helper. ?>
 					<?php endforeach; ?>
 				</nav>
 			</div>

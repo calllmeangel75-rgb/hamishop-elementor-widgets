@@ -20,6 +20,15 @@
 
 	var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+	/* A TOC entry is either a fragment link or a button with data-target. */
+	var tocTargetId = function (el) {
+		var direct = el.getAttribute('data-target');
+		if (direct) {
+			return direct;
+		}
+		return (el.getAttribute('href') || '').replace(/^#/, '');
+	};
+
 	Array.prototype.forEach.call(roots, function (root) {
 		var postId = root.getAttribute('data-post-id') || '';
 		var body = root.querySelector('[data-hsw-pp-body]');
@@ -63,12 +72,12 @@
 		if (tocLinks.length && 'IntersectionObserver' in window && body) {
 			var byId = {};
 			Array.prototype.forEach.call(tocLinks, function (link) {
-				var hash = (link.getAttribute('href') || '').replace(/^#/, '');
-				if (!hash) {
+				var id = tocTargetId(link);
+				if (!id) {
 					return;
 				}
-				byId[hash] = byId[hash] || [];
-				byId[hash].push(link);
+				byId[id] = byId[id] || [];
+				byId[id].push(link);
 			});
 
 			var headings = body.querySelectorAll('h2[id], h3[id]');
@@ -101,8 +110,8 @@
 		/* Smooth scroll for TOC links (respects reduced motion). */
 		Array.prototype.forEach.call(tocLinks, function (link) {
 			link.addEventListener('click', function (event) {
-				var hash = (link.getAttribute('href') || '').replace(/^#/, '');
-				var target = hash ? document.getElementById(hash) : null;
+				var id = tocTargetId(link);
+				var target = id ? document.getElementById(id) : null;
 				if (!target) {
 					return;
 				}
@@ -111,8 +120,15 @@
 					behavior: reduceMotion ? 'auto' : 'smooth',
 					block: 'start',
 				});
-				if (window.history && window.history.replaceState) {
-					window.history.replaceState(null, '', '#' + hash);
+
+				/*
+				 * Only fragment links write the hash. In «بدون لینک لنگر» mode
+				 * the entry is a <button>, so the URL never changes and there is
+				 * no `…/#heading` address for Google to index.
+				 */
+				var isAnchor = 'A' === link.tagName && link.getAttribute('href');
+				if (isAnchor && window.history && window.history.replaceState) {
+					window.history.replaceState(null, '', '#' + id);
 				}
 			});
 		});

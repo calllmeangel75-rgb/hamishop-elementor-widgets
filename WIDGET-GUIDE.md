@@ -966,3 +966,25 @@ $this->a_align( 'desc', __( 'تراز و جهت متن', 'hamishop-elementor-wid
 | متن مقاله | `hsw-post-page` | `body_size`, `body_al/dir/lh` |
 | توضیح سربرگ مجله | `hsw-blog-page` / `hsw-blog-hero` | `bsub_fs/al/dir/lh` · `sub_size/al/dir/lh` |
 | توضیحات محصول | `hsw-product-tabs` | `pdesc_fs`, `pdesc_al/dir/lh` |
+
+## لنگر فهرست مطالب — v1.11.10
+
+کنترل `toc_anchor` در `hsw-post-page` سه حالت دارد و `prepared_content( $post, $mode )` آن را می‌گیرد:
+
+| حالت | id هدینگ | مارک‌آپ فهرست | آدرس تولید می‌شود؟ |
+|---|---|---|---|
+| `slug` (پیش‌فرض) | اسلاگ فارسی مثل `فناوری-حذف-نویز-فعال` | `<a href="#id">` | بله |
+| `index` | `hsw-h-N` | `<a href="#id">` | بله |
+| `none` | `hsw-h-N` (فقط برای اسکرول) | `<button data-target="id">` | **خیر** |
+
+- **چرا `sanitize_title()` استفاده نمی‌شود:** با context پیش‌فرض `save` متن فارسی را percent-encode
+  می‌کند و `%d9%81…` می‌دهد. `heading_id()` خودش ZWNJ را حذف، فاصله را به `-` تبدیل و کاراکترهای
+  غیرحرفی را پاک می‌کند و `mb_strtolower` می‌زند؛ تیتر تکراری هم `-2` می‌گیرد.
+- **حالت `none` برای سئو:** چون هیچ `<a href="#…">` وجود ندارد، گوگل آدرس لنگر نمی‌بیند. هدینگ‌ها
+  `id` دارند تا `scrollIntoView` کار کند، ولی `history.replaceState` صدا زده نمی‌شود (JS فقط وقتی
+  `link.tagName === 'A'` باشد hash را می‌نویسد).
+- دو نقطهٔ رندر از `toc_link_html( $item, $mode, 'main'|'side' )` استفاده می‌کنند تا مارک‌آپ یک‌جا بماند؛
+  دکمه‌ها با `.hsw-pp__tocbtn` همان ظاهر لینک را دارند (شمارنده با `counter(hsw-pp-toc)`).
+
+**درس:** فهرست المنتور با لنگرهای عمومی (`#elementor-toc__heading-anchor-N`) در گوگل ایندکس شده بود.
+اگر روزی فهرست تازه‌ای اضافه کردید، همین کنترل `toc_anchor` را در آن هم بگذارید.
