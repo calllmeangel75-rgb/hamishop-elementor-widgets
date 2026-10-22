@@ -1054,3 +1054,22 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 نکته: `get_controls()` در المنتور کلید `label` را برمی‌دارد (در رجیستری Controls_Manager می‌ماند)،
 پس نبودن `label` در dump به معنی نبودن برچسب در پنل نیست — برای بررسی متن‌ها کد منبع را بخوانید،
 نه خروجی `get_controls()`.
+
+## استایل یکپارچهٔ صفحهٔ محصول — v1.11.14
+
+`HSW_Widget_Product_Page` بخش `sec_unified` را در تب استایل دارد (بومی، نه آینه‌شده — چون
+`part_style_section()` کنترل‌های CHOOSE را منتقل نمی‌کند).
+
+- رنگ‌ها: `.hsw-ptitle__h`, `.hsw-ppurch__main`, `.hsw-ppurch__old`,
+  `.hsw-ptabs__panel|.hsw-pfeat__item|.hsw-ptrust__t`, `.hsw-ptabs__btn(.is-active)`,
+  `.hsw-pvar__label`, `.hsw-pbread__link|__cur`.
+- تایپوگرافی با `a_typo()`: عنوان، قیمت، متن تب‌ها، ویژگی‌ها، برچسب واریانت، تب‌ها.
+- دکمه‌ها با `a_button()`: `.hsw-ppurch__cart` و `.hsw-psticky__cart`.
+
+**نکتهٔ تست:** کامپوزیت صفحهٔ محصول فقط روی صفحهٔ واقعی محصول محتوا رندر می‌کند (پارت‌ها از
+`$post` محصول می‌خوانند). روی یک برگهٔ معمولی فقط ریشه و `hsw-cp__hero` چاپ می‌شود — برای تست
+بصری باید روی URL محصول دید. برای بررسی تولید CSS، فایل `uploads/elementor/css/post-<id>.css` را
+بخوانید: قاعده‌هایی مثل `.elementor-element-w1 .hsw-ppurch__cart{background-color:...}` باید باشند.
+
+**نکتهٔ دوم:** پارت‌ها پیش‌فرض خاموش‌اند؛ اگر کامپوزیت خالی رندر شد، در «کنترل ویجت‌ها» پارت‌های
+`hsw-product-*` را روشن کنید.
