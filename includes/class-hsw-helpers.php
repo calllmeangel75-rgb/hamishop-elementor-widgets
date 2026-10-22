@@ -32,8 +32,41 @@ class HSW_Helpers {
          * Material Symbols icon markup (bundled subset font, zero external requests).
          */
         public static function icon( $name, $class = '', $fill = false ) {
+                /*
+                 * Several call sites use friendly names that Material Symbols does
+                 * not ship (`bell`, `trash`, `user`, …). Without this map they are
+                 * rendered as raw ligature text — the "English words" bug. Map
+                 * them to the real glyph names here instead of editing 100 call
+                 * sites, and keep the targets present in the font subset
+                 * (tools/_icons.txt).
+                 */
                 $aliases = array(
-                        'discount' => 'percent',
+                        'discount'            => 'percent',
+                        'alert'               => 'warning',
+                        'bell'                => 'notifications',
+                        'calendar'            => 'calendar_month',
+                        'eye'                 => 'visibility',
+                        'gift'                => 'redeem',
+                        'grid'                => 'grid_view',
+                        'heart'               => 'favorite',
+                        'location'            => 'place',
+                        'phone'               => 'call',
+                        'plus'                => 'add',
+                        'spark'               => 'auto_awesome',
+                        'ticket'              => 'confirmation_number',
+                        'trash'               => 'delete',
+                        'truck'               => 'local_shipping',
+                        'user'                => 'person',
+                        'arrow-left'          => 'arrow_back',
+                        'arrow-right'         => 'arrow_forward',
+                        'arrow-left-alt'      => 'arrow_left_alt',
+                        'home'                => 'home',
+                        'checkmark'           => 'check',
+                        'cancel'              => 'close',
+                        'success'             => 'check_circle',
+                        'error'               => 'error',
+                        'info'                => 'info',
+                        'warning'             => 'warning',
                 );
                 if ( isset( $aliases[ $name ] ) ) {
                         $name = $aliases[ $name ];

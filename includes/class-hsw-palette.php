@@ -57,6 +57,7 @@ class HSW_Palette {
 			'primary'      => array( __( 'رنگ اصلی', 'hamishop-elementor-widgets' ), '#2563eb', __( 'دکمه‌ها، لینک‌ها، آیتم فعال', 'hamishop-elementor-widgets' ) ),
 			'primary_dark' => array( __( 'رنگ اصلی تیره', 'hamishop-elementor-widgets' ), '#1d4ed8', __( 'حالت هاور و سربرگ‌های تیره', 'hamishop-elementor-widgets' ) ),
 			'accent'       => array( __( 'رنگ تاکید', 'hamishop-elementor-widgets' ), '#fc593a', __( 'برچسب تخفیف، CTA خرید', 'hamishop-elementor-widgets' ) ),
+			'hover'        => array( __( 'رنگ هاور', 'hamishop-elementor-widgets' ), '#1d4ed8', __( 'حالت هاور تب‌ها، منوها و آیتم‌های کلیک‌شدنی', 'hamishop-elementor-widgets' ) ),
 			'text'         => array( __( 'رنگ متن', 'hamishop-elementor-widgets' ), '#191c1e', __( 'متن اصلی', 'hamishop-elementor-widgets' ) ),
 			'muted'        => array( __( 'متن کم‌رنگ', 'hamishop-elementor-widgets' ), '#75777f', __( 'توضیحات، متادیتا', 'hamishop-elementor-widgets' ) ),
 			'border'       => array( __( 'رنگ حاشیه', 'hamishop-elementor-widgets' ), '#e1e2e4', __( 'خطوط و کادرها', 'hamishop-elementor-widgets' ) ),
@@ -124,6 +125,7 @@ class HSW_Palette {
 			'--hsw-primary-container'  => $p['primary_dark'],
 			'--hsw-secondary-container' => $p['accent'],
 			'--hsw-accent'             => $p['accent'],
+			'--hsw-hover'              => $p['hover'],
 			'--hsw-on-primary'         => '#ffffff',
 			'--hsw-on-surface'         => $p['text'],
 

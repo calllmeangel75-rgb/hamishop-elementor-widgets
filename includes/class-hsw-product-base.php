@@ -820,16 +820,37 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 $comment_field = '';
                 if ( function_exists( 'wc_review_ratings_enabled' ) && wc_review_ratings_enabled() ) {
                         $required = function_exists( 'wc_review_ratings_required' ) && wc_review_ratings_required();
-                        $comment_field .= '<div class="comment-form-rating">';
-                        $comment_field .= '<label for="' . esc_attr( $uid . '-rating' ) . '">' . esc_html__( 'امتیاز شما', 'hamishop-elementor-widgets' ) . ( $required ? '&nbsp;<span class="required">*</span>' : '' ) . '</label>';
-                        $comment_field .= '<select name="rating" id="' . esc_attr( $uid . '-rating' ) . '"' . ( $required ? ' required' : '' ) . '>';
-                        $comment_field .= '<option value="">' . esc_html__( 'انتخاب امتیاز…', 'hamishop-elementor-widgets' ) . '</option>';
-                        $comment_field .= '<option value="5">' . esc_html__( 'عالی', 'hamishop-elementor-widgets' ) . '</option>';
-                        $comment_field .= '<option value="4">' . esc_html__( 'خوب', 'hamishop-elementor-widgets' ) . '</option>';
-                        $comment_field .= '<option value="3">' . esc_html__( 'متوسط', 'hamishop-elementor-widgets' ) . '</option>';
-                        $comment_field .= '<option value="2">' . esc_html__( 'ضعیف', 'hamishop-elementor-widgets' ) . '</option>';
-                        $comment_field .= '<option value="1">' . esc_html__( 'خیلی ضعیف', 'hamishop-elementor-widgets' ) . '</option>';
-                        $comment_field .= '</select></div>';
+                        /*
+                         * Stars instead of a <select>. The inputs keep the exact
+                         * `rating` name WooCommerce validates on submit, so only
+                         * the presentation changes. DOM order is 1→5 and the row
+                         * is row-reversed, which makes `~ label` light up the
+                         * higher stars when one is hovered or checked.
+                         */
+                        $labels = array(
+                                1 => __( 'خیلی ضعیف', 'hamishop-elementor-widgets' ),
+                                2 => __( 'ضعیف', 'hamishop-elementor-widgets' ),
+                                3 => __( 'متوسط', 'hamishop-elementor-widgets' ),
+                                4 => __( 'خوب', 'hamishop-elementor-widgets' ),
+                                5 => __( 'عالی', 'hamishop-elementor-widgets' ),
+                        );
+
+                        $comment_field .= '<fieldset class="comment-form-rating hsw-stars">';
+                        $comment_field .= '<legend class="hsw-stars__legend">' . esc_html__( 'امتیاز شما', 'hamishop-elementor-widgets' ) . ( $required ? '&nbsp;<span class="required">*</span>' : '' ) . '</legend>';
+                        $comment_field .= '<div class="hsw-stars__row">';
+                        /* Descending DOM order + row-reverse: the highest star sits
+                           on the left of the row, so `~ label` lights the lower
+                           ones to its right — i.e. the fill grows from the right,
+                           which is how Persian readers expect a rating to fill. */
+                        foreach ( array_reverse( $labels, true ) as $value => $label ) {
+                                $rid = $uid . '-rating-' . $value;
+                                $comment_field .= '<input type="radio" name="rating" id="' . esc_attr( $rid ) . '" value="' . (int) $value . '"' . ( $required ? ' required' : '' ) . '>';
+                                $comment_field .= '<label for="' . esc_attr( $rid ) . '" title="' . esc_attr( $label ) . '">'
+                                        . HSW_Helpers::icon( 'star' )
+                                        . '<span class="hsw-stars__label">' . esc_html( $label ) . '</span>'
+                                        . '</label>';
+                        }
+                        $comment_field .= '</div></fieldset>';
                 }
                 $comment_field .= '<p class="comment-form-comment"><label for="' . esc_attr( $uid . '-comment' ) . '">' . esc_html__( 'دیدگاه شما', 'hamishop-elementor-widgets' ) . '&nbsp;<span class="required">*</span></label>';
                 $comment_field .= '<textarea id="' . esc_attr( $uid . '-comment' ) . '" name="comment" cols="45" rows="6" required></textarea></p>';

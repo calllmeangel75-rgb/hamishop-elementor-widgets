@@ -10,7 +10,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.17') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.18') format('woff2-variations');
 }
 
 /* ===== Responsive toggles ===== */
@@ -199,7 +199,7 @@
         font-weight: 600;
         transition: all .2s ease;
 }
-.hsw-btabs__pill:hover { border-color: var(--hswb-navy); color: var(--hswb-navy); }
+.hsw-btabs__pill:hover { border-color: var(--hsw-hover, var(--hswb-navy)); color: var(--hsw-hover, var(--hswb-navy)); }
 .hsw-btabs__pill.is-on {
         background: var(--hswb-navy);
         border-color: var(--hswb-navy);
