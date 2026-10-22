@@ -11,7 +11,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.11') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.12') format('woff2-variations');
 }
 
 .hsw-ic {
@@ -966,6 +966,41 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 
 /* ============================== PRODUCT GRID ============================== */
 .hsw-ag__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px 0; }
+/* Out-of-stock cards: muted, grayscale media, «ناموجود» badge. */
+.hsw-ag__card.is-oos {
+        opacity: .62;
+        transition: opacity .2s ease;
+}
+
+.hsw-ag__card.is-oos:hover {
+        opacity: .82;
+}
+
+.hsw-ag__card.is-oos .hsw-ag__media img {
+        filter: grayscale(1);
+}
+
+.hsw-ag__card.is-oos .hsw-ag__title,
+.hsw-ag__card.is-oos .hsw-ag__price {
+        color: var(--hswa-soft);
+}
+
+.hsw-ag__oosbadge {
+        position: absolute;
+        inset-inline-start: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) translateX(0);
+        padding: 5px 14px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, .78);
+        color: #fff;
+        font-size: 11.5px;
+        font-weight: 800;
+        letter-spacing: .3px;
+        pointer-events: none;
+        white-space: nowrap;
+}
+
 .hsw-ag__card {
         position: relative;
         background: var(--hswa-card);
@@ -1003,6 +1038,7 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 .hsw-ag__wish .hsw-ic { font-size: 16px; }
 .hsw-ag__wish.is-active .hsw-ic { font-variation-settings: 'FILL' 1; }
 .hsw-ag__media {
+        position: relative;
         width: 100%;
         height: 128px;
         display: flex;

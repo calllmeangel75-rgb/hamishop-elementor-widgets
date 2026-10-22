@@ -129,12 +129,29 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 );
 
                 $this->add_control(
+                        'desc_source',
+                        array(
+                                'label'       => __( 'منبع توضیحات', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'term',
+                                'options'     => array(
+                                        'term'   => __( 'توضیحات خود دسته‌بندی (داینامیک)', 'hamishop-elementor-widgets' ),
+                                        'shop'   => __( 'توضیحات برگهٔ فروشگاه', 'hamishop-elementor-widgets' ),
+                                        'auto'   => __( 'متن خودکار (نام دسته + تعداد کالا)', 'hamishop-elementor-widgets' ),
+                                        'custom' => __( 'متن ثابت زیر', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'در حالت «توضیحات خود دسته‌بندی»، هر دسته متن خودش را نشان می‌دهد؛ اگر دسته توضیح نداشته باشد متن خودکار جایگزین می‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
                         'seo_desc',
                         array(
-                                'label'       => __( 'توضیحات سئو (خالی = توضیح دسته)', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'متن ثابت توضیحات', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::WYSIWYG,
                                 'default'     => '',
-                                'description' => __( 'در حالت عادی از فیلد توضیحات خود دسته‌بندی ووکامرس خوانده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'desc_source' => 'custom' ),
+                                'description' => __( 'فقط وقتی «منبع توضیحات» روی «متن ثابت» باشد استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                         )
                 );
 

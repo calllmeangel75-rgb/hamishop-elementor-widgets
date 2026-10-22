@@ -519,7 +519,9 @@ abstract class HSW_Widget_Base extends Widget_Base {
                  * "28 arguments are required, 2 given" on every variable product.
                  */
                 $d = str_replace( '%s', 'hsw-add--d hsw-d', $open ) . HSW_Helpers::icon( $args['ico_add'] );
-                if ( 'best' === $type ) {
+                /* Any card type shows the label once the author types one; the
+                   deal card stays icon-only while the field is empty. */
+                if ( '' !== trim( (string) $args['txt_buy'] ) ) {
                         $d .= '<span>' . esc_html( $args['txt_buy'] ) . '</span>';
                 }
                 $d .= $close;
@@ -947,6 +949,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'txt_oos'       => array( __( 'متن اتمام موجودی', 'hamishop-elementor-widgets' ), 'اتمام موجودی' ),
                         'txt_notify'    => array( __( 'متن دکمه خبرم کن', 'hamishop-elementor-widgets' ), 'خبرم کن' ),
                         'txt_buy'       => array( __( 'متن دکمه خرید', 'hamishop-elementor-widgets' ), 'خرید' ),
+                        'txt_add'       => array( __( 'متن دکمه افزودن به سبد', 'hamishop-elementor-widgets' ), 'افزودن به سبد خرید' ),
                         'ico_add'       => array( __( 'آیکون دکمه افزودن', 'hamishop-elementor-widgets' ), 'shopping_cart' ),
                 );
 
@@ -1528,7 +1531,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'txt_ship'          => $s['txt_ship'] ?? 'ارسال رایگان',
                                 'txt_oos'           => $s['txt_oos'] ?? 'اتمام موجودی',
                                 'txt_notify'        => $s['txt_notify'] ?? 'خبرم کن',
-                                'txt_add'           => __( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ),
+                                'txt_add'           => $s['txt_add'] ?? __( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ),
                                 'txt_buy'           => $s['txt_buy'] ?? 'خرید',
                                 'ico_add'           => $s['ico_add'] ?? 'shopping_cart',
                                 'free_ship_min'     => (float) ( $s['free_ship_min'] ?? 0 ),

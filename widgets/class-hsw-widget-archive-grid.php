@@ -280,7 +280,8 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 $cur      = isset( $s['currency'] ) && '' !== trim( (string) $s['currency'] ) ? trim( (string) $s['currency'] ) : HSW_Helpers::currency_label();
                 $wish     = ( 'yes' === ( $s['show_wishlist'] ?? 'yes' ) );
                 ?>
-                <article class="hsw-ag__card">
+                <?php $is_oos = ! $product->is_in_stock(); ?>
+                <article class="hsw-ag__card<?php echo $is_oos ? ' is-oos' : ''; ?>">
 
                         <?php if ( 'sale' === $badge || 'featured' === $badge ) : ?>
                                 <div class="hsw-ag__badges">
@@ -300,6 +301,9 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
 
                         <a class="hsw-ag__media" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
                                 <?php echo $img_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe image markup. ?>
+                                <?php if ( $is_oos ) : ?>
+                                        <span class="hsw-ag__oosbadge"><?php echo esc_html( isset( $s['oos_text'] ) && '' !== trim( (string) $s['oos_text'] ) ? (string) $s['oos_text'] : __( 'ناموجود', 'hamishop-elementor-widgets' ) ); ?></span>
+                                <?php endif; ?>
                         </a>
 
                         <div class="hsw-ag__body">

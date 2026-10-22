@@ -46,7 +46,7 @@ class HSW_Widget_Wonder_Deals extends HSW_Widget_Base {
                         array(
                                 'show_rank'   => false,
                                 'price_label' => false,
-                                'txt_buy'     => false,
+                                'txt_buy'     => '',
                         )
                 );
 

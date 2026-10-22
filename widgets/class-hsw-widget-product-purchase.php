@@ -322,20 +322,19 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                                         <span class="hsw-ppurch__unit"><?php esc_html_e( 'تومان', 'hamishop-elementor-widgets' ); ?></span>
                                                 </div>
                                         </div>
-                                        <div class="hsw-ppurch__qty">
-                                                <span class="hsw-ppurch__qtylabel"><?php esc_html_e( 'تعداد:', 'hamishop-elementor-widgets' ); ?></span>
-                                                <div class="hsw-ppurch__stepper">
-                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">add</span></button>
-                                                        <span class="hsw-ppurch__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
-                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">remove</span></button>
-                                                </div>
-                                        </div>
                                 </div>
                         <?php endif; ?>
                         <div class="hsw-ppurch__ctas">
                                 <?php if ( $cfp ) : ?>
                                         <?php echo HSW_Helpers::cfp_action_html( $product, 'hsw-ppurch__cart hsw-ppurch__cart--cfp', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
                                 <?php else : ?>
+                                        <div class="hsw-ppurch__qty hsw-ppurch__qty--inline">
+                                                <div class="hsw-ppurch__stepper">
+                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">add</span></button>
+                                                        <span class="hsw-ppurch__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
+                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">remove</span></button>
+                                                </div>
+                                        </div>
                                         <button type="button" class="hsw-ppurch__cart" data-hsw-add>
                                                 <span class="hsw-ic">shopping_cart</span>
                                                 <span><?php echo esc_html( $cart_text ); ?></span>

@@ -16,6 +16,7 @@ class HSW_Archive_Query {
         public function __construct() {
                 add_action( 'init', array( $this, 'normalize_filter_params' ), 5 );
                 add_action( 'pre_get_posts', array( $this, 'apply' ) );
+                add_filter( 'posts_clauses', array( $this, 'oos_last_clauses' ), 20, 2 );
                 add_action( 'elementor/document/after_save', array( $this, 'sync_express_slug' ), 10, 2 );
         }
 
@@ -51,6 +52,32 @@ class HSW_Archive_Query {
                         $_GET[ $key ] = implode( ',', $flat );
                 }
                 // phpcs:enable
+        }
+
+        /**
+         * Sort in-stock products first on the product archive.
+         *
+         * `_stock_status` lives in postmeta, so a LEFT JOIN plus a CASE at the
+         * front of ORDER BY keeps every other ordering rule intact (price,
+         * newest, discount…) and simply pushes the out-of-stock rows down.
+         *
+         * @param array    $clauses Query clauses.
+         * @param WP_Query $q       Query.
+         * @return array
+         */
+        public function oos_last_clauses( $clauses, $q ) {
+                if ( 'yes' !== $q->get( 'hsw_oos_last' ) ) {
+                        return $clauses;
+                }
+
+                global $wpdb;
+
+                $clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS hsw_stock ON ( {$wpdb->posts}.ID = hsw_stock.post_id AND hsw_stock.meta_key = '_stock_status' )";
+
+                $rank = "CASE WHEN hsw_stock.meta_value = 'outofstock' THEN 1 ELSE 0 END ASC";
+                $clauses['orderby'] = $clauses['orderby'] ? $rank . ', ' . $clauses['orderby'] : $rank;
+
+                return $clauses;
         }
 
         /**
@@ -143,6 +170,15 @@ class HSW_Archive_Query {
                 }
                 if ( ! function_exists( 'is_woocommerce' ) || ! ( $q->is_post_type_archive( 'product' ) || $q->is_tax( get_object_taxonomies( 'product' ) ) ) ) {
                         return;
+                }
+
+                /*
+                 * Out-of-stock products sink to the end of every shop/category
+                 * archive. The flag is read back in oos_last_clauses() so the
+                 * JOIN/ORDER BY only ever touches the product archive query.
+                 */
+                if ( apply_filters( 'hsw_archive_oos_last', true ) ) {
+                        $q->set( 'hsw_oos_last', 'yes' );
                 }
 
                 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.

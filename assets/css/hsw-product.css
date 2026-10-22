@@ -11,7 +11,7 @@
         font-style: normal;
         font-weight: 100 700;
         font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.11') format('woff2-variations');
+        src: url('../fonts/material-symbols.woff2?ver=1.11.12') format('woff2-variations');
 }
 
 .hsw-p .hsw-ic {
@@ -594,6 +594,19 @@
 .hsw-ppurch__qbtn .hsw-ic { font-size: 18px !important; }
 .hsw-ppurch__qval { width: 36px; text-align: center; font-weight: 700; font-size: 14px; line-height: 24px; }
 .hsw-ppurch__ctas { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+/* Quantity stepper sits beside the buy button (moved out of the price row). */
+.hsw-ppurch__qty--inline {
+        flex: 0 0 auto;
+        width: 100%;
+        justify-content: center;
+}
+
+.hsw-ppurch__qty--inline .hsw-ppurch__qtylabel { display: none; }
+
+.hsw-ppurch__qty--inline .hsw-ppurch__stepper { height: 44px; }
+
+.hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 40px; height: 40px; }
 .hsw-ppurch__cart {
         display: flex;
         align-items: center;
@@ -634,8 +647,11 @@
 .hsw-ppurch__as--stock .hsw-ic { color: var(--hsw-primary) !important; }
 @media (min-width: 768px) {
         .hsw-ppurch__top { flex-direction: row; align-items: center; }
-        .hsw-ppurch__ctas { flex-direction: row; }
+        .hsw-ppurch__ctas { flex-direction: row; align-items: stretch; }
         .hsw-ppurch__cart { width: auto; flex: 1; }
+        .hsw-ppurch__qty--inline { width: auto; }
+        .hsw-ppurch__qty--inline .hsw-ppurch__stepper { height: 48px; }
+        .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 42px; height: 42px; }
 }
 /* OOS (out of stock) state */
 .hsw-ppurch.is-oos .hsw-ppurch__cart,

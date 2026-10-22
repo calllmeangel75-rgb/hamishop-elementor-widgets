@@ -565,29 +565,51 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          * @param string $custom Custom HTML from a widget control.
          * @return string Safe HTML.
          */
-        protected function archive_desc_html( $custom = '' ) {
+        protected function archive_desc_html( $custom = '', $source = 'term' ) {
                 $custom = trim( (string) $custom );
-                if ( '' !== $custom ) {
+                $source = in_array( $source, array( 'term', 'shop', 'auto', 'custom' ), true ) ? $source : 'term';
+
+                if ( 'custom' === $source && '' !== $custom ) {
                         return wp_kses_post( $custom );
                 }
                 if ( $this->is_demo() || ! $this->is_archive_context() ) {
                         return esc_html( $this->demo()['desc'] );
                 }
+
                 $term = $this->current_term();
-                if ( $term ) {
+
+                /*
+                 * «توضیح دسته» is the default: the archive copy must come from
+                 * the term's own description field so each category reads
+                 * differently, not from a fixed string in the widget.
+                 */
+                if ( 'term' === $source && $term ) {
                         $desc = term_description( $term );
                         if ( $desc && '' !== trim( wp_strip_all_tags( $desc ) ) ) {
                                 return wp_kses_post( $desc );
                         }
                         return $this->auto_archive_desc();
                 }
-                $shop_id = function_exists( 'wc_get_page_id' ) ? wc_get_page_id( 'shop' ) : 0;
-                if ( $shop_id > 0 ) {
-                        $content = get_post_field( 'post_content', $shop_id );
-                        if ( is_string( $content ) && '' !== trim( $content ) ) {
-                                return wp_kses_post( wpautop( $content ) );
-                        }
+
+                if ( 'auto' === $source ) {
+                        return $this->auto_archive_desc();
                 }
+
+                if ( 'shop' === $source || ! $term ) {
+                        $shop_id = function_exists( 'wc_get_page_id' ) ? wc_get_page_id( 'shop' ) : 0;
+                        if ( $shop_id > 0 ) {
+                                $content = get_post_field( 'post_content', $shop_id );
+                                if ( is_string( $content ) && '' !== trim( $content ) ) {
+                                        return wp_kses_post( wpautop( $content ) );
+                                }
+                        }
+                        return $this->auto_archive_desc();
+                }
+
+                if ( '' !== $custom ) {
+                        return wp_kses_post( $custom );
+                }
+
                 return $this->auto_archive_desc();
         }
 
@@ -602,7 +624,7 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          * @return string Safe HTML ('' when there is nothing to show).
          */
         protected function archive_desc_block_html( array $s, $mode = 'header' ) {
-                $desc = $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '' );
+                $desc = $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '', isset( $s['desc_source'] ) ? (string) $s['desc_source'] : 'term' );
                 if ( '' === trim( wp_strip_all_tags( $desc ) ) ) {
                         return '';
                 }
