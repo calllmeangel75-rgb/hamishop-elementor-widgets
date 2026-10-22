@@ -335,6 +335,12 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 $this->a_color( 'fb_sheet_bg', __( 'پس‌زمینه باکس/باتم‌شیت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-af__box, {{WRAPPER}} .hsw-asheet__panel', 'background-color' );
                 $this->a_color( 'fb_apply', __( 'پس‌زمینه دکمه اعمال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-af__apply', 'background-color' );
 
+                $this->a_button(
+                        'apply',
+                        __( 'دکمهٔ اعمال فیلتر', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-af__apply',
+                        array( 'size' => 12, 'radius' => 9 )
+                );
                 $this->end_controls_section();
         }
 

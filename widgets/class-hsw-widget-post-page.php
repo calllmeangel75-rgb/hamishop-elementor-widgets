@@ -308,6 +308,62 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			array( 'align' => 'justify', 'lh' => 2 )
 		);
 
+		$this->add_control(
+			'body_c',
+			array(
+				'label'     => __( 'رنگ متن مقاله', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .hsw-pp__body' => 'color: {{VALUE}};' ),
+			)
+		);
+
+		/* ---- titles & meta ---- */
+		$this->a_typo( 'title', __( 'عنوان مقاله', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__title', array( 'size' => 30, 'lh' => 1.45 ) );
+		$this->a_typo( 'stats', __( 'تاریخ و آمار', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__stats', array( 'size' => 11, 'weight' => false ) );
+		$this->a_typo( 'author', __( 'نام نویسنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__authorname', array( 'size' => 12.5 ) );
+
+		/* ---- table of contents ---- */
+		$this->a_typo(
+			'toc',
+			__( 'فهرست مطالب', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-pp__tocitem a, {{WRAPPER}} .hsw-pp__tocitem .hsw-pp__tocbtn',
+			array( 'size' => 12, 'weight' => false )
+		);
+		$this->a_typo( 'tochead', __( 'تیتر فهرست مطالب', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__toctitle', array( 'size' => 12.5 ) );
+		$this->a_typo( 'side', __( 'فهرست سایدبار', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__sidelink', array( 'size' => 11.5, 'weight' => false ) );
+
+		/* ---- body extras ---- */
+		$this->a_typo( 'tag', __( 'برچسب‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__tag', array( 'size' => 11, 'weight' => false ) );
+		$this->a_typo( 'rel', __( 'عنوان مقالات مرتبط', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__reltitle', array( 'size' => 12.5, 'lh' => 1.65 ) );
+		$this->a_typo( 'pop', __( 'پربازدیدترین‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__poptitle', array( 'size' => 11.5, 'weight' => false ) );
+		$this->a_typo( 'bio', __( 'متن باکس نویسنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__authorboxbio', array( 'size' => 12, 'weight' => false ) );
+
+		/* ---- comments ---- */
+		$this->a_typo( 'cmt', __( 'متن دیدگاه‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__commentbody', array( 'size' => 12.5, 'lh' => 1.9 ) );
+		$this->a_typo( 'cmtname', __( 'نام نویسندهٔ دیدگاه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__commentname', array( 'size' => 12.5 ) );
+
+		/* ---- buttons ---- */
+		$this->a_button(
+			'prod',
+			__( 'دکمهٔ خرید کارت محصول', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-pp__prodbtn',
+			array( 'size' => 11.5, 'radius' => 9 )
+		);
+
+		$this->a_button(
+			'dock',
+			__( 'دکمهٔ نوار پایین موبایل', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-pp__dockcta',
+			array( 'size' => 11.5, 'radius' => 9 )
+		);
+
+		$this->a_button(
+			'submit',
+			__( 'دکمهٔ ارسال دیدگاه', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-pp__submit',
+			array( 'size' => 12, 'radius' => 9 )
+		);
+
 		$this->end_controls_section();
 	}
 

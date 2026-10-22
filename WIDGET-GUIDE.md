@@ -988,3 +988,49 @@ $this->a_align( 'desc', __( 'تراز و جهت متن', 'hamishop-elementor-wid
 
 **درس:** فهرست المنتور با لنگرهای عمومی (`#elementor-toc__heading-anchor-N`) در گوگل ایندکس شده بود.
 اگر روزی فهرست تازه‌ای اضافه کردید، همین کنترل `toc_anchor` را در آن هم بگذارید.
+
+## استاندارد استایل متن و دکمه — v1.11.11
+
+دو هلپر در `HSW_Widget_Base` تعریف شده‌اند و **همهٔ ویجت‌ها باید از همین‌ها استفاده کنند** تا تب
+استایل یکدست بماند:
+
+```php
+// متن: تایپوگرافی کامل (اندازه/وزن/ارتفاع خط) + رنگ
+$this->a_typo( 'title', __( 'عنوان مقاله', 'hamishop-elementor-widgets' ),
+    '{{WRAPPER}} .hsw-pp__title', array( 'size' => 30, 'lh' => 1.45 ) );
+
+// دکمه: تب عادی + هاور، تایپوگرافی، حاشیه، گردی، فاصله داخلی، سایه
+$this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets' ),
+    '{{WRAPPER}} .hsw-pp__prodbtn', array( 'size' => 11.5, 'radius' => 9 ) );
+```
+
+- `a_typo( $id, $label, $selector, [size, weight, color, lh] )` — `weight => false` فیلد وزن را حذف
+  می‌کند، `color => false` کنترل رنگ را.
+- `a_button( $id, $label, $selector, [size, radius] )` — رنگ‌ها با `background-color` + `background-image:none`
+  ست می‌شوند تا گرادیانت/تصویر پس‌زمینهٔ قبلی خنثی شود؛ هاور روی `:hover, :focus-visible` هم اعمال می‌شود.
+- به‌همراه `a_align()` (تراز/جهت/ارتفاع خط) این سه، مجموعهٔ استاندارد استایل هستند.
+
+### ⚠️ نکتهٔ تست برنامه‌نویسی‌شده
+
+`Group_Control_Typography` فقط وقتی CSS تولید می‌کند که کلید `{$name}_typography` مقدار `custom`
+داشته باشد. اگر با اسکریپت (نه از رابط کاربری) تنظیمات را می‌سازید، حتماً این را هم بگذارید:
+
+```php
+'title_typo_typography' => 'custom',
+'title_typo_font_size'  => array( 'size' => 24, 'unit' => 'px' ),
+```
+
+بدون آن، مقدار `font_size` ذخیره می‌شود ولی هیچ قاعده‌ای در CSS نوشته نمی‌شود — و چون کنترل رنگ
+(که گروهی نیست) کار می‌کند، اشتباه‌یابی گمراه‌کننده است.
+
+### پوشش فعلی
+
+| ویجت | دکمه | متن |
+|---|---|---|
+| `hsw-post-page` | prodbtn، dockcta، submit | ۱۲ بلوک + بدنه |
+| `hsw-wonder-deals` / `best-sellers` / `popular` | `.hsw-add` (در `controls_card_style()` مشترک) | — |
+| `hsw-header-store` / `minimal` | catbtn، searchbtn (در `content_style()` مشترک) | — |
+| `hsw-archive-filters` / `hsw-archive-page` | `.hsw-af__apply` | توضیحات آرشیو |
+
+**باقی‌مانده:** سبد خرید، تسویه حساب، پرداخت، حساب کاربری و صفحهٔ محصول دکمه‌هایشان کلاس مشخص و
+یکدستی ندارند؛ قبل از افزودن کنترل باید کلاس دکمه‌ها استانداردسازی شود (مثلاً `hsw-btn` مشترک).

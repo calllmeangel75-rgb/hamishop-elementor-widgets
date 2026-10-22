@@ -137,6 +137,13 @@ class HSW_Widget_Archive_Page extends HSW_Archive_Base {
                         array( 'align' => 'justify', 'lh' => 1.9 )
                 );
 
+                $this->a_button(
+                        'apply',
+                        __( 'دکمهٔ اعمال فیلتر', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-af__apply',
+                        array( 'size' => 12, 'radius' => 9 )
+                );
+
                 $this->end_controls_section();
 
                 /* Every part's full Style tab, mirrored here so the complete

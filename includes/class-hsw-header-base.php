@@ -1124,6 +1124,19 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		$this->a_button(
+			'cat',
+			__( 'دکمهٔ دسته‌بندی محصولات', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-hd__catbtn',
+			array( 'size' => 12, 'radius' => 10 )
+		);
+
+		$this->a_button(
+			'search',
+			__( 'دکمهٔ جستجو', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-hd__searchbtn',
+			array( 'size' => 11.5, 'radius' => 10 )
+		);
 		$this->end_controls_section();
 	}
 

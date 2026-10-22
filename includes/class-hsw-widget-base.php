@@ -1304,6 +1304,13 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 );
                 $this->add_control( 'brand_c', array( 'label' => __( 'رنگ برند', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-brand' => 'color: {{VALUE}};' ) ) );
 
+                $this->a_button(
+                        'add',
+                        __( 'دکمهٔ افزودن به سبد', 'hamishop-elementor-widgets' ),
+                        '{{WRAPPER}} .hsw-add',
+                        array( 'size' => 11.5, 'radius' => 9 )
+                );
+
                 $this->end_controls_section();
         }
 
@@ -1787,5 +1794,228 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 )
                         );
                 }
+        }
+
+        /**
+         * Standard typography block: font size/weight/line-height + text colour.
+         *
+         * Companion to a_align(). Every text element in a widget should go
+         * through one of these two so the style tabs stay predictable.
+         *
+         * @param string $id       Control id prefix.
+         * @param string $label    Section heading.
+         * @param string $selector CSS selector.
+         * @param array  $args     size (px), weight (bool), color (bool), lh (em|false).
+         */
+        protected function a_typo( $id, $label, $selector, $args = array() ) {
+                $args = wp_parse_args(
+                        $args,
+                        array(
+                                'size'   => 14,
+                                'weight' => true,
+                                'color'  => true,
+                                'lh'     => false,
+                        )
+                );
+
+                $this->add_control(
+                        $id . '_typo_h',
+                        array(
+                                'label'     => $label,
+                                'type'      => Controls_Manager::HEADING,
+                                'separator' => 'before',
+                        )
+                );
+
+                $fields = array(
+                        'font_size' => array(
+                                'default' => array(
+                                        'size' => $args['size'],
+                                        'unit' => 'px',
+                                ),
+                        ),
+                );
+                if ( false !== $args['lh'] ) {
+                        $fields['line_height'] = array(
+                                'default' => array(
+                                        'size' => $args['lh'],
+                                        'unit' => 'em',
+                                ),
+                        );
+                }
+
+                $group = array(
+                        'name'           => $id . '_typo',
+                        'selector'       => $selector,
+                        'fields_options' => $fields,
+                );
+                if ( ! $args['weight'] ) {
+                        $group['exclude'] = array( 'font_weight' );
+                }
+
+                $this->add_group_control( Group_Control_Typography::get_type(), $group );
+
+                if ( $args['color'] ) {
+                        $this->add_control(
+                                $id . '_c',
+                                array(
+                                        'label'     => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
+                                        'type'      => Controls_Manager::COLOR,
+                                        'selectors' => array( $selector => 'color: {{VALUE}};' ),
+                                )
+                        );
+                }
+        }
+
+        /**
+         * Standard button block: background, text colour, hover, border, radius,
+         * shadow and the button's own typography.
+         *
+         * Buttons used to inherit their colour from the palette with no way to
+         * change a single one of them; this gives every call-to-action the same
+         * control set (normal + hover) so nothing is hard-coded.
+         *
+         * @param string $id       Control id prefix.
+         * @param string $label    Section heading.
+         * @param string $selector CSS selector of the button.
+         * @param array  $args     size (font px), radius (px).
+         */
+        protected function a_button( $id, $label, $selector, $args = array() ) {
+                $args = wp_parse_args(
+                        $args,
+                        array(
+                                'size'   => 12,
+                                'radius' => 9,
+                        )
+                );
+
+                $hover = $selector . ':hover, ' . $selector . ':focus-visible';
+
+                $this->add_control(
+                        $id . '_btn_h',
+                        array(
+                                'label'     => $label,
+                                'type'      => Controls_Manager::HEADING,
+                                'separator' => 'before',
+                        )
+                );
+
+                $this->start_controls_tabs( $id . '_btn_tabs' );
+
+                /* ---- normal ---- */
+                $this->start_controls_tab(
+                        $id . '_btn_tab_n',
+                        array( 'label' => __( 'عادی', 'hamishop-elementor-widgets' ) )
+                );
+
+                $this->add_control(
+                        $id . '_btn_bg',
+                        array(
+                                'label'     => __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array( $selector => 'background-color: {{VALUE}}; background-image: none;' ),
+                        )
+                );
+
+                $this->add_control(
+                        $id . '_btn_c',
+                        array(
+                                'label'     => __( 'رنگ متن دکمه', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array( $selector => 'color: {{VALUE}};' ),
+                        )
+                );
+
+                $this->end_controls_tab();
+
+                /* ---- hover ---- */
+                $this->start_controls_tab(
+                        $id . '_btn_tab_h',
+                        array( 'label' => __( 'هاور', 'hamishop-elementor-widgets' ) )
+                );
+
+                $this->add_control(
+                        $id . '_btn_bg_h',
+                        array(
+                                'label'     => __( 'پس‌زمینه (هاور)', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array( $hover => 'background-color: {{VALUE}}; background-image: none;' ),
+                        )
+                );
+
+                $this->add_control(
+                        $id . '_btn_c_h',
+                        array(
+                                'label'     => __( 'رنگ متن (هاور)', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array( $hover => 'color: {{VALUE}};' ),
+                        )
+                );
+
+                $this->end_controls_tab();
+                $this->end_controls_tabs();
+
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
+                        array(
+                                'name'           => $id . '_btn_typo',
+                                'label'          => __( 'تایپوگرافی دکمه', 'hamishop-elementor-widgets' ),
+                                'selector'       => $selector,
+                                'fields_options' => array(
+                                        'font_size' => array(
+                                                'default' => array(
+                                                        'size' => $args['size'],
+                                                        'unit' => 'px',
+                                                ),
+                                        ),
+                                ),
+                                'separator'      => 'before',
+                        )
+                );
+
+                $this->add_group_control(
+                        Group_Control_Border::get_type(),
+                        array(
+                                'name'     => $id . '_btn_bd',
+                                'label'    => __( 'حاشیه دکمه', 'hamishop-elementor-widgets' ),
+                                'selector' => $selector,
+                        )
+                );
+
+                $this->add_responsive_control(
+                        $id . '_btn_r',
+                        array(
+                                'label'      => __( 'گردی گوشه‌ها', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'default'    => array(
+                                        'size' => $args['radius'],
+                                        'unit' => 'px',
+                                ),
+                                'selectors'  => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->add_responsive_control(
+                        $id . '_btn_pad',
+                        array(
+                                'label'      => __( 'فاصله داخلی', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::DIMENSIONS,
+                                'size_units' => array( 'px' ),
+                                'selectors'  => array(
+                                        $selector => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->add_group_control(
+                        Group_Control_Box_Shadow::get_type(),
+                        array(
+                                'name'     => $id . '_btn_sh',
+                                'label'    => __( 'سایه دکمه', 'hamishop-elementor-widgets' ),
+                                'selector' => $selector,
+                        )
+                );
         }
 }
