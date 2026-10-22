@@ -90,7 +90,7 @@ class HSW_Widget_Blog_Featured extends HSW_Blog_Base {
 
                 echo '<div class="' . esc_attr( $this->root_class( 'blog-featured', 'hsw-bfeat' ) ) . '">';
                 echo '<a class="hsw-bfeat__media" href="' . esc_url( get_permalink( $post ) ) . '">';
-                echo $this->post_image( $post, 'large' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                echo $this->post_image( $post, 'large', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- leading image, never lazy.
                 echo '<span class="hsw-bfeat__badge">' . esc_html( $s['badge_text'] ?? '' ) . '</span>';
                 echo '</a>';
 

@@ -565,9 +565,9 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          * @param string $custom Custom HTML from a widget control.
          * @return string Safe HTML.
          */
-        protected function archive_desc_html( $custom = '', $source = 'term' ) {
+        protected function archive_desc_html( $custom = '', $source = 'both' ) {
                 $custom = trim( (string) $custom );
-                $source = in_array( $source, array( 'term', 'shop', 'auto', 'custom' ), true ) ? $source : 'term';
+                $source = in_array( $source, array( 'both', 'term', 'shop', 'auto', 'custom' ), true ) ? $source : 'both';
 
                 if ( 'custom' === $source && '' !== $custom ) {
                         return wp_kses_post( $custom );
@@ -583,6 +583,26 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
                  * the term's own description field so each category reads
                  * differently, not from a fixed string in the widget.
                  */
+                /*
+                 * «both» = the generated intro (default copy) followed by the
+                 * category's own description. That is what most shops want: a
+                 * consistent opening sentence on every archive plus the real
+                 * per-category copy underneath.
+                 */
+                if ( 'both' === $source ) {
+                        $auto = trim( (string) $this->auto_archive_desc() );
+                        $desc = $term ? term_description( $term ) : '';
+                        $desc = ( $desc && '' !== trim( wp_strip_all_tags( $desc ) ) ) ? $desc : '';
+
+                        if ( '' !== $auto && '' !== $desc ) {
+                                return wp_kses_post( '<p>' . $auto . '</p>' . $desc );
+                        }
+                        if ( '' !== $desc ) {
+                                return wp_kses_post( $desc );
+                        }
+                        return '' !== $auto ? wp_kses_post( $auto ) : $this->auto_archive_desc();
+                }
+
                 if ( 'term' === $source && $term ) {
                         $desc = term_description( $term );
                         if ( $desc && '' !== trim( wp_strip_all_tags( $desc ) ) ) {
@@ -624,7 +644,7 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          * @return string Safe HTML ('' when there is nothing to show).
          */
         protected function archive_desc_block_html( array $s, $mode = 'header' ) {
-                $desc = $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '', isset( $s['desc_source'] ) ? (string) $s['desc_source'] : 'term' );
+                $desc = $this->archive_desc_html( isset( $s['seo_desc'] ) ? (string) $s['seo_desc'] : '', isset( $s['desc_source'] ) ? (string) $s['desc_source'] : 'both' );
                 if ( '' === trim( wp_strip_all_tags( $desc ) ) ) {
                         return '';
                 }

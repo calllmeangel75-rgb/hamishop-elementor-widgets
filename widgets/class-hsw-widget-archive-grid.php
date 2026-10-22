@@ -194,7 +194,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
          * @param string     $alt     Alt text.
          * @return string
          */
-        protected function image_html( $product, $alt ) {
+        protected function image_html( $product, $alt, $priority = false ) {
                 $img_id = $product->get_image_id();
                 if ( $img_id ) {
                         $html = wp_get_attachment_image(
@@ -202,9 +202,11 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 'woocommerce_thumbnail',
                                 false,
                                 array(
-                                        'alt'      => $alt,
-                                        'loading'  => 'lazy',
-                                        'decoding' => 'async',
+                                        'alt'           => $alt,
+                                        /* The first card is the LCP candidate: never lazy-load it. */
+                                        'loading'       => $priority ? 'eager' : 'lazy',
+                                        'fetchpriority' => $priority ? 'high' : 'auto',
+                                        'decoding'      => 'async',
                                 )
                         );
                         if ( $html ) {
@@ -217,7 +219,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
         /**
          * Card markup for one row.
          */
-        protected function card( $kind, $item, $s ) {
+        protected function card( $kind, $item, $s, $priority = false ) {
                 $is_demo   = ( 'demo' === $kind );
                 $img_html  = '';
                 $name      = '';
@@ -274,7 +276,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 $addable  = $product->is_type( 'simple' ) && $product->is_in_stock() && $product->is_purchasable();
                         }
                         list( $note, $note_ok, $note_ic ) = $this->status_note( $product, $s );
-                        $img_html = $this->image_html( $product, $name );
+                        $img_html = $this->image_html( $product, $name, $priority );
                 }
 
                 $cur      = isset( $s['currency'] ) && '' !== trim( (string) $s['currency'] ) ? trim( (string) $s['currency'] ) : HSW_Helpers::currency_label();
@@ -371,8 +373,10 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'ag' ) ); ?><?php echo $is_list ? ' hsw-ag--list' : ''; ?>">
                         <div class="hsw-ag__grid">
+                                <?php $hsw_i = 0; ?>
                                 <?php foreach ( $products as $row ) : ?>
-                                        <?php $this->card( $row[0], $row[1], $s ); ?>
+                                        <?php $this->card( $row[0], $row[1], $s, 0 === $hsw_i ); ?>
+                                        <?php $hsw_i++; ?>
                                 <?php endforeach; ?>
                         </div>
                         <?php if ( empty( $products ) ) : ?>

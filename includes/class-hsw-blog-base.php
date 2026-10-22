@@ -238,14 +238,16 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
         /**
          * Card image (or a neutral gradient placeholder when no thumbnail).
          */
-        protected function post_image( $post, $size = 'medium_large' ) {
+        protected function post_image( $post, $size = 'medium_large', $priority = false ) {
                 if ( has_post_thumbnail( $post ) ) {
                         return get_the_post_thumbnail(
                                 $post,
                                 $size,
                                 array(
-                                        'class'   => 'hsw-blog__img',
-                                        'loading' => 'lazy',
+                                        'class'         => 'hsw-blog__img',
+                                        /* The leading card is the LCP candidate. */
+                                        'loading'       => $priority ? 'eager' : 'lazy',
+                                        'fetchpriority' => $priority ? 'high' : 'auto',
                                 )
                         );
                 }

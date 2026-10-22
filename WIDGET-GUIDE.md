@@ -1073,3 +1073,14 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 
 **نکتهٔ دوم:** پارت‌ها پیش‌فرض خاموش‌اند؛ اگر کامپوزیت خالی رندر شد، در «کنترل ویجت‌ها» پارت‌های
 `hsw-product-*` را روشن کنید.
+
+## توضیحات آرشیو و LCP — v1.11.15
+
+- `archive_desc_html( $custom, $source )` پنج حالت دارد: `both` (پیش‌فرض — متن خودکار + توضیحات
+  دسته)، `term`، `shop`، `auto`، `custom`. در `both` اگر دسته توضیح نداشته باشد فقط متن خودکار
+  برمی‌گردد و اگر متن خودکار خالی باشد فقط توضیحات دسته.
+- **تصویر LCP:** در `hsw-archive-grid` و `hsw-blog-grid` فقط کارت اول `loading="eager"` +
+  `fetchpriority="high"` می‌گیرد؛ بقیه lazy می‌مانند. برای همین `card()` و `image_html()` یک پارامتر
+  `$priority` گرفتند و `post_image()` هم همین‌طور. اگر حلقهٔ تازه‌ای اضافه کردید، شمارنده را فراموش
+  نکنید وگرنه همهٔ کارت‌ها eager می‌شوند.
+- `HSW_Assets::resource_hints()` یک preconnect به gravatar اضافه می‌کند.

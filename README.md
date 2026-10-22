@@ -317,6 +317,27 @@ GPL-2.0-or-later
 - فونت‌ها لوکال‌اند (هیچ درخواست خارجی)، تصاویر `loading="lazy"`، اسکریپت‌ها در فوتر.
 - **سمت هاست:** gzip/Brotli را روشن کنید — همان ۳۱۴KB به ~۵۵KB می‌رسد. این تنها بزرگ‌ترین
   اهرم باقی‌مانده است و در پلاگین قابل انجام نیست.
+- **تصویر LCP:** تصویر کارت اول در آرشیو و شبکهٔ مقالات `loading="eager"` + `fetchpriority="high"` است
+  (بقیه lazy). تصویر اصلی گالری محصول و تصویر شاخص مقاله هم eager هستند.
+- **preconnect** به `secure.gravatar.com` برای آواتارها.
+
+### تنظیم پیشنهادی سرور (برای Lighthouse)
+
+```apache
+# gzip
+AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/json
+
+# cache
+<FilesMatch "\.(css|js|woff2|png|jpg|jpeg|webp|svg|gif|ico)$">
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+<FilesMatch "\.(html)$">
+  Header set Cache-Control "public, max-age=0, must-revalidate"
+</FilesMatch>
+```
+
+در nginx معادل: `gzip on;` و `location ~* \.(css|js|woff2|png|jpg|webp|svg)$ { expires 1y; }`.
+با این دو، همان دو هشدار «No compression applied» و «Cache TTL = None» برطرف می‌شود.
 
 ## اندازهٔ فونت
 

@@ -143,11 +143,12 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                 }
 
                 echo '<div class="hsw-bgrid__grid">';
+                $hsw_i = 0;
                 foreach ( $q->posts as $post ) {
                         $cat = $this->post_category( $post );
 
                         echo '<article class="hsw-bgrid__card">';
-                        echo '<a class="hsw-bgrid__media" href="' . esc_url( get_permalink( $post ) ) . '">' . $this->post_image( $post ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                        echo '<a class="hsw-bgrid__media" href="' . esc_url( get_permalink( $post ) ) . '">' . $this->post_image( $post, 'medium_large', 0 === $hsw_i ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                         echo '</a>';
                         echo '<div class="hsw-bgrid__body">';
                         if ( $cat ) {
@@ -171,6 +172,7 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                         echo '</div>';
 
                         echo '</div></article>';
+                        $hsw_i++;
                 }
                 echo '</div>';
 

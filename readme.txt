@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.14
+Stable tag: 1.11.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.15 =
+* **توضیحات آرشیو ترکیبی شد:** حالت پیش‌فرض حالا «متن خودکار + توضیحات دسته‌بندی» است — یک جملهٔ ثابت
+  برای همهٔ آرشیوها، و بعد توضیحات واقعی همان دسته زیرش. حالت‌های «فقط دسته»، «برگهٔ فروشگاه»،
+  «فقط خودکار» و «متن ثابت» هم باقی مانده‌اند.
+* **بهینه‌سازی LCP (تصویر اول):** تصویر کارت اول در آرشیو محصولات و شبکهٔ مقالات دیگر `lazy` نیست و
+  با `fetchpriority="high"` می‌آید؛ بقیهٔ کارت‌ها lazy می‌مانند. تصویر شاخص مقاله و تصویر اصلی گالری
+  محصول هم از قبل eager بودند.
+* **preconnect به `secure.gravatar.com`** اضافه شد (آواتار نویسنده و دیدگاه‌ها).
+* دو مورد باقی‌ماندهٔ Lighthouse سمت هاست است و در پلاگین قابل انجام نیست: «No compression applied»
+  (gzip/Brotli) و «Cache TTL = None» (هدر `Cache-Control`). نمونهٔ تنظیم در README آمده.
+* به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۵.
 
 = 1.11.14 =
 * **بخش «رنگ‌ها و فونت (یکپارچه)» در ویجت صفحهٔ کامل محصول:** یک‌جا و بدون رفتن به ده بخش جدا.

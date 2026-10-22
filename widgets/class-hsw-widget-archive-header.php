@@ -133,14 +133,15 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                         array(
                                 'label'       => __( 'منبع توضیحات', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SELECT,
-                                'default'     => 'term',
+                                'default'     => 'both',
                                 'options'     => array(
-                                        'term'   => __( 'توضیحات خود دسته‌بندی (داینامیک)', 'hamishop-elementor-widgets' ),
+                                        'both'   => __( 'متن خودکار + توضیحات دسته‌بندی (پیشنهادی)', 'hamishop-elementor-widgets' ),
+                                        'term'   => __( 'فقط توضیحات خود دسته‌بندی', 'hamishop-elementor-widgets' ),
                                         'shop'   => __( 'توضیحات برگهٔ فروشگاه', 'hamishop-elementor-widgets' ),
-                                        'auto'   => __( 'متن خودکار (نام دسته + تعداد کالا)', 'hamishop-elementor-widgets' ),
+                                        'auto'   => __( 'فقط متن خودکار (نام دسته + تعداد کالا)', 'hamishop-elementor-widgets' ),
                                         'custom' => __( 'متن ثابت زیر', 'hamishop-elementor-widgets' ),
                                 ),
-                                'description' => __( 'در حالت «توضیحات خود دسته‌بندی»، هر دسته متن خودش را نشان می‌دهد؛ اگر دسته توضیح نداشته باشد متن خودکار جایگزین می‌شود.', 'hamishop-elementor-widgets' ),
+                                'description' => __( '«متن خودکار + توضیحات دسته» یک جملهٔ ثابت برای همهٔ آرشیوها می‌گذارد و بعد توضیحات واقعی همان دسته را زیرش اضافه می‌کند؛ اگر دسته توضیح نداشته باشد فقط متن خودکار می‌ماند.', 'hamishop-elementor-widgets' ),
                         )
                 );
 

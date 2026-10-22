@@ -12,6 +12,7 @@ class HSW_Assets {
 
         public function __construct() {
                 add_action( 'wp_enqueue_scripts', array( $this, 'register' ) );
+		add_filter( 'wp_resource_hints', array( $this, 'resource_hints' ), 10, 2 );
                 add_filter( 'elementor/frontend/print_google_fonts', array( $this, 'filter_google_fonts' ) );
                 add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
@@ -148,6 +149,21 @@ class HSW_Assets {
                 );
 
                 $element->end_controls_section();
+        }
+
+        /**
+         * Warm the gravatar connection: author boxes and comments load avatars
+         * from secure.gravatar.com, and Lighthouse flagged the extra handshake.
+         *
+         * @param array  $urls          Hint URLs.
+         * @param string $relation_type Relation type.
+         * @return array
+         */
+        public function resource_hints( $urls, $relation_type ) {
+                if ( 'preconnect' === $relation_type && ! in_array( 'https://secure.gravatar.com', $urls, true ) ) {
+                        $urls[] = 'https://secure.gravatar.com';
+                }
+                return $urls;
         }
 
         /**
