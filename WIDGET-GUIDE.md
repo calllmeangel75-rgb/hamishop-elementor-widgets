@@ -513,7 +513,7 @@ items + coupon + summary + mobile flow with sticky bottom bar).
 
 CSS: `assets/css/hsw-cart.css` — JS: `assets/js/hsw-cart.js` — پایه: `includes/class-hsw-cart-base.php`
 اکشن‌ها: `includes/class-hsw-cart-actions.php` (دکمه «خالی کردن سبد» با nonce)
-فونت آیکن: `assets/fonts/material-symbols.woff2` (ساب‌ست ۴۳ آیکن، شامل آیکن‌های سبد)
+فونت آیکن: `assets/fonts/material-symbols.woff2` — ساب‌ست مشترک ۹۶ نام / ۱۹۹ گلیف (۹۲KB).
 
 ## ویجت‌های دسته «حامی — ویجت‌های سبد خرید و پرداخت»
 | ویجت | slug | نقش |
@@ -547,7 +547,7 @@ summary aside + mobile flow with fixed bottom bar).
 CSS: `assets/css/hsw-checkout.css` — JS: `assets/js/hsw-checkout.js`
 پایه: `includes/class-hsw-checkout-base.php` (extends HSW_Cart_Base → money/کنترل‌های مشترک)
 REST: `includes/class-hsw-checkout-rest.php`
-فونت آیکن: `assets/fonts/material-symbols.woff2` (ساب‌ست ۶۸ آیکن — +location_on/add_circle/inventory_2/...)
+فونت آیکن: همان ساب‌ست مشترک `assets/fonts/material-symbols.woff2` — یک فایل برای همهٔ ویجت‌ها.
 
 ## ویجت‌های دسته «حامی — ویجت‌های سبد خرید و پرداخت»
 | ویجت | slug | نقش |
@@ -587,7 +587,7 @@ CSS/JS: همان `assets/css/hsw-checkout.css` + `assets/js/hsw-checkout.js`
 پایه: `includes/class-hsw-pay-base.php` (extends HSW_Checkout_Base)
 REST: `includes/class-hsw-checkout-rest.php` (۴ مسیر: shipping / note / payment / coupon) +
 `includes/class-hsw-checkout-complete.php` (ثبت نهایی سفارش: `POST /hsw/v1/checkout/complete`)
-فونت آیکن: ساب‌ست ۷۷ آیکن (+done/pin_drop/rocket_launch/account_balance/account_balance_wallet/loyalty/history/contact_support/published_with_changes)
+فونت آیکن: همان ساب‌ست مشترک. فهرست کامل نام‌ها در `includes/class-hsw-icon-set.php` (ساختهٔ `tools/build-icons.py`).
 
 ## ویجت‌های جدید دسته «حامی — ویجت‌های سبد خرید و پرداخت»
 | ویجت | slug | نقش |
@@ -920,20 +920,34 @@ CSS: `assets/css/hsw-post.css` · JS: `assets/js/hsw-post.js` · دسته: `hami
 
 ### بازسازی ساب‌ست فونت آیکون
 
-فونت `assets/fonts/material-symbols.woff2` یک ساب‌ست است. برای افزودن آیکون تازه:
+فونت `assets/fonts/material-symbols.woff2` یک ساب‌ست است. کل چرخه سه اسکریپت دارد:
+
+```
+python tools/audit-icons.py                 # چه نام‌هایی در کد استفاده شده؟ کدام‌ها گلیف ندارند؟
+python tools/audit-icons.py --write         # نام‌های تازه را به tools/_icons.txt اضافه کن
+python tools/build-icons.py tools/_full.woff2   # ساب‌ست + includes/class-hsw-icon-set.php
+python tools/build-assets.py                # مینیفای CSS/JS
+```
 
 1. فونت کامل را از گوگل بگیرید:
    `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200`
-   و آدرس `fonts.gstatic.com/...woff2` را دانلود کنید (حدود ۴MB).
-2. فهرست نام‌ها را از کد استخراج کنید (`icon( 'x' )` / `the_icon( 'x' )`) و آیکون تازه را اضافه کنید.
-3. ساب‌ست با **`--no-layout-closure`** و فیتچرهای `rclt,rlig` (نه `liga`):
-   ```
-   pyftsubset full.woff2 --text-file=icons.txt --flavor=woff2 --no-hinting \
-     --layout-features=rclt,rlig --no-layout-closure --output-file=subset.woff2
-   ```
-   بدون `--no-layout-closure` خروجی ۳.۷MB می‌شود؛ با `liga` هم لیگاتورها می‌پرند و همهٔ آیکون‌ها
+   و آدرس `fonts.gstatic.com/...woff2` را در `tools/_full.woff2` ذخیره کنید (حدود ۴MB، در git نیست).
+2. `tools/build-icons.py` هم ساب‌ست را می‌سازد و هم `includes/class-hsw-icon-set.php` را بازتولید
+   می‌کند. آن فایل لیست سفید `HSW_Helpers::icon()` است: هر نامی که در آن نباشد به‌جای متن انگلیسی
+   یک نقطهٔ بی‌طرف نشان می‌دهد. **هرگز دستی ویرایشش نکنید.**
+3. پرچم‌های لازم: `--no-layout-closure` و `--layout-features=rclt,rlig` (نه `liga`).
+   بدون `--no-layout-closure` خروجی ۳.۷MB می‌شود؛ با `liga` لیگاتورها می‌پرند و همهٔ آیکون‌ها
    متن خام می‌شوند. محورهای `FILL/GRAD/opsz/wght` باید در خروجی بمانند (`fvar`/`gvar`).
-4. تست: هر `.hsw-ic` که عرضش > ۴۰px باشد یعنی گلیفش نیست و متن خام رندر شده.
+4. تست: `tests/icons-probe.js` و `tests/icons-flow-probe.js` (Playwright) هر `.hsw-ic` را
+   می‌سنجند؛ نسبت `width / font-size` بزرگ‌تر از ۱.۶ یعنی گلیف نیست و متن خام رندر شده.
+
+> **کش فونت:** `@font-face` از PHP چاپ می‌شود و آدرسش `?v=filemtime(woff2)` دارد. اگر این را به
+> یک `?ver=` ثابت برگردانید، مرورگرها ساب‌ست قدیمی را نگه می‌دارند و آیکون‌های تازه هرگز دیده
+> نمی‌شوند — همان باگی که در ۱.۱۱.۲۰ رفع شد.
+>
+> **کش المنتور:** فیلتر `elementor/widget/render_content` (نگهبان نام آیکون) روی صفحات کش‌شده
+> اجرا نمی‌شود. `HSW_Plugin::maybe_flush_element_cache()` با هر تغییر نسخه،
+> `_elementor_element_cache` را پاک می‌کند تا مارک‌آپ تازه دوباره رندر شود.
 
 ## شخصی‌سازی متن — v1.11.8
 

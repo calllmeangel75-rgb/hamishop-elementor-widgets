@@ -19,6 +19,7 @@ class HSW_Assets {
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
                 add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
+                add_filter( 'elementor/widget/render_content', array( $this, 'guard_icon_markup' ), 20, 2 );
         }
 
         /**
@@ -89,6 +90,36 @@ class HSW_Assets {
                         $content = preg_replace( '/<\/h4>/', '</h3>', $content, 1 );
                 }
                 return $content;
+        }
+
+        /**
+         * Last line of defence: validate every `.hsw-ic` name in the final markup.
+         *
+         * `HSW_Helpers::icon()` already refuses unknown names, but roughly 120
+         * places write the span by hand (`<i class="hsw-ic">delete_sweep</i>`).
+         * Those bypass the helper, so a typo — or an icon that was never added to
+         * the font subset — would paint the word itself into the page. Running
+         * the name through `HSW_Helpers::icon_name()` here means no widget can
+         * ever emit English icon text, however the markup was written.
+         *
+         * @param string $content Widget HTML.
+         * @param mixed  $widget  Widget instance.
+         * @return string
+         */
+        public function guard_icon_markup( $content, $widget ) {
+                if ( ! is_string( $content ) || false === strpos( $content, 'hsw-ic' ) ) {
+                        return $content;
+                }
+
+                $fixed = preg_replace_callback(
+                        '/(<(?:i|span)\b[^>]*\bclass="[^"]*\bhsw-ic\b[^"]*"[^>]*>)([a-z0-9_\-]+)(<\/(?:i|span)>)/i',
+                        static function ( $m ) {
+                                return $m[1] . esc_html( HSW_Helpers::icon_name( $m[2] ) ) . $m[3];
+                        },
+                        $content
+                );
+
+                return is_string( $fixed ) ? $fixed : $content;
         }
 
         /**
@@ -187,6 +218,26 @@ class HSW_Assets {
         }
 
         /**
+         * `@font-face` for the bundled Material Symbols subset.
+         *
+         * Printed from PHP rather than baked into a stylesheet so the URL can
+         * carry `filemtime()` of the woff2. Without that, rebuilding the subset
+         * keeps the same `?ver=1.11.x` URL and browsers serve the previous
+         * font from cache — the icons that were just added keep rendering as
+         * English words no matter how many times the file is replaced.
+         *
+         * @return string
+         */
+        private function icon_font_face() {
+                $file = HSW_DIR . 'assets/fonts/material-symbols.woff2';
+                $ver  = file_exists( $file ) ? (string) filemtime( $file ) : HSW_VERSION;
+
+                return "@font-face{font-family:'Material Symbols Outlined';font-style:normal;font-weight:100 700;"
+                        . "font-display:block;src:url('" . HSW_URL . "assets/fonts/material-symbols.woff2?v=" . $ver . "')"
+                        . " format('woff2-variations');}";
+        }
+
+        /**
          * Register (not enqueue) — Elementor enqueues widget dependencies automatically.
          */
         public function register() {
@@ -196,6 +247,8 @@ class HSW_Assets {
                         array(),
                         HSW_VERSION
                 );
+
+                wp_add_inline_style( 'hsw-fonts', $this->icon_font_face() );
 
                 wp_register_style(
                         'hsw-header',

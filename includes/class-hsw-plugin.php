@@ -47,6 +47,30 @@ final class HSW_Plugin {
                  * registers, and ours was never registered.
                  */
                 add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'cart_fragments' ) );
+                add_action( 'init', array( $this, 'maybe_flush_element_cache' ) );
+        }
+
+        /**
+         * Drop Elementor's cached element HTML whenever the plugin version moves.
+         *
+         * Elementor stores the finished HTML of every element in
+         * `_elementor_element_cache` and, on a cache hit, skips the render pass
+         * entirely — including `elementor/widget/render_content`, which is where
+         * the icon-name guard lives. Without this flush an updated plugin keeps
+         * serving yesterday's markup, so a fixed icon (or any other template
+         * change) would never appear on an existing page.
+         *
+         * One DELETE, once per version — the option write stops it repeating.
+         */
+        public function maybe_flush_element_cache() {
+                if ( HSW_VERSION === get_option( 'hsw_asset_version' ) ) {
+                        return;
+                }
+
+                global $wpdb;
+                $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_element_cache'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+                update_option( 'hsw_asset_version', HSW_VERSION, false );
         }
 
         /**
@@ -106,6 +130,7 @@ final class HSW_Plugin {
                  * fatals the whole site at plugins_loaded (the classic
                  * white-screen-of-death: "Class HSW_Widget_Base not found").
                  */
+                require_once HSW_DIR . 'includes/class-hsw-icon-set.php';
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';

@@ -4,15 +4,6 @@
  * Mobile-first; desktop breakpoint = 768px (matches the mock's md:).
  */
 
-/* ===== Icon font (same bundled subset as the other suites) ===== */
-@font-face {
-        font-family: 'Material Symbols Outlined';
-        font-style: normal;
-        font-weight: 100 700;
-        font-display: block;
-        src: url('../fonts/material-symbols.woff2?ver=1.11.19') format('woff2-variations');
-}
-
 /* ===== Responsive toggles ===== */
 @media (max-width: 767.98px) {
         .hsw-d { display: none !important; }
@@ -57,18 +48,6 @@
 .hsw-b :where(h1, h2, h3, p) { margin: 0; }
 .hsw-b :where(a) { text-decoration: none; color: inherit; }
 .hsw-b :where(button) { font-family: inherit; cursor: pointer; }
-
-.hsw-b .hsw-ic {
-        font-family: 'Material Symbols Outlined';
-        font-weight: normal;
-        font-style: normal;
-        line-height: 1;
-        display: inline-block;
-        direction: ltr;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        -webkit-font-smoothing: antialiased;
-        user-select: none;
-}
 
 /* =========================================================================
  *  HERO

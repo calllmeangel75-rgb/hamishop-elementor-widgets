@@ -30,49 +30,96 @@ class HSW_Helpers {
 
         /**
          * Material Symbols icon markup (bundled subset font, zero external requests).
+         *
+         * The subset is a ligature font: the span's text IS the icon name, and the
+         * font swaps it for a glyph. If a name has no glyph the browser happily
+         * paints the raw word — the "English words in the UI" bug. Two guards stop
+         * that here, at the single choke point every widget goes through:
+         *
+         *   1. friendly names are mapped to their real Material name,
+         *   2. anything HSW_Icon_Set does not know becomes a neutral dot glyph
+         *      (and is reported under WP_DEBUG so the list can grow).
+         *
+         * @param string $name  Glyph name.
+         * @param string $class Extra CSS class.
+         * @param bool   $fill  Filled variant.
+         * @return string
          */
         public static function icon( $name, $class = '', $fill = false ) {
+                $name = self::icon_name( $name );
+
+                $style = $fill ? ' style="font-variation-settings:\'FILL\' 1;"' : '';
+
+                return '<span class="hsw-ic ' . esc_attr( $class ) . '"' . $style . '>' . esc_html( $name ) . '</span>';
+        }
+
+        /**
+         * Resolve a friendly/legacy icon name to one the bundled font can draw.
+         *
+         * Never returns a name that is missing from the subset: an unknown input
+         * degrades to `circle` (a neutral dot) instead of leaking English text.
+         *
+         * @param string $name Requested name.
+         * @return string
+         */
+        public static function icon_name( $name ) {
+                $name = strtolower( trim( (string) $name ) );
+
                 /*
-                 * Several call sites use friendly names that Material Symbols does
-                 * not ship (`bell`, `trash`, `user`, …). Without this map they are
-                 * rendered as raw ligature text — the "English words" bug. Map
-                 * them to the real glyph names here instead of editing 100 call
-                 * sites, and keep the targets present in the font subset
-                 * (tools/_icons.txt).
+                 * Friendly names used across the codebase that Material Symbols
+                 * does not ship under that spelling. Mapped here instead of
+                 * editing ~120 call sites; every target is present in
+                 * tools/_icons.txt.
                  */
                 $aliases = array(
-                        'discount'            => 'percent',
-                        'alert'               => 'warning',
-                        'bell'                => 'notifications',
-                        'calendar'            => 'calendar_month',
-                        'eye'                 => 'visibility',
-                        'gift'                => 'redeem',
-                        'grid'                => 'grid_view',
-                        'heart'               => 'favorite',
-                        'location'            => 'place',
-                        'phone'               => 'call',
-                        'plus'                => 'add',
-                        'spark'               => 'auto_awesome',
-                        'ticket'              => 'confirmation_number',
-                        'trash'               => 'delete',
-                        'truck'               => 'local_shipping',
-                        'user'                => 'person',
-                        'arrow-left'          => 'arrow_back',
-                        'arrow-right'         => 'arrow_forward',
-                        'arrow-left-alt'      => 'arrow_left_alt',
-                        'home'                => 'home',
-                        'checkmark'           => 'check',
-                        'cancel'              => 'close',
-                        'success'             => 'check_circle',
-                        'error'               => 'error',
-                        'info'                => 'info',
-                        'warning'             => 'warning',
+                        'discount'       => 'percent',
+                        'alert'          => 'warning',
+                        'bell'           => 'notifications',
+                        'calendar'       => 'calendar_month',
+                        'eye'            => 'visibility',
+                        'gift'           => 'redeem',
+                        'grid'           => 'grid_view',
+                        'heart'          => 'favorite',
+                        'location'       => 'place',
+                        'location_on'    => 'place',
+                        'phone'          => 'call',
+                        'phone_iphone'   => 'devices',
+                        'plus'           => 'add',
+                        'spark'          => 'auto_awesome',
+                        'ticket'         => 'confirmation_number',
+                        'trash'          => 'delete',
+                        'truck'          => 'local_shipping',
+                        'user'           => 'person',
+                        'arrow-left'     => 'arrow_back',
+                        'arrow-right'    => 'arrow_forward',
+                        'arrow-left-alt' => 'arrow_left_alt',
+                        'checkmark'      => 'check',
+                        'check-circle'   => 'check_circle',
+                        'chevron-left'   => 'chevron_left',
+                        'chevron-right'  => 'chevron_right',
+                        'credit-card'    => 'credit_card',
+                        'shopping-bag'   => 'shopping_bag',
+                        'cancel'         => 'close',
+                        'x'              => 'close',
+                        'success'        => 'check_circle',
+                        'warning'        => 'warning',
+                        'error'          => 'error',
+                        'info'           => 'info',
+                        'home'           => 'home',
                 );
                 if ( isset( $aliases[ $name ] ) ) {
                         $name = $aliases[ $name ];
                 }
-                $style = $fill ? ' style="font-variation-settings:\'FILL\' 1;"' : '';
-                return '<span class="hsw-ic ' . esc_attr( $class ) . '"' . $style . '>' . esc_html( $name ) . '</span>';
+
+                if ( class_exists( 'HSW_Icon_Set' ) && HSW_Icon_Set::has( $name ) ) {
+                        return $name;
+                }
+
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( sprintf( '[HSW/icon] "%s" is not in the bundled icon subset — rendered as a dot. Add it to tools/_icons.txt and rebuild.', $name ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                }
+
+                return 'circle';
         }
 
         /**

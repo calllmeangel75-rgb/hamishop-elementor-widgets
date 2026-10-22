@@ -9,14 +9,6 @@
  * Everything is scoped under .hsw-h so a theme header can never be affected.
  */
 
-@font-face {
-	font-family: 'Material Symbols Outlined';
-	font-style: normal;
-	font-weight: 100 700;
-	font-display: block;
-	src: url('../fonts/material-symbols.woff2?ver=1.11.19') format('woff2-variations');
-}
-
 .hsw-h,
 .hsw-h *,
 .hsw-h *::before,
@@ -76,24 +68,6 @@
 	display: block;
 	max-width: 100%;
 	height: auto;
-}
-
-.hsw-h .hsw-ic {
-	display: inline-block;
-	font-family: 'Material Symbols Outlined';
-	font-weight: normal;
-	font-style: normal;
-	font-size: 20px;
-	line-height: 1;
-	letter-spacing: normal;
-	text-transform: none;
-	white-space: nowrap;
-	word-wrap: normal;
-	direction: ltr;
-	font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	flex-shrink: 0;
 }
 
 .hsw-h :focus-visible {
