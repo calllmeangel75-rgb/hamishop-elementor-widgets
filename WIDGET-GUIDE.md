@@ -1126,3 +1126,16 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 
 **رنگ هاور:** توکن `hover` در پالت → `--hsw-hover`. تب‌های محصول و مجله از آن می‌خوانند؛ دکمه‌ها
 هاور اختصاصی خودشان را در `a_button()` دارند.
+
+## فیدبک افزودن به سبد — v1.11.19
+
+- **Fragmentها:** `HSW_Plugin::cart_fragments()` روی `woocommerce_add_to_cart_fragments` ثبت شده و
+  `[data-hsw-cart-count]` (با `data-count` خام) و `[data-hsw-cart-total]` را برمی‌گرداند. ووکامرس
+  فقط fragmentهای ثبت‌شده را در پاسخ AJAX می‌فرستد؛ نبودن این فیلتر باعث می‌شد شمارندهٔ هدر
+  هرگز عوض نشود.
+- **Toast سراسری:** `globalToast()` در `hsw-product.js` یک `.hsw-toast` روی `<body>` می‌سازد و
+  استایلش را یک‌بار با تزریق `<style id="hsw-toast-css">` اضافه می‌کند. دلیل: toast بیرون از
+  `.hsw-p` است و اگر از آرشیو افزوده شود، `hsw-product.css` لود نشده است.
+- `showToast()` اول toast داخل ویجت (نوار چسبان) را امتحان می‌کند و اگر دیده نشود
+  (`offsetParent === null`) به toast سراسری می‌افتد.
+- بعد از اعمال fragmentها، کلاس `is-empty` روی `.hsw-hd__cart` با `data-count` همگام می‌شود.

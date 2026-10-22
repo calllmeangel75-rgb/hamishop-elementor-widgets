@@ -281,6 +281,12 @@
 					var nodes = document.querySelectorAll(key);
 					nodes.forEach(function (n) { n.outerHTML = res.fragments[key]; });
 				});
+				/* Keep the dimmed "empty cart" styling in sync with the new count. */
+				document.querySelectorAll('.hsw-hd__cart').forEach(function (cart) {
+					var badge = cart.querySelector('[data-hsw-cart-count]');
+					var n = badge ? parseInt(badge.getAttribute('data-count') || '0', 10) : 0;
+					cart.classList.toggle('is-empty', !n);
+				});
 				document.body.dispatchEvent(new Event('wc_fragment_refresh'));
 			}
 		}).catch(function () {
@@ -291,15 +297,66 @@
 		btn.classList.add('is-added');
 		setTimeout(function () { btn.classList.remove('is-added'); }, 2000);
 	}
+	/*
+	 * Success feedback. The in-widget toast only exists inside the sticky bar,
+	 * so on desktop (where that bar is hidden) adding to the cart gave no
+	 * feedback at all. A page-level toast is created on demand as a fallback.
+	 */
 	function showToast(pid) {
+		var shown = false;
 		roots(pid).forEach(function (root) {
 			var toast = root.querySelector('[data-hsw-toast]');
-			if (toast) {
+			if (toast && toast.offsetParent !== null) {
+				shown = true;
 				toast.classList.add('is-visible');
 				clearTimeout(toast._t);
 				toast._t = setTimeout(function () { toast.classList.remove('is-visible'); }, 4000);
 			}
 		});
+		if (!shown) {
+			globalToast();
+		}
+	}
+
+	/*
+	 * The toast is appended to <body>, i.e. outside every widget scope, so it
+	 * cannot rely on a family stylesheet (adding from an archive card loads
+	 * hsw-archive.css, not hsw-product.css). It ships its own rules once.
+	 */
+	function toastStyles() {
+		if (document.getElementById('hsw-toast-css')) { return; }
+		var css = document.createElement('style');
+		css.id = 'hsw-toast-css';
+		css.textContent = [
+			'.hsw-toast{position:fixed;inset-inline:0;bottom:24px;z-index:99999;display:flex;align-items:center;gap:10px;width:max-content;max-width:calc(100vw - 32px);margin-inline:auto;padding:12px 16px;border-radius:12px;background:#0f172a;color:#fff;font-size:13px;font-weight:600;line-height:1.7;box-shadow:0 18px 40px rgba(15,23,42,.28);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .22s ease,transform .22s ease}',
+			'.hsw-toast.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}',
+			'.hsw-toast .hsw-ic{display:inline-block;font-family:"Material Symbols Outlined";font-weight:400;font-style:normal;font-size:20px;line-height:1;color:#34d399;font-variation-settings:"FILL" 1,"wght" 400,"GRAD" 0,"opsz" 24;flex-shrink:0}',
+			'.hsw-toast__link{color:#93c5fd;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}',
+			'.hsw-toast__link:hover{color:#bfdbfe}'
+		].join('');
+		document.head.appendChild(css);
+	}
+
+	function globalToast() {
+		var el = document.getElementById('hsw-add-toast');
+		if (!el) {
+			toastStyles();
+			el = document.createElement('div');
+			el.id = 'hsw-add-toast';
+			el.className = 'hsw-toast';
+			el.setAttribute('role', 'status');
+			el.innerHTML = '<span class="hsw-ic">check_circle</span>'
+				+ '<span class="hsw-toast__txt"></span>'
+				+ '<a class="hsw-toast__link" href="' + (D.cartUrl || '/cart/') + '"></a>';
+			document.body.appendChild(el);
+			var txt = el.querySelector('.hsw-toast__txt');
+			var link = el.querySelector('.hsw-toast__link');
+			if (txt) { txt.textContent = D.addedText || 'Added to cart'; }
+			if (link) { link.textContent = D.viewCart || 'View cart'; }
+		}
+		el.classList.add('is-visible');
+		clearTimeout(el._t);
+		el._t = setTimeout(function () { el.classList.remove('is-visible'); }, 4500);
 	}
 
 	/* ================= ZOOM OVERLAY ================= */

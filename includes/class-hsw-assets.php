@@ -392,6 +392,10 @@ class HSW_Assets {
                         array(
                                 'wcAjax'      => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
                                 'faDigits'    => true,
+                                /* Feedback after a successful add — the product page had none. */
+                                'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),
+                                'addedText'   => __( 'محصول به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
+                                'viewCart'    => __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ),
                         )
                 );
 

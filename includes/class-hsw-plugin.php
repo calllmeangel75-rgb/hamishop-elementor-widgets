@@ -41,6 +41,12 @@ final class HSW_Plugin {
                 add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
                 add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
                 add_filter( 'woocommerce_product_tabs', array( $this, 'localize_product_tabs' ), 50 );
+                /*
+                 * Without this the header cart badge never moves after an AJAX
+                 * add-to-cart: WooCommerce only returns the fragments a plugin
+                 * registers, and ours was never registered.
+                 */
+                add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'cart_fragments' ) );
         }
 
         /**
@@ -53,6 +59,26 @@ final class HSW_Plugin {
          * @param array $tabs WooCommerce tabs.
          * @return array
          */
+        /**
+         * Refresh the header cart badge and subtotal after an AJAX add-to-cart.
+         *
+         * @param array $fragments Fragment selector => markup.
+         * @return array
+         */
+        public function cart_fragments( $fragments ) {
+                if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+                        return $fragments;
+                }
+
+                $count = (int) WC()->cart->get_cart_contents_count();
+                $total = $count ? WC()->cart->get_cart_subtotal() : __( 'خالی', 'hamishop-elementor-widgets' );
+
+                $fragments['[data-hsw-cart-count]'] = '<span class="hsw-hd__badge" data-hsw-cart-count data-count="' . (int) $count . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span>';
+                $fragments['[data-hsw-cart-total]'] = '<span class="hsw-hd__actionsub hsw-hd__carttotal" data-hsw-cart-total>' . wp_kses_post( $total ) . '</span>';
+
+                return $fragments;
+        }
+
         public function localize_product_tabs( $tabs ) {
                 if ( ! is_array( $tabs ) ) {
                         return $tabs;
