@@ -95,6 +95,175 @@
 		};
 	}
 
+	/*
+	 * Pins the header to the viewport and slides it away on scroll-down.
+	 *
+	 * `position: sticky` cannot do this job here: inside Elementor the header
+	 * sits in a widget wrapper that is exactly as tall as the header, so there
+	 * is no travel distance and it scrolls off with the page. We measure the
+	 * header, copy that height into the placeholder that holds its old spot,
+	 * and switch to `position: fixed`.
+	 *
+	 * Hiding is direction-based: any downward scroll past the threshold slides
+	 * it out, any upward scroll brings it straight back. It never hides while
+	 * one of our panels is open, and it reveals on focus so a keyboard user can
+	 * never end up behind an invisible header.
+	 */
+	function initPinAndHide(root) {
+		if (!root.classList.contains('hsw-hd--sticky')) {
+			return;
+		}
+
+		var autohide = root.classList.contains('hsw-hd--autohide');
+		var offset = parseInt(root.getAttribute('data-hsw-hideoffset'), 10);
+		if (isNaN(offset)) {
+			offset = 80;
+		}
+
+		var ph = root.previousElementSibling;
+		if (!ph || !ph.classList.contains('hsw-hd__ph')) {
+			ph = document.createElement('div');
+			ph.className = 'hsw-hd__ph';
+			ph.setAttribute('aria-hidden', 'true');
+			root.parentNode.insertBefore(ph, root);
+		}
+
+		var pinned = false;
+		var raf = 0;
+
+		/*
+		 * Match the pinned header to the box the placeholder occupies, so a
+		 * boxed (non full-bleed) header keeps its width and side offsets. Full
+		 * width headers need no inline styles at all.
+		 */
+		function align() {
+			var r = ph.getBoundingClientRect();
+
+			/* The widget is hidden at this breakpoint (a site can ship a store
+			   header for desktop and a minimal pill for mobile). Leave the CSS
+			   alone instead of collapsing the header to zero width. */
+			if (!r.width || !r.height) {
+				return;
+			}
+
+			var vw = document.documentElement.clientWidth;
+			if (Math.abs(r.left) < 1 && Math.abs(r.width - vw) < 1) {
+				root.style.left = '';
+				root.style.right = '';
+				root.style.width = '';
+				return;
+			}
+			root.style.left = r.left + 'px';
+			root.style.right = 'auto';
+			root.style.width = r.width + 'px';
+		}
+
+		function pin() {
+			if (pinned) {
+				return;
+			}
+			/* Not rendered yet (hidden container) — a resize will retry. */
+			if (!root.offsetWidth) {
+				return;
+			}
+			ph.style.height = root.offsetHeight + 'px';
+			root.classList.add('is-fixed');
+			pinned = true;
+			align();
+		}
+
+		function sync() {
+			raf = 0;
+			if (!pinned) {
+				pin();
+				return;
+			}
+			/* Let the header reflow at the new viewport width before measuring. */
+			root.style.left = '';
+			root.style.right = '';
+			root.style.width = '';
+			ph.style.height = root.offsetHeight + 'px';
+			align();
+		}
+
+		pin();
+
+		window.addEventListener('resize', function () {
+			if (!raf) {
+				raf = window.requestAnimationFrame(sync);
+			}
+		}, { passive: true });
+
+		/* Web fonts change the header height after first paint. */
+		if (document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(sync);
+		}
+
+		if (!autohide) {
+			return;
+		}
+
+		var hidden = false;
+		var last = window.scrollY;
+		var ticking = false;
+
+		/*
+		 * `instant` matters: a transform turns the header into the containing
+		 * block for the `position: fixed` drawer nested inside it, so a panel
+		 * that opens mid-transition would size itself to the header instead of
+		 * the viewport. Every reveal that a panel can trigger is instant.
+		 */
+		function apply(value, instant) {
+			if (value === hidden) {
+				return;
+			}
+			hidden = value;
+			if (!instant) {
+				root.classList.toggle('is-hidden', value);
+				return;
+			}
+			root.style.transition = 'none';
+			root.classList.toggle('is-hidden', value);
+			void root.offsetWidth;
+			root.style.transition = '';
+		}
+
+		function busy() {
+			/* Never slide away while the user is inside one of our own panels. */
+			return !!(root.querySelector('.is-open') || root.querySelector('[aria-expanded="true"]'));
+		}
+
+		function update() {
+			ticking = false;
+			var y = window.scrollY;
+			var delta = y - last;
+
+			if (y <= offset || busy()) {
+				apply(false, true);
+			} else if (delta > 8) {
+				apply(true, false);
+			} else if (delta < -6) {
+				apply(false, false);
+			}
+			last = y;
+		}
+
+		window.addEventListener('scroll', function () {
+			if (!ticking) {
+				ticking = true;
+				window.requestAnimationFrame(update);
+			}
+		}, { passive: true });
+
+		/* A hidden header must never swallow focus or a click target. */
+		root.addEventListener('focusin', function () {
+			apply(false, true);
+		});
+		root.addEventListener('pointerdown', function () {
+			apply(false, true);
+		});
+	}
+
 	function initHeader(root) {
 		if (!root || root.getAttribute('data-hsw-init') === '1') {
 			return;
@@ -497,6 +666,8 @@
 			window.addEventListener('scroll', onScroll, { passive: true });
 			onScroll();
 		}
+
+		initPinAndHide(root);
 
 		/* Cart count / subtotal */
 		var countEls = all(root, '[data-hsw-cart-count]');

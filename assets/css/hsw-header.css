@@ -75,23 +75,83 @@
 	outline-offset: 2px;
 }
 
-/* Sticky shell */
+/* =========================================================================
+ * Sticky shell + smart hide
+ *
+ * `position: sticky` alone cannot hold this header: inside Elementor the
+ * widget wrapper is exactly as tall as the header, so there is no travel
+ * distance and the header just scrolls away. JS measures the header, copies
+ * that height into `.hsw-hd__ph` (so the page never jumps), then pins the
+ * header with `position: fixed`. The sticky rule below stays as a graceful
+ * fallback for layouts where it does work and JS never runs.
+ * ====================================================================== */
+
 .hsw-hd--sticky {
 	position: sticky;
-	top: 0;
+	top: var(--hsw-hd-top, 0px);
 }
 
+/* Height holder that keeps the document from shifting when the header pins. */
+.hsw-hd__ph {
+	display: block;
+	width: 100%;
+	height: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.hsw-hd--sticky.is-fixed {
+	position: fixed;
+	inset-inline: 0;
+	top: var(--hsw-hd-top, 0px);
+	z-index: 900;
+}
+
+/*
+ * Distance from the viewport edge: WP admin bar + floating (minimal) pill.
+ *
+ * The zero case is written `calc(0px)`, not `0px`, on purpose: the CSS
+ * minifier rewrites a bare `0px` to `0`, and `calc(-100% - 0)` is a type
+ * error — the browser then drops the whole transform and the header never
+ * hides. Do not "tidy" this back to `0px`.
+ */
+.hsw-hd--sticky { --hsw-hd-top: calc(0px); }
+.hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 16px; }
+body.admin-bar .hsw-hd--sticky { --hsw-hd-top: 32px; }
+body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
+
 .hsw-hd--minimal.hsw-hd--sticky {
-	top: 16px;
 	padding: 0 clamp(12px, 2.5vw, 24px);
 }
 
-body.admin-bar .hsw-hd--sticky {
-	top: 32px;
+@media (max-width: 1024px) {
+	.hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 8px; }
+	body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 40px; }
 }
 
-body.admin-bar .hsw-hd--minimal.hsw-hd--sticky {
-	top: 48px;
+@media (max-width: 782px) {
+	body.admin-bar .hsw-hd--sticky { --hsw-hd-top: 46px; }
+	body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 54px; }
+}
+
+/*
+ * Smart hide. `transform` is only ever set while hidden, never at rest: a
+ * transform on the header would turn it into the containing block for the
+ * `position: fixed` mobile drawer nested inside, and the drawer would stop
+ * covering the viewport.
+ */
+.hsw-hd--autohide.is-fixed {
+	transition: transform .34s cubic-bezier(.22, .61, .36, 1);
+}
+
+.hsw-hd--autohide.is-fixed.is-hidden {
+	transform: translateY(calc(-100% - var(--hsw-hd-top, 0px)));
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hsw-hd--autohide.is-fixed {
+		transition: none;
+	}
 }
 
 .hsw-hd--store.is-stuck {
@@ -1916,14 +1976,6 @@ html.hsw-hd-lock body {
 	.hsw-hd__searchform--compact .hsw-hd__searchbtn {
 		width: 38px;
 		padding: 0;
-	}
-
-	.hsw-hd--minimal.hsw-hd--sticky {
-		top: 8px;
-	}
-
-	body.admin-bar .hsw-hd--minimal.hsw-hd--sticky {
-		top: 40px;
 	}
 }
 

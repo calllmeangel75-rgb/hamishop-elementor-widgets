@@ -843,6 +843,39 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		/*
+		 * Smart hide: out of the way on scroll-down, back on the first
+		 * scroll-up. Only meaningful while the header is pinned, hence the
+		 * condition. Enabled by default because a pinned header that never
+		 * yields eats a third of a phone screen.
+		 */
+		$this->add_control(
+			'hd_autohide',
+			array(
+				'label'       => __( 'مخفی شدن هوشمند هنگام اسکرول', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'condition'   => array( 'hd_sticky' => 'yes' ),
+				'description' => __( 'با اسکرول به پایین هدر کنار می‌رود و با کوچک‌ترین اسکرول به بالا دوباره ظاهر می‌شود — موبایل و دسکتاپ.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
+			'hd_autohide_offset',
+			array(
+				'label'      => __( 'آستانهٔ شروع (پیکسل)', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 500, 'step' => 10 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 80 ),
+				'condition'  => array(
+					'hd_sticky'   => 'yes',
+					'hd_autohide' => 'yes',
+				),
+				'description' => __( 'تا این ارتفاع اسکرول، هدر همیشه می‌ماند؛ بعد از آن با اسکرول به پایین مخفی می‌شود.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
 		$this->ctrl_visibility();
 
 		$this->end_controls_section();
@@ -1148,13 +1181,29 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 * @return string
 	 */
 	protected function open_root( $variant, $s ) {
+		$sticky   = ! isset( $s['hd_sticky'] ) || 'yes' === $s['hd_sticky'];
+		$autohide = $sticky && ( ! isset( $s['hd_autohide'] ) || 'yes' === $s['hd_autohide'] );
+
 		$classes = 'hsw-h hsw-hd hsw-hd--' . $variant;
-		if ( ! isset( $s['hd_sticky'] ) || 'yes' === $s['hd_sticky'] ) {
+		if ( $sticky ) {
 			$classes .= ' hsw-hd--sticky';
+		}
+		if ( $autohide ) {
+			$classes .= ' hsw-hd--autohide';
 		}
 		$vis = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
 		$classes .= ' hsw-vis-' . $vis . $this->hsw_font_class();
 
-		return '<div class="' . esc_attr( $classes ) . '" data-hsw-header data-hsw-fragments="' . esc_url( $this->fragments_url() ) . '" data-hsw-rest="' . esc_url( rest_url( 'hsw/v1/header-products' ) ) . '">';
+		$offset = isset( $s['hd_autohide_offset']['size'] ) ? (int) $s['hd_autohide_offset']['size'] : 80;
+
+		/*
+		 * The pinned header leaves the document flow, so its height has to be
+		 * held by something else or the page jumps up behind it. The
+		 * placeholder sits in the exact spot the header occupied; JS mirrors
+		 * the measured height into it right before pinning.
+		 */
+		$ph = $sticky ? '<div class="hsw-hd__ph" aria-hidden="true"></div>' : '';
+
+		return $ph . '<div class="' . esc_attr( $classes ) . '" data-hsw-header data-hsw-hideoffset="' . esc_attr( $offset ) . '" data-hsw-fragments="' . esc_url( $this->fragments_url() ) . '" data-hsw-rest="' . esc_url( rest_url( 'hsw/v1/header-products' ) ) . '">';
 	}
 }
