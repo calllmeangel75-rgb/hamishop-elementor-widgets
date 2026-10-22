@@ -1034,3 +1034,23 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 
 **باقی‌مانده:** سبد خرید، تسویه حساب، پرداخت، حساب کاربری و صفحهٔ محصول دکمه‌هایشان کلاس مشخص و
 یکدستی ندارند؛ قبل از افزودن کنترل باید کلاس دکمه‌ها استانداردسازی شود (مثلاً `hsw-btn` مشترک).
+
+## مینیفای دارایی‌ها — v1.11.13
+
+- `tools/build-assets.py` هر `assets/css/*.css` و `assets/js/*.js` را به `.min.*` تبدیل می‌کند
+  (`csscompressor` + `rjsmin`). خروجی: CSS ۴۲۷→۳۱۴KB، JS ۱۲۳→۷۶KB.
+- `HSW_Assets::asset( $rel )` مسیر را می‌دهد: اگر `SCRIPT_DEBUG` خاموش و فایل `.min` موجود باشد،
+  نسخهٔ مینیفای‌شده؛ وگرنه فایل خوانا. هر ۲۰ ثبت دارایی از همین هلپر رد می‌شوند — **مسیر جدید را
+  مستقیم با `HSW_URL` نسازید**.
+- پوشهٔ `tools/` در بستهٔ نصبی نیست (فقط برای توسعه).
+- بعد از هر تغییر CSS/JS اسکریپت را اجرا کنید، وگرنه نسخهٔ قدیمی `.min` سرو می‌شود.
+
+## متن‌های ویجت‌های لوپ — v1.11.12/13
+
+`controls_card_content()` این متن‌ها را در «اجزای کارت محصول» می‌دهد: `currency`, `price_label`,
+`txt_sale`, `txt_feat`, `txt_ship`, `txt_oos`, `txt_notify`, `txt_buy`, `txt_add`, `brand_attr`, `ico_add`.
+`controls_header()` هم `hdr_icon/title/badge/sub/link_d/link_m/link_url` را می‌دهد.
+
+نکته: `get_controls()` در المنتور کلید `label` را برمی‌دارد (در رجیستری Controls_Manager می‌ماند)،
+پس نبودن `label` در dump به معنی نبودن برچسب در پنل نیست — برای بررسی متن‌ها کد منبع را بخوانید،
+نه خروجی `get_controls()`.

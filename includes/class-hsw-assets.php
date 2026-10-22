@@ -151,26 +151,46 @@ class HSW_Assets {
         }
 
         /**
+         * Asset URL, preferring the minified build.
+         *
+         * tools/build-assets.py writes `.min.css` / `.min.js` next to every
+         * source. They are used unless SCRIPT_DEBUG is on, so development keeps
+         * readable files while production downloads 26–38% less.
+         *
+         * @param string $rel Path relative to the plugin root.
+         * @return string
+         */
+        private function asset( $rel ) {
+                $min = preg_replace( '/\.(css|js)$/', '.min.$1', $rel );
+
+                if ( ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) && $min && file_exists( HSW_DIR . $min ) ) {
+                        return HSW_URL . $min;
+                }
+
+                return HSW_URL . $rel;
+        }
+
+        /**
          * Register (not enqueue) — Elementor enqueues widget dependencies automatically.
          */
         public function register() {
                 wp_register_style(
                         'hsw-fonts',
-                        HSW_URL . 'assets/css/hsw-fonts.css',
+                        $this->asset( 'assets/css/hsw-fonts.css' ),
                         array(),
                         HSW_VERSION
                 );
 
                 wp_register_style(
                         'hsw-header',
-                        HSW_URL . 'assets/css/hsw-header.css',
+                        $this->asset( 'assets/css/hsw-header.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-header',
-                        HSW_URL . 'assets/js/hsw-header.js',
+                        $this->asset( 'assets/js/hsw-header.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -178,28 +198,28 @@ class HSW_Assets {
 
                 wp_register_style(
                         'hsw-composite',
-                        HSW_URL . 'assets/css/hsw-composite.css',
+                        $this->asset( 'assets/css/hsw-composite.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_style(
                         'hsw-blog',
-                        HSW_URL . 'assets/css/hsw-blog.css',
+                        $this->asset( 'assets/css/hsw-blog.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_style(
                         'hsw-post',
-                        HSW_URL . 'assets/css/hsw-post.css',
+                        $this->asset( 'assets/css/hsw-post.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-post',
-                        HSW_URL . 'assets/js/hsw-post.js',
+                        $this->asset( 'assets/js/hsw-post.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -207,14 +227,14 @@ class HSW_Assets {
 
                 wp_register_style(
                         'hsw-loop',
-                        HSW_URL . 'assets/css/hsw-loop.css',
+                        $this->asset( 'assets/css/hsw-loop.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-loop',
-                        HSW_URL . 'assets/js/hsw-loop.js',
+                        $this->asset( 'assets/js/hsw-loop.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -222,21 +242,21 @@ class HSW_Assets {
 
                 wp_register_style(
                         'hsw-product',
-                        HSW_URL . 'assets/css/hsw-product.css',
+                        $this->asset( 'assets/css/hsw-product.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_style(
                         'hsw-archive',
-                        HSW_URL . 'assets/css/hsw-archive.css',
+                        $this->asset( 'assets/css/hsw-archive.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-archive',
-                        HSW_URL . 'assets/js/hsw-archive.js',
+                        $this->asset( 'assets/js/hsw-archive.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -244,14 +264,14 @@ class HSW_Assets {
 
                 wp_register_style(
                         'hsw-cart',
-                        HSW_URL . 'assets/css/hsw-cart.css',
+                        $this->asset( 'assets/css/hsw-cart.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-cart',
-                        HSW_URL . 'assets/js/hsw-cart.js',
+                        $this->asset( 'assets/js/hsw-cart.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -259,21 +279,21 @@ class HSW_Assets {
 
                 wp_register_style(
                         'hsw-checkout',
-                        HSW_URL . 'assets/css/hsw-checkout.css',
+                        $this->asset( 'assets/css/hsw-checkout.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_style(
                         'hsw-complete',
-                        HSW_URL . 'assets/css/hsw-complete.css',
+                        $this->asset( 'assets/css/hsw-complete.css' ),
                         array( 'hsw-checkout' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-checkout',
-                        HSW_URL . 'assets/js/hsw-checkout.js',
+                        $this->asset( 'assets/js/hsw-checkout.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -281,14 +301,14 @@ class HSW_Assets {
 
                 wp_register_style(
                         'hsw-account',
-                        HSW_URL . 'assets/css/hsw-account.css',
+                        $this->asset( 'assets/css/hsw-account.css' ),
                         array( 'hsw-fonts' ),
                         HSW_VERSION
                 );
 
                 wp_register_script(
                         'hsw-account',
-                        HSW_URL . 'assets/js/hsw-account.js',
+                        $this->asset( 'assets/js/hsw-account.js' ),
                         array(),
                         HSW_VERSION,
                         true
@@ -335,7 +355,7 @@ class HSW_Assets {
 
                 wp_register_script(
                         'hsw-product',
-                        HSW_URL . 'assets/js/hsw-product.js',
+                        $this->asset( 'assets/js/hsw-product.js' ),
                         array(),
                         HSW_VERSION,
                         true
