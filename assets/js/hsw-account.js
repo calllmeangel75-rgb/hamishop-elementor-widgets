@@ -641,6 +641,22 @@
 		});
 	});
 
+	/*
+	 * Fallback for browsers without :has(): the hero has to stop clipping while
+	 * the bell dropdown is open, otherwise the panel is cut off at the hero edge.
+	 */
+	document.querySelectorAll('.hsw-ac__bell').forEach(function (bell) {
+		var hero = bell.closest('.hsw-ac__hero');
+		if (!hero) {
+			return;
+		}
+		var sync = function () {
+			hero.classList.toggle('is-bell-open', bell.hasAttribute('open'));
+		};
+		bell.addEventListener('toggle', sync);
+		sync();
+	});
+
 	document.addEventListener('keydown', function (event) {
 		if ('Escape' === event.key) {
 			document.querySelectorAll('.hsw-ac__bell[open]').forEach(function (bell) {

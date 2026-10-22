@@ -415,9 +415,14 @@
  * Hero
  * ---------------------------------------------------------------------- */
 
+/*
+ * overflow stays visible: the notification bell opens a dropdown below the
+ * hero, and `overflow: hidden` used to clip it (the "masked notice" report).
+ * The decorations that DO need clipping live in .hsw-ac__hero-deco.
+ */
 .hsw-ac__hero {
 	position: relative;
-	overflow: hidden;
+	overflow: visible;
 	border-radius: var(--hsw-ac-radius);
 	background: linear-gradient(125deg, var(--hsw-ac-hero-a), var(--hsw-ac-hero-b));
 	color: #fff;
@@ -431,7 +436,16 @@
 	isolation: isolate;
 }
 
-.hsw-ac__hero::before {
+.hsw-ac__hero-deco {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	border-radius: inherit;
+	z-index: -1;
+	pointer-events: none;
+}
+
+.hsw-ac__hero-deco::before {
 	content: "";
 	position: absolute;
 	inset: auto -50px -95px auto;
@@ -439,7 +453,6 @@
 	height: 240px;
 	border-radius: 50%;
 	border: 34px solid rgba(255, 255, 255, .05);
-	z-index: -1;
 }
 
 .hsw-ac__hero-glow {
@@ -930,9 +943,15 @@ a.hsw-ac__stat:hover {
 	box-sizing: content-box;
 }
 
+/* While the dropdown is open the hero must stack above the sections below it. */
+.hsw-ac__hero:has(.hsw-ac__bell[open]),
+.hsw-ac__hero.is-bell-open {
+	z-index: 40;
+}
+
 .hsw-ac__bell-panel {
 	position: absolute;
-	z-index: 30;
+	z-index: 50;
 	top: calc(100% + 10px);
 	inset-inline-end: 0;
 	width: 330px;

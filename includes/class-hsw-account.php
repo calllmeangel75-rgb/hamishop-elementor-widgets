@@ -1218,7 +1218,13 @@ final class HSW_Account {
 		}
 
 		return '<section class="hsw-ac__hero" aria-labelledby="hsw-ac-hero-title">'
-			. '<div class="hsw-ac__hero-glow" aria-hidden="true"></div>'
+			/*
+			 * The decorative glow and the ::before ring stick out past the hero
+			 * edges, so they live in their own clipped layer. The hero itself
+			 * must stay overflow:visible, otherwise it also clips the bell
+			 * dropdown that hangs below it.
+			 */
+			. '<div class="hsw-ac__hero-deco" aria-hidden="true"><div class="hsw-ac__hero-glow"></div></div>'
 			. '<div class="hsw-ac__hero-content">'
 			. ( $badge ? '<span class="hsw-ac__hero-badge">' . $this->icon( 'check-circle' ) . esc_html( $badge ) . '</span>' : '' )
 			. '<h1 id="hsw-ac-hero-title" class="hsw-ac__hero-title">' . esc_html( $title ) . '</h1>'
