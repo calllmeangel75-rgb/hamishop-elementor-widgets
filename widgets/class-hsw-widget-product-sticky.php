@@ -129,7 +129,7 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                         array(
                                 'label'     => __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}} .hsw-psticky__cart' => '--hsw-cart-bg: {{VALUE}};' ),
+                                'selectors' => array( '{{WRAPPER}}' => '--hsw-cart-bg: {{VALUE}};' ),
                         )
                 );
                 $this->add_control(
@@ -137,7 +137,7 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                         array(
                                 'label'     => __( 'رنگ متن دکمه', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}} .hsw-psticky__cart' => '--hsw-cart-c: {{VALUE}};' ),
+                                'selectors' => array( '{{WRAPPER}}' => '--hsw-cart-c: {{VALUE}};' ),
                         )
                 );
                 $this->ctrl_text( 'st_cart', '{{WRAPPER}} .hsw-psticky__cart' );
@@ -178,12 +178,32 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                 $cart_text = isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ? $s['cart_text'] : __( 'خرید آنلاین', 'hamishop-elementor-widgets' );
                 $cart_url  = $demo ? '#' : ( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '#' );
 
+                /*
+                 * The stepper is an "in cart" control: hide it (and let the buy
+                 * button take the row) until the product really is in the cart.
+                 */
+                $hsw_remove  = '';
+                $in_cart_qty = 0;
+                if ( ! $demo && function_exists( 'WC' ) && WC()->cart && $product ) {
+                        foreach ( WC()->cart->get_cart() as $hsw_key => $hsw_item ) {
+                                if ( (int) $hsw_item['product_id'] === (int) $product->get_id() || (int) $hsw_item['variation_id'] === (int) $product->get_id() ) {
+                                        $hsw_remove  = wc_get_cart_remove_url( $hsw_key );
+                                        $in_cart_qty = (int) $hsw_item['quantity'];
+                                        break;
+                                }
+                        }
+                }
+                $stepper_qty = max( 1, $in_cart_qty );
+
                 $classes = $this->root_class( 'psticky', 'hsw-m' );
                 if ( ! $in_stock && ! $cfp ) {
                         $classes .= ' is-oos';
                 }
                 if ( $cfp ) {
                         $classes .= ' hsw-psticky--cfp';
+                }
+                if ( 0 === $in_cart_qty ) {
+                        $classes .= ' is-not-in-cart';
                 }
 
                 $hidden   = ( 0 === $discount ) ? ' style="display:none"' : '';
@@ -217,27 +237,18 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                                                          * At quantity 1 the minus has nothing to do, so the
                                                          * third control becomes the bin — same as the cart row.
                                                          * It only has a URL when the product is already in the
-                                                         * cart; otherwise it renders disabled.
+                                                         * cart; the JS edits the line through wc-ajax.
                                                          */
-                                                        $hsw_remove = '';
-                                                        if ( function_exists( 'WC' ) && WC()->cart ) {
-                                                                foreach ( WC()->cart->get_cart() as $hsw_key => $hsw_item ) {
-                                                                        if ( (int) $hsw_item['product_id'] === (int) $product->get_id() || (int) $hsw_item['variation_id'] === (int) $product->get_id() ) {
-                                                                                $hsw_remove = wc_get_cart_remove_url( $hsw_key );
-                                                                                break;
-                                                                        }
-                                                                }
-                                                        }
                                                         ?>
-                                                        <div class="hsw-psticky__stepper">
+                                                        <div class="hsw-psticky__stepper<?php echo $stepper_qty <= 1 ? ' is-min' : ''; ?>">
                                                                 <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--plus" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'add' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>
-                                                                <input type="text" class="hsw-psticky__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( 1 ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
+                                                                <input type="text" class="hsw-psticky__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( $stepper_qty ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                 <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'remove' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>
-                                                                <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"<?php echo '' === $hsw_remove ? ' disabled' : ''; ?>>
+                                                                <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'delete' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>
                                                         </div>

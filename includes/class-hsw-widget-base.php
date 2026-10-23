@@ -1889,12 +1889,30 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 $args = wp_parse_args(
                         $args,
                         array(
-                                'size'   => 12,
-                                'radius' => 9,
+                                'size'    => 12,
+                                'radius'  => 9,
+                                /*
+                                 * Optional CSS variable to mirror on the wrapper
+                                 * (e.g. `--hsw-cart-bg`): the quantity stepper and
+                                 * any sibling reads it, so +/− follow the button
+                                 * colour automatically instead of being kept in
+                                 * sync by hand.
+                                 */
+                                'css_var' => '',
                         )
                 );
 
                 $hover = $selector . ':hover, ' . $selector . ':focus-visible';
+                $var   = (string) $args['css_var'];
+
+                $bg_selectors = array( $selector => 'background-color: {{VALUE}}; background-image: none;' );
+                $c_selectors  = array( $selector => 'color: {{VALUE}};' );
+                $h_selectors  = array( $hover => 'background-color: {{VALUE}}; background-image: none;' );
+                if ( '' !== $var ) {
+                        $bg_selectors['{{WRAPPER}}'] = $var . ': {{VALUE}};';
+                        $c_selectors['{{WRAPPER}}']  = $var . '-c: {{VALUE}};';
+                        $h_selectors['{{WRAPPER}}']  = $var . '-hover: {{VALUE}};';
+                }
 
                 $this->add_control(
                         $id . '_btn_h',
@@ -1918,7 +1936,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         array(
                                 'label'     => __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( $selector => 'background-color: {{VALUE}}; background-image: none;' ),
+                                'selectors' => $bg_selectors,
                         )
                 );
 
@@ -1927,7 +1945,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         array(
                                 'label'     => __( 'رنگ متن دکمه', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( $selector => 'color: {{VALUE}};' ),
+                                'selectors' => $c_selectors,
                         )
                 );
 
@@ -1944,7 +1962,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         array(
                                 'label'     => __( 'پس‌زمینه (هاور)', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( $hover => 'background-color: {{VALUE}}; background-image: none;' ),
+                                'selectors' => $h_selectors,
                         )
                 );
 

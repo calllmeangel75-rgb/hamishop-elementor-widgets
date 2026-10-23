@@ -266,13 +266,25 @@
 			var pid3 = scope2.getAttribute('data-hsw-product');
 			var st3 = state(pid3);
 			var delta = parseInt(qb.getAttribute('data-hsw-qty'), 10) || 0;
-			setQty(pid3, st3.qty + delta);
+			var next = setQty(pid3, st3.qty + delta);
+			if (!scope2.classList.contains('is-not-in-cart')) {
+				pushQty(pid3, next);
+			}
 			return;
 		}
 
 		/* --- bin (only shown at quantity 1) --- */
 		var delBtn = t.closest('[data-hsw-del]');
 		if (delBtn) {
+			var scopeD = delBtn.closest('.hsw-p');
+			var pidD   = scopeD ? (scopeD.getAttribute('data-hsw-product') || scopeD.getAttribute('data-hsw-variants')) : '';
+			if (pidD && D.qtyAjax && scopeD && !scopeD.classList.contains('is-not-in-cart')) {
+				pushQty(pidD, 0).then(function () {
+					setRootInCart(pidD, false);
+					setQty(pidD, 1);
+				});
+				return;
+			}
 			var href = delBtn.getAttribute('data-hsw-del') || '';
 			if (href) { window.location.href = href; }
 			return;
@@ -340,7 +352,10 @@
 		var raw = toLatin(el.value);
 		var qty = raw === '' ? 1 : parseInt(raw, 10);
 		if (isNaN(qty) || qty < 1) { qty = 1; }
-		setQty(pid, qty);
+		qty = setQty(pid, qty);
+		if (!scope.classList.contains('is-not-in-cart')) {
+			pushQty(pid, qty);
+		}
 	}
 
 	document.addEventListener('keydown', function (e) {
@@ -366,6 +381,57 @@
 		}
 	});
 
+	/* ================= CART SYNC ================= */
+
+	/*
+	 * The stepper edits a real cart line. Before this, pressing + only changed
+	 * the number on screen — the customer picked 3 and received 1.
+	 */
+	function applyFragments(fragments) {
+		if (!fragments) { return; }
+		Object.keys(fragments).forEach(function (key) {
+			document.querySelectorAll(key).forEach(function (n) { n.outerHTML = fragments[key]; });
+		});
+		/* Keep the dimmed "empty cart" styling in sync with the new count. */
+		document.querySelectorAll('.hsw-hd__cart').forEach(function (cart) {
+			var badge = cart.querySelector('[data-hsw-cart-count]');
+			var n = badge ? parseInt(badge.getAttribute('data-count') || '0', 10) : 0;
+			cart.classList.toggle('is-empty', !n);
+		});
+		document.body.dispatchEvent(new Event('wc_fragment_refresh'));
+	}
+
+	function setRootInCart(pid, inCart) {
+		roots(pid).forEach(function (r) {
+			r.classList.toggle('is-not-in-cart', !inCart);
+			r.setAttribute('data-hsw-in-cart', inCart ? '1' : '0');
+			/* A page cached before the first add may carry a disabled bin. */
+			r.querySelectorAll('[data-hsw-del][disabled]').forEach(function (b) { b.removeAttribute('disabled'); });
+		});
+	}
+
+	function pushQty(pid, qty) {
+		if (!D.qtyAjax) { return Promise.resolve(null); }
+		var st = state(pid);
+		var body = new URLSearchParams();
+		body.set('product_id', pid);
+		if (st.variation && st.variation.id) { body.set('variation_id', st.variation.id); }
+		body.set('quantity', qty);
+		body.set('security', D.qtyNonce || '');
+
+		return fetch(D.qtyAjax, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: body.toString()
+		}).then(function (r) { return r.json(); }).then(function (res) {
+			if (!res || !res.success) { return null; }
+			applyFragments(res.data && res.data.fragments);
+			setRootInCart(pid, !!(res.data && res.data.in_cart));
+			return res.data;
+		}).catch(function () { return null; });
+	}
+
 	/* ================= ADD TO CART ================= */
 
 	function addToCart(btn, pid, st) {
@@ -379,6 +445,9 @@
 		if (st.variation && st.variation.id) { body.set('variation_id', st.variation.id); }
 		body.set('quantity', st.qty);
 
+		var scope    = btn.closest('.hsw-p');
+		var beforeQty = scope ? (parseInt(scope.getAttribute('data-hsw-in-cart') || '0', 10) || 0) : 0;
+
 		var url = D.wcAjax || '/?wc-ajax=add_to_cart';
 		fetch(url, {
 			method: 'POST',
@@ -390,19 +459,16 @@
 			if (res && res.error && res.product_url) { window.location = res.product_url; return; }
 			flashAdded(btn);
 			showAdded(btn, pid, res);
-			if (res && res.fragments) {
-				Object.keys(res.fragments).forEach(function (key) {
-					var nodes = document.querySelectorAll(key);
-					nodes.forEach(function (n) { n.outerHTML = res.fragments[key]; });
-				});
-				/* Keep the dimmed "empty cart" styling in sync with the new count. */
-				document.querySelectorAll('.hsw-hd__cart').forEach(function (cart) {
-					var badge = cart.querySelector('[data-hsw-cart-count]');
-					var n = badge ? parseInt(badge.getAttribute('data-count') || '0', 10) : 0;
-					cart.classList.toggle('is-empty', !n);
-				});
-				document.body.dispatchEvent(new Event('wc_fragment_refresh'));
-			}
+
+			/*
+			 * The item is in the cart now: reveal the stepper (it is hidden
+			 * before the first add) and seed it with the new line quantity.
+			 * WooCommerce adds the requested quantity to an existing line.
+			 */
+			setRootInCart(pid, true);
+			setQty(pid, beforeQty + (st.qty || 1));
+
+			applyFragments(res && res.fragments);
 		}).catch(function () {
 			btn.classList.remove('is-busy');
 		});

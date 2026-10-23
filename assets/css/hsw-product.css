@@ -640,6 +640,17 @@
 .hsw-ppurch__qbtn:hover { background: var(--hsw-surface-c); }
 .hsw-ppurch__qbtn:active { transform: scale(.95); }
 .hsw-ppurch__qbtn .hsw-ic { font-size: 18px !important; }
+
+/*
+ * Quantity 1: the minus has nothing to do, so the bin takes its place — on
+ * every viewport, not just on phones (it used to be inside the 767px query).
+ */
+.hsw-ppurch__stepper.is-min .hsw-ppurch__qbtn--minus { display: none; }
+.hsw-ppurch__stepper.is-min .hsw-ppurch__qbtn--del { display: flex; }
+
+/* The stepper only exists once the product is really in the cart. */
+.hsw-ppurch.is-not-in-cart .hsw-ppurch__qty--inline,
+.hsw-psticky.is-not-in-cart .hsw-psticky__stepper { display: none !important; }
 /* Two classes: themes ship `input[type="text"] { width: 100% }` and win otherwise. */
 .hsw-ppurch .hsw-ppurch__qval {
         width: 2.25rem; flex: 0 0 2.25rem; min-width: 0; text-align: center;
@@ -726,9 +737,6 @@
         .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 36px; height: 44px; }
         .hsw-ppurch__cart { width: auto; flex: 1 1 auto; min-width: 0; }
 
-        /* 1: the minus has nothing to do — the bin takes its place. */
-        .hsw-ppurch__stepper.is-min .hsw-ppurch__qbtn--minus { display: none; }
-        .hsw-ppurch__stepper.is-min .hsw-ppurch__qbtn--del { display: flex; }
 }
 
 @media (min-width: 768px) {
@@ -1298,3 +1306,112 @@
 
 /* Demo note (editor only) */
 .hsw-p .hsw-editor-note { font-size: 12px; color: #b5260b; background: #fff7f6; border: 1px dashed #fc593a; border-radius: 8px; padding: 8px 12px; }
+
+/* =====================================================================
+ * Hello Elementor button reset.
+ *
+ * theme.min.css ships
+ *   [type=button]:hover, [type=button]:focus,
+ *   button:hover, button:focus { background-color:#c36; color:#fff }
+ * which is (0,2,0) and painted every icon button in the product page pink.
+ * Each rule below carries `.hsw-p` (0,3,x) so the theme can never win, and
+ * declares the intended state instead of merely "not pink".
+ * ================================================================== */
+
+/* + / − : transparent, icon in the buy-button colour. */
+.hsw-p .hsw-ppurch__qbtn,
+.hsw-p .hsw-ppurch__qbtn:hover,
+.hsw-p .hsw-ppurch__qbtn:focus,
+.hsw-p .hsw-ppurch__qbtn:focus-visible,
+.hsw-p .hsw-ppurch__qbtn:active,
+.hsw-p .hsw-psticky__qbtn,
+.hsw-p .hsw-psticky__qbtn:hover,
+.hsw-p .hsw-psticky__qbtn:focus,
+.hsw-p .hsw-psticky__qbtn:focus-visible,
+.hsw-p .hsw-psticky__qbtn:active {
+        background: transparent !important;
+        background-image: none !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        color: var(--hsw-qty-c, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container)))) !important;
+}
+
+.hsw-p .hsw-ppurch__qbtn--del,
+.hsw-p .hsw-ppurch__qbtn--del:hover,
+.hsw-p .hsw-ppurch__qbtn--del:focus,
+.hsw-p .hsw-ppurch__qbtn--del:active,
+.hsw-p .hsw-psticky__qbtn--del,
+.hsw-p .hsw-psticky__qbtn--del:hover,
+.hsw-p .hsw-psticky__qbtn--del:focus,
+.hsw-p .hsw-psticky__qbtn--del:active {
+        color: var(--hsw-pal-danger, #ba1a1a) !important;
+}
+
+.hsw-p .hsw-ppurch__qbtn:focus-visible,
+.hsw-p .hsw-psticky__qbtn:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+}
+
+/* Buy button: never pink, and it keeps its own colour when no hover colour
+   was picked (--hsw-cart-bg-hover falls back to --hsw-cart-bg). */
+.hsw-p .hsw-ppurch__cart:hover,
+.hsw-p .hsw-ppurch__cart:focus,
+.hsw-p .hsw-ppurch__cart:focus-visible,
+.hsw-p .hsw-psticky__cart:hover,
+.hsw-p .hsw-psticky__cart:focus,
+.hsw-p .hsw-psticky__cart:focus-visible {
+        background-color: var(--hsw-cart-bg-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container)))) !important;
+        background-image: none !important;
+        color: var(--hsw-cart-c, #fff) !important;
+}
+
+.hsw-p .hsw-ppurch__cart:active,
+.hsw-p .hsw-psticky__cart:active {
+        background-color: var(--hsw-cart-bg-active, var(--hsw-cart-bg-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container))))) !important;
+}
+
+.hsw-p .hsw-ppurch__cart.is-added,
+.hsw-p .hsw-ppurch__cart.is-added:hover,
+.hsw-p .hsw-ppurch__cart.is-added:focus,
+.hsw-p .hsw-psticky__cart.is-added,
+.hsw-p .hsw-psticky__cart.is-added:hover {
+        background-color: var(--hsw-emerald, #10b981) !important;
+        color: #fff !important;
+}
+
+/* Neutral controls: no pink fill, own hover cue preserved. */
+.hsw-p .hsw-pvar__swatch:not(.is-active):hover,
+.hsw-p .hsw-pvar__swatch:not(.is-active):focus-visible,
+.hsw-p .hsw-pvar__mswatch:not(.is-active):hover,
+.hsw-p .hsw-pvar__mswatch:not(.is-active):focus-visible {
+        background-color: transparent !important;
+        color: inherit !important;
+}
+
+.hsw-p .hsw-pvar__chip:not(.is-active):hover,
+.hsw-p .hsw-pvar__chip:not(.is-active):focus-visible,
+.hsw-p .hsw-pvar__mchip:not(.is-active):hover,
+.hsw-p .hsw-pvar__mchip:not(.is-active):focus-visible {
+        background-color: transparent !important;
+        color: var(--hsw-chip-c, var(--hsw-on-surface-variant)) !important;
+        border-color: var(--hsw-primary);
+}
+
+.hsw-p .hsw-ptabs__btn:not(.is-active):hover,
+.hsw-p .hsw-ptabs__btn:not(.is-active):focus-visible {
+        background-color: transparent !important;
+        color: var(--hsw-hover, var(--hsw-on-surface)) !important;
+}
+
+.hsw-p .hsw-pacc__head:hover,
+.hsw-p .hsw-pacc__head:focus,
+.hsw-p .hsw-pacc__head:focus-visible {
+        background-color: transparent !important;
+        color: inherit !important;
+}
+
+.hsw-p .hsw-pgal__dot:not(.is-active):hover,
+.hsw-p .hsw-pgal__dot:not(.is-active):focus-visible {
+        background-color: var(--hsw-on-surface-variant) !important;
+}

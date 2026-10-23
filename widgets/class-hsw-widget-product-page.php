@@ -198,14 +198,14 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                         'buy',
                         __( 'دکمهٔ خرید (جعبه خرید)', 'hamishop-elementor-widgets' ),
                         '{{WRAPPER}} .hsw-ppurch__cart',
-                        array( 'size' => 14, 'radius' => 12 )
+                        array( 'size' => 14, 'radius' => 12, 'css_var' => '--hsw-cart-bg' )
                 );
 
                 $this->a_button(
                         'sticky',
                         __( 'دکمهٔ نوار خرید چسبان', 'hamishop-elementor-widgets' ),
                         '{{WRAPPER}} .hsw-psticky__cart',
-                        array( 'size' => 13, 'radius' => 10 )
+                        array( 'size' => 13, 'radius' => 10, 'css_var' => '--hsw-cart-bg' )
                 );
 
                 $this->end_controls_section();

@@ -314,12 +314,34 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                         $assure = $this->default_assure_items( $in_stock );
                 }
 
+                /*
+                 * Is this product already in the cart? The stepper is an
+                 * "in cart" control: before the first add it must not be shown
+                 * (the customer would see + 1 − next to a «خرید آنلاین» button
+                 * and could not tell what it does).
+                 */
+                $hsw_remove  = '';
+                $in_cart_qty = 0;
+                if ( ! $demo && function_exists( 'WC' ) && WC()->cart ) {
+                        foreach ( WC()->cart->get_cart() as $hsw_key => $hsw_item ) {
+                                if ( (int) $hsw_item['product_id'] === (int) $pid || (int) $hsw_item['variation_id'] === (int) $pid ) {
+                                        $hsw_remove  = wc_get_cart_remove_url( $hsw_key );
+                                        $in_cart_qty = (int) $hsw_item['quantity'];
+                                        break;
+                                }
+                        }
+                }
+                $stepper_qty = max( 1, $in_cart_qty );
+
                 $root_extra = ( $in_stock || $cfp ) ? '' : 'is-oos';
                 if ( $cfp ) {
                         $root_extra .= ' hsw-ppurch--cfp';
                 }
+                if ( 0 === $in_cart_qty ) {
+                        $root_extra .= ' is-not-in-cart';
+                }
                 ?>
-                <div class="<?php echo esc_attr( $this->root_class( 'ppurch', $root_extra ) ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>" data-hsw-max="<?php echo esc_attr( $qty_max ); ?>"<?php echo $cfp ? ' data-hsw-cfp="1"' : ''; ?>>
+                <div class="<?php echo esc_attr( $this->root_class( 'ppurch', $root_extra ) ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>" data-hsw-max="<?php echo esc_attr( $qty_max ); ?>" data-hsw-in-cart="<?php echo esc_attr( $in_cart_qty ); ?>"<?php echo $cfp ? ' data-hsw-cfp="1"' : ''; ?>>
                         <?php if ( $cfp ) : ?>
                                 <div class="hsw-ppurch__top hsw-ppurch__top--cfp">
                                         <div class="hsw-ppurch__cfp">
@@ -350,18 +372,9 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                          * Mobile shows the same row as the cart: plus, value,
                                          * then minus — or the bin once the value is 1.
                                          */
-                                        $hsw_remove = '';
-                                        if ( ! $demo && function_exists( 'WC' ) && WC()->cart ) {
-                                                foreach ( WC()->cart->get_cart() as $hsw_key => $hsw_item ) {
-                                                        if ( (int) $hsw_item['product_id'] === (int) $pid || (int) $hsw_item['variation_id'] === (int) $pid ) {
-                                                                $hsw_remove = wc_get_cart_remove_url( $hsw_key );
-                                                                break;
-                                                        }
-                                                }
-                                        }
                                         ?>
                                         <div class="hsw-ppurch__qty hsw-ppurch__qty--inline">
-                                                <div class="hsw-ppurch__stepper">
+                                                <div class="hsw-ppurch__stepper<?php echo $stepper_qty <= 1 ? ' is-min' : ''; ?>">
                                                         <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'add' ); ?></button>
                                                         <?php
                                                         /*
@@ -369,9 +382,9 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                                          * change the quantity, so typing a number did nothing.
                                                          */
                                                         ?>
-                                                        <input type="text" class="hsw-ppurch__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( 1 ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
+                                                        <input type="text" class="hsw-ppurch__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( $stepper_qty ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                         <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'remove' ); ?></button>
-                                                        <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"<?php echo '' === $hsw_remove ? ' disabled' : ''; ?>><?php echo HSW_Helpers::icon( 'delete' ); ?></button>
+                                                        <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></button>
                                                 </div>
                                         </div>
                                         <button type="button" class="hsw-ppurch__cart" data-hsw-add>
