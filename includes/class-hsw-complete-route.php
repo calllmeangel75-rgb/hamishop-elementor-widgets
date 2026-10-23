@@ -29,6 +29,7 @@ final class HSW_Complete_Route {
         add_filter( 'woocommerce_get_settings_checkout', array( $this, 'settings_field' ), 20, 2 );
         add_filter( 'woocommerce_get_checkout_order_received_url', array( $this, 'route_url' ), 20, 2 );
         add_action( 'template_redirect', array( $this, 'route_request' ) );
+        add_action( 'template_redirect', array( $this, 'guard_pay_address' ), 5 );
     }
 
     /* =========================================================================
@@ -141,6 +142,36 @@ final class HSW_Complete_Route {
         }
         $url = get_permalink( $id );
         return $url ? (string) $url : '';
+    }
+
+    /**
+     * A payment step without a delivery address is a dead end: the order is
+     * built from the customer's address, so the page can only say «برو آدرس
+     * بزن». Send them back to checkout (where the inline form lives) instead.
+     */
+    public function guard_pay_address() {
+        if ( is_admin() || ! function_exists( 'WC' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+            return;
+        }
+
+        $pay_id = self::pay_page_id();
+        if ( ! $pay_id || ! is_page( $pay_id ) ) {
+            return;
+        }
+
+        $customer = WC()->customer;
+        if ( ! $customer ) {
+            return;
+        }
+
+        foreach ( array( 'get_shipping_city', 'get_shipping_address_1', 'get_billing_city', 'get_billing_address_1' ) as $getter ) {
+            if ( '' !== trim( (string) $customer->$getter() ) ) {
+                return;
+            }
+        }
+
+        wp_safe_redirect( add_query_arg( 'hsw-need-address', '1', wc_get_checkout_url() ) );
+        exit;
     }
 
     /* =========================================================================

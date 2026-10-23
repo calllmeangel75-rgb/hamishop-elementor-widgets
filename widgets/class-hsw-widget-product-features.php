@@ -52,12 +52,14 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
          * @return array
          */
         protected function default_desk_items() {
-                $d     = $this->demo();
-                $items = array();
-                foreach ( $d['features_d'] as $text ) {
-                        $items[] = array( 'text' => $text );
-                }
-                return $items;
+                /*
+                 * No demo defaults: the design's Samsung texts used to be the
+                 * control default, so every product without attributes showed
+                 * «Galaxy AI» / «تیتانیوم» as if they were real specs.
+                 * Empty → the widget reads the product's own attributes and
+                 * renders nothing when the product has none.
+                 */
+                return array();
         }
 
         /**
@@ -66,16 +68,8 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
          * @return array
          */
         protected function default_mob_items() {
-                $d     = $this->demo();
-                $items = array();
-                foreach ( $d['features_m'] as $row ) {
-                        $items[] = array(
-                                'icon'  => isset( $row['icon'] ) ? $row['icon'] : 'tune',
-                                'label' => isset( $row['label'] ) ? $row['label'] : '',
-                                'value' => isset( $row['value'] ) ? $row['value'] : '',
-                        );
-                }
-                return $items;
+                /* See default_desk_items(): no mock specs on real products. */
+                return array();
         }
 
         /**
@@ -235,6 +229,35 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
         }
 
         /**
+         * Is this string one of the old design-demo feature texts?
+         *
+         * Templates saved before this release persisted the Samsung mock into
+         * the repeater, so the value survives a default change. Dropping the
+         * known strings keeps those pages clean without touching the editor.
+         *
+         * @param string $text Row text / label / value.
+         * @return bool
+         */
+        protected function is_demo_text( $text ) {
+                $text = trim( (string) $text );
+                if ( '' === $text ) {
+                        return false;
+                }
+                $d = $this->demo();
+                foreach ( (array) $d['features_d'] as $demo ) {
+                        if ( trim( (string) $demo ) === $text ) {
+                                return true;
+                        }
+                }
+                foreach ( (array) $d['features_m'] as $row ) {
+                        if ( trim( (string) ( $row['label'] ?? '' ) ) === $text || trim( (string) ( $row['value'] ?? '' ) ) === $text ) {
+                                return true;
+                        }
+                }
+                return false;
+        }
+
+        /**
          * Render the desktop check-list and the mobile bento grid.
          */
         protected function render() {
@@ -254,9 +277,10 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         $raw = ( isset( $s['desk_items'] ) && is_array( $s['desk_items'] ) ) ? $s['desk_items'] : array();
                         foreach ( $raw as $item ) {
                                 $text = isset( $item['text'] ) ? $item['text'] : '';
-                                if ( '' !== trim( (string) $text ) ) {
-                                        $desk[] = array( 'text' => $text );
+                                if ( '' === trim( (string) $text ) || $this->is_demo_text( $text ) ) {
+                                        continue;
                                 }
+                                $desk[] = array( 'text' => $text );
                         }
                 }
 
@@ -275,6 +299,9 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                                 $label = isset( $item['label'] ) ? $item['label'] : '';
                                 $value = isset( $item['value'] ) ? $item['value'] : '';
                                 if ( '' === trim( (string) $label ) && '' === trim( (string) $value ) ) {
+                                        continue;
+                                }
+                                if ( $this->is_demo_text( $label ) && $this->is_demo_text( $value ) ) {
                                         continue;
                                 }
                                 $mob[] = array(

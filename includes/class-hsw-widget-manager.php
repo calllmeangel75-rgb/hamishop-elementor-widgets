@@ -645,6 +645,35 @@ final class HSW_Widget_Manager {
 		}
 	}
 
+
+	/**
+	 * `options.php` in the same directory as the current admin screen.
+	 *
+	 * The dashboard can live behind a custom path (HamiShop → امنیت): a
+	 * relative `options.php` then resolves outside wp-admin and WordPress
+	 * redirects it to a URL the security guard answers with 404, so nothing is
+	 * saved. Deriving the action from the current request keeps the POST on the
+	 * path that actually works, with or without the custom slug.
+	 *
+	 * @return string
+	 */
+	protected function options_form_action() {
+		/*
+		 * HamiShop → امنیت can move the dashboard to a custom slug. The guard
+		 * rewrites REQUEST_URI to /wp-admin/… before the page renders, and a POST
+		 * there is answered with 404, so the form has to use the public path.
+		 */
+		if ( class_exists( 'HSW_Security' ) ) {
+			$security = HSW_Security::get();
+			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
+			if ( '' !== $slug ) {
+				return home_url( '/' . $slug . '/options.php' );
+			}
+		}
+		return admin_url( 'options.php' );
+	}
+
+
 	public function register_settings() {
 		register_setting(
 			'hsw_widgets_group',
@@ -839,7 +868,7 @@ final class HSW_Widget_Manager {
 				</aside>
 
 				<main class="hsw-wm-main">
-					<form method="post" action="options.php" class="hsw-wm-form" data-hsw-widgets>
+					<form method="post" action="<?php echo esc_url( $this->options_form_action() ); ?>" class="hsw-wm-form" data-hsw-widgets>
 						<?php settings_fields( 'hsw_widgets_group' ); ?>
 						<input type="hidden" name="<?php echo esc_attr( self::OPTION ); ?>[]" value="">
 
@@ -942,7 +971,10 @@ final class HSW_Widget_Manager {
 										<small><?php esc_html_e( 'پیشنهاد ما: روشن. مشتری در حال مرور است و «ادامه خرید» او را در همان صفحه نگه می‌دارد.', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
 									<span class="hsw-wm-switch">
+										<?php /* Hidden "no" first: an unchecked box posts nothing, so the option would keep its old value forever. */ ?>
+										<input type="hidden" name="hsw_add_feedback[modal_archive]" value="no" />
 										<input type="checkbox" id="hsw-fb-archive" name="hsw_add_feedback[modal_archive]" value="yes" <?php checked( $fb['archive'] ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
 									</span>
 								</label>
 
@@ -952,7 +984,9 @@ final class HSW_Widget_Manager {
 										<small><?php esc_html_e( 'پیش‌فرض خاموش. در صفحهٔ محصول مشتری همان کالا را می‌بیند و مودال روی گالری می‌افتد؛ اگر مودال را می‌خواهید، روشنش کنید. در حالت خاموش فقط یک پیام کوتاه نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
 									<span class="hsw-wm-switch">
+										<input type="hidden" name="hsw_add_feedback[modal_product]" value="no" />
 										<input type="checkbox" id="hsw-fb-product" name="hsw_add_feedback[modal_product]" value="yes" <?php checked( $fb['product'] ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
 									</span>
 								</label>
 							</div>
@@ -974,7 +1008,9 @@ final class HSW_Widget_Manager {
 										<small><?php esc_html_e( 'با روشن بودن، محصولات ناموجود در همهٔ صفحات فروشگاه و دسته‌بندی‌ها بعد از موجودها نمایش داده می‌شوند؛ ترتیب بقیه (قیمت، جدیدترین، تخفیف) دست‌نخورده می‌ماند.', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
 									<span class="hsw-wm-switch">
+										<input type="hidden" name="hsw_oos_last" value="no" />
 										<input type="checkbox" id="hsw-oos-last" name="hsw_oos_last" value="yes" <?php checked( 'yes', get_option( 'hsw_oos_last', 'yes' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
 									</span>
 								</label>
 							</div>
@@ -1000,6 +1036,29 @@ final class HSW_Widget_Manager {
 									</span>
 								</div>
 							</div>
+
+							<?php
+							/*
+							 * Stores often have a free-shipping method in a WooCommerce
+							 * zone *and* this setting. Show the zone value so the number
+							 * in the cart does not look like a bug in this field.
+							 */
+							$wc_free = class_exists( 'HSW_Free_Shipping' ) ? HSW_Free_Shipping::wc_threshold() : 0;
+							if ( $wc_free > 0 ) :
+								?>
+								<p class="hsw-wm-note hsw-wm-note--info">
+									<?php
+									echo esc_html(
+										sprintf(
+											/* translators: %s: amount. */
+											__( 'در روش‌های ارسال ووکامرس، «ارسال رایگان» از %s تومان به بالا فعال است؛ همان عدد در سبد خرید اعمال می‌شود. اگر می‌خواهید سقف این افزونه جای آن را بگیرد، ابتدا آن روش را در ووکامرس حذف کنید.', 'hamishop-elementor-widgets' ),
+											HSW_Helpers::fa_num( number_format_i18n( $wc_free ) )
+										)
+									);
+									?>
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>"><?php esc_html_e( 'ویرایش روش‌های ارسال', 'hamishop-elementor-widgets' ); ?></a>
+								</p>
+							<?php endif; ?>
 						</section>
 
 						<div class="hsw-wm-savebar">
@@ -1126,6 +1185,9 @@ final class HSW_Widget_Manager {
 			.hsw-wm-sectiontitle h2{margin:0;font-size:15px;font-weight:800;color:#0f2740}
 			.hsw-wm-sectiontitle p{margin:2px 0 0;font-size:11.5px;color:#6b7c90}
 			.hsw-wm-nav--settings{margin-top:4px}
+			.hsw-wm-note{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin:0;padding:10px 12px;border-radius:10px;font-size:11.5px;line-height:1.9}
+			.hsw-wm-note--info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
+			.hsw-wm-note a{color:#1d4ed8;font-weight:700;text-decoration:none}
 			.hsw-wm-switch{display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;width:44px;height:30px;margin:0}
 			.hsw-wm-switch input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
 			.hsw-wm-track{width:40px;height:23px;border-radius:999px;background:#cbd5e1;position:relative;transition:background .18s;box-shadow:inset 0 1px 2px rgba(15,39,64,.15)}

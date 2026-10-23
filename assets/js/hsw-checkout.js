@@ -240,7 +240,28 @@
         } );
 
         /* Day pills (desktop buttons + mobile pills share one selectable order) */
-        document.addEventListener( 'click', function ( event ) {
+        /*
+ * The checkout CTA refuses to move on without a delivery address: the pay page
+ * builds the order from that address, so the customer used to arrive there and
+ * be told to go add one in the account. Bring the inline form into view instead.
+ */
+document.addEventListener( 'click', function ( event ) {
+	var link = event.target.closest( '[data-hsw-need-address]' );
+	if ( ! link ) { return; }
+	var field = document.querySelector( '[data-hsw-address-form] [name="first_name"]' );
+	if ( ! field ) { return; }
+	event.preventDefault();
+	var card = field.closest( '.hsw-ckaddr__card' ) || field;
+	if ( card.scrollIntoView ) { card.scrollIntoView( { behavior: 'smooth', block: 'center' } ); }
+	field.focus( { preventScroll: true } );
+	var msg = document.querySelector( '[data-hsw-address-msg]' );
+	if ( msg ) {
+		msg.hidden = false;
+		msg.textContent = link.getAttribute( 'data-hsw-need-address-text' ) || 'برای ادامه، نشانی تحویل را کامل کنید.';
+	}
+} );
+
+document.addEventListener( 'click', function ( event ) {
                 var day = event.target.closest
                         ? event.target.closest( 'button.hsw-cksched__day:not(.is-off), button.hsw-cksched__mday' )
                         : null;

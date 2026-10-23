@@ -283,8 +283,8 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	flex-shrink: 0;
 	border: 1px solid var(--hsw-hd-border);
 	border-radius: calc(var(--hsw-hd-radius) * .7);
-	background: var(--hsw-hd-search);
-	color: var(--hsw-hd-text);
+	background: var(--hsw-hd-icon-bg, var(--hsw-hd-search));
+	color: var(--hsw-hd-icon, var(--hsw-hd-text));
 }
 
 .hsw-hd__burger .hsw-ic {
@@ -552,7 +552,8 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 
 .hsw-hd__account {
 	border-color: var(--hsw-hd-border);
-	background: var(--hsw-hd-bg);
+	background: var(--hsw-hd-icon-bg, var(--hsw-hd-bg));
+	color: var(--hsw-hd-icon, var(--hsw-hd-text));
 }
 
 .hsw-hd__account:hover {
@@ -561,7 +562,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 }
 
 .hsw-hd__cart {
-	background: var(--hsw-hd-search);
+	background: var(--hsw-hd-icon-bg, var(--hsw-hd-search));
 }
 
 .hsw-hd__cart:hover {
@@ -608,7 +609,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--hsw-hd-primary);
+	color: var(--hsw-hd-icon, var(--hsw-hd-primary));
 }
 
 .hsw-hd__carticon > .hsw-ic {

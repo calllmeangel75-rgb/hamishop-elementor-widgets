@@ -1093,6 +1093,23 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		/*
+		 * The three round icon buttons (menu, account, cart) also accept a
+		 * background: on a light header they are invisible without one, and the
+		 * customer asked for both knobs in one place.
+		 */
+		$this->add_control(
+			'icon_bg',
+			array(
+				'label'       => __( 'پس‌زمینه آیکون‌ها', 'hamishop-elementor-widgets' ),
+				'description' => __( 'دکمه‌های منو، حساب کاربری و سبد خرید. خالی = پس‌زمینهٔ پیش‌فرض هدر.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-icon-bg: {{VALUE}};',
+				),
+			)
+		);
+
 		$this->add_control(
 			'border_color',
 			array(

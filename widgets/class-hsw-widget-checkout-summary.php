@@ -400,6 +400,18 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 $sticky   = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );
                 $free     = $this->opt( 'free_text', __( 'رایگان', 'hamishop-elementor-widgets' ) );
                 $cta_url  = ! empty( $s['next_url']['url'] ) ? (string) $s['next_url']['url'] : $this->pay_step_url();
+
+                /*
+                 * No delivery address = no way forward. The pay page builds the
+                 * order from the customer's address, so sending them there only
+                 * produced «برو حساب کاربری آدرس بزن». The CTA now lands on the
+                 * inline address form instead of the next step.
+                 */
+                $need_address = ( ! $this->is_demo() && ! $this->customer_has_address() );
+                if ( $need_address ) {
+                        $cta_url = '#hsw-ckaddr-first_name';
+                }
+                $cta_attr = $need_address ? ' data-hsw-need-address="1"' : '';
                 $taxes_on = ( ! $this->is_demo() ) && $this->taxes_total() > 0;
 
                 $shipping_html = ( 'free' === $t['shipping'][0] )
@@ -479,11 +491,14 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                 </div>
                                         </div>
 
-                                        <a class="hsw-cksum__cta hsw-k-cta" href="<?php echo esc_url( $cta_url ); ?>">
+                                        <a class="hsw-cksum__cta hsw-k-cta" href="<?php echo esc_url( $cta_url ); ?>"<?php echo $cta_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attribute. ?>>
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', __( 'ادامه و ورود به مرحله پرداخت', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                 <?php echo HSW_Helpers::icon( 'arrow_back' ); ?>
                                         </a>
 
+                                        <?php if ( $need_address ) : ?>
+                                                <p class="hsw-cksum__note hsw-cksum__note--warn"><?php esc_html_e( 'برای ادامه، ابتدا نشانی تحویل را در فرم بالا کامل کنید.', 'hamishop-elementor-widgets' ); ?></p>
+                                        <?php endif; ?>
                                         <?php if ( '' !== trim( $this->opt( 'cta_note', '' ) ) ) : ?>
                                                 <p class="hsw-cksum__note"><?php echo esc_html( $this->opt( 'cta_note', '' ) ); ?></p>
                                         <?php endif; ?>
@@ -548,7 +563,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                 <span class="hsw-cksum__mbar-lbl"><?php echo esc_html( $this->opt( 'bar_pay_lbl', __( 'مبلغ قابل پرداخت', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                 <span class="hsw-cksum__mbar-v" data-hswk="total"><?php echo $this->money( (float) $t['total'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                         </div>
-                                        <a class="hsw-cksum__cta hsw-cksum__cta--m hsw-k-cta" href="<?php echo esc_url( $cta_url ); ?>">
+                                        <a class="hsw-cksum__cta hsw-cksum__cta--m hsw-k-cta" href="<?php echo esc_url( $cta_url ); ?>"<?php echo $cta_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attribute. ?>>
                                                 <span><?php echo esc_html( $this->opt( 'bar_cta', __( 'تأیید و پرداخت نهایی', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                 <?php echo HSW_Helpers::icon( 'chevron_left' ); ?>
                                         </a>

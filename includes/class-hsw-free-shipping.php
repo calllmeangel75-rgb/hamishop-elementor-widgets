@@ -36,6 +36,36 @@ class HSW_Free_Shipping {
 	}
 
 	/**
+	 * Free-shipping minimum configured in WooCommerce's own shipping zones.
+	 *
+	 * Stores often have both: a zone method («ارسال رایگان از ۵۰۰٬۰۰۰ تومان»)
+	 * and this setting. Reading the zone value lets the settings screen say
+	 * where the number comes from instead of looking like a conflict.
+	 *
+	 * @return float 0 when no free-shipping method has a minimum.
+	 */
+	public static function wc_threshold() {
+		if ( ! class_exists( 'WC_Shipping_Zones' ) ) {
+			return 0.0;
+		}
+
+		$min = 0.0;
+		foreach ( WC_Shipping_Zones::get_zones() as $zone ) {
+			foreach ( (array) $zone['shipping_methods'] as $method ) {
+				if ( ! $method instanceof WC_Shipping_Method || 'free_shipping' !== $method->id ) {
+					continue;
+				}
+				$amount = (float) $method->get_option( 'min_amount' );
+				if ( $amount > $min ) {
+					$min = $amount;
+				}
+			}
+		}
+
+		return $min;
+	}
+
+	/**
 	 * Cart subtotal the threshold is compared against.
 	 *
 	 * `get_displayed_subtotal()` follows the shop's "prices entered with tax"

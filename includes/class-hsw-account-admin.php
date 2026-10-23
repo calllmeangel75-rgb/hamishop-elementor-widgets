@@ -107,7 +107,7 @@ final class HSW_Account_Admin {
 			</nav>
 
 			<?php settings_errors(); ?>
-			<form method="post" action="options.php" class="hsw-admin-form">
+			<form method="post" action="<?php echo esc_url( $this->options_form_action() ); ?>" class="hsw-admin-form">
 				<?php settings_fields( 'hsw_account_group' ); ?>
 				<?php if ( 'general' === $tab ) : ?>
 					<?php $this->tab_general( $s ); ?>
@@ -227,6 +227,35 @@ final class HSW_Account_Admin {
 		</div>
 		<?php
 	}
+
+
+	/**
+	 * `options.php` in the same directory as the current admin screen.
+	 *
+	 * The dashboard can live behind a custom path (HamiShop → امنیت): a
+	 * relative `options.php` then resolves outside wp-admin and WordPress
+	 * redirects it to a URL the security guard answers with 404, so nothing is
+	 * saved. Deriving the action from the current request keeps the POST on the
+	 * path that actually works, with or without the custom slug.
+	 *
+	 * @return string
+	 */
+	protected function options_form_action() {
+		/*
+		 * HamiShop → امنیت can move the dashboard to a custom slug. The guard
+		 * rewrites REQUEST_URI to /wp-admin/… before the page renders, and a POST
+		 * there is answered with 404, so the form has to use the public path.
+		 */
+		if ( class_exists( 'HSW_Security' ) ) {
+			$security = HSW_Security::get();
+			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
+			if ( '' !== $slug ) {
+				return home_url( '/' . $slug . '/options.php' );
+			}
+		}
+		return admin_url( 'options.php' );
+	}
+
 
 	private function number_field( $s, $group, $key, $label, $min, $max, $desc = '' ) {
 		?>
