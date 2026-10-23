@@ -14,7 +14,8 @@
 	/* ---------- per-product state ---------- */
 	var states = {};
 	function state(pid) {
-		if (!states[pid]) { states[pid] = { qty: 1, color: '', storage: '', variation: null, data: null }; }
+		if (!states[pid]) { states[pid] = { qty: 1, color: '', storage: '', chips: {}, variation: null, data: null }; }
+		if (!states[pid].chips) { states[pid].chips = {}; }
 		return states[pid];
 	}
 	function payload(root) {
@@ -31,24 +32,40 @@
 	}
 
 	/* ---------- variation matching ---------- */
-	function matchVariation(list, map, color, storage) {
+	/*
+	 * One selection map covers every picker: the colour role, the primary chip
+	 * group (legacy `storage`) and any number of extra chip groups (`chips`).
+	 * The variation with the most matching attributes wins; a variation that
+	 * contradicts a selection is never chosen.
+	 */
+	function matchVariation(list, map, st) {
 		if (!list || !list.length) { return null; }
-		var keys = [];
-		if (map.color) { keys.push(map.color); }
-		if (map.storage) { keys.push(map.storage); }
+		st = st || {};
+
 		var sel = {};
-		if (map.color) { sel[map.color] = color; }
-		if (map.storage) { sel[map.storage] = storage; }
+		if (map.color) { sel[map.color] = st.color; }
+		if (map.storage) { sel[map.storage] = st.storage; }
+		(map.chips || []).forEach(function (tax) {
+			var value = st.chips && st.chips[tax];
+			if (value) { sel[tax] = value; }
+		});
+
+		var keys = Object.keys(sel).filter(function (k) { return !!sel[k]; });
+		var best = null, bestScore = -1;
+
 		for (var i = 0; i < list.length; i++) {
-			var v = list[i], ok = true;
+			var v = list[i], score = 0, ok = true;
 			for (var k = 0; k < keys.length; k++) {
 				var want = sel[keys[k]];
 				var have = v.attrs && v.attrs[keys[k]];
-				if (want && have && have !== want) { ok = false; break; }
+				if (!have) { continue; }            // wildcard / not part of this variation
+				if (have === want) { score++; } else { ok = false; break; }
 			}
-			if (ok) { return v; }
+			if (!ok) { continue; }
+			if (score > bestScore) { bestScore = score; best = v; }
+			if (score === keys.length) { break; }
 		}
-		return list[0] || null;
+		return best || list[0] || null;
 	}
 
 	/* ---------- render variant-dependent fields ---------- */
@@ -91,7 +108,7 @@
 		if (!any) { return; }
 		var list = payload(any);
 		var map = attrMap(any);
-		applyVariant(pid, matchVariation(list, map, st.color, st.storage));
+		applyVariant(pid, matchVariation(list, map, st));
 	}
 
 	/* ---------- reviews ---------- */
@@ -205,24 +222,39 @@
 		if (sw) {
 			var vr = sw.closest('.hsw-pvar');
 			var pid = vr.getAttribute('data-hsw-variants') || vr.getAttribute('data-hsw-product');
-			vr.querySelectorAll('.hsw-pvar__swatch, .hsw-pvar__mswatch').forEach(function (b) { b.classList.toggle('is-active', b === sw); });
 			var st = state(pid);
 			st.color = sw.getAttribute('data-hsw-color') || '';
 			var colorLabel = sw.getAttribute('data-hsw-label') || st.color;
+			/* Desktop and mobile render the same list: keep both in sync. */
+			vr.querySelectorAll('[data-hsw-color]').forEach(function (b) {
+				b.classList.toggle('is-active', b.getAttribute('data-hsw-color') === st.color);
+			});
 			vr.querySelectorAll('[data-hsw-selname="color"]').forEach(function (el) { el.textContent = colorLabel; });
 			refreshVariant(pid);
 			return;
 		}
 
-		/* --- storage chip --- */
+		/* --- attribute chips (ram, ssd, size, …) --- */
 		var chip = t.closest('.hsw-pvar__chip, .hsw-pvar__mchip');
 		if (chip) {
 			var vr2 = chip.closest('.hsw-pvar');
 			var pid2 = vr2.getAttribute('data-hsw-variants') || vr2.getAttribute('data-hsw-product');
-			vr2.querySelectorAll('.hsw-pvar__chip, .hsw-pvar__mchip').forEach(function (b) { b.classList.toggle('is-active', b === chip); });
+			var tax = chip.getAttribute('data-hsw-attr') || 'storage';
+			var val = chip.getAttribute('data-hsw-val') || chip.getAttribute('data-hsw-storage') || '';
+
+			vr2.querySelectorAll('[data-hsw-attr]').forEach(function (b) {
+				if (b.getAttribute('data-hsw-attr') !== tax) { return; }
+				b.classList.toggle('is-active', (b.getAttribute('data-hsw-val') || b.getAttribute('data-hsw-storage')) === val);
+			});
+
 			var st2 = state(pid2);
-			st2.storage = chip.getAttribute('data-hsw-storage') || '';
-			vr2.querySelectorAll('[data-hsw-selname="storage"]').forEach(function (el) { el.textContent = st2.storage; });
+			st2.chips[tax] = val;
+			if (attrMap(vr2).storage === tax) { st2.storage = val; }
+			vr2.querySelectorAll('[data-hsw-selname]').forEach(function (el) {
+				if (el.getAttribute('data-hsw-selname') === tax || el.getAttribute('data-hsw-selname-alias') === tax) {
+					el.textContent = val;
+				}
+			});
 			refreshVariant(pid2);
 			return;
 		}
@@ -442,12 +474,22 @@
 			var pid = root.getAttribute('data-hsw-product') || root.getAttribute('data-hsw-variants');
 			var st = state(pid);
 			st.data = payload(root);
-			/* preselect first active swatch/chip labels */
+
+			var map = attrMap(root);
+			/* preselect first active swatch / one active chip per group */
 			var sw = root.querySelector('.hsw-pvar__swatch.is-active, .hsw-pvar__mswatch.is-active');
-			var ch = root.querySelector('.hsw-pvar__chip.is-active, .hsw-pvar__mchip.is-active');
 			if (sw) { st.color = sw.getAttribute('data-hsw-color') || ''; }
-			if (ch) { st.storage = ch.getAttribute('data-hsw-storage') || ''; }
-			applyVariant(pid, matchVariation(st.data, attrMap(root), st.color, st.storage));
+
+			st.chips = {};
+			root.querySelectorAll('.hsw-pvar__chip.is-active, .hsw-pvar__mchip.is-active').forEach(function (b) {
+				var tax = b.getAttribute('data-hsw-attr') || 'storage';
+				var val = b.getAttribute('data-hsw-val') || b.getAttribute('data-hsw-storage') || '';
+				if (!val) { return; }
+				if (!st.chips[tax]) { st.chips[tax] = val; }
+				if (map.storage === tax) { st.storage = val; }
+			});
+
+			applyVariant(pid, matchVariation(st.data, map, st));
 		});
 	}
 	if (document.readyState === 'loading') {

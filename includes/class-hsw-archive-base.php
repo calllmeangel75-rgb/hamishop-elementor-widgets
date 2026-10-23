@@ -179,9 +179,11 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
         /**
          * Build an archive URL with modified params (null removes a key).
          *
-         * @param array $changes Key => value|null.
+         * @param array  $changes Key => value|null.
+         * @param string $base    Optional base URL (defaults to the current archive).
+         * @return string
          */
-        protected function filter_url( $changes = array() ) {
+        protected function filter_url( $changes = array(), $base = '' ) {
                 $params = $this->current_params();
                 unset( $params['paged'] );
                 foreach ( $changes as $k => $v ) {
@@ -191,7 +193,7 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
                                 $params[ $k ] = $v;
                         }
                 }
-                $url = $this->archive_url();
+                $url = '' !== (string) $base ? (string) $base : $this->archive_url();
                 if ( ! empty( $params ) ) {
                         /*
                          * Let WordPress do the encoding. `add_query_arg()` runs
@@ -331,7 +333,9 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          */
         protected function taxonomy_label( $tax ) {
                 $tax_obj = get_taxonomy( $tax );
-                return ( $tax_obj && ! empty( $tax_obj->labels->singular_name ) ) ? $tax_obj->labels->singular_name : $tax;
+                $label   = ( $tax_obj && ! empty( $tax_obj->labels->singular_name ) ) ? (string) $tax_obj->labels->singular_name : (string) $tax;
+                /* WooCommerce's Persian labels read «محصول رنگ». */
+                return trim( (string) preg_replace( '/^محصول\s+/u', '', $label ) );
         }
 
         /**

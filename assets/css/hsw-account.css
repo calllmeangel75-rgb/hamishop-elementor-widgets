@@ -2395,6 +2395,23 @@ a.hsw-ac__stat:hover {
 	color: #1d4ed8;
 }
 
+/* Department chip — shown next to the status in the ticket list and thread. */
+.hsw-ac__dept-badge {
+	display: inline-flex;
+	align-items: center;
+	max-width: 160px;
+	overflow: hidden;
+	border-radius: 99px;
+	padding: 1px 8px;
+	background: color-mix(in srgb, var(--hsw-ac-primary, #0e2a47) 8%, #fff);
+	color: var(--hsw-ac-primary, #0e2a47);
+	font-size: 9.5px;
+	font-weight: 700;
+	line-height: 1.8;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
 .hsw-ac__status-badge.is-danger {
 	background: #fff1f2;
 	color: #be123c;

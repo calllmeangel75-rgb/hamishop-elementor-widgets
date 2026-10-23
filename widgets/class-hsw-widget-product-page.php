@@ -149,6 +149,42 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                         );
                 }
 
+                /* ---- icons & stars ----
+                 * Several product stylesheets pin icon colours with !important,
+                 * so a plain `color:` control never won. One switch here paints
+                 * every product-page icon, and another owns the rating stars.
+                 */
+                $this->add_control(
+                        'uni_icon_head',
+                        array(
+                                'label'     => __( 'آیکون‌ها و ستاره‌ها', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::HEADING,
+                                'separator' => 'before',
+                        )
+                );
+                $this->add_control(
+                        'uni_icon_c',
+                        array(
+                                'label'       => __( 'رنگ آیکون‌ها', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'تیک ویژگی‌ها، خطوط گارانتی، تب‌ها و آکاردئون. خالی = رنگ پیش‌فرض هر بخش.', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::COLOR,
+                                'selectors'   => array(
+                                        '{{WRAPPER}} .hsw-pfeat__ic, {{WRAPPER}} .hsw-ppurch__as .hsw-ic, {{WRAPPER}} .hsw-pacc__title .hsw-ic, {{WRAPPER}} .hsw-pacc__chev, {{WRAPPER}} .hsw-pacc__wline .hsw-ic, {{WRAPPER}} .hsw-ptabs__btn .hsw-ic' => 'color: {{VALUE}} !important;',
+                                ),
+                        )
+                );
+                $this->add_control(
+                        'uni_star_c',
+                        array(
+                                'label'       => __( 'رنگ ستاره‌ها', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'ستارهٔ امتیاز در دسکتاپ و موبایل.', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::COLOR,
+                                'selectors'   => array(
+                                        '{{WRAPPER}} .hsw-ptitle__star, {{WRAPPER}} .hsw-ptitle__mscore .hsw-ic' => 'color: {{VALUE}} !important;',
+                                ),
+                        )
+                );
+
                 /* ---- typography ---- */
                 $this->a_typo( 't_title', __( 'عنوان محصول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptitle__h', array( 'size' => 24, 'lh' => 1.5 ) );
                 $this->a_typo( 't_price', __( 'قیمت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ppurch__main', array( 'size' => 24 ) );

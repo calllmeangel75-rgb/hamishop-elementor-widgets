@@ -755,6 +755,7 @@ final class HSW_Account_Support {
 		$updated = get_post_meta( $ticket->ID, self::UPDATED_META, true );
 		$updated = $updated ? absint( $updated ) : $this->timestamp_from_local( $ticket->post_modified );
 		$order   = absint( get_post_meta( $ticket->ID, self::ORDER_META, true ) );
+		$dept    = (string) get_post_meta( $ticket->ID, self::DEPARTMENT, true );
 		$excerpt = wp_trim_words( wp_strip_all_tags( (string) $ticket->post_content ), 9, '…' );
 
 		$html  = '<li class="hsw-ac__chat-item' . ( $unread ? ' is-unread' : '' ) . '" data-id="' . esc_attr( $ticket->ID ) . '">';
@@ -769,7 +770,11 @@ final class HSW_Account_Support {
 			$html .= '<b>' . esc_html( sprintf( 'سفارش #%s', HSW_Helpers::fa_num( $order ) ) ) . '</b> — ';
 		}
 		$html .= esc_html( $excerpt ) . '</span>';
-		$html .= '<span class="hsw-ac__chat-rowmeta"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span><span class="hsw-ac__chat-date">' . esc_html( $this->format_date( $updated ) ) . '</span></span>';
+		$html .= '<span class="hsw-ac__chat-rowmeta"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span>';
+		if ( '' !== $dept ) {
+			$html .= '<span class="hsw-ac__dept-badge">' . esc_html( $dept ) . '</span>';
+		}
+		$html .= '<span class="hsw-ac__chat-date">' . esc_html( $this->format_date( $updated ) ) . '</span></span>';
 		$html .= '</a></li>';
 
 		return $html;
@@ -808,10 +813,15 @@ final class HSW_Account_Support {
 		$status = $this->get_status( $ticket_id );
 		$closed = 'closed' === $status;
 		$order  = absint( get_post_meta( $ticket_id, self::ORDER_META, true ) );
+		$dept   = (string) get_post_meta( $ticket_id, self::DEPARTMENT, true );
 
 		$html  = '<div class="hsw-ac__thread" data-hsw-thread="' . esc_attr( $ticket_id ) . '">';
 		$html .= '<header class="hsw-ac__thread-head"><div class="hsw-ac__thread-title"><h2>' . esc_html( $ticket->post_title ) . '</h2>';
-		$html .= '<div class="hsw-ac__thread-meta"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span><span class="hsw-ac__ticket-id">#T-' . esc_html( HSW_Helpers::fa_num( $ticket_id ) ) . '</span>';
+		$html .= '<div class="hsw-ac__thread-meta"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span>';
+		if ( '' !== $dept ) {
+			$html .= '<span class="hsw-ac__dept-badge">' . esc_html( $dept ) . '</span>';
+		}
+		$html .= '<span class="hsw-ac__ticket-id">#T-' . esc_html( HSW_Helpers::fa_num( $ticket_id ) ) . '</span>';
 		if ( $order ) {
 			$html .= '<a class="hsw-ac__thread-order" href="' . esc_url( wc_get_endpoint_url( 'view-order', $order, wc_get_page_permalink( 'myaccount' ) ) ) . '">' . $this->account->icon( 'receipt' ) . esc_html( sprintf( 'سفارش #%s', HSW_Helpers::fa_num( $order ) ) ) . '</a>';
 		}
@@ -921,7 +931,7 @@ final class HSW_Account_Support {
 		 * landed in the first department.
 		 */
 		$departments = array_values( array_filter( array_map( 'trim', (array) $this->account->setting( 'support.departments', array() ) ) ) );
-		if ( count( $departments ) > 1 ) {
+		if ( ! empty( $departments ) ) {
 			$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-department">' . esc_html__( 'دپارتمان', 'hamishop-elementor-widgets' ) . '</label>';
 			$html .= '<select id="hsw-ac-t-department" name="department">';
 			foreach ( $departments as $dlabel ) {

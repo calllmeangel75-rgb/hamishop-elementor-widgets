@@ -273,10 +273,20 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                         }
                 }
 
-                $storages = array();
+                $storages    = array(); // primary chip group (sticky bar / legacy contract)
+                $chip_groups = array(); // every non-colour variation attribute
+
                 if ( $product ) {
-                        foreach ( $this->attribute_terms( $product, $attr_storage ) as $term ) {
-                                $storages[] = $term['name'];
+                        $primary = $this->attribute_terms( $product, $attr_storage );
+                        if ( $primary ) {
+                                $storages      = wp_list_pluck( $primary, 'name' );
+                                $chip_groups[] = array(
+                                        'tax'     => $attr_storage,
+                                        'key'     => $this->real_taxonomy( $attr_storage ) ? $this->real_taxonomy( $attr_storage ) : $attr_storage,
+                                        'label_d' => rtrim( (string) $lbl_storage_d, ': ' ),
+                                        'label_m' => rtrim( (string) $lbl_storage_m, ': ' ),
+                                        'terms'   => $storages,
+                                );
                         }
                 }
 
@@ -284,24 +294,43 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                         /* Design mock — only when the site has no product at all. */
                         $colors   = $d['colors'];
                         $storages = $d['storages'];
+                        $chip_groups = array(
+                                array(
+                                        'tax'     => 'storage',
+                                        'key'     => 'storage',
+                                        'label_d' => rtrim( (string) $lbl_storage_d, ': ' ),
+                                        'label_m' => rtrim( (string) $lbl_storage_m, ': ' ),
+                                        'terms'   => $storages,
+                                ),
+                        );
                 } elseif ( $product && $product->is_type( 'variable' ) ) {
                         /*
                          * Auto-detect the product's own variation attributes when
                          * the configured slugs don't exist on this particular
-                         * product. The old code grabbed the *first* attribute for
-                         * the colour role, so a product whose only option was
-                         * «سایز» rendered grey colour dots that meant nothing.
-                         * Only an attribute that is actually about colour can
-                         * become the colour picker now.
+                         * product. Only an attribute that is actually about colour
+                         * can become the colour picker; every other variation
+                         * attribute becomes a chip group of its own, so a product
+                         * with pa_ram + pa_ssd renders two pickers instead of none.
                          */
                         $pool = $this->auto_variation_attributes( $product );
-                        unset( $pool[ $attr_color ], $pool[ $attr_storage ] );
+                        foreach ( array( $attr_color, $attr_storage ) as $used ) {
+                                $used_key = $this->normalize_attribute_key( $used );
+                                foreach ( array_keys( $pool ) as $pool_key ) {
+                                        if ( $this->normalize_attribute_key( $pool_key ) === $used_key ) {
+                                                unset( $pool[ $pool_key ] );
+                                        }
+                                }
+                        }
 
                         if ( empty( $colors ) && $pool ) {
                                 $candidate = $this->pick_attribute( $pool, 'color', false );
                                 if ( '' !== $candidate ) {
                                         $attr_color = $candidate;
-                                        unset( $pool[ $candidate ] );
+                                        foreach ( array_keys( $pool ) as $pool_key ) {
+                                                if ( $this->normalize_attribute_key( $pool_key ) === $this->normalize_attribute_key( $candidate ) ) {
+                                                        unset( $pool[ $pool_key ] );
+                                                }
+                                        }
                                         foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
                                                 $colors[] = array(
                                                         'name'  => $term['name'],
@@ -313,21 +342,27 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         }
                                 }
                         }
-                        if ( empty( $storages ) && $pool ) {
-                                /* The leftover attribute is only assumed to be the
-                                   second dimension when a colour was identified. */
-                                $candidate = $this->pick_attribute( $pool, 'storage', ! empty( $colors ) );
-                                if ( '' !== $candidate ) {
-                                        $attr_storage = $candidate;
-                                        unset( $pool[ $attr_storage ] );
-                                        foreach ( $this->attribute_terms( $product, $attr_storage ) as $term ) {
-                                                $storages[] = $term['name'];
-                                        }
+
+                        foreach ( $pool as $tax => $options ) {
+                                $terms = $this->attribute_terms( $product, $tax );
+                                if ( empty( $terms ) ) {
+                                        continue;
+                                }
+                                $names = wp_list_pluck( $terms, 'name' );
+                                $chip_groups[] = array(
+                                        'tax'     => $tax,
+                                        'key'     => $this->real_taxonomy( $tax ) ? $this->real_taxonomy( $tax ) : $tax,
+                                        'label_d' => $this->attribute_label( $tax ),
+                                        'label_m' => $this->attribute_label( $tax ),
+                                        'terms'   => $names,
+                                );
+                                if ( empty( $storages ) ) {
+                                        $storages = $names;
                                 }
                         }
                 }
 
-                if ( empty( $colors ) && empty( $storages ) ) {
+                if ( empty( $colors ) && empty( $chip_groups ) ) {
                         return; // No real options on this product — render nothing (never fake data).
                 }
 
@@ -335,36 +370,38 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                  * An auto-detected attribute is not the one the editor named, so
                  * it must not borrow that label («سایز» is not «حافظه داخلی و رم»).
                  */
-                if ( $product && $attr_color !== $asked_color ) {
-                        $tax = get_taxonomy( $attr_color );
-                        if ( $tax && ! empty( $tax->labels->name ) ) {
-                                $lbl_color_d = $tax->labels->name . ':';
-                                $lbl_color_m = $tax->labels->name . ':';
-                        }
-                }
-                if ( $product && $attr_storage !== $asked_storage ) {
-                        $tax = get_taxonomy( $attr_storage );
-                        if ( $tax && ! empty( $tax->labels->name ) ) {
-                                $lbl_storage_d = $tax->labels->name . ':';
-                                $lbl_storage_m = $tax->labels->name . ':';
-                        }
+                $color_label_d = rtrim( (string) $lbl_color_d, ': ' );
+                $color_label_m = rtrim( (string) $lbl_color_m, ': ' );
+                if ( $product && $this->normalize_attribute_key( $attr_color ) !== $this->normalize_attribute_key( $asked_color ) ) {
+                        $color_label_d = $this->attribute_label( $attr_color );
+                        $color_label_m = $this->attribute_label( $attr_color );
                 }
 
                 $first_color   = ! empty( $colors[0]['label'] ) ? $colors[0]['label'] : ( ! empty( $colors[0]['name'] ) ? $colors[0]['name'] : '' );
-                $first_storage = ! empty( $storages[0] ) ? $storages[0] : '';
+                $first_storage = ! empty( $chip_groups[0]['terms'][0] ) ? $chip_groups[0]['terms'][0] : '';
+
+                $attrs_map = array(
+                        'color'   => ! empty( $colors ) ? ( $this->real_taxonomy( $attr_color ) ? $this->real_taxonomy( $attr_color ) : $attr_color ) : '',
+                        'storage' => ! empty( $chip_groups ) ? $chip_groups[0]['key'] : '',
+                        'chips'   => array(),
+                );
+                foreach ( $chip_groups as $group ) {
+                        $attrs_map['chips'][] = $group['key'];
+                }
+                $attrs_map['chips'] = array_values( array_unique( $attrs_map['chips'] ) );
 
                 $pid = $product ? $product->get_id() : 0;
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'pvar' ) ); ?>" data-hsw-variants="<?php echo esc_attr( $pid ); ?>"<?php echo ( $product && HSW_Helpers::is_call_for_price( $product ) ) ? ' data-hsw-cfp="1"' : ''; ?>
                         <?php if ( $product && $product->is_type( 'variable' ) ) : ?>
                                 data-hsw-variations='<?php echo esc_attr( wp_json_encode( $this->variations_payload( $product ) ) ); ?>'
-                                data-hsw-attrs='<?php echo esc_attr( wp_json_encode( array( 'color' => $attr_color, 'storage' => $attr_storage ) ) ); ?>'
+                                data-hsw-attrs='<?php echo esc_attr( wp_json_encode( $attrs_map ) ); ?>'
                         <?php endif; ?>>
                         <div class="hsw-d">
                                 <?php if ( ! empty( $colors ) ) : ?>
                                 <div class="hsw-pvar__group">
                                         <div class="hsw-pvar__head">
-                                                <span class="hsw-pvar__label"><?php echo esc_html( $lbl_color_d ); ?> <strong class="hsw-pvar__selname" data-hsw-selname="color"><?php echo esc_html( $first_color ); ?></strong></span>
+                                                <span class="hsw-pvar__label"><?php echo esc_html( $color_label_d ); ?>: <strong class="hsw-pvar__selname" data-hsw-selname="color"><?php echo esc_html( $first_color ); ?></strong></span>
                                         </div>
                                         <div class="hsw-pvar__swatches">
                                                 <?php foreach ( $colors as $i => $c ) : ?>
@@ -374,22 +411,22 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         </div>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ( ! empty( $storages ) ) : ?>
+                                <?php foreach ( $chip_groups as $gi => $group ) : ?>
                                 <div class="hsw-pvar__group">
-                                        <div class="hsw-pvar__head"><span class="hsw-pvar__label"><?php echo esc_html( $lbl_storage_d ); ?></span></div>
+                                        <div class="hsw-pvar__head"><span class="hsw-pvar__label"><?php echo esc_html( $group['label_d'] ); ?>:</span></div>
                                         <div class="hsw-pvar__chips">
-                                                <?php foreach ( $storages as $i => $lbl ) : ?>
-                                                        <button type="button" class="hsw-pvar__chip<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-storage="<?php echo esc_attr( $lbl ); ?>"><?php echo esc_html( $lbl ); ?></button>
+                                                <?php foreach ( $group['terms'] as $i => $lbl ) : ?>
+                                                        <button type="button" class="hsw-pvar__chip<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-attr="<?php echo esc_attr( $group['key'] ); ?>" data-hsw-val="<?php echo esc_attr( $lbl ); ?>"<?php echo 0 === $gi ? ' data-hsw-storage="' . esc_attr( $lbl ) . '"' : ''; ?>><?php echo esc_html( $lbl ); ?></button>
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
                         </div>
                         <div class="hsw-m">
                                 <?php if ( ! empty( $colors ) ) : ?>
                                 <div class="hsw-pvar__mcard">
                                         <div class="hsw-pvar__head">
-                                                <span class="hsw-pvar__label"><?php echo esc_html( $lbl_color_m ); ?></span>
+                                                <span class="hsw-pvar__label"><?php echo esc_html( $color_label_m ); ?>:</span>
                                                 <span class="hsw-pvar__label hsw-pvar__selname" data-hsw-selname="color"><?php echo esc_html( $first_color ); ?></span>
                                         </div>
                                         <div class="hsw-pvar__swatches">
@@ -400,19 +437,19 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         </div>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ( ! empty( $storages ) ) : ?>
+                                <?php foreach ( $chip_groups as $gi => $group ) : ?>
                                 <div class="hsw-pvar__mcard">
                                         <div class="hsw-pvar__head">
-                                                <span class="hsw-pvar__label"><?php echo esc_html( $lbl_storage_m ); ?></span>
-                                                <span class="hsw-pvar__label hsw-pvar__selname" data-hsw-selname="storage"><?php echo esc_html( $first_storage ); ?></span>
+                                                <span class="hsw-pvar__label"><?php echo esc_html( $group['label_m'] ); ?>:</span>
+                                                <span class="hsw-pvar__label hsw-pvar__selname" data-hsw-selname="<?php echo esc_attr( $group['key'] ); ?>"<?php echo 0 === $gi ? ' data-hsw-selname-alias="storage"' : ''; ?>><?php echo esc_html( $group['terms'][0] ); ?></span>
                                         </div>
                                         <div class="hsw-pvar__mchips">
-                                                <?php foreach ( $storages as $i => $lbl ) : ?>
-                                                        <button type="button" class="hsw-pvar__mchip<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-storage="<?php echo esc_attr( $lbl ); ?>"><?php echo esc_html( $lbl ); ?></button>
+                                                <?php foreach ( $group['terms'] as $i => $lbl ) : ?>
+                                                        <button type="button" class="hsw-pvar__mchip<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-attr="<?php echo esc_attr( $group['key'] ); ?>" data-hsw-val="<?php echo esc_attr( $lbl ); ?>"<?php echo 0 === $gi ? ' data-hsw-storage="' . esc_attr( $lbl ) . '"' : ''; ?>><?php echo esc_html( $lbl ); ?></button>
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
                         </div>
                 </div>
                 <?php

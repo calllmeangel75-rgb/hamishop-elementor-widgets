@@ -168,31 +168,54 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         if ( ! $var ) {
                                 continue;
                         }
-                        $attrs = array();
+                        $attrs         = array();
+                        $product_attrs = $product->get_attributes();
                         foreach ( $var->get_attributes() as $key => $slug ) {
                                 $slug = (string) $slug;
                                 if ( '' === $slug ) {
                                         continue; // "any value" — wildcard, let the JS match.
                                 }
+
+                                /*
+                                 * The variation key can be the percent-encoded form
+                                 * (`pa_%d8%b1…`) while the taxonomy is registered as
+                                 * `pa_رنگ`. Resolve both and publish the value under
+                                 * both keys so the picker's map always matches.
+                                 */
+                                $real  = $this->real_taxonomy( $key );
                                 $label = $slug;
-                                if ( taxonomy_exists( $key ) ) {
-                                        $term = get_term_by( 'slug', $slug, $key );
-                                        if ( $term && ! is_wp_error( $term ) ) {
+
+                                if ( '' !== $real ) {
+                                        $term = get_term_by( 'slug', $slug, $real );
+                                        if ( ! $term instanceof WP_Term ) {
+                                                $decoded = rawurldecode( $slug );
+                                                foreach ( array( $decoded, sanitize_title( $decoded ) ) as $candidate ) {
+                                                        $term = get_term_by( 'slug', $candidate, $real );
+                                                        if ( $term instanceof WP_Term ) {
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                        if ( $term instanceof WP_Term ) {
                                                 $label = $term->name;
                                         }
                                 } else {
                                         /* Custom (non-taxonomy) attribute: map the stored slug back to its display option. */
-                                        $product_attrs = $product->get_attributes();
-                                        if ( isset( $product_attrs[ $key ] ) && $product_attrs[ $key ] instanceof WC_Product_Attribute ) {
-                                                foreach ( $product_attrs[ $key ]->get_options() as $opt ) {
-                                                        if ( sanitize_title( $opt ) === $slug ) {
+                                        $attr = isset( $product_attrs[ $key ] ) && $product_attrs[ $key ] instanceof WC_Product_Attribute ? $product_attrs[ $key ] : $this->find_attribute( $product, $key );
+                                        if ( $attr ) {
+                                                foreach ( $attr->get_options() as $opt ) {
+                                                        if ( sanitize_title( $opt ) === $slug || (string) $opt === $slug ) {
                                                                 $label = $opt;
                                                                 break;
                                                         }
                                                 }
                                         }
                                 }
+
                                 $attrs[ $key ] = $label;
+                                if ( '' !== $real && $real !== $key ) {
+                                        $attrs[ $real ] = $label;
+                                }
                         }
                         $regular = (float) $var->get_regular_price();
                         $sale    = (float) $var->get_price();
@@ -211,6 +234,151 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         }
 
         /**
+         * Comparable form of an attribute key.
+         *
+         * WooCommerce mixes three spellings for the same attribute:
+         * `pa_رنگ` (registered taxonomy), `pa_%d8%b1%d9%86%da%af` (what
+         * `WC_Product_Attribute::get_name()` keeps) and the sanitize_title()
+         * form. Decoding + lowercasing makes them equal.
+         *
+         * @param string $key Attribute key.
+         * @return string
+         */
+        protected function normalize_attribute_key( $key ) {
+                $key = strtolower( rawurldecode( (string) $key ) );
+                return (string) preg_replace( '/\s+/u', ' ', trim( $key ) );
+        }
+
+        /**
+         * Locate a WC_Product_Attribute whatever spelling the caller uses.
+         *
+         * @param WC_Product|null $product  Product.
+         * @param string          $taxonomy Attribute key.
+         * @return WC_Product_Attribute|null
+         */
+        protected function find_attribute( $product, $taxonomy ) {
+                if ( ! $product ) {
+                        return null;
+                }
+                $attrs = $product->get_attributes();
+                if ( empty( $attrs ) ) {
+                        return null;
+                }
+
+                $wanted = $this->normalize_attribute_key( $taxonomy );
+                foreach ( $attrs as $key => $attr ) {
+                        if ( (string) $key === (string) $taxonomy ) {
+                                return $attr;
+                        }
+                        if ( $this->normalize_attribute_key( $key ) === $wanted ) {
+                                return $attr;
+                        }
+                }
+                return null;
+        }
+
+        /**
+         * The taxonomy actually registered in WordPress for an attribute key.
+         *
+         * @param string $taxonomy Attribute key (any spelling).
+         * @return string Registered taxonomy name or '' for custom attributes.
+         */
+        protected function real_taxonomy( $taxonomy ) {
+                $taxonomy = (string) $taxonomy;
+                $decoded  = rawurldecode( $taxonomy );
+                foreach ( array( $taxonomy, $decoded, sanitize_title( $decoded ) ) as $candidate ) {
+                        if ( '' !== $candidate && taxonomy_exists( $candidate ) ) {
+                                return $candidate;
+                        }
+                }
+                return '';
+        }
+
+        /**
+         * Slugs used by this product's variations for one attribute.
+         *
+         * `get_variation_attributes()` keys are decoded, values are slugs; both
+         * spellings are returned so a term can be matched either way.
+         *
+         * @param WC_Product|null $product  Product.
+         * @param string          $taxonomy Attribute key.
+         * @return string[]
+         */
+        protected function variation_slugs( $product, $taxonomy ) {
+                $out = array();
+                if ( ! $product || ! $product->is_type( 'variable' ) ) {
+                        return $out;
+                }
+                $wanted = $this->normalize_attribute_key( $taxonomy );
+                foreach ( $product->get_variation_attributes() as $name => $options ) {
+                        if ( $this->normalize_attribute_key( $name ) !== $wanted ) {
+                                continue;
+                        }
+                        foreach ( (array) $options as $slug ) {
+                                $slug = (string) $slug;
+                                if ( '' === $slug ) {
+                                        continue;
+                                }
+                                $out[ $slug ]              = true;
+                                $out[ rawurldecode( $slug ) ] = true;
+                        }
+                }
+                return array_keys( $out );
+        }
+
+        /**
+         * Is this term slug one of the allowed variation slugs?
+         *
+         * @param string   $slug    Term slug.
+         * @param string[] $allowed Slugs from variation_slugs().
+         * @return bool
+         */
+        protected function slug_in_list( $slug, array $allowed ) {
+                if ( empty( $allowed ) ) {
+                        return true;
+                }
+                $decoded = rawurldecode( (string) $slug );
+                foreach ( $allowed as $candidate ) {
+                        if ( (string) $candidate === (string) $slug ) {
+                                return true;
+                        }
+                        if ( rawurldecode( (string) $candidate ) === $decoded ) {
+                                return true;
+                        }
+                }
+                return false;
+        }
+
+        /**
+         * Human label of an attribute, without WooCommerce's «محصول » prefix.
+         *
+         * The Persian WooCommerce build stores attribute labels as
+         * «محصول رنگ», which reads wrong above a colour picker.
+         *
+         * @param string $taxonomy Attribute key.
+         * @return string
+         */
+        protected function attribute_label( $taxonomy ) {
+                $real  = $this->real_taxonomy( $taxonomy );
+                $label = '';
+
+                if ( $real && function_exists( 'wc_attribute_label' ) ) {
+                        $label = (string) wc_attribute_label( $real );
+                }
+                if ( '' === $label ) {
+                        $tax = get_taxonomy( $real ? $real : $taxonomy );
+                        if ( $tax ) {
+                                $label = ! empty( $tax->labels->singular_name ) ? (string) $tax->labels->singular_name : (string) $tax->labels->name;
+                        }
+                }
+                if ( '' === $label ) {
+                        $label = (string) $taxonomy;
+                }
+
+                return trim( (string) preg_replace( '/^محصول\s+/u', '', $label ) );
+        }
+
+        /**
          * Terms of a product attribute taxonomy with a real swatch color.
          *
          * WooCommerce itself has no color column, but many swatch plugins store
@@ -226,10 +394,12 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 if ( ! $product || ! $taxonomy ) {
                         return array();
                 }
-                $attrs = $product->get_attributes();
-                if ( empty( $attrs[ $taxonomy ] ) || ! ( $attrs[ $taxonomy ] instanceof WC_Product_Attribute ) ) {
+
+                $attr = $this->find_attribute( $product, $taxonomy );
+                if ( ! $attr ) {
                         return array();
                 }
+
                 /*
                  * A variation attribute is an option the customer *must* pick, so
                  * hiding it from the "additional information" table is not a
@@ -237,23 +407,43 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                  * disappeared from products whose attributes were marked
                  * "not visible on the product page").
                  */
-                if ( ! $attrs[ $taxonomy ]->get_visible() && ! $attrs[ $taxonomy ]->get_variation() ) {
+                if ( ! $attr->get_visible() && ! $attr->get_variation() ) {
                         return array();
                 }
+
+                $real  = $this->real_taxonomy( $attr->get_name() );
                 $terms = array();
-                foreach ( $attrs[ $taxonomy ]->get_terms() as $term ) {
-                        if ( ! $term instanceof WP_Term ) {
-                                continue;
-                        }
-                        $terms[] = array(
-                                'name'  => $term->name,
-                                'slug'  => $term->slug,
-                                'label' => $this->attribute_value_label( $taxonomy, $term->name ),
-                                'color' => $this->term_color( $term, $term->name, '' ),
+
+                if ( '' !== $real ) {
+                        $allowed = $this->variation_slugs( $product, $real );
+                        $list    = wc_get_product_terms(
+                                $product->get_id(),
+                                $real,
+                                array( 'fields' => 'all' )
                         );
+                        if ( is_wp_error( $list ) || empty( $list ) ) {
+                                $list = $attr->get_terms();
+                        }
+
+                        foreach ( (array) $list as $term ) {
+                                if ( ! $term instanceof WP_Term ) {
+                                        continue;
+                                }
+                                /* Keep only options this product actually varies on. */
+                                if ( ! $this->slug_in_list( $term->slug, $allowed ) ) {
+                                        continue;
+                                }
+                                $terms[] = array(
+                                        'name'  => $term->name,
+                                        'slug'  => $term->slug,
+                                        'label' => $this->attribute_value_label( $real, $term->name ),
+                                        'color' => $this->term_color( $term, $term->name, '' ),
+                                );
+                        }
                 }
-                if ( empty( $terms ) && $attrs[ $taxonomy ]->is_taxonomy() === false ) {
-                        foreach ( $attrs[ $taxonomy ]->get_options() as $opt ) {
+
+                if ( empty( $terms ) && '' === $real ) {
+                        foreach ( $attr->get_options() as $opt ) {
                                 /* A custom attribute is often typed as «قرمز، مشکی». */
                                 $parts = preg_split( '/\s*[,،]\s*/u', (string) $opt );
                                 foreach ( is_array( $parts ) ? $parts : array( $opt ) as $part ) {
@@ -270,6 +460,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                 }
                         }
                 }
+
                 return $terms;
         }
 
@@ -281,15 +472,32 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          */
         protected function is_color_attribute( $taxonomy ) {
                 $taxonomy = (string) $taxonomy;
-                $slug     = strtolower( $taxonomy );
+                $decoded  = rawurldecode( $taxonomy );
+                $slug     = strtolower( $decoded );
+
                 if ( false !== strpos( $slug, 'color' ) || false !== strpos( $slug, 'colour' ) ) {
                         return true;
                 }
-                if ( false !== strpos( $taxonomy, 'رنگ' ) ) {
+                if ( false !== strpos( $decoded, 'رنگ' ) ) {
                         return true;
                 }
-                $tax = function_exists( 'get_taxonomy' ) ? get_taxonomy( $taxonomy ) : null;
-                return ( $tax && isset( $tax->labels->name ) && false !== strpos( (string) $tax->labels->name, 'رنگ' ) );
+
+                /* Registered taxonomy / WooCommerce attribute label. */
+                $real = $this->real_taxonomy( $taxonomy );
+                if ( '' !== $real ) {
+                        $tax = get_taxonomy( $real );
+                        if ( $tax ) {
+                                $label = (string) ( $tax->labels->singular_name ?? $tax->labels->name );
+                                if ( false !== strpos( $label, 'رنگ' ) ) {
+                                        return true;
+                                }
+                        }
+                        if ( function_exists( 'wc_attribute_label' ) && false !== strpos( (string) wc_attribute_label( $real ), 'رنگ' ) ) {
+                                return true;
+                        }
+                }
+
+                return false;
         }
 
         /**
@@ -559,11 +767,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         if ( $skip_options && ( $attribute->get_variation() || $this->is_color_attribute( $attribute->get_name() ) ) ) {
                                 continue;
                         }
-                        $label = $attribute->get_name();
-                        if ( $attribute->is_taxonomy() ) {
-                                $tax   = get_taxonomy( $attribute->get_name() );
-                                $label = $tax ? $tax->labels->name : $attribute->get_name();
-                        }
+                        $label = $this->attribute_label( $attribute->get_name() );
                         $value = $product->get_attribute( $attribute->get_name() );
                         if ( '' === trim( (string) $value ) ) {
                                 continue;
@@ -669,17 +873,25 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 }
                 $preferred = array(
                         'color'   => array( 'color', 'colour', 'رنگ' ),
-                        'storage' => array( 'storage', 'memory', 'capacity', 'حافظه', 'رم', 'ظرفیت' ),
+                        'storage' => array( 'storage', 'memory', 'capacity', 'ram', 'ssd', 'rom', 'حافظه', 'رم', 'ظرفیت', 'هارد', 'درایو' ),
                 );
                 if ( isset( $preferred[ $role ] ) ) {
                         foreach ( array_keys( $pool ) as $name ) {
-                                $low = strtolower( $name );
+                                $low = strtolower( (string) $name );
                                 foreach ( $preferred[ $role ] as $needle ) {
                                         if ( false !== strpos( $low, $needle ) ) {
                                                 return $name;
                                         }
                                 }
                         }
+                }
+                /*
+                 * A chip group is always better than an empty picker: for the
+                 * storage role the leftover attribute is used even when its name
+                 * is not in the list above (pa_ssd, pa_ظرفیت, pa_هارد…).
+                 */
+                if ( 'storage' === $role ) {
+                        $allow_first = true;
                 }
                 return $allow_first ? (string) array_key_first( $pool ) : '';
         }
@@ -1147,7 +1359,8 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 $this->add_control( $id . '_c', array(
                         'label'     => __( 'رنگ آیکون', 'hamishop-elementor-widgets' ),
                         'type'      => Controls_Manager::COLOR,
-                        'selectors' => array( $selector => 'color: {{VALUE}};' ),
+                        /* The stylesheets pin several icon colours with !important. */
+                        'selectors' => array( $selector => 'color: {{VALUE}} !important;' ),
                 ) );
                 $this->add_control( $id . '_s', array(
                         'label'     => __( 'اندازه آیکون', 'hamishop-elementor-widgets' ),

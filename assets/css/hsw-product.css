@@ -189,6 +189,48 @@
 }
 .hsw-pgal__thumb img { width: 100%; height: 100%; object-fit: contain; }
 .hsw-pgal__thumb.is-active { box-shadow: 0 0 0 2px var(--hsw-primary); }
+
+/* -------------------------------------------------------------------------
+ * Theme button reset.
+ *
+ * Hello Elementor ships:
+ *   button { color:#c36; border:1px solid #c36; padding:.5rem 1rem }
+ *   button:hover { background:#c36; color:#fff }
+ * The gallery frame and thumbnails are <button> elements now, so without this
+ * the whole photo turns pink on hover and the 36px zoom button collapses to a
+ * 0px icon (the theme padding eats the box).
+ * ---------------------------------------------------------------------- */
+.hsw-p .hsw-pgal__frame,
+.hsw-p .hsw-pgal__frame:hover,
+.hsw-p .hsw-pgal__frame:focus {
+        background: var(--hsw-gal-frame-bg, var(--hsw-surface-bright)) !important;
+        padding: 0 !important;
+        border: 0 !important;
+        color: inherit !important;
+}
+
+.hsw-p .hsw-pgal__thumb,
+.hsw-p .hsw-pgal__thumb:hover,
+.hsw-p .hsw-pgal__thumb:focus {
+        background: var(--hsw-surface-bright) !important;
+        padding: 4px !important;
+        color: inherit !important;
+        border: 1px solid rgba(197, 198, 207, .4) !important;
+}
+
+.hsw-p .hsw-pgal__zoom { padding: 0 !important; }
+.hsw-p .hsw-pgal__zoom .hsw-ic {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+}
+
+.hsw-p .hsw-pgal__frame:focus-visible,
+.hsw-p .hsw-pgal__thumb:focus-visible,
+.hsw-p .hsw-pgal__zoom:focus-visible {
+        outline: 2px solid var(--hsw-primary);
+        outline-offset: 2px;
+}
 /* mobile badges + dots */
 .hsw-pgal__mbadges {
         position: absolute;
@@ -305,7 +347,7 @@
 .hsw-ptitle__score { display: inline-flex; align-items: center; gap: 6px; color: var(--hsw-on-surface); }
 .hsw-ptitle__score b { font-weight: 700; }
 .hsw-ptitle__score i { font-style: normal; color: var(--hsw-on-surface-variant); font-size: 11px; line-height: 16px; }
-.hsw-ptitle__star { color: var(--hsw-rate-star, var(--hsw-secondary)) !important; font-size: 20px !important; }
+.hsw-ptitle__star { color: var(--hsw-rate-star, var(--hsw-secondary)) !important; font-size: 20px; }
 .hsw-ptitle__dot { width: 4px; height: 4px; border-radius: 9999px; background: var(--hsw-outline-variant); }
 .hsw-ptitle__revlink { color: var(--hsw-rate-link, var(--hsw-primary)); display: inline-flex; align-items: center; gap: 4px; }
 .hsw-ptitle__revlink:hover { text-decoration: underline; }
@@ -340,7 +382,7 @@
         50% { opacity: .4; }
 }
 .hsw-ptitle__mscore { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; line-height: 20px; }
-.hsw-ptitle__mscore .hsw-ic { color: var(--hsw-amber); font-size: 16px !important; }
+.hsw-ptitle__mscore .hsw-ic { color: var(--hsw-rate-star, var(--hsw-amber)); font-size: 16px; }
 .hsw-ptitle__mscore .hsw-ptitle__mcnt { font-size: 11px; color: var(--hsw-on-surface-variant); }
 .hsw-ptitle__h2 {
         font-size: 18px;

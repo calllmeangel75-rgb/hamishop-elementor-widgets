@@ -24,6 +24,13 @@ class HSW_Archive_Query {
          * Without JavaScript the filter form may submit the same `filter_*`
          * checkbox name twice; PHP turns that into an array while WooCommerce
          * expects a comma-separated string. Normalise before the main query.
+         *
+         * Values are DECODED here, not re-encoded: WooCommerce runs
+         * `wc_clean()` over every term, and that function deletes percent
+         * octets — `wc_clean('%d8%b3%d8%a8%d8%b2')` is an empty string, so an
+         * encoded Persian slug made the layered-nav filter vanish. Plain
+         * `سبز` survives `wc_clean()` and `get_term_by()` sanitizes it back to
+         * the stored slug on its own.
          */
         public function normalize_filter_params() {
                 if ( empty( $_GET ) || ! is_array( $_GET ) ) {
@@ -31,25 +38,38 @@ class HSW_Archive_Query {
                 }
                 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.
                 foreach ( $_GET as $key => $value ) {
-                        if ( ! is_string( $key ) || 0 !== strpos( $key, 'filter_' ) || ! is_array( $value ) ) {
+                        if ( ! is_string( $key ) || 0 !== strpos( $key, 'filter_' ) ) {
                                 continue;
                         }
-                        $flat = array();
-                        foreach ( $value as $item ) {
-                                if ( is_array( $item ) ) {
-                                        foreach ( $item as $sub ) {
-                                                $flat[] = $sub;
+
+                        if ( is_array( $value ) ) {
+                                $flat = array();
+                                array_walk_recursive(
+                                        $value,
+                                        static function ( $item ) use ( &$flat ) {
+                                                $flat[] = $item;
                                         }
-                                        continue;
-                                }
-                                $flat[] = $item;
+                                );
+                                $value = $flat;
+                        } else {
+                                $value = array( $value );
                         }
-                        $flat = array_values( array_unique( array_filter( array_map( 'sanitize_title', array_map( 'wp_unslash', array_map( 'strval', $flat ) ) ), 'strlen' ) ) );
-                        if ( empty( $flat ) ) {
+
+                        $terms = array();
+                        foreach ( $value as $item ) {
+                                foreach ( explode( ',', (string) $item ) as $part ) {
+                                        $part = trim( sanitize_text_field( rawurldecode( (string) wp_unslash( $part ) ) ) );
+                                        if ( '' !== $part ) {
+                                                $terms[ $part ] = true;
+                                        }
+                                }
+                        }
+
+                        if ( empty( $terms ) ) {
                                 unset( $_GET[ $key ] );
                                 continue;
                         }
-                        $_GET[ $key ] = implode( ',', $flat );
+                        $_GET[ $key ] = implode( ',', array_keys( $terms ) );
                 }
                 // phpcs:enable
         }

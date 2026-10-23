@@ -271,7 +271,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                 <?php endif; ?>
 
                                 <?php if ( 'yes' === ( $s['show_zoom'] ?? 'yes' ) ) : ?>
-                                        <button type="button" class="hsw-pgal__zoom hsw-d" data-hsw-zoom aria-label="<?php esc_attr_e( 'بزرگنمایی تصویر', 'hamishop-elementor-widgets' ); ?>">
+                                        <button type="button" class="hsw-pgal__zoom" data-hsw-zoom aria-label="<?php esc_attr_e( 'بزرگنمایی تصویر', 'hamishop-elementor-widgets' ); ?>">
                                                 <?php echo HSW_Helpers::icon( 'zoom_in' ); ?>
                                         </button>
                                 <?php endif; ?>

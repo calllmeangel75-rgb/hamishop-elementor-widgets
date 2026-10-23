@@ -1316,7 +1316,15 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 $reset_changes[ $param_key ] = null;
                         }
                 }
-                $reset = $this->filter_url( $reset_changes );
+                /*
+                 * «حذف همه» must leave the category archive too. Resetting on
+                 * `archive_url()` kept `/product-category/…/` in the path, so the
+                 * grid stayed filtered by category and the button looked dead.
+                 * The shop permalink is the real "no filters" destination; only
+                 * the view switch (grid/list) survives.
+                 */
+                $reset_base = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : $this->archive_url();
+                $reset      = $this->filter_url( $reset_changes, $reset_base );
 
                 /* Store inputs live once per form: chips/swatches write here. */
                 $store = '';
@@ -1350,7 +1358,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                         <div class="hsw-af__box hsw-af__box--head">
                                                 <div class="hsw-af__headrow">
                                                         <span class="hsw-af__headtitle"><?php echo HSW_Helpers::icon( 'tune', 'hsw-af__headic' ); ?><?php echo esc_html( $f_ttl ); ?></span>
-                                                        <a class="hsw-af__reset" href="<?php echo esc_url( $reset ); ?>" data-hsw-reset data-hsw-reset-url="<?php echo esc_url( $this->archive_url() ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
+                                                        <a class="hsw-af__reset" href="<?php echo esc_url( $reset ); ?>" data-hsw-reset data-hsw-reset-url="<?php echo esc_url( $reset_base ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
                                                 </div>
                                         </div>
 
@@ -1378,7 +1386,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                                 </div>
 
                                                 <div class="hsw-asheet__foot">
-                                                        <a class="hsw-af__clear" href="<?php echo esc_url( $reset ); ?>" data-hsw-reset data-hsw-reset-url="<?php echo esc_url( $this->archive_url() ); ?>"><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
+                                                        <a class="hsw-af__clear" href="<?php echo esc_url( $reset ); ?>" data-hsw-reset data-hsw-reset-url="<?php echo esc_url( $reset_base ); ?>"><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
                                                         <button type="submit" class="hsw-af__apply">
                                                                 <?php esc_html_e( 'اعمال فیلترها', 'hamishop-elementor-widgets' ); ?>
                                                                 <?php if ( $found ) : ?>
