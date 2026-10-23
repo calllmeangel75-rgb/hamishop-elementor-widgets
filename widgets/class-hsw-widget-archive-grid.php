@@ -141,6 +141,20 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 $this->a_color( 'card_media', __( 'پس‌زمینه محفظه تصویر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__media', 'background-color' );
 
                 $this->end_controls_section();
+
+                /*
+                 * Card type scale. The archive card carries three sizes; they
+                 * were hard-coded in the stylesheet, so a shop that wanted a
+                 * larger price had to touch CSS.
+                 */
+                $this->style_typography_section(
+                        'ag',
+                        array(
+                                'title' => array( __( 'عنوان محصول', 'hamishop-elementor-widgets' ), 14 ),
+                                'price' => array( __( 'قیمت', 'hamishop-elementor-widgets' ), 18 ),
+                                'note'  => array( __( 'یادداشت زیر عنوان', 'hamishop-elementor-widgets' ), 11 ),
+                        )
+                );
         }
 
         /**

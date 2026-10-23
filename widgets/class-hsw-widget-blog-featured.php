@@ -70,6 +70,21 @@ class HSW_Widget_Blog_Featured extends HSW_Blog_Base {
                 ) );
 
                 $this->end_controls_section();
+
+		/*
+		 * One type scale per widget. The variables land on the wrapper, so a
+		 * child element only has to read them and the generated CSS stays a
+		 * single declaration per part.
+		 */
+		$this->style_typography_section(
+			'bfeat',
+			array(
+			'title' => array( __( 'عنوان مطلب ویژه', 'hamishop-elementor-widgets' ), 20 ),
+			'ex' => array( __( 'خلاصه مطلب', 'hamishop-elementor-widgets' ), 14 ),
+			'cat' => array( __( 'برچسب دسته', 'hamishop-elementor-widgets' ), 12 ),
+			'meta' => array( __( 'اطلاعات نویسنده و تاریخ', 'hamishop-elementor-widgets' ), 12.5 ),
+			)
+		);
         }
 
         protected function render() {

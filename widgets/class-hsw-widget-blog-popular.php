@@ -73,6 +73,19 @@ class HSW_Widget_Blog_Popular extends HSW_Blog_Base {
                 ) );
 
                 $this->end_controls_section();
+
+		/*
+		 * One type scale per widget. The variables land on the wrapper, so a
+		 * child element only has to read them and the generated CSS stays a
+		 * single declaration per part.
+		 */
+		$this->style_typography_section(
+			'bpop',
+			array(
+			'title' => array( __( 'عنوان مطلب', 'hamishop-elementor-widgets' ), 20 ),
+			'meta' => array( __( 'تاریخ و بازدید', 'hamishop-elementor-widgets' ), 12 ),
+			)
+		);
         }
 
         protected function render() {

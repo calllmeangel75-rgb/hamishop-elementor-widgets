@@ -1031,10 +1031,10 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 .hsw-ag__rate .hsw-ic { font-size: 11px; font-variation-settings: 'FILL' 1; }
 .hsw-ag__score { color: #334155; }
 .hsw-ag__revcount { color: var(--hswa-soft); }
-.hsw-ag__title { font-size: 12px; font-weight: 700; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 34px; }
+.hsw-ag__title { font-size: calc(var(--hsw-ag-title-fs, 14px) * .857); font-weight: 700; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 34px; }
 .hsw-ag__title a { transition: color .15s; }
 .hsw-ag__title a:hover { color: var(--hswa-primary); }
-.hsw-ag__note { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 10px; color: var(--hswa-emerald); font-weight: 500; }
+.hsw-ag__note { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: calc(var(--hsw-ag-note-fs, 11px) * .91); color: var(--hswa-emerald); font-weight: 500; }
 .hsw-ag__note .hsw-ic { font-size: 12px; }
 .hsw-ag__note.is-oos { color: var(--hswa-rose); }
 .hsw-ag__pricing {
@@ -1049,7 +1049,7 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 .hsw-ag__prices { min-width: 0; }
 .hsw-ag__old { display: block; font-size: 10px; color: var(--hswa-soft); text-decoration: line-through; }
 .hsw-ag__old--ph { text-decoration: none; }
-.hsw-ag__price { display: block; font-weight: 800; color: var(--hswa-strong); font-size: 12px; white-space: nowrap; }
+.hsw-ag__price { display: block; font-weight: 800; color: var(--hswa-strong); font-size: calc(var(--hsw-ag-price-fs, 18px) * .667); white-space: nowrap; }
 .hsw-ag__price small { font-size: 9px; font-weight: 400; color: var(--hswa-body); }
 .hsw-ag__prices--cfp { display: flex; flex-direction: column; gap: 2px; }
 .hsw-ag__cfp {
@@ -1114,11 +1114,11 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         .hsw-ag__meta { font-size: 11px; margin-bottom: 4px; }
         .hsw-ag__rate .hsw-ic { font-size: 12px; }
         .hsw-ag__rate { gap: 4px; }
-        .hsw-ag__title { font-size: 14px; min-height: 40px; }
-        .hsw-ag__note { font-size: 11px; margin-top: 8px; }
+        .hsw-ag__title { font-size: var(--hsw-ag-title-fs, 14px); min-height: 40px; }
+        .hsw-ag__note { font-size: var(--hsw-ag-note-fs, 11px); margin-top: 8px; }
         .hsw-ag__pricing { padding-top: 12px; margin-top: 16px; }
         .hsw-ag__old { font-size: 12px; }
-        .hsw-ag__price { font-size: 18px; font-weight: 900; }
+        .hsw-ag__price { font-size: var(--hsw-ag-price-fs, 18px); font-weight: 900; }
         .hsw-ag__price small { font-size: 11px; }
         .hsw-ag__cfp { font-size: 13px; line-height: 20px; }
         .hsw-ag__cfp .hsw-cfp__icon { font-size: 16px; }

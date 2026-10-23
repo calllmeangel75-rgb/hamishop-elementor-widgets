@@ -119,6 +119,21 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                 ) );
 
                 $this->end_controls_section();
+
+		/*
+		 * One type scale per widget. The variables land on the wrapper, so a
+		 * child element only has to read them and the generated CSS stays a
+		 * single declaration per part.
+		 */
+		$this->style_typography_section(
+			'bgrid',
+			array(
+			'title' => array( __( 'عنوان کارت', 'hamishop-elementor-widgets' ), 15 ),
+			'ex' => array( __( 'خلاصه کارت', 'hamishop-elementor-widgets' ), 13 ),
+			'cat' => array( __( 'برچسب دسته', 'hamishop-elementor-widgets' ), 11.5 ),
+			'meta' => array( __( 'اطلاعات پایین کارت', 'hamishop-elementor-widgets' ), 12 ),
+			)
+		);
         }
 
         protected function render() {

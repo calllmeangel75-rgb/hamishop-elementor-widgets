@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.35
+Stable tag: 1.11.36
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,19 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.36 =
+* **تایپوگرافی مجله، مقاله و کارت‌های آرشیو — تکمیل پوشش بخش ۱ درخواست.**
+  - ویجت‌های مجله (`hsw-blog-hero`، `blog-featured`، `blog-grid`، `blog-popular`،
+    `blog-tabs`، `blog-tags`، `blog-newsletter`)، صفحهٔ مقاله (`hsw-post-page`) و کارت‌های
+    آرشیو (`hsw-archive-grid`) حالا بخش **تایپوگرافی** با واحد px / em / rem و مقدار جدا برای
+    دسکتاپ/تبلت/موبایل دارند.
+  - اندازه‌ها از CSS Variables خوانده می‌شوند و **مقدار پیش‌فرض همان اندازهٔ فعلی طرح** است،
+    پس هیچ صفحه‌ای تغییر ظاهری نمی‌دهد.
+  - اندازه‌های کوچک‌تر (موبایل/تبلت) به‌جای عدد ثابت، نسبتی از همان متغیر هستند
+    (`calc(var(--…) * .81)`)، بنابراین بزرگ‌کردن عنوان در دسکتاپ، موبایل را خراب نمی‌کند.
+  - کنترل «اندازهٔ متن توضیح» هدر مجله (`sub_size`) هم به سه واحد ارتقا یافت؛ شناسهٔ کنترل
+    عوض نشد.
 
 = 1.11.35 =
 * **سیستم استایل یکپارچه، «سود شما از خرید»، پیام کوپن و مودال سبد.**

@@ -134,18 +134,12 @@ class HSW_Widget_Blog_Hero extends HSW_Blog_Base {
                         )
                 );
 
-                $this->add_responsive_control(
+                /* Control id kept (`sub_size`): saved pages carry a value for it. */
+                $this->style_typo_var(
                         'sub_size',
-                        array(
-                                'label'      => __( 'اندازهٔ متن توضیح', 'hamishop-elementor-widgets' ),
-                                'type'       => Controls_Manager::SLIDER,
-                                'size_units' => array( 'px' ),
-                                'range'      => array( 'px' => array( 'min' => 11, 'max' => 24 ) ),
-                                'default'    => array( 'size' => 13, 'unit' => 'px' ),
-                                'selectors'  => array(
-                                        '{{WRAPPER}} .hsw-bhero__sub' => 'font-size: {{SIZE}}{{UNIT}};',
-                                ),
-                        )
+                        __( 'اندازهٔ متن توضیح', 'hamishop-elementor-widgets' ),
+                        'hsw-bhero-sub-fs',
+                        array( 'default' => 14 )
                 );
 
                 $this->a_align(
@@ -156,6 +150,20 @@ class HSW_Widget_Blog_Hero extends HSW_Blog_Base {
                 );
 
                 $this->end_controls_section();
+
+		/*
+		 * One type scale per widget. The variables land on the wrapper, so a
+		 * child element only has to read them and the generated CSS stays a
+		 * single declaration per part.
+		 */
+		$this->style_typography_section(
+			'bhero',
+			array(
+			'title' => array( __( 'عنوان اصلی', 'hamishop-elementor-widgets' ), 26 ),
+			'stat' => array( __( 'اعداد آمار', 'hamishop-elementor-widgets' ), 22 ),
+			'hot' => array( __( 'برچسب‌های داغ', 'hamishop-elementor-widgets' ), 12 ),
+			)
+		);
         }
 
         protected function render() {

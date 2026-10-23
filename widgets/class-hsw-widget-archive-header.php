@@ -297,20 +297,12 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                                 ),
                         )
                 );
-                $this->add_control(
-                        'hd_desc_lh',
-                        array(
-                                'label'       => __( 'ارتفاع خط توضیحات', 'hamishop-elementor-widgets' ),
-                                'type'        => Controls_Manager::NUMBER,
-                                'min'         => 1,
-                                'max'         => 3,
-                                'step'        => 0.05,
-                                'placeholder' => '1.9',
-                                'selectors'   => array(
-                                        '{{WRAPPER}} .hsw-ahd__desc, {{WRAPPER}} .hsw-ahd__mdesc' => 'line-height: {{VALUE}};',
-                                ),
-                        )
-                );
+                /*
+                 * No `hd_desc_lh` here: a_align( 'hd_desc' ) above already
+                 * registers it (responsive, em/px). Declaring it twice made
+                 * Elementor log "Cannot redeclare control with same name" on
+                 * every front-end request.
+                 */
 
                 $this->add_control(
                         'hd_dbox_head',
