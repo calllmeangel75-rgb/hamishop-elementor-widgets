@@ -2165,7 +2165,13 @@ final class HSW_Account {
 		$html .= '<tr class="hsw-inv__grand"><th>' . esc_html__( 'مبلغ پرداخت‌شده', 'hamishop-elementor-widgets' ) . '</th><td>' . wp_kses_post( $order->get_formatted_order_total() ) . '</td></tr>';
 		$html .= '</tbody></table>';
 
-		$html .= '<div class="hsw-inv__paidbox"><span>' . esc_html__( 'مبلغ پرداخت‌شده:', 'hamishop-elementor-widgets' ) . '</span><strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong></div>';
+		$words = HSW_Helpers::number_words( (float) $order->get_total() );
+
+		$html .= '<div class="hsw-inv__paidbox">';
+		$html .= '<span>' . esc_html__( 'مبلغ پرداخت‌شده به خریدار:', 'hamishop-elementor-widgets' ) . '</span>';
+		$html .= '<strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong>';
+		$html .= '<p class="hsw-inv__words">' . esc_html( $words . ' ' . ( function_exists( 'get_woocommerce_currency' ) && 'IRT' === get_woocommerce_currency() ? __( 'تومان', 'hamishop-elementor-widgets' ) : get_woocommerce_currency() ) ) . '</p>';
+		$html .= '</div>';
 
 		$html .= '</div>';
 
@@ -2175,13 +2181,14 @@ final class HSW_Account {
 		$html .= '</dl>';
 
 		/* ---------- stamp + signature ---------- */
+		/* Signature on the reading side, stamp opposite — as in the reference. */
 		$html .= '<div class="hsw-inv__sign">';
+		$html .= '<span class="hsw-inv__signline">' . esc_html__( 'امضای خریدار', 'hamishop-elementor-widgets' ) . '</span>';
 		if ( '' !== $stamp ) {
 			$html .= '<img class="hsw-inv__stamp" src="' . esc_url( $stamp ) . '" alt="" />';
 		} else {
 			$html .= '<span class="hsw-inv__stamp hsw-inv__stamp--empty" aria-hidden="true"></span>';
 		}
-		$html .= '<span class="hsw-inv__signline">' . esc_html__( 'امضای خریدار', 'hamishop-elementor-widgets' ) . '</span>';
 		$html .= '</div>';
 
 		/* ---------- footer ---------- */
@@ -2239,10 +2246,28 @@ final class HSW_Account {
 			$edit_url  = wc_get_endpoint_url( 'edit-address', $type, wc_get_page_permalink( 'myaccount' ) );
 			$has       = '' !== trim( wp_strip_all_tags( (string) $formatted ) );
 
+			/*
+			 * WooCommerce lets a customer ship to billing without ever filling a
+			 * separate shipping address. The card used to say "nothing saved"
+			 * even though every order went to that same address.
+			 */
+			$borrowed = false;
+			if ( ! $has && 'shipping' === $type ) {
+				$billing = function_exists( 'wc_get_account_formatted_address' ) ? wc_get_account_formatted_address( 'billing' ) : '';
+				if ( '' !== trim( wp_strip_all_tags( (string) $billing ) ) ) {
+					$formatted = $billing;
+					$has       = true;
+					$borrowed  = true;
+				}
+			}
+
 			$html .= '<article class="hsw-ac__card hsw-ac__addr-card' . ( $has ? '' : ' is-empty' ) . '">';
 			$html .= '<header class="hsw-ac__addr-head"><div><span class="hsw-ac__addr-kicker">' . esc_html__( 'آدرس', 'hamishop-elementor-widgets' ) . '</span><h3>' . esc_html( $label ) . '</h3></div>' . ( $has ? '<span class="hsw-ac__addr-badge">' . $this->icon( 'check' ) . esc_html__( 'ثبت شده', 'hamishop-elementor-widgets' ) . '</span>' : '' ) . '</header>';
 
 			if ( $has ) {
+				if ( $borrowed ) {
+					$html .= '<p class="hsw-ac__addr-note">' . $this->icon( 'info' ) . esc_html__( 'تحویل به همان آدرس صورتحساب', 'hamishop-elementor-widgets' ) . '</p>';
+				}
 				$html .= '<address class="hsw-ac__addr-body">' . wp_kses_post( $formatted ) . '</address>';
 				$html .= '<a class="hsw-ac__addr-edit" href="' . esc_url( $edit_url ) . '">' . $this->icon( 'edit' ) . esc_html__( 'ویرایش آدرس', 'hamishop-elementor-widgets' ) . '</a>';
 			} else {

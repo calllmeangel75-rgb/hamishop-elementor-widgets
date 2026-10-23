@@ -79,7 +79,12 @@
 
 		closeToast();
 
-		toastEl = el('div', 'hsw-toast hsw-toast--center', {
+		/*
+		 * `thin` is the wishlist line: same strip as the add-to-cart notice but
+		 * without the cart link or the timer bar, because there is nowhere to
+		 * send the customer.
+		 */
+		toastEl = el('div', 'hsw-toast hsw-toast--center' + (opts.thin ? ' hsw-toast--line hsw-toast--thin' : ''), {
 			role: 'status',
 			'aria-live': 'polite',
 			'aria-atomic': 'true'
@@ -269,11 +274,71 @@
 	 * Modal when we have cart markup (the useful case), toast otherwise. Never
 	 * both, and never two modals for two fast clicks.
 	 */
+	/* ---------- one-line notice ---------- */
+
+	/*
+	 * The alternative to the modal. One strip, the product name, a link to the
+	 * cart and a green bar that empties over five seconds — the bar doubles as
+	 * the close timer, so the customer can see how long it stays.
+	 */
+	function lineNotice(payload, cfg) {
+		if (modalEl) { return; }
+
+		closeToast();
+
+		var name = payload.productName || '';
+		var message = payload.message || cfg.added || 'به سبد خرید اضافه شد';
+		var line = name ? (name + ' — ' + message) : message;
+
+		toastEl = el('div', 'hsw-toast hsw-toast--line', {
+			role: 'status',
+			'aria-live': 'polite',
+			'aria-atomic': 'true'
+		});
+
+		var icon = document.createElement('span');
+		icon.className = 'hsw-toast__ic';
+		icon.setAttribute('aria-hidden', 'true');
+		icon.innerHTML = window.hswIcon ? window.hswIcon('check_circle') : '';
+
+		var text = el('span', 'hsw-toast__msg');
+		text.textContent = line;
+
+		var link = el('a', 'hsw-toast__link', { href: payload.cartUrl || '/cart/' });
+		link.textContent = cfg.viewCart || 'مشاهده سبد خرید';
+
+		var close = el('button', 'hsw-toast__close', { type: 'button', 'aria-label': cfg.close || 'بستن' });
+		close.innerHTML = window.hswIcon ? window.hswIcon('close') : '';
+		close.addEventListener('click', closeToast);
+
+		var bar = el('span', 'hsw-toast__bar', { 'aria-hidden': 'true' });
+
+		toastEl.appendChild(icon);
+		toastEl.appendChild(text);
+		toastEl.appendChild(link);
+		toastEl.appendChild(close);
+		toastEl.appendChild(bar);
+
+		document.body.appendChild(toastEl);
+		requestAnimationFrame(function () {
+			if (toastEl) { toastEl.classList.add('is-show'); }
+		});
+
+		/* Five seconds, matching the bar's animation. */
+		toastTimer = setTimeout(closeToast, 5000);
+	}
+
 	function addedToCart(payload) {
 		payload = payload || {};
 
 		var html = fragmentBody(payload.fragments);
 		var cfg = payload.labels || {};
+		var style = payload.style || window.hswFeedbackStyle || 'modal';
+
+		if ('toast' === style) {
+			lineNotice(payload, cfg);
+			return;
+		}
 
 		if (html) {
 			modal({

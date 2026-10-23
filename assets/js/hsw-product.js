@@ -376,10 +376,13 @@
 		 * so a dialog over the gallery is noise. Default is a plain toast.
 		 */
 		if (window.HSWFeedback && D.modal) {
+			var titleEl = document.querySelector('.hsw-ptitle__h1, .hsw-ptitle__h2');
 			window.HSWFeedback.addedToCart({
 				fragments: res && res.fragments,
 				cartUrl: D.cartUrl,
 				message: D.addedText,
+				productName: titleEl ? titleEl.textContent.trim() : '',
+				style: D.feedbackStyle || 'modal',
 				labels: {
 					modalTitle: D.modalTitle,
 					viewCart: D.viewCart,

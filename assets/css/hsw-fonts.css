@@ -236,28 +236,44 @@ body.hsw-scroll-lock {
 .hsw-modal__backdrop {
 	position: absolute;
 	inset: 0;
-	background: rgba(8, 15, 26, .58);
-	backdrop-filter: blur(2px);
+	background: rgba(8, 15, 26, .32);
+	backdrop-filter: blur(10px) saturate(120%);
+	-webkit-backdrop-filter: blur(10px) saturate(120%);
 }
 
 /*
  * Slimmer than the first version: 30rem read as a page, not a confirmation.
  * 24rem with tighter padding still fits a two-line product name and the total.
  */
+/*
+ * Glass: a translucent panel over a blurred backdrop. `backdrop-filter` is
+ * progressive — where it is unsupported (older Firefox) the background colour
+ * below is opaque enough to stay readable.
+ */
 .hsw-modal__panel {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	width: min(24rem, 100%);
-	max-height: min(72vh, 32rem);
-	background: var(--hsw-pal-surface, #fff);
-	border-radius: 14px;
-	box-shadow: 0 24px 50px -18px rgba(8, 15, 26, .4);
-	transform: translateY(10px) scale(.98);
+	width: min(22rem, 100%);
+	max-height: min(70vh, 30rem);
+	background: color-mix(in srgb, var(--hsw-pal-surface, #fff) 78%, transparent);
+	backdrop-filter: blur(18px) saturate(160%);
+	-webkit-backdrop-filter: blur(18px) saturate(160%);
+	border: 1px solid color-mix(in srgb, #fff 65%, transparent);
+	border-radius: 16px;
+	box-shadow: 0 30px 60px -22px rgba(8, 15, 26, .45), inset 0 1px 0 rgba(255, 255, 255, .6);
+	transform: translateY(10px) scale(.97);
 	transition: transform .22s ease;
 	overflow: hidden;
 	font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
-	font-size: 13px;
+	font-size: 12.5px;
+}
+
+/* Opaque fallback when the browser cannot blur. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+	.hsw-modal__panel {
+		background: var(--hsw-pal-surface, #fff);
+	}
 }
 
 .hsw-modal.is-show .hsw-modal__panel {
@@ -479,4 +495,98 @@ body.hsw-scroll-lock {
 /* Inside the pay summary the row sits between other total rows. */
 .hsw-psum__rows .hsw-savings {
 	margin: 6px 0;
+}
+
+/* -------------------------------------------------------------------------
+ * One-line "added to cart" notice
+ *
+ * The alternative to the modal: a slim centred strip with the product name, a
+ * link to the cart, and a green bar that empties over five seconds — the bar is
+ * both a progress indicator and the close timer, so the customer knows how long
+ * it will stay.
+ * ---------------------------------------------------------------------- */
+.hsw-toast--line {
+	top: 42%;
+	width: min(34rem, calc(100vw - 24px));
+	padding: 10px 14px;
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--hsw-pal-surface, #fff) 88%, transparent);
+	backdrop-filter: blur(14px) saturate(150%);
+	-webkit-backdrop-filter: blur(14px) saturate(150%);
+	border: 1px solid color-mix(in srgb, var(--hsw-primary, #0f2042) 14%, transparent);
+	color: var(--hsw-on-surface, #0f172a);
+	font-size: 13px;
+	font-weight: 600;
+	box-shadow: 0 14px 30px -16px rgba(8, 15, 26, .35);
+	overflow: hidden;
+}
+
+.hsw-toast--line .hsw-toast__ic {
+	color: var(--hsw-success, #0b7a4b);
+	display: inline-flex;
+}
+
+.hsw-toast--line .hsw-toast__msg {
+	flex: 1 1 auto;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.hsw-toast--line .hsw-toast__link {
+	flex: 0 0 auto;
+	color: var(--hsw-primary, #0f2042);
+	font-weight: 700;
+	text-decoration: none;
+	border-bottom: 1px solid color-mix(in srgb, var(--hsw-primary, #0f2042) 35%, transparent);
+}
+
+.hsw-toast--line .hsw-toast__close {
+	background: color-mix(in srgb, var(--hsw-primary, #0f2042) 8%, transparent);
+	color: inherit;
+}
+
+/* The bar: 5s, linear, green. Re-created on every show so it always restarts. */
+.hsw-toast__bar {
+	position: absolute;
+	inset-inline: 0;
+	bottom: 0;
+	height: 3px;
+	background: color-mix(in srgb, var(--hsw-success, #0b7a4b) 18%, transparent);
+	overflow: hidden;
+}
+
+.hsw-toast__bar::after {
+	content: '';
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: 100%;
+	background: var(--hsw-success, #0b7a4b);
+	transform-origin: right center;
+	animation: hsw-toast-bar 5s linear forwards;
+}
+
+@keyframes hsw-toast-bar {
+	from { transform: scaleX(1); }
+	to   { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hsw-toast__bar::after { animation-duration: 5s; }
+}
+
+/* Wishlist line: same strip, no cart link, no timer bar. */
+.hsw-toast--thin {
+	top: 46%;
+	width: max-content;
+	max-width: min(30rem, calc(100vw - 24px));
+	padding: 8px 14px;
+	font-size: 12.5px;
+	font-weight: 600;
+}
+
+.hsw-toast--thin.is-error .hsw-toast__ic {
+	color: var(--hsw-pal-danger, #ba1a1a);
 }

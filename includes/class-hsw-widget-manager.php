@@ -659,6 +659,17 @@ final class HSW_Widget_Manager {
 
 		register_setting(
 			'hsw_widgets_group',
+			HSW_Free_Shipping::OPTION,
+			array(
+				'type'              => 'number',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_free_shipping' ),
+				'default'           => 0,
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_setting(
+			'hsw_widgets_group',
 			'hsw_add_feedback',
 			array(
 				'type'              => 'array',
@@ -673,6 +684,18 @@ final class HSW_Widget_Manager {
 	}
 
 	/**
+	 * Free-shipping threshold: a positive amount or 0 for "off".
+	 *
+	 * @param mixed $input Raw input.
+	 * @return float
+	 */
+	public static function sanitize_free_shipping( $input ) {
+		$value = (float) str_replace( array( ',', '٬', ' ' ), '', (string) $input );
+
+		return $value > 0 ? $value : 0;
+	}
+
+	/**
 	 * Two checkboxes, each stored as `yes` or `no`.
 	 *
 	 * @param mixed $input Raw input.
@@ -684,6 +707,7 @@ final class HSW_Widget_Manager {
 		return array(
 			'modal_archive' => ( isset( $input['modal_archive'] ) && 'yes' === $input['modal_archive'] ) ? 'yes' : 'no',
 			'modal_product' => ( isset( $input['modal_product'] ) && 'yes' === $input['modal_product'] ) ? 'yes' : 'no',
+			'style'         => ( isset( $input['style'] ) && 'toast' === $input['style'] ) ? 'toast' : 'modal',
 		);
 	}
 
@@ -858,7 +882,21 @@ final class HSW_Widget_Manager {
 								<p><?php esc_html_e( 'بعد از افزودن محصول، چه چیزی به مشتری نشان داده شود؟', 'hamishop-elementor-widgets' ); ?></p>
 							</header>
 
+							<?php $fb_style = HSW_Assets::feedback_settings()['style']; ?>
 							<div class="hsw-wm-rows">
+								<div class="hsw-wm-row">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'شکل نمایش', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'مودال: پنجرهٔ شیشه‌ای با محتوای سبد. نوار تک‌خطی: یک خط بالای صفحه با نوار سبز ۵ ثانیه‌ای و لینک «مشاهده سبد خرید».', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<select name="hsw_add_feedback[style]" id="hsw-fb-style">
+											<option value="modal" <?php selected( $fb_style, 'modal' ); ?>><?php esc_html_e( 'مودال سبد خرید', 'hamishop-elementor-widgets' ); ?></option>
+											<option value="toast" <?php selected( $fb_style, 'toast' ); ?>><?php esc_html_e( 'نوار تک‌خطی', 'hamishop-elementor-widgets' ); ?></option>
+										</select>
+									</span>
+								</div>
+
 								<label class="hsw-wm-row" for="hsw-fb-archive">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'مودال سبد خرید در آرشیو و فهرست محصولات', 'hamishop-elementor-widgets' ); ?></strong>
@@ -878,6 +916,25 @@ final class HSW_Widget_Manager {
 										<input type="checkbox" id="hsw-fb-product" name="hsw_add_feedback[modal_product]" value="yes" <?php checked( $fb['product'] ); ?> />
 									</span>
 								</label>
+							</div>
+						</section>
+
+						<section class="hsw-wm-group" id="hsw-group-shipping">
+							<header class="hsw-wm-grouphead">
+								<h2><?php esc_html_e( 'ارسال رایگان', 'hamishop-elementor-widgets' ); ?></h2>
+								<p><?php esc_html_e( 'بالای این مبلغ، هزینهٔ ارسال صفر می‌شود و مشتری «ارسال رایگان» می‌بیند.', 'hamishop-elementor-widgets' ); ?></p>
+							</header>
+
+							<div class="hsw-wm-rows">
+								<div class="hsw-wm-row">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'سقف ارسال رایگان (تومان)', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'صفر یعنی غیرفعال. مبلغ بر اساس جمع اقلام سبد سنجیده می‌شود، نه مبلغ نهایی.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="number" min="0" step="1000" name="<?php echo esc_attr( HSW_Free_Shipping::OPTION ); ?>" value="<?php echo esc_attr( (string) (int) HSW_Free_Shipping::threshold() ); ?>" class="small-text" dir="ltr" />
+									</span>
+								</div>
 							</div>
 						</section>
 

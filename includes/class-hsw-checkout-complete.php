@@ -116,6 +116,7 @@ class HSW_Checkout_Complete {
 		}
 
 		$this->decorate_order( $order );
+		$this->persist_customer_address( $order, $data );
 
 		/** Same hook WooCommerce fires in process_checkout() (emails, plugins). */
 		do_action( 'woocommerce_checkout_order_processed', $order_id, $data, $order );
@@ -175,6 +176,69 @@ class HSW_Checkout_Complete {
 	/* =========================================================================
 	 *  INTERNALS
 	 * ====================================================================== */
+
+	/**
+	 * Write the order address back to the customer.
+	 *
+	 * `WC_Checkout::create_order()` stores the address on the order only, so a
+	 * customer who typed it during checkout opened the address book afterwards
+	 * and read "no address saved". Copying the non-empty fields onto
+	 * WC_Customer makes the next order (and the account page) use them.
+	 *
+	 * @param WC_Order $order Order.
+	 * @param array    $data  Posted data used to create it.
+	 */
+	protected function persist_customer_address( $order, $data ) {
+		if ( ! is_user_logged_in() || ! WC()->customer ) {
+			return;
+		}
+
+		$customer = WC()->customer;
+		$changed  = false;
+
+		foreach ( array( 'billing', 'shipping' ) as $type ) {
+			foreach ( array( 'first_name', 'last_name', 'company', 'country', 'state', 'postcode', 'city', 'address_1', 'address_2', 'phone', 'email' ) as $field ) {
+				$key = $type . '_' . $field;
+				$set = 'set_' . $key;
+
+				if ( 'email' === $field && 'shipping' === $type ) {
+					continue; /* shipping has no email */
+				}
+
+				$value = is_callable( array( $order, 'get_' . $key ) ) ? (string) $order->{'get_' . $key}() : '';
+				if ( '' === trim( $value ) || ! is_callable( array( $customer, $set ) ) ) {
+					continue;
+				}
+
+				if ( (string) $customer->{'get_' . $key}() !== $value ) {
+					$customer->$set( $value );
+					$changed = true;
+				}
+			}
+		}
+
+		/*
+		 * "Ship to a different address" unchecked is the common case: the order
+		 * carries billing only. Without this the address book kept telling the
+		 * customer their shipping address was missing right after they had
+		 * typed it.
+		 */
+		if ( '' === trim( (string) $customer->get_shipping_address_1() ) && '' !== trim( (string) $customer->get_billing_address_1() ) ) {
+			foreach ( array( 'first_name', 'last_name', 'company', 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' ) as $field ) {
+				$get = 'get_billing_' . $field;
+				$set = 'set_shipping_' . $field;
+				$val = is_callable( array( $customer, $get ) ) ? (string) $customer->$get() : '';
+				if ( '' !== trim( $val ) && is_callable( array( $customer, $set ) ) ) {
+					$customer->$set( $val );
+					$changed = true;
+				}
+			}
+		}
+
+		if ( $changed ) {
+			$customer->save();
+		}
+	}
 
 	/**
 	 * The posted-data equivalent for WC_Checkout::create_order(), sourced from

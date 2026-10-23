@@ -471,6 +471,8 @@
                                         fragments: res && res.fragments,
                                         cartUrl: data.cartUrl,
                                         message: data.addedText,
+                                        productName: btn.getAttribute('data-hsw-name') || '',
+                                        style: data.feedbackStyle || 'modal',
                                         labels: {
                                                 modalTitle: data.modalTitle,
                                                 viewCart: data.viewCart,
@@ -527,6 +529,16 @@
                 var on = -1 !== list.indexOf(id);
                 btn.classList.toggle('is-active', on);
                 if (window.hswFill) { window.hswFill(btn.querySelector('.hsw-ic'), on); }
+
+                if (window.HSWFeedback) {
+                        var nm = btn.getAttribute('data-hsw-name') || '';
+                        window.HSWFeedback.toast(
+                                on
+                                        ? (nm ? nm + ' به علاقه‌مندی‌ها اضافه شد' : 'محصول به علاقه‌مندی‌ها اضافه شد')
+                                        : 'از علاقه‌مندی‌ها حذف شد',
+                                { thin: true, duration: 2500, tone: on ? 'ok' : 'error' }
+                        );
+                }
         });
         if ('loading' !== document.readyState) { initWish(); } else { document.addEventListener('DOMContentLoaded', initWish); }
 })();

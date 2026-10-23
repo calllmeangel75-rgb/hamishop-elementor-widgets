@@ -5624,17 +5624,30 @@ a.hsw-ac__stat:hover {
 /* -------------------------------------------------------------------------
  * Order view as an invoice
  *
- * Laid out like a printed sales document: title + invoice meta, buyer/seller
- * boxes, an itemised table, a settlement block, signature line and footer.
- * The @media print block at the end lifts this card onto the sheet on its own.
+ * Laid out like the reference document: title + invoice meta on one side,
+ * brand on the other, two bordered party boxes, an itemised table, a
+ * settlement block (totals + the amount in words), payment/status, a stamp
+ * and a signature line, then the footer.
+ *
+ * Colours come from the palette (`--hsw-primary` / `--hsw-accent`), so the
+ * invoice is printed in the shop's own brand rather than a fixed navy.
+ * Everything is deliberately tight: a ten-line order still has to fit one A4
+ * sheet, which is what the customer prints.
  * ---------------------------------------------------------------------- */
 .hsw-ac__invoice {
+	--inv-ink: var(--hsw-ac-ink);
+	--inv-muted: var(--hsw-ac-muted);
+	--inv-line: var(--hsw-ac-line);
+	--inv-brand: var(--hsw-primary, #0f2042);
+	--inv-accent: var(--hsw-accent, #fc593a);
 	background: var(--hsw-ac-card);
-	border: 1px solid var(--hsw-ac-line);
+	border: 1px solid var(--inv-line);
 	border-radius: var(--hsw-ac-radius);
-	padding: 30px 32px 24px;
+	padding: 22px 26px 16px;
 	box-shadow: 0 8px 30px rgba(15, 23, 42, .05);
-	color: var(--hsw-ac-ink);
+	color: var(--inv-ink);
+	font-size: 12px;
+	line-height: 1.7;
 }
 
 /* ---------- title + brand ---------- */
@@ -5642,55 +5655,55 @@ a.hsw-ac__stat:hover {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 24px;
+	gap: 20px;
 	flex-wrap: wrap;
-	padding-bottom: 18px;
-	border-bottom: 2px solid var(--hsw-ac-line);
+	padding-bottom: 12px;
+	border-bottom: 2px solid var(--inv-brand);
 }
 
 .hsw-inv__title {
-	margin: 0 0 14px;
-	font-size: 26px;
+	margin: 0 0 8px;
+	font-size: 21px;
 	font-weight: 800;
 	line-height: 1.4;
 	letter-spacing: -.01em;
-	color: var(--hsw-ac-ink);
+	color: var(--inv-brand);
 }
 
 .hsw-inv__meta {
 	display: grid;
-	gap: 6px;
+	gap: 2px;
 	margin: 0;
-	font-size: 12.5px;
+	font-size: 11.5px;
 }
 
 .hsw-inv__meta > div {
 	display: grid;
-	grid-template-columns: 92px minmax(0, 1fr);
-	gap: 10px;
+	grid-template-columns: 82px minmax(0, 1fr);
+	gap: 8px;
 	align-items: baseline;
 }
 
 .hsw-inv__meta dt {
-	color: var(--hsw-ac-muted);
+	color: var(--inv-muted);
 	font-weight: 500;
 }
 
 .hsw-inv__meta dd {
 	margin: 0;
 	font-weight: 700;
-	color: var(--hsw-ac-ink);
+	color: var(--inv-ink);
 }
 
 .hsw-inv__brand {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 10px;
 	min-width: 0;
 }
 
 .hsw-inv__logo {
-	max-height: 54px;
+	max-height: 42px;
 	width: auto;
 	display: block;
 }
@@ -5698,65 +5711,66 @@ a.hsw-ac__stat:hover {
 .hsw-inv__brandtext {
 	display: flex;
 	flex-direction: column;
-	line-height: 1.6;
+	line-height: 1.5;
 	text-align: end;
 }
 
 .hsw-inv__brandtext strong {
-	font-size: 16px;
+	font-size: 14px;
 	font-weight: 800;
+	color: var(--inv-brand);
 }
 
 .hsw-inv__brandtext span {
-	font-size: 11.5px;
-	color: var(--hsw-ac-muted);
+	font-size: 10.5px;
+	color: var(--inv-muted);
 }
 
 /* ---------- buyer / seller ---------- */
 .hsw-inv__parties {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 16px;
-	padding: 20px 0;
-	border-bottom: 1px solid var(--hsw-ac-line);
+	gap: 12px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--inv-line);
 }
 
 .hsw-inv__party {
-	border: 1px solid var(--hsw-ac-line);
-	border-radius: 12px;
-	padding: 0 0 12px;
+	border: 1px solid var(--inv-line);
+	border-radius: 8px;
+	padding: 0 0 8px;
 	overflow: hidden;
 }
 
 .hsw-inv__party h2 {
-	margin: 0 0 12px;
-	padding: 8px 14px;
-	background: #f6f8fb;
-	border-bottom: 1px solid var(--hsw-ac-line);
-	font-size: 12px;
+	margin: 0 0 7px;
+	padding: 4px 10px;
+	background: color-mix(in srgb, var(--inv-brand) 6%, #fff);
+	border-bottom: 1px solid var(--inv-line);
+	font-size: 11px;
 	font-weight: 700;
-	color: var(--hsw-ac-muted);
+	color: var(--inv-brand);
 	text-align: center;
 	letter-spacing: .02em;
 }
 
 .hsw-inv__party dl {
 	display: grid;
-	gap: 6px;
+	gap: 3px;
 	margin: 0;
-	padding: 0 14px;
-	font-size: 12.5px;
+	padding: 0 10px;
+	font-size: 11.5px;
 }
 
 .hsw-inv__party dl > div {
 	display: grid;
-	grid-template-columns: 54px minmax(0, 1fr);
-	gap: 10px;
+	grid-template-columns: 42px minmax(0, 1fr);
+	gap: 8px;
 	align-items: baseline;
 }
 
 .hsw-inv__party dt {
-	color: var(--hsw-ac-muted);
+	color: var(--inv-muted);
 	font-weight: 500;
 }
 
@@ -5770,69 +5784,68 @@ a.hsw-ac__stat:hover {
 .hsw-inv__items {
 	width: 100%;
 	border-collapse: collapse;
-	margin: 20px 0 0;
-	font-size: 12.5px;
+	margin: 12px 0 0;
+	font-size: 11.5px;
 }
 
 .hsw-inv__items thead th {
-	padding: 10px 8px;
-	border-bottom: 1.5px solid var(--hsw-ac-ink);
-	font-size: 11.5px;
+	padding: 6px 6px;
+	border-bottom: 1.5px solid var(--inv-brand);
+	font-size: 10.5px;
 	font-weight: 700;
-	color: var(--hsw-ac-muted);
+	color: var(--inv-muted);
 	text-align: start;
 	white-space: nowrap;
 }
 
 .hsw-inv__items tbody td {
-	padding: 10px 8px;
+	padding: 5px 6px;
 	border-bottom: 1px solid #eef1f5;
 	vertical-align: top;
 	text-align: start;
 }
 
-.hsw-inv__c-num   { width: 48px; color: var(--hsw-ac-muted); }
-.hsw-inv__c-qty   { width: 64px; text-align: center !important; }
-.hsw-inv__c-price { width: 120px; white-space: nowrap; }
-.hsw-inv__c-total { width: 120px; white-space: nowrap; font-weight: 700; }
+.hsw-inv__c-num   { width: 38px; color: var(--inv-muted); }
+.hsw-inv__c-qty   { width: 54px; text-align: center !important; }
+.hsw-inv__c-price { width: 100px; white-space: nowrap; }
+.hsw-inv__c-total { width: 100px; white-space: nowrap; font-weight: 700; }
 
 .hsw-inv__pname {
 	display: block;
 	font-weight: 700;
-	line-height: 1.8;
+	line-height: 1.7;
 }
 
 .hsw-inv__pmeta {
 	display: block;
-	margin-top: 3px;
-	font-size: 11px;
-	color: var(--hsw-ac-muted);
-	line-height: 1.8;
+	margin-top: 1px;
+	font-size: 10px;
+	color: var(--inv-muted);
+	line-height: 1.6;
 }
 
 /* ---------- settlement ---------- */
-/* Totals on the start side, the dashed "paid" box on the end side. */
 .hsw-inv__settle {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 24px;
+	gap: 18px;
 	flex-wrap: nowrap;
-	margin-top: 4px;
-	padding: 14px 0 2px;
+	margin-top: 2px;
+	padding: 10px 0 0;
 }
 
 .hsw-inv__totals {
-	min-width: 250px;
+	min-width: 220px;
 	max-width: 58%;
 	border-collapse: collapse;
-	font-size: 12.5px;
+	font-size: 11.5px;
 	flex: 0 1 auto;
 }
 
 .hsw-inv__totals th,
 .hsw-inv__totals td {
-	padding: 6px 10px;
+	padding: 3px 8px;
 	text-align: start;
 	font-weight: 500;
 }
@@ -5845,38 +5858,46 @@ a.hsw-ac__stat:hover {
 
 .hsw-inv__grand th,
 .hsw-inv__grand td {
-	padding-top: 10px;
-	border-top: 2px solid var(--hsw-ac-line);
-	font-size: 14px;
+	padding-top: 6px;
+	border-top: 2px solid var(--inv-line);
+	font-size: 13px;
 	font-weight: 800;
-	color: var(--hsw-ac-ink);
+	color: var(--inv-ink);
 }
 
 .hsw-inv__paidbox {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-	min-width: 200px;
-	padding: 10px 16px;
-	border: 1.5px dashed var(--hsw-ac-line);
-	border-radius: 10px;
-	font-size: 12px;
-	color: var(--hsw-ac-muted);
-	flex: 0 0 auto;
+	min-width: 190px;
+	padding: 8px 12px;
+	border: 1.5px dashed color-mix(in srgb, var(--inv-brand) 35%, #fff);
+	border-radius: 8px;
+	font-size: 11px;
+	color: var(--inv-muted);
+	background: color-mix(in srgb, var(--inv-brand) 4%, #fff);
 }
 
 .hsw-inv__paidbox strong {
-	font-size: 15px;
+	font-size: 13.5px;
 	font-weight: 800;
-	color: var(--hsw-ac-ink);
+	color: var(--inv-brand);
+}
+
+.hsw-inv__words {
+	margin: 2px 0 0;
+	font-size: 10.5px;
+	line-height: 1.7;
+	color: var(--inv-ink);
+	font-weight: 600;
 }
 
 /* ---------- payment meta ---------- */
 .hsw-inv__paymeta {
 	display: grid;
-	gap: 5px;
-	margin: 10px 0 0;
-	font-size: 12.5px;
+	gap: 3px;
+	margin: 8px 0 0;
+	font-size: 11.5px;
 }
 
 .hsw-inv__paymeta > div {
@@ -5887,7 +5908,7 @@ a.hsw-ac__stat:hover {
 }
 
 .hsw-inv__paymeta dt {
-	color: var(--hsw-ac-muted);
+	color: var(--inv-muted);
 	font-weight: 500;
 }
 
@@ -5902,44 +5923,44 @@ a.hsw-ac__stat:hover {
 	align-items: flex-end;
 	justify-content: space-between;
 	gap: 24px;
-	margin-top: 14px;
-	padding-top: 6px;
+	margin-top: 8px;
+	padding-top: 4px;
 }
 
 .hsw-inv__stamp {
 	display: block;
-	width: 96px;
-	height: 96px;
+	width: 84px;
+	height: 84px;
 	object-fit: contain;
 }
 
 /* Empty placeholder: a faint dashed disc reads as "stamp goes here". */
 .hsw-inv__stamp--empty {
-	width: 96px;
-	height: 96px;
-	border: 1px dashed var(--hsw-ac-line);
+	width: 84px;
+	height: 84px;
+	border: 1px dashed var(--inv-line);
 	border-radius: 50%;
 }
 
 .hsw-inv__signline {
-	font-size: 12px;
-	color: var(--hsw-ac-muted);
-	padding-bottom: 10px;
+	font-size: 11px;
+	color: var(--inv-muted);
+	padding-bottom: 6px;
 }
 
 /* ---------- footer ---------- */
 .hsw-inv__foot {
-	margin-top: 12px;
-	padding-top: 10px;
-	border-top: 1px solid var(--hsw-ac-line);
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--inv-line);
 }
 
 .hsw-inv__footnote {
-	margin: 0 0 10px;
-	font-size: 11.5px;
-	line-height: 1.9;
+	margin: 0 0 6px;
+	font-size: 10.5px;
+	line-height: 1.8;
 	text-align: center;
-	color: var(--hsw-ac-muted);
+	color: var(--inv-muted);
 }
 
 .hsw-inv__footrow {
@@ -5947,8 +5968,8 @@ a.hsw-ac__stat:hover {
 	align-items: center;
 	justify-content: space-between;
 	gap: 12px;
-	font-size: 11px;
-	color: var(--hsw-ac-muted);
+	font-size: 10px;
+	color: var(--inv-muted);
 	word-break: break-all;
 }
 
@@ -5958,9 +5979,9 @@ a.hsw-ac__stat:hover {
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
-	margin-top: 22px;
-	padding-top: 18px;
-	border-top: 1px dashed var(--hsw-ac-line);
+	margin-top: 16px;
+	padding-top: 14px;
+	border-top: 1px dashed var(--inv-line);
 }
 
 .hsw-inv__print {
@@ -5971,7 +5992,7 @@ a.hsw-ac__stat:hover {
 	padding: 0 22px;
 	border: 0;
 	border-radius: 12px;
-	background: var(--hsw-cta, var(--hsw-ac-primary));
+	background: var(--hsw-cta, var(--hsw-primary, #0f2042));
 	color: #fff;
 	font-family: inherit;
 	font-size: 13px;
@@ -5981,7 +6002,7 @@ a.hsw-ac__stat:hover {
 }
 
 .hsw-inv__print:hover {
-	background: var(--hsw-cta-hover, var(--hsw-ac-accent));
+	background: var(--hsw-cta-hover, var(--hsw-accent));
 	color: #fff;
 	transform: translateY(-1px);
 }
@@ -5992,7 +6013,7 @@ a.hsw-ac__stat:hover {
 
 @media (max-width: 767.98px) {
 	.hsw-ac__invoice {
-		padding: 20px 16px 16px;
+		padding: 16px 14px 12px;
 	}
 
 	.hsw-inv__parties {
@@ -6011,11 +6032,6 @@ a.hsw-ac__stat:hover {
 
 	.hsw-inv__totals {
 		max-width: none;
-	}
-
-	.hsw-inv__totals,
-	.hsw-inv__paidbox {
-		width: 100%;
 	}
 }
 
@@ -6282,4 +6298,36 @@ a.hsw-ac__stat:hover {
 	font-weight: 800;
 	letter-spacing: .02em;
 	color: var(--hsw-ac-ink);
+}
+
+/* "Shipping = billing" note on the address card. */
+.hsw-ac__addr-note {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0 0 6px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	background: color-mix(in srgb, var(--hsw-ac-primary) 7%, #fff);
+	color: var(--hsw-ac-primary);
+	font-size: 11.5px;
+	font-weight: 700;
+}
+
+.hsw-ac__addr-note .hsw-ic {
+	font-size: 1rem;
+}
+
+/*
+ * The account stylesheet resets every inline SVG to `max-width: 100%; height: auto`
+ * so product images never overflow. For our icon sprite that is fatal: an inline
+ * `<svg><use>` has no intrinsic width, so it collapsed to 0px and the wishlist
+ * remove button showed an empty square.
+ */
+.hsw-ac .hsw-ic,
+.hsw-ac .hsw-ac-ic {
+	width: 1em;
+	height: 1em;
+	max-width: none;
+	flex: 0 0 auto;
 }

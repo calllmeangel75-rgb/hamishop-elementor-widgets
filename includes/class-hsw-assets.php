@@ -288,6 +288,7 @@ class HSW_Assets {
                 return array(
                         'archive' => ! isset( $saved['modal_archive'] ) ? true : ( 'yes' === $saved['modal_archive'] ),
                         'product' => isset( $saved['modal_product'] ) && 'yes' === $saved['modal_product'],
+                        'style'   => ( isset( $saved['style'] ) && 'toast' === $saved['style'] ) ? 'toast' : 'modal',
                 );
         }
 
@@ -534,6 +535,7 @@ class HSW_Assets {
                                 'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'modal'        => self::feedback_settings()['product'],
+                                'feedbackStyle' => self::feedback_settings()['style'],
                         )
                 );
 
@@ -552,6 +554,7 @@ class HSW_Assets {
                                 'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'modal'        => self::feedback_settings()['archive'],
+                                'feedbackStyle' => self::feedback_settings()['style'],
                         )
                 );
         }

@@ -124,6 +124,113 @@ class HSW_Helpers {
         }
 
         /**
+         * Amount in Persian words, for the invoice.
+         *
+         * The reference invoice prints the paid amount both as a number and as
+         * words; on a printed document that is what makes a total hard to
+         * alter. Handles up to hundreds of billions, which is enough for a
+         * Toman store.
+         *
+         * @param float $amount Amount.
+         * @return string
+         */
+        public static function number_words( $amount ) {
+                $amount = (float) $amount;
+                if ( $amount <= 0 ) {
+                        return __( 'صفر', 'hamishop-elementor-widgets' );
+                }
+
+                $ones = array(
+                        1  => 'یک',
+                        2  => 'دو',
+                        3  => 'سه',
+                        4  => 'چهار',
+                        5  => 'پنج',
+                        6  => 'شش',
+                        7  => 'هفت',
+                        8  => 'هشت',
+                        9  => 'نه',
+                );
+                $teens = array(
+                        10 => 'ده',
+                        11 => 'یازده',
+                        12 => 'دوازده',
+                        13 => 'سیزده',
+                        14 => 'چهارده',
+                        15 => 'پانزده',
+                        16 => 'شانزده',
+                        17 => 'هفده',
+                        18 => 'هجده',
+                        19 => 'نوزده',
+                );
+                $tens = array(
+                        2 => 'بیست',
+                        3 => 'سی',
+                        4 => 'چهل',
+                        5 => 'پنجاه',
+                        6 => 'شصت',
+                        7 => 'هفتاد',
+                        8 => 'هشتاد',
+                        9 => 'نود',
+                );
+                $hundreds = array(
+                        1 => 'صد',
+                        2 => 'دویست',
+                        3 => 'سیصد',
+                        4 => 'چهارصد',
+                        5 => 'پانصد',
+                        6 => 'ششصد',
+                        7 => 'هفتصد',
+                        8 => 'هشتصد',
+                        9 => 'نهصد',
+                );
+                $scales = array( '', ' هزار', ' میلیون', ' میلیارد', ' هزار میلیارد' );
+
+                /* Three digits at a time, right to left. */
+                $three = static function ( $n ) use ( $ones, $teens, $tens, $hundreds ) {
+                        $parts = array();
+
+                        $h = intdiv( $n, 100 );
+                        if ( $h > 0 ) {
+                                $parts[] = $hundreds[ $h ];
+                        }
+
+                        $rest = $n % 100;
+                        if ( $rest >= 10 && $rest < 20 ) {
+                                $parts[] = $teens[ $rest ];
+                        } else {
+                                $t = intdiv( $rest, 10 );
+                                if ( $t > 0 ) {
+                                        $parts[] = $tens[ $t ];
+                                }
+                                $o = $rest % 10;
+                                if ( $o > 0 ) {
+                                        $parts[] = $ones[ $o ];
+                                }
+                        }
+
+                        return implode( ' و ', $parts );
+                };
+
+                $whole = (int) floor( $amount );
+                $chunks = array();
+                $i      = 0;
+
+                while ( $whole > 0 && $i < count( $scales ) ) {
+                        $chunk = $whole % 1000;
+                        if ( $chunk > 0 ) {
+                                /* "هزار" reads better than "یک هزار". */
+                                $word = ( 1 === $chunk && 1 === $i ) ? '' : $three( $chunk ) . ' ';
+                                $chunks[] = $word . ltrim( $scales[ $i ] );
+                        }
+                        $whole = intdiv( $whole, 1000 );
+                        ++$i;
+                }
+
+                return trim( implode( ' و ', array_reverse( $chunks ) ) );
+        }
+
+        /**
          * WooCommerce session notices, printed once per request.
          *
          * `wc_print_notices()` both prints AND clears the session queue. The

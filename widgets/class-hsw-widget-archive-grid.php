@@ -363,10 +363,10 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                                 <span class="hsw-ag__price"><?php echo esc_html( $price ); ?> <small><?php echo esc_html( $cur ); ?></small></span>
                                         </div>
                                         <?php if ( $is_demo || $addable ) : ?>
-                                                <button type="button" class="hsw-ag__cta hsw-d" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>" title="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
+                                                <button type="button" class="hsw-ag__cta hsw-d" data-hsw-add="<?php echo esc_attr( $pid ); ?>" data-hsw-name="<?php echo esc_attr( $name ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>" title="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
                                                         <?php echo HSW_Helpers::icon( 'add_shopping_cart' ); ?>
                                                 </button>
-                                                <button type="button" class="hsw-ag__cta--m hsw-m" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
+                                                <button type="button" class="hsw-ag__cta--m hsw-m" data-hsw-add="<?php echo esc_attr( $pid ); ?>" data-hsw-name="<?php echo esc_attr( $name ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
                                                         <?php echo HSW_Helpers::icon( 'add' ); ?>
                                                 </button>
                                         <?php else : ?>
