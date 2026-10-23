@@ -92,6 +92,77 @@ class HSW_Security {
 		if ( 'yes' === $o['clean_widgets'] ) {
 			add_action( 'widgets_init', array( $this, 'clean_widgets' ), 11 );
 		}
+		if ( 'yes' === $o['font_swap'] ) {
+			add_action( 'template_redirect', array( $this, 'start_font_swap' ), 1 );
+		}
+	}
+
+	/* ---------------------------------------------------------------------
+	 * font-display: swap
+	 *
+	 * A font block (`font-display: block`) keeps the text invisible for up to
+	 * three seconds while the file downloads; `swap` paints the fallback
+	 * immediately and swaps when the webfont lands. Our own fonts already use
+	 * swap, but themes and page builders inline their @font-face with `auto`
+	 * or `block`, and there is no CSS-level way to override it.
+	 *
+	 * So we buffer the finished HTML and rewrite the value inside <style>
+	 * blocks only — no parsing of markup, no touching of external files.
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Start buffering the front-end response.
+	 */
+	public function start_font_swap() {
+		if ( is_admin() || wp_doing_ajax() || $this->is_elementor_context() ) {
+			return;
+		}
+
+		if ( ! empty( $GLOBALS['wp_query'] ) && ( is_feed() || is_robots() || is_trackback() ) ) {
+			return;
+		}
+
+		ob_start( array( $this, 'rewrite_font_display' ) );
+	}
+
+	/**
+	 * Rewrite `font-display` inside inline styles and Google Fonts URLs.
+	 *
+	 * @param string $html Buffered response.
+	 * @return string
+	 */
+	public function rewrite_font_display( $html ) {
+		if ( ! is_string( $html ) || '' === $html ) {
+			return $html;
+		}
+
+		/*
+		 * Only touch <style> blocks; inline attributes never carry font-display.
+		 * The pattern is written with double quotes so the character class can
+		 * hold both quote types without escaping gymnastics.
+		 */
+		$html = preg_replace_callback(
+			"#<style\b[^>]*>.*?</style>#is",
+			static function ( $match ) {
+				return preg_replace( '/font-display\s*:\s*(?:auto|block|fallback)\b/i', 'font-display:swap', $match[0] );
+			},
+			$html
+		);
+
+		/* Google Fonts: `display=block` (or a missing parameter) → swap. */
+		$html = preg_replace_callback(
+			"#https://fonts\.googleapis\.com/[^\"'\s>]+#i",
+			static function ( $match ) {
+				$url = $match[0];
+				if ( preg_match( '/[?&]display=/i', $url ) ) {
+					return preg_replace( '/([?&]display=)[a-z]+/i', '$1swap', $url );
+				}
+				return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . 'display=swap';
+			},
+			$html
+		);
+
+		return $html;
 	}
 
 	/**
@@ -327,6 +398,7 @@ class HSW_Security {
 			'clean_head'       => 'no',
 			'clean_assets'     => 'no',
 			'clean_widgets'    => 'no',
+			'font_swap'        => 'no',
 		);
 	}
 
@@ -942,6 +1014,7 @@ class HSW_Security {
 				'clean_head'       => ( 'yes' === ( $in['clean_head'] ?? '' ) ) ? 'yes' : 'no',
 				'clean_assets'     => ( 'yes' === ( $in['clean_assets'] ?? '' ) ) ? 'yes' : 'no',
 				'clean_widgets'    => ( 'yes' === ( $in['clean_widgets'] ?? '' ) ) ? 'yes' : 'no',
+				'font_swap'        => ( 'yes' === ( $in['font_swap'] ?? '' ) ) ? 'yes' : 'no',
 			),
 			false
 		);
@@ -1080,6 +1153,14 @@ class HSW_Security {
 							</label>
 							<p class="description">
 								<?php esc_html_e( 'فقط فهرست ویجت‌های پیشخوان کوتاه می‌شود؛ روی سرعت سایت اثری ندارد.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+
+							<label style="display:block;margin-top:10px">
+								<input type="checkbox" name="hsw_security[font_swap]" value="yes" <?php checked( 'yes', $s['font_swap'] ); ?> />
+								<?php esc_html_e( 'اجبار font-display: swap روی همهٔ فونت‌های سایت', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'با font-display: block متن تا سه ثانیه نامرئی می‌ماند تا فونت برسد. با swap، متن با فونت جایگزین نمایش داده می‌شود و بعد فونت اصلی جای آن می‌نشیند. این گزینه مقدار auto/block/fallback را در استایل‌های درون‌صفحه و آدرس‌های Google Fonts به swap تغییر می‌دهد؛ روی فایل‌های CSS خارجی دست نمی‌برد.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 
 							<p class="description" style="margin-top:12px">

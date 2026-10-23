@@ -238,6 +238,14 @@
 			return;
 		}
 
+		/* --- bin (only shown at quantity 1) --- */
+		var delBtn = t.closest('[data-hsw-del]');
+		if (delBtn) {
+			var href = delBtn.getAttribute('data-hsw-del') || '';
+			if (href) { window.location.href = href; }
+			return;
+		}
+
 		/* --- add to cart --- */
 		var addBtn = t.closest('[data-hsw-add]');
 		if (addBtn) {
@@ -251,6 +259,15 @@
 	});
 
 	/* ---------- quantity ---------- */
+
+	/* First paint: mark every stepper that starts at 1. */
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('.hsw-psticky__stepper, .hsw-ppurch__stepper').forEach(function (box) {
+			var val = box.querySelector('[data-hsw-qval]');
+			var n = val ? parseInt(String(val.value).replace(/[^0-9]/g, ''), 10) : 1;
+			box.classList.toggle('is-min', !(n > 1));
+		});
+	});
 
 	/* Persian/Arabic digits are what a Persian keyboard produces. */
 	function toLatin(value) {
@@ -274,6 +291,10 @@
 				} else {
 					el.textContent = fa(st.qty);
 				}
+			});
+			/* Quantity 1: the minus becomes the bin (see the stylesheet). */
+			r.querySelectorAll('.hsw-psticky__stepper, .hsw-ppurch__stepper').forEach(function (box) {
+				box.classList.toggle('is-min', st.qty <= 1);
 			});
 		});
 		return st.qty;

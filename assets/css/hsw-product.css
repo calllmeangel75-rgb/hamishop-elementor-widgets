@@ -571,6 +571,8 @@
         color: var(--hsw-qty-c, var(--hsw-cart-bg, var(--hsw-primary-container)));
         transition: background-color .15s, transform .1s;
 }
+.hsw-ppurch__qbtn--del { color: var(--hsw-pal-danger, #ba1a1a); display: none; }
+.hsw-ppurch__qbtn--del:disabled { opacity: .35; }
 .hsw-ppurch__qbtn:hover { background: var(--hsw-surface-c); }
 .hsw-ppurch__qbtn:active { transform: scale(.95); }
 .hsw-ppurch__qbtn .hsw-ic { font-size: 18px !important; }
@@ -640,14 +642,24 @@
 .hsw-ppurch__as .hsw-ic { font-size: 18px !important; }
 .hsw-ppurch__as--shield .hsw-ic { color: var(--hsw-secondary-container) !important; }
 .hsw-ppurch__as--stock .hsw-ic { color: var(--hsw-primary) !important; }
+/* Phone: stepper and buy button share one row, exactly like the cart card. */
+@media (max-width: 767.98px) {
+        .hsw-ppurch__ctas { flex-direction: row; align-items: stretch; gap: 8px; }
+        .hsw-ppurch__qty--inline { width: auto; flex: 0 0 auto; }
+        .hsw-ppurch__qty--inline .hsw-ppurch__stepper { margin: 0; height: 48px; }
+        .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 36px; height: 44px; }
+        .hsw-ppurch__cart { width: auto; flex: 1 1 auto; min-width: 0; }
+
+        /* 1: the minus has nothing to do — the bin takes its place. */
+        .hsw-ppurch__stepper.is-min .hsw-ppurch__qbtn--minus { display: none; }
+        .hsw-ppurch__stepper.is-min .hsw-ppurch__qbtn--del { display: flex; }
+}
+
 @media (min-width: 768px) {
         .hsw-ppurch__top { flex-direction: row; align-items: center; }
         .hsw-ppurch__ctas { flex-direction: row; align-items: stretch; }
         .hsw-ppurch__cart { width: auto; flex: 1; }
         .hsw-ppurch__qty--inline { width: auto; }
-
-        /* Phone: the stepper takes its own row and the pill centres itself. */
-        .hsw-ppurch__qty--inline .hsw-ppurch__stepper { margin-inline: auto; }
         .hsw-ppurch__qty--inline .hsw-ppurch__stepper { height: 48px; }
         .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 36px; height: 42px; }
 }
@@ -1086,10 +1098,12 @@
 .hsw-psticky__prow { display: flex; align-items: baseline; gap: 4px; }
 .hsw-psticky__pval { font-size: 20px; line-height: 28px; font-weight: 800; color: var(--hsw-price-c, var(--hsw-primary)); letter-spacing: -.02em; }
 .hsw-psticky__unit { font-size: 11px; line-height: 16px; color: var(--hsw-on-surface-variant); }
-.hsw-psticky__side { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
+.hsw-psticky__side { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
 .hsw-psticky__stepper {
         display: flex;
         align-items: center;
+        flex: 0 0 auto;
+        gap: 2px;
         border: 1px solid var(--hsw-outline-variant);
         border-radius: 12px;
         background: var(--hsw-surface-lowest);
@@ -1111,12 +1125,26 @@
 }
 .hsw-psticky__qbtn--plus { color: var(--hsw-primary); }
 .hsw-psticky__qbtn--minus { color: var(--hsw-on-surface-variant); }
+.hsw-psticky__qbtn--del { color: var(--hsw-pal-danger, #ba1a1a); display: none; }
+.hsw-psticky__qbtn--del:disabled { opacity: .35; }
+
+/*
+ * Quantity 1: nothing to decrease, so the bin takes the minus's place. The
+ * markup carries both buttons and the class decides which one is visible —
+ * cheaper than re-rendering the row on every tap.
+ */
+.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--minus { display: none; }
+.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--del { display: flex; }
 .hsw-psticky__qbtn:hover { background: var(--hsw-surface-c); }
 .hsw-psticky__qbtn:active { transform: scale(.9); }
 .hsw-psticky__qbtn .hsw-ic { font-size: 18px !important; }
-.hsw-psticky__qval {
-        width: 30px; text-align: center; font-weight: 700; font-size: 14px; line-height: 22px;
-        border: 0; padding: 0; background: transparent; color: inherit; font-family: inherit;
+/* Two classes + an explicit basis: the theme's `input[type="text"]{width:100%}`
+   used to stretch this to 310px and squeeze the buy button to 16px. */
+.hsw-psticky .hsw-psticky__qval {
+        width: 2rem; flex: 0 0 2rem; min-width: 0;
+        text-align: center; font-weight: 700; font-size: 14px; line-height: 22px;
+        border: 0 !important; padding: 0; background: transparent; color: inherit; font-family: inherit;
+        box-shadow: none;
         appearance: textfield; -moz-appearance: textfield; border-radius: 6px; cursor: text;
 }
 .hsw-psticky__qval:focus { outline: none; background: rgba(15, 32, 66, .06); }

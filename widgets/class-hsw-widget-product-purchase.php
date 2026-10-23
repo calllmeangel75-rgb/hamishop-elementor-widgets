@@ -342,6 +342,21 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                 <?php if ( $cfp ) : ?>
                                         <?php echo HSW_Helpers::cfp_action_html( $product, 'hsw-ppurch__cart hsw-ppurch__cart--cfp', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
                                 <?php else : ?>
+                                        <?php
+                                        /*
+                                         * Mobile shows the same row as the cart: plus, value,
+                                         * then minus — or the bin once the value is 1.
+                                         */
+                                        $hsw_remove = '';
+                                        if ( ! $demo && function_exists( 'WC' ) && WC()->cart ) {
+                                                foreach ( WC()->cart->get_cart() as $hsw_key => $hsw_item ) {
+                                                        if ( (int) $hsw_item['product_id'] === (int) $pid || (int) $hsw_item['variation_id'] === (int) $pid ) {
+                                                                $hsw_remove = wc_get_cart_remove_url( $hsw_key );
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                        ?>
                                         <div class="hsw-ppurch__qty hsw-ppurch__qty--inline">
                                                 <div class="hsw-ppurch__stepper">
                                                         <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'add' ); ?></button>
@@ -352,7 +367,8 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                                          */
                                                         ?>
                                                         <input type="text" class="hsw-ppurch__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( 1 ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
-                                                        <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'remove' ); ?></button>
+                                                        <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'remove' ); ?></button>
+                                                        <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"<?php echo '' === $hsw_remove ? ' disabled' : ''; ?>><?php echo HSW_Helpers::icon( 'delete' ); ?></button>
                                                 </div>
                                         </div>
                                         <button type="button" class="hsw-ppurch__cart" data-hsw-add>

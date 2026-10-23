@@ -212,6 +212,23 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                                                         </div>
                                                 </div>
                                                 <div class="hsw-psticky__side">
+                                                        <?php
+                                                        /*
+                                                         * At quantity 1 the minus has nothing to do, so the
+                                                         * third control becomes the bin — same as the cart row.
+                                                         * It only has a URL when the product is already in the
+                                                         * cart; otherwise it renders disabled.
+                                                         */
+                                                        $hsw_remove = '';
+                                                        if ( function_exists( 'WC' ) && WC()->cart ) {
+                                                                foreach ( WC()->cart->get_cart() as $hsw_key => $hsw_item ) {
+                                                                        if ( (int) $hsw_item['product_id'] === (int) $product->get_id() || (int) $hsw_item['variation_id'] === (int) $product->get_id() ) {
+                                                                                $hsw_remove = wc_get_cart_remove_url( $hsw_key );
+                                                                                break;
+                                                                        }
+                                                                }
+                                                        }
+                                                        ?>
                                                         <div class="hsw-psticky__stepper">
                                                                 <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--plus" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'add' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
@@ -219,6 +236,9 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                                                                 <input type="text" class="hsw-psticky__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( 1 ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                 <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'remove' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                                </button>
+                                                                <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"<?php echo '' === $hsw_remove ? ' disabled' : ''; ?>>
+                                                                        <?php echo HSW_Helpers::icon( 'delete' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>
                                                         </div>
                                                         <button type="button" class="hsw-psticky__cart" data-hsw-add>
