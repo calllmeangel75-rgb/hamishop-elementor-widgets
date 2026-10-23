@@ -21,6 +21,12 @@ final class HSW_Account_Support {
 	const PRIORITY    = '_hsw_ticket_priority';
 	const DEPARTMENT  = '_hsw_ticket_department';
 
+	/** Related WooCommerce order ID (0 when none). */
+	const ORDER_META = '_hsw_ticket_order';
+
+	/** Attachment ID of the screenshot the customer attached. */
+	const IMAGE_META = '_hsw_ticket_image';
+
 	/** @var HSW_Account */
 	private $account;
 
@@ -30,6 +36,13 @@ final class HSW_Account_Support {
 		add_action( 'init', array( $this, 'register_post_type' ), 5 );
 		add_action( 'template_redirect', array( $this, 'handle_frontend_actions' ) );
 		add_action( 'woocommerce_account_support_endpoint', array( $this, 'render_endpoint' ) );
+
+		/* Chat UI actions — logged-in customers only. */
+		add_action( 'wp_ajax_hsw_ticket_create', array( $this, 'ajax_create_ticket' ) );
+		add_action( 'wp_ajax_hsw_ticket_reply', array( $this, 'ajax_reply_ticket' ) );
+		add_action( 'wp_ajax_hsw_ticket_view', array( $this, 'ajax_view_ticket' ) );
+		add_action( 'wp_ajax_hsw_ticket_close', array( $this, 'ajax_close_ticket' ) );
+		add_action( 'wp_ajax_hsw_orders_search', array( $this, 'ajax_orders_search' ) );
 
 		if ( is_admin() ) {
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
@@ -144,16 +157,6 @@ final class HSW_Account_Support {
 		return isset( $priorities[ $priority ] ) ? $priorities[ $priority ] : 'معمولی';
 	}
 
-	private function status_filter() {
-		$filter = isset( $_GET['ticket_status'] ) ? sanitize_key( wp_unslash( $_GET['ticket_status'] ) ) : 'all';
-		return in_array( $filter, array( 'all', 'open', 'answered', 'closed' ), true ) ? $filter : 'all';
-	}
-
-	private function current_page() {
-		$page = isset( $_GET['ticket_page'] ) ? absint( $_GET['ticket_page'] ) : 1;
-		return max( 1, $page );
-	}
-
 	/* ---------------------------------------------------------------------
 	 * Front-end rendering
 	 * ------------------------------------------------------------------ */
@@ -176,140 +179,16 @@ final class HSW_Account_Support {
 	}
 
 	private function content_for_user( $user_id, $value ) {
-		if ( '' === $value ) {
-			return $this->list_content( $user_id );
-		}
+		$active   = 0;
+		$open_new = false;
+
 		if ( 'new' === $value ) {
-			return $this->new_ticket_content( $user_id );
-		}
-		return $this->ticket_detail_content( $user_id, absint( $value ) );
-	}
-
-	private function list_content( $user_id ) {
-		$all = get_posts(
-			array(
-				'post_type'      => self::POST_TYPE,
-				'post_status'    => 'publish',
-				'author'         => $user_id,
-				'posts_per_page' => -1,
-				'orderby'        => 'date',
-				'order'          => 'DESC',
-				'no_found_rows'  => true,
-			)
-		);
-
-		$counts = array( 'all' => count( $all ), 'open' => 0, 'answered' => 0, 'closed' => 0 );
-		foreach ( $all as $post ) {
-			$status = $this->get_status( $post->ID );
-			if ( isset( $counts[ $status ] ) ) {
-				$counts[ $status ]++;
-			}
+			$open_new = true;
+		} elseif ( '' !== $value ) {
+			$active = absint( $value );
 		}
 
-		$filter = $this->status_filter();
-		$tickets = array();
-		foreach ( $all as $post ) {
-			if ( 'all' === $filter || $this->get_status( $post->ID ) === $filter ) {
-				$tickets[] = $post;
-			}
-		}
-
-		$per_page = 10;
-		$page     = $this->current_page();
-		$pages    = max( 1, (int) ceil( count( $tickets ) / $per_page ) );
-		$page     = min( $page, $pages );
-		$slice    = array_slice( $tickets, ( $page - 1 ) * $per_page, $per_page );
-		$max_open = max( 1, absint( $this->account->setting( 'support.max_open', 5 ) ) );
-		$open     = $counts['open'] + $counts['answered'];
-		$can_new  = $open < $max_open;
-
-		$html  = '<section class="hsw-ac__card hsw-ac__tickets" aria-labelledby="hsw-ac-tickets-title">';
-		$html .= '<header class="hsw-ac__page-head"><div><h2 id="hsw-ac-tickets-title">' . esc_html__( 'تیکت‌های پشتیبانی', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'گفتگوهای خود با تیم پشتیبانی را از این‌جا پیگیری کنید.', 'hamishop-elementor-widgets' ) . '</p></div>';
-		if ( $can_new ) {
-			$html .= '<a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( $this->new_ticket_url() ) . '">' . $this->account->icon( 'plus' ) . esc_html__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '</a>';
-		}
-		$html .= '</header>';
-
-		if ( ! $can_new ) {
-			$html .= '<p class="hsw-ac__note is-warning">' . $this->account->icon( 'alert' ) . '<span>' . esc_html( sprintf( 'حداکثر %s تیکت باز هم‌زمان مجاز است. ابتدا یکی از تیکت‌ها را ببندید.', HSW_Helpers::fa_num( $max_open ) ) ) . '</span></p>';
-		}
-
-		$html .= '<div class="hsw-ac__ticket-tabs" role="tablist">';
-		$tabs = array(
-			'all'      => 'همه',
-			'open'     => 'در انتظار پاسخ',
-			'answered' => 'پاسخ داده شده',
-			'closed'   => 'بسته شده',
-		);
-		foreach ( $tabs as $key => $label ) {
-			$url = add_query_arg( 'ticket_status', $key, $this->support_url() );
-			$html .= '<a href="' . esc_url( $url ) . '" class="' . ( $filter === $key ? 'is-active' : '' ) . '"' . ( $filter === $key ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '<span>' . esc_html( HSW_Helpers::fa_num( $counts[ $key ] ) ) . '</span></a>';
-		}
-		$html .= '</div>';
-
-		if ( $slice ) {
-			$html .= '<ul class="hsw-ac__ticket-list">';
-			foreach ( $slice as $post ) {
-				$html .= $this->ticket_card( $post );
-			}
-			$html .= '</ul>';
-			$html .= $this->pagination( $pages, $page, $filter );
-		} else {
-			$html .= '<div class="hsw-ac__empty hsw-ac__empty--inline"><span class="hsw-ac__empty-ic">' . $this->account->icon( 'support' ) . '</span><h3>' . esc_html__( 'تیکتی در این بخش نیست', 'hamishop-elementor-widgets' ) . '</h3><p>' . esc_html__( 'اگر سؤالی دارید، یک تیکت جدید ثبت کنید تا تیم پشتیبانی پاسخ دهد.', 'hamishop-elementor-widgets' ) . '</p></div>';
-		}
-
-		$html .= '</section>';
-		return $html;
-	}
-
-	private function ticket_card( $post ) {
-		$status   = $this->get_status( $post->ID );
-		$updated  = get_post_meta( $post->ID, self::UPDATED_META, true );
-		$updated  = $updated ? absint( $updated ) : $this->timestamp_from_local( $post->post_modified );
-		$priority = get_post_meta( $post->ID, self::PRIORITY, true );
-		$dept     = get_post_meta( $post->ID, self::DEPARTMENT, true );
-		$replies  = get_comments(
-			array(
-				'post_id' => $post->ID,
-				'type'    => 'hsw_ticket_reply',
-				'status'  => 'approve',
-				'count'   => true,
-			)
-		);
-		$unread   = (int) get_post_meta( $post->ID, self::UNREAD_USER, true );
-
-		$html  = '<li class="hsw-ac__ticket' . ( $unread ? ' is-unread' : '' ) . '">';
-		$html .= '<a class="hsw-ac__ticket-main" href="' . esc_url( $this->ticket_url( $post->ID ) ) . '">';
-		$html .= '<div class="hsw-ac__ticket-top"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span><span class="hsw-ac__ticket-id">#T-' . esc_html( HSW_Helpers::fa_num( $post->ID ) ) . '</span></div>';
-		$html .= '<h3 class="hsw-ac__ticket-title">' . esc_html( $post->post_title ) . '</h3>';
-		$html .= '<div class="hsw-ac__ticket-meta"><span>' . $this->account->icon( 'support' ) . esc_html( $dept ? $dept : 'پشتیبانی' ) . '</span><span>' . $this->account->icon( 'alert' ) . esc_html( $this->priority_label( $priority ) ) . '</span><span>' . $this->account->icon( 'clock' ) . esc_html( $this->format_date( $updated ) ) . '</span><span>' . $this->account->icon( 'ticket' ) . esc_html( sprintf( '%s پاسخ', HSW_Helpers::fa_num( $replies ) ) ) . '</span></div>';
-		$html .= '</a>';
-		$html .= '<a class="hsw-ac__ticket-open" href="' . esc_url( $this->ticket_url( $post->ID ) ) . '" aria-label="' . esc_attr__( 'مشاهده تیکت', 'hamishop-elementor-widgets' ) . '">' . $this->account->icon( 'arrow-left' ) . '</a>';
-		$html .= '</li>';
-		return $html;
-	}
-
-	private function pagination( $pages, $current, $filter ) {
-		if ( $pages < 2 ) {
-			return '';
-		}
-		$base = add_query_arg( 'ticket_status', $filter, $this->support_url() );
-		$base = add_query_arg( 'ticket_page', '%#%', $base );
-		$links = paginate_links(
-			array(
-				'base'      => $base,
-				'format'    => '',
-				'current'   => $current,
-				'total'     => $pages,
-				'type'      => 'array',
-				'prev_text' => '‹',
-				'next_text' => '›',
-			)
-		);
-		if ( ! $links ) {
-			return '';
-		}
-		return '<nav class="hsw-ac__pagination" aria-label="' . esc_attr__( 'صفحه‌بندی تیکت‌ها', 'hamishop-elementor-widgets' ) . '"><ul><li>' . implode( '</li><li>', $links ) . '</li></ul></nav>';
+		return $this->chat_shell( $user_id, $active, $open_new );
 	}
 
 	private function timestamp_from_local( $local ) {
@@ -323,124 +202,6 @@ final class HSW_Account_Support {
 
 	private function format_date( $timestamp ) {
 		return $this->account->format_date( $timestamp );
-	}
-
-	private function new_ticket_content( $user_id ) {
-		$max_open = max( 1, absint( $this->account->setting( 'support.max_open', 5 ) ) );
-		if ( $this->open_ticket_count( $user_id ) >= $max_open ) {
-			$html  = '<section class="hsw-ac__card hsw-ac__empty"><span class="hsw-ac__empty-ic">' . $this->account->icon( 'alert' ) . '</span>';
-			$html .= '<h2>' . esc_html__( 'حد مجاز تیکت‌های باز', 'hamishop-elementor-widgets' ) . '</h2>';
-			$html .= '<p>' . esc_html( sprintf( 'حداکثر %s تیکت باز هم‌زمان می‌توانید داشته باشید.', HSW_Helpers::fa_num( $max_open ) ) ) . '</p>';
-			$html .= '<a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( $this->support_url() ) . '">' . $this->account->icon( 'arrow-right' ) . esc_html__( 'بازگشت به تیکت‌ها', 'hamishop-elementor-widgets' ) . '</a></section>';
-			return $html;
-		}
-
-		$departments = (array) $this->account->setting( 'support.departments', array() );
-		$priorities  = (array) $this->account->setting( 'support.priorities', array() );
-		$default_pri = (string) $this->account->setting( 'support.priority_default', 'normal' );
-		$prefill     = isset( $_GET['department'] ) ? sanitize_text_field( wp_unslash( $_GET['department'] ) ) : '';
-
-		$html  = '<section class="hsw-ac__card hsw-ac__ticket-page" aria-labelledby="hsw-ac-new-ticket-title">';
-		$html .= '<a class="hsw-ac__back" href="' . esc_url( $this->support_url() ) . '">' . $this->account->icon( 'arrow-right' ) . esc_html__( 'بازگشت به تیکت‌ها', 'hamishop-elementor-widgets' ) . '</a>';
-		$html .= '<header class="hsw-ac__page-head"><div><h2 id="hsw-ac-new-ticket-title">' . esc_html__( 'ثبت تیکت جدید', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'موضوع را دقیق بنویسید تا سریع‌تر به پاسخ درست برسید.', 'hamishop-elementor-widgets' ) . '</p></div></header>';
-		$html .= '<form class="hsw-ac-form hsw-ac-form--ticket" method="post" action="' . esc_url( $this->support_url() ) . '">';
-		$html .= '<div class="hsw-ac-form-grid">';
-		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-ticket-subject">' . esc_html__( 'موضوع تیکت', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><input type="text" id="hsw-ac-ticket-subject" name="subject" maxlength="120" required></div>';
-		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-ticket-dept">' . esc_html__( 'دپارتمان', 'hamishop-elementor-widgets' ) . '</label><select id="hsw-ac-ticket-dept" name="department">';
-		foreach ( $departments as $department ) {
-			$html .= '<option value="' . esc_attr( $department ) . '"' . selected( $department, $prefill, false ) . '>' . esc_html( $department ) . '</option>';
-		}
-		$html .= '</select></div>';
-		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-ticket-priority">' . esc_html__( 'اولویت', 'hamishop-elementor-widgets' ) . '</label><select id="hsw-ac-ticket-priority" name="priority">';
-		foreach ( $priorities as $key => $label ) {
-			$html .= '<option value="' . esc_attr( $key ) . '"' . selected( $key, $default_pri, false ) . '>' . esc_html( $label ) . '</option>';
-		}
-		$html .= '</select></div>';
-		$html .= '</div>';
-		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-ticket-message">' . esc_html__( 'متن پیام', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><textarea id="hsw-ac-ticket-message" name="message" rows="8" maxlength="' . esc_attr( $this->account->setting( 'support.max_message', 3000 ) ) . '" required placeholder="' . esc_attr__( 'شماره سفارش، توضیح مشکل و هر اطلاعات مفید دیگری را بنویسید…', 'hamishop-elementor-widgets' ) . '"></textarea></div>';
-		$html .= '<div class="hsw-ac-hp" aria-hidden="true"><label>Website<input type="text" name="hsw_website" tabindex="-1" autocomplete="off"></label></div>';
-		$html .= '<input type="hidden" name="hsw_ticket_action" value="create">';
-		$html .= wp_nonce_field( 'hsw_ticket_create', 'hsw_ticket_nonce', true, false );
-		$html .= '<div class="hsw-ac-form-actions"><button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">' . $this->account->icon( 'ticket' ) . esc_html__( 'ارسال تیکت', 'hamishop-elementor-widgets' ) . '</button><span class="hsw-ac-form-hint">' . esc_html__( 'پاسخ‌گویی معمولاً کمتر از ۲۴ ساعت کاری است.', 'hamishop-elementor-widgets' ) . '</span></div>';
-		$html .= '</form></section>';
-		return $html;
-	}
-
-	private function ticket_detail_content( $user_id, $ticket_id ) {
-		$ticket = get_post( $ticket_id );
-		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id || 'publish' !== $ticket->post_status ) {
-			$html  = '<section class="hsw-ac__card hsw-ac__empty"><span class="hsw-ac__empty-ic">' . $this->account->icon( 'alert' ) . '</span>';
-			$html .= '<h2>' . esc_html__( 'تیکت پیدا نشد', 'hamishop-elementor-widgets' ) . '</h2>';
-			$html .= '<p>' . esc_html__( 'این تیکت وجود ندارد یا به حساب شما تعلق ندارد.', 'hamishop-elementor-widgets' ) . '</p>';
-			$html .= '<a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( $this->support_url() ) . '">' . $this->account->icon( 'arrow-right' ) . esc_html__( 'بازگشت به تیکت‌ها', 'hamishop-elementor-widgets' ) . '</a></section>';
-			return $html;
-		}
-
-		update_post_meta( $ticket_id, self::UNREAD_USER, 0 );
-
-		$status   = $this->get_status( $ticket_id );
-		$priority = get_post_meta( $ticket_id, self::PRIORITY, true );
-		$dept     = get_post_meta( $ticket_id, self::DEPARTMENT, true );
-		$created  = $this->timestamp_from_local( $ticket->post_date );
-		$updated  = get_post_meta( $ticket_id, self::UPDATED_META, true );
-		$updated  = $updated ? absint( $updated ) : $this->timestamp_from_local( $ticket->post_modified );
-		$closed   = 'closed' === $status;
-
-		$html  = '<section class="hsw-ac__card hsw-ac__ticket-page" aria-labelledby="hsw-ac-ticket-title">';
-		$html .= '<a class="hsw-ac__back" href="' . esc_url( $this->support_url() ) . '">' . $this->account->icon( 'arrow-right' ) . esc_html__( 'بازگشت به تیکت‌ها', 'hamishop-elementor-widgets' ) . '</a>';
-		$html .= '<header class="hsw-ac__ticket-head"><div><div class="hsw-ac__ticket-top"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span><span class="hsw-ac__ticket-id">#T-' . esc_html( HSW_Helpers::fa_num( $ticket_id ) ) . '</span></div>';
-		$html .= '<h2 id="hsw-ac-ticket-title">' . esc_html( $ticket->post_title ) . '</h2>';
-		$html .= '<div class="hsw-ac__ticket-meta"><span>' . $this->account->icon( 'support' ) . esc_html( $dept ? $dept : 'پشتیبانی' ) . '</span><span>' . $this->account->icon( 'alert' ) . esc_html( $this->priority_label( $priority ) ) . '</span><span>' . $this->account->icon( 'calendar' ) . esc_html( sprintf( 'ایجاد: %s', $this->format_date( $created ) ) ) . '</span><span>' . $this->account->icon( 'clock' ) . esc_html( sprintf( 'آخرین به‌روزرسانی: %s', $this->format_date( $updated ) ) ) . '</span></div></div>';
-		if ( ! $closed ) {
-			$html .= '<form method="post" action="' . esc_url( $this->support_url() ) . '" class="hsw-ac-ticket-close-form">';
-			$html .= '<input type="hidden" name="hsw_ticket_action" value="close"><input type="hidden" name="ticket_id" value="' . esc_attr( $ticket_id ) . '">';
-			$html .= wp_nonce_field( 'hsw_ticket_close_' . $ticket_id, 'hsw_ticket_nonce', true, false );
-			$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--ghost hsw-ac__btn--danger">' . $this->account->icon( 'check' ) . esc_html__( 'بستن تیکت', 'hamishop-elementor-widgets' ) . '</button></form>';
-		}
-		$html .= '</header>';
-
-		$html .= '<div class="hsw-ac__thread">';
-		$html .= $this->message_bubble( $user_id, $ticket->post_content, $created, false );
-		$comments = get_comments(
-			array(
-				'post_id' => $ticket_id,
-				'type'    => 'hsw_ticket_reply',
-				'status'  => 'approve',
-				'order'   => 'ASC',
-			)
-		);
-		foreach ( $comments as $comment ) {
-			$comment_author = get_user_by( 'id', (int) $comment->user_id );
-			$is_staff       = $comment_author && ( user_can( $comment_author, 'manage_woocommerce' ) || user_can( $comment_author, 'manage_options' ) );
-			$html .= $this->message_bubble( (int) $comment->user_id, $comment->comment_content, $this->timestamp_from_local( $comment->comment_date ), $is_staff );
-		}
-		$html .= '</div>';
-
-		if ( $closed ) {
-			$html .= '<div class="hsw-ac__ticket-closed">' . $this->account->icon( 'lock' ) . '<p>' . esc_html__( 'این تیکت بسته شده است. برای موضوع جدید یک تیکت تازه ثبت کنید.', 'hamishop-elementor-widgets' ) . '</p><a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( $this->new_ticket_url() ) . '">' . esc_html__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '</a></div>';
-		} else {
-			$html .= '<form class="hsw-ac-form hsw-ac-form--reply" method="post" action="' . esc_url( $this->support_url() ) . '">';
-			$html .= '<div class="hsw-ac-field"><label for="hsw-ac-reply-message">' . esc_html__( 'پاسخ شما', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><textarea id="hsw-ac-reply-message" name="message" rows="5" maxlength="' . esc_attr( $this->account->setting( 'support.max_message', 3000 ) ) . '" required placeholder="' . esc_attr__( 'پاسخ یا توضیح تکمیلی خود را بنویسید…', 'hamishop-elementor-widgets' ) . '"></textarea></div>';
-			$html .= '<input type="hidden" name="hsw_ticket_action" value="reply"><input type="hidden" name="ticket_id" value="' . esc_attr( $ticket_id ) . '">';
-			$html .= wp_nonce_field( 'hsw_ticket_reply_' . $ticket_id, 'hsw_ticket_nonce', true, false );
-			$html .= '<div class="hsw-ac-form-actions"><button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">' . $this->account->icon( 'arrow-left' ) . esc_html__( 'ارسال پاسخ', 'hamishop-elementor-widgets' ) . '</button></div>';
-			$html .= '</form>';
-		}
-		$html .= '</section>';
-		return $html;
-	}
-
-	private function message_bubble( $author_id, $content, $timestamp, $is_staff ) {
-		$author = get_user_by( 'id', $author_id );
-		$name   = $author ? $author->display_name : ( $is_staff ? 'پشتیبانی' : 'کاربر' );
-		$initial = function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 1, 'UTF-8' ) : substr( $name, 0, 1 );
-		$staff   = class_exists( 'HSW_Branding' ) ? sprintf( 'پشتیبانی %s', HSW_Branding::name() ) : $name;
-
-		return '<article class="hsw-ac__msg' . ( $is_staff ? ' is-staff' : '' ) . '">'
-			. '<div class="hsw-ac__msg-avatar" aria-hidden="true">' . ( $is_staff ? $this->account->icon( 'support' ) : esc_html( $initial ) ) . '</div>'
-			. '<div class="hsw-ac__msg-body"><div class="hsw-ac__msg-head"><strong>' . esc_html( $is_staff ? $staff : $name ) . '</strong><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( $this->format_date( $timestamp ) ) . '</time></div>'
-			. '<div class="hsw-ac__msg-text">' . nl2br( esc_html( $content ) ) . '</div></div>'
-			. '</article>';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -587,7 +348,7 @@ final class HSW_Account_Support {
 
 	private function insert_reply( $ticket_id, $user_id, $message, $is_staff ) {
 		$user = get_user_by( 'id', $user_id );
-		wp_insert_comment(
+		return (int) wp_insert_comment(
 			array(
 				'comment_post_ID'      => $ticket_id,
 				'comment_author'       => $user ? $user->display_name : ( $is_staff ? 'پشتیبانی' : 'کاربر' ),
@@ -627,12 +388,24 @@ final class HSW_Account_Support {
 			'موضوع: ' . ( $ticket ? $ticket->post_title : '' ),
 			'دپارتمان: ' . get_post_meta( $ticket_id, self::DEPARTMENT, true ),
 			'اولویت: ' . $this->priority_label( get_post_meta( $ticket_id, self::PRIORITY, true ) ),
-			'',
-			$is_reply ? 'پاسخ کاربر:' : 'متن تیکت:',
-			$is_reply ? '' : ( $ticket ? $ticket->post_content : '' ),
-			'',
-			'مشاهده در پیشخوان: ' . admin_url( 'post.php?post=' . $ticket_id . '&action=edit' ),
 		);
+
+		$order_id = absint( get_post_meta( $ticket_id, self::ORDER_META, true ) );
+		if ( $order_id ) {
+			$lines[] = 'سفارش مرتبط: #' . $order_id;
+		}
+
+		$image_id = absint( get_post_meta( $ticket_id, self::IMAGE_META, true ) );
+		if ( $image_id ) {
+			$lines[] = 'عکس پیوست: ' . (string) wp_get_attachment_url( $image_id );
+		}
+
+		$lines[] = '';
+		$lines[] = $is_reply ? 'پاسخ کاربر:' : 'متن تیکت:';
+		$lines[] = $is_reply ? '' : ( $ticket ? $ticket->post_content : '' );
+		$lines[] = '';
+		$lines[] = 'مشاهده در پیشخوان: ' . admin_url( 'post.php?post=' . $ticket_id . '&action=edit' );
+
 		wp_mail( $to, $subject, implode( "\n", $lines ), array( 'Content-Type: text/plain; charset=UTF-8' ) );
 	}
 
@@ -642,6 +415,719 @@ final class HSW_Account_Support {
 		}
 		wp_safe_redirect( $url );
 		exit;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Chat UI (v1.11.24)
+	 *
+	 * One screen instead of three pages: conversations on the side, the thread
+	 * in the middle, and the new-ticket form in a modal behind the «+» button.
+	 *
+	 * Everything is server-rendered, so the section still works with JS off —
+	 * the list items are real links and the modal is a real form. The script
+	 * only adds instant switching, inline replies and client-side image
+	 * compression.
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Two-pane support screen.
+	 *
+	 * @param int  $user_id   Customer.
+	 * @param int  $active_id Ticket to open, 0 for the empty state.
+	 * @param bool $open_new  Open the modal straight away.
+	 * @return string
+	 */
+	private function chat_shell( $user_id, $active_id, $open_new = false ) {
+		$max_open = max( 1, absint( $this->account->setting( 'support.max_open', 5 ) ) );
+		$can_new  = $this->open_ticket_count( $user_id ) < $max_open;
+
+		$html  = '<section class="hsw-ac__chat" data-hsw-chat data-active="' . esc_attr( $active_id ) . '">';
+		$html .= $this->chat_list_html( $user_id, $can_new );
+		$html .= '<div class="hsw-ac__chat-main" data-hsw-chat-main>';
+		$html .= $active_id ? $this->chat_thread_html( $user_id, $active_id ) : $this->chat_empty_html();
+		$html .= '</div>';
+		$html .= $this->ticket_modal_html( $can_new, $open_new );
+		$html .= '</section>';
+
+		return $html;
+	}
+
+	/**
+	 * Conversation list.
+	 *
+	 * @param int  $user_id Customer.
+	 * @param bool $can_new Whether another open ticket is allowed.
+	 * @return string
+	 */
+	private function chat_list_html( $user_id, $can_new ) {
+		$tickets = get_posts(
+			array(
+				'post_type'      => self::POST_TYPE,
+				'post_status'    => 'publish',
+				'author'         => $user_id,
+				'posts_per_page' => 50,
+				'orderby'        => 'modified',
+				'order'          => 'DESC',
+				'no_found_rows'  => true,
+			)
+		);
+
+		$html  = '<aside class="hsw-ac__chat-side">';
+		$html .= '<header class="hsw-ac__chat-sidehead"><div><h2>' . esc_html__( 'گفتگوها', 'hamishop-elementor-widgets' ) . '</h2><span>' . esc_html( sprintf( '%s گفتگو', HSW_Helpers::fa_num( count( $tickets ) ) ) ) . '</span></div>';
+		if ( $can_new ) {
+			$html .= '<button type="button" class="hsw-ac__chat-add" data-hsw-ticket-new aria-label="' . esc_attr__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '" title="' . esc_attr__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '">' . $this->account->icon( 'plus' ) . '</button>';
+		}
+		$html .= '</header>';
+
+		$html .= '<div class="hsw-ac__chat-search"><span aria-hidden="true">' . $this->account->icon( 'search' ) . '</span><input type="search" data-hsw-ticket-search placeholder="' . esc_attr__( 'جستجوی گفتگو…', 'hamishop-elementor-widgets' ) . '" aria-label="' . esc_attr__( 'جستجوی گفتگو', 'hamishop-elementor-widgets' ) . '"></div>';
+
+		/*
+		 * The list element is always rendered, even when empty: the first ticket
+		 * created through the modal is inserted into it by JS, and a missing
+		 * <ul> would silently swallow that row.
+		 */
+		$html .= '<ul class="hsw-ac__chat-list" data-hsw-ticket-list>';
+		if ( ! $tickets ) {
+			$html .= '<li class="hsw-ac__chat-none" data-hsw-chat-placeholder><span aria-hidden="true">' . $this->account->icon( 'support' ) . '</span><p>' . esc_html__( 'هنوز گفتگویی ندارید.', 'hamishop-elementor-widgets' ) . '</p></li>';
+		} else {
+			foreach ( $tickets as $ticket ) {
+				$html .= $this->chat_row_html( $ticket );
+			}
+		}
+		$html .= '</ul>';
+
+		$html .= '</aside>';
+		return $html;
+	}
+
+	/**
+	 * One row in the conversation list.
+	 *
+	 * @param WP_Post $ticket Ticket post.
+	 * @return string
+	 */
+	private function chat_row_html( $ticket ) {
+		$status  = $this->get_status( $ticket->ID );
+		$unread  = (int) get_post_meta( $ticket->ID, self::UNREAD_USER, true );
+		$updated = get_post_meta( $ticket->ID, self::UPDATED_META, true );
+		$updated = $updated ? absint( $updated ) : $this->timestamp_from_local( $ticket->post_modified );
+		$order   = absint( get_post_meta( $ticket->ID, self::ORDER_META, true ) );
+		$excerpt = wp_trim_words( wp_strip_all_tags( (string) $ticket->post_content ), 9, '…' );
+
+		$html  = '<li class="hsw-ac__chat-item' . ( $unread ? ' is-unread' : '' ) . '" data-id="' . esc_attr( $ticket->ID ) . '">';
+		$html .= '<a class="hsw-ac__chat-link" href="' . esc_url( $this->ticket_url( $ticket->ID ) ) . '" data-hsw-ticket="' . esc_attr( $ticket->ID ) . '">';
+		$html .= '<span class="hsw-ac__chat-rowtop"><span class="hsw-ac__chat-subj">' . esc_html( $ticket->post_title ) . '</span>';
+		if ( $unread ) {
+			$html .= '<span class="hsw-ac__chat-dot" aria-label="' . esc_attr__( 'پاسخ خوانده‌نشده', 'hamishop-elementor-widgets' ) . '"></span>';
+		}
+		$html .= '</span>';
+		$html .= '<span class="hsw-ac__chat-excerpt">';
+		if ( $order ) {
+			$html .= '<b>' . esc_html( sprintf( 'سفارش #%s', HSW_Helpers::fa_num( $order ) ) ) . '</b> — ';
+		}
+		$html .= esc_html( $excerpt ) . '</span>';
+		$html .= '<span class="hsw-ac__chat-rowmeta"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span><span class="hsw-ac__chat-date">' . esc_html( $this->format_date( $updated ) ) . '</span></span>';
+		$html .= '</a></li>';
+
+		return $html;
+	}
+
+	/**
+	 * Placeholder shown in the thread pane before a conversation is picked.
+	 *
+	 * @param string $text Optional message.
+	 * @return string
+	 */
+	private function chat_empty_html( $text = '' ) {
+		$html  = '<div class="hsw-ac__chat-empty"><span class="hsw-ac__chat-emptyic" aria-hidden="true">' . $this->account->icon( 'support' ) . '</span>';
+		$html .= '<h3>' . esc_html__( 'یک گفتگو انتخاب کنید', 'hamishop-elementor-widgets' ) . '</h3>';
+		$html .= '<p>' . esc_html( '' !== $text ? $text : __( 'از فهرست کنار یک گفتگو را باز کنید یا گفتگوی تازه‌ای بسازید.', 'hamishop-elementor-widgets' ) ) . '</p>';
+		$html .= '<button type="button" class="hsw-ac__btn hsw-ac__btn--primary" data-hsw-ticket-new>' . $this->account->icon( 'plus' ) . esc_html__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '</button></div>';
+		return $html;
+	}
+
+	/**
+	 * Thread pane for one ticket. Also returned by the AJAX switch action.
+	 *
+	 * @param int $user_id   Customer.
+	 * @param int $ticket_id Ticket.
+	 * @return string
+	 */
+	private function chat_thread_html( $user_id, $ticket_id ) {
+		$ticket = get_post( $ticket_id );
+
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id || 'publish' !== $ticket->post_status ) {
+			return $this->chat_empty_html( __( 'این گفتگو وجود ندارد یا به حساب شما تعلق ندارد.', 'hamishop-elementor-widgets' ) );
+		}
+
+		update_post_meta( $ticket_id, self::UNREAD_USER, 0 );
+
+		$status = $this->get_status( $ticket_id );
+		$closed = 'closed' === $status;
+		$order  = absint( get_post_meta( $ticket_id, self::ORDER_META, true ) );
+
+		$html  = '<div class="hsw-ac__thread" data-hsw-thread="' . esc_attr( $ticket_id ) . '">';
+		$html .= '<header class="hsw-ac__thread-head"><div class="hsw-ac__thread-title"><h2>' . esc_html( $ticket->post_title ) . '</h2>';
+		$html .= '<div class="hsw-ac__thread-meta"><span class="hsw-ac__status-badge is-' . esc_attr( $this->status_tone( $status ) ) . '">' . esc_html( $this->status_label( $status ) ) . '</span><span class="hsw-ac__ticket-id">#T-' . esc_html( HSW_Helpers::fa_num( $ticket_id ) ) . '</span>';
+		if ( $order ) {
+			$html .= '<a class="hsw-ac__thread-order" href="' . esc_url( wc_get_endpoint_url( 'view-order', $order, wc_get_page_permalink( 'myaccount' ) ) ) . '">' . $this->account->icon( 'receipt' ) . esc_html( sprintf( 'سفارش #%s', HSW_Helpers::fa_num( $order ) ) ) . '</a>';
+		}
+		$html .= '</div></div>';
+		if ( ! $closed ) {
+			$html .= '<button type="button" class="hsw-ac__thread-close" data-hsw-ticket-close="' . esc_attr( $ticket_id ) . '">' . $this->account->icon( 'check' ) . '<span>' . esc_html__( 'بستن', 'hamishop-elementor-widgets' ) . '</span></button>';
+		}
+		$html .= '</header>';
+
+		$html .= '<div class="hsw-ac__thread-scroll" data-hsw-thread-scroll>';
+		$html .= $this->bubble_html( $user_id, $ticket->post_content, $this->timestamp_from_local( $ticket->post_date ), false, absint( get_post_meta( $ticket_id, self::IMAGE_META, true ) ) );
+
+		$comments = get_comments(
+			array(
+				'post_id' => $ticket_id,
+				'type'    => 'hsw_ticket_reply',
+				'status'  => 'approve',
+				'order'   => 'ASC',
+			)
+		);
+		foreach ( $comments as $comment ) {
+			$author   = get_user_by( 'id', (int) $comment->user_id );
+			$is_staff = $author && ( user_can( $author, 'manage_woocommerce' ) || user_can( $author, 'manage_options' ) );
+			$html    .= $this->bubble_html(
+				(int) $comment->user_id,
+				$comment->comment_content,
+				$this->timestamp_from_local( $comment->comment_date ),
+				$is_staff,
+				absint( get_comment_meta( $comment->comment_ID, self::IMAGE_META, true ) )
+			);
+		}
+		$html .= '</div>';
+
+		if ( $closed ) {
+			$html .= '<div class="hsw-ac__thread-closed">' . $this->account->icon( 'lock' ) . '<p>' . esc_html__( 'این گفتگو بسته شده است. برای موضوع جدید یک گفتگوی تازه بسازید.', 'hamishop-elementor-widgets' ) . '</p><button type="button" class="hsw-ac__btn hsw-ac__btn--primary" data-hsw-ticket-new>' . esc_html__( 'گفتگوی جدید', 'hamishop-elementor-widgets' ) . '</button></div>';
+		} else {
+			$html .= '<form class="hsw-ac__composer" data-hsw-reply-form data-ticket="' . esc_attr( $ticket_id ) . '">';
+			$html .= '<textarea name="message" rows="1" maxlength="' . esc_attr( max( 200, absint( $this->account->setting( 'support.max_message', 3000 ) ) ) ) . '" placeholder="' . esc_attr__( 'پیامت رو بنویس…', 'hamishop-elementor-widgets' ) . '" required></textarea>';
+			$html .= '<button type="submit" class="hsw-ac__composer-send" aria-label="' . esc_attr__( 'ارسال', 'hamishop-elementor-widgets' ) . '">' . $this->account->icon( 'arrow-left' ) . '</button>';
+			$html .= '</form>';
+			$html .= '<p class="hsw-ac__composer-msg" data-hsw-reply-msg role="status" aria-live="polite"></p>';
+		}
+		$html .= '</div>';
+
+		return $html;
+	}
+
+	/**
+	 * One message bubble.
+	 *
+	 * @param int    $author_id  Author.
+	 * @param string $content    Text.
+	 * @param int    $timestamp  Unix time.
+	 * @param bool   $is_staff   Staff message.
+	 * @param int    $image_id   Attachment ID, 0 for none.
+	 * @return string
+	 */
+	private function bubble_html( $author_id, $content, $timestamp, $is_staff, $image_id = 0 ) {
+		$author  = get_user_by( 'id', $author_id );
+		$name    = $author ? $author->display_name : ( $is_staff ? 'پشتیبانی' : 'کاربر' );
+		$staff   = class_exists( 'HSW_Branding' ) ? sprintf( 'پشتیبانی %s', HSW_Branding::name() ) : $name;
+		$initial = function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 1, 'UTF-8' ) : substr( $name, 0, 1 );
+
+		$image = '';
+		if ( $image_id ) {
+			$image = '<a class="hsw-ac__bubble-img" href="' . esc_url( (string) wp_get_attachment_url( $image_id ) ) . '" target="_blank" rel="noopener">'
+				. wp_get_attachment_image( $image_id, 'medium', false, array( 'loading' => 'lazy', 'alt' => '' ) )
+				. '</a>';
+		}
+
+		return '<article class="hsw-ac__bubble' . ( $is_staff ? ' is-staff' : ' is-user' ) . '">'
+			. '<div class="hsw-ac__bubble-avatar" aria-hidden="true">' . ( $is_staff ? $this->account->icon( 'support' ) : esc_html( $initial ) ) . '</div>'
+			. '<div class="hsw-ac__bubble-body"><div class="hsw-ac__bubble-head"><strong>' . esc_html( $is_staff ? $staff : $name ) . '</strong><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( $this->format_date( $timestamp ) ) . '</time></div>'
+			. '<div class="hsw-ac__bubble-text">' . nl2br( esc_html( $content ) ) . $image . '</div></div>'
+			. '</article>';
+	}
+
+	/**
+	 * New-ticket modal.
+	 *
+	 * @param bool $can_new Whether the customer may open another ticket.
+	 * @param bool $open    Render it open (used by the no-JS ?new=1 link).
+	 * @return string
+	 */
+	private function ticket_modal_html( $can_new, $open = false ) {
+		$cap     = $this->captcha_new();
+		$subject = isset( $_GET['subject'] ) ? sanitize_text_field( wp_unslash( $_GET['subject'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$max     = max( 200, absint( $this->account->setting( 'support.max_message', 3000 ) ) );
+
+		$html  = '<div class="hsw-ac__modal" data-hsw-ticket-modal' . ( $open && $can_new ? ' data-open="1"' : '' ) . ' hidden>';
+		$html .= '<div class="hsw-ac__modal-backdrop" data-hsw-modal-close></div>';
+		$html .= '<div class="hsw-ac__modal-card" role="dialog" aria-modal="true" aria-labelledby="hsw-ac-modal-title">';
+
+		$html .= '<header class="hsw-ac__modal-head"><div><h2 id="hsw-ac-modal-title">' . esc_html__( 'یه تیکت جدید بزن', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'مشکل یا سؤالتو بنویس، سریع بهت جواب می‌دیم.', 'hamishop-elementor-widgets' ) . '</p></div>';
+		$html .= '<button type="button" class="hsw-ac__modal-x" data-hsw-modal-close aria-label="' . esc_attr__( 'بستن', 'hamishop-elementor-widgets' ) . '">' . $this->account->icon( 'x' ) . '</button></header>';
+
+		$html .= '<form class="hsw-ac__modal-body" data-hsw-ticket-form novalidate>';
+
+		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-subject">' . esc_html__( 'موضوع تیکت', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label>';
+		$html .= '<input type="text" id="hsw-ac-t-subject" name="subject" maxlength="120" required value="' . esc_attr( $subject ) . '" placeholder="' . esc_attr__( 'موضوع تیکتو بنویس…', 'hamishop-elementor-widgets' ) . '"></div>';
+
+		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-order">' . esc_html__( 'سفارش / سرویس مرتبط', 'hamishop-elementor-widgets' ) . ' <span class="hsw-ac__optional">(' . esc_html__( 'اختیاری', 'hamishop-elementor-widgets' ) . ')</span></label>';
+		$html .= '<div class="hsw-ac__picker" data-hsw-order-picker>';
+		$html .= '<input type="text" id="hsw-ac-t-order" data-hsw-order-input autocomplete="off" placeholder="' . esc_attr__( 'جستجوی سفارش…', 'hamishop-elementor-widgets' ) . '">';
+		$html .= '<input type="hidden" name="order_id" value="0" data-hsw-order-value>';
+		$html .= '<div class="hsw-ac__picker-list" data-hsw-order-list hidden></div>';
+		$html .= '<p class="hsw-ac__picker-hint">' . esc_html__( 'شماره سفارش را بنویس یا از فهرست انتخاب کن.', 'hamishop-elementor-widgets' ) . '</p>';
+		$html .= '</div></div>';
+
+		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-message">' . esc_html__( 'متن پیام', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label>';
+		$html .= '<textarea id="hsw-ac-t-message" name="message" rows="5" maxlength="' . esc_attr( $max ) . '" required placeholder="' . esc_attr__( 'پیامتو بنویس…', 'hamishop-elementor-widgets' ) . '"></textarea></div>';
+
+		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-image">' . esc_html__( 'عکس', 'hamishop-elementor-widgets' ) . ' <span class="hsw-ac__optional">(' . esc_html__( 'اختیاری', 'hamishop-elementor-widgets' ) . ')</span></label>';
+		$html .= '<label class="hsw-ac__upload" data-hsw-upload><input type="file" id="hsw-ac-t-image" name="image" accept="image/*" data-hsw-image-input hidden>';
+		$html .= '<span class="hsw-ac__upload-ic" aria-hidden="true">' . $this->account->icon( 'image' ) . '</span>';
+		$html .= '<span class="hsw-ac__upload-copy"><strong>' . esc_html__( 'یه عکس اضافه کن', 'hamishop-elementor-widgets' ) . '</strong><small>' . esc_html__( 'خودکار فشرده می‌شه', 'hamishop-elementor-widgets' ) . '</small></span>';
+		$html .= '<span class="hsw-ac__upload-preview" data-hsw-image-preview></span></label></div>';
+
+		$html .= '<div class="hsw-ac-field hsw-ac__captcha"><label for="hsw-ac-t-captcha">' . esc_html__( 'یه سوال کوچیک', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label>';
+		$html .= '<div class="hsw-ac__captcha-row"><span class="hsw-ac__captcha-q" data-hsw-captcha-q>' . esc_html( HSW_Helpers::fa_num( $cap['a'] ) . ' + ' . HSW_Helpers::fa_num( $cap['b'] ) . ' = ?' ) . '</span>';
+		$html .= '<input type="text" id="hsw-ac-t-captcha" name="captcha" inputmode="numeric" pattern="[0-9۰-۹]*" autocomplete="off" required placeholder="' . esc_attr__( 'جواب رو بنویس…', 'hamishop-elementor-widgets' ) . '">';
+		$html .= '<input type="hidden" name="captcha_token" value="' . esc_attr( $cap['token'] ) . '" data-hsw-captcha-token></div></div>';
+
+		$html .= '<p class="hsw-ac__modal-msg" data-hsw-ticket-msg role="status" aria-live="polite"></p>';
+
+		$html .= '<footer class="hsw-ac__modal-foot"><button type="button" class="hsw-ac__btn hsw-ac__btn--ghost" data-hsw-modal-close>' . esc_html__( 'بی‌خیال', 'hamishop-elementor-widgets' ) . '</button>';
+		$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary" data-hsw-ticket-submit>' . esc_html__( 'ثبت تیکت', 'hamishop-elementor-widgets' ) . '</button></footer>';
+
+		$html .= '</form></div></div>';
+
+		return $html;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Captcha
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * A fresh two-number challenge. The answer lives in a transient keyed by the
+	 * token, so the form only carries the token — never the result.
+	 *
+	 * @return array{token:string,a:int,b:int}
+	 */
+	private function captcha_new() {
+		$a     = wp_rand( 1, 9 );
+		$b     = wp_rand( 1, 9 );
+		$token = wp_generate_password( 20, false, false );
+
+		set_transient( 'hsw_cap_' . $token, $a + $b, 30 * MINUTE_IN_SECONDS );
+
+		return array(
+			'token' => $token,
+			'a'     => $a,
+			'b'     => $b,
+		);
+	}
+
+	/**
+	 * Check and burn a challenge.
+	 *
+	 * @param string $token  Challenge token.
+	 * @param string $answer Raw answer (Persian or Latin digits).
+	 * @return bool
+	 */
+	private function captcha_check( $token, $answer ) {
+		$token = sanitize_text_field( (string) $token );
+		if ( '' === $token ) {
+			return false;
+		}
+
+		$expected = get_transient( 'hsw_cap_' . $token );
+		if ( false === $expected ) {
+			return false;
+		}
+		delete_transient( 'hsw_cap_' . $token );
+
+		$answer = HSW_Helpers::en_num( (string) $answer );
+
+		return '' !== $answer && (int) $expected === (int) $answer;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Chat UI — AJAX
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Shared guard for every chat action: nonce + login.
+	 *
+	 * @return int Current user ID (exits on failure).
+	 */
+	private function ajax_user() {
+		check_ajax_referer( 'hsw_ticket_ajax', 'nonce' );
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( array( 'message' => __( 'ابتدا وارد حساب خود شوید.', 'hamishop-elementor-widgets' ) ), 401 );
+		}
+		return get_current_user_id();
+	}
+
+	/**
+	 * Character count that behaves for Persian (bytes would count each letter 2×).
+	 *
+	 * @param string $value Text.
+	 * @return int
+	 */
+	private function len( $value ) {
+		$value = (string) $value;
+		return function_exists( 'mb_strlen' ) ? (int) mb_strlen( $value, 'UTF-8' ) : (int) strlen( $value );
+	}
+
+	/**
+	 * Create a ticket from the modal.
+	 */
+	public function ajax_create_ticket() {
+		$user_id = $this->ajax_user();
+
+		$subject = isset( $_POST['subject'] ) ? sanitize_text_field( wp_unslash( $_POST['subject'] ) ) : '';
+		$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+		$order   = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+		$token   = isset( $_POST['captcha_token'] ) ? sanitize_text_field( wp_unslash( $_POST['captcha_token'] ) ) : '';
+		$answer  = isset( $_POST['captcha'] ) ? wp_unslash( $_POST['captcha'] ) : '';
+
+		$max_message = max( 200, absint( $this->account->setting( 'support.max_message', 3000 ) ) );
+
+		/* Every failure ships a fresh challenge so the customer can retry. */
+		$fail = function ( $text, $status = 400 ) {
+			wp_send_json_error(
+				array(
+					'message' => $text,
+					'captcha' => $this->captcha_new(),
+				),
+				$status
+			);
+		};
+
+		if ( ! $this->captcha_check( $token, $answer ) ) {
+			$fail( __( 'جواب سؤال امنیتی درست نیست. دوباره حساب کن.', 'hamishop-elementor-widgets' ) );
+		}
+		if ( $this->len( $subject ) < 3 || $this->len( $subject ) > 120 ) {
+			$fail( __( 'موضوع باید بین ۳ تا ۱۲۰ کاراکتر باشد.', 'hamishop-elementor-widgets' ) );
+		}
+		if ( $this->len( $message ) < 10 || $this->len( $message ) > $max_message ) {
+			$fail( __( 'متن پیام کوتاه یا بیش از حد بلند است.', 'hamishop-elementor-widgets' ) );
+		}
+		if ( $order && ! $this->user_owns_order( $user_id, $order ) ) {
+			$fail( __( 'این سفارش به حساب شما تعلق ندارد.', 'hamishop-elementor-widgets' ) );
+		}
+
+		$max_open = max( 1, absint( $this->account->setting( 'support.max_open', 5 ) ) );
+		if ( $this->open_ticket_count( $user_id ) >= $max_open ) {
+			$fail( __( 'حد مجاز گفتگوهای باز تکمیل است. یکی را ببندید و دوباره تلاش کنید.', 'hamishop-elementor-widgets' ), 409 );
+		}
+
+		$departments = (array) $this->account->setting( 'support.departments', array() );
+		$priorities  = (array) $this->account->setting( 'support.priorities', array() );
+		$dept        = $departments ? (string) reset( $departments ) : 'پشتیبانی';
+		$priority    = (string) $this->account->setting( 'support.priority_default', 'normal' );
+		if ( ! isset( $priorities[ $priority ] ) ) {
+			$priority = 'normal';
+		}
+
+		$ticket_id = wp_insert_post(
+			array(
+				'post_type'    => self::POST_TYPE,
+				'post_status'  => 'publish',
+				'post_author'  => $user_id,
+				'post_title'   => $subject,
+				'post_content' => $message,
+			),
+			true
+		);
+
+		if ( is_wp_error( $ticket_id ) ) {
+			$fail( __( 'ثبت تیکت ناموفق بود. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ), 500 );
+		}
+
+		update_post_meta( $ticket_id, self::STATUS_META, 'open' );
+		update_post_meta( $ticket_id, self::PRIORITY, $priority );
+		update_post_meta( $ticket_id, self::DEPARTMENT, $dept );
+		update_post_meta( $ticket_id, self::UPDATED_META, time() );
+		update_post_meta( $ticket_id, self::UNREAD_ADMIN, 1 );
+		update_post_meta( $ticket_id, self::UNREAD_USER, 0 );
+
+		if ( $order ) {
+			update_post_meta( $ticket_id, self::ORDER_META, $order );
+		}
+
+		$image = $this->handle_image_upload( $ticket_id );
+		if ( $image ) {
+			update_post_meta( $ticket_id, self::IMAGE_META, $image );
+		}
+
+		$this->notify_admin( $ticket_id, false );
+
+		$this->account->add_notification(
+			$user_id,
+			array(
+				'type'  => 'ticket',
+				'title' => __( 'تیکت شما ثبت شد', 'hamishop-elementor-widgets' ),
+				'text'  => sprintf( 'گفتگوی «%s» ثبت شد و در انتظار پاسخ تیم پشتیبانی است.', $subject ),
+				'url'   => $this->ticket_url( $ticket_id ),
+			)
+		);
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'تیکت شما ثبت شد.', 'hamishop-elementor-widgets' ),
+				'ticket'  => (int) $ticket_id,
+				'html'    => $this->chat_thread_html( $user_id, $ticket_id ),
+				'row'     => $this->chat_row_html( get_post( $ticket_id ) ),
+			)
+		);
+	}
+
+	/**
+	 * Post a reply into an open thread.
+	 */
+	public function ajax_reply_ticket() {
+		$user_id   = $this->ajax_user();
+		$ticket_id = isset( $_POST['ticket_id'] ) ? absint( $_POST['ticket_id'] ) : 0;
+		$ticket    = $ticket_id ? get_post( $ticket_id ) : null;
+
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id || 'publish' !== $ticket->post_status ) {
+			wp_send_json_error( array( 'message' => __( 'گفتگو پیدا نشد.', 'hamishop-elementor-widgets' ) ), 404 );
+		}
+		if ( 'closed' === $this->get_status( $ticket_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'این گفتگو بسته شده است.', 'hamishop-elementor-widgets' ) ), 409 );
+		}
+
+		$message     = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+		$max_message = max( 200, absint( $this->account->setting( 'support.max_message', 3000 ) ) );
+
+		if ( $this->len( $message ) < 2 || $this->len( $message ) > $max_message ) {
+			wp_send_json_error( array( 'message' => __( 'متن پاسخ خالی یا بیش از حد بلند است.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		$comment_id = $this->insert_reply( $ticket_id, $user_id, $message, false );
+
+		update_post_meta( $ticket_id, self::STATUS_META, 'open' );
+		update_post_meta( $ticket_id, self::UPDATED_META, time() );
+		update_post_meta( $ticket_id, self::UNREAD_ADMIN, 1 );
+		update_post_meta( $ticket_id, self::UNREAD_USER, 0 );
+
+		$this->notify_admin( $ticket_id, true );
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'پاسخ شما ارسال شد.', 'hamishop-elementor-widgets' ),
+				'html'    => $this->bubble_html( $user_id, $message, time(), false, 0 ),
+				'row'     => $this->chat_row_html( get_post( $ticket_id ) ),
+				'comment' => (int) $comment_id,
+			)
+		);
+	}
+
+	/**
+	 * Return one thread — used when switching conversations without a reload.
+	 */
+	public function ajax_view_ticket() {
+		$user_id   = $this->ajax_user();
+		$ticket_id = isset( $_POST['ticket_id'] ) ? absint( $_POST['ticket_id'] ) : 0;
+
+		wp_send_json_success(
+			array(
+				'html'   => $this->chat_thread_html( $user_id, $ticket_id ),
+				'row'    => $this->chat_row_html( get_post( $ticket_id ) ),
+				'ticket' => (int) $ticket_id,
+			)
+		);
+	}
+
+	/**
+	 * Close a conversation from the thread header.
+	 */
+	public function ajax_close_ticket() {
+		$user_id   = $this->ajax_user();
+		$ticket_id = isset( $_POST['ticket_id'] ) ? absint( $_POST['ticket_id'] ) : 0;
+		$ticket    = $ticket_id ? get_post( $ticket_id ) : null;
+
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id ) {
+			wp_send_json_error( array( 'message' => __( 'گفتگو پیدا نشد.', 'hamishop-elementor-widgets' ) ), 404 );
+		}
+
+		update_post_meta( $ticket_id, self::STATUS_META, 'closed' );
+		update_post_meta( $ticket_id, self::UPDATED_META, time() );
+
+		wp_send_json_success(
+			array(
+				'message' => __( 'گفتگو بسته شد.', 'hamishop-elementor-widgets' ),
+				'html'    => $this->chat_thread_html( $user_id, $ticket_id ),
+				'row'     => $this->chat_row_html( get_post( $ticket_id ) ),
+			)
+		);
+	}
+
+	/**
+	 * Order suggestions for the picker — the customer's own orders only.
+	 */
+	public function ajax_orders_search() {
+		$user_id = $this->ajax_user();
+
+		if ( ! function_exists( 'wc_get_orders' ) ) {
+			wp_send_json_success( array( 'orders' => array() ) );
+		}
+
+		$term   = isset( $_POST['term'] ) ? sanitize_text_field( wp_unslash( $_POST['term'] ) ) : '';
+		$digits = HSW_Helpers::en_num( $term );
+		$found  = array();
+
+		/* A number is almost always an order id — try that first. */
+		if ( '' !== $digits ) {
+			$order = wc_get_order( absint( $digits ) );
+			if ( $order && (int) $order->get_customer_id() === (int) $user_id ) {
+				$found[] = $order;
+			}
+		}
+
+		if ( ! $found ) {
+			$found = wc_get_orders(
+				array(
+					'customer' => $user_id,
+					'limit'    => 8,
+					'orderby'  => 'date',
+					'order'    => 'DESC',
+					'type'     => 'shop_order',
+				)
+			);
+		}
+
+		$out = array();
+		foreach ( $found as $order ) {
+			$out[] = array(
+				'id'    => (int) $order->get_id(),
+				'label' => $this->order_label( $order ),
+			);
+		}
+
+		wp_send_json_success( array( 'orders' => $out ) );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Chat UI — helpers
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Human label for the order picker: «#۶۶۵۹ - ۳۷۵,۸۸۸ تومان».
+	 *
+	 * @param WC_Order $order Order.
+	 * @return string
+	 */
+	private function order_label( $order ) {
+		$price = html_entity_decode( wp_strip_all_tags( wc_price( $order->get_total() ) ), ENT_QUOTES, 'UTF-8' );
+
+		return sprintf( '#%s - %s', HSW_Helpers::fa_num( $order->get_id() ), HSW_Helpers::fa_num( $price ) );
+	}
+
+	/**
+	 * @param int $user_id  Customer.
+	 * @param int $order_id Order.
+	 * @return bool
+	 */
+	private function user_owns_order( $user_id, $order_id ) {
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return false;
+		}
+		$order = wc_get_order( $order_id );
+
+		return $order && (int) $order->get_customer_id() === (int) $user_id;
+	}
+
+	/**
+	 * Store the screenshot the customer attached to the modal.
+	 *
+	 * The browser already downscaled it, so this only guards against a wrong
+	 * type or a runaway size. Returns 0 when there is nothing usable.
+	 *
+	 * @param int $ticket_id Parent ticket.
+	 * @return int Attachment ID.
+	 */
+	private function handle_image_upload( $ticket_id ) {
+		if ( empty( $_FILES['image'] ) || ! isset( $_FILES['image']['tmp_name'] ) ) {
+			return 0;
+		}
+		if ( UPLOAD_ERR_OK !== (int) $_FILES['image']['error'] ) {
+			return 0;
+		}
+		if ( (int) $_FILES['image']['size'] > 4 * MB_IN_BYTES ) {
+			return 0;
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		/*
+		 * `wp_check_filetype_and_ext()` takes an `ext => mime` map (the same shape
+		 * as `get_allowed_mime_types()`), not `mime => ext` — passing it the other
+		 * way round makes every upload look invalid.
+		 */
+		$mimes = array(
+			'jpg|jpeg|jpe' => 'image/jpeg',
+			'png'          => 'image/png',
+			'webp'         => 'image/webp',
+		);
+		$check = wp_check_filetype_and_ext( $_FILES['image']['tmp_name'], $_FILES['image']['name'], $mimes ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- validated by WordPress.
+
+		if ( empty( $check['type'] ) || ! in_array( $check['type'], array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+			return 0;
+		}
+
+		$attachment_id = media_handle_upload( 'image', $ticket_id, array(), array( 'test_form' => false ) );
+
+		return is_wp_error( $attachment_id ) ? 0 : (int) $attachment_id;
+	}
+
+	/**
+	 * Tell the customer a staff member answered.
+	 *
+	 * @param int    $ticket_id Ticket.
+	 * @param string $message   Staff reply text.
+	 */
+	private function notify_customer( $ticket_id, $message ) {
+		if ( 'yes' !== $this->account->setting( 'support.email_notifications', 'yes' ) ) {
+			return;
+		}
+
+		$ticket = get_post( $ticket_id );
+		if ( ! $ticket ) {
+			return;
+		}
+
+		$user = get_user_by( 'id', (int) $ticket->post_author );
+		if ( ! $user || ! is_email( $user->user_email ) ) {
+			return;
+		}
+
+		$brand = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
+		$link  = $this->ticket_url( $ticket_id );
+
+		$subject = sprintf(
+			/* translators: 1: store name, 2: ticket subject. */
+			__( '%1$s — پاسخ جدید در گفتگوی «%2$s»', 'hamishop-elementor-widgets' ),
+			$brand,
+			$ticket->post_title
+		);
+
+		$body  = sprintf(
+			/* translators: %s: customer name. */
+			__( 'سلام %s،', 'hamishop-elementor-widgets' ),
+			$user->display_name
+		) . "\n\n";
+		$body .= sprintf(
+			/* translators: %s: ticket subject. */
+			__( 'تیم پشتیبانی به گفتگوی «%s» پاسخ داد:', 'hamishop-elementor-widgets' ),
+			$ticket->post_title
+		) . "\n\n";
+		$body .= $message . "\n\n";
+		$body .= __( 'برای دیدن و ادامهٔ گفتگو:', 'hamishop-elementor-widgets' ) . "\n" . $link . "\n";
+
+		wp_mail( $user->user_email, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -797,6 +1283,9 @@ final class HSW_Account_Support {
 		update_post_meta( $ticket_id, self::UPDATED_META, time() );
 		update_post_meta( $ticket_id, self::UNREAD_ADMIN, 0 );
 		update_post_meta( $ticket_id, self::UNREAD_USER, 1 );
+
+		/* The customer has no way of knowing otherwise — mail them. */
+		$this->notify_customer( $ticket_id, $message );
 
 		$ticket = get_post( $ticket_id );
 		if ( $ticket && 'yes' === $this->account->setting( 'notifications.ticket_reply', 'yes' ) ) {

@@ -131,7 +131,487 @@
 		var scope = root || document;
 		scope.querySelectorAll('[data-hsw-wishlist]').forEach(renderWishlist);
 		scope.querySelectorAll('[data-hsw-verify]').forEach(initEmailVerify);
+		scope.querySelectorAll('[data-hsw-chat]').forEach(initSupportChat);
 		updateCounts();
+	}
+
+	/*
+	 * Support chat: switch conversations without a reload, reply inline, and
+	 * create a ticket from the modal.
+	 *
+	 * The markup is fully server-rendered — every list item is a real link and
+	 * the modal is a real form. This only takes over once it is running.
+	 */
+	function initSupportChat(chat) {
+		if (!chat || '1' === chat.getAttribute('data-hsw-ready')) {
+			return;
+		}
+		chat.setAttribute('data-hsw-ready', '1');
+
+		var main = chat.querySelector('[data-hsw-chat-main]');
+		var list = chat.querySelector('[data-hsw-ticket-list]');
+		var modal = chat.querySelector('[data-hsw-ticket-modal]');
+		var form = chat.querySelector('[data-hsw-ticket-form]');
+		var search = chat.querySelector('[data-hsw-ticket-search]');
+
+		function scrollThread() {
+			var box = chat.querySelector('[data-hsw-thread-scroll]');
+			if (box) {
+				box.scrollTop = box.scrollHeight;
+			}
+		}
+
+		function setRow(row) {
+			if (!row || !list) {
+				return;
+			}
+			var id = row.getAttribute('data-id');
+			var existing = list.querySelector('[data-id="' + id + '"]');
+			if (existing) {
+				existing.outerHTML = row.outerHTML;
+				return;
+			}
+			/* The first ticket replaces the «no conversations» placeholder. */
+			var placeholder = list.querySelector('[data-hsw-chat-placeholder]');
+			if (placeholder) {
+				placeholder.remove();
+			}
+			list.insertAdjacentHTML('afterbegin', row.outerHTML);
+		}
+
+		/* --- conversation switching ------------------------------------- */
+
+		function openTicket(id, push) {
+			chat.setAttribute('data-active', id);
+			main.setAttribute('aria-busy', 'true');
+			ajax('hsw_ticket_view', { ticket_id: id }, data().ticketNonce)
+				.then(function (response) {
+					main.removeAttribute('aria-busy');
+					if (!response || !response.success) {
+						return;
+					}
+					main.innerHTML = response.data.html;
+					if (response.data.row) {
+						setRow(wrapRow(response.data.row, id));
+					}
+					var link = list ? list.querySelector('[data-hsw-ticket="' + id + '"]') : null;
+					if (link) {
+						var item = link.closest('.hsw-ac__chat-item');
+						if (item) {
+							item.classList.remove('is-unread');
+						}
+					}
+					if (push !== false) {
+						history.replaceState({}, '', link ? link.href : location.href);
+					}
+					scrollThread();
+				})
+				.catch(function () {
+					main.removeAttribute('aria-busy');
+				});
+		}
+
+		/* Turn the returned <li> string into an element we can address by id. */
+		function wrapRow(html, id) {
+			var tmp = document.createElement('ul');
+			tmp.innerHTML = html;
+			var li = tmp.firstElementChild;
+			if (li) {
+				li.setAttribute('data-id', id);
+			}
+			return li;
+		}
+
+		if (list) {
+			list.addEventListener('click', function (event) {
+				var link = event.target.closest('[data-hsw-ticket]');
+				if (!link || event.metaKey || event.ctrlKey || event.shiftKey) {
+					return;
+				}
+				event.preventDefault();
+				openTicket(link.getAttribute('data-hsw-ticket'));
+			});
+		}
+
+		/* --- reply ------------------------------------------------------ */
+
+		main.addEventListener('submit', function (event) {
+			var replyForm = event.target.closest('[data-hsw-reply-form]');
+			if (!replyForm) {
+				return;
+			}
+			event.preventDefault();
+
+			var textarea = replyForm.querySelector('textarea');
+			var button = replyForm.querySelector('.hsw-ac__composer-send');
+			var value = (textarea.value || '').trim();
+			if (!value) {
+				return;
+			}
+
+			var msg = chat.querySelector('[data-hsw-reply-msg]');
+			if (button) {
+				button.disabled = true;
+			}
+			if (msg) {
+				msg.textContent = '';
+			}
+
+			ajax(
+				'hsw_ticket_reply',
+				{ ticket_id: replyForm.getAttribute('data-ticket'), message: value },
+				data().ticketNonce
+			)
+				.then(function (response) {
+					if (button) {
+						button.disabled = false;
+					}
+					if (!response || !response.success) {
+						if (msg) {
+							msg.textContent = (response && response.data && response.data.message) || data().emailFailed;
+							msg.className = 'hsw-ac__composer-msg is-error';
+						}
+						return;
+					}
+					var box = chat.querySelector('[data-hsw-thread-scroll]');
+					if (box && response.data.html) {
+						box.insertAdjacentHTML('beforeend', response.data.html);
+					}
+					textarea.value = '';
+					autoGrow(textarea);
+					if (response.data.row) {
+						setRow(wrapRow(response.data.row, replyForm.getAttribute('data-ticket')));
+					}
+					scrollThread();
+				})
+				.catch(function () {
+					if (button) {
+						button.disabled = false;
+					}
+				});
+		});
+
+		function autoGrow(textarea) {
+			if (!textarea) {
+				return;
+			}
+			textarea.style.height = 'auto';
+			textarea.style.height = Math.min(160, textarea.scrollHeight) + 'px';
+		}
+
+		main.addEventListener('input', function (event) {
+			if (event.target.matches('[data-hsw-reply-form] textarea')) {
+				autoGrow(event.target);
+			}
+		});
+
+		/* --- close ------------------------------------------------------ */
+
+		main.addEventListener('click', function (event) {
+			var button = event.target.closest('[data-hsw-ticket-close]');
+			if (!button) {
+				return;
+			}
+			if (!window.confirm(data().closeConfirm || 'بسته شود؟')) {
+				return;
+			}
+			button.disabled = true;
+			ajax('hsw_ticket_close', { ticket_id: button.getAttribute('data-hsw-ticket-close') }, data().ticketNonce)
+				.then(function (response) {
+					if (response && response.success) {
+						main.innerHTML = response.data.html;
+						if (response.data.row) {
+							setRow(wrapRow(response.data.row, chat.getAttribute('data-active')));
+						}
+					} else {
+						button.disabled = false;
+					}
+				});
+		});
+
+		/* --- search ----------------------------------------------------- */
+
+		if (search && list) {
+			search.addEventListener('input', function () {
+				var term = search.value.trim().toLowerCase();
+				list.querySelectorAll('.hsw-ac__chat-item').forEach(function (item) {
+					item.hidden = term.length > 0 && item.textContent.toLowerCase().indexOf(term) === -1;
+				});
+			});
+		}
+
+		/* --- modal ------------------------------------------------------ */
+
+		function openModal() {
+			if (!modal) {
+				return;
+			}
+			modal.hidden = false;
+			requestAnimationFrame(function () {
+				modal.classList.add('is-open');
+			});
+			var first = modal.querySelector('#hsw-ac-t-subject');
+			if (first) {
+				first.focus();
+			}
+		}
+
+		function closeModal() {
+			if (!modal) {
+				return;
+			}
+			modal.classList.remove('is-open');
+			window.setTimeout(function () {
+				modal.hidden = true;
+			}, 200);
+		}
+
+		chat.addEventListener('click', function (event) {
+			if (event.target.closest('[data-hsw-ticket-new]')) {
+				event.preventDefault();
+				openModal();
+			}
+			if (event.target.closest('[data-hsw-modal-close]')) {
+				event.preventDefault();
+				closeModal();
+			}
+		});
+
+		document.addEventListener('keydown', function (event) {
+			if ('Escape' === event.key && modal && !modal.hidden) {
+				closeModal();
+			}
+		});
+
+		if (modal && '1' === modal.getAttribute('data-open')) {
+			openModal();
+		}
+
+		/* --- order picker ----------------------------------------------- */
+
+		var picker = modal ? modal.querySelector('[data-hsw-order-picker]') : null;
+		if (picker) {
+			var input = picker.querySelector('[data-hsw-order-input]');
+			var value = picker.querySelector('[data-hsw-order-value]');
+			var dropdown = picker.querySelector('[data-hsw-order-list]');
+			var timer = 0;
+
+			function renderOrders(orders) {
+				dropdown.innerHTML = '';
+				if (!orders || !orders.length) {
+					dropdown.innerHTML = '<p class="hsw-ac__picker-empty">' + (data().noOrders || 'موردی نیست') + '</p>';
+					dropdown.hidden = false;
+					return;
+				}
+				orders.forEach(function (order) {
+					var button = document.createElement('button');
+					button.type = 'button';
+					button.className = 'hsw-ac__picker-item';
+					button.textContent = order.label;
+					button.addEventListener('click', function () {
+						value.value = order.id;
+						input.value = order.label;
+						dropdown.hidden = true;
+					});
+					dropdown.appendChild(button);
+				});
+				dropdown.hidden = false;
+			}
+
+			function fetchOrders() {
+				ajax('hsw_orders_search', { term: input.value.trim() }, data().ticketNonce)
+					.then(function (response) {
+						if (response && response.success) {
+							renderOrders(response.data.orders);
+						}
+					});
+			}
+
+			input.addEventListener('focus', fetchOrders);
+			input.addEventListener('input', function () {
+				value.value = 0;
+				window.clearTimeout(timer);
+				timer = window.setTimeout(fetchOrders, 300);
+			});
+			input.addEventListener('blur', function () {
+				window.setTimeout(function () {
+					dropdown.hidden = true;
+				}, 180);
+			});
+		}
+
+		/* --- image: compress in the browser before it ever leaves ------- */
+
+		var fileInput = modal ? modal.querySelector('[data-hsw-image-input]') : null;
+		var preview = modal ? modal.querySelector('[data-hsw-image-preview]') : null;
+		var picked = null;
+
+		if (fileInput) {
+			fileInput.addEventListener('change', function () {
+				var file = fileInput.files && fileInput.files[0];
+				picked = null;
+				if (preview) {
+					preview.innerHTML = '';
+				}
+				if (!file) {
+					return;
+				}
+				compressImage(file, 1600, 0.82)
+					.then(function (blob) {
+						if (!blob) {
+							return;
+						}
+						picked = blob;
+						if (preview) {
+							preview.innerHTML = '';
+							var img = document.createElement('img');
+							img.src = URL.createObjectURL(blob);
+							img.alt = '';
+							preview.appendChild(img);
+						}
+					})
+					.catch(function () {});
+			});
+		}
+
+		/*
+		 * Canvas re-encode: a 4MB phone photo becomes ~200KB, which keeps the
+		 * upload inside PHP's limits and makes the thread load fast.
+		 */
+		function compressImage(file, maxSize, quality) {
+			return new Promise(function (resolve) {
+				if (!/^image\//.test(file.type)) {
+					resolve(null);
+					return;
+				}
+				var url = URL.createObjectURL(file);
+				var img = new Image();
+				img.onload = function () {
+					var scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+					var canvas = document.createElement('canvas');
+					canvas.width = Math.round(img.width * scale);
+					canvas.height = Math.round(img.height * scale);
+					var ctx = canvas.getContext('2d');
+					ctx.fillStyle = '#fff';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+					URL.revokeObjectURL(url);
+					canvas.toBlob(function (blob) {
+						resolve(blob);
+					}, 'image/jpeg', quality);
+				};
+				img.onerror = function () {
+					URL.revokeObjectURL(url);
+					resolve(null);
+				};
+				img.src = url;
+			});
+		}
+
+		/* --- submit the modal ------------------------------------------- */
+
+		if (form) {
+			form.addEventListener('submit', function (event) {
+				event.preventDefault();
+
+				var msg = form.querySelector('[data-hsw-ticket-msg]');
+				var submit = form.querySelector('[data-hsw-ticket-submit]');
+				var subject = form.querySelector('[name="subject"]');
+				var message = form.querySelector('[name="message"]');
+
+				function showError(text) {
+					if (msg) {
+						msg.textContent = text;
+						msg.className = 'hsw-ac__modal-msg is-error';
+					}
+				}
+
+				if (!subject.value.trim() || !message.value.trim()) {
+					showError(data().ticketEmpty || 'موضوع و متن پیام را کامل کنید.');
+					return;
+				}
+
+				var body = new FormData(form);
+				body.append('action', 'hsw_ticket_create');
+				body.append('nonce', data().ticketNonce || '');
+				if (picked) {
+					body.append('image', picked, 'ticket.jpg');
+				} else {
+					body.delete('image');
+				}
+
+				if (submit) {
+					submit.disabled = true;
+				}
+				if (msg) {
+					msg.textContent = '';
+				}
+
+				fetch(data().ajax || '/wp-admin/admin-ajax.php', {
+					method: 'POST',
+					credentials: 'same-origin',
+					body: body
+				})
+					.then(function (response) {
+						return response.json();
+					})
+					.then(function (response) {
+						if (submit) {
+							submit.disabled = false;
+						}
+						if (!response || !response.success) {
+							showError((response && response.data && response.data.message) || data().emailFailed);
+							if (response && response.data && response.data.captcha) {
+								applyCaptcha(response.data.captcha);
+							}
+							return;
+						}
+
+						main.innerHTML = response.data.html;
+						if (response.data.row) {
+							setRow(wrapRow(response.data.row, response.data.ticket));
+						}
+						chat.setAttribute('data-active', response.data.ticket);
+						form.reset();
+						picked = null;
+						if (preview) {
+							preview.innerHTML = '';
+						}
+						closeModal();
+						scrollThread();
+					})
+					.catch(function () {
+						if (submit) {
+							submit.disabled = false;
+						}
+						showError(data().emailFailed || 'خطا');
+					});
+			});
+		}
+
+		function applyCaptcha(captcha) {
+			if (!modal || !captcha) {
+				return;
+			}
+			var question = modal.querySelector('[data-hsw-captcha-q]');
+			var token = modal.querySelector('[data-hsw-captcha-token]');
+			var answer = modal.querySelector('[name="captcha"]');
+			var fa = function (n) {
+				return faNum(n);
+			};
+			if (question) {
+				question.textContent = fa(captcha.a) + ' + ' + fa(captcha.b) + ' = ?';
+			}
+			if (token) {
+				token.value = captcha.token;
+			}
+			if (answer) {
+				answer.value = '';
+			}
+		}
+
+		/* The server renders the newest ticket last; start at the bottom. */
+		scrollThread();
 	}
 
 	/*

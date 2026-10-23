@@ -21,6 +21,25 @@ class HSW_Helpers {
         }
 
         /**
+         * Convert Persian/Arabic digits back to latin, and drop anything else.
+         *
+         * Used wherever a customer types a number into a form (captcha answers,
+         * order ids): a Persian keyboard produces ۱۲۳, which `(int)` turns into 0.
+         *
+         * @param string $value Raw input.
+         * @return string Digits only.
+         */
+        public static function en_num( $value ) {
+                $map = array(
+                        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+                        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+                        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+                        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+                );
+                return preg_replace( '/\D/', '', strtr( (string) $value, $map ) );
+        }
+
+        /**
          * Format a price number with thousands separator (+ optional Persian digits).
          */
         public static function price_num( $number, $persian = true ) {
