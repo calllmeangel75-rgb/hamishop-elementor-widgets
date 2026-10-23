@@ -110,8 +110,9 @@
 }
 
 .hsw-ticket-msg.is-staff {
-	border-color: #cfe0fb;
-	background: #f4f8ff;
+	border-color: #c7dbfb;
+	border-inline-start: 3px solid #2271b1;
+	background: #e9f2ff;
 }
 
 .hsw-ticket-msg:last-child {
