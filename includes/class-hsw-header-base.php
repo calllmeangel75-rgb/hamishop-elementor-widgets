@@ -332,7 +332,12 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$aria     = '' !== $label ? $label : __( 'سبد خرید', 'hamishop-elementor-widgets' );
 
 		$out  = '<a class="hsw-hd__action hsw-hd__cart' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . ( $count ? '' : ' is-empty' ) . '" href="' . esc_url( $this->cart_url() ) . '" aria-label="' . esc_attr( $aria ) . '">';
-		$out .= '<span class="hsw-hd__carticon">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span class="hsw-hd__badge" data-hsw-cart-count>' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></span>';
+		/*
+		 * `data-count` carries the number as a plain integer. The client reads it
+		 * to decide whether a cached badge has to be cleared for a visitor with
+		 * no cart; without the attribute the reset never fired.
+		 */
+		$out .= '<span class="hsw-hd__carticon">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></span>';
 		if ( ! $minimal && '' !== $label ) {
 			$out .= '<span class="hsw-hd__actionmeta"><span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span><span class="hsw-hd__actionsub hsw-hd__carttotal" data-hsw-cart-total>' . wp_kses_post( $total ) . '</span></span>';
 		}
@@ -680,7 +685,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= '<div class="hsw-hd__drawerfoot">';
 		if ( $show_cart ) {
 			$count = $this->cart_count();
-			$out  .= '<a class="hsw-hd__drawercart" href="' . esc_url( $this->cart_url() ) . '">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span>' . esc_html__( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ) . '</span><span class="hsw-hd__badge" data-hsw-cart-count>' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a>';
+			$out  .= '<a class="hsw-hd__drawercart" href="' . esc_url( $this->cart_url() ) . '">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span>' . esc_html__( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ) . '</span><span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a>';
 		}
 		$out .= '<div class="hsw-hd__drawerlinks">';
 		if ( $show_acct ) {

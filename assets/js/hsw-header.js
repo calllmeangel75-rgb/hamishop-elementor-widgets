@@ -677,6 +677,8 @@
 		function applyCart(count, total) {
 			countEls.forEach(function (el) {
 				el.textContent = formatCount(count);
+				/* Keep the plain integer in sync so later reads stay truthful. */
+				el.setAttribute('data-count', String(parseInt(count, 10) || 0));
 			});
 			cartLinks.forEach(function (el) {
 				el.classList.toggle('is-empty', !count);

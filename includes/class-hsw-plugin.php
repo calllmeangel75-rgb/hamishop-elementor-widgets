@@ -84,7 +84,14 @@ final class HSW_Plugin {
          * serving yesterday's markup, so a fixed icon (or any other template
          * change) would never appear on an existing page.
          *
-         * One DELETE, once per version — the option write stops it repeating.
+         * Runs once per version. The work is sliced so a huge postmeta table is
+         * never locked by one long DELETE, but the flush completes inside a single
+         * request and the marker always moves afterwards.
+         *
+         * Spreading the slices across requests does NOT work: Elementor re-caches
+         * every element it renders, so the next request finds a freshly populated
+         * table, deletes it again, and the marker never reaches the current
+         * version — the element cache would stay permanently disabled.
          */
         public function maybe_flush_element_cache() {
                 if ( HSW_VERSION === get_option( 'hsw_asset_version' ) ) {
@@ -92,14 +99,24 @@ final class HSW_Plugin {
                 }
 
                 global $wpdb;
-                /* Delete in slices: no single long locking DELETE on huge postmeta tables;
-                   the version marker moves only once nothing is left. */
-                $deleted = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_element_cache' LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                if ( $deleted ) {
-                        return;
-                }
 
-                update_option( 'hsw_asset_version', HSW_VERSION, false );
+                $started = microtime( true );
+                $slices  = 0;
+                $deleted = 0;
+
+                do {
+                        $deleted = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_element_cache' LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                        $slices++;
+                } while (
+                        is_int( $deleted ) && $deleted > 0
+                        && $slices < 50
+                        && ( microtime( true ) - $started ) < 5
+                );
+
+                /* A failed query leaves the marker alone so the next request retries. */
+                if ( false !== $deleted ) {
+                        update_option( 'hsw_asset_version', HSW_VERSION, false );
+                }
         }
 
         /**
