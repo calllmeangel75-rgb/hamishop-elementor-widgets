@@ -119,37 +119,118 @@ final class HSW_Account_Auth {
 		return $phone ? substr( $phone, 0, 4 ) . '***' . substr( $phone, -3 ) : '';
 	}
 
-	private function find_user_by_phone( $phone ) {
-		global $wpdb;
-		$phone = $this->normalize_phone( $phone );
-		if ( ! $phone ) {
-			return null;
-		}
-		$tail = substr( $phone, -10 );
-		$rows = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key IN ('billing_phone','_hsw_auth_phone','_hsw_2fa_phone') AND meta_value LIKE %s LIMIT 5",
-				'%' . $wpdb->esc_like( $tail ) . '%'
-			)
-		);
-		foreach ( $rows as $user_id ) {
-			$user = get_user_by( 'id', (int) $user_id );
-			if ( $user && $this->user_phone( $user->ID ) === $phone ) {
-				return $user;
-			}
-		}
-		return null;
+	/**
+	 * The number this account has *proved* it owns.
+	 *
+	 * Only `_hsw_auth_phone` counts, and it is written exclusively after a code
+	 * sent to that number was entered correctly. `billing_phone` is typed by the
+	 * customer at checkout and never verified — matching logins against it meant
+	 * anyone who entered someone else's number (by typo or on purpose) could sign
+	 * in as that person.
+	 *
+	 * @param int $user_id User ID.
+	 * @return string Normalised number, '' when the account has none.
+	 */
+	private function user_phone( $user_id ) {
+		return $this->normalize_phone( (string) get_user_meta( $user_id, '_hsw_auth_phone', true ) );
 	}
 
-	private function user_phone( $user_id ) {
-		$phone = get_user_meta( $user_id, 'billing_phone', true );
+	/**
+	 * Number used for the second factor — its own key, never the login number.
+	 *
+	 * @param int $user_id User ID.
+	 * @return string
+	 */
+	private function two_factor_phone( $user_id ) {
+		return $this->normalize_phone( (string) get_user_meta( $user_id, '_hsw_2fa_phone', true ) );
+	}
+
+	/**
+	 * Which account already owns this verified number?
+	 *
+	 * @param string $phone Normalised number.
+	 * @return int User ID, 0 when free.
+	 */
+	private function phone_owner( $phone ) {
+		global $wpdb;
+
+		$phone = $this->normalize_phone( $phone );
 		if ( ! $phone ) {
-			$phone = get_user_meta( $user_id, '_hsw_auth_phone', true );
+			return 0;
 		}
+
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = '_hsw_auth_phone' AND meta_value = %s LIMIT 5",
+				$phone
+			)
+		);
+
+		foreach ( $ids as $id ) {
+			if ( $this->user_phone( (int) $id ) === $phone ) {
+				return (int) $id;
+			}
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Bind a verified number to an account, refusing numbers owned elsewhere.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $phone   Normalised number.
+	 * @return true|WP_Error
+	 */
+	private function claim_phone( $user_id, $phone ) {
+		$phone = $this->normalize_phone( $phone );
+
 		if ( ! $phone ) {
-			$phone = get_user_meta( $user_id, '_hsw_2fa_phone', true );
+			return new WP_Error( 'hsw_bad_phone', __( 'شماره موبایل معتبر نیست.', 'hamishop-elementor-widgets' ) );
 		}
-		return $this->normalize_phone( $phone );
+
+		$owner = $this->phone_owner( $phone );
+		if ( $owner && $owner !== (int) $user_id ) {
+			return new WP_Error( 'hsw_phone_taken', __( 'این شماره قبلاً روی حساب دیگری تأیید شده است. با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) );
+		}
+
+		update_user_meta( $user_id, '_hsw_auth_phone', $phone );
+
+		return true;
+	}
+
+	/**
+	 * @param string $phone Normalised number.
+	 * @return WP_User|null
+	 */
+	private function find_user_by_phone( $phone ) {
+		$owner = $this->phone_owner( $phone );
+
+		return $owner ? get_user_by( 'id', $owner ) : null;
+	}
+
+	/**
+	 * May this account sign in with a one-time code?
+	 *
+	 * A phone number is a single factor. Staff accounts carry far more than a
+	 * customer account, so passwordless entry is refused for them — they keep the
+	 * code as a *second* factor after the password instead.
+	 *
+	 * @param WP_User|null $user User.
+	 * @return bool
+	 */
+	private function otp_allowed( $user ) {
+		if ( ! $user instanceof WP_User ) {
+			return true;
+		}
+
+		if ( user_can( $user, 'manage_options' ) || user_can( $user, 'manage_woocommerce' ) || user_can( $user, 'edit_others_posts' ) ) {
+			return (bool) apply_filters( 'hsw_otp_allowed_privileged', false, $user );
+		}
+
+		$roles = (array) apply_filters( 'hsw_otp_allowed_roles', array( 'customer', 'subscriber' ), $user );
+
+		return (bool) array_intersect( (array) $user->roles, $roles );
 	}
 
 	private function bale_chat_id( $user_id, $phone = '' ) {
@@ -243,6 +324,89 @@ final class HSW_Account_Auth {
 
 	private function clear_rate_limit( $phone, $channel, $context ) {
 		delete_transient( 'hsw_otp_cool_' . md5( $this->normalize_phone( $phone ) . '|' . $channel . '|' . $context ) );
+	}
+
+	/**
+	 * Per-IP, per-number and per-channel send ceilings.
+	 *
+	 * The resend cooldown above only stops one number from being hammered; these
+	 * counters stop a script from walking through thousands of numbers from one
+	 * connection, or from draining the WhatsApp quota in a minute.
+	 *
+	 * @param string $phone   Normalised number.
+	 * @param string $channel Channel.
+	 * @return true|WP_Error
+	 */
+	private function check_send_throttle( $phone, $channel ) {
+		$per_ip = HSW_Throttle::hit(
+			'otp_send_ip:' . HSW_Throttle::ip(),
+			(int) apply_filters( 'hsw_otp_ip_hourly', 20 ),
+			HOUR_IN_SECONDS
+		);
+		if ( ! $per_ip['allowed'] ) {
+			return new WP_Error( 'hsw_throttle_ip', __( 'تعداد درخواست کد از این اتصال زیاد بوده است. کمی بعد دوباره تلاش کنید.', 'hamishop-elementor-widgets' ) );
+		}
+
+		$per_day = HSW_Throttle::hit(
+			'otp_send_day:' . $phone,
+			(int) apply_filters( 'hsw_otp_phone_daily', 10 ),
+			DAY_IN_SECONDS
+		);
+		if ( ! $per_day['allowed'] ) {
+			return new WP_Error( 'hsw_throttle_phone', __( 'برای این شماره امروز بیش از حد کد فرستاده شده است. فردا دوباره تلاش کنید.', 'hamishop-elementor-widgets' ) );
+		}
+
+		if ( 'whatsapp' === $channel ) {
+			$per_minute = HSW_Throttle::hit(
+				'otp_wa_minute',
+				(int) apply_filters( 'hsw_otp_whatsapp_per_minute', 30 ),
+				MINUTE_IN_SECONDS
+			);
+			if ( ! $per_minute['allowed'] ) {
+				return new WP_Error( 'hsw_throttle_wa', __( 'سامانهٔ واتساپ شلوغ است. یک دقیقهٔ دیگر تلاش کنید.', 'hamishop-elementor-widgets' ) );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Wrong codes are counted per number, across every code issued to it.
+	 *
+	 * The per-code attempt counter resets as soon as a new code is issued, so on
+	 * its own it lets an attacker try five guesses on every resend. This counter
+	 * spans resends.
+	 *
+	 * @param string $phone Normalised number.
+	 */
+	private function note_failed_verify( $phone ) {
+		HSW_Throttle::hit(
+			'otp_verify_fail:' . $this->normalize_phone( $phone ),
+			(int) apply_filters( 'hsw_otp_verify_failures', 10 ),
+			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
+	 * Is this number locked out after too many wrong codes?
+	 *
+	 * @param string $phone Normalised number.
+	 * @return int Seconds left, 0 when not locked.
+	 */
+	private function verify_lock_seconds( $phone ) {
+		$state = HSW_Throttle::peek( 'otp_verify_fail:' . $this->normalize_phone( $phone ) );
+		$limit = (int) apply_filters( 'hsw_otp_verify_failures', 10 );
+
+		return ( $state['hits'] >= $limit && $state['retry_after'] > 0 ) ? (int) $state['retry_after'] : 0;
+	}
+
+	/**
+	 * Clear the failure counter after a successful sign-in.
+	 *
+	 * @param string $phone Normalised number.
+	 */
+	private function clear_failed_verify( $phone ) {
+		HSW_Throttle::clear( 'otp_verify_fail:' . $this->normalize_phone( $phone ) );
 	}
 
 	private function message( $code ) {
@@ -422,6 +586,16 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'این شماره قبلاً ثبت‌نام کرده است. از تب ورود استفاده کنید.', 'hamishop-elementor-widgets' ), 'switch_tab' => 'login' ), 409 );
 		}
 
+		/* A phone is one factor; staff accounts must not be reachable with it alone. */
+		if ( 'login' === $context && $user && ! $this->otp_allowed( $user ) ) {
+			wp_send_json_error( array( 'message' => __( 'برای حساب‌های مدیریتی ورود با کد یکبارمصرف فعال نیست. با نام کاربری و رمز عبور وارد شوید.', 'hamishop-elementor-widgets' ) ), 403 );
+		}
+
+		$throttle = $this->check_send_throttle( $phone, $channel );
+		if ( is_wp_error( $throttle ) ) {
+			wp_send_json_error( array( 'message' => $throttle->get_error_message() ), 429 );
+		}
+
 		$limit = $this->rate_limit( $phone, $channel, $context );
 		if ( is_wp_error( $limit ) ) {
 			wp_send_json_error( array( 'message' => $limit->get_error_message() ), 429 );
@@ -497,10 +671,33 @@ final class HSW_Account_Auth {
 			}
 		}
 
+		if ( 'login' === $context && $user && ! $this->otp_allowed( $user ) ) {
+			wp_send_json_error( array( 'message' => __( 'برای حساب‌های مدیریتی ورود با کد یکبارمصرف فعال نیست. با نام کاربری و رمز عبور وارد شوید.', 'hamishop-elementor-widgets' ) ), 403 );
+		}
+
+		$locked = $this->verify_lock_seconds( $phone );
+		if ( $locked > 0 ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: minutes left. */
+						__( 'به دلیل تلاش‌های ناموفق، ورود با کد برای این شماره تا %s دقیقه قفل است.', 'hamishop-elementor-widgets' ),
+						HSW_Helpers::fa_num( (int) ceil( $locked / 60 ) )
+					),
+				),
+				429
+			);
+		}
+
 		$checked = $this->check_code( $phone, $channel, $context, $code );
 		if ( is_wp_error( $checked ) ) {
+			if ( 'hsw_otp_invalid' === $checked->get_error_code() ) {
+				$this->note_failed_verify( $phone );
+			}
 			wp_send_json_error( array( 'message' => $checked->get_error_message() ), 400 );
 		}
+
+		$this->clear_failed_verify( $phone );
 
 		if ( 'login' === $context ) {
 			$this->login_user( $user );
@@ -595,7 +792,8 @@ final class HSW_Account_Auth {
 		if ( ! in_array( $channel, array( 'bale', 'whatsapp' ), true ) || 'yes' !== get_user_meta( $user->ID, '_hsw_2fa_enabled', true ) ) {
 			return;
 		}
-		$phone = $this->user_phone( $user->ID );
+		/* Its own key: the second factor is never the login number by accident. */
+		$phone = $this->two_factor_phone( $user->ID );
 		if ( ! $phone ) {
 			return;
 		}
@@ -649,9 +847,24 @@ final class HSW_Account_Auth {
 			delete_transient( 'hsw_2fa_' . $token );
 			wp_send_json_error( array( 'message' => __( 'تعداد تلاش‌ها بیش از حد مجاز است. دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 429 );
 		}
+		$locked = $this->verify_lock_seconds( (string) $data['phone'] );
+		if ( $locked > 0 ) {
+			delete_transient( 'hsw_2fa_' . $token );
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: minutes left. */
+						__( 'به دلیل تلاش‌های ناموفق، ورود دوعاملی تا %s دقیقه قفل است.', 'hamishop-elementor-widgets' ),
+						HSW_Helpers::fa_num( (int) ceil( $locked / 60 ) )
+					),
+				),
+				429
+			);
+		}
 		if ( ! wp_check_password( (string) $code, $data['hash'] ) ) {
 			$data['attempts'] = (int) $data['attempts'] + 1;
 			set_transient( 'hsw_2fa_' . $token, $data, max( 1, $data['expires'] - time() ) );
+			$this->note_failed_verify( (string) $data['phone'] );
 			wp_send_json_error( array( 'message' => __( 'کد وارد شده صحیح نیست.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		$user = get_user_by( 'id', (int) $data['user_id'] );
@@ -661,6 +874,7 @@ final class HSW_Account_Auth {
 		}
 		delete_transient( 'hsw_2fa_' . $token );
 		$this->clear_rate_limit( (string) $data['phone'], (string) $data['channel'], '2fa' );
+		$this->clear_failed_verify( (string) $data['phone'] );
 		$this->login_user( $user );
 		wp_send_json_success(
 			array(
@@ -706,9 +920,22 @@ final class HSW_Account_Auth {
 		if ( ! $this->channel_enabled( $channel ) ) {
 			wp_send_json_error( array( 'message' => __( 'این کانال فعال نیست.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
+		/*
+		 * A verified number is preferred, but a customer who has never verified
+		 * one may type it here: the code proves ownership and, on success, the
+		 * number is claimed as the account's login identity as well.
+		 */
 		$phone = $this->user_phone( $user_id );
 		if ( ! $phone ) {
-			wp_send_json_error( array( 'message' => __( 'ابتدا شماره موبایل خود را در اطلاعات حساب ثبت کنید.', 'hamishop-elementor-widgets' ), 'edit_account' => wc_get_account_endpoint_url( 'edit-account' ) ), 400 );
+			$typed = isset( $_POST['phone'] ) ? $this->normalize_phone( wp_unslash( $_POST['phone'] ) ) : '';
+			if ( ! $typed ) {
+				wp_send_json_error( array( 'message' => __( 'برای فعال‌سازی، شماره موبایل خود را وارد کنید.', 'hamishop-elementor-widgets' ) ), 400 );
+			}
+			$owner = $this->phone_owner( $typed );
+			if ( $owner && $owner !== (int) $user_id ) {
+				wp_send_json_error( array( 'message' => __( 'این شماره قبلاً روی حساب دیگری تأیید شده است. با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) ), 409 );
+			}
+			$phone = $typed;
 		}
 		if ( 'bale' === $channel && ! $this->bale_chat_id( $user_id, $phone ) ) {
 			$token = $this->bale_link_token( $user_id );
@@ -721,6 +948,11 @@ final class HSW_Account_Auth {
 				400
 			);
 		}
+		$throttle = $this->check_send_throttle( $phone, $channel );
+		if ( is_wp_error( $throttle ) ) {
+			wp_send_json_error( array( 'message' => $throttle->get_error_message() ), 429 );
+		}
+
 		$limit = $this->rate_limit( $phone, $channel, 'setup' );
 		if ( is_wp_error( $limit ) ) {
 			wp_send_json_error( array( 'message' => $limit->get_error_message() ), 429 );
@@ -765,6 +997,17 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'کد وارد شده صحیح نیست.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		delete_transient( 'hsw_2fa_setup_' . $user_id );
+
+		/*
+		 * Entering a code sent to that number is the proof of ownership, so the
+		 * same act claims it as the login identity. A number already verified on
+		 * another account is refused here too, not only when it was typed.
+		 */
+		$claim = $this->claim_phone( $user_id, (string) $data['phone'] );
+		if ( is_wp_error( $claim ) ) {
+			wp_send_json_error( array( 'message' => $claim->get_error_message() ), 409 );
+		}
+
 		update_user_meta( $user_id, '_hsw_2fa_enabled', 'yes' );
 		update_user_meta( $user_id, '_hsw_2fa_channel', $data['channel'] );
 		update_user_meta( $user_id, '_hsw_2fa_phone', $data['phone'] );
@@ -808,26 +1051,66 @@ final class HSW_Account_Auth {
 			exit;
 		}
 
-		$message = isset( $data['message'] ) && is_array( $data['message'] ) ? $data['message'] : array();
-		$chat_id = isset( $message['chat']['id'] ) ? (string) $message['chat']['id'] : '';
-		$text    = isset( $message['text'] ) ? (string) $message['text'] : '';
-		$contact = isset( $message['contact'] ) && is_array( $message['contact'] ) ? $message['contact'] : array();
+		$message    = isset( $data['message'] ) && is_array( $data['message'] ) ? $data['message'] : array();
+		$chat_id    = isset( $message['chat']['id'] ) ? (string) $message['chat']['id'] : '';
+		$chat_type  = isset( $message['chat']['type'] ) ? (string) $message['chat']['type'] : '';
+		$from_id    = isset( $message['from']['id'] ) ? (string) $message['from']['id'] : '';
+		$text       = isset( $message['text'] ) ? (string) $message['text'] : '';
+		$contact    = isset( $message['contact'] ) && is_array( $message['contact'] ) ? $message['contact'] : array();
+		$contact_id = isset( $contact['user_id'] ) ? (string) $contact['user_id'] : '';
 
 		if ( $contact && $chat_id ) {
-			$phone = $this->normalize_phone( isset( $contact['phone_number'] ) ? $contact['phone_number'] : '' );
-			if ( $phone ) {
-				$contacts = get_option( 'hsw_bale_contacts', array() );
-				$contacts = is_array( $contacts ) ? $contacts : array();
-				$contacts[ $phone ] = $chat_id;
-				if ( count( $contacts ) > 1000 ) {
-					$contacts = array_slice( $contacts, -1000, null, true );
+			/*
+			 * A shared contact proves ownership only when the sender shared *their
+			 * own* number, in a private chat: Bale/Telegram set `contact.user_id`
+			 * to the sender's id in exactly that case. A forwarded contact, or one
+			 * shared in a group, carries someone else's id (or none at all) — and
+			 * accepting it would let an attacker bind any phone number to their own
+			 * chat, then receive that person's login codes.
+			 *
+			 * Providers that never send `contact.user_id` therefore cannot use this
+			 * path at all; for them the only route is `/start <token>`, which only
+			 * a signed-in customer can generate.
+			 */
+			if ( 'private' !== $chat_type || '' === $contact_id || '' === $from_id || $contact_id !== $from_id ) {
+				$this->bale_send(
+					$chat_id,
+					__( 'برای اتصال، شمارهٔ خودتان را با دکمهٔ «ارسال شماره موبایل» و در گفتگوی خصوصی با ربات بفرستید.', 'hamishop-elementor-widgets' )
+				);
+			} else {
+				$phone = $this->normalize_phone( isset( $contact['phone_number'] ) ? $contact['phone_number'] : '' );
+
+				if ( $phone ) {
+					$contacts = get_option( 'hsw_bale_contacts', array() );
+					$contacts = is_array( $contacts ) ? $contacts : array();
+					$user     = $this->find_user_by_phone( $phone );
+					$bound    = isset( $contacts[ $phone ] ) ? (string) $contacts[ $phone ] : '';
+					$user_chat = $user ? (string) get_user_meta( $user->ID, '_hsw_bale_chat_id', true ) : '';
+
+					/*
+					 * Never silently re-point a number that is already connected to
+					 * a different chat. Re-binding is a deliberate act: the old chat
+					 * is told to use /start, and the new one is refused here.
+					 */
+					if ( ( '' !== $bound && $bound !== $chat_id ) || ( '' !== $user_chat && $user_chat !== $chat_id ) ) {
+						$this->bale_send(
+							$chat_id,
+							__( 'این شماره قبلاً به حساب دیگری متصل شده است. اگر مالک آن هستید، از پنل حساب کاربری دوباره وارد شوید و ربات را از همان‌جا وصل کنید.', 'hamishop-elementor-widgets' )
+						);
+					} else {
+						$contacts[ $phone ] = $chat_id;
+						if ( count( $contacts ) > 1000 ) {
+							$contacts = array_slice( $contacts, -1000, null, true );
+						}
+						update_option( 'hsw_bale_contacts', $contacts, false );
+
+						if ( $user ) {
+							update_user_meta( $user->ID, '_hsw_bale_chat_id', $chat_id );
+						}
+
+						$this->bale_send( $chat_id, __( 'شماره شما با موفقیت به حساب فروشگاه متصل شد.', 'hamishop-elementor-widgets' ) );
+					}
 				}
-				update_option( 'hsw_bale_contacts', $contacts, false );
-				$user = $this->find_user_by_phone( $phone );
-				if ( $user ) {
-					update_user_meta( $user->ID, '_hsw_bale_chat_id', $chat_id );
-				}
-				$this->bale_send( $chat_id, __( 'شماره شما با موفقیت به حساب فروشگاه متصل شد.', 'hamishop-elementor-widgets' ) );
 			}
 		} elseif ( preg_match( '/^\/start(?:\s+(\S+))?/u', $text, $matches ) ) {
 			$token = isset( $matches[1] ) ? sanitize_key( $matches[1] ) : '';
@@ -923,8 +1206,10 @@ final class HSW_Account_Auth {
 			return '';
 		}
 		$active   = (string) get_user_meta( $user_id, '_hsw_2fa_channel', true );
-		$phone    = $this->user_phone( $user_id );
-		$chat     = $this->bale_chat_id( $user_id, $phone );
+		$verified = $this->user_phone( $user_id );
+		/* What the code is sent to: the 2FA number once enabled, else the verified one. */
+		$phone    = $enabled ? $this->two_factor_phone( $user_id ) : $verified;
+		$chat     = $this->bale_chat_id( $user_id, '' !== $verified ? $verified : $phone );
 		$default  = isset( $channels[ $active ] ) ? $active : $this->default_channel();
 		$link     = ( ! $chat && isset( $channels['bale'] ) ) ? $this->bale_link( $this->bale_link_token( $user_id ) ) : '';
 
@@ -939,6 +1224,18 @@ final class HSW_Account_Auth {
 		}
 
 		$html .= '<p class="hsw-ac__security-desc">' . esc_html__( 'روش دریافت کد را انتخاب کنید؛ پس از تأیید کد، ورود دوعاملی فعال می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+
+		/*
+		 * No verified number yet: ask for one. Entering the code that arrives on
+		 * it proves ownership, so the same step registers it as the account's
+		 * login number — that is the migration path for customers whose old
+		 * `billing_phone` was never verified.
+		 */
+		if ( '' === $verified ) {
+			$html .= '<div class="hsw-ac-field"><label for="hsw-2fa-phone">' . esc_html__( 'شماره موبایل', 'hamishop-elementor-widgets' ) . '</label>';
+			$html .= '<div class="hsw-ac-input-wrap">' . $this->account->icon( 'phone' ) . '<input type="tel" id="hsw-2fa-phone" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="09121234567" data-hsw-2fa-phone></div>';
+			$html .= '<p class="hsw-ac__security-note">' . esc_html__( 'این شماره با کد تأیید می‌شود و به‌عنوان شمارهٔ ورود حساب ثبت می‌گردد.', 'hamishop-elementor-widgets' ) . '</p></div>';
+		}
 		$html .= '<div class="hsw-ac-otp__channels" role="radiogroup" aria-label="' . esc_attr__( 'روش ورود دوعاملی', 'hamishop-elementor-widgets' ) . '">';
 		foreach ( $channels as $key => $label ) {
 			$html .= '<button type="button" class="hsw-ac-otp__channel' . ( $key === $default ? ' is-active' : '' ) . '" data-hsw-2fa-channel="' . esc_attr( $key ) . '" aria-pressed="' . ( $key === $default ? 'true' : 'false' ) . '">' . $this->account->icon( 'bale' === $key ? 'send' : 'phone' ) . esc_html( $label ) . '</button>';

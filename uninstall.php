@@ -24,8 +24,9 @@ function hsw_uninstall_site() {
 	 * Options
 	 * --------------------------------------------------------------- */
 	$options = array(
-		'hsw_account',
+		'hsw_account_settings',
 		'hsw_account_rewrite_hash',
+		'hsw_throttle_db',
 		'hsw_asset_version',
 		'hsw_bale_contacts',
 		'hsw_brand',
@@ -75,6 +76,11 @@ function hsw_uninstall_site() {
 	$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		"DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '\\_hsw\\_ticket\\_%'"
 	);
+
+	/* ------------------------------------------------------------------
+	 * The throttle table (login counters).
+	 * --------------------------------------------------------------- */
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}hsw_throttle" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
 	/* ------------------------------------------------------------------
 	 * The admin-URL rewrite block.

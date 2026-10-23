@@ -971,8 +971,13 @@
 		if (button) {
 			button.disabled = true;
 		}
+		var phoneInput = panel.querySelector('[data-hsw-2fa-phone]');
+		var payload = { channel: channel };
+		if (phoneInput && phoneInput.value.trim()) {
+			payload.phone = phoneInput.value.trim();
+		}
 		setMessage(message, data().sending || 'در حال ارسال کد...');
-		ajax('hsw_2fa_setup_send', { channel: channel }, data().twoFactorNonce)
+		ajax('hsw_2fa_setup_send', payload, data().twoFactorNonce)
 			.then(function (payload) {
 				if (!payload || !payload.success) {
 					var error = payload && payload.data ? payload.data : {};
