@@ -4379,3 +4379,121 @@ a.hsw-ac__stat:hover {
 	object-fit: contain;
 	display: block;
 }
+
+/* =========================================================================
+ * Email verification banner — v1.11.23
+ *
+ * Shown to accounts created through the phone OTP: they have an email on file
+ * but never proved it. Lives on dashboard / orders / account details until the
+ * address is confirmed, then never returns.
+ * ====================================================================== */
+
+.hsw-ac__verify {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 18px;
+	padding: 16px 18px;
+	border: 1px solid color-mix(in srgb, var(--hsw-ac-accent) 28%, #fff);
+	border-radius: 16px;
+	background: color-mix(in srgb, var(--hsw-ac-accent) 6%, #fff);
+	transition: opacity .25s ease;
+}
+
+.hsw-ac__verify[hidden],
+.hsw-ac__verify-form[hidden],
+.hsw-ac__verify-step[hidden] {
+	display: none;
+}
+
+.hsw-ac__verify.is-done {
+	opacity: .75;
+}
+
+.hsw-ac__verify-ic {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 12px;
+	background: color-mix(in srgb, var(--hsw-ac-accent) 14%, #fff);
+	color: var(--hsw-ac-accent);
+	font-size: 20px;
+	flex-shrink: 0;
+}
+
+.hsw-ac__verify-copy strong {
+	display: block;
+	font-size: 13px;
+	font-weight: 800;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac__verify-copy p {
+	margin: 4px 0 0;
+	font-size: 11.5px;
+	line-height: 1.75;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__verify-open {
+	white-space: nowrap;
+}
+
+.hsw-ac__verify-form {
+	grid-column: 1 / -1;
+	margin-top: 4px;
+	padding-top: 14px;
+	border-top: 1px dashed color-mix(in srgb, var(--hsw-ac-accent) 26%, #fff);
+}
+
+.hsw-ac__verify-form .hsw-ac-field {
+	margin-bottom: 10px;
+}
+
+.hsw-ac__verify-step {
+	margin-top: 12px;
+}
+
+.hsw-ac__verify-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.hsw-ac__verify-msg {
+	margin: 8px 0 2px;
+	min-height: 1.1em;
+	font-size: 11.5px;
+	font-weight: 600;
+}
+
+.hsw-ac__verify-msg.is-error {
+	color: var(--hsw-ac-danger);
+}
+
+.hsw-ac__verify-msg.is-success {
+	color: var(--hsw-ac-success);
+}
+
+.hsw-ac__verify-send.is-busy,
+.hsw-ac__verify-form .is-busy {
+	opacity: .6;
+	pointer-events: none;
+}
+
+@media (max-width: 640px) {
+	.hsw-ac__verify {
+		grid-template-columns: auto 1fr;
+		padding: 14px;
+	}
+
+	.hsw-ac__verify-open {
+		grid-column: 1 / -1;
+		width: 100%;
+		justify-content: center;
+	}
+}

@@ -130,7 +130,134 @@
 	function init(root) {
 		var scope = root || document;
 		scope.querySelectorAll('[data-hsw-wishlist]').forEach(renderWishlist);
+		scope.querySelectorAll('[data-hsw-verify]').forEach(initEmailVerify);
 		updateCounts();
+	}
+
+	/*
+	 * Email confirmation banner for phone-first accounts.
+	 *
+	 * The whole flow is optional: without JS the banner still tells the customer
+	 * what to do and the account-details form still lets them change the address.
+	 * With JS it expands into a two-step code form that talks to admin-ajax.
+	 */
+	function initEmailVerify(box) {
+		if (!box || '1' === box.getAttribute('data-hsw-ready')) {
+			return;
+		}
+		box.setAttribute('data-hsw-ready', '1');
+
+		var openBtn = box.querySelector('[data-hsw-verify-open]');
+		var form = box.querySelector('[data-hsw-verify-form]');
+		var step = box.querySelector('[data-hsw-verify-step]');
+		var email = box.querySelector('[data-hsw-verify-email]');
+		var code = box.querySelector('[data-hsw-verify-code]');
+		var message = box.querySelector('[data-hsw-verify-msg]');
+		var sendBtn = box.querySelector('[data-hsw-verify-send]');
+		var confirmBtn = box.querySelector('[data-hsw-verify-confirm]');
+		var resendBtn = box.querySelector('[data-hsw-verify-resend]');
+
+		function busy(button, on) {
+			if (!button) {
+				return;
+			}
+			button.disabled = on;
+			button.classList.toggle('is-busy', on);
+		}
+
+		function send() {
+			var value = (email && email.value ? email.value : '').trim();
+			if (!value || value.indexOf('@') === -1) {
+				setMessage(message, data().emailInvalid || 'ایمیل معتبر وارد کنید.', 'error');
+				if (email) {
+					email.focus();
+				}
+				return;
+			}
+			busy(sendBtn, true);
+			setMessage(message, data().sending || 'در حال ارسال...', '');
+			ajax('hsw_email_send', { email: value }, data().emailNonce)
+				.then(function (response) {
+					busy(sendBtn, false);
+					if (!response || !response.success) {
+						setMessage(message, (response && response.data && response.data.message) || data().emailFailed, 'error');
+						return;
+					}
+					setMessage(message, (response.data && response.data.message) || data().emailSent, 'success');
+					if (step) {
+						step.hidden = false;
+					}
+					if (code) {
+						code.focus();
+					}
+				})
+				.catch(function () {
+					busy(sendBtn, false);
+					setMessage(message, data().emailFailed, 'error');
+				});
+		}
+
+		function confirm() {
+			var value = (code && code.value ? code.value : '').replace(/\D/g, '');
+			if (6 !== value.length) {
+				setMessage(message, data().codeRequired || 'کد تأیید را وارد کنید.', 'error');
+				return;
+			}
+			busy(confirmBtn, true);
+			ajax('hsw_email_verify', { code: value }, data().emailNonce)
+				.then(function (response) {
+					busy(confirmBtn, false);
+					if (!response || !response.success) {
+						setMessage(message, (response && response.data && response.data.message) || data().emailFailed, 'error');
+						return;
+					}
+					box.classList.add('is-done');
+					setMessage(message, (response.data && response.data.message) || data().emailDone, 'success');
+					/* Let the success state be readable, then drop the banner. */
+					window.setTimeout(function () {
+						box.hidden = true;
+					}, 2200);
+				})
+				.catch(function () {
+					busy(confirmBtn, false);
+					setMessage(message, data().emailFailed, 'error');
+				});
+		}
+
+		if (openBtn && form) {
+			openBtn.addEventListener('click', function () {
+				form.hidden = false;
+				openBtn.hidden = true;
+				if (email) {
+					email.focus();
+				}
+			});
+		}
+		if (sendBtn) {
+			sendBtn.addEventListener('click', send);
+		}
+		if (resendBtn) {
+			resendBtn.addEventListener('click', send);
+		}
+		if (confirmBtn) {
+			confirmBtn.addEventListener('click', confirm);
+		}
+		if (email) {
+			email.addEventListener('keydown', function (event) {
+				if ('Enter' === event.key) {
+					event.preventDefault();
+					send();
+				}
+			});
+		}
+		if (code) {
+			code.addEventListener('keydown', function (event) {
+				if ('Enter' === event.key) {
+					event.preventDefault();
+					confirm();
+				}
+			});
+		}
 	}
 
 	function switchAuth(tab) {

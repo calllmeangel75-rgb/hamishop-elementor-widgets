@@ -35,6 +35,35 @@ class HSW_Branding {
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
 		add_action( 'admin_print_footer_scripts', array( $this, 'picker_script' ), 99 );
+
+		/*
+		 * Sender identity for every email WordPress sends — order mail, password
+		 * resets, our own verification codes. Previously this needed a snippet in
+		 * the child theme (`wp_mail_from` / `wp_mail_from_name`); now it is a
+		 * setting. Both filters stay inert while their field is empty.
+		 */
+		add_filter( 'wp_mail_from', array( $this, 'filter_from_email' ) );
+		add_filter( 'wp_mail_from_name', array( $this, 'filter_from_name' ) );
+	}
+
+	/**
+	 * @param string $email Original from address.
+	 * @return string
+	 */
+	public function filter_from_email( $email ) {
+		$b     = self::get();
+		$value = trim( (string) $b['from_email'] );
+		return is_email( $value ) ? $value : $email;
+	}
+
+	/**
+	 * @param string $name Original from name.
+	 * @return string
+	 */
+	public function filter_from_name( $name ) {
+		$b     = self::get();
+		$value = trim( (string) $b['from_name'] );
+		return '' !== $value ? $value : $name;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -48,10 +77,12 @@ class HSW_Branding {
 	 */
 	public static function defaults() {
 		return array(
-			'name'    => get_bloginfo( 'name' ),
-			'tagline' => get_bloginfo( 'description' ),
-			'logo_id' => (int) get_theme_mod( 'custom_logo' ),
-			'logo_url' => '',
+			'name'       => get_bloginfo( 'name' ),
+			'tagline'    => get_bloginfo( 'description' ),
+			'logo_id'    => (int) get_theme_mod( 'custom_logo' ),
+			'logo_url'   => '',
+			'from_email' => '',
+			'from_name'  => '',
 		);
 	}
 
@@ -235,10 +266,12 @@ class HSW_Branding {
 		update_option(
 			self::OPTION,
 			array(
-				'name'     => sanitize_text_field( $in['name'] ?? '' ),
-				'tagline'  => sanitize_text_field( $in['tagline'] ?? '' ),
-				'logo_id'  => absint( $in['logo_id'] ?? 0 ),
-				'logo_url' => esc_url_raw( $in['logo_url'] ?? '' ),
+				'name'       => sanitize_text_field( $in['name'] ?? '' ),
+				'tagline'    => sanitize_text_field( $in['tagline'] ?? '' ),
+				'logo_id'    => absint( $in['logo_id'] ?? 0 ),
+				'logo_url'   => esc_url_raw( $in['logo_url'] ?? '' ),
+				'from_email' => sanitize_email( $in['from_email'] ?? '' ),
+				'from_name'  => sanitize_text_field( $in['from_name'] ?? '' ),
 			),
 			false
 		);
@@ -301,6 +334,39 @@ class HSW_Branding {
 							<input type="url" class="regular-text" id="hsw-brand-logo-url" name="hsw_brand[logo_url]"
 								value="<?php echo esc_attr( $b['logo_url'] ); ?>" placeholder="https://" dir="ltr" />
 							<p class="description"><?php esc_html_e( 'فقط وقتی استفاده می‌شود که لوگویی از کتابخانه انتخاب نشده باشد.', 'hamishop-elementor-widgets' ); ?></p>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'ایمیل فرستنده', 'hamishop-elementor-widgets' ); ?></h2>
+				<p class="description" style="max-width:780px">
+					<?php esc_html_e( 'آدرس و نامی که وردپرس با آن ایمیل می‌فرستد. به‌صورت پیش‌فرض wordpress@دامنه است که بسیاری از سرورها آن را اسپم می‌کنند؛ اینجا آدرس واقعی فروشگاه را بگذارید. این تنظیم روی همهٔ ایمیل‌های سایت اثر دارد (سفارش، بازیابی رمز، کد تأیید ایمیل).', 'hamishop-elementor-widgets' ); ?>
+				</p>
+				<table class="form-table" role="presentation">
+					<tbody>
+					<tr>
+						<th scope="row"><label for="hsw-brand-from-email"><?php esc_html_e( 'آدرس فرستنده', 'hamishop-elementor-widgets' ); ?></label></th>
+						<td>
+							<input type="email" class="regular-text" id="hsw-brand-from-email" name="hsw_brand[from_email]"
+								value="<?php echo esc_attr( $b['from_email'] ); ?>" placeholder="no-reply@<?php echo esc_attr( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ); ?>" dir="ltr" />
+							<p class="description">
+								<?php
+								printf(
+									/* translators: %s: current from address. */
+									esc_html__( 'خالی بگذارید تا مقدار پیش‌فرض وردپرس (%s) استفاده شود. برای تحویل بهتر، آدرس باید روی دامنهٔ همین سایت باشد.', 'hamishop-elementor-widgets' ),
+									'<code dir="ltr">wordpress@' . esc_html( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) . '</code>'
+								);
+								?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="hsw-brand-from-name"><?php esc_html_e( 'نام فرستنده', 'hamishop-elementor-widgets' ); ?></label></th>
+						<td>
+							<input type="text" class="regular-text" id="hsw-brand-from-name" name="hsw_brand[from_name]"
+								value="<?php echo esc_attr( $b['from_name'] ); ?>" placeholder="<?php echo esc_attr( self::name() ); ?>" />
+							<p class="description"><?php esc_html_e( 'خالی بگذارید تا نام برند بالا استفاده شود.', 'hamishop-elementor-widgets' ); ?></p>
 						</td>
 					</tr>
 					</tbody>

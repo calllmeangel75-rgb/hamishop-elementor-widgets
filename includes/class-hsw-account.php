@@ -34,6 +34,9 @@ final class HSW_Account {
 	/** @var HSW_Account_Admin|null */
 	public $admin = null;
 
+	/** @var HSW_Email_Verify|null */
+	public $email_verify = null;
+
 	/** @var bool */
 	private $tokens_printed = false;
 
@@ -55,6 +58,9 @@ final class HSW_Account {
 		}
 		if ( class_exists( 'HSW_Account_Auth' ) ) {
 			$this->auth = new HSW_Account_Auth( $this );
+		}
+		if ( class_exists( 'HSW_Email_Verify' ) ) {
+			$this->email_verify = HSW_Email_Verify::instance( $this );
 		}
 		if ( is_admin() && class_exists( 'HSW_Account_Admin' ) ) {
 			$this->admin = new HSW_Account_Admin( $this );
@@ -121,6 +127,7 @@ final class HSW_Account {
 				'show_menu'            => 'yes',
 				'show_logout'          => 'yes',
 				'menu_title'           => 'حساب کاربری من',
+				'email_verify'         => 'yes',
 			),
 			'dashboard' => array(
 				'show_stats'          => 'yes',
@@ -2053,8 +2060,15 @@ final class HSW_Account {
 	private function render_endpoint_content( $ctx ) {
 		$endpoint = $ctx['endpoint'];
 
+		/*
+		 * Phone-first accounts never proved their email. The banner rides on the
+		 * three screens a customer actually visits (dashboard, orders, account
+		 * details) and disappears for good once the address is confirmed.
+		 */
+		$verify = $this->email_verify ? $this->email_verify->banner( $ctx ) : '';
+
 		if ( 'dashboard' === $endpoint ) {
-			return '<div class="hsw-ac__content">' . $this->dashboard_cards( $ctx ) . '</div>';
+			return '<div class="hsw-ac__content">' . $verify . $this->dashboard_cards( $ctx ) . '</div>';
 		}
 		if ( 'customer-logout' !== $endpoint && ! $this->endpoint_enabled_for_context( $endpoint, $ctx ) ) {
 			return '<div class="hsw-ac__content">' . $this->disabled_card( $ctx['current_label'] ) . '</div>';
@@ -2072,13 +2086,13 @@ final class HSW_Account {
 			return '<div class="hsw-ac__content">' . $this->wallet_content( $ctx ) . '</div>';
 		}
 		if ( 'orders' === $endpoint ) {
-			return '<div class="hsw-ac__content">' . $this->orders_content( $ctx ) . '</div>';
+			return '<div class="hsw-ac__content">' . $verify . $this->orders_content( $ctx ) . '</div>';
 		}
 		if ( 'edit-address' === $endpoint && '' === trim( (string) $this->endpoint_value( 'edit-address' ) ) ) {
 			return '<div class="hsw-ac__content">' . $this->addresses_content( $ctx ) . '</div>';
 		}
 		if ( 'edit-account' === $endpoint ) {
-			return '<div class="hsw-ac__content">' . $this->account_content( $ctx ) . '</div>';
+			return '<div class="hsw-ac__content">' . $verify . $this->account_content( $ctx ) . '</div>';
 		}
 		if ( 'customer-logout' === $endpoint ) {
 			$html  = '<section class="hsw-ac__card hsw-ac__empty">';

@@ -271,6 +271,7 @@ final class HSW_Account_Admin {
 			<p class="hsw-admin-desc">این تنظیمات پایهٔ پنل حساب در شورت‌کد و ویجت المنتور است.</p>
 			<div class="hsw-admin-grid">
 				<?php $this->switch_field( $s, 'general', 'enabled', 'فعال‌سازی پنل حساب HamiShop', 'در صورت غیرفعال بودن، شورت‌کد به پنل پیش‌فرض ووکامرس برمی‌گردد.' ); ?>
+				<?php $this->switch_field( $s, 'general', 'email_verify', 'درخواست تأیید ایمیل از کاربران پیامکی', 'کاربری که با کد پیامکی ثبت‌نام کرده، در پیشخوان و سفارش‌ها پیام «ایمیل خود را تأیید کنید» می‌بیند و می‌تواند ایمیلش را با یک کد ۶ رقمی تأیید و به حساب وصل کند.' ); ?>
 				<?php $this->select_field( $s, 'general', 'side_position', 'جای منوی کناری', array( 'right' => 'سمت راست', 'left' => 'سمت چپ' ) ); ?>
 				<?php $this->number_field( $s, 'general', 'side_width', 'عرض ستون کناری (پیکسل)', 240, 420 ); ?>
 				<?php $this->number_field( $s, 'general', 'gap', 'فاصلهٔ ستون‌ها (پیکسل)', 0, 64 ); ?>
