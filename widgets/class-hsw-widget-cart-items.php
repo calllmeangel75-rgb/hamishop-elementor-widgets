@@ -445,12 +445,22 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                         <div class="hsw-citems__mctrl<?php echo ( ! $show_warranty || '' === $item['warranty'] ) ? ' is-divided' : ''; ?>">
                                 <form method="post" action="<?php echo esc_url( $this->cart_url() ); ?>" class="hsw-citems__qtyform">
                                         <?php echo $this->cart_nonce(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hidden nonce inputs. ?>
-                                        <div class="hsw-c-qty hsw-citems__mqty">
+                                        <?php
+                                        /*
+                                         * Mobile had a plus button and a delete link, nothing else:
+                                         * a customer who ordered eight of something could only go up.
+                                         * Now it mirrors the desktop stepper — minus down to `min`
+                                         * (1 unless WooCommerce says otherwise) and the bin removes
+                                         * the line entirely.
+                                         */
+                                        ?>
+                                        <div class="hsw-c-qty hsw-citems__mqty" data-min="<?php echo esc_attr( $item['min'] ); ?>">
                                                 <button type="button" class="hsw-c-qty__btn is-plus" data-dir="plus" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'add' ); ?></button>
-                                                <input type="hidden" name="cart[<?php echo esc_attr( $item['key'] ); ?>][qty]" value="<?php echo esc_attr( $item['qty'] ); ?>">
+                                                <input type="hidden" name="cart[<?php echo esc_attr( $item['key'] ); ?>][qty]" value="<?php echo esc_attr( $item['qty'] ); ?>" min="<?php echo esc_attr( $item['min'] ); ?>"<?php echo ( 0 < $item['max'] ) ? ' max="' . esc_attr( $item['max'] ) . '"' : ''; ?>>
                                                 <span class="hsw-c-qty__v"><?php echo esc_html( HSW_Helpers::fa_num( $item['qty'] ) ); ?></span>
+                                                <button type="button" class="hsw-c-qty__btn is-minus" data-dir="minus" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"<?php echo ( (int) $item['qty'] <= (int) $item['min'] ) ? ' disabled aria-disabled="true"' : ''; ?>><?php echo HSW_Helpers::icon( 'remove' ); ?></button>
                                                 <?php if ( $show_del && '' !== $item['remove'] ) : ?>
-                                                        <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__mremove" aria-label="<?php esc_attr_e( 'حذف یا کاهش', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></a>
+                                                        <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__mremove" aria-label="<?php esc_attr_e( 'حذف از سبد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></a>
                                                 <?php endif; ?>
                                         </div>
                                         <button type="submit" name="update_cart" value="1" class="hsw-citems__update" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'به‌روزرسانی سبد', 'hamishop-elementor-widgets' ); ?></button>

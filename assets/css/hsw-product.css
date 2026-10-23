@@ -543,32 +543,44 @@
 .hsw-ppurch__unit { font-size: 16px; line-height: 26px; font-weight: 600; color: var(--hsw-unit-c, var(--hsw-on-surface-variant)); }
 .hsw-ppurch__qty { display: flex; align-items: center; gap: 12px; }
 .hsw-ppurch__qtylabel { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--hsw-on-surface); }
+/*
+ * Compact pill. It used to be a flex child that grew to the full column, so the
+ * two buttons ended up 300px apart with the number floating in the middle.
+ */
 .hsw-ppurch__stepper {
-        display: flex;
+        display: inline-flex;
+        flex: 0 0 auto;
+        width: auto;
         align-items: center;
+        gap: 2px;
         border: 1px solid var(--hsw-outline-variant);
-        border-radius: 8px;
+        border-radius: 10px;
         background: var(--hsw-surface-bright);
         padding: 2px;
 }
 .hsw-ppurch__qbtn {
         width: 32px;
         height: 32px;
+        flex: 0 0 auto;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 0;
-        border-radius: 4px;
+        border-radius: 8px;
         background: transparent;
-        color: var(--hsw-on-surface);
+        color: var(--hsw-qty-c, var(--hsw-cart-bg, var(--hsw-primary-container)));
         transition: background-color .15s, transform .1s;
 }
 .hsw-ppurch__qbtn:hover { background: var(--hsw-surface-c); }
 .hsw-ppurch__qbtn:active { transform: scale(.95); }
 .hsw-ppurch__qbtn .hsw-ic { font-size: 18px !important; }
-.hsw-ppurch__qval {
-        width: 36px; text-align: center; font-weight: 700; font-size: 14px; line-height: 24px;
-        border: 0; padding: 0; background: transparent; color: inherit; font-family: inherit;
+/* Two classes: themes ship `input[type="text"] { width: 100% }` and win otherwise. */
+.hsw-ppurch .hsw-ppurch__qval {
+        width: 2.25rem; flex: 0 0 2.25rem; min-width: 0; text-align: center;
+        font-weight: 700; font-size: 14px; line-height: 24px;
+        border: 0 !important; outline: 0; padding: 0; margin: 0;
+        background: transparent; color: inherit; font-family: inherit;
+        box-shadow: none;
         appearance: textfield; -moz-appearance: textfield; border-radius: 6px; cursor: text;
         transition: background .15s, box-shadow .15s;
 }
@@ -581,7 +593,7 @@
 /* Quantity stepper sits beside the buy button (moved out of the price row). */
 .hsw-ppurch__qty--inline {
         flex: 0 0 auto;
-        width: 100%;
+        width: auto;
         justify-content: center;
 }
 
@@ -589,7 +601,7 @@
 
 .hsw-ppurch__qty--inline .hsw-ppurch__stepper { height: 44px; }
 
-.hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 40px; height: 40px; }
+.hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 34px; height: 38px; }
 .hsw-ppurch__cart {
         display: flex;
         align-items: center;
@@ -633,8 +645,11 @@
         .hsw-ppurch__ctas { flex-direction: row; align-items: stretch; }
         .hsw-ppurch__cart { width: auto; flex: 1; }
         .hsw-ppurch__qty--inline { width: auto; }
+
+        /* Phone: the stepper takes its own row and the pill centres itself. */
+        .hsw-ppurch__qty--inline .hsw-ppurch__stepper { margin-inline: auto; }
         .hsw-ppurch__qty--inline .hsw-ppurch__stepper { height: 48px; }
-        .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 42px; height: 42px; }
+        .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 36px; height: 42px; }
 }
 /* OOS (out of stock) state */
 .hsw-ppurch.is-oos .hsw-ppurch__cart,

@@ -202,12 +202,17 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                         'pp_ctas_heading',
                         array( 'label' => __( 'دکمه‌ها', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
                 );
+                /*
+                 * The variable sits on the wrapper, not on the button: the + / -
+                 * stepper reads the same value, so "one colour for buy and
+                 * stepper" is the default instead of something to keep in sync.
+                 */
                 $this->add_control(
                         'pp_cart_bgc',
                         array(
                                 'label'     => __( 'پس‌زمینه دکمه سبد', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}} .hsw-ppurch__cart' => '--hsw-cart-bg: {{VALUE}};' ),
+                                'selectors' => array( '{{WRAPPER}}' => '--hsw-cart-bg: {{VALUE}};' ),
                         )
                 );
                 $this->add_control(
@@ -215,7 +220,16 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                         array(
                                 'label'     => __( 'رنگ متن دکمه سبد', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}} .hsw-ppurch__cart' => '--hsw-cart-c: {{VALUE}};' ),
+                                'selectors' => array( '{{WRAPPER}}' => '--hsw-cart-c: {{VALUE}};' ),
+                        )
+                );
+                $this->add_control(
+                        'pp_qty_col',
+                        array(
+                                'label'       => __( 'رنگ علامت‌های + و −', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::COLOR,
+                                'description' => __( 'خالی بگذارید تا همان رنگ دکمهٔ خرید استفاده شود.', 'hamishop-elementor-widgets' ),
+                                'selectors'   => array( '{{WRAPPER}} .hsw-ppurch__stepper' => '--hsw-qty-c: {{VALUE}};' ),
                         )
                 );
                 $this->ctrl_text( 'pp_cart', '{{WRAPPER}} .hsw-ppurch__cart' );

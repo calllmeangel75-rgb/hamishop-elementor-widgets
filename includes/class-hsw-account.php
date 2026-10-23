@@ -188,6 +188,11 @@ final class HSW_Account {
 				'point_value' => 100,
 				'sms_url'    => '',
 				'sms_secret' => '',
+				'topup_mode'    => 'gateway',
+				'topup_gateway' => '',
+				'card_number'   => '',
+				'card_owner'    => '',
+				'card_bank'     => '',
 			),
 			'loyalty' => array(
 				'enabled' => 'yes',
@@ -420,6 +425,11 @@ final class HSW_Account {
 			$out['wallet']['point_value'] = max( 1, absint( $w['point_value'] ?? $out['wallet']['point_value'] ) );
 			$out['wallet']['sms_url']     = esc_url_raw( (string) ( $w['sms_url'] ?? $out['wallet']['sms_url'] ) );
 			$out['wallet']['sms_secret']  = sanitize_text_field( (string) ( $w['sms_secret'] ?? $out['wallet']['sms_secret'] ) );
+			$out['wallet']['topup_mode']    = ( 'card' === ( $w['topup_mode'] ?? '' ) ) ? 'card' : 'gateway';
+			$out['wallet']['topup_gateway'] = sanitize_text_field( (string) ( $w['topup_gateway'] ?? '' ) );
+			$out['wallet']['card_number']   = sanitize_text_field( (string) ( $w['card_number'] ?? '' ) );
+			$out['wallet']['card_owner']    = sanitize_text_field( (string) ( $w['card_owner'] ?? '' ) );
+			$out['wallet']['card_bank']     = sanitize_text_field( (string) ( $w['card_bank'] ?? '' ) );
 		}
 
 		if ( isset( $input['loyalty'] ) && is_array( $input['loyalty'] ) ) {
@@ -2580,17 +2590,64 @@ final class HSW_Account {
 		/* ---------- top-up + points ---------- */
 		$html .= '<div class="hsw-ac__wallet-actions">';
 
+		$topup   = class_exists( 'HSW_Wallet_Topup' ) ? HSW_Wallet_Topup::settings() : array( 'mode' => 'card', 'gateway' => '', 'card' => '', 'owner' => '', 'bank' => '', 'min' => $min );
+		$online  = ( 'gateway' === $topup['mode'] );
+		$cards   = ( 'card' === $topup['mode'] );
+		$options = $online ? HSW_Wallet_Topup::gateways() : array();
+
 		$html .= '<section class="hsw-ac__card hsw-ac__wallet-panel" data-hsw-wallet-panel>';
 		$html .= '<h3>' . $this->icon( 'add' ) . esc_html__( 'شارژ کیف پول', 'hamishop-elementor-widgets' ) . '</h3>';
-		$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را وارد کنید؛ پس از واریز و تایید پشتیبانی، موجودی اضافه می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
-		$html .= '<form class="hsw-ac__wallet-form" data-hsw-wallet-topup>';
+
+		if ( $online ) {
+			$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را وارد کنید و از طریق درگاه پرداخت کنید؛ موجودی بلافاصله پس از پرداخت اضافه می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+		} else {
+			$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را واریز کنید، شمارهٔ پیگیری را ثبت کنید تا پس از تایید پشتیبانی موجودی اضافه شود.', 'hamishop-elementor-widgets' ) . '</p>';
+		}
+
+		if ( $cards && ( '' !== trim( (string) $topup['card'] ) || '' !== trim( (string) $topup['owner'] ) ) ) {
+			$html .= '<div class="hsw-ac__wallet-card">';
+			if ( '' !== trim( (string) $topup['card'] ) ) {
+				$html .= '<div><span>' . esc_html__( 'شماره کارت', 'hamishop-elementor-widgets' ) . '</span><strong dir="ltr">' . esc_html( HSW_Helpers::fa_num( $topup['card'] ) ) . '</strong></div>';
+			}
+			if ( '' !== trim( (string) $topup['owner'] ) ) {
+				$html .= '<div><span>' . esc_html__( 'به نام', 'hamishop-elementor-widgets' ) . '</span><strong>' . esc_html( $topup['owner'] ) . '</strong></div>';
+			}
+			if ( '' !== trim( (string) $topup['bank'] ) ) {
+				$html .= '<div><span>' . esc_html__( 'بانک', 'hamishop-elementor-widgets' ) . '</span><strong>' . esc_html( $topup['bank'] ) . '</strong></div>';
+			}
+			$html .= '</div>';
+		}
+
+		$html .= '<form class="hsw-ac__wallet-form" ' . ( $online ? 'data-hsw-wallet-pay' : 'data-hsw-wallet-topup' ) . '>';
 		$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-amount">' . esc_html__( 'مبلغ (تومان)', 'hamishop-elementor-widgets' ) . '</label>';
-		$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-amount" name="amount" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( number_format( max( $min, 100000 ) ) ) ) . '" dir="ltr">';
-		$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-note">' . esc_html__( 'شماره پیگیری / توضیح (اختیاری)', 'hamishop-elementor-widgets' ) . '</label>';
-		$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-note" name="note" type="text">';
+		$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-amount" name="amount" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( number_format( max( (int) $topup['min'], 100000 ) ) ) ) . '" dir="ltr">';
+
+		if ( $online && count( $options ) > 1 ) {
+			$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-gateway">' . esc_html__( 'درگاه پرداخت', 'hamishop-elementor-widgets' ) . '</label>';
+			$html .= '<select class="hsw-ac__wallet-input" id="hsw-wallet-gateway" name="gateway">';
+			foreach ( $options as $gid => $gtitle ) {
+				$html .= '<option value="' . esc_attr( $gid ) . '"' . selected( $gid, (string) $topup['gateway'], false ) . '>' . esc_html( $gtitle ) . '</option>';
+			}
+			$html .= '</select>';
+		}
+
+		if ( ! $online ) {
+			$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-note">' . esc_html__( 'شماره پیگیری / توضیح', 'hamishop-elementor-widgets' ) . '</label>';
+			$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-note" name="note" type="text">';
+		}
+
 		$html .= '<p class="hsw-ac__wallet-msg" data-hsw-wallet-msg role="alert" hidden></p>';
-		$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">' . $this->icon( 'wallet' ) . esc_html__( 'ثبت درخواست شارژ', 'hamishop-elementor-widgets' ) . '</button>';
-		$html .= '</form></section>';
+		$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">'
+			. $this->icon( 'wallet' )
+			. ( $online ? esc_html__( 'پرداخت و شارژ', 'hamishop-elementor-widgets' ) : esc_html__( 'ثبت فیش و درخواست شارژ', 'hamishop-elementor-widgets' ) )
+			. '</button>';
+		$html .= '</form>';
+
+		if ( $online && 0 === count( $options ) ) {
+			$html .= '<p class="hsw-ac__wallet-empty">' . esc_html__( 'هیچ درگاه پرداختی روی سایت فعال نیست؛ با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) . '</p>';
+		}
+
+		$html .= '</section>';
 
 		if ( $loyalty ) {
 			$available = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::points_available( $user_id ) : 0;

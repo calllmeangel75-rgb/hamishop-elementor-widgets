@@ -6254,3 +6254,32 @@ a.hsw-ac__stat:hover {
 		display: none;
 	}
 }
+
+/* Card-to-card details shown above the top-up form. */
+.hsw-ac__wallet-card {
+	display: grid;
+	gap: 6px;
+	margin: 0 0 14px;
+	padding: 12px 14px;
+	border: 1px dashed var(--hsw-ac-line);
+	border-radius: 12px;
+	background: #fbfcfe;
+}
+
+.hsw-ac__wallet-card > div {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 12px;
+}
+
+.hsw-ac__wallet-card span {
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__wallet-card strong {
+	font-weight: 800;
+	letter-spacing: .02em;
+	color: var(--hsw-ac-ink);
+}

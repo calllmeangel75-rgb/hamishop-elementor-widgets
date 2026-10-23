@@ -74,6 +74,24 @@ class HSW_Wallet {
 			)
 		);
 
+		/*
+		 * Pay for a top-up through the shop's own gateway. Returns the URL of
+		 * the WooCommerce order-pay screen, where the chosen gateway takes over.
+		 */
+		register_rest_route(
+			'hsw/v1',
+			'/account/wallet/pay',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'rest_pay' ),
+				'permission_callback' => $auth,
+				'args'                => array(
+					'amount'  => array( 'sanitize_callback' => 'absint' ),
+					'gateway' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+				),
+			)
+		);
+
 		register_rest_route(
 			'hsw/v1',
 			'/account/wallet/convert',
@@ -104,6 +122,33 @@ class HSW_Wallet {
 				'ok'      => true,
 				'id'      => $result,
 				'message' => __( 'درخواست شارژ ثبت شد. پس از تایید، موجودی اضافه می‌شود.', 'hamishop-elementor-widgets' ),
+			)
+		);
+	}
+
+	public function rest_pay( $request ) {
+		if ( ! class_exists( 'HSW_Wallet_Topup' ) ) {
+			return new WP_REST_Response( array( 'message' => __( 'شارژ آنلاین در دسترس نیست.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		$order_id = HSW_Wallet_Topup::create_order(
+			get_current_user_id(),
+			(float) $request->get_param( 'amount' ),
+			(string) $request->get_param( 'gateway' )
+		);
+
+		if ( is_wp_error( $order_id ) ) {
+			return new WP_REST_Response( array( 'message' => $order_id->get_error_message() ), 400 );
+		}
+
+		$order = wc_get_order( $order_id );
+
+		return rest_ensure_response(
+			array(
+				'ok'       => true,
+				'order'    => $order_id,
+				'redirect' => $order ? $order->get_checkout_payment_url() : '',
+				'message'  => __( 'در حال انتقال به درگاه پرداخت…', 'hamishop-elementor-widgets' ),
 			)
 		);
 	}

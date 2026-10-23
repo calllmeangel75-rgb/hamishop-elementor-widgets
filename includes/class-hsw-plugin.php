@@ -40,6 +40,7 @@ final class HSW_Plugin {
                 HSW_Cache_Guard::instance();
                 HSW_Throttle::instance();
                 HSW_Wallet::instance();
+                new HSW_Wallet_Topup();
                 HSW_Coupon_Messages::instance();
 
                 /* One SVG sprite per page, containing only the icons it rendered. */
@@ -189,6 +190,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-cache-guard.php';
                 require_once HSW_DIR . 'includes/class-hsw-throttle.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet.php';
+                require_once HSW_DIR . 'includes/class-hsw-wallet-pay.php';
                 require_once HSW_DIR . 'includes/class-hsw-coupon-messages.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';

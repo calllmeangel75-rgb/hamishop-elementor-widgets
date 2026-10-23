@@ -452,8 +452,6 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                         <span class="hsw-psum__v" data-hswk="subtotal"><?php echo $this->money( (float) $t['subtotal'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                                 </div>
 
-                                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--pay' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
-
                                                 <?php if ( 0 < (float) $t['discount'] ) : ?>
                                                         <div class="hsw-psum__row is-discount">
                                                                 <span><?php echo esc_html( $this->opt( 'discount_label', '' ) ); ?></span>
@@ -482,6 +480,8 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                                 <?php endif; ?>
                                                         </span>
                                                 </div>
+
+                                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--pay' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
 
                                                 <div class="hsw-psum__final">
                                                         <span>

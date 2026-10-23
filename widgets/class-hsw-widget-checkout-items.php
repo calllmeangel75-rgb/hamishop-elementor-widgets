@@ -124,8 +124,6 @@ class HSW_Widget_Checkout_Items extends HSW_Checkout_Base {
                                                 </a>
                                         <?php endforeach; ?>
                                 </div>
-
-                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--checkout' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
                         </article>
 
                         <!-- =================== MOBILE =================== -->

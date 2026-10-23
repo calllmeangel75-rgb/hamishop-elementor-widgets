@@ -352,8 +352,18 @@ class HSW_Checkout_Rest {
                         $cart->remove_coupon( $remove );
                         $cart->calculate_totals();
                 } elseif ( '' !== $code ) {
+                        /*
+                         * `WC_Cart::is_coupon_valid()` does not exist — calling it threw
+                         * "Call to undefined method" and WordPress answered the REST
+                         * request with its generic "critical error" page, which is what
+                         * the customer saw after typing a wrong coupon on the pay step.
+                         *
+                         * The validator lives on WC_Discounts and takes a WC_Coupon.
+                         */
+                        $coupon    = new WC_Coupon( $code );
                         $discounts = new WC_Discounts( $cart );
-                        $valid     = $cart->is_coupon_valid( $code, $discounts );
+                        $valid     = $discounts->is_coupon_valid( $coupon );
+
                         if ( is_wp_error( $valid ) ) {
                                 return new WP_Error( 'hsw_bad_coupon', wp_strip_all_tags( $valid->get_error_message() ), array( 'status' => 400 ) );
                         }

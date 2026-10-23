@@ -499,6 +499,42 @@ final class HSW_Account_Admin {
 			</div>
 			<?php $this->textarea_field( $s, 'wallet', 'note', 'توضیح زیر موجودی', 'یک جملهٔ کوتاه برای مشتری.', true ); ?>
 
+			<h3 style="margin:22px 0 6px">روش شارژ</h3>
+			<p class="hsw-admin-desc">مشتری از صفحهٔ کیف پول، مبلغ را انتخاب می‌کند. در حالت «درگاه»، یک سفارش شارژ ساخته می‌شود و پرداخت با همان درگاهی انجام می‌شود که انتخاب می‌کنید؛ موجودی بلافاصله پس از پرداخت اضافه می‌شود. در حالت «کارت به کارت»، شمارهٔ کارت نمایش داده می‌شود و مشتری شمارهٔ پیگیری را ثبت می‌کند تا شما در <strong>HamiShop ← کیف پول</strong> تایید کنید.</p>
+			<?php
+			$topup_mode = $this->val( $s, 'wallet', 'topup_mode' );
+			$topup_mode = '' !== $topup_mode ? $topup_mode : 'gateway';
+			$gateways   = class_exists( 'HSW_Wallet_Topup' ) ? HSW_Wallet_Topup::gateways() : array();
+			?>
+			<div class="hsw-admin-grid">
+				<p>
+					<label for="hsw-wallet-topup-mode"><strong>روش شارژ</strong></label><br>
+					<select id="hsw-wallet-topup-mode" name="hsw_account[wallet][topup_mode]">
+						<option value="gateway" <?php selected( $topup_mode, 'gateway' ); ?>>درگاه پرداخت آنلاین</option>
+						<option value="card" <?php selected( $topup_mode, 'card' ); ?>>کارت به کارت</option>
+					</select>
+				</p>
+				<p>
+					<label for="hsw-wallet-topup-gateway"><strong>درگاه شارژ</strong></label><br>
+					<select id="hsw-wallet-topup-gateway" name="hsw_account[wallet][topup_gateway]">
+						<option value="">— خودکار (اولین درگاه فعال) —</option>
+						<?php foreach ( $gateways as $gid => $gtitle ) : ?>
+							<option value="<?php echo esc_attr( $gid ); ?>" <?php selected( $this->val( $s, 'wallet', 'topup_gateway' ), $gid ); ?>><?php echo esc_html( $gtitle ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<?php if ( ! $gateways ) : ?>
+						<br><small>هیچ درگاه پرداختی فعال نیست؛ در حالت «درگاه» دکمهٔ شارژ پیام خطا می‌دهد.</small>
+					<?php endif; ?>
+				</p>
+			</div>
+
+			<h3 style="margin:22px 0 6px">کارت به کارت</h3>
+			<div class="hsw-admin-grid">
+				<?php $this->text_field( $s, 'wallet', 'card_number', 'شماره کارت', 'با یا بدون خط تیره؛ روی صفحهٔ کیف پول نمایش داده می‌شود.' ); ?>
+				<?php $this->text_field( $s, 'wallet', 'card_owner', 'به نام', 'نام صاحب حساب.' ); ?>
+				<?php $this->text_field( $s, 'wallet', 'card_bank', 'بانک', 'مثلاً بانک ملت.' ); ?>
+			</div>
+
 			<h3 style="margin:22px 0 6px">پیامک شارژ</h3>
 			<p class="hsw-admin-desc">هنگام شارژ گروهی، به هر مشتری یک پیامک اطلاع‌رسانی فرستاده می‌شود. هر پنل پیامکی یا پل بله که یک <code>POST</code> با بدنهٔ <code>{"phone","text","secret"}</code> بپذیرد کار می‌کند؛ اگر آدرس را خالی بگذارید پیامکی ارسال نمی‌شود و شارژ انجام می‌شود.</p>
 			<div class="hsw-admin-grid">

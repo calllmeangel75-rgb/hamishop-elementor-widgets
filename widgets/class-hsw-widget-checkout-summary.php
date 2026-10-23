@@ -464,6 +464,15 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                         <span class="hsw-cksum__v" data-hswk="taxes"><?php echo $taxes_on ? $this->money( (float) $t['taxes'], true ) : '<span>' . esc_html( $this->opt( 'taxes_included', __( 'محاسبه در قیمت', 'hamishop-elementor-widgets' ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                                 </div>
 
+                                                <?php
+                                                /*
+                                                 * The saving belongs with the money rows, right above
+                                                 * "مبلغ قابل پرداخت" — it is the last thing the customer
+                                                 * reads before the amount, which is where it does its job.
+                                                 */
+                                                echo HSW_Helpers::savings_html( 'hsw-savings--cksum' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside.
+                                                ?>
+
                                                 <div class="hsw-cksum__final">
                                                         <span><?php echo esc_html( $this->opt( 'total_label', __( 'مبلغ قابل پرداخت:', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         <span class="hsw-cksum__total-v" data-hswk="total"><?php echo $this->money( (float) $t['total'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>

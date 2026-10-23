@@ -1358,6 +1358,37 @@
 		var form = event.target;
 		if (!form || !form.matches) { return; }
 
+		if (form.matches('[data-hsw-wallet-pay]')) {
+			event.preventDefault();
+			var amountField = form.querySelector('[name="amount"]');
+			var gatewayField = form.querySelector('[name="gateway"]');
+			var payload = { amount: toLatin(amountField ? amountField.value : '') };
+			if (gatewayField) { payload.gateway = gatewayField.value; }
+
+			var payBtn = form.querySelector('button[type="submit"]');
+			if (payBtn) { payBtn.disabled = true; }
+			var cfg0 = data();
+			fetch(cfg0.rest + '/account/wallet/pay', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg0.nonce || '' },
+				body: JSON.stringify(payload)
+			})
+				.then(function (r) { return r.json(); })
+				.then(function (json) {
+					if (!json || !json.ok || !json.redirect) {
+						throw new Error((json && json.message) || 'failed');
+					}
+					say(form, json.message || 'در حال انتقال…', 'ok');
+					window.location.href = json.redirect;
+				})
+				.catch(function (err) {
+					if (payBtn) { payBtn.disabled = false; }
+					say(form, (err && err.message) ? err.message : 'شارژ انجام نشد.', 'error');
+				});
+			return;
+		}
+
 		if (form.matches('[data-hsw-wallet-topup]')) {
 			event.preventDefault();
 			var amount = form.querySelector('[name="amount"]');

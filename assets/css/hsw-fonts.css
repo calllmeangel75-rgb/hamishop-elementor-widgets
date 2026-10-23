@@ -240,18 +240,24 @@ body.hsw-scroll-lock {
 	backdrop-filter: blur(2px);
 }
 
+/*
+ * Slimmer than the first version: 30rem read as a page, not a confirmation.
+ * 24rem with tighter padding still fits a two-line product name and the total.
+ */
 .hsw-modal__panel {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	width: min(30rem, 100%);
-	max-height: min(80vh, 40rem);
+	width: min(24rem, 100%);
+	max-height: min(72vh, 32rem);
 	background: var(--hsw-pal-surface, #fff);
-	border-radius: 18px;
-	box-shadow: 0 30px 70px -20px rgba(8, 15, 26, .45);
-	transform: translateY(12px) scale(.97);
+	border-radius: 14px;
+	box-shadow: 0 24px 50px -18px rgba(8, 15, 26, .4);
+	transform: translateY(10px) scale(.98);
 	transition: transform .22s ease;
 	overflow: hidden;
+	font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
+	font-size: 13px;
 }
 
 .hsw-modal.is-show .hsw-modal__panel {
@@ -262,15 +268,15 @@ body.hsw-scroll-lock {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
-	padding: 16px 18px;
+	gap: 10px;
+	padding: 12px 14px;
 	border-bottom: 1px solid var(--hsw-pal-border, #e6ebf2);
 }
 
 .hsw-modal__title {
 	margin: 0;
-	font-size: 15px;
-	font-weight: 800;
+	font-size: 13.5px;
+	font-weight: 700;
 	color: var(--hsw-on-surface, #0f172a);
 }
 
@@ -297,7 +303,7 @@ body.hsw-scroll-lock {
 }
 
 .hsw-modal__body {
-	padding: 16px 18px;
+	padding: 12px 14px;
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 }
@@ -324,8 +330,8 @@ body.hsw-scroll-lock {
 }
 
 .hsw-modal__body .woocommerce-mini-cart-item img {
-	width: 54px;
-	height: 54px;
+	width: 44px;
+	height: 44px;
 	object-fit: cover;
 	border-radius: 10px;
 	flex-shrink: 0;
@@ -348,10 +354,10 @@ body.hsw-scroll-lock {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin: 10px 0 0;
-	padding-top: 12px;
+	margin: 8px 0 0;
+	padding-top: 10px;
 	border-top: 1px solid var(--hsw-pal-border, #e6ebf2);
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 800;
 	color: var(--hsw-on-surface, #0f172a);
 }
@@ -363,8 +369,8 @@ body.hsw-scroll-lock {
 
 .hsw-modal__foot {
 	display: flex;
-	gap: 10px;
-	padding: 0 18px 18px;
+	gap: 8px;
+	padding: 0 14px 14px;
 }
 
 .hsw-modal__btn {
@@ -372,10 +378,11 @@ body.hsw-scroll-lock {
 	align-items: center;
 	justify-content: center;
 	flex: 1 1 0;
-	min-height: 46px;
-	padding: 0 16px;
-	border-radius: 12px;
-	font-size: 13.5px;
+	min-height: 40px;
+	padding: 0 12px;
+	border-radius: 10px;
+	font-family: inherit;
+	font-size: 12.5px;
 	font-weight: 700;
 	text-decoration: none;
 	transition: background-color .15s ease, color .15s ease, transform .15s ease;

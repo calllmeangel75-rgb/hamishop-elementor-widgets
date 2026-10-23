@@ -75,6 +75,14 @@
 			mirror.textContent = faNum( value );
 		}
 
+		/* At `min` the minus has nothing left to do; the bin removes the line. */
+		var minus = box.querySelector( '.hsw-c-qty__btn[data-dir="minus"]' );
+		if ( minus ) {
+			var floor = value <= min;
+			minus.disabled = floor;
+			minus.setAttribute( 'aria-disabled', floor ? 'true' : 'false' );
+		}
+
 		/* Editor preview: update the number, never submit. */
 		if ( isEditor ) {
 			event.preventDefault();
