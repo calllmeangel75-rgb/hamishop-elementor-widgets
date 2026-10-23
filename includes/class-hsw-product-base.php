@@ -227,7 +227,17 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         return array();
                 }
                 $attrs = $product->get_attributes();
-                if ( empty( $attrs[ $taxonomy ] ) || ! ( $attrs[ $taxonomy ] instanceof WC_Product_Attribute ) || ! $attrs[ $taxonomy ]->get_visible() ) {
+                if ( empty( $attrs[ $taxonomy ] ) || ! ( $attrs[ $taxonomy ] instanceof WC_Product_Attribute ) ) {
+                        return array();
+                }
+                /*
+                 * A variation attribute is an option the customer *must* pick, so
+                 * hiding it from the "additional information" table is not a
+                 * reason to drop the picker (that is how a colour picker
+                 * disappeared from products whose attributes were marked
+                 * "not visible on the product page").
+                 */
+                if ( ! $attrs[ $taxonomy ]->get_visible() && ! $attrs[ $taxonomy ]->get_variation() ) {
                         return array();
                 }
                 $terms = array();
@@ -239,17 +249,25 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                 'name'  => $term->name,
                                 'slug'  => $term->slug,
                                 'label' => $this->attribute_value_label( $taxonomy, $term->name ),
-                                'color' => $this->term_color( $term, $term->name ),
+                                'color' => $this->term_color( $term, $term->name, '' ),
                         );
                 }
                 if ( empty( $terms ) && $attrs[ $taxonomy ]->is_taxonomy() === false ) {
                         foreach ( $attrs[ $taxonomy ]->get_options() as $opt ) {
-                                $terms[] = array(
-                                        'name'  => $opt,
-                                        'slug'  => sanitize_title( $opt ),
-                                        'label' => $this->attribute_value_label( $taxonomy, $opt ),
-                                        'color' => $this->term_color( null, $opt ),
-                                );
+                                /* A custom attribute is often typed as «قرمز، مشکی». */
+                                $parts = preg_split( '/\s*[,،]\s*/u', (string) $opt );
+                                foreach ( is_array( $parts ) ? $parts : array( $opt ) as $part ) {
+                                        $part = trim( (string) $part );
+                                        if ( '' === $part ) {
+                                                continue;
+                                        }
+                                        $terms[] = array(
+                                                'name'  => $part,
+                                                'slug'  => sanitize_title( $part ),
+                                                'label' => $this->attribute_value_label( $taxonomy, $part ),
+                                                'color' => $this->term_color( null, $part, '' ),
+                                        );
+                                }
                         }
                 }
                 return $terms;
@@ -316,7 +334,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          * @param string       $name Term name fallback.
          * @return string CSS color (never empty).
          */
-        protected function term_color( $term, $name = '' ) {
+        protected function term_color( $term, $name = '', $fallback = '#cccccc' ) {
                 if ( $term instanceof WP_Term ) {
                         foreach ( array( 'color', 'product_attribute_color', 'swatch_color', 'color_hex', 'hex', '_color' ) as $meta_key ) {
                                 $raw = get_term_meta( $term->term_id, $meta_key, true );
@@ -338,7 +356,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         }
                 }
                 $color = $this->color_name_hex( $name ? $name : ( $term instanceof WP_Term ? $term->name : '' ) );
-                return '' !== $color ? $color : '#cccccc';
+                return '' !== $color ? $color : (string) $fallback;
         }
 
         /**
@@ -519,14 +537,26 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
 
         /**
          * Key/value rows from product attributes (specs tab/accordion).
+         *
+         * @param WC_Product|null $product      Product.
+         * @param bool            $skip_options Drop variation / colour attributes.
+         * @return array
          */
-        protected function specs_rows( $product ) {
+        protected function specs_rows( $product, $skip_options = false ) {
                 if ( ! $product ) {
                         return array();
                 }
                 $rows = array();
                 foreach ( $product->get_attributes() as $attribute ) {
                         if ( ! $attribute->get_visible() ) {
+                                continue;
+                        }
+                        /*
+                         * «ویژگی‌های شاخص کالا» must list specs, not the choices
+                         * of a picker: «محصول رنگ: قرمز، مشکی» is an option list
+                         * that already has its own swatches above the price.
+                         */
+                        if ( $skip_options && ( $attribute->get_variation() || $this->is_color_attribute( $attribute->get_name() ) ) ) {
                                 continue;
                         }
                         $label = $attribute->get_name();
@@ -556,7 +586,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          */
         protected function feature_rows( $product, $limit = 4 ) {
                 $rows = array();
-                foreach ( array_slice( $this->specs_rows( $product ), 0, $limit ) as $r ) {
+                foreach ( array_slice( $this->specs_rows( $product, true ), 0, $limit ) as $r ) {
                         $rows[] = array( 'k' => $r['k'], 'v' => $r['v'] );
                 }
                 if ( $rows ) {
@@ -626,11 +656,14 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         /**
          * Best-matching attribute name for a role (color / storage) in a pool.
          *
-         * @param array  $pool attr name => options.
-         * @param string $role 'color' | 'storage' | ''.
-         * @return string Attribute name or '' when the pool is empty.
+         * @param array  $pool        attr name => options.
+         * @param string $role        'color' | 'storage' | ''.
+         * @param bool   $allow_first Fall back to the first attribute when no
+         *                            name matches (only safe when the other
+         *                            role was already identified).
+         * @return string Attribute name or '' when nothing matches.
          */
-        protected function pick_attribute( array $pool, $role = '' ) {
+        protected function pick_attribute( array $pool, $role = '', $allow_first = true ) {
                 if ( ! $pool ) {
                         return '';
                 }
@@ -648,7 +681,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                 }
                         }
                 }
-                return (string) array_key_first( $pool );
+                return $allow_first ? (string) array_key_first( $pool ) : '';
         }
 
         /**

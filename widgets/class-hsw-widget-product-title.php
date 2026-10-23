@@ -97,6 +97,22 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                         )
                 );
 
+                /*
+                 * Stars are the product's real average rating (WooCommerce
+                 * reviews) — there is no "fake rating" field on purpose. What
+                 * the widget owns is whether the bar shows at all and how it
+                 * looks (colour + size below).
+                 */
+                $this->add_control(
+                        'show_rating',
+                        array(
+                                'label'       => __( 'نمایش ستاره و امتیاز', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SWITCHER,
+                                'default'     => 'yes',
+                                'description' => __( 'امتیاز از میانگین دیدگاه‌های واقعی ووکامرس خوانده می‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
                 $this->add_control(
                         'title_tag',
                         array(
@@ -152,6 +168,19 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                 'label'     => __( 'رنگ ستاره', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
                                 'selectors' => array( '{{WRAPPER}} .hsw-ptitle__star' => '--hsw-rate-star: {{VALUE}};' ),
+                        )
+                );
+                $this->add_responsive_control(
+                        'tt_star_size',
+                        array(
+                                'label'      => __( 'اندازه ستاره', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 10, 'max' => 32 ) ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-ptitle__star'              => 'font-size: {{SIZE}}{{UNIT}};',
+                                        '{{WRAPPER}} .hsw-ptitle__mscore .hsw-ic'   => 'font-size: {{SIZE}}{{UNIT}};',
+                                ),
                         )
                 );
                 $this->add_control(
@@ -234,7 +263,8 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                         }
                 }
 
-                $show_rec = ( '' !== (string) $rec && '0' !== (string) $rec && '۰' !== (string) $rec );
+                $show_rec    = ( '' !== (string) $rec && '0' !== (string) $rec && '۰' !== (string) $rec );
+                $show_rating = ! isset( $s['show_rating'] ) || 'yes' === $s['show_rating'];
 
                 $stock_text = $in_stock ? __( 'موجود در انبار', 'hamishop-elementor-widgets' ) : __( 'ناموجود', 'hamishop-elementor-widgets' );
                 ?>
@@ -249,6 +279,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                         <?php endif; ?>
                                 </div>
                                 <<?php echo esc_html( $tag ); ?> class="hsw-ptitle__h1"><?php echo esc_html( $name ); ?></<?php echo esc_html( $tag ); ?>>
+                                <?php if ( $show_rating ) : ?>
                                 <div class="hsw-ptitle__ratebar">
                                         <span class="hsw-ptitle__score">
                                                 <?php echo HSW_Helpers::icon( 'star', 'hsw-ptitle__star', true ); ?>
@@ -261,6 +292,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                                 <span class="hsw-ptitle__rec"><?php echo esc_html( $rec ); ?>٪ <?php esc_html_e( 'خریداران پیشنهاد کرده‌اند', 'hamishop-elementor-widgets' ); ?></span>
                                         <?php endif; ?>
                                 </div>
+                                <?php endif; ?>
                         </div>
                         <div class="hsw-m">
                                 <div class="hsw-ptitle__mrow">
@@ -271,11 +303,13 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                                         <span class="hsw-ptitle__stock is-oos" style="color:var(--hsw-secondary)"><i class="hsw-ptitle__pulse" aria-hidden="true"></i><?php echo esc_html( $stock_text ); ?></span>
                                                 <?php endif; ?>
                                         <?php endif; ?>
+                                        <?php if ( $show_rating ) : ?>
                                         <span class="hsw-ptitle__mscore">
                                                 <span class="hsw-ptitle__mcnt">(<?php echo esc_html( $reviews ); ?> <?php esc_html_e( 'نظر', 'hamishop-elementor-widgets' ); ?>)</span>
                                                 <b><?php echo esc_html( $rating ); ?></b>
                                                 <?php echo HSW_Helpers::icon( 'star', true ); ?>
                                         </span>
+                                        <?php endif; ?>
                                 </div>
                                 <h2 class="hsw-ptitle__h2"><?php echo esc_html( $name ); ?></h2>
                                 <?php if ( '' !== $name_en ) : ?>

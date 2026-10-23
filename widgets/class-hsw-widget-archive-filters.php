@@ -516,7 +516,8 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                         foreach ( $terms as $t ) {
                                 $rows[] = array(
                                         'name'  => $t->name,
-                                        'slug'  => $t->slug,
+                                        /* Decoded: see clean_param_value(). */
+                                        'slug'  => rawurldecode( $t->slug ),
                                         'count' => (int) $t->count,
                                         'hex'   => $is_color ? $this->term_color( $t, $map ) : '',
                                 );
@@ -1301,7 +1302,19 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                         'max_price'     => null,
                 );
                 foreach ( $taxes as $tax ) {
-                        $reset_changes[ 'filter_' . $tax ] = null;
+                        $reset_changes[ 'filter_' . $tax ]     = null;
+                        $reset_changes[ 'query_type_' . $tax ] = null;
+                }
+                /*
+                 * Also clear any filter that is in the URL but whose box is not
+                 * rendered on this page (empty attribute, box removed from the
+                 * template, a link shared by someone else…). Without this the
+                 * reset link kept that parameter and the archive stayed filtered.
+                 */
+                foreach ( array_keys( $this->current_params() ) as $param_key ) {
+                        if ( 0 === strpos( (string) $param_key, 'filter_' ) || 0 === strpos( (string) $param_key, 'query_type_' ) ) {
+                                $reset_changes[ $param_key ] = null;
+                        }
                 }
                 $reset = $this->filter_url( $reset_changes );
 
@@ -1337,7 +1350,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                         <div class="hsw-af__box hsw-af__box--head">
                                                 <div class="hsw-af__headrow">
                                                         <span class="hsw-af__headtitle"><?php echo HSW_Helpers::icon( 'tune', 'hsw-af__headic' ); ?><?php echo esc_html( $f_ttl ); ?></span>
-                                                        <a class="hsw-af__reset" href="<?php echo esc_url( $reset ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
+                                                        <a class="hsw-af__reset" href="<?php echo esc_url( $reset ); ?>" data-hsw-reset data-hsw-reset-url="<?php echo esc_url( $this->archive_url() ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
                                                 </div>
                                         </div>
 
@@ -1365,7 +1378,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                                 </div>
 
                                                 <div class="hsw-asheet__foot">
-                                                        <a class="hsw-af__clear" href="<?php echo esc_url( $reset ); ?>"><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
+                                                        <a class="hsw-af__clear" href="<?php echo esc_url( $reset ); ?>" data-hsw-reset data-hsw-reset-url="<?php echo esc_url( $this->archive_url() ); ?>"><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
                                                         <button type="submit" class="hsw-af__apply">
                                                                 <?php esc_html_e( 'اعمال فیلترها', 'hamishop-elementor-widgets' ); ?>
                                                                 <?php if ( $found ) : ?>

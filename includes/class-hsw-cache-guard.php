@@ -54,7 +54,7 @@ class HSW_Cache_Guard {
 	 * Mark the current request as uncacheable when it shows private data.
 	 */
 	public function maybe_disable_cache() {
-		if ( ! $this->is_private_view() ) {
+		if ( ! $this->is_private_view() && ! $this->is_filtered_archive() ) {
 			return;
 		}
 
@@ -76,6 +76,43 @@ class HSW_Cache_Guard {
 
 		/* LiteSpeed reads its own constant; harmless when the plugin is absent. */
 		do_action( 'litespeed_control_set_nocache', 'HamiShop: customer-specific screen' );
+	}
+
+	/**
+	 * Is this a filtered product archive?
+	 *
+	 * A cached copy of `/shop/` served for `/shop/?filter_pa_color=red` looks
+	 * exactly like a filter that "does nothing" — and the same happens when the
+	 * customer then clicks «حذف همه». Filtered archives are cheap to build and
+	 * different for every visitor, so they must never come from the page cache.
+	 *
+	 * @return bool
+	 */
+	private function is_filtered_archive() {
+		if ( empty( $_GET ) || ! is_array( $_GET ) ) {
+			return false;
+		}
+		if ( ! function_exists( 'is_shop' ) ) {
+			return false;
+		}
+		$is_archive = is_shop() || ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() );
+		if ( ! $is_archive ) {
+			return false;
+		}
+
+		$plain = array( 'instock', 'express', 'onsale', 'rating_filter', 'min_price', 'max_price', 'orderby', 'paged' );
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.
+		foreach ( array_keys( $_GET ) as $key ) {
+			if ( ! is_string( $key ) ) {
+				continue;
+			}
+			if ( 0 === strpos( $key, 'filter_' ) || 0 === strpos( $key, 'query_type_' ) || in_array( $key, $plain, true ) ) {
+				return true;
+			}
+		}
+		// phpcs:enable
+
+		return false;
 	}
 
 	/**

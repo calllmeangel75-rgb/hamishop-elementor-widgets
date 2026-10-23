@@ -64,6 +64,33 @@
                 document.querySelectorAll('.hsw-asheet.is-open, .hsw-agd__modal.is-open').forEach(closeSheet);
         });
 
+        /* ======================= FILTER RESET («حذف همه») ======================= */
+
+        /*
+         * The link already points at the unfiltered archive URL, but a page
+         * cache can hand back the filtered document for it. Clearing the form
+         * first means the next render starts from a clean state, and the
+         * explicit navigation ignores any stale href the browser restored from
+         * the bfcache.
+         */
+        document.addEventListener('click', function (e) {
+                var reset = e.target.closest('[data-hsw-reset]');
+                if (!reset) { return; }
+                e.preventDefault();
+
+                var form = reset.closest('.hsw-af__form');
+                if (form) {
+                        form.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+                        form.querySelectorAll('[data-hsw-taxinput]').forEach(function (inp) { inp.value = ''; });
+                        form.querySelectorAll('[data-hsw-tax].is-active').forEach(function (el) { el.classList.remove('is-active'); });
+                }
+
+                var url = reset.getAttribute('href') || reset.getAttribute('data-hsw-reset-url');
+                if (url) {
+                        window.location.assign(url);
+                }
+        });
+
         /* ======================= SEO DESCRIPTION TOGGLE ======================= */
 
         document.addEventListener('click', function (e) {

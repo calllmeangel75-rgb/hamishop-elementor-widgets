@@ -40,6 +40,7 @@
          * `a:hover` rule decided (black on one button, white on the next).
          */
         --hswc-cta: var(--hsw-cta, #0f2042);
+        --hswc-cta-active: var(--hsw-cta-active, #0a1730);
         --hswc-cta-hover: var(--hsw-cta-hover, #1c3566);
         --hswc-on-cta: var(--hsw-on-cta, #ffffff);
         --hswc-on-btn2: #7389b0;        /* on-primary-container */
@@ -651,3 +652,16 @@
 .hsw-c-empty__btn:hover,
 .hsw-c-empty__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
 .hsw-c-empty__btn .hsw-ic { font-size: 1.25rem; }
+
+/* Purchase CTA states (see the checkout stylesheet for the palette chain). */
+.hsw-c .hsw-csummary__cta:hover,
+.hsw-c .hsw-csummary__mcta:hover,
+.hsw-c .hsw-c-empty__btn:hover {
+        background: var(--hswc-cta-hover);
+}
+
+.hsw-c .hsw-csummary__cta:active,
+.hsw-c .hsw-csummary__mcta:active,
+.hsw-c .hsw-c-empty__btn:active {
+        background: var(--hswc-cta-active);
+}

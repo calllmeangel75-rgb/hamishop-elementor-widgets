@@ -276,9 +276,9 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                         </button>
                                 <?php endif; ?>
 
-                                <div class="hsw-pgal__frame">
+                                <button type="button" class="hsw-pgal__frame" data-hsw-zoom aria-label="<?php esc_attr_e( 'بزرگ‌نمایی تصویر', 'hamishop-elementor-widgets' ); ?>">
                                         <img class="hsw-pgal__img skip-lazy" src="<?php echo esc_url( $images[0] ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="eager" fetchpriority="high" data-no-lazy="1" decoding="async">
-                                </div>
+                                </button>
 
                                 <?php if ( count( $images ) > 1 ) : ?>
                                         <div class="hsw-pgal__thumbs hsw-d">

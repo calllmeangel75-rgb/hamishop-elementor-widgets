@@ -151,7 +151,26 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
         protected function clean_param_value( $value, $key = '' ) {
                 $value = (string) $value;
                 if ( 0 === strpos( (string) $key, 'filter_' ) ) {
-                        $parts = array_filter( array_map( 'sanitize_title', explode( ',', $value ) ), 'strlen' );
+                        /*
+                         * `sanitize_title()` percent-encodes non-ASCII slugs
+                         * ("رم-4" → "%d8%b1%d9%85-4"). Keeping that form in memory
+                         * meant the browser encoded the % signs again on submit
+                         * ("%25d8…"), WooCommerce compared it against the term
+                         * slug, found nothing, and the filter silently did
+                         * nothing — which is why "حذف همه" looked broken: the
+                         * page never changed in the first place.
+                         *
+                         * Everything downstream (row slugs, checkboxes, chips,
+                         * filter_url) now uses the decoded UTF-8 slug and lets
+                         * the URL layer encode exactly once.
+                         */
+                        $parts = array();
+                        foreach ( explode( ',', $value ) as $part ) {
+                                $part = rawurldecode( sanitize_title( $part ) );
+                                if ( '' !== $part ) {
+                                        $parts[] = $part;
+                                }
+                        }
                         return implode( ',', array_unique( $parts ) );
                 }
                 return sanitize_text_field( $value );
@@ -174,7 +193,16 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
                 }
                 $url = $this->archive_url();
                 if ( ! empty( $params ) ) {
-                        $url = add_query_arg( array_map( 'rawurlencode', $params ), $url );
+                        /*
+                         * Let WordPress do the encoding. `add_query_arg()` runs
+                         * every value through `urlencode_deep()` exactly once,
+                         * so pre-encoding here produced `%25d8…` for a slug that
+                         * was already `%d8…` — WooCommerce then compared a
+                         * double-encoded string with the term slug, matched
+                         * nothing, and the link looked dead (this is what made
+                         * «حذف همه» and the chip «×» appear to do nothing).
+                         */
+                        $url = add_query_arg( $params, $url );
                 }
                 return $url;
         }

@@ -915,6 +915,21 @@ final class HSW_Account_Support {
 		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-subject">' . esc_html__( 'موضوع تیکت', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label>';
 		$html .= '<input type="text" id="hsw-ac-t-subject" name="subject" maxlength="120" required value="' . esc_attr( $subject ) . '" placeholder="' . esc_attr__( 'موضوع تیکتو بنویس…', 'hamishop-elementor-widgets' ) . '"></div>';
 
+		/*
+		 * Department: the list the shop owner maintains in HamiShop → حساب کاربری →
+		 * پشتیبانی. It never reached the modal before, so every ticket silently
+		 * landed in the first department.
+		 */
+		$departments = array_values( array_filter( array_map( 'trim', (array) $this->account->setting( 'support.departments', array() ) ) ) );
+		if ( count( $departments ) > 1 ) {
+			$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-department">' . esc_html__( 'دپارتمان', 'hamishop-elementor-widgets' ) . '</label>';
+			$html .= '<select id="hsw-ac-t-department" name="department">';
+			foreach ( $departments as $dlabel ) {
+				$html .= '<option value="' . esc_attr( $dlabel ) . '">' . esc_html( $dlabel ) . '</option>';
+			}
+			$html .= '</select></div>';
+		}
+
 		/* Priority used to be forced to the default behind the customer's back. */
 		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-priority">' . esc_html__( 'اولویت', 'hamishop-elementor-widgets' ) . '</label>';
 		$html .= '<select id="hsw-ac-t-priority" name="priority">';
@@ -1074,9 +1089,14 @@ final class HSW_Account_Support {
 			$fail( __( 'حد مجاز گفتگوهای باز تکمیل است. یکی را ببندید و دوباره تلاش کنید.', 'hamishop-elementor-widgets' ), 409 );
 		}
 
-		$departments = (array) $this->account->setting( 'support.departments', array() );
+		$departments = array_values( array_filter( array_map( 'trim', (array) $this->account->setting( 'support.departments', array() ) ) ) );
 		$priorities  = (array) $this->account->setting( 'support.priorities', array() );
-		$dept        = $departments ? (string) reset( $departments ) : 'پشتیبانی';
+
+		/* Whatever the customer picked in the modal, validated against the list. */
+		$dept = isset( $_POST['department'] ) ? sanitize_text_field( wp_unslash( $_POST['department'] ) ) : '';
+		if ( ! in_array( $dept, $departments, true ) ) {
+			$dept = $departments ? (string) reset( $departments ) : 'پشتیبانی';
+		}
 
 		/* The customer picks the priority in the modal; anything unknown falls back. */
 		$priority = isset( $_POST['priority'] ) ? sanitize_key( wp_unslash( $_POST['priority'] ) ) : '';

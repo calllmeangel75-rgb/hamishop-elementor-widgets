@@ -416,7 +416,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	top: 50%;
 	transform: translateY(-50%);
 	z-index: 1;
-	color: var(--hsw-hd-muted);
+	color: var(--hsw-hd-icon, var(--hsw-hd-muted, #64748b));
 	font-size: 19px;
 	pointer-events: none;
 }
@@ -523,7 +523,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	border: 1px solid var(--hsw-hd-border);
 	border-radius: 50%;
 	background: var(--hsw-hd-bg);
-	color: var(--hsw-hd-text);
+	color: var(--hsw-hd-icon, var(--hsw-hd-text, #0f172a));
 	transition: color .15s, border-color .15s, background-color .15s;
 }
 

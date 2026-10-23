@@ -133,11 +133,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 0;
+        border: 1px solid var(--hsw-pal-border, #e6ebf2);
         border-radius: 8px;
-        background: rgba(255, 255, 255, .8);
+        background: rgba(255, 255, 255, .92);
         backdrop-filter: blur(4px);
-        color: var(--hsw-zoom-c, var(--hsw-on-surface-variant));
+        color: var(--hsw-zoom-c, var(--hsw-on-surface-variant, #334155));
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         transition: color .15s, background-color .15s;
 }
@@ -150,7 +150,10 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        padding: 0;
+        border: 0;
         border-radius: 8px;
+        cursor: zoom-in;
         background: var(--hsw-gal-frame-bg, var(--hsw-surface-bright));
 }
 .hsw-pgal__img {
@@ -160,7 +163,8 @@
         padding: 12px;
         transition: transform .3s;
 }
-.hsw-pgal__card:hover .hsw-pgal__img { transform: scale(1.05); }
+/* Gallery images keep their colour on hover: the only feedback is the
+   cursor, and a click opens the lightbox. */
 /* thumbnails (desktop) */
 .hsw-pgal__thumbs {
         display: flex;
@@ -184,7 +188,6 @@
         transition: opacity .15s, box-shadow .15s;
 }
 .hsw-pgal__thumb img { width: 100%; height: 100%; object-fit: contain; }
-.hsw-pgal__thumb:hover { opacity: .9; }
 .hsw-pgal__thumb.is-active { box-shadow: 0 0 0 2px var(--hsw-primary); }
 /* mobile badges + dots */
 .hsw-pgal__mbadges {
@@ -386,6 +389,25 @@
 .hsw-pvar__swdot { display: block; width: 100%; height: 100%; border-radius: 9999px; background: var(--sw, #ccc); box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .06); }
 .hsw-pvar__swatch:not(.is-active):hover { transform: scale(1.05); }
 .hsw-pvar__swatch.is-active { box-shadow: 0 0 0 2px var(--hsw-var-ring, var(--hsw-primary)), 0 0 0 4px var(--hsw-surface-lowest); }
+/* No swatch colour on file → show the option name, never a meaningless grey dot. */
+.hsw-pvar__swatch--named,
+.hsw-pvar__mswatch--named {
+        width: auto;
+        min-width: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--hsw-chip-bc, var(--hsw-outline-variant));
+        background: var(--hsw-chip-bg, var(--hsw-surface-lowest));
+}
+.hsw-pvar__mswatch--named { min-width: 40px; height: 40px; }
+.hsw-pvar__swname {
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+        white-space: nowrap;
+        color: var(--hsw-chip-c, var(--hsw-on-surface-variant));
+}
+.hsw-pvar__swatch--named.is-active .hsw-pvar__swname,
+.hsw-pvar__mswatch--named.is-active .hsw-pvar__swname { color: var(--hsw-chip-ac, var(--hsw-primary)); }
 .hsw-pvar__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .hsw-pvar__chip {
         padding: 6px 14px;
@@ -614,16 +636,28 @@
         height: 48px;
         border: 0;
         border-radius: 8px;
-        background: var(--hsw-cart-bg, var(--hsw-primary-container));
-        color: var(--hsw-cart-c, var(--hsw-on-primary));
+        /*
+         * One colour for every purchase CTA: product → cart → checkout → pay.
+         * A widget-level colour still wins through --hsw-cart-bg, and its
+         * hover/active tints are generated next to it by the Elementor control.
+         */
+        background: var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container)));
+        color: var(--hsw-cart-c, var(--hsw-on-cta, var(--hsw-on-primary)));
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         font-size: 16px;
         line-height: 26px;
         font-weight: 600;
         transition: all .15s, opacity .15s, background-color .15s;
 }
-.hsw-ppurch__cart:hover { opacity: .95; }
-.hsw-ppurch__cart:active { transform: scale(.99); }
+.hsw-ppurch__cart:hover {
+        background: var(--hsw-cart-bg-hover, var(--hsw-cta-hover, var(--hsw-cta, var(--hsw-primary-container))));
+        opacity: 1;
+}
+
+.hsw-ppurch__cart:active {
+        background: var(--hsw-cart-bg-active, var(--hsw-cta-active, var(--hsw-cta, var(--hsw-primary-container))));
+        transform: scale(.99);
+}
 .hsw-ppurch__cart .hsw-ic { font-size: 22px !important; }
 .hsw-ppurch__cart.is-added { background: var(--hsw-emerald); color: #fff; }
 .hsw-ppurch__assure {

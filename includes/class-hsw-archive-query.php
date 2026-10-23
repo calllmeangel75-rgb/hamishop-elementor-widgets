@@ -239,11 +239,88 @@ class HSW_Archive_Query {
                         }
                 }
 
+                /*
+                 * Attribute filters (`filter_pa_*`).
+                 *
+                 * WooCommerce turns these into a tax query only for taxonomies
+                 * that exist in its own attribute table. A store that created
+                 * its attributes another way — or with a non-ASCII name such as
+                 * `pa_رنگ` — got a sidebar that ticked the box, highlighted the
+                 * chip, and still listed every product. Adding the missing tax
+                 * query here makes the filter real; taxonomies WooCommerce
+                 * already handled are skipped so nothing is applied twice.
+                 */
+                $extra_tax = $this->attribute_filter_tax_query( $q );
+                if ( $extra_tax ) {
+                        $tax = $q->get( 'tax_query' );
+                        $tax = is_array( $tax ) ? $tax : array();
+                        $q->set( 'tax_query', array_merge( $tax, $extra_tax ) );
+                }
+
                 if ( 'discount' === $orderby ) {
                         $q->set( 'hsw_orderby_discount', true );
                         add_filter( 'posts_join', array( $this, 'discount_join' ), 10, 2 );
                         add_filter( 'posts_orderby', array( $this, 'discount_orderby' ), 10, 2 );
                 }
+        }
+
+        /**
+         * Build a tax query for `filter_*` params WooCommerce left alone.
+         *
+         * Values are normalised with `sanitize_title()`, which keeps existing
+         * `%d8%b3…` octets and encodes plain UTF-8, so both URL spellings match
+         * the term slug stored in the database.
+         *
+         * @param WP_Query $q Main archive query.
+         * @return array Tax query rows (possibly empty).
+         */
+        private function attribute_filter_tax_query( $q ) {
+                if ( empty( $_GET ) || ! is_array( $_GET ) ) {
+                        return array();
+                }
+
+                $existing = $q->get( 'tax_query' );
+                $existing = is_array( $existing ) ? $existing : array();
+                $handled  = array();
+                foreach ( $existing as $row ) {
+                        if ( is_array( $row ) && ! empty( $row['taxonomy'] ) ) {
+                                $handled[ (string) $row['taxonomy'] ] = true;
+                        }
+                }
+
+                $out = array();
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.
+                foreach ( $_GET as $key => $value ) {
+                        if ( ! is_string( $key ) || 0 !== strpos( $key, 'filter_' ) ) {
+                                continue;
+                        }
+                        $taxonomy = substr( $key, 7 );
+                        if ( '' === $taxonomy || ! taxonomy_exists( $taxonomy ) || isset( $handled[ $taxonomy ] ) ) {
+                                continue;
+                        }
+
+                        $terms = is_array( $value ) ? $value : explode( ',', (string) $value );
+                        $terms = array_map( 'strval', $terms );
+                        $terms = array_map( 'wp_unslash', $terms );
+                        $terms = array_map( 'sanitize_title', $terms );
+                        $terms = array_values( array_unique( array_filter( $terms, 'strlen' ) ) );
+                        if ( empty( $terms ) ) {
+                                continue;
+                        }
+
+                        $query_type = isset( $_GET[ 'query_type_' . $taxonomy ] ) ? sanitize_key( wp_unslash( $_GET[ 'query_type_' . $taxonomy ] ) ) : 'and';
+
+                        $out[] = array(
+                                'taxonomy'         => $taxonomy,
+                                'field'            => 'slug',
+                                'terms'            => $terms,
+                                'operator'         => 'or' === $query_type ? 'IN' : 'AND',
+                                'include_children' => false,
+                        );
+                }
+                // phpcs:enable
+
+                return $out;
         }
 
         /**

@@ -242,6 +242,12 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $lbl_storage_d = ( isset( $s['label_storage_d'] ) && '' !== trim( (string) $s['label_storage_d'] ) ) ? $s['label_storage_d'] : __( 'حافظه داخلی و رم:', 'hamishop-elementor-widgets' );
                 $lbl_storage_m = ( isset( $s['label_storage_m'] ) && '' !== trim( (string) $s['label_storage_m'] ) ) ? $s['label_storage_m'] : __( 'حافظه داخلی:', 'hamishop-elementor-widgets' );
 
+                /* Remember what the editor asked for, so an auto-detected
+                   attribute can borrow its own label instead of being called
+                   «رنگ» or «حافظه» when it is actually «سایز». */
+                $asked_color   = $attr_color;
+                $asked_storage = $attr_storage;
+
                 /* Colors: real product attribute terms; color hex from the repeater map. */
                 $color_map = array();
                 if ( ! empty( $s['color_map'] ) && is_array( $s['color_map'] ) ) {
@@ -262,7 +268,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         'label' => isset( $term['label'] ) && '' !== $term['label'] ? $term['label'] : $term['name'],
                                         'hex'   => isset( $color_map[ $term['name'] ] )
                                                 ? $color_map[ $term['name'] ]
-                                                : ( isset( $term['label'], $color_map[ $term['label'] ] ) ? $color_map[ $term['label'] ] : ( ! empty( $term['color'] ) ? $term['color'] : '#cccccc' ) ),
+                                                : ( isset( $term['label'], $color_map[ $term['label'] ] ) ? $color_map[ $term['label'] ] : ( ! empty( $term['color'] ) ? $term['color'] : '' ) ),
                                 );
                         }
                 }
@@ -279,36 +285,69 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                         $colors   = $d['colors'];
                         $storages = $d['storages'];
                 } elseif ( $product && $product->is_type( 'variable' ) ) {
-                        /* Auto-detect the product's own variation attributes when the
-                           configured slugs don't exist on this particular product —
-                           each product page then shows its own real options. */
+                        /*
+                         * Auto-detect the product's own variation attributes when
+                         * the configured slugs don't exist on this particular
+                         * product. The old code grabbed the *first* attribute for
+                         * the colour role, so a product whose only option was
+                         * «سایز» rendered grey colour dots that meant nothing.
+                         * Only an attribute that is actually about colour can
+                         * become the colour picker now.
+                         */
                         $pool = $this->auto_variation_attributes( $product );
                         unset( $pool[ $attr_color ], $pool[ $attr_storage ] );
 
                         if ( empty( $colors ) && $pool ) {
-                                $attr_color = $this->pick_attribute( $pool, 'color' );
-                                unset( $pool[ $attr_color ] );
-                                foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
-                                        $colors[] = array(
-                                                'name'  => $term['name'],
-                                                'label' => isset( $term['label'] ) && '' !== $term['label'] ? $term['label'] : $term['name'],
-                                                'hex'   => isset( $color_map[ $term['name'] ] )
-                                                        ? $color_map[ $term['name'] ]
-                                                        : ( isset( $term['label'], $color_map[ $term['label'] ] ) ? $color_map[ $term['label'] ] : ( ! empty( $term['color'] ) ? $term['color'] : '#cccccc' ) ),
-                                        );
+                                $candidate = $this->pick_attribute( $pool, 'color', false );
+                                if ( '' !== $candidate ) {
+                                        $attr_color = $candidate;
+                                        unset( $pool[ $candidate ] );
+                                        foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
+                                                $colors[] = array(
+                                                        'name'  => $term['name'],
+                                                        'label' => isset( $term['label'] ) && '' !== $term['label'] ? $term['label'] : $term['name'],
+                                                        'hex'   => isset( $color_map[ $term['name'] ] )
+                                                                ? $color_map[ $term['name'] ]
+                                                                : ( isset( $term['label'], $color_map[ $term['label'] ] ) ? $color_map[ $term['label'] ] : ( ! empty( $term['color'] ) ? $term['color'] : '' ) ),
+                                                );
+                                        }
                                 }
                         }
                         if ( empty( $storages ) && $pool ) {
-                                $attr_storage = $this->pick_attribute( $pool, 'storage' );
-                                unset( $pool[ $attr_storage ] );
-                                foreach ( $this->attribute_terms( $product, $attr_storage ) as $term ) {
-                                        $storages[] = $term['name'];
+                                /* The leftover attribute is only assumed to be the
+                                   second dimension when a colour was identified. */
+                                $candidate = $this->pick_attribute( $pool, 'storage', ! empty( $colors ) );
+                                if ( '' !== $candidate ) {
+                                        $attr_storage = $candidate;
+                                        unset( $pool[ $attr_storage ] );
+                                        foreach ( $this->attribute_terms( $product, $attr_storage ) as $term ) {
+                                                $storages[] = $term['name'];
+                                        }
                                 }
                         }
                 }
 
                 if ( empty( $colors ) && empty( $storages ) ) {
                         return; // No real options on this product — render nothing (never fake data).
+                }
+
+                /*
+                 * An auto-detected attribute is not the one the editor named, so
+                 * it must not borrow that label («سایز» is not «حافظه داخلی و رم»).
+                 */
+                if ( $product && $attr_color !== $asked_color ) {
+                        $tax = get_taxonomy( $attr_color );
+                        if ( $tax && ! empty( $tax->labels->name ) ) {
+                                $lbl_color_d = $tax->labels->name . ':';
+                                $lbl_color_m = $tax->labels->name . ':';
+                        }
+                }
+                if ( $product && $attr_storage !== $asked_storage ) {
+                        $tax = get_taxonomy( $attr_storage );
+                        if ( $tax && ! empty( $tax->labels->name ) ) {
+                                $lbl_storage_d = $tax->labels->name . ':';
+                                $lbl_storage_m = $tax->labels->name . ':';
+                        }
                 }
 
                 $first_color   = ! empty( $colors[0]['label'] ) ? $colors[0]['label'] : ( ! empty( $colors[0]['name'] ) ? $colors[0]['name'] : '' );
@@ -329,7 +368,8 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         </div>
                                         <div class="hsw-pvar__swatches">
                                                 <?php foreach ( $colors as $i => $c ) : ?>
-                                                        <button type="button" class="hsw-pvar__swatch<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" data-hsw-label="<?php echo esc_attr( $c['label'] ); ?>" style="--sw:<?php echo esc_attr( $c['hex'] ); ?>" aria-label="<?php echo esc_attr( $c['label'] ); ?>"><span class="hsw-pvar__swdot"></span></button>
+                                                        <?php $hex = isset( $c['hex'] ) ? (string) $c['hex'] : ''; ?>
+                                                        <button type="button" class="hsw-pvar__swatch<?php echo 0 === $i ? ' is-active' : ''; ?><?php echo '' === $hex ? ' hsw-pvar__swatch--named' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" data-hsw-label="<?php echo esc_attr( $c['label'] ); ?>"<?php echo '' !== $hex ? ' style="--sw:' . esc_attr( $hex ) . '"' : ''; ?> aria-label="<?php echo esc_attr( $c['label'] ); ?>"><?php if ( '' !== $hex ) : ?><span class="hsw-pvar__swdot"></span><?php else : ?><span class="hsw-pvar__swname"><?php echo esc_html( $c['label'] ); ?></span><?php endif; ?></button>
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>
@@ -354,7 +394,8 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                         </div>
                                         <div class="hsw-pvar__swatches">
                                                 <?php foreach ( $colors as $i => $c ) : ?>
-                                                        <button type="button" class="hsw-pvar__mswatch<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" data-hsw-label="<?php echo esc_attr( $c['label'] ); ?>" style="--sw:<?php echo esc_attr( $c['hex'] ); ?>" aria-label="<?php echo esc_attr( $c['label'] ); ?>"><span class="hsw-pvar__swdot"></span></button>
+                                                        <?php $hex = isset( $c['hex'] ) ? (string) $c['hex'] : ''; ?>
+                                                        <button type="button" class="hsw-pvar__mswatch<?php echo 0 === $i ? ' is-active' : ''; ?><?php echo '' === $hex ? ' hsw-pvar__mswatch--named' : ''; ?>" data-hsw-color="<?php echo esc_attr( $c['name'] ); ?>" data-hsw-label="<?php echo esc_attr( $c['label'] ); ?>"<?php echo '' !== $hex ? ' style="--sw:' . esc_attr( $hex ) . '"' : ''; ?> aria-label="<?php echo esc_attr( $c['label'] ); ?>"><?php if ( '' !== $hex ) : ?><span class="hsw-pvar__swdot"></span><?php else : ?><span class="hsw-pvar__swname"><?php echo esc_html( $c['label'] ); ?></span><?php endif; ?></button>
                                                 <?php endforeach; ?>
                                         </div>
                                 </div>

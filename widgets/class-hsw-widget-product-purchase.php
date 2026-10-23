@@ -210,9 +210,12 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 $this->add_control(
                         'pp_cart_bgc',
                         array(
-                                'label'     => __( 'پس‌زمینه دکمه سبد', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}}' => '--hsw-cart-bg: {{VALUE}};' ),
+                                'label'       => __( 'پس‌زمینه دکمه سبد', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::COLOR,
+                                'description' => __( 'خالی = همان رنگ «CTA مراحل خرید» از پالت. اگر رنگ جدا انتخاب کنید، حالت‌های هاور و کلیک هم از همان رنگ ساخته می‌شوند.', 'hamishop-elementor-widgets' ),
+                                'selectors'   => array(
+                                        '{{WRAPPER}}' => '--hsw-cart-bg: {{VALUE}}; --hsw-cart-bg-hover: color-mix(in srgb, {{VALUE}} 86%, #000); --hsw-cart-bg-active: color-mix(in srgb, {{VALUE}} 74%, #000);',
+                                ),
                         )
                 );
                 $this->add_control(

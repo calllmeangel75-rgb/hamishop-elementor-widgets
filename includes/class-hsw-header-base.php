@@ -1076,6 +1076,23 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		/*
+		 * Icons used to follow the text colour, which on a dark or transparent
+		 * header made the magnifier vanish. One control owns every header icon
+		 * (search, account, cart, menu) and falls back to the text colour.
+		 */
+		$this->add_control(
+			'icon_color',
+			array(
+				'label'       => __( 'رنگ آیکون‌ها', 'hamishop-elementor-widgets' ),
+				'description' => __( 'جستجو، حساب کاربری، سبد خرید و منو. خالی = همان رنگ متن هدر.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-icon: {{VALUE}};',
+				),
+			)
+		);
+
 		$this->add_control(
 			'border_color',
 			array(

@@ -46,6 +46,7 @@
          */
         --hswk-cta: var(--hsw-cta, #0f2042);
         --hswk-cta-hover: var(--hsw-cta-hover, #1c3566);
+        --hswk-cta-active: var(--hsw-cta-active, #0a1730);
         --hswk-on-cta: var(--hsw-on-cta, #ffffff);
         --hswk-accent2: #b5260b;    /* secondary */
         --hswk-accentbg: #ffdad3;   /* secondary-fixed */
@@ -1836,4 +1837,24 @@ select.hsw-ckaddr__fi {
 	.hsw-ckaddr__frow {
 		grid-template-columns: minmax(0, 1fr);
 	}
+}
+
+/* -------------------------------------------------------------------------
+ * Purchase CTA states — one palette source for cart → checkout → pay
+ * (HamiShop → پالت رنگی → «CTA مراحل خرید» / هاور / کلیک).
+ * ---------------------------------------------------------------------- */
+.hsw-cksum__cta:hover,
+.hsw-cksum__cta--m:hover,
+.hsw-psum__cta:hover,
+.hsw-psum__cta--m:hover,
+.hsw-k-pay:hover {
+        background: var(--hswk-cta-hover);
+}
+
+.hsw-cksum__cta:active,
+.hsw-cksum__cta--m:active,
+.hsw-psum__cta:active,
+.hsw-psum__cta--m:active,
+.hsw-k-pay:active {
+        background: var(--hswk-cta-active);
 }

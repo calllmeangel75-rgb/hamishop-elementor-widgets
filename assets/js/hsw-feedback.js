@@ -328,6 +328,118 @@
 		toastTimer = setTimeout(closeToast, 5000);
 	}
 
+	/* ---------- cart summary ---------- */
+
+	/*
+	 * The dialog used to inject the theme's whole mini-cart. Woodmart (and a
+	 * few other themes) ship their own classes and buttons, so inside a 420px
+	 * dialog the thumbnail filled the width and the theme's own «مشاهده سبد
+	 * خرید / تسویه حساب» stacked on top of ours. We now read the fragment and
+	 * print a compact list of our own — image, name, quantity, price — so the
+	 * dialog looks the same on every theme.
+	 */
+	function cartItems(html) {
+		if (!html) { return []; }
+		var doc;
+		try {
+			doc = new DOMParser().parseFromString(html, 'text/html');
+		} catch (err) {
+			return [];
+		}
+		var nodes = doc.querySelectorAll('.woocommerce-mini-cart-item, li[data-key], .wd-cart-item, .mini-cart-item');
+		var out = [];
+		nodes.forEach(function (node) {
+			var img = node.querySelector('img');
+			/*
+			 * The first link in a mini-cart row is usually the «×» remove
+			 * button, so pick the link that actually carries text.
+			 */
+			var links = Array.prototype.slice.call(node.querySelectorAll('a[href]')).filter(function (a) {
+				return !a.classList.contains('remove') && !a.classList.contains('wd-cart-remove');
+			});
+			links.sort(function (a, b) {
+				return (b.textContent || '').trim().length - (a.textContent || '').trim().length;
+			});
+			var link = links[0] || null;
+			var title = link ? (link.textContent || '').trim() : '';
+			if (!title) {
+				var nameEl = node.querySelector('.product-name, [class*="product-name"], [class*="item-name"]');
+				title = nameEl ? (nameEl.textContent || '').trim() : '';
+			}
+			if (!title) {
+				var clone = node.cloneNode(true);
+				clone.querySelectorAll('.amount, .quantity, .remove, del, ins').forEach(function (n) {
+					if (n.parentNode) { n.parentNode.removeChild(n); }
+				});
+				title = (clone.textContent || '').replace(/[×✕]/g, ' ').replace(/\s+/g, ' ').trim();
+			}
+			if (!title) { return; }
+
+			var qtyEl = node.querySelector('.quantity, [class*="quantity"], [class*="qty"]');
+			var qty = qtyEl ? (qtyEl.textContent || '').replace(/\s+/g, ' ').trim() : '';
+			var priceEls = node.querySelectorAll('.amount, [class*="price"]');
+			var price = priceEls.length ? (priceEls[priceEls.length - 1].textContent || '').replace(/\s+/g, ' ').trim() : '';
+
+			out.push({
+				img: img ? (img.getAttribute('src') || '') : '',
+				title: title,
+				qty: qty,
+				price: price,
+				url: link ? link.getAttribute('href') : ''
+			});
+		});
+		return out;
+	}
+
+	function cartSummary(items, total, fallbackName) {
+		var wrap = el('div', 'hsw-cartlist');
+		var list = el('ul', 'hsw-cartlist__items');
+
+		if (!items.length && fallbackName) {
+			items = [{ img: '', title: fallbackName, qty: '', price: '', url: '' }];
+		}
+
+		items.forEach(function (item) {
+			var row = el('li', 'hsw-cartlist__item');
+			if (item.img) {
+				var im = el('img', 'hsw-cartlist__img');
+				im.src = item.img;
+				im.alt = '';
+				im.loading = 'lazy';
+				row.appendChild(im);
+			}
+			var body = el('div', 'hsw-cartlist__body');
+			var name = el('a', 'hsw-cartlist__name', { href: item.url || '#' });
+			name.textContent = item.title;
+			body.appendChild(name);
+
+			var meta = [item.qty, item.price].filter(Boolean).join(' — ');
+			if (meta) {
+				var line = el('span', 'hsw-cartlist__meta');
+				line.textContent = meta;
+				body.appendChild(line);
+			}
+
+			row.appendChild(body);
+			list.appendChild(row);
+		});
+
+		wrap.appendChild(list);
+
+		if (total) {
+			var foot = el('div', 'hsw-cartlist__total');
+			var label = el('span', 'hsw-cartlist__totallabel');
+			label.textContent = 'جمع سبد خرید';
+			var value = el('span', 'hsw-cartlist__totalvalue');
+			value.textContent = total;
+			foot.appendChild(label);
+			foot.appendChild(value);
+			wrap.appendChild(foot);
+		}
+
+		return wrap.outerHTML;
+	}
+
 	function addedToCart(payload) {
 		payload = payload || {};
 
@@ -343,7 +455,7 @@
 		if (html) {
 			modal({
 				title: cfg.modalTitle || 'به سبد خرید اضافه شد',
-				html: html,
+				html: cartSummary(cartItems(html), fragmentTotal(html), payload.productName || ''),
 				closeLabel: cfg.close || 'بستن',
 				actions: [
 					{ label: cfg.viewCart || 'مشاهده سبد خرید', url: payload.cartUrl || '/cart/', primary: true },
