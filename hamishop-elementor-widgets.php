@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک و بهینه برای Lighthouse 100.
- * Version:     1.11.24
+ * Version:     1.11.25
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -43,7 +43,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.24' );
+define( 'HSW_VERSION', '1.11.25' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
@@ -65,12 +65,20 @@ if ( ! function_exists( 'hsw_report_fatal' ) ) {
                 error_log( $msg );
                 $prev = get_option( 'hsw_last_error' );
                 if ( ! is_array( $prev ) || ! isset( $prev['msg'] ) || $prev['msg'] !== $msg ) {
+                        $file = (string) $e->getFile();
                         update_option(
                                 'hsw_last_error',
                                 array(
                                         'msg'     => $msg,
                                         'time'    => time(),
                                         'version' => defined( 'HSW_VERSION' ) ? HSW_VERSION : '',
+                                        /*
+                                         * The file and its mtime at the moment of the
+                                         * error. If the file is edited afterwards the
+                                         * message is stale — see the notice below.
+                                         */
+                                        'file'    => $file,
+                                        'mtime'   => ( $file && is_file( $file ) ) ? (int) filemtime( $file ) : 0,
                                 ),
                                 false
                         );
@@ -221,6 +229,21 @@ if ( ! function_exists( 'hsw_last_error_notice' ) ) {
                         delete_option( 'hsw_last_error' );
                         return;
                 }
+
+                /*
+                 * Same version, but the file has been edited since the error was
+                 * caught — a syntax error is recorded by the shutdown handler
+                 * *before* the fix, so the record outlives the bug and nags about
+                 * something that no longer happens. Compare the mtime: if the file
+                 * changed, the message is stale.
+                 */
+                $err_file  = isset( $err['file'] ) ? (string) $err['file'] : '';
+                $err_mtime = isset( $err['mtime'] ) ? (int) $err['mtime'] : 0;
+                if ( $err_file && $err_mtime && is_file( $err_file ) && (int) filemtime( $err_file ) !== $err_mtime ) {
+                        delete_option( 'hsw_last_error' );
+                        return;
+                }
+
                 $clear = wp_nonce_url( add_query_arg( 'hsw_clear_error', '1', admin_url( 'index.php' ) ), 'hsw_clear_error' );
                 printf(
                         '<div class="notice notice-error"><p><strong>HamiShop Elementor Widgets — آخرین خطای ثبت‌شده:</strong><br><code>%s</code><br><span style="color:#646970">%s</span> · <a href="%s">پاک کردن این پیام</a></p></div>',
