@@ -101,7 +101,7 @@ final class HSW_Account_Support {
 				'post_type'      => self::POST_TYPE,
 				'post_status'    => 'publish',
 				'author'         => absint( $user_id ),
-				'posts_per_page' => -1,
+				'posts_per_page' => 200,
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
 			)

@@ -2502,6 +2502,10 @@ final class HSW_Account {
 			if ( ! $product || 'publish' !== get_post_status( $id ) ) {
 				continue;
 			}
+			/* Public route: never expose hidden or password-protected products. */
+			if ( ! $product->is_visible() || '' !== (string) get_post_field( 'post_password', $id ) ) {
+				continue;
+			}
 			$valid_ids[] = $id;
 			$html       .= $this->wishlist_card_html( $product );
 			$count++;

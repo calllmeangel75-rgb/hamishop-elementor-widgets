@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.28
+Stable tag: 1.11.29
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.29 =
+* **سازگاری با کش صفحه و بهینه‌سازی.**
+  - شمارندهٔ سبد هدر هنگام بارگذاری با کوکی `woocommerce_items_in_cart` هم‌گام می‌شود (جلوگیری از نمایش سبد دیگران در صفحهٔ کش‌شده).
+  - مسیر عمومی `/account/wishlist` محصولات پنهان و دارای رمز را برنمی‌گرداند.
+  - تایمر شمارش معکوس فقط وقتی تب دیده می‌شود اجرا می‌شود.
+  - پاکسازی کش المنتور بعد از به‌روزرسانی به‌صورت تکه‌ای (۱۰۰۰تایی) انجام می‌شود.
+  - شمارش تیکت‌های باز سقف ۲۰۰ دارد.
 
 = 1.11.28 =
 * **سخت‌سازی ورود با کد یکبارمصرف (بحرانی).**

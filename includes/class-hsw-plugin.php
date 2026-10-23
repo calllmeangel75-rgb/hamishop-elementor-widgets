@@ -92,7 +92,12 @@ final class HSW_Plugin {
                 }
 
                 global $wpdb;
-                $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_element_cache'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                /* Delete in slices: no single long locking DELETE on huge postmeta tables;
+                   the version marker moves only once nothing is left. */
+                $deleted = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_element_cache' LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                if ( $deleted ) {
+                        return;
+                }
 
                 update_option( 'hsw_asset_version', HSW_VERSION, false );
         }

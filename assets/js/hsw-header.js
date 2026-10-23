@@ -721,6 +721,18 @@
 
 		document.addEventListener('hsw_added_to_cart', refreshCart);
 
+		/*
+		 * Page-cache safety: the badge is printed server-side, so a cached
+		 * copy shows the cart of whoever warmed the cache. Re-sync on load:
+		 * WooCommerce sets `woocommerce_items_in_cart` only for visitors with
+		 * a cart, so everyone else is reset to empty without a request.
+		 */
+		if (/(?:^|;\s*)woocommerce_items_in_cart=/.test(document.cookie)) {
+			refreshCart();
+		} else if (countEls.length && parseInt(countEls[0].getAttribute('data-count') || '0', 10) > 0) {
+			applyCart(0, '');
+		}
+
 		if (window.jQuery) {
 			var $body = window.jQuery(document.body);
 			$body.on('added_to_cart', function (event, fragments) {

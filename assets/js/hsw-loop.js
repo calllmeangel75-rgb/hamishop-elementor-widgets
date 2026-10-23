@@ -53,7 +53,19 @@
 		});
 	}
 	tickAll();
-	setInterval(tickAll, 1000);
+	/* Tick only while countdowns exist and the tab is visible. */
+	var tickTimer = null;
+	function startTick() {
+		if (tickTimer || !document.querySelector('[data-hsw-end]')) { return; }
+		tickTimer = setInterval(tickAll, 1000);
+	}
+	function stopTick() {
+		if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (document.hidden) { stopTick(); } else { tickAll(); startTick(); }
+	});
+	if (!document.hidden) { startTick(); }
 
 	/* ---------- Toast ---------- */
 	var toastEl = null;
