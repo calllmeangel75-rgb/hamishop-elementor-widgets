@@ -37,6 +37,7 @@ final class HSW_Plugin {
                 HSW_Palette::instance();
                 HSW_Branding::instance();
                 HSW_Security::instance();
+                HSW_Cache_Guard::instance();
                 new HSW_Rest();
                 new HSW_Assets();
 
@@ -50,6 +51,26 @@ final class HSW_Plugin {
                  */
                 add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'cart_fragments' ) );
                 add_action( 'init', array( $this, 'maybe_flush_element_cache' ) );
+
+                /*
+                 * Tell WooCommerce this plugin is HPOS-safe. Every order is read
+                 * through `wc_get_order()` and its getters — there is no direct
+                 * postmeta access — so the declaration is accurate. Without it
+                 * WooCommerce reports the plugin as "uncertain" and can refuse to
+                 * enable the high-performance order tables on the store.
+                 */
+                add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
+        }
+
+
+        /**
+         * Declare compatibility with WooCommerce features.
+         */
+        public function declare_woocommerce_compatibility() {
+                if ( ! class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+                        return;
+                }
+                \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', HSW_FILE, true );
         }
 
         /**
@@ -136,6 +157,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
                 require_once HSW_DIR . 'includes/class-hsw-branding.php';
                 require_once HSW_DIR . 'includes/class-hsw-security.php';
+                require_once HSW_DIR . 'includes/class-hsw-cache-guard.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
