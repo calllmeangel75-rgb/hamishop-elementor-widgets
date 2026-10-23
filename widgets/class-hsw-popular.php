@@ -154,6 +154,29 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
                 $this->end_controls_section();
         }
 
+        /**
+         * Post that owns this widget.
+         *
+         * Inside an Elementor page the current document is the page being
+         * rendered, which is what `_elementor_data` is keyed by. Falls back to
+         * the queried post for non-Elementor contexts.
+         *
+         * @return int
+         */
+        protected function current_document_id() {
+                if ( class_exists( '\\Elementor\\Plugin' ) ) {
+                        $documents = \Elementor\Plugin::$instance->documents;
+                        if ( $documents ) {
+                                $current = $documents->get_current();
+                                if ( $current ) {
+                                        return (int) $current->get_main_id();
+                                }
+                        }
+                }
+
+                return (int) get_the_ID();
+        }
+
         protected function render() {
                 $s        = $this->effective_settings();
                 $products = $this->resolve_products();
@@ -163,11 +186,21 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
                 $show_tabs   = 'yes' === ( $s['show_tabs'] ?? 'yes' );
                 $tabs        = is_array( $s['tabs'] ?? null ) ? $s['tabs'] : array();
 
-                /* Endpoint + signature for tab fragments */
-                $sig      = md5( wp_salt( 'auth' ) . '|hsw|popular' );
-                $endpoint = esc_url( rest_url( 'hsw/v1/loop' ) );
-                $count    = max( 1, (int) ( $s['count']['size'] ?? 8 ) );
-                $term_id  = isset( $s['source_term'] ) ? (int) $s['source_term'] : 0;
+                /*
+                 * Endpoint + signature for tab fragments.
+                 *
+                 * The signature is bound to this post and this widget, and the
+                 * IDs travel with every request so the server can re-read the
+                 * widget's own settings and render the fragment exactly like the
+                 * first page load. Without them the tab switch fell back to
+                 * default texts and badges.
+                 */
+                $post_id   = $this->current_document_id();
+                $widget_id = (string) $this->get_id();
+                $sig       = HSW_Rest::loop_signature( $post_id, $widget_id );
+                $endpoint  = esc_url( rest_url( 'hsw/v1/loop' ) );
+                $count     = max( 1, (int) ( $s['count']['size'] ?? 8 ) );
+                $term_id   = isset( $s['source_term'] ) ? (int) $s['source_term'] : 0;
                 ?>
                 <section class="hsw-loop hsw-loop--box hsw-loop--pop hsw-loop--hsw-popular<?php echo esc_attr( $this->hsw_font_class() ); ?>"
                         <?php if ( $show_tabs && ! empty( $tabs ) ) : ?>
@@ -202,7 +235,7 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
                                                                 <?php foreach ( $tabs as $tab ) : ?>
                                                                         <button type="button" role="tab" aria-selected="<?php echo $first ? 'true' : 'false'; ?>"
                                                                                 class="hsw-tab<?php echo $first ? ' is-active' : ''; ?>"
-                                                                                data-hsw-query="<?php echo esc_attr( http_build_query( array( 'type' => 'popular', 'source' => $tab['tab_source'], 'per_page' => $count, 'term_id' => $term_id, 'sig' => $sig ) ) ); ?>">
+                                                                                data-hsw-query="<?php echo esc_attr( http_build_query( array( 'type' => 'popular', 'source' => $tab['tab_source'], 'per_page' => $count, 'term_id' => $term_id, 'post_id' => $post_id, 'widget_id' => $widget_id, 'sig' => $sig ) ) ); ?>">
                                                                                 <?php echo esc_html( $tab['tab_label'] ); ?>
                                                                         </button>
                                                                         <?php $first = false; ?>

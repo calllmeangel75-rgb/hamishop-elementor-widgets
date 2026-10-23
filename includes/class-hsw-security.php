@@ -39,19 +39,55 @@ class HSW_Security {
 		add_action( 'admin_menu', array( $this, 'menu' ), 13 );
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_init', array( $this, 'keep_rewrite_alive' ), 20 );
-		add_action( 'init', array( $this, 'guard_admin_url' ), 1 );
 		add_filter( 'rest_endpoints', array( $this, 'filter_rest_users' ) );
 		add_action( 'admin_notices', array( $this, 'rewrite_notice' ) );
-		add_filter( 'determine_current_user', array( $this, 'resolve_user_from_logged_in_cookie' ), 20 );
 
 		/*
-		 * Set the flag now, not in guard_admin_url(): `determine_current_user`
-		 * can fire during plugins_loaded, long before init, and it has to know
-		 * that this request came in through the custom slug.
+		 * Everything below touches the admin URL. When the escape hatch is set in
+		 * wp-config.php the whole mechanism has to stay inert — not just the 404
+		 * guard: the cookie derivation and the request flag are part of the same
+		 * feature, and leaving them on would keep a half-active state alive.
 		 */
-		$this->on_custom_slug = $this->is_custom_slug_request();
+		if ( ! self::disabled() ) {
+			add_action( 'init', array( $this, 'guard_admin_url' ), 1 );
+			add_filter( 'determine_current_user', array( $this, 'resolve_user_from_logged_in_cookie' ), 20 );
+
+			/*
+			 * Set the flag now, not in guard_admin_url(): `determine_current_user`
+			 * can fire during plugins_loaded, long before init, and it has to know
+			 * that this request came in through the custom slug.
+			 */
+			$this->on_custom_slug = $this->is_custom_slug_request();
+		}
 
 		$this->maybe_disable_xmlrpc();
+	}
+
+	/**
+	 * Emergency off switch: `define( 'HSW_DISABLE_ADMIN_URL', true );` in
+	 * wp-config.php disables the custom admin URL without touching the database.
+	 *
+	 * @return bool
+	 */
+	private static function disabled() {
+		return defined( 'HSW_DISABLE_ADMIN_URL' ) && HSW_DISABLE_ADMIN_URL;
+	}
+
+	/**
+	 * Does a request path fall inside the custom slug?
+	 *
+	 * Exact match or a real sub-path only. A plain prefix comparison would make
+	 * `/manage-guide` look like `/manage` and swallow an unrelated page into the
+	 * admin rewrite.
+	 *
+	 * @param string $rel  Request path relative to the home path.
+	 * @param string $slug Custom slug.
+	 * @return bool
+	 */
+	private static function path_matches_slug( $rel, $slug ) {
+		$base = '/' . $slug;
+
+		return $rel === $base || 0 === strpos( $rel, $base . '/' );
 	}
 
 	/**
@@ -68,7 +104,7 @@ class HSW_Security {
 		$request   = (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_PATH );
 		$rel       = self::relative_path( $request, $home_path );
 
-		return 0 === strpos( $rel, '/' . $s['admin_slug'] );
+		return self::path_matches_slug( $rel, (string) $s['admin_slug'] );
 	}
 
 	/**
@@ -90,7 +126,7 @@ class HSW_Security {
 	 * @return int
 	 */
 	public function resolve_user_from_logged_in_cookie( $user_id ) {
-		if ( $user_id || ! $this->on_custom_slug ) {
+		if ( $user_id || ! $this->on_custom_slug || self::disabled() ) {
 			return $user_id;
 		}
 		$resolved = $this->inject_auth_cookie();
@@ -104,38 +140,60 @@ class HSW_Security {
 	 * runs through `determine_current_user`, so this has to be called eagerly —
 	 * not only from the user-resolution filter.
 	 *
+	 * On HTTPS the matching cookie is `SECURE_AUTH_COOKIE` with the
+	 * `secure_auth` scheme; minting a plain `auth` cookie there would be
+	 * rejected by `auth_redirect()` and bounce the user back to the login screen.
+	 *
 	 * @return int User ID, or 0 when nothing could be derived.
 	 */
 	private function inject_auth_cookie() {
 		if ( ! defined( 'AUTH_COOKIE' ) || ! defined( 'LOGGED_IN_COOKIE' ) ) {
 			return 0;
 		}
-		if ( isset( $_COOKIE[ AUTH_COOKIE ] ) || empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
+
+		$secure      = is_ssl() && defined( 'SECURE_AUTH_COOKIE' );
+		$scheme      = $secure ? 'secure_auth' : 'auth';
+		$cookie_name = $secure ? SECURE_AUTH_COOKIE : AUTH_COOKIE;
+
+		if ( isset( $_COOKIE[ $cookie_name ] ) || empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
 			return 0;
 		}
 
-		$parsed = wp_parse_auth_cookie( wp_unslash( $_COOKIE[ LOGGED_IN_COOKIE ] ), 'logged_in' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed and HMAC-verified by WordPress.
-		if ( empty( $parsed['username'] ) || empty( $parsed['token'] ) ) {
+		$raw = wp_unslash( $_COOKIE[ LOGGED_IN_COOKIE ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- validated by WordPress below.
+
+		/*
+		 * Validate before trusting anything in it: `wp_parse_auth_cookie()` only
+		 * splits the string and checks the HMAC — it never looks at the session
+		 * token. `wp_validate_auth_cookie()` is the call that also proves the
+		 * session still exists, so it runs first and its result is what we build on.
+		 */
+		$logged_in_user = wp_validate_auth_cookie( $raw, 'logged_in' );
+		if ( ! $logged_in_user ) {
+			return 0;
+		}
+
+		$parsed = wp_parse_auth_cookie( $raw, 'logged_in' );
+		if ( empty( $parsed['username'] ) || empty( $parsed['token'] ) || empty( $parsed['expiration'] ) ) {
 			return 0;
 		}
 
 		$user = get_user_by( 'login', $parsed['username'] );
-		if ( ! $user ) {
+		if ( ! $user || (int) $user->ID !== (int) $logged_in_user ) {
 			return 0;
 		}
 
-		$auth = wp_generate_auth_cookie( $user->ID, (int) $parsed['expiration'], 'auth', $parsed['token'] );
+		$auth = wp_generate_auth_cookie( $user->ID, (int) $parsed['expiration'], $scheme, $parsed['token'] );
 		if ( ! $auth ) {
 			return 0;
 		}
 
-		/* Full validation, including the session token. */
-		$resolved = wp_validate_auth_cookie( $auth, 'auth' );
+		/* Full validation of the derived cookie, including the session token. */
+		$resolved = wp_validate_auth_cookie( $auth, $scheme );
 		if ( ! $resolved ) {
 			return 0;
 		}
 
-		$_COOKIE[ AUTH_COOKIE ] = $auth;
+		$_COOKIE[ $cookie_name ] = $auth;
 
 		return (int) $resolved;
 	}
@@ -173,23 +231,135 @@ class HSW_Security {
 	 * @return string[]
 	 */
 	private static function reserved_slugs() {
-		return array( 'wp-admin', 'wp-login', 'wp-content', 'wp-includes', 'wp-json', 'wp-cron', 'admin', 'login', 'dashboard', 'feed', 'xmlrpc' );
+		return array( 'wp-admin', 'wp-login', 'wp-content', 'wp-includes', 'wp-json', 'wp-cron', 'wp-signup', 'wp-activate', 'admin', 'login', 'dashboard', 'feed', 'xmlrpc', 'robots', 'sitemap' );
+	}
+
+	/**
+	 * Why a slug cannot be used, or '' when it is fine.
+	 *
+	 * A slug that collides with an existing page, a WooCommerce page, or a post
+	 * type / taxonomy base would either shadow real content or be shadowed by it
+	 * — the rewrite and WordPress would both claim the same URL.
+	 *
+	 * @param string $slug Sanitised slug.
+	 * @return string Human-readable conflict label, '' when free.
+	 */
+	private static function slug_conflict( $slug ) {
+		/* An existing page or post with this path. */
+		$page = get_page_by_path( $slug, OBJECT, array( 'page', 'post' ) );
+		if ( $page ) {
+			return sprintf(
+				/* translators: %s: post type label. */
+				__( 'یک %s موجود با همین آدرس', 'hamishop-elementor-widgets' ),
+				(string) get_post_type_object( $page->post_type )->labels->singular_name
+			);
+		}
+
+		/* WooCommerce's own pages — the store cannot live under a slug that
+		   already serves the shop, cart, checkout or account screen. */
+		if ( function_exists( 'wc_get_page_id' ) ) {
+			$wc_pages = array(
+				'shop'      => __( 'صفحهٔ فروشگاه ووکامرس', 'hamishop-elementor-widgets' ),
+				'cart'      => __( 'صفحهٔ سبد خرید ووکامرس', 'hamishop-elementor-widgets' ),
+				'checkout'  => __( 'صفحهٔ تسویه‌حساب ووکامرس', 'hamishop-elementor-widgets' ),
+				'myaccount' => __( 'صفحهٔ حساب کاربری ووکامرس', 'hamishop-elementor-widgets' ),
+			);
+			foreach ( $wc_pages as $key => $label ) {
+				$page_id = (int) wc_get_page_id( $key );
+				if ( $page_id > 0 && get_post_field( 'post_name', $page_id ) === $slug ) {
+					return $label;
+				}
+			}
+		}
+
+		/* Post type and taxonomy rewrite bases. */
+		$objects = array_merge(
+			array_values( get_post_types( array( 'public' => true ), 'objects' ) ),
+			array_values( get_taxonomies( array( 'public' => true ), 'objects' ) )
+		);
+		foreach ( $objects as $object ) {
+			if ( empty( $object->rewrite ) ) {
+				continue;
+			}
+			$base = isset( $object->rewrite['slug'] ) ? (string) $object->rewrite['slug'] : '';
+			if ( '' !== $base && trim( $base, '/' ) === $slug ) {
+				return sprintf(
+					/* translators: %s: post type or taxonomy label. */
+					__( 'پایهٔ آدرس «%s»', 'hamishop-elementor-widgets' ),
+					(string) $object->labels->name
+				);
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Validate a slug and explain why it was rejected.
+	 *
+	 * @param mixed $raw Raw input (may be an array from a malformed POST).
+	 * @return array{slug:string,error:string}
+	 */
+	public static function validate_slug( $raw ) {
+		$raw = is_string( $raw ) ? $raw : '';
+		$raw = trim( $raw, " /\\\t\n\r\0\x0B" );
+
+		if ( '' === $raw ) {
+			return array(
+				'slug'  => '',
+				'error' => '',
+			);
+		}
+
+		$slug = preg_replace( '/[^a-z0-9_-]/', '', (string) sanitize_title( $raw ) );
+
+		if ( '' === $slug ) {
+			return array(
+				'slug'  => '',
+				'error' => __( 'آدرس باید فقط شامل حروف انگلیسی کوچک، عدد، خط تیره یا زیرخط باشد.', 'hamishop-elementor-widgets' ),
+			);
+		}
+		if ( strlen( $slug ) < 3 ) {
+			return array(
+				'slug'  => '',
+				'error' => __( 'آدرس باید حداقل ۳ کاراکتر باشد.', 'hamishop-elementor-widgets' ),
+			);
+		}
+		if ( in_array( $slug, self::reserved_slugs(), true ) ) {
+			return array(
+				'slug'  => '',
+				/* translators: %s: slug. */
+				'error' => sprintf( __( '«%s» جزو مسیرهای رزروشدهٔ وردپرس است. نام دیگری انتخاب کنید.', 'hamishop-elementor-widgets' ), $slug ),
+			);
+		}
+
+		$conflict = self::slug_conflict( $slug );
+		if ( '' !== $conflict ) {
+			return array(
+				'slug'  => '',
+				/* translators: 1: slug, 2: conflicting object. */
+				'error' => sprintf( __( '«%1$s» با %2$s تداخل دارد. نام دیگری انتخاب کنید.', 'hamishop-elementor-widgets' ), $slug, $conflict ),
+			);
+		}
+
+		return array(
+			'slug'  => $slug,
+			'error' => '',
+		);
 	}
 
 	/**
 	 * Sanitised slug, or '' when invalid.
 	 *
+	 * Kept for callers that only need the value; `validate_slug()` is the one
+	 * that can explain a rejection.
+	 *
 	 * @param string $raw Raw input.
 	 * @return string
 	 */
 	public static function sanitize_slug( $raw ) {
-		$slug = sanitize_title( trim( (string) $raw, " /\\\t\n\r\0\x0B" ) );
-		if ( '' === $slug || in_array( $slug, self::reserved_slugs(), true ) ) {
-			return '';
-		}
-		// Keep the rewrite rule safe: no slashes, no dots, no regex metacharacters.
-		$slug = preg_replace( '/[^a-z0-9_-]/', '', $slug );
-		return (string) $slug;
+		$result = self::validate_slug( $raw );
+		return (string) $result['slug'];
 	}
 
 	/* ---------------------------------------------------------------------
@@ -219,13 +389,14 @@ class HSW_Security {
 	 * rewriting REQUEST_URI here is safe and complete.
 	 */
 	public function guard_admin_url() {
+		if ( self::disabled() ) {
+			return;
+		}
+
 		$s    = self::get();
 		$slug = (string) $s['admin_slug'];
 
-		if ( '' === $slug || ! self::rewrite_installed() ) {
-			return;
-		}
-		if ( defined( 'HSW_DISABLE_ADMIN_URL' ) && HSW_DISABLE_ADMIN_URL ) {
+		if ( '' === $slug ) {
 			return;
 		}
 
@@ -233,8 +404,23 @@ class HSW_Security {
 		$request   = (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_PATH );
 		$rel       = self::relative_path( $request, $home_path );
 
+		$is_slug  = self::path_matches_slug( $rel, $slug );
+		$is_admin = 0 === strpos( $rel, '/wp-admin' );
+
+		/*
+		 * Compare the path first. Most requests are neither the slug nor
+		 * wp-admin, and they must not pay for reading `.htaccess` at all.
+		 */
+		if ( ! $is_slug && ! $is_admin ) {
+			return;
+		}
+
+		if ( ! self::rewrite_installed() ) {
+			return;
+		}
+
 		/* Custom slug: hand the request to wp-admin under the real path. */
-		if ( 0 === strpos( $rel, '/' . $slug ) ) {
+		if ( $is_slug ) {
 			$rest  = substr( $rel, strlen( $slug ) + 1 ); // '' or '/post.php'.
 			$query = isset( $_SERVER['QUERY_STRING'] ) && '' !== $_SERVER['QUERY_STRING']
 				? '?' . wp_unslash( $_SERVER['QUERY_STRING'] )
@@ -248,10 +434,6 @@ class HSW_Security {
 			if ( $uid ) {
 				wp_set_current_user( $uid );
 			}
-			return;
-		}
-
-		if ( 0 !== strpos( $rel, '/wp-admin' ) ) {
 			return;
 		}
 
@@ -319,7 +501,8 @@ class HSW_Security {
 			array(
 				'timeout'     => 8,
 				'redirection' => 0,
-				'sslverify'   => false,
+				/* Same default WordPress uses for its own loopback checks. */
+				'sslverify'   => (bool) apply_filters( 'https_local_ssl_verify', false ),
 				'user-agent'  => 'HamiShop-Security-Check',
 			)
 		);
@@ -340,11 +523,16 @@ class HSW_Security {
 	 * Put the block back if something rewrote `.htaccess` in the meantime.
 	 *
 	 * WordPress rebuilds `.htaccess` with `insert_with_markers()` whenever the
-	 * permalink settings are saved, which drops every block that is not its
-	 * own. Re-checking on admin_init keeps the custom URL alive without
-	 * touching the front-end request path.
+	 * permalink settings are saved, which preserves marker blocks but can still
+	 * drop ours on hosts that rewrite the file themselves. Re-checking on
+	 * admin_init keeps the custom URL alive; it costs one cached read per admin
+	 * request and nothing on the front end.
 	 */
 	public function keep_rewrite_alive() {
+		if ( self::disabled() ) {
+			return;
+		}
+
 		$s = self::get();
 		if ( '' === (string) $s['admin_slug'] || self::rewrite_installed() ) {
 			return;
@@ -357,8 +545,60 @@ class HSW_Security {
 		update_option( self::OPTION, $s, false );
 	}
 
+	/**
+	 * `.htaccess` lives at the site's home path, not at `ABSPATH` — on a
+	 * WordPress install inside a subdirectory those differ, and writing to
+	 * `ABSPATH` would put the rules in a file Apache never reads.
+	 *
+	 * @return string
+	 */
 	private static function htaccess_path() {
-		return ABSPATH . '.htaccess';
+		if ( ! function_exists( 'get_home_path' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		$home = (string) get_home_path();
+
+		return ( $home ? $home : ABSPATH ) . '.htaccess';
+	}
+
+	/**
+	 * Read `.htaccess` once per request.
+	 *
+	 * Three callers ask for it (the guard, the keep-alive check and the admin
+	 * notice); without this each of them re-reads the file.
+	 *
+	 * @return string Empty string when the file is missing or unreadable.
+	 */
+	private static function htaccess_contents() {
+		static $contents = null;
+
+		if ( null !== $contents ) {
+			return $contents;
+		}
+
+		$file     = self::htaccess_path();
+		$contents = is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file, no HTTP.
+
+		return $contents;
+	}
+
+	/**
+	 * Keep a copy of the file as it was before the first edit, in an option.
+	 *
+	 * A `.htaccess.hsw-bak` next to the original would be served as plain text
+	 * on hosts that do not deny `.ht*`, so the copy is stored in the database
+	 * instead — it is small and never public.
+	 *
+	 * @param string $content Current file contents.
+	 */
+	private static function backup_once( $content ) {
+		if ( '' === trim( $content ) ) {
+			return;
+		}
+		if ( false !== get_option( 'hsw_htaccess_backup', false ) ) {
+			return;
+		}
+		update_option( 'hsw_htaccess_backup', $content, false );
 	}
 
 	/**
@@ -397,12 +637,8 @@ class HSW_Security {
 	 * @return bool
 	 */
 	public static function rewrite_installed() {
-		$file = self::htaccess_path();
-		if ( ! is_readable( $file ) ) {
-			return false;
-		}
-		$content = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file, no HTTP.
-		if ( false === strpos( $content, '# BEGIN ' . self::MARKER ) ) {
+		$content = self::htaccess_contents();
+		if ( '' === $content || false === strpos( $content, '# BEGIN ' . self::MARKER ) ) {
 			return false;
 		}
 		$s = self::get();
@@ -412,14 +648,20 @@ class HSW_Security {
 	/**
 	 * Write the rewrite block. Returns false when `.htaccess` is not writable.
 	 *
+	 * The block is prepended rather than appended on purpose: it has to be
+	 * evaluated before WordPress' catch-all `RewriteRule . /index.php [L]`, and
+	 * `insert_with_markers()` always appends a new block at the end of the file.
+	 *
 	 * @param string $slug Sanitised slug.
 	 * @return bool
 	 */
 	public static function install_rewrite( $slug ) {
 		$file    = self::htaccess_path();
 		$content = is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$content = self::strip_block( $content );
-		$content = self::rules( $slug ) . $content;
+
+		self::backup_once( $content );
+
+		$content = self::rules( $slug ) . self::strip_block( $content );
 
 		return false !== @file_put_contents( $file, $content, LOCK_EX ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- .htaccess is not writable through the WP filesystem API on most hosts.
 	}
@@ -529,15 +771,19 @@ class HSW_Security {
 			return;
 		}
 
-		$in    = isset( $_POST['hsw_security'] ) ? (array) wp_unslash( $_POST['hsw_security'] ) : array();
-		$raw   = (string) ( $in['admin_slug'] ?? '' );
-		$slug  = self::sanitize_slug( $raw );
+		$in   = isset( $_POST['hsw_security'] ) ? (array) wp_unslash( $_POST['hsw_security'] ) : array();
+		$raw  = isset( $in['admin_slug'] ) && is_string( $in['admin_slug'] ) ? $in['admin_slug'] : '';
+		$slug = '';
 		$check = 'no';
 
-		if ( '' !== trim( $raw ) && '' === $slug ) {
-			add_settings_error( 'hsw_security', 'slug', __( 'آدرس واردشده معتبر نیست یا جزو مسیرهای رزروشدهٔ وردپرس است. یک نام دیگر انتخاب کنید.', 'hamishop-elementor-widgets' ), 'error' );
+		/* `validate_slug()` explains the rejection: bad characters, a reserved
+		   path, an existing page, a WooCommerce page, a rewrite base. */
+		$validated = self::validate_slug( $raw );
+		if ( '' !== $validated['error'] ) {
+			add_settings_error( 'hsw_security', 'slug', $validated['error'], 'error' );
 			return;
 		}
+		$slug = (string) $validated['slug'];
 
 		if ( '' !== $slug ) {
 			if ( ! self::install_rewrite( $slug ) ) {
@@ -641,8 +887,12 @@ class HSW_Security {
 
 				<div class="notice notice-info inline" style="max-width:780px">
 					<p>
-						<strong><?php esc_html_e( 'چه اتفاقی می‌افتد؟', 'hamishop-elementor-widgets' ); ?></strong>
-						<?php esc_html_e( 'کاربر مهمان (کسی که وارد نشده) با باز کردن wp-admin صفحهٔ ۴۰۴ می‌بیند. کاربر واردشده همیشه دسترسی دارد، پس امکان قفل‌شدن حساب مدیر وجود ندارد. آدرس سفارشی همیشه کار می‌کند و می‌توانید آن را بوکمارک کنید.', 'hamishop-elementor-widgets' ); ?>
+						<strong><?php esc_html_e( 'دقیقاً چه چیزی محافظت می‌شود؟', 'hamishop-elementor-widgets' ); ?></strong>
+						<?php esc_html_e( 'کاربر مهمان (کسی که وارد نشده) با باز کردن wp-admin صفحهٔ ۴۰۴ می‌بیند؛ اسکنرها و ربات‌های حمله دیگر مسیر پیشخوان را پیدا نمی‌کنند. کاربر واردشده همیشه دسترسی دارد، پس امکان قفل‌شدن حساب مدیر وجود ندارد. آدرس سفارشی همیشه کار می‌کند و می‌توانید آن را بوکمارک کنید.', 'hamishop-elementor-widgets' ); ?>
+					</p>
+					<p>
+						<strong><?php esc_html_e( 'چه چیزی محافظت نمی‌شود؟', 'hamishop-elementor-widgets' ); ?></strong>
+						<?php esc_html_e( 'wp-login.php سر جای خود باز می‌ماند و هیچ‌جا مخفی نمی‌شود — این ماژول صفحهٔ ورود را جابه‌جا نمی‌کند. یعنی کسی که آدرس ورود را می‌داند همچنان به فرم ورود دسترسی دارد؛ چیزی که کم می‌شود «پیدا کردن خودکار پیشخوان» است، نه «ورود». برای محدودکردن تلاش ورود از یک افزونهٔ مخصوص همین کار استفاده کنید. همچنین توجه کنید این قابلیت کوکی نشست مدیر را برای همان درخواست از روی کوکی ورود می‌سازد تا آدرس سفارشی احراز هویت شود؛ اگر این سطح از اعتماد را نمی‌پسندید، با ثابت HSW_DISABLE_ADMIN_URL در wp-config.php خاموشش کنید.', 'hamishop-elementor-widgets' ); ?>
 					</p>
 					<p>
 						<?php esc_html_e( 'admin-ajax.php و admin-post.php باز می‌مانند، چون فرم‌ها و فیلترهای فروشگاه از آن‌ها استفاده می‌کنند.', 'hamishop-elementor-widgets' ); ?>

@@ -25,6 +25,24 @@ class HSW_Rest {
                                 'methods'             => 'GET',
                                 'callback'            => array( $this, 'search' ),
                                 'permission_callback' => array( $this, 'can_edit' ),
+                                'args'                => array(
+                                        'term'  => array(
+                                                'type'              => 'string',
+                                                'required'          => true,
+                                                'sanitize_callback' => 'sanitize_text_field',
+                                                'validate_callback' => static function ( $value ) {
+                                                        return is_string( $value ) && strlen( $value ) <= 120;
+                                                },
+                                        ),
+                                        'limit' => array(
+                                                'type'              => 'integer',
+                                                'default'           => 20,
+                                                'minimum'           => 5,
+                                                'maximum'           => 30,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                ),
                         )
                 );
 
@@ -35,6 +53,57 @@ class HSW_Rest {
                                 'methods'             => 'GET',
                                 'callback'            => array( $this, 'loop_fragment' ),
                                 'permission_callback' => '__return_true',
+                                'args'                => array(
+                                        'type' => array(
+                                                'type'              => 'string',
+                                                'default'           => 'deal',
+                                                'enum'              => array( 'deal', 'best', 'popular' ),
+                                                'sanitize_callback' => 'sanitize_key',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'source' => array(
+                                                'type'              => 'string',
+                                                'required'          => true,
+                                                'enum'              => array( 'sale', 'best_selling', 'rating', 'newest', 'discount', 'featured' ),
+                                                'sanitize_callback' => 'sanitize_key',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'per_page' => array(
+                                                'type'              => 'integer',
+                                                'default'           => 8,
+                                                'minimum'           => 1,
+                                                'maximum'           => 24,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'term_id' => array(
+                                                'type'              => 'integer',
+                                                'default'           => 0,
+                                                'minimum'           => 0,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'post_id' => array(
+                                                'type'              => 'integer',
+                                                'default'           => 0,
+                                                'minimum'           => 0,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'widget_id' => array(
+                                                'type'              => 'string',
+                                                'default'           => '',
+                                                'sanitize_callback' => 'sanitize_text_field',
+                                                'validate_callback' => static function ( $value ) {
+                                                        return is_string( $value ) && strlen( $value ) <= 32;
+                                                },
+                                        ),
+                                        'sig'       => array(
+                                                'type'              => 'string',
+                                                'required'          => true,
+                                                'sanitize_callback' => 'sanitize_text_field',
+                                        ),
+                                ),
                         )
                 );
 
@@ -52,11 +121,68 @@ class HSW_Rest {
                                 'callback'            => array( $this, 'header_products' ),
                                 'permission_callback' => '__return_true',
                                 'args'                => array(
-                                        'cat'   => array( 'sanitize_callback' => 'absint' ),
-                                        'limit' => array( 'sanitize_callback' => 'absint' ),
+                                        'cat'   => array(
+                                                'type'              => 'integer',
+                                                'required'          => true,
+                                                'minimum'           => 1,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => static function ( $value ) {
+                                                        return (bool) term_exists( absint( $value ), 'product_cat' );
+                                                },
+                                        ),
+                                        'limit' => array(
+                                                'type'              => 'integer',
+                                                'default'           => 4,
+                                                'minimum'           => 1,
+                                                'maximum'           => 8,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
                                 ),
                         )
                 );
+        }
+
+        /**
+         * Signature for a /loop fragment request.
+         *
+         * Bound to the post + widget that produced the markup, so a caller
+         * cannot ask the server to render an arbitrary widget's settings, and
+         * it never expires (unlike a nonce, which would break tab switching
+         * after 12–24 hours or as soon as a page cache stores the HTML).
+         *
+         * @param int    $post_id   Post holding the widget.
+         * @param string $widget_id Elementor element ID.
+         * @return string
+         */
+        public static function loop_signature( $post_id, $widget_id ) {
+                return hash_hmac( 'sha256', (int) $post_id . '|' . (string) $widget_id, 'hsw-loop|' . wp_salt( 'auth' ) );
+        }
+
+        /**
+         * Version marker that moves whenever a product changes, so cached
+         * fragments expire with the catalogue and not on a fixed clock alone.
+         *
+         * @return string
+         */
+        private static function product_version() {
+                if ( class_exists( 'WC_Cache_Helper' ) ) {
+                        return (string) WC_Cache_Helper::get_transient_version( 'product' );
+                }
+                return '1';
+        }
+
+        /**
+         * Send a short public cache header — the fragment is identical for every
+         * visitor, so a proxy may keep it for a few minutes.
+         *
+         * @param int $seconds Max age.
+         */
+        private static function cache_header( $seconds = 300 ) {
+                if ( headers_sent() ) {
+                        return;
+                }
+                header( 'Cache-Control: public, max-age=' . absint( $seconds ) );
         }
 
         public function can_edit() {
@@ -97,23 +223,38 @@ class HSW_Rest {
 
         /**
          * Render a cards fragment for tab switching.
-         * Params: type (deal|best|popular), source, per_page, term_id, nonce_widget (widget signature hash).
+         *
+         * The fragment must look exactly like the server-rendered cards, so the
+         * widget's own Elementor settings are re-read here — without them the
+         * first tab switch silently fell back to the default texts and badges.
+         *
+         * @param WP_REST_Request $request Request.
+         * @return WP_REST_Response|WP_Error
          */
         public function loop_fragment( $request ) {
-                $type     = in_array( $request->get_param( 'type' ), array( 'deal', 'best', 'popular' ), true ) ? $request->get_param( 'type' ) : 'deal';
-                $source   = sanitize_key( (string) $request->get_param( 'source' ) );
-                $per_page = min( 24, max( 1, (int) $request->get_param( 'per_page' ) ) );
-                $term_id  = (int) $request->get_param( 'term_id' );
-                $sig      = (string) $request->get_param( 'sig' );
+                $type      = (string) $request->get_param( 'type' );
+                $source    = (string) $request->get_param( 'source' );
+                $per_page  = (int) $request->get_param( 'per_page' );
+                $term_id   = (int) $request->get_param( 'term_id' );
+                $post_id   = (int) $request->get_param( 'post_id' );
+                $widget_id = (string) $request->get_param( 'widget_id' );
+                $sig       = (string) $request->get_param( 'sig' );
 
-                // Signature = md5( AUTH_SALT + widget_key ) — prevents arbitrary fragment injection.
-                if ( ! hash_equals( md5( wp_salt( 'auth' ) . '|hsw|' . $type ), (string) $sig ) ) {
+                if ( ! hash_equals( self::loop_signature( $post_id, $widget_id ), $sig ) ) {
                         return new WP_Error( 'hsw_bad_sig', 'invalid signature', array( 'status' => 400 ) );
                 }
 
-                $allowed_sources = array( 'sale', 'best_selling', 'rating', 'newest', 'discount', 'featured' );
-                if ( ! in_array( $source, $allowed_sources, true ) ) {
-                        return new WP_Error( 'hsw_bad_source', 'invalid source', array( 'status' => 400 ) );
+                if ( $term_id && ! term_exists( $term_id, 'product_cat' ) ) {
+                        return new WP_Error( 'hsw_bad_term', 'unknown product category', array( 'status' => 400 ) );
+                }
+
+                $version = self::product_version();
+                $key     = 'hsw_loop_' . md5( implode( '|', array( $type, $source, $per_page, $term_id, $post_id, $widget_id, $version ) ) );
+
+                $cached = get_transient( $key );
+                if ( is_array( $cached ) && isset( $cached['html'] ) ) {
+                        self::cache_header( 300 );
+                        return rest_ensure_response( $cached );
                 }
 
                 $products = HSW_Plugin::instance()->products->query(
@@ -131,14 +272,90 @@ class HSW_Rest {
                         require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
                 }
 
-                $html = HSW_Widget_Base::cards_html( $type, $products, array() );
+                $settings = $this->widget_settings( $post_id, $widget_id );
+                $html     = HSW_Widget_Base::cards_html( $type, $products, $settings );
 
-                return rest_ensure_response(
-                        array(
-                                'html'  => $html,
-                                'found' => count( $products ),
-                        )
+                $payload = array(
+                        'html'  => $html,
+                        'found' => count( $products ),
                 );
+
+                set_transient( $key, $payload, 5 * MINUTE_IN_SECONDS );
+                self::cache_header( 300 );
+
+                return rest_ensure_response( $payload );
+        }
+
+        /**
+         * Elementor settings for one widget on one published post.
+         *
+         * Only scalars are returned: the settings array also holds responsive
+         * and typography sub-arrays, and handing those to the card renderer
+         * would only risk `esc_html( array )` notices.
+         *
+         * @param int    $post_id   Post ID.
+         * @param string $widget_id Elementor element ID.
+         * @return array<string,scalar>
+         */
+        private function widget_settings( $post_id, $widget_id ) {
+                if ( ! $post_id || '' === (string) $widget_id ) {
+                        return array();
+                }
+
+                $post = get_post( $post_id );
+                if ( ! $post || 'publish' !== $post->post_status || '' !== (string) $post->post_password ) {
+                        return array();
+                }
+
+                $raw = get_post_meta( $post_id, '_elementor_data', true );
+                if ( ! is_string( $raw ) || '' === $raw ) {
+                        return array();
+                }
+
+                $data = json_decode( $raw, true );
+                if ( ! is_array( $data ) ) {
+                        return array();
+                }
+
+                $element = $this->find_element( $data, (string) $widget_id );
+                if ( ! $element || empty( $element['settings'] ) || ! is_array( $element['settings'] ) ) {
+                        return array();
+                }
+
+                $out = array();
+                foreach ( $element['settings'] as $name => $value ) {
+                        if ( is_scalar( $value ) ) {
+                                $out[ $name ] = $value;
+                        }
+                }
+
+                return $out;
+        }
+
+        /**
+         * Depth-first search for an Elementor element by ID.
+         *
+         * @param array  $elements Elements.
+         * @param string $id       Element ID.
+         * @return array|null
+         */
+        private function find_element( $elements, $id ) {
+                foreach ( (array) $elements as $element ) {
+                        if ( ! is_array( $element ) ) {
+                                continue;
+                        }
+                        if ( isset( $element['id'] ) && (string) $element['id'] === $id ) {
+                                return $element;
+                        }
+                        if ( ! empty( $element['elements'] ) && is_array( $element['elements'] ) ) {
+                                $found = $this->find_element( $element['elements'], $id );
+                                if ( $found ) {
+                                        return $found;
+                                }
+                        }
+                }
+
+                return null;
         }
 
         /**
@@ -157,42 +374,78 @@ class HSW_Rest {
                 $limit   = $limit > 0 ? min( 8, $limit ) : 4;
 
                 if ( ! $term_id || ! function_exists( 'wc_get_products' ) ) {
-                        return rest_ensure_response( array( 'html' => '', 'found' => 0 ) );
+                        return rest_ensure_response( array( 'html' => '', 'found' => 0, 'count' => 0 ) );
                 }
 
                 $term = get_term( $term_id, 'product_cat' );
                 if ( ! $term instanceof WP_Term ) {
-                        return rest_ensure_response( array( 'html' => '', 'found' => 0 ) );
+                        return rest_ensure_response( array( 'html' => '', 'found' => 0, 'count' => 0 ) );
                 }
 
                 /*
-                 * No `visibility` arg on purpose: the category counter in the
-                 * menu comes from term counts, which include hidden products.
-                 * Filtering by catalog visibility here produced empty previews
-                 * for categories the menu advertised as non-empty.
+                 * `count` is the raw `product_count_product_cat` termmeta: the
+                 * number the menu shows. It includes products that are hidden
+                 * from the catalog, so the preview below can legitimately return
+                 * fewer tiles than the counter — better an honest empty slot than
+                 * advertising a product the shop has hidden.
                  */
-                $products = wc_get_products(
-                        array(
-                                'status'  => 'publish',
-                                'limit'   => $limit,
-                                'category' => array( $term->slug ),
-                                'orderby' => 'date',
-                                'order'   => 'DESC',
-                                'return'  => 'objects',
-                        )
-                );
+                $count = (int) $term->count;
 
-                $html = '';
-                foreach ( $products as $product ) {
-                        $html .= $this->mini_product_html( $product );
+                $key    = 'hsw_hp_' . md5( $term_id . '|' . $limit . '|' . self::product_version() );
+                $cached = get_transient( $key );
+                if ( is_array( $cached ) && isset( $cached['html'] ) ) {
+                        self::cache_header( 300 );
+                        return rest_ensure_response( $cached );
                 }
 
-                return rest_ensure_response(
+                /* Fetch a few extra: hidden / password-protected entries are
+                   dropped below and must not eat into the requested count. */
+                $products = wc_get_products(
                         array(
-                                'html'  => $html,
-                                'found' => count( $products ),
+                                'status'   => 'publish',
+                                'limit'    => $limit + 6,
+                                'category' => array( $term->slug ),
+                                'orderby'  => 'date',
+                                'order'    => 'DESC',
+                                'return'   => 'objects',
                         )
                 );
+
+                $html  = '';
+                $found = 0;
+                foreach ( $products as $product ) {
+                        if ( ! $product instanceof WC_Product ) {
+                                continue;
+                        }
+                        if ( $found >= $limit ) {
+                                break;
+                        }
+                        /* Never leak a product the shop hides from the catalog. */
+                        if ( ! $product->is_visible() ) {
+                                continue;
+                        }
+                        /*
+                         * Password-protected products have no public page. The
+                         * password lives on the post, not on WC_Product — there
+                         * is no `get_password()` getter.
+                         */
+                        if ( '' !== (string) get_post_field( 'post_password', $product->get_id() ) ) {
+                                continue;
+                        }
+                        $html .= $this->mini_product_html( $product );
+                        $found++;
+                }
+
+                $payload = array(
+                        'html'  => $html,
+                        'found' => $found,
+                        'count' => $count,
+                );
+
+                set_transient( $key, $payload, 5 * MINUTE_IN_SECONDS );
+                self::cache_header( 300 );
+
+                return rest_ensure_response( $payload );
         }
 
         /**
