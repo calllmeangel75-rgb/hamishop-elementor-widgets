@@ -69,6 +69,12 @@ class HSW_Palette {
 			'success'      => array( __( 'موفق / موجود', 'hamishop-elementor-widgets' ), '#0f9f6e', '' ),
 			'warning'      => array( __( 'هشدار / امتیاز', 'hamishop-elementor-widgets' ), '#b45309', '' ),
 			'danger'       => array( __( 'خطا / ناموجود', 'hamishop-elementor-widgets' ), '#ba1a1a', '' ),
+			/*
+			 * The account panel used to keep its own two hero colours; they live
+			 * here now so one palette paints the storefront *and* the account.
+			 */
+			'hero_a'       => array( __( 'گرادیان هدر حساب (شروع)', 'hamishop-elementor-widgets' ), '#0b2036', __( 'رنگ اول گرادیان هدر پنل حساب کاربری', 'hamishop-elementor-widgets' ) ),
+			'hero_b'       => array( __( 'گرادیان هدر حساب (پایان)', 'hamishop-elementor-widgets' ), '#173b5c', __( 'رنگ دوم گرادیان هدر پنل حساب کاربری', 'hamishop-elementor-widgets' ) ),
 		);
 	}
 

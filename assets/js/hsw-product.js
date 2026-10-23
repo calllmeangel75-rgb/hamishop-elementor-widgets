@@ -340,6 +340,9 @@
 			r.querySelectorAll('.hsw-psticky__stepper, .hsw-ppurch__stepper').forEach(function (box) {
 				box.classList.toggle('is-min', st.qty <= 1);
 			});
+			if (!r.classList.contains('is-not-in-cart')) {
+				r.setAttribute('data-hsw-in-cart', String(st.qty));
+			}
 		});
 		return st.qty;
 	}
@@ -401,10 +404,13 @@
 		document.body.dispatchEvent(new Event('wc_fragment_refresh'));
 	}
 
-	function setRootInCart(pid, inCart) {
+	function setRootInCart(pid, inCart, qty) {
+		var n = parseInt(qty, 10);
+		if (isNaN(n) || n < 0) { n = 1; }
 		roots(pid).forEach(function (r) {
 			r.classList.toggle('is-not-in-cart', !inCart);
-			r.setAttribute('data-hsw-in-cart', inCart ? '1' : '0');
+			/* The real cart quantity, never a boolean: addToCart() reads it back. */
+			r.setAttribute('data-hsw-in-cart', inCart ? String(n) : '0');
 			/* A page cached before the first add may carry a disabled bin. */
 			r.querySelectorAll('[data-hsw-del][disabled]').forEach(function (b) { b.removeAttribute('disabled'); });
 		});
@@ -427,7 +433,9 @@
 		}).then(function (r) { return r.json(); }).then(function (res) {
 			if (!res || !res.success) { return null; }
 			applyFragments(res.data && res.data.fragments);
-			setRootInCart(pid, !!(res.data && res.data.in_cart));
+			var qty = res.data && typeof res.data.quantity === 'number' ? res.data.quantity : 0;
+			setRootInCart(pid, !!(res.data && res.data.in_cart), qty);
+			if (qty > 0) { setQty(pid, qty); }
 			return res.data;
 		}).catch(function () { return null; });
 	}
@@ -439,14 +447,17 @@
 		if (!pid || btn.classList.contains('is-busy')) { return; }
 		btn.classList.add('is-busy');
 
+		var scope     = btn.closest('.hsw-p');
+		var inCart    = !!(scope && !scope.classList.contains('is-not-in-cart'));
+		var beforeQty = scope ? (parseInt(scope.getAttribute('data-hsw-in-cart') || '0', 10) || 0) : 0;
+		/* Already in the cart? «خرید آنلاین» adds one more, not the whole stepper. */
+		var addQty    = inCart ? 1 : (st.qty || 1);
+
 		var body = new URLSearchParams();
 		body.set('action', 'hsw_add_to_cart'); /* unused; wc-ajax endpoint ignores action */
 		body.set('product_id', st.variation && st.variation.id ? st.variation.id : pid);
 		if (st.variation && st.variation.id) { body.set('variation_id', st.variation.id); }
-		body.set('quantity', st.qty);
-
-		var scope    = btn.closest('.hsw-p');
-		var beforeQty = scope ? (parseInt(scope.getAttribute('data-hsw-in-cart') || '0', 10) || 0) : 0;
+		body.set('quantity', addQty);
 
 		var url = D.wcAjax || '/?wc-ajax=add_to_cart';
 		fetch(url, {
@@ -463,10 +474,12 @@
 			/*
 			 * The item is in the cart now: reveal the stepper (it is hidden
 			 * before the first add) and seed it with the new line quantity.
-			 * WooCommerce adds the requested quantity to an existing line.
+			 * WooCommerce adds the requested quantity to an existing line, so
+			 * the stepper, data-hsw-in-cart and the header badge stay identical.
 			 */
-			setRootInCart(pid, true);
-			setQty(pid, beforeQty + (st.qty || 1));
+			var newQty = inCart ? beforeQty + 1 : addQty;
+			setRootInCart(pid, true, newQty);
+			setQty(pid, newQty);
 
 			applyFragments(res && res.fragments);
 		}).catch(function () {

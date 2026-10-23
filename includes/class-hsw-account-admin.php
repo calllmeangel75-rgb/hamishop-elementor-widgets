@@ -84,7 +84,7 @@ final class HSW_Account_Admin {
 			'notifications' => 'اعلان‌ها',
 			'wallet'        => 'کیف پول',
 			'auth'          => 'ورود و امنیت',
-			'design'        => 'رنگ و چیدمان',
+			'design'        => 'پالت و ظاهر',
 			'shortcode'     => 'شورت‌کد و راهنما',
 		);
 		if ( ! isset( $tabs[ $tab ] ) ) {
@@ -124,7 +124,7 @@ final class HSW_Account_Admin {
 				<?php elseif ( 'design' === $tab ) : ?>
 					<?php $this->tab_design( $s ); ?>
 				<?php endif; ?>
-				<?php if ( 'shortcode' !== $tab ) : ?>
+				<?php if ( 'shortcode' !== $tab && 'design' !== $tab ) : ?>
 					<p class="hsw-admin-submit"><?php submit_button( 'ذخیره تنظیمات', 'primary', 'submit', false ); ?></p>
 				<?php endif; ?>
 			</form>
@@ -359,11 +359,11 @@ final class HSW_Account_Admin {
 		</div>
 		<div class="hsw-admin-card">
 			<h2>باشگاه مشتریان و امتیاز</h2>
-			<p class="hsw-admin-desc">امتیاز هر کاربر از مجموع خریدهای معتبر (total spent ووکامرس) تقسیم بر «مبلغ هر امتیاز» محاسبه می‌شود. امتیازها سطح کاربر را تعیین می‌کنند و فعلاً به کیف پول تبدیل نمی‌شوند.</p>
+			<p class="hsw-admin-desc">امتیاز هر کاربر از مجموع خریدهای معتبر (total spent ووکامرس) تقسیم بر «مبلغ خرید برای دریافت ۱ امتیاز» محاسبه می‌شود. امتیازها سطح کاربر را تعیین می‌کنند و مشتری می‌تواند آن‌ها را در بخش کیف پول به اعتبار خرید تبدیل کند.</p>
 			<div class="hsw-admin-grid">
 				<?php $this->switch_field( $s, 'loyalty', 'enabled', 'فعال‌سازی باشگاه مشتریان' ); ?>
 				<?php $this->text_field( $s, 'loyalty', 'label', 'نام امتیازها' ); ?>
-				<?php $this->number_field( $s, 'loyalty', 'rate', 'مبلغ هر امتیاز (تومان)', 1, 10000000, 'مثلاً ۱۰۰۰۰ یعنی هر ۱۰,۰۰۰ تومان خرید = ۱ امتیاز.' ); ?>
+				<?php $this->number_field( $s, 'loyalty', 'rate', 'مبلغ خرید برای دریافت ۱ امتیاز (تومان)', 1, 10000000, 'مثلاً ۱۰۰۰۰ یعنی هر ۱۰,۰۰۰ تومان خرید = ۱ امتیاز.' ); ?>
 				<?php $this->number_field( $s, 'loyalty', 'silver', 'حد امتیاز سطح نقره‌ای', 1, 10000000 ); ?>
 				<?php $this->number_field( $s, 'loyalty', 'gold', 'حد امتیاز سطح طلایی', 1, 10000000 ); ?>
 			</div>
@@ -495,7 +495,7 @@ final class HSW_Account_Admin {
 			<div class="hsw-admin-grid">
 				<?php $this->text_field( $s, 'wallet', 'label', 'نام کیف پول', 'مثلاً «کیف پول» یا «اعتبار حساب».' ); ?>
 				<?php $this->number_field( $s, 'wallet', 'min_topup', 'حداقل مبلغ شارژ (تومان)', 0, 10000000 ); ?>
-				<?php $this->number_field( $s, 'wallet', 'point_value', 'ارزش هر امتیاز (تومان)', 1, 1000000 ); ?>
+				<?php $this->number_field( $s, 'wallet', 'point_value', 'مبلغ شارژ کیف پول به ازای هر ۱ امتیاز (تومان)', 1, 1000000, 'هنگام تبدیل امتیاز توسط مشتری، هر ۱ امتیاز معادل این مبلغ به کیف پول او اضافه می‌شود.' ); ?>
 			</div>
 			<?php $this->textarea_field( $s, 'wallet', 'note', 'توضیح زیر موجودی', 'یک جملهٔ کوتاه برای مشتری.', true ); ?>
 
@@ -611,33 +611,41 @@ final class HSW_Account_Admin {
 	}
 
 	private function tab_design( $s ) {
+		$palette_url = admin_url( 'admin.php?page=hamishop-palette' );
+		$account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/' );
+		$palette     = class_exists( 'HSW_Palette' ) ? HSW_Palette::get() : array();
+		$tokens      = class_exists( 'HSW_Palette' ) ? HSW_Palette::tokens() : array();
 		?>
 		<div class="hsw-admin-card">
-			<h2>پالت رنگ</h2>
-			<p class="hsw-admin-desc">این رنگ‌ها به‌عنوان مقدار پایه اعمال می‌شوند. در ویجت المنتور می‌توانید هر نمونه را مستقل تغییر دهید.</p>
-			<div class="hsw-colors">
-				<?php
-				$colors = array(
-					'primary'      => 'اصلی (سرمه‌ای)',
-					'primary_dark' => 'سرمه‌ای تیره',
-					'accent'       => 'رنگ تاکیدی',
-					'bg'           => 'پس‌زمینه',
-					'card'         => 'کارت‌ها',
-					'ink'          => 'متن اصلی',
-					'muted'        => 'متن ثانویه',
-					'line'         => 'خطوط',
-					'success'      => 'موفقیت',
-					'warning'      => 'هشدار',
-					'danger'       => 'خطا',
-					'hero_a'       => 'گرادیان هدر ۱',
-					'hero_b'       => 'گرادیان هدر ۲',
-				);
-				foreach ( $colors as $key => $label ) {
-					$this->color_field( $s, 'design', $key, $label );
-				}
-				?>
-			</div>
+			<h2>پالت رنگی سراسری</h2>
+			<p class="hsw-admin-desc">رنگ‌های پنل حساب کاربری از <strong>HamiShop ← پالت رنگی</strong> خوانده می‌شوند؛ با یک‌بار تغییر پالت، فروشگاه و پنل حساب با هم هماهنگ می‌مانند. فیلدهای رنگ جداگانهٔ این تب حذف شدند تا دو پالت ناهماهنگ نداشته باشیم.</p>
+			<p style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px">
+				<a class="button button-primary" href="<?php echo esc_url( $palette_url ); ?>">ویرایش پالت رنگی سراسری</a>
+				<a class="button" href="<?php echo esc_url( $account_url ); ?>" target="_blank" rel="noopener">مشاهدهٔ پنل حساب</a>
+			</p>
 		</div>
+
+		<div class="hsw-admin-card">
+			<h2>رنگ‌های فعلی</h2>
+			<p class="hsw-admin-desc">این مقادیر فقط نمایشی‌اند و از پالت سراسری خوانده شده‌اند.</p>
+			<div class="hsw-pal-preview">
+				<?php foreach ( $palette as $key => $hex ) : ?>
+					<span class="hsw-pal-chip">
+						<i style="background:<?php echo esc_attr( $hex ); ?>"></i>
+						<b><?php echo esc_html( isset( $tokens[ $key ][0] ) ? $tokens[ $key ][0] : $key ); ?></b>
+						<code><?php echo esc_html( $hex ); ?></code>
+					</span>
+				<?php endforeach; ?>
+			</div>
+			<p class="description">برای تغییر هر رنگ، روی «ویرایش پالت رنگی سراسری» بزنید؛ همان لحظه در فروشگاه، سبد خرید و پنل حساب اعمال می‌شود.</p>
+		</div>
+		<style>
+			.hsw-pal-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0 6px}
+			.hsw-pal-chip{display:flex;align-items:center;gap:8px;border:1px solid #e6ebf2;border-radius:10px;padding:8px 10px;background:#fff;font-size:12px}
+			.hsw-pal-chip i{width:22px;height:22px;flex:0 0 22px;border-radius:6px;border:1px solid rgba(0,0,0,.08)}
+			.hsw-pal-chip b{flex:1;min-width:0;font-weight:600;color:#0f2740;font-size:11.5px;line-height:1.5}
+			.hsw-pal-chip code{direction:ltr;font-size:10.5px;color:#64748b}
+		</style>
 		<?php
 	}
 

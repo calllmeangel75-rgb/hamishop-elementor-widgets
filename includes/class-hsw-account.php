@@ -781,23 +781,48 @@ final class HSW_Account {
 	}
 
 	public function tokens_css() {
-		$s    = $this->settings();
-		$d    = $s['design'];
-		$g    = $s['general'];
+		$s = $this->settings();
+		$d = $s['design'];
+		$g = $s['general'];
+
+		/*
+		 * ONE palette for the whole plugin. The account panel used to carry its
+		 * own 13 colours (HamiShop → پنل حساب کاربری → رنگ و چیدمان), which
+		 * drifted away from HamiShop → پالت رنگی. Every colour now comes from
+		 * HSW_Palette; `design` is only a legacy fallback for the moment the
+		 * palette class is unavailable.
+		 */
+		$p = class_exists( 'HSW_Palette' ) ? HSW_Palette::get() : array();
+		$c = array(
+			'primary'      => isset( $p['primary'] ) ? $p['primary'] : $d['primary'],
+			'primary_dark' => isset( $p['primary_dark'] ) ? $p['primary_dark'] : $d['primary_dark'],
+			'accent'       => isset( $p['accent'] ) ? $p['accent'] : $d['accent'],
+			'bg'           => isset( $p['surface_alt'] ) ? $p['surface_alt'] : $d['bg'],
+			'card'         => isset( $p['surface'] ) ? $p['surface'] : $d['card'],
+			'ink'          => isset( $p['text'] ) ? $p['text'] : $d['ink'],
+			'muted'        => isset( $p['muted'] ) ? $p['muted'] : $d['muted'],
+			'line'         => isset( $p['border'] ) ? $p['border'] : $d['line'],
+			'success'      => isset( $p['success'] ) ? $p['success'] : $d['success'],
+			'warning'      => isset( $p['warning'] ) ? $p['warning'] : $d['warning'],
+			'danger'       => isset( $p['danger'] ) ? $p['danger'] : $d['danger'],
+			'hero_a'       => isset( $p['hero_a'] ) ? $p['hero_a'] : $d['hero_a'],
+			'hero_b'       => isset( $p['hero_b'] ) ? $p['hero_b'] : $d['hero_b'],
+		);
+
 		$vars = array(
-			'--hsw-ac-primary'      => $d['primary'],
-			'--hsw-ac-primary-dark' => $d['primary_dark'],
-			'--hsw-ac-accent'       => $d['accent'],
-			'--hsw-ac-bg'           => $d['bg'],
-			'--hsw-ac-card'         => $d['card'],
-			'--hsw-ac-ink'          => $d['ink'],
-			'--hsw-ac-muted'        => $d['muted'],
-			'--hsw-ac-line'         => $d['line'],
-			'--hsw-ac-success'      => $d['success'],
-			'--hsw-ac-warning'      => $d['warning'],
-			'--hsw-ac-danger'       => $d['danger'],
-			'--hsw-ac-hero-a'       => $d['hero_a'],
-			'--hsw-ac-hero-b'       => $d['hero_b'],
+			'--hsw-ac-primary'      => $c['primary'],
+			'--hsw-ac-primary-dark' => $c['primary_dark'],
+			'--hsw-ac-accent'       => $c['accent'],
+			'--hsw-ac-bg'           => $c['bg'],
+			'--hsw-ac-card'         => $c['card'],
+			'--hsw-ac-ink'          => $c['ink'],
+			'--hsw-ac-muted'        => $c['muted'],
+			'--hsw-ac-line'         => $c['line'],
+			'--hsw-ac-success'      => $c['success'],
+			'--hsw-ac-warning'      => $c['warning'],
+			'--hsw-ac-danger'       => $c['danger'],
+			'--hsw-ac-hero-a'       => $c['hero_a'],
+			'--hsw-ac-hero-b'       => $c['hero_b'],
 			'--hsw-ac-side'         => $g['side_width'] . 'px',
 			'--hsw-ac-gap'          => $g['gap'] . 'px',
 			'--hsw-ac-max'          => $g['max_width'] . 'px',
