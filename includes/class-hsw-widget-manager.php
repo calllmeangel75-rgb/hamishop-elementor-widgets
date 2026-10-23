@@ -659,6 +659,17 @@ final class HSW_Widget_Manager {
 
 		register_setting(
 			'hsw_widgets_group',
+			'hsw_oos_last',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_yes_no' ),
+				'default'           => 'yes',
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_setting(
+			'hsw_widgets_group',
 			HSW_Free_Shipping::OPTION,
 			array(
 				'type'              => 'number',
@@ -681,6 +692,16 @@ final class HSW_Widget_Manager {
 				'show_in_rest'      => false,
 			)
 		);
+	}
+
+	/**
+	 * yes/no checkbox helper.
+	 *
+	 * @param mixed $input Raw input.
+	 * @return string
+	 */
+	public static function sanitize_yes_no( $input ) {
+		return ( 'yes' === $input ) ? 'yes' : 'no';
 	}
 
 	/**
@@ -914,6 +935,25 @@ final class HSW_Widget_Manager {
 									</span>
 									<span class="hsw-wm-switch">
 										<input type="checkbox" id="hsw-fb-product" name="hsw_add_feedback[modal_product]" value="yes" <?php checked( $fb['product'] ); ?> />
+									</span>
+								</label>
+							</div>
+						</section>
+
+						<section class="hsw-wm-group" id="hsw-group-catalog">
+							<header class="hsw-wm-grouphead">
+								<h2><?php esc_html_e( 'ترتیب محصولات', 'hamishop-elementor-widgets' ); ?></h2>
+								<p><?php esc_html_e( 'محصولات ناموجود کجای فهرست فروشگاه بیایند؟', 'hamishop-elementor-widgets' ); ?></p>
+							</header>
+
+							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row" for="hsw-oos-last">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'ناموجودها انتهای فهرست', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'با روشن بودن، محصولات ناموجود در همهٔ صفحات فروشگاه و دسته‌بندی‌ها بعد از موجودها نمایش داده می‌شوند؛ ترتیب بقیه (قیمت، جدیدترین، تخفیف) دست‌نخورده می‌ماند.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="checkbox" id="hsw-oos-last" name="hsw_oos_last" value="yes" <?php checked( 'yes', get_option( 'hsw_oos_last', 'yes' ) ); ?> />
 									</span>
 								</label>
 							</div>

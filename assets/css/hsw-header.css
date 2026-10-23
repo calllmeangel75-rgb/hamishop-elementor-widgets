@@ -2080,3 +2080,51 @@ html.hsw-hd-lock body {
 		animation-duration: .01ms !important;
 	}
 }
+
+/* -------------------------------------------------------------------------
+ * Palette-driven interaction states
+ *
+ * The header used to derive hover/active from `--hsw-hd-primary` with a
+ * hand-mixed darkening, so changing the palette moved the base colour but the
+ * hover stayed a slightly different blue. These rules point every interactive
+ * element at the palette's own tokens:
+ *
+ *   primary  → HamiShop → پالت رنگی → «رنگ اصلی»
+ *   hover    → «رنگ هاور»
+ *   active   → «رنگ اصلی تیره»
+ *
+ * The fallbacks keep older installs (whose palette predates `hover`) looking
+ * exactly as before.
+ * ---------------------------------------------------------------------- */
+.hsw-hd__iconbtn:hover,
+.hsw-hd__account:hover,
+.hsw-hd__cart:hover,
+.hsw-hd__catbtn:hover,
+.hsw-hd__phone:hover,
+.hsw-hd__utilslinks a:hover,
+.hsw-hd__menu > li > a:hover,
+.hsw-hd__megatoggle:hover {
+	color: var(--hsw-hover, var(--hsw-hd-primary));
+}
+
+.hsw-hd__iconbtn:hover {
+	border-color: color-mix(in srgb, var(--hsw-hover, var(--hsw-hd-primary)) 45%, var(--hsw-hd-border));
+}
+
+.hsw-hd__iconbtn:active,
+.hsw-hd__account:active,
+.hsw-hd__cart:active,
+.hsw-hd__catbtn:active {
+	color: var(--hsw-primary-dark, var(--hsw-hd-primary));
+	background: color-mix(in srgb, var(--hsw-primary) 9%, var(--hsw-hd-bg));
+}
+
+.hsw-hd__cta:hover {
+	background: var(--hsw-hover, var(--hsw-hd-primary));
+	color: #fff;
+}
+
+.hsw-hd__cta:active {
+	background: var(--hsw-primary-dark, var(--hsw-hd-primary));
+	color: #fff;
+}

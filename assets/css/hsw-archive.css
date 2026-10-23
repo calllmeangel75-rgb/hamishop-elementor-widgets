@@ -959,11 +959,18 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         color: var(--hswa-soft);
 }
 
+/*
+ * Centred with inset + auto margins instead of `inset-inline-start: 50%` and a
+ * translate: in RTL the inline-start edge is the *right* one, so the -50% shift
+ * pushed the pill off-centre (and off the card on a phone).
+ */
 .hsw-ag__oosbadge {
         position: absolute;
-        inset-inline-start: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) translateX(0);
+        inset: 0;
+        margin: auto;
+        width: max-content;
+        height: max-content;
+        max-width: calc(100% - 12px);
         padding: 5px 14px;
         border-radius: 999px;
         background: rgba(15, 23, 42, .78);
@@ -971,6 +978,8 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         font-size: 11.5px;
         font-weight: 800;
         letter-spacing: .3px;
+        line-height: 1.7;
+        text-align: center;
         pointer-events: none;
         white-space: nowrap;
 }
@@ -1025,6 +1034,32 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         overflow: hidden;
 }
 .hsw-ag__media img { max-height: 100%; max-width: 100%; object-fit: contain; }
+
+/*
+ * Hover swap: the second gallery photo fades in over the first and settles at
+ * 1.1. Scoped to devices with a real pointer — on touch the "hover" state gets
+ * stuck after a tap.
+ */
+.hsw-ag__media img.hsw-ag__img2 {
+        position: absolute;
+        inset: 8px;
+        width: calc(100% - 16px);
+        height: calc(100% - 16px);
+        object-fit: contain;
+        opacity: 0;
+        transform: scale(1.04);
+        transition: opacity .35s ease, transform .45s ease;
+        pointer-events: none;
+        will-change: opacity, transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+        .hsw-ag__card:hover .hsw-ag__media img.hsw-ag__img2,
+        .hsw-ag__card:focus-within .hsw-ag__media img.hsw-ag__img2 {
+                opacity: 1;
+                transform: scale(1.1);
+        }
+}
 .hsw-ag__body { min-width: 0; }
 .hsw-ag__meta { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--hswa-soft); margin-bottom: 4px; }
 .hsw-ag__rate { display: inline-flex; align-items: center; gap: 2px; color: var(--hswa-amber); font-weight: 700; }
@@ -1577,4 +1612,12 @@ footer.wd-footer .color-500,
 footer.wd-footer .wd-text-block p,
 footer.wd-footer .wd-list-content {
         color: #5f6368 !important;
+}
+/* Phone: the badge may need two lines in a narrow card — keep it centred. */
+@media (max-width: 767.98px) {
+        .hsw-ag__oosbadge {
+                white-space: normal;
+                font-size: 11px;
+                padding: 4px 12px;
+        }
 }

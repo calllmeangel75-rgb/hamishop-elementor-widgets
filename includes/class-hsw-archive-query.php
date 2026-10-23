@@ -177,7 +177,9 @@ class HSW_Archive_Query {
                  * archive. The flag is read back in oos_last_clauses() so the
                  * JOIN/ORDER BY only ever touches the product archive query.
                  */
-                if ( apply_filters( 'hsw_archive_oos_last', true ) ) {
+                $oos_last = 'yes' === get_option( 'hsw_oos_last', 'yes' );
+
+                if ( apply_filters( 'hsw_archive_oos_last', $oos_last ) ) {
                         $q->set( 'hsw_oos_last', 'yes' );
                 }
 

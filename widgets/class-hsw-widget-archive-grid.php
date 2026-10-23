@@ -257,6 +257,8 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 $url       = '#';
                 $addable   = false;
                 $cfp       = false;
+                /* Only set in the live branch; the demo branch never has one. */
+                $product   = null;
 
                 if ( $is_demo ) {
                         $p        = $item;
@@ -297,12 +299,36 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                         }
                         list( $note, $note_ok, $note_ic ) = $this->status_note( $product, $s );
                         $img_html = $this->image_html( $product, $name, $priority );
+
+                /*
+                 * Second gallery image: fades in on hover with a slight zoom.
+                 * Only rendered when the product actually has one, so a card
+                 * with a single photo keeps its single <img>.
+                 */
+                $img2_html = '';
+                if ( $product instanceof WC_Product ) {
+                        $gallery = $product->get_gallery_image_ids();
+                        if ( ! empty( $gallery ) ) {
+                                $img2_html = wp_get_attachment_image(
+                                        (int) $gallery[0],
+                                        'woocommerce_thumbnail',
+                                        false,
+                                        array(
+                                                'class'    => 'hsw-ag__img2',
+                                                'alt'      => '',
+                                                'loading'  => 'lazy',
+                                                'decoding' => 'async',
+                                                'aria-hidden' => 'true',
+                                        )
+                                );
+                        }
+                }
                 }
 
                 $cur      = isset( $s['currency'] ) && '' !== trim( (string) $s['currency'] ) ? trim( (string) $s['currency'] ) : HSW_Helpers::currency_label();
                 $wish     = ( 'yes' === ( $s['show_wishlist'] ?? 'yes' ) );
                 ?>
-                <?php $is_oos = ! $product->is_in_stock(); ?>
+                <?php $is_oos = ( $product instanceof WC_Product ) && ! $product->is_in_stock(); ?>
                 <article class="hsw-ag__card<?php echo $is_oos ? ' is-oos' : ''; ?>">
 
                         <?php if ( 'sale' === $badge || 'featured' === $badge ) : ?>
@@ -323,6 +349,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
 
                         <a class="hsw-ag__media" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
                                 <?php echo $img_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe image markup. ?>
+                                <?php echo $img2_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- safe image markup. ?>
                                 <?php if ( $is_oos ) : ?>
                                         <span class="hsw-ag__oosbadge"><?php echo esc_html( isset( $s['oos_text'] ) && '' !== trim( (string) $s['oos_text'] ) ? (string) $s['oos_text'] : __( 'ناموجود', 'hamishop-elementor-widgets' ) ); ?></span>
                                 <?php endif; ?>
