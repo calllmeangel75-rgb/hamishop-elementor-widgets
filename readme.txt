@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.44
+Stable tag: 1.11.45
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.45 =
+* **دو سخت‌سازی کوچک برای سایت لایو.**
+  - **تشخیص خودکار برگهٔ پرداخت و تکمیل خرید:** اگر `hsw_pay_page_id` یا
+    `hsw_complete_page_id` خالی/صفر باشد، برگهٔ منتشرشده با اسلاگ `payment`
+    یا `complete` پیدا و استفاده می‌شود؛ دیگر ریدایرکت تسویه حساب به خودش
+    برنمی‌گردد. گارد قبلی (سبد/تسویه/برگهٔ نامعتبر) دست‌نخورده است.
+  - **کلید کدشدهٔ فیلتر:** اگر خودِ نام تاکسونومی در URL درصد-کد شده باشد
+    (`filter_pa_%d8%b1%d9%86%da%af`)، هم در `normalize_filter_params()` و هم
+    در ساخت کوئری تاکسونومی دیکد می‌شود تا `taxonomy_exists('pa_رنگ')` همیشه
+    درست باشد؛ کلید `query_type_*` هم به همان شکل منتقل می‌شود.
 
 = 1.11.44 =
 * **بازطراحی چیدمان صفحهٔ «کنترل ویجت‌ها».**

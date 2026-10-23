@@ -36,11 +36,38 @@ final class HSW_Complete_Route {
      * ====================================================================== */
 
     /**
+     * Resolve a page id from its option, then from a page slug.
+     *
+     * A store that already has a `/complete/` or `/payment/` page but never
+     * picked it in the WooCommerce settings used to fall through to "no
+     * route", and checkout redirected to itself. The slug is a safe last
+     * resort: it must be a published page, and the caller still runs the
+     * cart/checkout guard afterwards.
+     *
+     * @param string $option Option name holding the page id.
+     * @param string $slug   Fallback page slug.
+     * @return int Page id or 0.
+     */
+    private static function resolve_page_id( $option, $slug ) {
+        $id = (int) get_option( $option, 0 );
+        if ( $id > 0 && 'publish' === get_post_status( $id ) ) {
+            return $id;
+        }
+
+        $page = get_page_by_path( $slug, OBJECT, 'page' );
+        if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+            return (int) $page->ID;
+        }
+
+        return 0;
+    }
+
+    /**
      * The configured completion page id, or 0 (disabled / guard tripped).
      */
     public static function page_id() {
-        $id = (int) get_option( self::OPTION, 0 );
-        if ( $id <= 0 || 'publish' !== get_post_status( $id ) ) {
+        $id = self::resolve_page_id( self::OPTION, 'complete' );
+        if ( $id <= 0 ) {
             return 0;
         }
         /* Never route the customer back into the cart / checkout pages. */
@@ -85,8 +112,8 @@ final class HSW_Complete_Route {
      * summary CTA leads to), or 0 (disabled / guard tripped).
      */
     public static function pay_page_id() {
-        $id = (int) get_option( self::PAY_OPTION, 0 );
-        if ( $id <= 0 || 'publish' !== get_post_status( $id ) ) {
+        $id = self::resolve_page_id( self::PAY_OPTION, 'payment' );
+        if ( $id <= 0 ) {
             return 0;
         }
         /* Never send the customer into the cart, the checkout page itself or

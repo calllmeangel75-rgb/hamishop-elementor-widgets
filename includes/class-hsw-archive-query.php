@@ -38,9 +38,34 @@ class HSW_Archive_Query {
                 }
                 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public archive filters.
                 foreach ( $_GET as $key => $value ) {
-                        if ( ! is_string( $key ) || 0 !== strpos( $key, 'filter_' ) ) {
+                        if ( ! is_string( $key ) ) {
                                 continue;
                         }
+
+                        /*
+                         * `query_type_pa_%d8%b1…` travels with an encoded
+                         * `filter_` key; move it under the decoded name too.
+                         */
+                        if ( 0 === strpos( $key, 'query_type_' ) ) {
+                                $type_key = 'query_type_' . rawurldecode( substr( $key, 11 ) );
+                                if ( $type_key !== $key ) {
+                                        $_GET[ $type_key ] = $value;
+                                        unset( $_GET[ $key ] );
+                                }
+                                continue;
+                        }
+
+                        if ( 0 !== strpos( $key, 'filter_' ) ) {
+                                continue;
+                        }
+
+                        /*
+                         * The taxonomy name itself can arrive percent-encoded
+                         * (`filter_pa_%d8%b1%d9%86%da%af`). Decode the key too,
+                         * otherwise WooCommerce and our own tax query look for a
+                         * taxonomy called `pa_%d8%b1…` that does not exist.
+                         */
+                        $taxonomy_key = 'filter_' . rawurldecode( substr( $key, 7 ) );
 
                         if ( is_array( $value ) ) {
                                 $flat = array();
@@ -65,11 +90,16 @@ class HSW_Archive_Query {
                                 }
                         }
 
-                        if ( empty( $terms ) ) {
+                        /* Move the value under the decoded key. */
+                        if ( $taxonomy_key !== $key ) {
                                 unset( $_GET[ $key ] );
+                        }
+
+                        if ( empty( $terms ) ) {
+                                unset( $_GET[ $taxonomy_key ] );
                                 continue;
                         }
-                        $_GET[ $key ] = implode( ',', array_keys( $terms ) );
+                        $_GET[ $taxonomy_key ] = implode( ',', array_keys( $terms ) );
                 }
                 // phpcs:enable
         }
@@ -304,7 +334,8 @@ class HSW_Archive_Query {
                 $handled  = array();
                 foreach ( $existing as $row ) {
                         if ( is_array( $row ) && ! empty( $row['taxonomy'] ) ) {
-                                $handled[ (string) $row['taxonomy'] ] = true;
+                                /* Compare decoded, so `pa_%d8%b1…` and `pa_رنگ` match. */
+                                $handled[ rawurldecode( (string) $row['taxonomy'] ) ] = true;
                         }
                 }
 
@@ -314,7 +345,15 @@ class HSW_Archive_Query {
                         if ( ! is_string( $key ) || 0 !== strpos( $key, 'filter_' ) ) {
                                 continue;
                         }
-                        $taxonomy = substr( $key, 7 );
+
+                        /*
+                         * The key itself can be percent-encoded
+                         * (`filter_pa_%d8%b1%d9%86%da%af`): without decoding,
+                         * `taxonomy_exists()` is always false and the filter is
+                         * silently dropped.
+                         */
+                        $raw_taxonomy = substr( $key, 7 );
+                        $taxonomy     = rawurldecode( $raw_taxonomy );
                         if ( '' === $taxonomy || ! taxonomy_exists( $taxonomy ) || isset( $handled[ $taxonomy ] ) ) {
                                 continue;
                         }
@@ -328,7 +367,13 @@ class HSW_Archive_Query {
                                 continue;
                         }
 
-                        $query_type = isset( $_GET[ 'query_type_' . $taxonomy ] ) ? sanitize_key( wp_unslash( $_GET[ 'query_type_' . $taxonomy ] ) ) : 'and';
+                        $type_key   = 'query_type_' . $taxonomy;
+                        $query_type = 'and';
+                        if ( isset( $_GET[ $type_key ] ) ) {
+                                $query_type = sanitize_key( wp_unslash( $_GET[ $type_key ] ) );
+                        } elseif ( isset( $_GET[ 'query_type_' . $raw_taxonomy ] ) ) {
+                                $query_type = sanitize_key( wp_unslash( $_GET[ 'query_type_' . $raw_taxonomy ] ) );
+                        }
 
                         $out[] = array(
                                 'taxonomy'         => $taxonomy,
