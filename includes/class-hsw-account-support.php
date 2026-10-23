@@ -434,10 +434,11 @@ final class HSW_Account_Support {
 		$author = get_user_by( 'id', $author_id );
 		$name   = $author ? $author->display_name : ( $is_staff ? 'پشتیبانی' : 'کاربر' );
 		$initial = function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 1, 'UTF-8' ) : substr( $name, 0, 1 );
+		$staff   = class_exists( 'HSW_Branding' ) ? sprintf( 'پشتیبانی %s', HSW_Branding::name() ) : $name;
 
 		return '<article class="hsw-ac__msg' . ( $is_staff ? ' is-staff' : '' ) . '">'
 			. '<div class="hsw-ac__msg-avatar" aria-hidden="true">' . ( $is_staff ? $this->account->icon( 'support' ) : esc_html( $initial ) ) . '</div>'
-			. '<div class="hsw-ac__msg-body"><div class="hsw-ac__msg-head"><strong>' . esc_html( $is_staff ? 'پشتیبانی HamiShop' : $name ) . '</strong><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( $this->format_date( $timestamp ) ) . '</time></div>'
+			. '<div class="hsw-ac__msg-body"><div class="hsw-ac__msg-head"><strong>' . esc_html( $is_staff ? $staff : $name ) . '</strong><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( $this->format_date( $timestamp ) ) . '</time></div>'
 			. '<div class="hsw-ac__msg-text">' . nl2br( esc_html( $content ) ) . '</div></div>'
 			. '</article>';
 	}

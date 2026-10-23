@@ -35,6 +35,8 @@ final class HSW_Plugin {
 
                 new HSW_Widget_Manager();
                 HSW_Palette::instance();
+                HSW_Branding::instance();
+                HSW_Security::instance();
                 new HSW_Rest();
                 new HSW_Assets();
 
@@ -132,6 +134,8 @@ final class HSW_Plugin {
                  */
                 require_once HSW_DIR . 'includes/class-hsw-icon-set.php';
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
+                require_once HSW_DIR . 'includes/class-hsw-branding.php';
+                require_once HSW_DIR . 'includes/class-hsw-security.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';

@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک و بهینه برای Lighthouse 100.
- * Version:     1.11.21
+ * Version:     1.11.22
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -43,7 +43,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.21' );
+define( 'HSW_VERSION', '1.11.22' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
@@ -144,6 +144,23 @@ if ( ! function_exists( 'hsw_activation_guard' ) ) {
                 );
         }
         register_activation_hook( __FILE__, 'hsw_activation_guard' );
+}
+
+/**
+ * Leave no trace in `.htaccess` when the plugin is switched off.
+ *
+ * The custom admin path is a rewrite rule, not PHP. Deactivating without
+ * removing it would leave a rule pointing at wp-admin with nothing managing
+ * it, so the block is cleaned up explicitly.
+ */
+if ( ! function_exists( 'hsw_deactivation_cleanup' ) ) {
+        function hsw_deactivation_cleanup() {
+                if ( ! class_exists( 'HSW_Security' ) ) {
+                        require_once HSW_DIR . 'includes/class-hsw-security.php';
+                }
+                HSW_Security::remove_rewrite();
+        }
+        register_deactivation_hook( __FILE__, 'hsw_deactivation_cleanup' );
 }
 
 /**

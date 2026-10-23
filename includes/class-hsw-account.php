@@ -2430,7 +2430,7 @@ final class HSW_Account {
 			$customer_id,
 			array(
 				'type'  => 'welcome',
-				'title' => 'به HamiShop خوش آمدید',
+				'title' => sprintf( 'به %s خوش آمدید', class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' ) ),
 				'text'  => 'حساب کاربری شما ساخته شد. از این پس می‌توانید سفارش‌ها و اطلاعات خود را از این پنل مدیریت کنید.',
 				'url'   => wc_get_page_permalink( 'myaccount' ),
 			)
@@ -2661,7 +2661,7 @@ final class HSW_Account {
 			$html .= '</div>';
 			$html .= '<a class="hsw-ac-auth__back" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . $this->icon( 'arrow-right' ) . esc_html__( 'بازگشت به ورود', 'hamishop-elementor-widgets' ) . '</a>';
 		} else {
-			$html .= '<div class="hsw-ac-auth__heading"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'حساب کاربری HamiShop', 'hamishop-elementor-widgets' ) . '</span><h1>' . esc_html( $opts['auth']['login_title'] ) . '</h1><p>' . esc_html( $opts['auth']['login_subtitle'] ) . '</p></div>';
+			$html .= '<div class="hsw-ac-auth__heading"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'حساب کاربری', 'hamishop-elementor-widgets' ) . '</span><h1>' . esc_html( $opts['auth']['login_title'] ) . '</h1><p>' . esc_html( $opts['auth']['login_subtitle'] ) . '</p></div>';
 
 			if ( $show_register ) {
 				$html .= '<div class="hsw-ac-auth__tabs" role="tablist" aria-label="' . esc_attr__( 'ورود یا ثبت‌نام', 'hamishop-elementor-widgets' ) . '">';
@@ -2700,9 +2700,14 @@ final class HSW_Account {
 		$brand_title = $opts['auth']['brand_title'];
 		$brand_sub   = $opts['auth']['brand_subtitle'];
 		$benefits    = $opts['auth']['benefits'];
+		$brand_logo  = class_exists( 'HSW_Branding' ) ? HSW_Branding::logo_html( 'hsw-ac-auth__logo-img' ) : '';
+		$brand_name  = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
+		$brand_mark  = '' !== $brand_logo
+			? '<span class="hsw-ac-auth__logo-mark hsw-ac-auth__logo-mark--img">' . $brand_logo . '</span>'
+			: '<span class="hsw-ac-auth__logo-mark">' . $this->icon( 'shopping-bag' ) . '</span>';
 		$html        = '<aside class="hsw-ac-auth__brand">';
 		$html       .= '<div class="hsw-ac-auth__brand-glow" aria-hidden="true"></div>';
-		$html       .= '<a class="hsw-ac-auth__logo" href="' . esc_url( home_url( '/' ) ) . '"><span class="hsw-ac-auth__logo-mark">' . $this->icon( 'shopping-bag' ) . '</span><span>HamiShop</span></a>';
+		$html       .= '<a class="hsw-ac-auth__logo" href="' . esc_url( home_url( '/' ) ) . '">' . $brand_mark . '<span>' . esc_html( $brand_name ) . '</span></a>';
 		$html       .= '<div class="hsw-ac-auth__brand-copy"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'تجربه خرید بهتر', 'hamishop-elementor-widgets' ) . '</span><h2>' . esc_html( $brand_title ) . '</h2><p>' . esc_html( $brand_sub ) . '</p></div>';
 		if ( 'yes' === $opts['auth']['show_benefits'] && ! empty( $benefits ) ) {
 			$html .= '<ul class="hsw-ac-auth__benefits">';

@@ -4158,3 +4158,224 @@ a.hsw-ac__stat:hover {
 }
 
 
+
+/* =========================================================================
+ * Modern form fields — v1.11.22
+ *
+ * One visual language for every input in the account panel: the login,
+ * register and OTP forms (.hsw-ac-form) and WooCommerce's own account
+ * details form, which we only restyle and never replace.
+ *
+ *   filled #f7f9fc  ·  1px #e3e8ef  ·  13px radius  ·  52px tall
+ *   focus → white surface + primary ring + 1px lift
+ * ====================================================================== */
+
+/* --- Our own forms (login / register / OTP / support) ------------------ */
+
+.hsw-ac-form .hsw-ac-field > label,
+.hsw-ac-otp .hsw-ac-field > label {
+	margin-bottom: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .2px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac-input-wrap > input,
+.hsw-ac-input-wrap > select,
+.hsw-ac-input-wrap > textarea,
+.hsw-ac-form .hsw-ac-field > input,
+.hsw-ac-form .hsw-ac-field > select,
+.hsw-ac-form .hsw-ac-field > textarea {
+	width: 100%;
+	min-height: 52px;
+	padding: 0 14px;
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background: #f7f9fc;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--hsw-ac-ink);
+	transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.hsw-ac-input-wrap > input {
+	padding-inline-start: 40px;
+}
+
+.hsw-ac-input-wrap > input::placeholder,
+.hsw-ac-form .hsw-ac-field > input::placeholder {
+	color: #9aa7b8;
+	font-weight: 500;
+}
+
+.hsw-ac-input-wrap > input:hover,
+.hsw-ac-form .hsw-ac-field > input:hover,
+.hsw-ac-form .hsw-ac-field > select:hover {
+	background: #f1f5fa;
+	border-color: #d7e0ea;
+}
+
+.hsw-ac-input-wrap > input:focus,
+.hsw-ac-input-wrap > select:focus,
+.hsw-ac-input-wrap > textarea:focus,
+.hsw-ac-form .hsw-ac-field > input:focus,
+.hsw-ac-form .hsw-ac-field > select:focus,
+.hsw-ac-form .hsw-ac-field > textarea:focus {
+	background: #fff;
+	border-color: var(--hsw-ac-primary);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--hsw-ac-primary) 12%, transparent);
+	outline: 0;
+}
+
+.hsw-ac-input-wrap > textarea,
+.hsw-ac-form .hsw-ac-field > textarea {
+	min-height: 120px;
+	padding: 13px 14px;
+}
+
+/* The icon rides on top of the filled field, so give it the muted tone. */
+.hsw-ac-input-wrap > .hsw-ac-ic {
+	color: #8b99aa;
+	transition: color .18s ease;
+}
+
+.hsw-ac-input-wrap:focus-within > .hsw-ac-ic {
+	color: var(--hsw-ac-primary);
+}
+
+/* --- WooCommerce account details ------------------------------------- */
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm {
+	display: grid;
+	grid-template-columns: 1fr;
+	margin: 0;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm .clear {
+	display: none;
+}
+
+/*
+ * Two columns only when the CARD is wide enough, not the viewport: the form
+ * sits in a column that is ~330px wide next to the account sidebar on a 1440px
+ * screen, so a viewport media query would squeeze the name fields into 150px.
+ * Browsers without container queries simply keep the single-column fallback.
+ */
+.hsw-ac__account-form {
+	container-type: inline-size;
+}
+
+@container (min-width: 440px) {
+	.hsw-ac__wc-wrap .woocommerce-EditAccountForm {
+		grid-template-columns: 1fr 1fr;
+		column-gap: 16px;
+	}
+
+	/* Everything that is not the first/last name pair spans both columns. */
+	.hsw-ac__wc-wrap .woocommerce-EditAccountForm .form-row:not(.form-row-first):not(.form-row-last),
+	.hsw-ac__wc-wrap .woocommerce-EditAccountForm fieldset,
+	.hsw-ac__wc-wrap .woocommerce-EditAccountForm > p:last-of-type {
+		grid-column: 1 / -1;
+	}
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm .form-row {
+	margin: 0 0 14px;
+	padding: 0;
+	width: 100%;
+	float: none;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm label {
+	margin: 0 0 6px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .2px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm .required {
+	color: var(--hsw-ac-danger);
+	text-decoration: none;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm input.input-text {
+	width: 100%;
+	min-height: 52px;
+	padding: 0 14px;
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background: #f7f9fc;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--hsw-ac-ink);
+	transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm input.input-text:hover {
+	background: #f1f5fa;
+	border-color: #d7e0ea;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm input.input-text:focus {
+	background: #fff;
+	border-color: var(--hsw-ac-primary);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--hsw-ac-primary) 12%, transparent);
+	outline: 0;
+}
+
+/* Password block reads as its own card instead of a bare <fieldset>. */
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm fieldset {
+	margin: 4px 0 18px;
+	padding: 18px 18px 4px;
+	border: 1px solid #e8edf4;
+	border-radius: 16px;
+	background: #fbfcfe;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm legend {
+	padding: 0 8px;
+	font-size: 12px;
+	font-weight: 800;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm .woocommerce-Button {
+	min-height: 52px;
+	padding: 0 30px;
+	border: 0;
+	border-radius: 13px;
+	background: var(--hsw-ac-primary);
+	color: #fff;
+	font-size: 13px;
+	font-weight: 800;
+	letter-spacing: .2px;
+	box-shadow: 0 10px 24px color-mix(in srgb, var(--hsw-ac-primary) 24%, transparent);
+	transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm .woocommerce-Button:hover {
+	background: var(--hsw-ac-primary-dark);
+	transform: translateY(-1px);
+	box-shadow: 0 14px 28px color-mix(in srgb, var(--hsw-ac-primary) 30%, transparent);
+}
+
+.hsw-ac__wc-wrap .woocommerce-EditAccountForm .woocommerce-Button:active {
+	transform: translateY(0);
+}
+
+/* --- Brand logo in the auth panel ------------------------------------- */
+
+.hsw-ac-auth__logo-mark--img {
+	padding: 0;
+	overflow: hidden;
+	background: #fff;
+}
+
+.hsw-ac-auth__logo-img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
+}
