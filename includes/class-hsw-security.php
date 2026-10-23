@@ -61,6 +61,118 @@ class HSW_Security {
 		}
 
 		$this->maybe_disable_xmlrpc();
+		$this->maybe_clean_frontend();
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Front-end cleanup (optional)
+	 *
+	 * These are the classic "head cleanup" tweaks: drop the emoji script, the
+	 * RSD/WLW/shortlink/generator/oEmbed tags and — when asked — the block
+	 * stylesheets on pages that do not need them.
+	 *
+	 * Cost: zero at runtime. Every item is a `remove_action` / `wp_dequeue_*`
+	 * that stops a request from being made; nothing is added. The saving is
+	 * small (a few KB and 2–4 requests) but it is never negative.
+	 *
+	 * Risk: removing `wp-block-library` / `global-styles` breaks the styling of
+	 * posts written with the block editor, which is why it is a separate
+	 * checkbox and why it is skipped on cart / checkout / account.
+	 * ------------------------------------------------------------------ */
+
+	private function maybe_clean_frontend() {
+		$o = self::get();
+
+		if ( 'yes' === $o['clean_head'] ) {
+			add_action( 'init', array( $this, 'clean_head' ) );
+		}
+		if ( 'yes' === $o['clean_assets'] ) {
+			add_action( 'wp_enqueue_scripts', array( $this, 'clean_assets' ), 100 );
+		}
+		if ( 'yes' === $o['clean_widgets'] ) {
+			add_action( 'widgets_init', array( $this, 'clean_widgets' ), 11 );
+		}
+	}
+
+	/**
+	 * Elementor builds its preview inside the same front-end request, so the
+	 * cleanup must never run there — a missing stylesheet makes the editor look
+	 * broken even though the published page is fine.
+	 *
+	 * @return bool
+	 */
+	private function is_elementor_context() {
+		if ( ! empty( $_GET['elementor-preview'] ) || ! empty( $_GET['elementor_library'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only context check.
+			return true;
+		}
+		if ( is_admin() && isset( $_GET['action'] ) && 'elementor' === $_GET['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Emoji + the head links nobody reads.
+	 */
+	public function clean_head() {
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+		remove_action( 'admin_print_styles', 'print_emoji_styles' );
+		remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+		remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+		remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
+
+		remove_action( 'wp_head', 'feed_links_extra', 3 );
+		remove_action( 'wp_head', 'rsd_link' );
+		remove_action( 'wp_head', 'wlwmanifest_link' );
+		remove_action( 'wp_head', 'wp_shortlink_wp_head', 10 );
+		remove_action( 'wp_head', 'wp_generator' );
+		remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
+		remove_action( 'template_redirect', 'rest_output_link_header', 11 );
+		remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+	}
+
+	/**
+	 * wp-embed plus the block stylesheets on pages that do not use blocks.
+	 *
+	 * The REST API, feeds and the block editor itself keep working: only the
+	 * front-end stylesheet is dequeued, and only outside the account area.
+	 */
+	public function clean_assets() {
+		if ( is_admin() || $this->is_elementor_context() ) {
+			return;
+		}
+
+		wp_dequeue_script( 'wp-embed' );
+
+		$is_account_area = function_exists( 'is_cart' ) && ( is_cart() || is_checkout() || is_account_page() );
+		if ( $is_account_area ) {
+			return;
+		}
+
+		/* Escape hatch: a site whose blog posts use blocks can keep the styles. */
+		if ( apply_filters( 'hsw_keep_block_styles', false ) ) {
+			return;
+		}
+
+		wp_dequeue_style( 'wp-block-library' );
+		wp_dequeue_style( 'wp-block-library-theme' );
+		wp_dequeue_style( 'wc-blocks-style' );
+		wp_dequeue_style( 'global-styles' );
+		wp_dequeue_style( 'classic-theme-styles' );
+	}
+
+	/**
+	 * The default widgets almost no store uses.
+	 */
+	public function clean_widgets() {
+		unregister_widget( 'WP_Widget_Calendar' );
+		unregister_widget( 'WP_Widget_Meta' );
+		unregister_widget( 'WP_Widget_RSS' );
+		unregister_widget( 'WP_Widget_Tag_Cloud' );
+		unregister_widget( 'WP_Widget_Links' );
 	}
 
 	/**
@@ -211,6 +323,10 @@ class HSW_Security {
 			'admin_verified'   => 'no',
 			'block_rest_users' => 'yes',
 			'disable_xmlrpc'   => 'no',
+			/* Front-end cleanup — off until the shop owner ticks the box. */
+			'clean_head'       => 'no',
+			'clean_assets'     => 'no',
+			'clean_widgets'    => 'no',
 		);
 	}
 
@@ -823,6 +939,9 @@ class HSW_Security {
 				'admin_verified'   => '' !== $slug ? (string) $check : 'no',
 				'block_rest_users' => ( 'yes' === ( $in['block_rest_users'] ?? '' ) ) ? 'yes' : 'no',
 				'disable_xmlrpc'   => ( 'yes' === ( $in['disable_xmlrpc'] ?? '' ) ) ? 'yes' : 'no',
+				'clean_head'       => ( 'yes' === ( $in['clean_head'] ?? '' ) ) ? 'yes' : 'no',
+				'clean_assets'     => ( 'yes' === ( $in['clean_assets'] ?? '' ) ) ? 'yes' : 'no',
+				'clean_widgets'    => ( 'yes' === ( $in['clean_widgets'] ?? '' ) ) ? 'yes' : 'no',
 			),
 			false
 		);
@@ -932,6 +1051,40 @@ class HSW_Security {
 							</label>
 							<p class="description">
 								<?php esc_html_e( 'اگر از اپلیکیشن وردپرس یا جت‌پک استفاده نمی‌کنید، خاموش‌کردنش امن‌تر است؛ XML-RPC یکی دیگر از راه‌های لو دادن نام کاربری است.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row"><?php esc_html_e( 'بهینه‌سازی و پاکسازی فرانت', 'hamishop-elementor-widgets' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="hsw_security[clean_head]" value="yes" <?php checked( 'yes', $s['clean_head'] ); ?> />
+								<?php esc_html_e( 'حذف ایموجی و تگ‌های اضافی هدر', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'اسکریپت ایموجی، RSD، WLW، shortlink، generator و لینک‌های oEmbed حذف می‌شوند. نه کوئری‌ای اضافه می‌کند نه چیزی را کند می‌کند — فقط چند تگ و یک درخواست کمتر.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+
+							<label style="display:block;margin-top:10px">
+								<input type="checkbox" name="hsw_security[clean_assets]" value="yes" <?php checked( 'yes', $s['clean_assets'] ); ?> />
+								<?php esc_html_e( 'حذف wp-embed و استایل بلاک‌ها در صفحات غیر از سبد/تسویه/حساب', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'اگر نوشته‌های بلاگ‌تان را با ویرایشگر بلاک (گوتنبرگ) نوشته‌اید، این گزینه را نزنید؛ استایل بلاک‌ها لازم می‌شود. با فیلتر hsw_keep_block_styles هم می‌توانید فقط استایل بلاک‌ها را نگه دارید.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+
+							<label style="display:block;margin-top:10px">
+								<input type="checkbox" name="hsw_security[clean_widgets]" value="yes" <?php checked( 'yes', $s['clean_widgets'] ); ?> />
+								<?php esc_html_e( 'حذف ویجت‌های کم‌کاربرد (تقویم، متا، RSS، ابر برچسب، لینک‌ها)', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'فقط فهرست ویجت‌های پیشخوان کوتاه می‌شود؛ روی سرعت سایت اثری ندارد.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+
+							<p class="description" style="margin-top:12px">
+								<strong><?php esc_html_e( 'هزینهٔ کارایی:', 'hamishop-elementor-widgets' ); ?></strong>
+								<?php esc_html_e( 'صفر. این گزینه‌ها فقط چیزهایی را که وردپرس اضافه می‌کند حذف می‌کنند؛ هیچ کوئری یا فایلی اضافه نمی‌شود و در ویرایشگر المنتور هم اجرا نمی‌شوند.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 						</td>
 					</tr>

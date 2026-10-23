@@ -389,9 +389,10 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         }
                 }
 
-                $field = function ( $name, $label, $value, $type = 'text', $extra = '' ) {
-                        $html  = '<label class="hsw-ckaddr__fl" for="hsw-ckaddr-' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>';
-                        $html .= '<input class="hsw-ckaddr__fi" id="hsw-ckaddr-' . esc_attr( $name ) . '" type="' . esc_attr( $type ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '"' . $extra . '>';
+                $field = function ( $name, $label, $value, $type = 'text', $extra = '', $required = false ) {
+                        $mark  = $required ? ' <span class="hsw-ckaddr__req" aria-hidden="true">*</span>' : '';
+                        $html  = '<label class="hsw-ckaddr__fl" for="hsw-ckaddr-' . esc_attr( $name ) . '">' . esc_html( $label ) . $mark . '</label>';
+                        $html .= '<input class="hsw-ckaddr__fi" id="hsw-ckaddr-' . esc_attr( $name ) . '" type="' . esc_attr( $type ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '"' . ( $required ? ' required aria-required="true"' : '' ) . $extra . '>';
                         return $html;
                 };
 
@@ -412,7 +413,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         <form class="hsw-ckaddr__form" data-hsw-address-form novalidate>
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'first_name', __( 'نام', 'hamishop-elementor-widgets' ), $first, 'text', ' required autocomplete="given-name"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'first_name', __( 'نام', 'hamishop-elementor-widgets' ), $first, 'text', ' autocomplete="given-name"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                         <div class="hsw-ckaddr__fcell">
                                                 <?php echo $field( 'last_name', __( 'نام خانوادگی', 'hamishop-elementor-widgets' ), $last, 'text', ' autocomplete="family-name"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -421,7 +422,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
 
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' required inputmode="tel" dir="ltr" autocomplete="tel"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                         <div class="hsw-ckaddr__fcell">
                                                 <?php echo $field( 'postcode', __( 'کد پستی', 'hamishop-elementor-widgets' ), $postcode, 'text', ' inputmode="numeric" dir="ltr" autocomplete="postal-code"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -430,7 +431,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
 
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
-                                                <label class="hsw-ckaddr__fl" for="hsw-ckaddr-state"><?php esc_html_e( 'استان', 'hamishop-elementor-widgets' ); ?></label>
+                                                <label class="hsw-ckaddr__fl" for="hsw-ckaddr-state"><?php esc_html_e( 'استان', 'hamishop-elementor-widgets' ); ?> <span class="hsw-ckaddr__req" aria-hidden="true">*</span></label>
                                                 <?php if ( $states ) : ?>
                                                         <select class="hsw-ckaddr__fi" id="hsw-ckaddr-state" name="state" required>
                                                                 <option value=""><?php esc_html_e( 'انتخاب کنید', 'hamishop-elementor-widgets' ); ?></option>
@@ -439,17 +440,17 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                                                 <?php endforeach; ?>
                                                         </select>
                                                 <?php else : ?>
-                                                        <?php echo $field( 'state', __( 'استان', 'hamishop-elementor-widgets' ), $state, 'text', ' required' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                        <?php echo $field( 'state', __( 'استان', 'hamishop-elementor-widgets' ), $state, 'text', '', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                                 <?php endif; ?>
                                         </div>
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'city', __( 'شهر', 'hamishop-elementor-widgets' ), $city, 'text', ' required autocomplete="address-level2"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'city', __( 'شهر', 'hamishop-elementor-widgets' ), $city, 'text', ' autocomplete="address-level2"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
 
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
-                                                <?php echo $field( 'address_1', __( 'نشانی کامل', 'hamishop-elementor-widgets' ), $line1, 'text', ' required autocomplete="street-address"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'address_1', __( 'نشانی کامل', 'hamishop-elementor-widgets' ), $line1, 'text', ' autocomplete="street-address"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
 

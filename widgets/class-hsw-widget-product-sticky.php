@@ -216,7 +216,7 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                                                                 <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--plus" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'add' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>
-                                                                <span class="hsw-psticky__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
+                                                                <input type="text" class="hsw-psticky__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( 1 ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                 <button type="button" class="hsw-psticky__qbtn hsw-psticky__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'remove' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>

@@ -586,18 +586,27 @@
         cursor: pointer;
 }
 .hsw-cknote__lbl .hsw-ic { font-size: 1.125rem; }
+/* Matches the address fields above it — same radius, fill and focus ring. */
 .hsw-cknote__ta {
         width: 100%;
-        border-radius: var(--hswk-r-s);
-        border: 1px solid var(--hswk-border2);
-        background: var(--hswk-surface);
-        padding: .75rem;
-        font-size: .875rem; line-height: 1.5rem;
-        outline: none; resize: none;
-        transition: border-color .15s, box-shadow .15s;
+        border-radius: 13px;
+        border: 1px solid #e3e8ef;
+        background-color: #f7f9fc;
+        padding: 13px 14px;
+        font-family: inherit;
+        font-size: .84375rem; line-height: 1.9;
+        font-weight: 600;
+        color: var(--hswk-text);
+        outline: none; resize: vertical;
+        transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
-.hsw-cknote__ta::placeholder { color: var(--hswk-border2); }
-.hsw-cknote__ta:focus { border-color: var(--hswk-primary); box-shadow: 0 0 0 1px var(--hswk-primary); }
+.hsw-cknote__ta::placeholder { color: var(--hswk-muted); font-weight: 500; }
+.hsw-cknote__ta:hover { background-color: #f1f5fa; border-color: #d7e0ea; }
+.hsw-cknote__ta:focus {
+        background-color: #fff;
+        border-color: var(--hswk-primary);
+        box-shadow: 0 0 0 4px var(--hsw-pal-primary-ring, rgba(37, 99, 235, .14));
+}
 .hsw-cknote__inv { padding-top: .75rem; border-top: var(--hswk-bd-soft); }
 .hsw-cknote__inv-row { display: flex; align-items: center; gap: .75rem; cursor: pointer; user-select: none; }
 .hsw-cknote__check { width: 1.125rem; height: 1.125rem; border-radius: .25rem; flex-shrink: 0; }
@@ -1715,19 +1724,27 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 
 .hsw-ckaddr__fl {
 	display: block;
-	margin: 0 0 7px;
-	font-size: .78125rem;
+	margin: 0 0 8px;
+	font-size: .8125rem;
 	font-weight: 700;
 	color: var(--hswk-text);
 }
 
+/* Required marker — the form shipped with `required` attributes but no visible hint. */
+.hsw-ckaddr__req {
+	margin-inline-start: 2px;
+	color: var(--hsw-pal-danger, #d92d3a);
+	font-weight: 700;
+}
+
+/* Same language as the account forms: 52px tall, 13px radius, tinted fill. */
 .hsw-ckaddr__fi {
 	width: 100%;
-	min-height: 50px;
+	min-height: 52px;
 	padding: 0 14px;
-	border: 1px solid var(--hswk-border);
-	border-radius: 12px;
-	background-color: var(--hswk-surface);
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background-color: #f7f9fc;
 	font-family: inherit;
 	font-size: .84375rem;
 	font-weight: 600;
@@ -1741,14 +1758,20 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 }
 
 .hsw-ckaddr__fi:hover {
-	background-color: var(--hswk-card2);
+	background-color: #f1f5fa;
+	border-color: #d7e0ea;
 }
 
 .hsw-ckaddr__fi:focus {
-	background-color: var(--hswk-card);
+	background-color: #fff;
 	border-color: var(--hswk-primary);
 	box-shadow: 0 0 0 4px var(--hsw-pal-primary-ring, rgba(37, 99, 235, .14));
 	outline: 0;
+}
+
+.hsw-ckaddr__fi::placeholder {
+	color: var(--hswk-muted);
+	font-weight: 500;
 }
 
 /* Native arrow lands on the rounded border in RTL — draw our own. */

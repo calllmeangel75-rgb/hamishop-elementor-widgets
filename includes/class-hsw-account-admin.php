@@ -82,6 +82,7 @@ final class HSW_Account_Admin {
 			'sections'      => 'بخش‌ها و منو',
 			'support'       => 'پشتیبانی',
 			'notifications' => 'اعلان‌ها',
+			'wallet'        => 'کیف پول',
 			'auth'          => 'ورود و امنیت',
 			'design'        => 'رنگ و چیدمان',
 			'shortcode'     => 'شورت‌کد و راهنما',
@@ -116,6 +117,8 @@ final class HSW_Account_Admin {
 					<?php $this->tab_support( $s ); ?>
 				<?php elseif ( 'notifications' === $tab ) : ?>
 					<?php $this->tab_notifications( $s ); ?>
+				<?php elseif ( 'wallet' === $tab ) : ?>
+					<?php $this->tab_wallet( $s ); ?>
 				<?php elseif ( 'auth' === $tab ) : ?>
 					<?php $this->tab_auth( $s ); ?>
 				<?php elseif ( 'design' === $tab ) : ?>
@@ -472,6 +475,35 @@ final class HSW_Account_Admin {
 				<?php foreach ( $statuses as $key => $label ) : ?>
 					<label class="hsw-check"><input type="checkbox" name="<?php echo esc_attr( $this->name( 'notifications', 'order_statuses' ) ); ?>[]" value="<?php echo esc_attr( $key ); ?>" <?php checked( in_array( $key, $selected, true ) ); ?>> <?php echo esc_html( $label ); ?></label>
 				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Wallet settings: limits, points rate and the SMS webhook.
+	 *
+	 * @param array $s Settings.
+	 */
+	private function tab_wallet( $s ) {
+		?>
+		<div class="hsw-admin-card">
+			<h2>کیف پول</h2>
+			<p class="hsw-admin-desc">موجودی هر مشتری در یک متای کاربر نگه داشته می‌شود و تراکنش‌ها در جدول <code>hsw_wallet_ledger</code> ثبت می‌شوند. شارژ دستی و شارژ گروهی مشتریان طلایی از منوی <strong>HamiShop ← کیف پول</strong> انجام می‌شود.</p>
+
+			<?php $this->switch_field( $s, 'wallet', 'enabled', 'فعال بودن کیف پول', 'با خاموش کردن، صفحهٔ کیف پول از منو حذف می‌شود و تبدیل امتیاز هم غیرفعال می‌شود.' ); ?>
+			<div class="hsw-admin-grid">
+				<?php $this->text_field( $s, 'wallet', 'label', 'نام کیف پول', 'مثلاً «کیف پول» یا «اعتبار حساب».' ); ?>
+				<?php $this->number_field( $s, 'wallet', 'min_topup', 'حداقل مبلغ شارژ (تومان)', 0, 10000000 ); ?>
+				<?php $this->number_field( $s, 'wallet', 'point_value', 'ارزش هر امتیاز (تومان)', 1, 1000000 ); ?>
+			</div>
+			<?php $this->textarea_field( $s, 'wallet', 'note', 'توضیح زیر موجودی', 'یک جملهٔ کوتاه برای مشتری.', true ); ?>
+
+			<h3 style="margin:22px 0 6px">پیامک شارژ</h3>
+			<p class="hsw-admin-desc">هنگام شارژ گروهی، به هر مشتری یک پیامک اطلاع‌رسانی فرستاده می‌شود. هر پنل پیامکی یا پل بله که یک <code>POST</code> با بدنهٔ <code>{"phone","text","secret"}</code> بپذیرد کار می‌کند؛ اگر آدرس را خالی بگذارید پیامکی ارسال نمی‌شود و شارژ انجام می‌شود.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->text_field( $s, 'wallet', 'sms_url', 'آدرس وب‌هوک پیامک', 'مثلاً آدرس وبهوک n8n یا پنل پیامکی.', 'url' ); ?>
+				<?php $this->text_field( $s, 'wallet', 'sms_secret', 'کلید وب‌هوک (اختیاری)', 'در بدنهٔ درخواست به‌عنوان secret فرستاده می‌شود.' ); ?>
 			</div>
 		</div>
 		<?php

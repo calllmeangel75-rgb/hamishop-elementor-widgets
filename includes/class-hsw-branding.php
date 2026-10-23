@@ -77,13 +77,40 @@ class HSW_Branding {
 	 */
 	public static function defaults() {
 		return array(
-			'name'       => get_bloginfo( 'name' ),
-			'tagline'    => get_bloginfo( 'description' ),
-			'logo_id'    => (int) get_theme_mod( 'custom_logo' ),
-			'logo_url'   => '',
-			'from_email' => '',
-			'from_name'  => '',
+			'name'        => get_bloginfo( 'name' ),
+			'tagline'     => get_bloginfo( 'description' ),
+			'logo_id'     => (int) get_theme_mod( 'custom_logo' ),
+			'logo_url'    => '',
+			'from_email'  => '',
+			'from_name'   => '',
+			/*
+			 * Seller details printed on the invoice. Defaults come from the
+			 * WooCommerce store address so an existing shop needs no setup;
+			 * every one of them can be overridden below.
+			 */
+			'store_address' => self::default_store_address(),
+			'store_phone'   => '',
+			'store_email'   => (string) get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
+			'stamp_url'     => '',
 		);
+	}
+
+	/**
+	 * WooCommerce store address as plain text lines.
+	 *
+	 * @return string
+	 */
+	public static function default_store_address() {
+		$parts = array_filter(
+			array(
+				(string) get_option( 'woocommerce_store_address', '' ),
+				(string) get_option( 'woocommerce_store_address_2', '' ),
+				(string) get_option( 'woocommerce_store_city', '' ),
+				(string) get_option( 'woocommerce_store_postcode', '' ),
+			)
+		);
+
+		return implode( '، ', $parts );
 	}
 
 	/**
@@ -272,6 +299,10 @@ class HSW_Branding {
 				'logo_url'   => esc_url_raw( $in['logo_url'] ?? '' ),
 				'from_email' => sanitize_email( $in['from_email'] ?? '' ),
 				'from_name'  => sanitize_text_field( $in['from_name'] ?? '' ),
+				'store_address' => sanitize_textarea_field( $in['store_address'] ?? '' ),
+				'store_phone'   => sanitize_text_field( $in['store_phone'] ?? '' ),
+				'store_email'   => sanitize_email( $in['store_email'] ?? '' ),
+				'stamp_url'     => esc_url_raw( $in['stamp_url'] ?? '' ),
 			),
 			false
 		);
@@ -367,6 +398,43 @@ class HSW_Branding {
 							<input type="text" class="regular-text" id="hsw-brand-from-name" name="hsw_brand[from_name]"
 								value="<?php echo esc_attr( $b['from_name'] ); ?>" placeholder="<?php echo esc_attr( self::name() ); ?>" />
 							<p class="description"><?php esc_html_e( 'خالی بگذارید تا نام برند بالا استفاده شود.', 'hamishop-elementor-widgets' ); ?></p>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'اطلاعات فروشنده (فاکتور)', 'hamishop-elementor-widgets' ); ?></h2>
+				<p class="description" style="max-width:780px">
+					<?php esc_html_e( 'این اطلاعات در ستون «فروشنده» فاکتور چاپی چاپ می‌شود. اگر خالی بگذارید، نشانی از تنظیمات ووکامرس و ایمیل از آدرس فرستندهٔ فروشگاه خوانده می‌شود.', 'hamishop-elementor-widgets' ); ?>
+				</p>
+				<table class="form-table" role="presentation">
+					<tbody>
+					<tr>
+						<th scope="row"><label for="hsw-brand-store-address"><?php esc_html_e( 'نشانی فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
+						<td>
+							<textarea class="large-text" rows="2" id="hsw-brand-store-address" name="hsw_brand[store_address]" placeholder="<?php echo esc_attr( self::default_store_address() ); ?>"><?php echo esc_textarea( $b['store_address'] ); ?></textarea>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="hsw-brand-store-phone"><?php esc_html_e( 'تلفن فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
+						<td>
+							<input type="text" class="regular-text" id="hsw-brand-store-phone" name="hsw_brand[store_phone]"
+								value="<?php echo esc_attr( $b['store_phone'] ); ?>" dir="ltr" placeholder="021-00000000" />
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="hsw-brand-store-email"><?php esc_html_e( 'ایمیل فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
+						<td>
+							<input type="email" class="regular-text" id="hsw-brand-store-email" name="hsw_brand[store_email]"
+								value="<?php echo esc_attr( $b['store_email'] ); ?>" dir="ltr" />
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="hsw-brand-stamp"><?php esc_html_e( 'تصویر مهر فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
+						<td>
+							<input type="url" class="regular-text" id="hsw-brand-stamp" name="hsw_brand[stamp_url]"
+								value="<?php echo esc_attr( $b['stamp_url'] ); ?>" placeholder="https://" dir="ltr" />
+							<p class="description"><?php esc_html_e( 'اختیاری. اگر خالی باشد، جای مهر در فاکتور خالی می‌ماند.', 'hamishop-elementor-widgets' ); ?></p>
 						</td>
 					</tr>
 					</tbody>

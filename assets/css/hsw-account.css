@@ -315,6 +315,24 @@
 	flex-wrap: wrap;
 }
 
+/* Count pill + "mark all read" sit together on the right of the heading. */
+.hsw-ac__page-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.hsw-ac__notif-readall {
+	min-height: 36px;
+	padding: 0 14px;
+	font-size: 12px;
+}
+
+.hsw-ac__notif-readall .hsw-ic {
+	font-size: 1rem;
+}
+
 .hsw-ac__page-head h2 {
 	font-size: 19px;
 	font-weight: 800;
@@ -5606,28 +5624,62 @@ a.hsw-ac__stat:hover {
 /* -------------------------------------------------------------------------
  * Order view as an invoice
  *
- * Replaces WooCommerce's plain view-order table. The document is designed to
- * be printed: the @media print block below hides the entire account shell and
- * lifts the invoice to the top of the sheet.
+ * Laid out like a printed sales document: title + invoice meta, buyer/seller
+ * boxes, an itemised table, a settlement block, signature line and footer.
+ * The @media print block at the end lifts this card onto the sheet on its own.
  * ---------------------------------------------------------------------- */
 .hsw-ac__invoice {
 	background: var(--hsw-ac-card);
 	border: 1px solid var(--hsw-ac-line);
 	border-radius: var(--hsw-ac-radius);
-	padding: 28px 30px 22px;
+	padding: 30px 32px 24px;
 	box-shadow: 0 8px 30px rgba(15, 23, 42, .05);
 	color: var(--hsw-ac-ink);
 }
 
-/* ---------- header ---------- */
-.hsw-inv__head {
+/* ---------- title + brand ---------- */
+.hsw-inv__top {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 20px;
+	gap: 24px;
 	flex-wrap: wrap;
-	padding-bottom: 20px;
+	padding-bottom: 18px;
 	border-bottom: 2px solid var(--hsw-ac-line);
+}
+
+.hsw-inv__title {
+	margin: 0 0 14px;
+	font-size: 26px;
+	font-weight: 800;
+	line-height: 1.4;
+	letter-spacing: -.01em;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-inv__meta {
+	display: grid;
+	gap: 6px;
+	margin: 0;
+	font-size: 12.5px;
+}
+
+.hsw-inv__meta > div {
+	display: grid;
+	grid-template-columns: 92px minmax(0, 1fr);
+	gap: 10px;
+	align-items: baseline;
+}
+
+.hsw-inv__meta dt {
+	color: var(--hsw-ac-muted);
+	font-weight: 500;
+}
+
+.hsw-inv__meta dd {
+	margin: 0;
+	font-weight: 700;
+	color: var(--hsw-ac-ink);
 }
 
 .hsw-inv__brand {
@@ -5638,7 +5690,7 @@ a.hsw-ac__stat:hover {
 }
 
 .hsw-inv__logo {
-	max-height: 48px;
+	max-height: 54px;
 	width: auto;
 	display: block;
 }
@@ -5646,11 +5698,12 @@ a.hsw-ac__stat:hover {
 .hsw-inv__brandtext {
 	display: flex;
 	flex-direction: column;
-	line-height: 1.5;
+	line-height: 1.6;
+	text-align: end;
 }
 
 .hsw-inv__brandtext strong {
-	font-size: 17px;
+	font-size: 16px;
 	font-weight: 800;
 }
 
@@ -5659,95 +5712,57 @@ a.hsw-ac__stat:hover {
 	color: var(--hsw-ac-muted);
 }
 
-.hsw-inv__meta {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 3px;
-	text-align: end;
-}
-
-.hsw-inv__kicker {
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: .08em;
-	text-transform: uppercase;
-	color: var(--hsw-ac-muted);
-}
-
-.hsw-inv__no {
-	font-size: 22px;
-	font-weight: 800;
-	letter-spacing: -.01em;
-	color: var(--hsw-ac-primary);
-}
-
-.hsw-inv__date {
-	font-size: 11.5px;
-	color: var(--hsw-ac-muted);
-}
-
-.hsw-inv__status {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	margin-top: 4px;
-	padding: 3px 11px;
-	border-radius: 999px;
-	font-size: 11px;
-	font-weight: 700;
-	background: #eef2f7;
-	color: #3c4a5e;
-}
-
-.hsw-inv__status::before {
-	content: '';
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	background: currentColor;
-}
-
-.hsw-inv__status.is-success { background: #e7f6ef; color: #0b7a4b; }
-.hsw-inv__status.is-info    { background: #e8f0fe; color: #1a56b8; }
-.hsw-inv__status.is-warning { background: #fdf3e2; color: #9a5b06; }
-.hsw-inv__status.is-danger  { background: #fdeceb; color: #a8231f; }
-.hsw-inv__status.is-muted   { background: #eef0f3; color: #5b6675; }
-
-/* ---------- parties ---------- */
+/* ---------- buyer / seller ---------- */
 .hsw-inv__parties {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 18px 24px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
 	padding: 20px 0;
 	border-bottom: 1px solid var(--hsw-ac-line);
 }
 
-.hsw-inv__party h3 {
-	margin: 0 0 6px;
-	font-size: 11px;
+.hsw-inv__party {
+	border: 1px solid var(--hsw-ac-line);
+	border-radius: 12px;
+	padding: 0 0 12px;
+	overflow: hidden;
+}
+
+.hsw-inv__party h2 {
+	margin: 0 0 12px;
+	padding: 8px 14px;
+	background: #f6f8fb;
+	border-bottom: 1px solid var(--hsw-ac-line);
+	font-size: 12px;
 	font-weight: 700;
-	letter-spacing: .04em;
-	text-transform: uppercase;
 	color: var(--hsw-ac-muted);
+	text-align: center;
+	letter-spacing: .02em;
 }
 
-.hsw-inv__party h3.hsw-inv__h3--gap {
-	margin-top: 14px;
-}
-
-.hsw-inv__party address {
-	font-style: normal;
+.hsw-inv__party dl {
+	display: grid;
+	gap: 6px;
+	margin: 0;
+	padding: 0 14px;
 	font-size: 12.5px;
-	line-height: 1.95;
-	color: var(--hsw-ac-ink);
 }
 
-.hsw-inv__line {
-	margin: 2px 0 0;
-	font-size: 12.5px;
+.hsw-inv__party dl > div {
+	display: grid;
+	grid-template-columns: 54px minmax(0, 1fr);
+	gap: 10px;
+	align-items: baseline;
+}
+
+.hsw-inv__party dt {
+	color: var(--hsw-ac-muted);
+	font-weight: 500;
+}
+
+.hsw-inv__party dd {
+	margin: 0;
 	font-weight: 600;
-	color: var(--hsw-ac-ink);
 	word-break: break-word;
 }
 
@@ -5755,44 +5770,31 @@ a.hsw-ac__stat:hover {
 .hsw-inv__items {
 	width: 100%;
 	border-collapse: collapse;
-	margin: 20px 0 4px;
+	margin: 20px 0 0;
 	font-size: 12.5px;
 }
 
 .hsw-inv__items thead th {
-	padding: 9px 10px;
-	background: #f6f8fb;
-	border-bottom: 1px solid var(--hsw-ac-line);
-	font-size: 11px;
+	padding: 10px 8px;
+	border-bottom: 1.5px solid var(--hsw-ac-ink);
+	font-size: 11.5px;
 	font-weight: 700;
 	color: var(--hsw-ac-muted);
 	text-align: start;
 	white-space: nowrap;
 }
 
-.hsw-inv__items thead th:first-child {
-	border-start-start-radius: 10px;
-}
-
-.hsw-inv__items thead th:last-child {
-	border-start-end-radius: 10px;
-}
-
 .hsw-inv__items tbody td {
-	padding: 12px 10px;
-	border-bottom: 1px solid #f1f4f8;
+	padding: 10px 8px;
+	border-bottom: 1px solid #eef1f5;
 	vertical-align: top;
 	text-align: start;
 }
 
-.hsw-inv__items tbody tr:last-child td {
-	border-bottom: 1px solid var(--hsw-ac-line);
-}
-
-.hsw-inv__c-num   { width: 42px; color: var(--hsw-ac-muted); }
-.hsw-inv__c-qty   { width: 70px; text-align: center !important; }
-.hsw-inv__c-price { width: 130px; white-space: nowrap; }
-.hsw-inv__c-total { width: 130px; white-space: nowrap; font-weight: 700; }
+.hsw-inv__c-num   { width: 48px; color: var(--hsw-ac-muted); }
+.hsw-inv__c-qty   { width: 64px; text-align: center !important; }
+.hsw-inv__c-price { width: 120px; white-space: nowrap; }
+.hsw-inv__c-total { width: 120px; white-space: nowrap; font-weight: 700; }
 
 .hsw-inv__pname {
 	display: block;
@@ -5802,46 +5804,35 @@ a.hsw-ac__stat:hover {
 
 .hsw-inv__pmeta {
 	display: block;
-	margin-top: 2px;
+	margin-top: 3px;
 	font-size: 11px;
 	color: var(--hsw-ac-muted);
 	line-height: 1.8;
 }
 
-/* ---------- totals ---------- */
-.hsw-inv__foot {
+/* ---------- settlement ---------- */
+/* Totals on the start side, the dashed "paid" box on the end side. */
+.hsw-inv__settle {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 24px;
-	flex-wrap: wrap;
-	padding-top: 16px;
-}
-
-.hsw-inv__note {
-	flex: 1 1 240px;
-	font-size: 11.5px;
-	line-height: 1.95;
-	color: var(--hsw-ac-muted);
-}
-
-.hsw-inv__note p {
-	margin: 0 0 4px;
-}
-
-.hsw-inv__muted {
-	color: var(--hsw-ac-muted);
+	flex-wrap: nowrap;
+	margin-top: 4px;
+	padding: 14px 0 2px;
 }
 
 .hsw-inv__totals {
-	min-width: 260px;
+	min-width: 250px;
+	max-width: 58%;
 	border-collapse: collapse;
 	font-size: 12.5px;
+	flex: 0 1 auto;
 }
 
 .hsw-inv__totals th,
 .hsw-inv__totals td {
-	padding: 7px 10px;
+	padding: 6px 10px;
 	text-align: start;
 	font-weight: 500;
 }
@@ -5852,18 +5843,113 @@ a.hsw-ac__stat:hover {
 	font-weight: 600;
 }
 
-.hsw-inv__totals tr + tr th,
-.hsw-inv__totals tr + tr td {
-	border-top: 1px solid #f1f4f8;
-}
-
 .hsw-inv__grand th,
 .hsw-inv__grand td {
-	padding-top: 11px;
-	border-top: 2px solid var(--hsw-ac-line) !important;
+	padding-top: 10px;
+	border-top: 2px solid var(--hsw-ac-line);
 	font-size: 14px;
 	font-weight: 800;
-	color: var(--hsw-ac-primary);
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-inv__paidbox {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 200px;
+	padding: 10px 16px;
+	border: 1.5px dashed var(--hsw-ac-line);
+	border-radius: 10px;
+	font-size: 12px;
+	color: var(--hsw-ac-muted);
+	flex: 0 0 auto;
+}
+
+.hsw-inv__paidbox strong {
+	font-size: 15px;
+	font-weight: 800;
+	color: var(--hsw-ac-ink);
+}
+
+/* ---------- payment meta ---------- */
+.hsw-inv__paymeta {
+	display: grid;
+	gap: 5px;
+	margin: 10px 0 0;
+	font-size: 12.5px;
+}
+
+.hsw-inv__paymeta > div {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 6px;
+	align-items: baseline;
+}
+
+.hsw-inv__paymeta dt {
+	color: var(--hsw-ac-muted);
+	font-weight: 500;
+}
+
+.hsw-inv__paymeta dd {
+	margin: 0;
+	font-weight: 700;
+}
+
+/* ---------- stamp + signature ---------- */
+.hsw-inv__sign {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 24px;
+	margin-top: 14px;
+	padding-top: 6px;
+}
+
+.hsw-inv__stamp {
+	display: block;
+	width: 96px;
+	height: 96px;
+	object-fit: contain;
+}
+
+/* Empty placeholder: a faint dashed disc reads as "stamp goes here". */
+.hsw-inv__stamp--empty {
+	width: 96px;
+	height: 96px;
+	border: 1px dashed var(--hsw-ac-line);
+	border-radius: 50%;
+}
+
+.hsw-inv__signline {
+	font-size: 12px;
+	color: var(--hsw-ac-muted);
+	padding-bottom: 10px;
+}
+
+/* ---------- footer ---------- */
+.hsw-inv__foot {
+	margin-top: 12px;
+	padding-top: 10px;
+	border-top: 1px solid var(--hsw-ac-line);
+}
+
+.hsw-inv__footnote {
+	margin: 0 0 10px;
+	font-size: 11.5px;
+	line-height: 1.9;
+	text-align: center;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__footrow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 11px;
+	color: var(--hsw-ac-muted);
+	word-break: break-all;
 }
 
 /* ---------- actions ---------- */
@@ -5904,15 +5990,6 @@ a.hsw-ac__stat:hover {
 	font-size: 1.15rem;
 }
 
-.hsw-inv__thanks {
-	margin: 18px 0 0;
-	padding-top: 14px;
-	border-top: 1px solid var(--hsw-ac-line);
-	font-size: 11.5px;
-	text-align: center;
-	color: var(--hsw-ac-muted);
-}
-
 @media (max-width: 767.98px) {
 	.hsw-ac__invoice {
 		padding: 20px 16px 16px;
@@ -5927,11 +6004,17 @@ a.hsw-ac__stat:hover {
 		display: none;
 	}
 
-	.hsw-inv__foot {
+	.hsw-inv__settle {
 		flex-direction: column;
+		flex-wrap: wrap;
 	}
 
 	.hsw-inv__totals {
+		max-width: none;
+	}
+
+	.hsw-inv__totals,
+	.hsw-inv__paidbox {
 		width: 100%;
 	}
 }
@@ -5997,5 +6080,177 @@ a.hsw-ac__stat:hover {
 
 	@page {
 		margin: 12mm;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Wallet: top-up, points conversion and statement
+ * ---------------------------------------------------------------------- */
+/* The wallet page is a 2-column grid; these two blocks own a full row. */
+.hsw-ac__wallet-actions,
+.hsw-ac__wallet-ledger {
+	grid-column: 1 / -1;
+}
+
+.hsw-ac__wallet-actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	margin-top: 0;
+}
+
+.hsw-ac__wallet-panel {
+	padding: 20px 20px 18px;
+}
+
+.hsw-ac__wallet-panel h3,
+.hsw-ac__wallet-ledger h3 {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+	font-size: 14.5px;
+	font-weight: 800;
+}
+
+.hsw-ac__wallet-panel h3 .hsw-ic,
+.hsw-ac__wallet-ledger h3 .hsw-ic {
+	font-size: 1.15rem;
+	color: var(--hsw-ac-primary);
+}
+
+.hsw-ac__wallet-hint {
+	margin: 0 0 14px;
+	font-size: 12px;
+	line-height: 1.9;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-ac__wallet-form {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.hsw-ac__wallet-label {
+	margin-top: 6px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac__wallet-input {
+	width: 100%;
+	min-height: 48px;
+	padding: 0 14px;
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background-color: #f7f9fc;
+	font-family: inherit;
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--hsw-ac-ink);
+	transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.hsw-ac__wallet-input:focus {
+	background-color: #fff;
+	border-color: var(--hsw-ac-primary);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--hsw-ac-primary) 12%, transparent);
+	outline: 0;
+}
+
+.hsw-ac__wallet-form .hsw-ac__btn {
+	margin-top: 12px;
+	align-self: flex-start;
+}
+
+.hsw-ac__wallet-msg {
+	margin: 8px 0 0;
+	padding: 8px 12px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.8;
+	background: #fff3f3;
+	color: #8a1c24;
+}
+
+.hsw-ac__wallet-msg.is-ok {
+	background: #effaf4;
+	color: #0b7a4b;
+}
+
+.hsw-ac__wallet-empty {
+	margin: 0;
+	font-size: 12.5px;
+	color: var(--hsw-ac-muted);
+}
+
+/* ---------- statement ---------- */
+.hsw-ac__wallet-ledger {
+	margin-top: 16px;
+}
+
+.hsw-ac__ledger {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 8px;
+	font-size: 12.5px;
+}
+
+.hsw-ac__ledger thead th {
+	padding: 9px 10px;
+	background: #f6f8fb;
+	border-bottom: 1px solid var(--hsw-ac-line);
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--hsw-ac-muted);
+	text-align: start;
+	white-space: nowrap;
+}
+
+.hsw-ac__ledger tbody td {
+	padding: 11px 10px;
+	border-bottom: 1px solid #f1f4f8;
+	text-align: start;
+}
+
+.hsw-ac__ledger tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.hsw-ac__ledger-date {
+	color: var(--hsw-ac-muted);
+	white-space: nowrap;
+}
+
+.hsw-ac__ledger-amount {
+	font-weight: 800;
+	white-space: nowrap;
+}
+
+.hsw-ac__ledger-amount.is-in {
+	color: var(--hsw-ac-success);
+}
+
+.hsw-ac__ledger-amount.is-out {
+	color: var(--hsw-ac-danger);
+}
+
+.hsw-ac__ledger-balance {
+	white-space: nowrap;
+	font-weight: 600;
+	color: var(--hsw-ac-muted);
+}
+
+@media (max-width: 767.98px) {
+	.hsw-ac__wallet-actions {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.hsw-ac__ledger thead th:nth-child(4),
+	.hsw-ac__ledger tbody td:nth-child(4) {
+		display: none;
 	}
 }

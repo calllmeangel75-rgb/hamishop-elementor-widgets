@@ -1303,6 +1303,144 @@
 	}
 
 	/* ---------------------------------------------------------------------------
+ * Wallet: top-up request and points conversion
+ * ------------------------------------------------------------------------ */
+(function () {
+	function toLatin(value) {
+		return String(value)
+			.replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
+			.replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
+			.replace(/[^\d]/g, '');
+	}
+
+	function say(form, text, tone) {
+		var msg = form.querySelector('[data-hsw-wallet-msg]');
+		if (!msg) { return; }
+		msg.textContent = text || '';
+		msg.hidden = !text;
+		msg.classList.toggle('is-error', tone === 'error');
+		msg.classList.toggle('is-ok', tone === 'ok');
+	}
+
+	function submit(form, path, payload, reload) {
+		var cfg = data();
+		if (!cfg.rest) { return; }
+
+		var btn = form.querySelector('button[type="submit"]');
+		if (btn) { btn.disabled = true; }
+
+		fetch(cfg.rest + path, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': cfg.nonce || ''
+			},
+			body: JSON.stringify(payload)
+		})
+			.then(function (response) { return response.json(); })
+			.then(function (json) {
+				if (!json || !json.ok) {
+					throw new Error((json && json.message) || 'failed');
+				}
+				say(form, json.message, 'ok');
+				if (reload) {
+					window.location.reload();
+				}
+			})
+			.catch(function (err) {
+				if (btn) { btn.disabled = false; }
+				say(form, (err && err.message) ? err.message : (cfg.errorText || 'انجام نشد.'), 'error');
+			});
+	}
+
+	document.addEventListener('submit', function (event) {
+		var form = event.target;
+		if (!form || !form.matches) { return; }
+
+		if (form.matches('[data-hsw-wallet-topup]')) {
+			event.preventDefault();
+			var amount = form.querySelector('[name="amount"]');
+			var note = form.querySelector('[name="note"]');
+			submit(form, '/account/wallet/topup', {
+				amount: toLatin(amount ? amount.value : ''),
+				note: note ? note.value : ''
+			}, false);
+			return;
+		}
+
+		if (form.matches('[data-hsw-wallet-convert]')) {
+			event.preventDefault();
+			var points = form.querySelector('[name="points"]');
+			submit(form, '/account/wallet/convert', {
+				points: toLatin(points ? points.value : '')
+			}, true);
+		}
+	});
+})();
+
+/* ---------------------------------------------------------------------------
+ * Notifications: "خواندن همه"
+ *
+ * The whole list lives in one user-meta row, so this is a single write. The
+ * DOM is patched in place rather than reloading the page.
+ * ------------------------------------------------------------------------ */
+document.addEventListener('click', function (event) {
+	var btn = event.target.closest ? event.target.closest('[data-hsw-readall]') : null;
+	if (!btn || btn.disabled) {
+		return;
+	}
+	var cfg = data();
+	if (!cfg.rest) {
+		return;
+	}
+
+	btn.disabled = true;
+
+	fetch(cfg.rest + '/account/notifications/read', {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': cfg.nonce || ''
+		}
+	})
+		.then(function (response) {
+			return response.json();
+		})
+		.then(function (json) {
+			if (!json || !json.ok) {
+				throw new Error('failed');
+			}
+
+			document.querySelectorAll('.hsw-ac__notif.is-unread').forEach(function (el) {
+				el.classList.remove('is-unread');
+			});
+			document.querySelectorAll('.hsw-ac__unread-dot').forEach(function (el) {
+				el.remove();
+			});
+
+			var pill = document.querySelector('[data-hsw-unread-pill]');
+			if (pill) {
+				pill.remove();
+			}
+
+			/* Sidebar badge on the notifications item. */
+			document.querySelectorAll('.hsw-ac__menu a[href*="/notifications"]').forEach(function (link) {
+				var badge = link.querySelector('.hsw-ac__badge');
+				if (badge) {
+					badge.remove();
+				}
+			});
+
+			btn.remove();
+		})
+		.catch(function () {
+			btn.disabled = false;
+		});
+});
+
+/* ---------------------------------------------------------------------------
  * Invoice printing
  *
  * A delegated listener rather than a per-widget init: the invoice markup is

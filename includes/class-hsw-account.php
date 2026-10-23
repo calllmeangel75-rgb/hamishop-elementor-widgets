@@ -181,9 +181,13 @@ final class HSW_Account {
 				'max'            => 50,
 			),
 			'wallet' => array(
-				'enabled' => 'yes',
-				'label'   => 'کیف پول',
-				'note'    => 'برای شارژ کیف پول یا پیگیری تراکنش‌ها با پشتیبانی تماس بگیرید.',
+				'enabled'    => 'yes',
+				'label'      => 'کیف پول',
+				'note'       => 'برای شارژ کیف پول یا پیگیری تراکنش‌ها با پشتیبانی تماس بگیرید.',
+				'min_topup'  => 50000,
+				'point_value' => 100,
+				'sms_url'    => '',
+				'sms_secret' => '',
 			),
 			'loyalty' => array(
 				'enabled' => 'yes',
@@ -412,6 +416,10 @@ final class HSW_Account {
 			$out['wallet']['enabled'] = $this->yes_no( $w['enabled'] ?? $out['wallet']['enabled'] );
 			$out['wallet']['label']   = $this->clean_text( $w['label'] ?? '', $out['wallet']['label'] );
 			$out['wallet']['note']    = $this->clean_textarea( $w['note'] ?? '', $out['wallet']['note'] );
+			$out['wallet']['min_topup']   = max( 0, absint( $w['min_topup'] ?? $out['wallet']['min_topup'] ) );
+			$out['wallet']['point_value'] = max( 1, absint( $w['point_value'] ?? $out['wallet']['point_value'] ) );
+			$out['wallet']['sms_url']     = esc_url_raw( (string) ( $w['sms_url'] ?? $out['wallet']['sms_url'] ) );
+			$out['wallet']['sms_secret']  = sanitize_text_field( (string) ( $w['sms_secret'] ?? $out['wallet']['sms_secret'] ) );
 		}
 
 		if ( isset( $input['loyalty'] ) && is_array( $input['loyalty'] ) ) {
@@ -1996,103 +2004,124 @@ final class HSW_Account {
 			return '<section class="hsw-ac__card hsw-ac__empty"><span class="hsw-ac__empty-ic">' . $this->icon( 'package' ) . '</span><h2>' . esc_html__( 'سفارش پیدا نشد', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'این سفارش در حساب شما وجود ندارد.', 'hamishop-elementor-widgets' ) . '</p><a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a></section>';
 		}
 
-		$status      = $order->get_status();
-		$status_name = wc_get_order_status_name( $status );
-		$created     = $order->get_date_created();
-		$date        = $created ? $this->format_date( $created->getTimestamp(), 'j F Y' ) : '';
-		$date_full   = $created ? $this->format_date( $created->getTimestamp() ) : '';
-		$brand       = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
-		$tagline     = class_exists( 'HSW_Branding' ) ? HSW_Branding::tagline() : '';
-		$logo        = class_exists( 'HSW_Branding' ) ? HSW_Branding::logo_html( 'hsw-inv__logo' ) : '';
+		$brand   = class_exists( 'HSW_Branding' ) ? HSW_Branding::get() : array();
+		$name    = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
+		$logo    = class_exists( 'HSW_Branding' ) ? HSW_Branding::logo_html( 'hsw-inv__logo' ) : '';
+		$currency = $order->get_currency();
 
-		$billing  = $order->get_formatted_billing_address();
-		$shipping = $order->get_formatted_shipping_address();
-		if ( '' === trim( wp_strip_all_tags( (string) $shipping ) ) ) {
-			$shipping = $billing;
+		$created = $order->get_date_created();
+		$ts      = $created ? $created->getTimestamp() : 0;
+		$date    = $ts ? $this->format_date( $ts, 'j F Y' ) : '';
+		$year    = $ts ? $this->format_date( $ts, 'Y' ) : '';
+		$number  = $order->get_order_number();
+
+		/* Invoice number follows the reference document: year-order. */
+		$invoice_no = ( '' !== $year ? $year . '-' : '' ) . $number;
+
+		$billing_name = trim( $order->get_formatted_billing_full_name() );
+		$phone        = (string) $order->get_billing_phone();
+		$email        = (string) $order->get_billing_email();
+
+		$seller_addr  = trim( (string) ( $brand['store_address'] ?? '' ) );
+		$seller_phone = trim( (string) ( $brand['store_phone'] ?? '' ) );
+		$seller_mail  = trim( (string) ( $brand['store_email'] ?? '' ) );
+		$stamp        = trim( (string) ( $brand['stamp_url'] ?? '' ) );
+
+		$payment = (string) $order->get_payment_method_title();
+		if ( '' === trim( $payment ) ) {
+			$payment = __( 'ثبت نشده', 'hamishop-elementor-widgets' );
 		}
 
-		$payment = $order->get_payment_method_title();
-		if ( '' === trim( (string) $payment ) ) {
-			$payment = __( 'پرداخت در محل / ثبت‌نشده', 'hamishop-elementor-widgets' );
-		}
-
-		$shipping_method = '';
-		foreach ( $order->get_shipping_methods() as $method ) {
-			$shipping_method = $method->get_name();
-			break;
-		}
-		if ( '' === $shipping_method ) {
-			$shipping_method = __( 'تحویل حضوری', 'hamishop-elementor-widgets' );
+		$paid_line = '';
+		if ( $order->is_paid() && $order->get_date_paid() ) {
+			$paid_line = sprintf(
+				/* translators: %s: payment date. */
+				__( 'پرداخت شده در %s', 'hamishop-elementor-widgets' ),
+				$this->format_date( $order->get_date_paid()->getTimestamp() )
+			);
+		} elseif ( $order->is_paid() ) {
+			$paid_line = __( 'پرداخت شده', 'hamishop-elementor-widgets' );
+		} else {
+			$paid_line = wc_get_order_status_name( $order->get_status() );
 		}
 
 		$html  = '<section class="hsw-ac__invoice" id="hsw-invoice">';
 
-		/* ---------- header ---------- */
-		$html .= '<header class="hsw-inv__head">';
-		$html .= '<div class="hsw-inv__brand">' . $logo . '<div class="hsw-inv__brandtext"><strong>' . esc_html( $brand ) . '</strong>';
-		if ( '' !== trim( (string) $tagline ) ) {
-			$html .= '<span>' . esc_html( $tagline ) . '</span>';
-		}
-		$html .= '</div></div>';
-		$html .= '<div class="hsw-inv__meta">';
-		$html .= '<span class="hsw-inv__kicker">' . esc_html__( 'فاکتور فروش', 'hamishop-elementor-widgets' ) . '</span>';
-		$html .= '<strong class="hsw-inv__no" dir="ltr">#' . esc_html( HSW_Helpers::fa_num( $order->get_order_number() ) ) . '</strong>';
-		$html .= '<span class="hsw-inv__date">' . esc_html( sprintf( 'تاریخ صدور: %s', $date ) ) . '</span>';
-		$html .= '<span class="hsw-inv__status is-' . esc_attr( $this->order_tone( $status ) ) . '">' . esc_html( $status_name ) . '</span>';
-		$html .= '</div></header>';
+		/* ---------- title + brand ---------- */
+		$html .= '<header class="hsw-inv__top">';
+		$html .= '<div class="hsw-inv__title-block">';
+		$html .= '<h1 class="hsw-inv__title">' . esc_html__( 'فاکتور فروش', 'hamishop-elementor-widgets' ) . '</h1>';
+		$html .= '<dl class="hsw-inv__meta">';
+		$html .= '<div><dt>' . esc_html__( 'شماره فاکتور', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( HSW_Helpers::fa_num( $invoice_no ) ) . '</dd></div>';
+		$html .= '<div><dt>' . esc_html__( 'تاریخ صدور', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( HSW_Helpers::fa_num( $date ) ) . '</dd></div>';
+		$html .= '<div><dt>' . esc_html__( 'شماره سفارش', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( HSW_Helpers::fa_num( $number ) ) . '</dd></div>';
+		$html .= '</dl></div>';
 
-		/* ---------- parties ---------- */
+		$html .= '<div class="hsw-inv__brand">' . $logo;
+		$html .= '<div class="hsw-inv__brandtext"><strong>' . esc_html( $name ) . '</strong>';
+		$html .= '<span dir="ltr">' . esc_html( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) . '</span>';
+		$html .= '</div></div>';
+		$html .= '</header>';
+
+		/* ---------- buyer / seller ---------- */
 		$html .= '<div class="hsw-inv__parties">';
-		$html .= '<div class="hsw-inv__party"><h3>' . esc_html__( 'صورتحساب برای', 'hamishop-elementor-widgets' ) . '</h3><address>' . wp_kses_post( $billing ? $billing : '—' ) . '</address>';
-		if ( $order->get_billing_phone() ) {
-			$html .= '<p class="hsw-inv__line" dir="ltr">' . esc_html( $order->get_billing_phone() ) . '</p>';
+
+		$html .= '<section class="hsw-inv__party"><h2>' . esc_html__( 'خریدار', 'hamishop-elementor-widgets' ) . '</h2><dl>';
+		$html .= '<div><dt>' . esc_html__( 'نام', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( '' !== $billing_name ? $billing_name : '—' ) . '</dd></div>';
+		$html .= '<div><dt>' . esc_html__( 'تلفن', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( HSW_Helpers::fa_num( $phone ) ) . '</dd></div>';
+		$html .= '<div><dt>' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( $email ) . '</dd></div>';
+		$html .= '</dl></section>';
+
+		$html .= '<section class="hsw-inv__party"><h2>' . esc_html__( 'فروشنده', 'hamishop-elementor-widgets' ) . '</h2><dl>';
+		$html .= '<div><dt>' . esc_html__( 'نام', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( $name ) . '</dd></div>';
+		if ( '' !== $seller_addr ) {
+			$html .= '<div><dt>' . esc_html__( 'نشانی', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( $seller_addr ) . '</dd></div>';
 		}
-		if ( $order->get_billing_email() ) {
-			$html .= '<p class="hsw-inv__line" dir="ltr">' . esc_html( $order->get_billing_email() ) . '</p>';
+		if ( '' !== $seller_phone ) {
+			$html .= '<div><dt>' . esc_html__( 'تلفن', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( HSW_Helpers::fa_num( $seller_phone ) ) . '</dd></div>';
 		}
+		if ( '' !== $seller_mail ) {
+			$html .= '<div><dt>' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( $seller_mail ) . '</dd></div>';
+		}
+		$html .= '</dl></section>';
 		$html .= '</div>';
-
-		$html .= '<div class="hsw-inv__party"><h3>' . esc_html__( 'تحویل به', 'hamishop-elementor-widgets' ) . '</h3><address>' . wp_kses_post( $shipping ? $shipping : '—' ) . '</address></div>';
-
-		$html .= '<div class="hsw-inv__party"><h3>' . esc_html__( 'روش پرداخت', 'hamishop-elementor-widgets' ) . '</h3><p class="hsw-inv__line">' . esc_html( $payment ) . '</p>';
-		$html .= '<h3 class="hsw-inv__h3--gap">' . esc_html__( 'روش ارسال', 'hamishop-elementor-widgets' ) . '</h3><p class="hsw-inv__line">' . esc_html( $shipping_method ) . '</p>';
-		$html .= '</div></div>';
 
 		/* ---------- items ---------- */
 		$html .= '<table class="hsw-inv__items"><thead><tr>';
-		$html .= '<th class="hsw-inv__c-num">#</th>';
-		$html .= '<th class="hsw-inv__c-name">' . esc_html__( 'کالا', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-num">' . esc_html__( 'ردیف', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-name">' . esc_html__( 'شرح کالا یا خدمت', 'hamishop-elementor-widgets' ) . '</th>';
 		$html .= '<th class="hsw-inv__c-qty">' . esc_html__( 'تعداد', 'hamishop-elementor-widgets' ) . '</th>';
-		$html .= '<th class="hsw-inv__c-price">' . esc_html__( 'قیمت واحد', 'hamishop-elementor-widgets' ) . '</th>';
-		$html .= '<th class="hsw-inv__c-total">' . esc_html__( 'جمع', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-price">' . esc_html__( 'بهای واحد', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-total">' . esc_html__( 'مبلغ کل', 'hamishop-elementor-widgets' ) . '</th>';
 		$html .= '</tr></thead><tbody>';
 
 		$i = 0;
 		foreach ( $order->get_items() as $item ) {
 			$i++;
-			$product = $item->get_product();
-			$qty     = (int) $item->get_quantity();
-			$line    = (float) $item->get_total();
-			$unit    = $qty > 0 ? $line / $qty : $line;
+			$qty  = (int) $item->get_quantity();
+			$line = (float) $item->get_total();
+			$unit = $qty > 0 ? $line / $qty : $line;
+
+			$meta = wc_display_item_meta( $item, array( 'echo' => false, 'before' => '', 'separator' => ' · ', 'after' => '' ) );
+			$meta = trim( wp_strip_all_tags( (string) $meta ) );
 
 			$html .= '<tr>';
 			$html .= '<td class="hsw-inv__c-num">' . esc_html( HSW_Helpers::fa_num( $i ) ) . '</td>';
 			$html .= '<td class="hsw-inv__c-name"><span class="hsw-inv__pname">' . esc_html( $item->get_name() ) . '</span>';
-			$meta = wc_display_item_meta( $item, array( 'echo' => false, 'before' => '', 'separator' => ' · ', 'after' => '' ) );
-			if ( '' !== trim( (string) $meta ) ) {
-				$html .= '<span class="hsw-inv__pmeta">' . wp_kses_post( wp_strip_all_tags( $meta ) ) . '</span>';
+			if ( '' !== $meta ) {
+				$html .= '<span class="hsw-inv__pmeta">' . esc_html( $meta ) . '</span>';
 			}
 			$html .= '</td>';
 			$html .= '<td class="hsw-inv__c-qty">' . esc_html( HSW_Helpers::fa_num( $qty ) ) . '</td>';
-			$html .= '<td class="hsw-inv__c-price">' . wp_kses_post( wc_price( $unit, array( 'currency' => $order->get_currency() ) ) ) . '</td>';
-			$html .= '<td class="hsw-inv__c-total">' . wp_kses_post( wc_price( $line, array( 'currency' => $order->get_currency() ) ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-price">' . wp_kses_post( wc_price( $unit, array( 'currency' => $currency ) ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-total">' . wp_kses_post( wc_price( $line, array( 'currency' => $currency ) ) ) . '</td>';
 			$html .= '</tr>';
 		}
 		$html .= '</tbody></table>';
 
 		/* ---------- totals ---------- */
-		$rows = array();
-		$rows[] = array( __( 'جمع اقلام', 'hamishop-elementor-widgets' ), $order->get_subtotal() );
+		$rows   = array();
+		$rows[] = array( __( 'جمع کل', 'hamishop-elementor-widgets' ), (float) $order->get_subtotal() );
 
 		$discount = (float) $order->get_discount_total();
 		if ( $discount > 0 ) {
@@ -2100,36 +2129,61 @@ final class HSW_Account {
 		}
 
 		$ship_total = (float) $order->get_shipping_total();
-		$rows[]     = array( __( 'هزینه ارسال', 'hamishop-elementor-widgets' ), $ship_total );
+		if ( $ship_total > 0 ) {
+			$rows[] = array( __( 'هزینه ارسال', 'hamishop-elementor-widgets' ), $ship_total );
+		}
+
+		foreach ( $order->get_fees() as $fee ) {
+			$rows[] = array( $fee->get_name(), (float) $fee->get_total() );
+		}
 
 		$tax = (float) $order->get_total_tax();
 		if ( $tax > 0 ) {
 			$rows[] = array( __( 'مالیات', 'hamishop-elementor-widgets' ), $tax );
 		}
 
-		$html .= '<div class="hsw-inv__foot">';
-		$html .= '<div class="hsw-inv__note">';
-		if ( $date_full ) {
-			$html .= '<p>' . esc_html( sprintf( 'این فاکتور در تاریخ %s صادر شده است.', $date_full ) ) . '</p>';
-		}
-		$html .= '<p class="hsw-inv__muted">' . esc_html( sprintf( 'شناسهٔ سفارش: #%s', HSW_Helpers::fa_num( $order->get_order_number() ) ) ) . '</p>';
-		$html .= '</div>';
+		$html .= '<div class="hsw-inv__settle">';
 
 		$html .= '<table class="hsw-inv__totals"><tbody>';
 		foreach ( $rows as $row ) {
 			$value  = (float) $row[1];
-			$html  .= '<tr><th>' . esc_html( $row[0] ) . '</th><td>' . wp_kses_post( $value < 0 ? '− ' . wc_price( abs( $value ), array( 'currency' => $order->get_currency() ) ) : ( 0.0 === $value ? esc_html__( 'رایگان', 'hamishop-elementor-widgets' ) : wc_price( $value, array( 'currency' => $order->get_currency() ) ) ) ) . '</td></tr>';
+			$amount = $value < 0
+				? '− ' . wc_price( abs( $value ), array( 'currency' => $currency ) )
+				: ( 0.0 === $value ? esc_html__( 'رایگان', 'hamishop-elementor-widgets' ) : wc_price( $value, array( 'currency' => $currency ) ) );
+			$html  .= '<tr><th>' . esc_html( $row[0] ) . '</th><td>' . wp_kses_post( $amount ) . '</td></tr>';
 		}
-		$html .= '<tr class="hsw-inv__grand"><th>' . esc_html__( 'مبلغ قابل پرداخت', 'hamishop-elementor-widgets' ) . '</th><td>' . wp_kses_post( $order->get_formatted_order_total() ) . '</td></tr>';
-		$html .= '</tbody></table></div>';
+		$html .= '<tr class="hsw-inv__grand"><th>' . esc_html__( 'مبلغ پرداخت‌شده', 'hamishop-elementor-widgets' ) . '</th><td>' . wp_kses_post( $order->get_formatted_order_total() ) . '</td></tr>';
+		$html .= '</tbody></table>';
 
-		/* ---------- actions ---------- */
-		$html .= '<footer class="hsw-inv__actions no-print">';
-		$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
-		$html .= '<a class="hsw-ac__btn hsw-ac__btn--ghost" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a>';
+		$html .= '<div class="hsw-inv__paidbox"><span>' . esc_html__( 'مبلغ پرداخت‌شده:', 'hamishop-elementor-widgets' ) . '</span><strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong></div>';
+
+		$html .= '</div>';
+
+		$html .= '<dl class="hsw-inv__paymeta">';
+		$html .= '<div><dt>' . esc_html__( 'روش پرداخت:', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( $payment ) . '</dd></div>';
+		$html .= '<div><dt>' . esc_html__( 'وضعیت:', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( $paid_line ) . '</dd></div>';
+		$html .= '</dl>';
+
+		/* ---------- stamp + signature ---------- */
+		$html .= '<div class="hsw-inv__sign">';
+		if ( '' !== $stamp ) {
+			$html .= '<img class="hsw-inv__stamp" src="' . esc_url( $stamp ) . '" alt="" />';
+		} else {
+			$html .= '<span class="hsw-inv__stamp hsw-inv__stamp--empty" aria-hidden="true"></span>';
+		}
+		$html .= '<span class="hsw-inv__signline">' . esc_html__( 'امضای خریدار', 'hamishop-elementor-widgets' ) . '</span>';
+		$html .= '</div>';
+
+		/* ---------- footer ---------- */
+		$html .= '<footer class="hsw-inv__foot">';
+		$html .= '<p class="hsw-inv__footnote">' . esc_html__( 'این فاکتور بابت فروش کالا یا خدمات صادر شده و پرداخت آن به معنای پذیرش قوانین فروشگاه است.', 'hamishop-elementor-widgets' ) . '</p>';
+		$html .= '<div class="hsw-inv__footrow"><span dir="ltr">' . esc_html( $order->get_view_order_url() ) . '</span><span>۱ / ۱</span></div>';
 		$html .= '</footer>';
 
-		$html .= '<p class="hsw-inv__thanks">' . esc_html( sprintf( 'از خرید شما سپاسگزاریم — %s', $brand ) ) . '</p>';
+		$html .= '<div class="hsw-inv__actions no-print">';
+		$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
+		$html .= '<a class="hsw-ac__btn hsw-ac__btn--ghost" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a>';
+		$html .= '</div>';
 
 		return $html . '</section>';
 	}
@@ -2435,7 +2489,10 @@ final class HSW_Account {
 		$html   = '<section class="hsw-ac__card hsw-ac__notifications" aria-labelledby="hsw-ac-notifications-title">';
 		$html  .= '<header class="hsw-ac__page-head"><div><h2 id="hsw-ac-notifications-title">' . esc_html__( 'اعلان‌ها', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'آخرین رویدادهای حساب و سفارش‌های شما.', 'hamishop-elementor-widgets' ) . '</p></div>';
 		if ( $unread ) {
-			$html .= '<span class="hsw-ac__count-pill">' . esc_html( sprintf( '%s خوانده‌نشده', HSW_Helpers::fa_num( $unread ) ) ) . '</span>';
+			$html .= '<div class="hsw-ac__page-actions">';
+			$html .= '<span class="hsw-ac__count-pill" data-hsw-unread-pill>' . esc_html( sprintf( '%s خوانده‌نشده', HSW_Helpers::fa_num( $unread ) ) ) . '</span>';
+			$html .= '<button type="button" class="hsw-ac__btn hsw-ac__btn--ghost hsw-ac__notif-readall" data-hsw-readall>' . $this->icon( 'check' ) . esc_html__( 'خواندن همه', 'hamishop-elementor-widgets' ) . '</button>';
+			$html .= '</div>';
 		}
 		$html .= '</header>';
 
@@ -2498,25 +2555,121 @@ final class HSW_Account {
 	}
 
 	private function wallet_content( $ctx ) {
-		$balance = $this->wallet_balance( $ctx['user_id'] );
-		$spent   = function_exists( 'wc_get_customer_total_spent' ) ? (float) wc_get_customer_total_spent( $ctx['user_id'] ) : 0;
+		$user_id = (int) $ctx['user_id'];
+		$balance = $this->wallet_balance( $user_id );
+		$spent   = function_exists( 'wc_get_customer_total_spent' ) ? (float) wc_get_customer_total_spent( $user_id ) : 0;
 		$points  = isset( $ctx['loyalty']['points'] ) ? (int) $ctx['loyalty']['points'] : 0;
+		$label   = (string) $this->setting( 'wallet.label', 'کیف پول' );
+		$min     = (int) $this->setting( 'wallet.min_topup', 50000 );
+		$loyalty = ( 'yes' === $ctx['opts']['loyalty']['enabled'] );
+		$per_pt  = (int) $this->setting( 'wallet.point_value', 100 );
 
 		$html  = '<div class="hsw-ac__wallet-grid">';
 		$html .= '<section class="hsw-ac__wallet-main" aria-labelledby="hsw-ac-wallet-title">';
 		$html .= '<div class="hsw-ac__wallet-ic">' . $this->icon( 'wallet' ) . '</div>';
-		$html .= '<div class="hsw-ac__wallet-copy"><span>' . esc_html( $this->setting( 'wallet.label', 'کیف پول' ) ) . '</span><h2 id="hsw-ac-wallet-title">' . wp_kses_post( $this->price_html( $balance ) ) . '</h2><p>' . esc_html( $this->setting( 'wallet.note', '' ) ) . '</p></div>';
-		if ( 'yes' === $ctx['opts']['support']['enabled'] ) {
-			$html .= '<a class="hsw-ac__btn hsw-ac__btn--light" href="' . esc_url( $ctx['support_url'] ) . '">' . $this->icon( 'support' ) . esc_html__( 'تماس با پشتیبانی', 'hamishop-elementor-widgets' ) . '</a>';
-		}
+		$html .= '<div class="hsw-ac__wallet-copy"><span>' . esc_html( $label ) . '</span><h2 id="hsw-ac-wallet-title" data-hsw-wallet-balance>' . wp_kses_post( $this->price_html( $balance ) ) . '</h2><p>' . esc_html( $this->setting( 'wallet.note', '' ) ) . '</p></div>';
 		$html .= '</section>';
+
 		$html .= '<div class="hsw-ac__wallet-mini-grid">';
 		$html .= '<div class="hsw-ac__card hsw-ac__wallet-mini"><span class="hsw-ac__wallet-mini-ic is-success">' . $this->icon( 'shopping-bag' ) . '</span><div><span>' . esc_html__( 'مجموع خرید', 'hamishop-elementor-widgets' ) . '</span><strong>' . wp_kses_post( $this->price_html( $spent ) ) . '</strong></div></div>';
-		if ( 'yes' === $ctx['opts']['loyalty']['enabled'] ) {
+		if ( $loyalty ) {
 			$html .= '<div class="hsw-ac__card hsw-ac__wallet-mini"><span class="hsw-ac__wallet-mini-ic is-accent">' . $this->icon( 'gift' ) . '</span><div><span>' . esc_html( $ctx['opts']['loyalty']['label'] ) . '</span><strong>' . esc_html( HSW_Helpers::fa_num( $points ) ) . '</strong></div></div>';
 		}
-		$html .= '</div></div>';
+		$html .= '</div>';
+
+		/* ---------- top-up + points ---------- */
+		$html .= '<div class="hsw-ac__wallet-actions">';
+
+		$html .= '<section class="hsw-ac__card hsw-ac__wallet-panel" data-hsw-wallet-panel>';
+		$html .= '<h3>' . $this->icon( 'add' ) . esc_html__( 'شارژ کیف پول', 'hamishop-elementor-widgets' ) . '</h3>';
+		$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را وارد کنید؛ پس از واریز و تایید پشتیبانی، موجودی اضافه می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+		$html .= '<form class="hsw-ac__wallet-form" data-hsw-wallet-topup>';
+		$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-amount">' . esc_html__( 'مبلغ (تومان)', 'hamishop-elementor-widgets' ) . '</label>';
+		$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-amount" name="amount" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( number_format( max( $min, 100000 ) ) ) ) . '" dir="ltr">';
+		$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-note">' . esc_html__( 'شماره پیگیری / توضیح (اختیاری)', 'hamishop-elementor-widgets' ) . '</label>';
+		$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-note" name="note" type="text">';
+		$html .= '<p class="hsw-ac__wallet-msg" data-hsw-wallet-msg role="alert" hidden></p>';
+		$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">' . $this->icon( 'wallet' ) . esc_html__( 'ثبت درخواست شارژ', 'hamishop-elementor-widgets' ) . '</button>';
+		$html .= '</form></section>';
+
+		if ( $loyalty ) {
+			$available = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::points_available( $user_id ) : 0;
+			$html     .= '<section class="hsw-ac__card hsw-ac__wallet-panel">';
+			$html     .= '<h3>' . $this->icon( 'gift' ) . esc_html__( 'تبدیل امتیاز به موجودی', 'hamishop-elementor-widgets' ) . '</h3>';
+			$html     .= '<p class="hsw-ac__wallet-hint">' . esc_html(
+				sprintf(
+					/* translators: 1: points per unit, 2: unit amount. */
+					__( 'هر امتیاز %1$s تومان است. امتیاز قابل تبدیل شما: %2$s', 'hamishop-elementor-widgets' ),
+					HSW_Helpers::fa_num( number_format( $per_pt ) ),
+					HSW_Helpers::fa_num( $available )
+				)
+			) . '</p>';
+
+			if ( $available > 0 ) {
+				$html .= '<form class="hsw-ac__wallet-form" data-hsw-wallet-convert>';
+				$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-points">' . esc_html__( 'تعداد امتیاز', 'hamishop-elementor-widgets' ) . '</label>';
+				$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-points" name="points" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( $available ) ) . '" dir="ltr">';
+				$html .= '<p class="hsw-ac__wallet-msg" data-hsw-wallet-msg role="alert" hidden></p>';
+				$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">' . $this->icon( 'savings' ) . esc_html__( 'تبدیل به کیف پول', 'hamishop-elementor-widgets' ) . '</button>';
+				$html .= '</form>';
+			} else {
+				$html .= '<p class="hsw-ac__wallet-empty">' . esc_html__( 'هنوز امتیاز قابل تبدیلی ندارید.', 'hamishop-elementor-widgets' ) . '</p>';
+			}
+			$html .= '</section>';
+		}
+
+		$html .= '</div>';
+
+		/* ---------- statement ---------- */
+		$entries = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::entries( $user_id, 10 ) : array();
+
+		$html .= '<section class="hsw-ac__card hsw-ac__wallet-ledger">';
+		$html .= '<h3>' . $this->icon( 'receipt' ) . esc_html__( 'آخرین تراکنش‌ها', 'hamishop-elementor-widgets' ) . '</h3>';
+
+		if ( ! $entries ) {
+			$html .= '<p class="hsw-ac__wallet-empty">' . esc_html__( 'هنوز تراکنشی ثبت نشده است.', 'hamishop-elementor-widgets' ) . '</p>';
+		} else {
+			$html .= '<table class="hsw-ac__ledger"><thead><tr>';
+			$html .= '<th>' . esc_html__( 'تاریخ', 'hamishop-elementor-widgets' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'شرح', 'hamishop-elementor-widgets' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'مبلغ', 'hamishop-elementor-widgets' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'موجودی', 'hamishop-elementor-widgets' ) . '</th>';
+			$html .= '</tr></thead><tbody>';
+
+			foreach ( $entries as $row ) {
+				$amount = (float) $row->amount;
+				$when   = strtotime( (string) $row->created_at );
+				$html  .= '<tr>';
+				$html  .= '<td class="hsw-ac__ledger-date">' . esc_html( $when ? $this->format_date( $when, 'j F Y' ) : '—' ) . '</td>';
+				$html  .= '<td>' . esc_html( '' !== (string) $row->note ? (string) $row->note : $this->ledger_kind_label( (string) $row->kind ) ) . '</td>';
+				$html  .= '<td class="hsw-ac__ledger-amount ' . ( $amount < 0 ? 'is-out' : 'is-in' ) . '">' . ( $amount < 0 ? '− ' : '+ ' ) . wp_kses_post( $this->price_html( abs( $amount ) ) ) . '</td>';
+				$html  .= '<td class="hsw-ac__ledger-balance">' . wp_kses_post( $this->price_html( (float) $row->balance_after ) ) . '</td>';
+				$html  .= '</tr>';
+			}
+			$html .= '</tbody></table>';
+		}
+
+		$html .= '</section></div>';
+
 		return $html;
+	}
+
+	/**
+	 * Human label for a ledger row kind.
+	 *
+	 * @param string $kind Kind key.
+	 * @return string
+	 */
+	private function ledger_kind_label( $kind ) {
+		$map = array(
+			'topup'  => __( 'شارژ کیف پول', 'hamishop-elementor-widgets' ),
+			'admin'  => __( 'شارژ توسط پشتیبانی', 'hamishop-elementor-widgets' ),
+			'points' => __( 'تبدیل امتیاز', 'hamishop-elementor-widgets' ),
+			'spend'  => __( 'پرداخت از کیف پول', 'hamishop-elementor-widgets' ),
+			'refund' => __( 'بازگشت وجه', 'hamishop-elementor-widgets' ),
+		);
+
+		return isset( $map[ $kind ] ) ? $map[ $kind ] : __( 'تراکنش', 'hamishop-elementor-widgets' );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -2702,6 +2855,51 @@ final class HSW_Account {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+			)
+		);
+
+		register_rest_route(
+			'hsw/v1',
+			'/account/notifications/read',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'rest_notifications_read' ),
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
+			)
+		);
+	}
+
+	/**
+	 * Mark every notification read.
+	 *
+	 * One meta write, no per-item update: the whole list lives in a single
+	 * user-meta row, so "read all" is the same cost as "read one".
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function rest_notifications_read() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return new WP_Error( 'hsw_auth', __( 'ابتدا وارد حساب خود شوید.', 'hamishop-elementor-widgets' ), array( 'status' => 401 ) );
+		}
+
+		$list = get_user_meta( $user_id, '_hsw_notifications', true );
+		$list = is_array( $list ) ? $list : array();
+
+		foreach ( $list as $index => $item ) {
+			if ( is_array( $item ) ) {
+				$list[ $index ]['read'] = true;
+			}
+		}
+
+		update_user_meta( $user_id, '_hsw_notifications', $list );
+
+		return rest_ensure_response(
+			array(
+				'ok'     => true,
+				'unread' => 0,
 			)
 		);
 	}

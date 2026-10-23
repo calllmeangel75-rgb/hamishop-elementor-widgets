@@ -331,7 +331,13 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                         <div class="hsw-ppurch__qty hsw-ppurch__qty--inline">
                                                 <div class="hsw-ppurch__stepper">
                                                         <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="1" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">add</span></button>
-                                                        <span class="hsw-ppurch__qval" data-hsw-qval><?php echo esc_html( HSW_Helpers::fa_num( 1 ) ); ?></span>
+                                                        <?php
+                                                        /*
+                                                         * A real field, not a span: the stepper used to be the only way to
+                                                         * change the quantity, so typing a number did nothing.
+                                                         */
+                                                        ?>
+                                                        <input type="text" class="hsw-ppurch__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( 1 ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                         <button type="button" class="hsw-ppurch__qbtn" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><span class="hsw-ic">remove</span></button>
                                                 </div>
                                         </div>

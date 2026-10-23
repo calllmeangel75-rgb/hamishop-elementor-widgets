@@ -234,10 +234,7 @@
 			var pid3 = scope2.getAttribute('data-hsw-product');
 			var st3 = state(pid3);
 			var delta = parseInt(qb.getAttribute('data-hsw-qty'), 10) || 0;
-			st3.qty = Math.max(1, Math.min(99, st3.qty + delta));
-			roots(pid3).forEach(function (r) {
-				r.querySelectorAll('[data-hsw-qval]').forEach(function (el) { el.textContent = fa(st3.qty); });
-			});
+			setQty(pid3, st3.qty + delta);
 			return;
 		}
 
@@ -253,7 +250,71 @@
 		}
 	});
 
+	/* ---------- quantity ---------- */
+
+	/* Persian/Arabic digits are what a Persian keyboard produces. */
+	function toLatin(value) {
+		return String(value)
+			.replace(/[\u06F0-\u06F9]/g, function (d) { return String(d.charCodeAt(0) - 0x06F0); })
+			.replace(/[\u0660-\u0669]/g, function (d) { return String(d.charCodeAt(0) - 0x0660); })
+			.replace(/[^\d]/g, '');
+	}
+
+	/* The stepper and the typed field share one source of truth: state().qty. */
+	function setQty(pid, value) {
+		var st = state(pid);
+		var qty = parseInt(value, 10);
+		if (isNaN(qty)) { qty = 1; }
+		st.qty = Math.max(1, Math.min(99, qty));
+
+		roots(pid).forEach(function (r) {
+			r.querySelectorAll('[data-hsw-qval]').forEach(function (el) {
+				if ('INPUT' === el.tagName) {
+					el.value = fa(st.qty);
+				} else {
+					el.textContent = fa(st.qty);
+				}
+			});
+		});
+		return st.qty;
+	}
+
+	function commitQty(el) {
+		var scope = el.closest('.hsw-p');
+		if (!scope) { return; }
+		var pid = scope.getAttribute('data-hsw-product') || scope.getAttribute('data-hsw-variants');
+		if (!pid) { return; }
+		var raw = toLatin(el.value);
+		var qty = raw === '' ? 1 : parseInt(raw, 10);
+		if (isNaN(qty) || qty < 1) { qty = 1; }
+		setQty(pid, qty);
+	}
+
+	document.addEventListener('keydown', function (e) {
+		var el = e.target;
+		if (!el || !el.hasAttribute || !el.hasAttribute('data-hsw-qval')) { return; }
+		if ('Enter' === e.key) {
+			e.preventDefault();
+			commitQty(el);
+			el.blur();
+		}
+	});
+
+	document.addEventListener('change', function (e) {
+		var el = e.target;
+		if (!el || !el.hasAttribute || !el.hasAttribute('data-hsw-qval')) { return; }
+		commitQty(el);
+	});
+
+	document.addEventListener('focusin', function (e) {
+		var el = e.target;
+		if (el && el.hasAttribute && el.hasAttribute('data-hsw-qval') && 'INPUT' === el.tagName) {
+			el.select();
+		}
+	});
+
 	/* ================= ADD TO CART ================= */
+
 	function addToCart(btn, pid, st) {
 		if (document.body.classList.contains('elementor-editor-active')) { flashAdded(btn); return; }
 		if (!pid || btn.classList.contains('is-busy')) { return; }
