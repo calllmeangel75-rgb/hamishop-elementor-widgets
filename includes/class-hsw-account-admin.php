@@ -96,7 +96,6 @@ final class HSW_Account_Admin {
 				<div class="hsw-admin-brand"><span class="hsw-admin-logo">HamiShop</span><div><h1>پنل حساب کاربری</h1><p>تنظیمات یکپارچهٔ داشبورد، منو، پشتیبانی، اعلان‌ها و ظاهر حساب مشتریان.</p></div></div>
 				<div class="hsw-admin-headactions">
 					<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=hamishop-widgets' ) ); ?>">کنترل ویجت‌ها</a>
-					<a class="button button-primary" href="<?php echo esc_url( wc_get_page_permalink( 'myaccount' ) ); ?>" target="_blank" rel="noopener">مشاهده صفحه حساب</a>
 				</div>
 			</div>
 
@@ -136,13 +135,17 @@ final class HSW_Account_Admin {
 	private function page_styles() {
 		?>
 		<style>
-			.hsw-admin{--hsw-a:#0e2a47;--hsw-b:#f3f6fa;--hsw-line:#e6ebf2;--hsw-muted:#5b6b80;max-width:1280px}
+			.hsw-admin{--hsw-a:#0e2a47;--hsw-b:#f3f6fa;--hsw-line:#e6ebf2;--hsw-muted:#5b6b80;max-width:1280px;padding-bottom:110px}
 			.hsw-admin-head{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#0b2036,#173b5c);color:#fff;border-radius:18px;padding:22px 24px;margin:12px 0 18px;flex-wrap:wrap}
 			.hsw-admin-brand{display:flex;align-items:center;gap:14px}
 			.hsw-admin-logo{font-weight:800;font-size:20px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:8px 14px;border-radius:12px}
 			.hsw-admin-head h1{color:#fff;margin:0 0 4px;font-size:22px}
 			.hsw-admin-head p{margin:0;color:rgba(255,255,255,.75)}
 			.hsw-admin-headactions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+			/* WP's default .button is blue-on-white; on this dark header it turned into
+			   blue-on-navy and was unreadable. */
+			.hsw-admin-headactions .button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.34);color:#fff;font-weight:700;border-radius:10px;padding:6px 16px;min-height:34px;line-height:1.6;box-shadow:none;text-shadow:none}
+			.hsw-admin-headactions .button:hover,.hsw-admin-headactions .button:focus{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.55);color:#fff}
 			.hsw-admin-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 			.hsw-admin-tabs a{background:#fff;border:1px solid var(--hsw-line);border-radius:999px;padding:8px 16px;text-decoration:none;color:#1d2327;font-weight:600}
 			.hsw-admin-tabs a.is-active{background:var(--hsw-a);border-color:var(--hsw-a);color:#fff}
@@ -169,6 +172,14 @@ final class HSW_Account_Admin {
 			.hsw-badge.is-native{background:#e0f2fe;color:#075985}
 			.hsw-badge.is-custom{background:#fef3c7;color:#92400e}
 			.hsw-admin-submit{margin:0;position:sticky;bottom:12px;background:rgba(243,246,250,.92);padding:12px 0;backdrop-filter:blur(4px)}
+			.hsw-inbound{margin-top:22px;padding:16px 18px;border:1px solid var(--hsw-line);border-radius:14px;background:#f8fafc}
+			.hsw-inbound h3{margin:0 0 6px;font-size:14px}
+			.hsw-inbound .hsw-admin-desc{margin:0 0 12px}
+			.hsw-inbound .form-table{margin:0}
+			.hsw-inbound .form-table th{width:140px;font-weight:600;padding:8px 0;font-size:13px}
+			.hsw-inbound .form-table td{padding:8px 0}
+			.hsw-inbound code{display:inline-block;background:#fff;border:1px solid var(--hsw-line);border-radius:8px;padding:4px 9px;font-size:12px;color:#0e2a47}
+			.hsw-inbound .description{color:var(--hsw-muted);margin:6px 0 0}
 			.hsw-code{direction:ltr;text-align:left;background:#0f172a;color:#e2e8f0;padding:14px 16px;border-radius:12px;font-family:Consolas,monospace;display:block;margin:8px 0 14px;overflow:auto}
 			.hsw-status-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}
 			.hsw-status-list li{background:var(--hsw-b);border:1px solid var(--hsw-line);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px}
@@ -398,6 +409,30 @@ final class HSW_Account_Admin {
 				<?php $this->number_field( $s, 'support', 'retention_days', 'نگهداری تیکت بسته‌شده (روز) — ۰ = هرگز', 0, 3650 ); ?>
 			</div>
 			<?php $this->textarea_field( $s, 'support', 'departments', 'دپارتمان‌ها', 'هر دپارتمان در یک خط.', true ); ?>
+
+			<div class="hsw-inbound">
+			<h3>پاسخ از داخل ایمیل</h3>
+			<p class="hsw-admin-desc">
+				هر ایمیل اطلاع‌رسانی تیکت با یک «Reply-To» امضاشده فرستاده می‌شود؛ اگر سرویس ایمیل شما پیام‌های آن آدرس را به این وب‌هوک بفرستد، پاسخ شما مستقیماً به تیکت اضافه و به مشتری اطلاع داده می‌شود.
+			</p>
+			<?php $secret = $this->account->inbound_secret(); ?>
+			<?php if ( '' === $secret ) : ?>
+				<p class="hsw-admin-desc"><strong>ساخت کلید ناموفق بود؛ یک‌بار همین صفحه را ذخیره کنید.</strong></p>
+			<?php else : ?>
+				<table class="form-table" role="presentation"><tbody>
+					<tr>
+						<th scope="row">آدرس وب‌هوک</th>
+						<td><code dir="ltr" style="user-select:all"><?php echo esc_html( rest_url( 'hsw/v1/ticket-inbound' ) ); ?></code></td>
+					</tr>
+					<tr>
+						<th scope="row">کلید (secret)</th>
+						<td><code dir="ltr" style="user-select:all"><?php echo esc_html( $secret ); ?></code>
+							<p class="description">در بدنهٔ درخواست POST به شکل <code dir="ltr">{"secret":"…","to":"…","from":"…","text":"…"}</code> فرستاده شود. فقط ایمیل پشتیبانی، مدیر فروشگاه یا خود مشتری پذیرفته می‌شود.</p>
+						</td>
+					</tr>
+				</tbody></table>
+			<?php endif; ?>
+			</div>
 		</div>
 		<div class="hsw-admin-card">
 			<h2>وضعیت اندپوینت‌ها</h2>

@@ -36,6 +36,7 @@ final class HSW_Account_Support {
 		add_action( 'init', array( $this, 'register_post_type' ), 5 );
 		add_action( 'hsw_ticket_cleanup', array( $this, 'cleanup_old_tickets' ) );
 		add_action( 'init', array( $this, 'schedule_cleanup' ), 20 );
+		add_action( 'rest_api_init', array( $this, 'register_inbound_route' ) );
 		add_action( 'template_redirect', array( $this, 'handle_frontend_actions' ) );
 		add_action( 'woocommerce_account_support_endpoint', array( $this, 'render_endpoint' ) );
 
@@ -292,6 +293,7 @@ final class HSW_Account_Support {
 
 		set_transient( 'hsw_ticket_lock_' . $user_id, 1, 30 );
 		$this->notify_admin( $ticket_id, false );
+		$this->notify_customer_created( $ticket_id );
 
 		$this->account->add_notification(
 			$user_id,
@@ -409,7 +411,34 @@ final class HSW_Account_Support {
 		$lines[] = '';
 		$lines[] = 'مشاهده در پیشخوان: ' . admin_url( 'post.php?post=' . $ticket_id . '&action=edit' );
 
-		wp_mail( $to, $subject, implode( "\n", $lines ), array( 'Content-Type: text/plain; charset=UTF-8' ) );
+		/*
+		 * Replying to this message goes back to the ticket, not to the customer:
+		 * the Reply-To carries a signed per-ticket tag that the inbound webhook
+		 * (see handle_inbound_email) turns into a staff reply.
+		 */
+		wp_mail( $to, $subject, implode( "\n", $lines ), $this->mail_headers( $ticket_id ) );
+	}
+
+	/**
+	 * Headers shared by every ticket email.
+	 *
+	 * `Reply-To` is the whole point of the integration: hit reply in any mail
+	 * client and the answer is filed on the ticket instead of vanishing into
+	 * the store's own inbox. When no usable mailbox is configured the header is
+	 * omitted and everything falls back to the previous behaviour.
+	 *
+	 * @param int $ticket_id Ticket.
+	 * @return array<int,string>
+	 */
+	private function mail_headers( $ticket_id ) {
+		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+		$reply   = $this->reply_address( $ticket_id );
+
+		if ( '' !== $reply ) {
+			$headers[] = 'Reply-To: ' . $reply;
+		}
+
+		return $headers;
 	}
 
 	private function redirect_with_notice( $url, $type, $message ) {
@@ -418,6 +447,21 @@ final class HSW_Account_Support {
 		}
 		wp_safe_redirect( $url );
 		exit;
+	}
+
+	/**
+	 * Public webhook for inbound support mail (secret-protected).
+	 */
+	public function register_inbound_route() {
+		register_rest_route(
+			'hsw/v1',
+			'/ticket-inbound',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'handle_inbound_email' ),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**
@@ -437,6 +481,183 @@ final class HSW_Account_Support {
 		} elseif ( ! $wanted && $next ) {
 			wp_clear_scheduled_hook( 'hsw_ticket_cleanup' );
 		}
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Reply by email
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Signed per-ticket tag used in the Reply-To address.
+	 *
+	 * The tag proves the address came from us, so a stranger cannot make up
+	 * `support+t9999...@domain` and inject a reply into someone's ticket.
+	 *
+	 * @param int $ticket_id Ticket.
+	 * @return string
+	 */
+	private function reply_token( $ticket_id ) {
+		return 't' . (int) $ticket_id . '.' . substr( hash_hmac( 'sha256', 'hsw-ticket|' . (int) $ticket_id, wp_salt( 'auth' ) ), 0, 10 );
+	}
+
+	/**
+	 * Address the admin should reply to for a given ticket.
+	 *
+	 * Uses `+` sub-addressing on the configured support mailbox, which every
+	 * mainstream provider (Gmail, most cPanel hosts) routes to the same inbox.
+	 *
+	 * @param int $ticket_id Ticket.
+	 * @return string
+	 */
+	private function reply_address( $ticket_id ) {
+		$base = (string) $this->account->setting( 'support.support_email', '' );
+
+		if ( ! is_email( $base ) ) {
+			$base = (string) get_option( 'admin_email' );
+		}
+		if ( ! is_email( $base ) ) {
+			return '';
+		}
+
+		list( $local, $domain ) = array_pad( explode( '@', $base, 2 ), 2, '' );
+
+		return $local . '+' . $this->reply_token( $ticket_id ) . '@' . $domain;
+	}
+
+	/**
+	 * Turn an inbound email into a staff reply on the ticket.
+	 *
+	 * There is no IMAP dependency here on purpose: `ext-imap` is missing on many
+	 * hosts (and deprecated in PHP 8.4), so the endpoint takes an already-parsed
+	 * message. Point any "email to webhook" service — or a cPanel forwarder — at
+	 * it with the secret from the support settings.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function handle_inbound_email( $request ) {
+		/*
+		 * This route has to be publicly reachable for a mail provider to call
+		 * it, so it gets the same per-IP ceiling as the OTP endpoints: enough
+		 * for a busy support desk, not enough to flood the log or grind away at
+		 * the secret.
+		 */
+		if ( class_exists( 'HSW_Throttle' ) ) {
+			$gate = HSW_Throttle::hit( 'ticket_in:' . HSW_Throttle::ip(), 120, HOUR_IN_SECONDS );
+			if ( empty( $gate['allowed'] ) ) {
+				return new WP_Error( 'hsw_inbound_busy', 'too many requests', array( 'status' => 429 ) );
+			}
+		}
+
+		$secret = (string) $this->account->inbound_secret();
+		$given  = (string) $request->get_param( 'secret' );
+
+		if ( '' === $secret || ! hash_equals( $secret, $given ) ) {
+			return new WP_Error( 'hsw_inbound_forbidden', 'forbidden', array( 'status' => 403 ) );
+		}
+
+		$to   = (string) $request->get_param( 'to' );
+		$from = sanitize_email( (string) $request->get_param( 'from' ) );
+		$text = (string) $request->get_param( 'text' );
+
+		if ( ! preg_match( '/\+(t\d+\.[a-f0-9]{10})@/i', $to, $match ) ) {
+			return new WP_Error( 'hsw_inbound_token', 'missing ticket tag', array( 'status' => 400 ) );
+		}
+
+		$ticket_id = (int) substr( $match[1], 1, strpos( $match[1], '.' ) - 1 );
+		if ( ! $ticket_id || ! hash_equals( $this->reply_token( $ticket_id ), $match[1] ) ) {
+			return new WP_Error( 'hsw_inbound_token', 'invalid ticket tag', array( 'status' => 400 ) );
+		}
+
+		$ticket = get_post( $ticket_id );
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type ) {
+			return new WP_Error( 'hsw_inbound_ticket', 'ticket not found', array( 'status' => 404 ) );
+		}
+
+		/*
+		 * The signed tag proves the message belongs to this ticket, but not who
+		 * wrote it — mail gets forwarded. The sender must still be either the
+		 * ticket author or a support mailbox / shop manager.
+		 */
+		$author    = get_user_by( 'id', (int) $ticket->post_author );
+		$sender    = $from ? get_user_by( 'email', $from ) : null;
+		$is_author = ( $author && '' !== $from && strtolower( $from ) === strtolower( (string) $author->user_email ) );
+
+		$support_box = sanitize_email( (string) $this->account->setting( 'support.support_email', '' ) );
+		$admin_box   = sanitize_email( (string) get_option( 'admin_email' ) );
+
+		$is_staff = ( '' !== $from && ( $from === $support_box || $from === $admin_box ) )
+			|| ( $sender && ( user_can( $sender, 'manage_options' ) || user_can( $sender, 'manage_woocommerce' ) ) );
+
+		if ( ! $is_author && ! $is_staff ) {
+			return new WP_Error( 'hsw_inbound_sender', 'sender not allowed', array( 'status' => 403 ) );
+		}
+
+		$message = $this->strip_quoted_reply( $text );
+		if ( $this->len( $message ) < 2 ) {
+			return new WP_Error( 'hsw_inbound_empty', 'empty message', array( 'status' => 400 ) );
+		}
+
+		if ( $is_author && ! $is_staff ) {
+			/* The customer answered from their inbox: it belongs in the thread
+			 * exactly like a reply typed in the account panel. */
+			$this->insert_reply( $ticket_id, (int) $author->ID, $message, false );
+			update_post_meta( $ticket_id, self::STATUS_META, 'open' );
+			update_post_meta( $ticket_id, self::UNREAD_ADMIN, 1 );
+			update_post_meta( $ticket_id, self::UNREAD_USER, 0 );
+			$this->notify_admin( $ticket_id, true );
+		} else {
+			$this->insert_reply( $ticket_id, $sender ? (int) $sender->ID : 0, $message, true );
+			update_post_meta( $ticket_id, self::STATUS_META, 'answered' );
+			update_post_meta( $ticket_id, self::UNREAD_ADMIN, 0 );
+			update_post_meta( $ticket_id, self::UNREAD_USER, 1 );
+			$this->notify_customer( $ticket_id, $message );
+		}
+
+		update_post_meta( $ticket_id, self::UPDATED_META, time() );
+
+		return rest_ensure_response(
+			array(
+				'ok'     => true,
+				'ticket' => $ticket_id,
+			)
+		);
+	}
+
+	/**
+	 * Drop the quoted history a mail client appends.
+	 *
+	 * @param string $text Raw body.
+	 * @return string
+	 */
+	private function strip_quoted_reply( $text ) {
+		$lines = preg_split( '/\r\n|\r|\n/', (string) $text );
+		$out   = array();
+
+		foreach ( (array) $lines as $line ) {
+			$trimmed = ltrim( $line );
+
+			if ( '' !== $trimmed && '>' === $trimmed[0] ) {
+				continue;
+			}
+			/*
+			 * The previous pattern contained `From://s`, which closed the
+			 * delimiter and made the whole regex fail to compile — the strip
+			 * silently never ran. Kept as separate, escaped alternatives.
+			 */
+			if ( preg_match( '/^(On .+ wrote:|-{2,}\s*Original Message\s*-{2,}|From:\s|Sent from my |فرستاده شده از|در تاریخ .+ نوشت)/iu', $trimmed ) ) {
+				break;
+			}
+			$out[] = $line;
+		}
+
+		/*
+		 * Returning the raw text as a fallback would defeat the empty-message
+		 * guard below: a body made entirely of quoted history would come back
+		 * unchanged and be filed as a reply. An empty result is the correct
+		 * answer — the caller rejects it.
+		 */
+		return trim( implode( "\n", $out ) );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -898,6 +1119,7 @@ final class HSW_Account_Support {
 		}
 
 		$this->notify_admin( $ticket_id, false );
+		$this->notify_customer_created( $ticket_id );
 
 		$this->account->add_notification(
 			$user_id,
@@ -1146,6 +1368,61 @@ final class HSW_Account_Support {
 	}
 
 	/**
+	 * Acknowledge a new ticket to the customer.
+	 *
+	 * Until now only the admin was mailed on creation; the customer got an
+	 * in-panel notification and nothing in their inbox, so a ticket sent outside
+	 * business hours looked like it had gone nowhere.
+	 *
+	 * @param int $ticket_id Ticket.
+	 */
+	private function notify_customer_created( $ticket_id ) {
+		if ( 'yes' !== $this->account->setting( 'support.email_notifications', 'yes' ) ) {
+			return;
+		}
+
+		$ticket = get_post( $ticket_id );
+		if ( ! $ticket ) {
+			return;
+		}
+
+		$user = get_user_by( 'id', (int) $ticket->post_author );
+		if ( ! $user || ! is_email( $user->user_email ) ) {
+			return;
+		}
+
+		$brand = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
+		$link  = $this->ticket_url( $ticket_id );
+
+		$subject = sprintf(
+			/* translators: 1: store name, 2: ticket id. */
+			__( '%1$s — تیکت شما ثبت شد (#T-%2$s)', 'hamishop-elementor-widgets' ),
+			$brand,
+			HSW_Helpers::fa_num( $ticket_id )
+		);
+
+		$body  = sprintf(
+			/* translators: %s: customer name. */
+			__( 'سلام %s،', 'hamishop-elementor-widgets' ),
+			$user->display_name
+		) . "\n\n";
+		$body .= sprintf(
+			/* translators: %s: ticket subject. */
+			__( 'تیکت شما با موضوع «%s» ثبت شد و در صف بررسی قرار گرفت.', 'hamishop-elementor-widgets' ),
+			$ticket->post_title
+		) . "\n";
+		$body .= sprintf(
+			/* translators: %s: ticket id. */
+			__( 'شمارهٔ پیگیری: #T-%s', 'hamishop-elementor-widgets' ),
+			HSW_Helpers::fa_num( $ticket_id )
+		) . "\n\n";
+		$body .= __( 'به‌محض دریافت پاسخ، همین‌جا به شما اطلاع می‌دهیم.', 'hamishop-elementor-widgets' ) . "\n";
+		$body .= __( 'برای دیدن و ادامهٔ گفتگو:', 'hamishop-elementor-widgets' ) . "\n" . $link . "\n";
+
+		wp_mail( $user->user_email, $subject, $body, $this->mail_headers( $ticket_id ) );
+	}
+
+	/**
 	 * Tell the customer a staff member answered.
 	 *
 	 * @param int    $ticket_id Ticket.
@@ -1189,7 +1466,7 @@ final class HSW_Account_Support {
 		$body .= $message . "\n\n";
 		$body .= __( 'برای دیدن و ادامهٔ گفتگو:', 'hamishop-elementor-widgets' ) . "\n" . $link . "\n";
 
-		wp_mail( $user->user_email, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
+		wp_mail( $user->user_email, $subject, $body, $this->mail_headers( $ticket_id ) );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -1306,22 +1583,6 @@ final class HSW_Account_Support {
 			<textarea form="hsw-ticket-reply-form" name="message" rows="5" class="widefat" required placeholder="پاسخ خود را بنویسید…"></textarea>
 			<p><button type="submit" form="hsw-ticket-reply-form" class="button button-primary">ارسال پاسخ به کاربر</button></p>
 		</div>
-		<style>
-			.hsw-ticket-thread{max-height:420px;overflow:auto;background:#f6f7f7;padding:12px;border:1px solid #dcdcde;border-radius:6px}
-			.hsw-ticket-msg{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:10px 12px;margin:0 0 10px}
-			.hsw-ticket-msg.is-staff{border-color:#2271b1;background:#f0f6fc}
-			.hsw-ticket-msg-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:12px;color:#646970}
-			.hsw-ticket-msg-text{white-space:normal;line-height:1.8}
-			.hsw-ticket-reply{margin-top:12px}
-			.hsw-ticket-toolbar{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}
-			.hsw-ticket-toolbar .button{margin-inline-start:auto}
-			.hsw-ticket-toolbar a{font-size:12px;color:#2271b1;text-decoration:none}
-			.hsw-ticket-attach{display:block;max-width:260px;margin-top:8px;border-radius:8px;overflow:hidden;line-height:0}
-			.hsw-ticket-attach img{display:block;width:100%;height:auto;border:1px solid #dcdcde;border-radius:8px}
-			.hsw-ticket-reply textarea{margin-bottom:8px}
-			.hsw-ticket-unread{color:#b32d2e;font-weight:700}
-			.hsw-ticket-admin-actions form{display:inline-block}
-		</style>
 		<?php
 	}
 

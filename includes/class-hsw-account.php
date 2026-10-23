@@ -170,6 +170,8 @@ final class HSW_Account {
 				'support_email'      => '',
 				/* Closed tickets older than this many days are deleted daily. */
 				'retention_days'     => 365,
+				/* Secret for the inbound-mail webhook (generated on first save). */
+				'inbound_secret'     => '',
 			),
 			'notifications' => array(
 				'enabled'        => 'yes',
@@ -294,6 +296,34 @@ final class HSW_Account {
 		delete_option( 'hsw_account_rewrite_hash' );
 	}
 
+	/**
+	 * Shared secret for the inbound-email webhook, created on first use.
+	 *
+	 * The sanitiser only mints one when the settings form is saved, which left
+	 * existing installs with an empty secret and a "save this page once" notice.
+	 * Generating it on first read means the address works immediately.
+	 *
+	 * @return string
+	 */
+	public function inbound_secret() {
+		$secret = (string) $this->setting( 'support.inbound_secret', '' );
+		if ( '' !== $secret ) {
+			return $secret;
+		}
+
+		$all = $this->settings();
+		if ( ! isset( $all['support'] ) || ! is_array( $all['support'] ) ) {
+			return '';
+		}
+
+		$secret = wp_generate_password( 32, false, false );
+		$all['support']['inbound_secret'] = $secret;
+		update_option( self::OPTION, $all, false );
+		$this->settings( true );
+
+		return $secret;
+	}
+
 	public function sanitize_settings( $input ) {
 		$defaults = self::defaults();
 		$input    = is_array( $input ) ? $input : array();
@@ -353,6 +383,10 @@ final class HSW_Account {
 			$out['support']['email_notifications'] = $this->yes_no( $s['email_notifications'] ?? $out['support']['email_notifications'] );
 			$out['support']['support_email']       = sanitize_email( $s['support_email'] ?? '' );
 			$out['support']['retention_days']      = $this->clean_int( $s['retention_days'] ?? $out['support']['retention_days'], 0, 3650, 365 );
+			$out['support']['inbound_secret']      = sanitize_text_field( wp_unslash( (string) ( $s['inbound_secret'] ?? $out['support']['inbound_secret'] ) ) );
+			if ( '' === $out['support']['inbound_secret'] ) {
+				$out['support']['inbound_secret'] = wp_generate_password( 32, false, false );
+			}
 		}
 
 		if ( isset( $input['notifications'] ) && is_array( $input['notifications'] ) ) {

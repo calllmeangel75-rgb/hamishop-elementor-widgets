@@ -20,6 +20,59 @@ class HSW_Assets {
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
                 add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
                 add_filter( 'elementor/widget/render_content', array( $this, 'guard_icon_markup' ), 20, 2 );
+                add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
+        }
+
+        /**
+         * Typography and ticket styling for our own admin screens.
+         *
+         * The bundled Vazirmatn is only loaded on the storefront, so wp-admin fell
+         * back to whatever the theme/browser picked (Tahoma here). The font files
+         * are already in the plugin, so the settings and ticket screens use them
+         * too — no extra request on any other admin page.
+         */
+        public function admin_styles() {
+                $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+                if ( ! $screen ) {
+                        return;
+                }
+
+                $post_type = isset( $screen->post_type ) ? (string) $screen->post_type : '';
+                $screen_id = (string) $screen->id;
+                $ours      = ( 'hsw_ticket' === $post_type ) || false !== strpos( $screen_id, 'hamishop' );
+
+                if ( ! $ours ) {
+                        return;
+                }
+
+                wp_enqueue_style( 'hsw-fonts', $this->asset( 'assets/css/hsw-fonts.css' ), array(), HSW_VERSION );
+
+                /*
+                 * WordPress ships a locale override — `.locale-fa-ir body {
+                 * font-family: Tahoma, Arial, sans-serif }` in common.css — which
+                 * outranks a plain `body` selector, so a bare rule here changed
+                 * nothing on a Persian install. Matching the same specificity and
+                 * marking it important wins regardless of load order.
+                 *
+                 * `font-family: inherit` on the controls is the other half: inputs
+                 * and buttons do not inherit the body font on their own. The icon
+                 * font (`.hsw-ic`) is unaffected — it carries its own
+                 * `!important` family on a class selector.
+                 */
+                wp_add_inline_style(
+                        'hsw-fonts',
+                        "body,body.locale-fa-ir,body.wp-admin{font-family:'Vazirmatn HSW',Vazirmatn,Tahoma,sans-serif!important}"
+                        . "input,select,textarea,button,.button,.wp-core-ui .button{font-family:inherit}"
+                );
+
+                if ( 'hsw_ticket' === $post_type ) {
+                        wp_enqueue_style(
+                                'hsw-admin-tickets',
+                                $this->asset( 'assets/css/hsw-admin-tickets.css' ),
+                                array( 'hsw-fonts' ),
+                                HSW_VERSION
+                        );
+                }
         }
 
         /**
