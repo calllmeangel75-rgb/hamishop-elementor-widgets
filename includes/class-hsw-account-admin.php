@@ -395,6 +395,7 @@ final class HSW_Account_Admin {
 				<?php $this->switch_field( $s, 'support', 'email_notifications', 'ارسال ایمیل به مدیر', 'با هر تیکت جدید یا پاسخ کاربر، یک ایمیل اطلاع‌رسانی ارسال می‌شود.' ); ?>
 				<?php $this->text_field( $s, 'support', 'support_email', 'ایمیل پشتیبانی', 'اگر خالی باشد، ایمیل مدیر وردپرس استفاده می‌شود.', 'email' ); ?>
 				<?php $this->select_field( $s, 'support', 'priority_default', 'اولویت پیش‌فرض', $s['support']['priorities'] ); ?>
+				<?php $this->number_field( $s, 'support', 'retention_days', 'نگهداری تیکت بسته‌شده (روز) — ۰ = هرگز', 0, 3650 ); ?>
 			</div>
 			<?php $this->textarea_field( $s, 'support', 'departments', 'دپارتمان‌ها', 'هر دپارتمان در یک خط.', true ); ?>
 		</div>

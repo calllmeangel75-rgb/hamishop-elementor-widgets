@@ -168,6 +168,8 @@ final class HSW_Account {
 				'max_message'        => 3000,
 				'email_notifications'=> 'yes',
 				'support_email'      => '',
+				/* Closed tickets older than this many days are deleted daily. */
+				'retention_days'     => 365,
 			),
 			'notifications' => array(
 				'enabled'        => 'yes',
@@ -350,6 +352,7 @@ final class HSW_Account {
 			$out['support']['max_message']         = $this->clean_int( $s['max_message'] ?? $out['support']['max_message'], 200, 10000, 3000 );
 			$out['support']['email_notifications'] = $this->yes_no( $s['email_notifications'] ?? $out['support']['email_notifications'] );
 			$out['support']['support_email']       = sanitize_email( $s['support_email'] ?? '' );
+			$out['support']['retention_days']      = $this->clean_int( $s['retention_days'] ?? $out['support']['retention_days'], 0, 3650, 365 );
 		}
 
 		if ( isset( $input['notifications'] ) && is_array( $input['notifications'] ) ) {

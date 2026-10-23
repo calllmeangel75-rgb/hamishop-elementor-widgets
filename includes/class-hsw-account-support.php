@@ -34,6 +34,8 @@ final class HSW_Account_Support {
 		$this->account = $account;
 
 		add_action( 'init', array( $this, 'register_post_type' ), 5 );
+		add_action( 'hsw_ticket_cleanup', array( $this, 'cleanup_old_tickets' ) );
+		add_action( 'init', array( $this, 'schedule_cleanup' ), 20 );
 		add_action( 'template_redirect', array( $this, 'handle_frontend_actions' ) );
 		add_action( 'woocommerce_account_support_endpoint', array( $this, 'render_endpoint' ) );
 
@@ -48,6 +50,7 @@ final class HSW_Account_Support {
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 			add_action( 'save_post_' . self::POST_TYPE, array( $this, 'save_ticket' ), 10, 2 );
 			add_action( 'admin_post_hsw_admin_ticket_reply', array( $this, 'admin_reply' ) );
+			add_action( 'admin_post_hsw_export_tickets', array( $this, 'export_tickets' ) );
 			add_action( 'admin_post_hsw_admin_ticket_close', array( $this, 'admin_set_status_action' ) );
 			add_action( 'admin_post_hsw_admin_ticket_reopen', array( $this, 'admin_set_status_action' ) );
 			add_filter( 'manage_' . self::POST_TYPE . '_posts_columns', array( $this, 'admin_columns' ) );
@@ -417,6 +420,25 @@ final class HSW_Account_Support {
 		exit;
 	}
 
+	/**
+	 * Keep the daily cleanup event in step with the retention setting.
+	 *
+	 * The event is scheduled on `init` (not on activation) so it also starts for
+	 * sites that upgraded instead of activating fresh, and it is cleared again
+	 * when the window is turned off.
+	 */
+	public function schedule_cleanup() {
+		$days   = absint( $this->account->setting( 'support.retention_days', 365 ) );
+		$wanted = $days >= 30;
+		$next   = wp_next_scheduled( 'hsw_ticket_cleanup' );
+
+		if ( $wanted && ! $next ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'hsw_ticket_cleanup' );
+		} elseif ( ! $wanted && $next ) {
+			wp_clear_scheduled_hook( 'hsw_ticket_cleanup' );
+		}
+	}
+
 	/* ---------------------------------------------------------------------
 	 * Chat UI (v1.11.24)
 	 *
@@ -654,8 +676,10 @@ final class HSW_Account_Support {
 	 * @return string
 	 */
 	private function ticket_modal_html( $can_new, $open = false ) {
-		$cap     = $this->captcha_new();
-		$subject = isset( $_GET['subject'] ) ? sanitize_text_field( wp_unslash( $_GET['subject'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$cap         = $this->captcha_new();
+		$priorities  = (array) $this->account->setting( 'support.priorities', array() );
+		$default_pri = (string) $this->account->setting( 'support.priority_default', 'normal' );
+		$subject     = isset( $_GET['subject'] ) ? sanitize_text_field( wp_unslash( $_GET['subject'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$max     = max( 200, absint( $this->account->setting( 'support.max_message', 3000 ) ) );
 
 		$html  = '<div class="hsw-ac__modal" data-hsw-ticket-modal' . ( $open && $can_new ? ' data-open="1"' : '' ) . ' hidden>';
@@ -669,6 +693,14 @@ final class HSW_Account_Support {
 
 		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-subject">' . esc_html__( 'موضوع تیکت', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label>';
 		$html .= '<input type="text" id="hsw-ac-t-subject" name="subject" maxlength="120" required value="' . esc_attr( $subject ) . '" placeholder="' . esc_attr__( 'موضوع تیکتو بنویس…', 'hamishop-elementor-widgets' ) . '"></div>';
+
+		/* Priority used to be forced to the default behind the customer's back. */
+		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-priority">' . esc_html__( 'اولویت', 'hamishop-elementor-widgets' ) . '</label>';
+		$html .= '<select id="hsw-ac-t-priority" name="priority">';
+		foreach ( $priorities as $pkey => $plabel ) {
+			$html .= '<option value="' . esc_attr( $pkey ) . '"' . selected( $pkey, $default_pri, false ) . '>' . esc_html( $plabel ) . '</option>';
+		}
+		$html .= '</select></div>';
 
 		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-order">' . esc_html__( 'سفارش / سرویس مرتبط', 'hamishop-elementor-widgets' ) . ' <span class="hsw-ac__optional">(' . esc_html__( 'اختیاری', 'hamishop-elementor-widgets' ) . ')</span></label>';
 		$html .= '<div class="hsw-ac__picker" data-hsw-order-picker>';
@@ -824,7 +856,12 @@ final class HSW_Account_Support {
 		$departments = (array) $this->account->setting( 'support.departments', array() );
 		$priorities  = (array) $this->account->setting( 'support.priorities', array() );
 		$dept        = $departments ? (string) reset( $departments ) : 'پشتیبانی';
-		$priority    = (string) $this->account->setting( 'support.priority_default', 'normal' );
+
+		/* The customer picks the priority in the modal; anything unknown falls back. */
+		$priority = isset( $_POST['priority'] ) ? sanitize_key( wp_unslash( $_POST['priority'] ) ) : '';
+		if ( ! isset( $priorities[ $priority ] ) ) {
+			$priority = (string) $this->account->setting( 'support.priority_default', 'normal' );
+		}
 		if ( ! isset( $priorities[ $priority ] ) ) {
 			$priority = 'normal';
 		}
@@ -1006,6 +1043,31 @@ final class HSW_Account_Support {
 		}
 
 		wp_send_json_success( array( 'orders' => $out ) );
+	}
+
+	/**
+	 * Attachment preview for the admin thread.
+	 *
+	 * The screenshot a customer sends was saved and shown on the storefront but
+	 * never rendered here, so support saw the text and no picture.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return string
+	 */
+	private function attachment_html( $attachment_id ) {
+		$attachment_id = absint( $attachment_id );
+		if ( ! $attachment_id ) {
+			return '';
+		}
+
+		$url = wp_get_attachment_url( $attachment_id );
+		$img = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'alt' => '' ) );
+
+		if ( ! $url || ! $img ) {
+			return '';
+		}
+
+		return '<a class="hsw-ticket-attach" href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . $img . '</a>';
 	}
 
 	/* ---------------------------------------------------------------------
@@ -1215,17 +1277,28 @@ final class HSW_Account_Support {
 				'order'   => 'ASC',
 			)
 		);
+		$status   = $this->get_status( $post->ID );
+		$order_id = absint( get_post_meta( $post->ID, self::ORDER_META, true ) );
 		?>
+		<div class="hsw-ticket-toolbar">
+			<span class="hsw-admin-badge is-<?php echo esc_attr( $this->status_tone( $status ) ); ?>"><?php echo esc_html( $this->status_label( $status ) ); ?></span>
+			<?php if ( $order_id ) : ?>
+				<a href="<?php echo esc_url( admin_url( 'post.php?post=' . $order_id . '&action=edit' ) ); ?>">سفارش #<?php echo esc_html( HSW_Helpers::fa_num( $order_id ) ); ?></a>
+			<?php endif; ?>
+			<button type="submit" form="hsw-ticket-status-form" class="button">
+				<?php echo 'closed' === $status ? 'بازگشایی تیکت' : 'بستن تیکت'; ?>
+			</button>
+		</div>
 		<div class="hsw-ticket-thread">
 			<div class="hsw-ticket-msg is-customer">
 				<div class="hsw-ticket-msg-head"><strong><?php echo esc_html( get_the_author_meta( 'display_name', $post->post_author ) ); ?></strong><span><?php echo esc_html( $this->format_date( $this->timestamp_from_local( $post->post_date ) ) ); ?></span></div>
-				<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $post->post_content ) ); ?></div>
+				<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $post->post_content ) ); ?><?php echo $this->attachment_html( absint( get_post_meta( $post->ID, self::IMAGE_META, true ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url + wp_get_attachment_image. ?></div>
 			</div>
 			<?php foreach ( $comments as $comment ) : ?>
 				<?php $is_staff = user_can( (int) $comment->user_id, 'edit_posts' ); ?>
 				<div class="hsw-ticket-msg <?php echo $is_staff ? 'is-staff' : 'is-customer'; ?>">
 					<div class="hsw-ticket-msg-head"><strong><?php echo esc_html( $comment->comment_author ); ?></strong><span><?php echo esc_html( $this->format_date( $this->timestamp_from_local( $comment->comment_date ) ) ); ?></span></div>
-					<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $comment->comment_content ) ); ?></div>
+					<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $comment->comment_content ) ); ?><?php echo $this->attachment_html( absint( get_comment_meta( $comment->comment_ID, self::IMAGE_META, true ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url + wp_get_attachment_image. ?></div>
 				</div>
 			<?php endforeach; ?>
 		</div>
@@ -1240,6 +1313,11 @@ final class HSW_Account_Support {
 			.hsw-ticket-msg-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:12px;color:#646970}
 			.hsw-ticket-msg-text{white-space:normal;line-height:1.8}
 			.hsw-ticket-reply{margin-top:12px}
+			.hsw-ticket-toolbar{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+			.hsw-ticket-toolbar .button{margin-inline-start:auto}
+			.hsw-ticket-toolbar a{font-size:12px;color:#2271b1;text-decoration:none}
+			.hsw-ticket-attach{display:block;max-width:260px;margin-top:8px;border-radius:8px;overflow:hidden;line-height:0}
+			.hsw-ticket-attach img{display:block;width:100%;height:auto;border:1px solid #dcdcde;border-radius:8px}
 			.hsw-ticket-reply textarea{margin-bottom:8px}
 			.hsw-ticket-unread{color:#b32d2e;font-weight:700}
 			.hsw-ticket-admin-actions form{display:inline-block}
@@ -1379,6 +1457,142 @@ final class HSW_Account_Support {
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $current, $key, false ) . '>' . esc_html( $label ) . '</option>';
 		}
 		echo '</select>';
+
+		/* Export honours the status filter currently selected above. */
+		$url = wp_nonce_url(
+			add_query_arg(
+				array(
+					'action' => 'hsw_export_tickets',
+					'status' => $current,
+				),
+				admin_url( 'admin-post.php' )
+			),
+			'hsw_export_tickets'
+		);
+		echo ' <a class="button" href="' . esc_url( $url ) . '">خروجی CSV (اکسل)</a>';
+	}
+
+	/**
+	 * Stream every ticket as a CSV that Excel opens correctly.
+	 *
+	 * A UTF-8 BOM is written first: without it Excel renders Persian as mojibake.
+	 * Rows are written as they are produced, so a shop with tens of thousands of
+	 * tickets never builds the whole file in memory.
+	 */
+	public function export_tickets() {
+		if ( ! current_user_can( 'manage_options' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( 'دسترسی غیرمجاز.' );
+		}
+		check_admin_referer( 'hsw_export_tickets' );
+
+		$status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
+
+		$args = array(
+			'post_type'      => self::POST_TYPE,
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'no_found_rows'  => true,
+			'fields'         => 'ids',
+		);
+		if ( in_array( $status, array( 'open', 'answered', 'closed' ), true ) ) {
+			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				array(
+					'key'   => self::STATUS_META,
+					'value' => $status,
+				),
+			);
+		}
+
+		$ids = get_posts( $args );
+
+		nocache_headers();
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename=tickets-' . gmdate( 'Y-m-d' ) . '.csv' );
+
+		$out = fopen( 'php://output', 'w' );
+		fwrite( $out, "\xEF\xBB\xBF" ); // UTF-8 BOM so Excel reads Persian correctly.
+
+		fputcsv(
+			$out,
+			array( 'شناسه', 'موضوع', 'کاربر', 'ایمیل', 'وضعیت', 'اولویت', 'دپارتمان', 'سفارش', 'تاریخ ایجاد', 'آخرین به‌روزرسانی', 'تعداد پاسخ', 'متن', 'پیوست' )
+		);
+
+		foreach ( $ids as $id ) {
+			$ticket = get_post( $id );
+			if ( ! $ticket ) {
+				continue;
+			}
+			$user     = get_user_by( 'id', (int) $ticket->post_author );
+			$image_id = absint( get_post_meta( $id, self::IMAGE_META, true ) );
+			$updated  = absint( get_post_meta( $id, self::UPDATED_META, true ) );
+			$created  = $this->timestamp_from_local( $ticket->post_date );
+
+			fputcsv(
+				$out,
+				array(
+					$id,
+					$ticket->post_title,
+					$user ? $user->display_name : '—',
+					$user ? $user->user_email : '',
+					$this->status_label( $this->get_status( $id ) ),
+					$this->priority_label( (string) get_post_meta( $id, self::PRIORITY, true ) ),
+					(string) get_post_meta( $id, self::DEPARTMENT, true ),
+					absint( get_post_meta( $id, self::ORDER_META, true ) ) ? absint( get_post_meta( $id, self::ORDER_META, true ) ) : '',
+					$created ? gmdate( 'Y-m-d H:i', $created ) : '',
+					$updated ? gmdate( 'Y-m-d H:i', $updated ) : '',
+					(int) get_comments( array( 'post_id' => $id, 'type' => 'hsw_ticket_reply', 'count' => true ) ),
+					wp_strip_all_tags( (string) $ticket->post_content ),
+					$image_id ? (string) wp_get_attachment_url( $image_id ) : '',
+				)
+			);
+		}
+
+		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		exit;
+	}
+
+	/**
+	 * Delete closed tickets nobody has touched for the retention window.
+	 *
+	 * Runs daily. Only `closed` tickets are removed — an open conversation is
+	 * somebody's unanswered request, not stale data.
+	 */
+	public function cleanup_old_tickets() {
+		$days = absint( $this->account->setting( 'support.retention_days', 365 ) );
+		if ( $days < 30 ) {
+			return; // Never on an accidental small number.
+		}
+
+		$cutoff = time() - ( $days * DAY_IN_SECONDS );
+
+		$ids = get_posts(
+			array(
+				'post_type'      => self::POST_TYPE,
+				'post_status'    => 'any',
+				'posts_per_page' => 200,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					'relation' => 'AND',
+					array(
+						'key'   => self::STATUS_META,
+						'value' => 'closed',
+					),
+					array(
+						'key'     => self::UPDATED_META,
+						'value'   => $cutoff,
+						'compare' => '<',
+						'type'    => 'NUMERIC',
+					),
+				),
+			)
+		);
+
+		foreach ( $ids as $id ) {
+			wp_delete_post( (int) $id, true );
+		}
 	}
 
 	public function admin_filter_query( $query ) {

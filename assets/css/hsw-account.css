@@ -5095,9 +5095,15 @@ a.hsw-ac__stat:hover {
 	flex-shrink: 0;
 }
 
+/*
+ * `max-width: none` is load-bearing: the global `.hsw-ac :where(img, svg)`
+ * rule sets `max-width: 100%`, and inside this flex button that percentage
+ * resolves to the 2px border box, squeezing the icon to a sliver.
+ */
 .hsw-ac__modal-x svg {
 	width: 18px;
 	height: 18px;
+	max-width: none;
 	stroke-width: 2.2;
 }
 
@@ -5357,3 +5363,90 @@ a.hsw-ac__stat:hover {
 		max-width: 100%;
 	}
 }
+
+/* =========================================================================
+ * New-ticket modal — field styling (v1.11.31)
+ *
+ * The modal body is not `.hsw-ac-form`, so the shared field rules never applied
+ * and the subject / message / priority controls fell back to browser defaults
+ * while the order picker and captcha were styled. One rule set for all of them.
+ * ====================================================================== */
+
+.hsw-ac__modal-body .hsw-ac-field > input[type="text"],
+.hsw-ac__modal-body .hsw-ac-field > input[type="email"],
+.hsw-ac__modal-body .hsw-ac-field > input[type="tel"],
+.hsw-ac__modal-body .hsw-ac-field > select,
+.hsw-ac__modal-body .hsw-ac-field > textarea {
+	width: 100%;
+	min-height: 52px;
+	padding: 0 14px;
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background: #f7f9fc;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--hsw-ac-ink);
+	transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.hsw-ac__modal-body .hsw-ac-field > textarea {
+	min-height: 118px;
+	padding: 13px 14px;
+	line-height: 1.85;
+	resize: vertical;
+}
+
+/* Native arrow, but with the same box as everything else. */
+.hsw-ac__modal-body .hsw-ac-field > select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding-inline-end: 38px;
+	background-image: linear-gradient(45deg, transparent 50%, #64748b 50%),
+		linear-gradient(135deg, #64748b 50%, transparent 50%);
+	background-position: calc(100% - 19px) 24px, calc(100% - 13px) 24px;
+	background-size: 6px 6px, 6px 6px;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+.hsw-ac__modal-body .hsw-ac-field > input[type="text"]:hover,
+.hsw-ac__modal-body .hsw-ac-field > input[type="email"]:hover,
+.hsw-ac__modal-body .hsw-ac-field > input[type="tel"]:hover,
+.hsw-ac__modal-body .hsw-ac-field > select:hover,
+.hsw-ac__modal-body .hsw-ac-field > textarea:hover {
+	background-color: #f1f5fa;
+	border-color: #d7e0ea;
+}
+
+.hsw-ac__modal-body .hsw-ac-field > input[type="text"]:focus,
+.hsw-ac__modal-body .hsw-ac-field > input[type="email"]:focus,
+.hsw-ac__modal-body .hsw-ac-field > input[type="tel"]:focus,
+.hsw-ac__modal-body .hsw-ac-field > select:focus,
+.hsw-ac__modal-body .hsw-ac-field > textarea:focus {
+	background-color: #fff;
+	border-color: var(--hsw-ac-primary);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--hsw-ac-primary) 12%, transparent);
+	outline: 0;
+}
+
+.hsw-ac__modal-body .hsw-ac-field > input::placeholder,
+.hsw-ac__modal-body .hsw-ac-field > textarea::placeholder {
+	color: #9aa7b8;
+	font-weight: 500;
+}
+
+/* --- close button: make it look like an action, not a caption --------- */
+
+.hsw-ac__thread-close {
+	border-color: color-mix(in srgb, var(--hsw-ac-danger) 32%, #fff);
+	background: color-mix(in srgb, var(--hsw-ac-danger) 6%, #fff);
+	color: var(--hsw-ac-danger);
+	font-weight: 800;
+}
+
+.hsw-ac__thread-close:hover {
+	border-color: var(--hsw-ac-danger);
+	background: var(--hsw-ac-danger);
+	color: #fff;
+}
+
