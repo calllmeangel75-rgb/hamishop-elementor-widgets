@@ -813,6 +813,13 @@ final class HSW_Widget_Manager {
 						<?php endforeach; ?>
 					</nav>
 
+					<nav class="hsw-wm-nav hsw-wm-nav--settings" aria-label="<?php esc_attr_e( 'تنظیمات فروشگاه', 'hamishop-elementor-widgets' ); ?>">
+						<span class="hsw-wm-navtitle"><?php esc_html_e( 'تنظیمات فروشگاه', 'hamishop-elementor-widgets' ); ?></span>
+						<a href="#hsw-group-feedback"><span class="dashicons dashicons-cart" aria-hidden="true"></span><span><?php esc_html_e( 'رفتار افزودن به سبد', 'hamishop-elementor-widgets' ); ?></span></a>
+						<a href="#hsw-group-catalog"><span class="dashicons dashicons-sort" aria-hidden="true"></span><span><?php esc_html_e( 'ترتیب محصولات', 'hamishop-elementor-widgets' ); ?></span></a>
+						<a href="#hsw-group-shipping"><span class="dashicons dashicons-car" aria-hidden="true"></span><span><?php esc_html_e( 'ارسال رایگان', 'hamishop-elementor-widgets' ); ?></span></a>
+					</nav>
+
 					<div class="hsw-wm-tip">
 						<span class="dashicons dashicons-lightbulb" aria-hidden="true"></span>
 						<h2><?php esc_html_e( 'چطور انتخاب کنیم؟', 'hamishop-elementor-widgets' ); ?></h2>
@@ -896,21 +903,32 @@ final class HSW_Widget_Manager {
 							</section>
 						<?php endforeach; ?>
 
+						<div class="hsw-wm-sectiontitle" id="hsw-settings">
+							<span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
+							<div>
+								<h2><?php esc_html_e( 'تنظیمات فروشگاه', 'hamishop-elementor-widgets' ); ?></h2>
+								<p><?php esc_html_e( 'سه تنظیم سراسری که روی همهٔ ویجت‌ها اثر می‌گذارد.', 'hamishop-elementor-widgets' ); ?></p>
+							</div>
+						</div>
+
 						<?php $fb = HSW_Assets::feedback_settings(); ?>
-						<section class="hsw-wm-group" id="hsw-group-feedback">
+						<section class="hsw-wm-group" id="hsw-group-feedback" style="--hsw-wm-accent:#0e7490">
 							<header class="hsw-wm-grouphead">
-								<h2><?php esc_html_e( 'رفتار افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?></h2>
-								<p><?php esc_html_e( 'بعد از افزودن محصول، چه چیزی به مشتری نشان داده شود؟', 'hamishop-elementor-widgets' ); ?></p>
+								<span class="hsw-wm-groupicon dashicons dashicons-cart" aria-hidden="true"></span>
+								<div class="hsw-wm-grouptitle">
+									<h2><?php esc_html_e( 'رفتار افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'بعد از افزودن محصول، چه چیزی به مشتری نشان داده شود؟', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
 							</header>
 
 							<?php $fb_style = HSW_Assets::feedback_settings()['style']; ?>
 							<div class="hsw-wm-rows">
-								<div class="hsw-wm-row">
+								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'شکل نمایش', 'hamishop-elementor-widgets' ); ?></strong>
 										<small><?php esc_html_e( 'مودال: پنجرهٔ شیشه‌ای با محتوای سبد. نوار تک‌خطی: یک خط بالای صفحه با نوار سبز ۵ ثانیه‌ای و لینک «مشاهده سبد خرید».', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
-									<span class="hsw-wm-switch">
+									<span class="hsw-wm-field">
 										<select name="hsw_add_feedback[style]" id="hsw-fb-style">
 											<option value="modal" <?php selected( $fb_style, 'modal' ); ?>><?php esc_html_e( 'مودال سبد خرید', 'hamishop-elementor-widgets' ); ?></option>
 											<option value="toast" <?php selected( $fb_style, 'toast' ); ?>><?php esc_html_e( 'نوار تک‌خطی', 'hamishop-elementor-widgets' ); ?></option>
@@ -918,7 +936,7 @@ final class HSW_Widget_Manager {
 									</span>
 								</div>
 
-								<label class="hsw-wm-row" for="hsw-fb-archive">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-fb-archive">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'مودال سبد خرید در آرشیو و فهرست محصولات', 'hamishop-elementor-widgets' ); ?></strong>
 										<small><?php esc_html_e( 'پیشنهاد ما: روشن. مشتری در حال مرور است و «ادامه خرید» او را در همان صفحه نگه می‌دارد.', 'hamishop-elementor-widgets' ); ?></small>
@@ -928,7 +946,7 @@ final class HSW_Widget_Manager {
 									</span>
 								</label>
 
-								<label class="hsw-wm-row" for="hsw-fb-product">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-fb-product">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'مودال سبد خرید در صفحهٔ محصول', 'hamishop-elementor-widgets' ); ?></strong>
 										<small><?php esc_html_e( 'پیش‌فرض خاموش. در صفحهٔ محصول مشتری همان کالا را می‌بیند و مودال روی گالری می‌افتد؛ اگر مودال را می‌خواهید، روشنش کنید. در حالت خاموش فقط یک پیام کوتاه نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
@@ -940,14 +958,17 @@ final class HSW_Widget_Manager {
 							</div>
 						</section>
 
-						<section class="hsw-wm-group" id="hsw-group-catalog">
+						<section class="hsw-wm-group" id="hsw-group-catalog" style="--hsw-wm-accent:#7c3aed">
 							<header class="hsw-wm-grouphead">
-								<h2><?php esc_html_e( 'ترتیب محصولات', 'hamishop-elementor-widgets' ); ?></h2>
-								<p><?php esc_html_e( 'محصولات ناموجود کجای فهرست فروشگاه بیایند؟', 'hamishop-elementor-widgets' ); ?></p>
+								<span class="hsw-wm-groupicon dashicons dashicons-sort" aria-hidden="true"></span>
+								<div class="hsw-wm-grouptitle">
+									<h2><?php esc_html_e( 'ترتیب محصولات', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'محصولات ناموجود کجای فهرست فروشگاه بیایند؟', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
 							</header>
 
 							<div class="hsw-wm-rows">
-								<label class="hsw-wm-row" for="hsw-oos-last">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-oos-last">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'ناموجودها انتهای فهرست', 'hamishop-elementor-widgets' ); ?></strong>
 										<small><?php esc_html_e( 'با روشن بودن، محصولات ناموجود در همهٔ صفحات فروشگاه و دسته‌بندی‌ها بعد از موجودها نمایش داده می‌شوند؛ ترتیب بقیه (قیمت، جدیدترین، تخفیف) دست‌نخورده می‌ماند.', 'hamishop-elementor-widgets' ); ?></small>
@@ -959,19 +980,22 @@ final class HSW_Widget_Manager {
 							</div>
 						</section>
 
-						<section class="hsw-wm-group" id="hsw-group-shipping">
+						<section class="hsw-wm-group" id="hsw-group-shipping" style="--hsw-wm-accent:#16a34a">
 							<header class="hsw-wm-grouphead">
-								<h2><?php esc_html_e( 'ارسال رایگان', 'hamishop-elementor-widgets' ); ?></h2>
-								<p><?php esc_html_e( 'بالای این مبلغ، هزینهٔ ارسال صفر می‌شود و مشتری «ارسال رایگان» می‌بیند.', 'hamishop-elementor-widgets' ); ?></p>
+								<span class="hsw-wm-groupicon dashicons dashicons-car" aria-hidden="true"></span>
+								<div class="hsw-wm-grouptitle">
+									<h2><?php esc_html_e( 'ارسال رایگان', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'بالای این مبلغ، هزینهٔ ارسال صفر می‌شود و مشتری «ارسال رایگان» می‌بیند.', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
 							</header>
 
 							<div class="hsw-wm-rows">
-								<div class="hsw-wm-row">
+								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'سقف ارسال رایگان (تومان)', 'hamishop-elementor-widgets' ); ?></strong>
 										<small><?php esc_html_e( 'صفر یعنی غیرفعال. مبلغ بر اساس جمع اقلام سبد سنجیده می‌شود، نه مبلغ نهایی.', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
-									<span class="hsw-wm-switch">
+									<span class="hsw-wm-field">
 										<input type="number" min="0" step="1000" name="<?php echo esc_attr( HSW_Free_Shipping::OPTION ); ?>" value="<?php echo esc_attr( (string) (int) HSW_Free_Shipping::threshold() ); ?>" class="small-text" dir="ltr" />
 									</span>
 								</div>
@@ -1087,6 +1111,21 @@ final class HSW_Widget_Manager {
 			.hsw-wm-row.is-general{background:#fbfdfe;background:linear-gradient(90deg,color-mix(in srgb,var(--hsw-wm-accent) 5%,#fff),#fff 70%);border-color:#edf2f7;margin:4px 0}
 			.hsw-wm-row.is-part{opacity:.94}
 			.hsw-wm-row[hidden]{display:none!important}
+			/* Setting rows hold a label + one control (no 44px switch column). */
+			.hsw-wm-row--field{grid-template-columns:minmax(0,1fr) auto;gap:16px}
+			.hsw-wm-rowtext{display:grid;gap:3px;min-width:0}
+			.hsw-wm-rowtext strong{font-size:12.5px;font-weight:700;color:#18344f}
+			.hsw-wm-rowtext small{display:block;font-size:11px;line-height:1.8;color:#6b7c90}
+			.hsw-wm-field{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex:0 0 auto}
+			.hsw-wm-field select{min-width:210px;max-width:280px;height:34px;border:1px solid #d7e0ea;border-radius:9px;background:#fff;padding:0 9px;font-size:12px;color:#18344f}
+			.hsw-wm-field select:focus{border-color:#0e7490;box-shadow:0 0 0 3px rgba(14,116,144,.13);outline:none}
+			.hsw-wm-field input[type="number"]{width:150px;height:34px;border:1px solid #d7e0ea;border-radius:9px;background:#fff;padding:0 9px;font-size:12px;color:#18344f;text-align:center}
+			.hsw-wm-field input[type="number"]:focus{border-color:#0e7490;box-shadow:0 0 0 3px rgba(14,116,144,.13);outline:none}
+			.hsw-wm-sectiontitle{display:flex;align-items:center;gap:12px;margin:26px 0 14px;padding:0 4px}
+			.hsw-wm-sectiontitle .dashicons{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:#eef7fa;color:#0e7490;font-size:19px}
+			.hsw-wm-sectiontitle h2{margin:0;font-size:15px;font-weight:800;color:#0f2740}
+			.hsw-wm-sectiontitle p{margin:2px 0 0;font-size:11.5px;color:#6b7c90}
+			.hsw-wm-nav--settings{margin-top:4px}
 			.hsw-wm-switch{display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;width:44px;height:30px;margin:0}
 			.hsw-wm-switch input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
 			.hsw-wm-track{width:40px;height:23px;border-radius:999px;background:#cbd5e1;position:relative;transition:background .18s;box-shadow:inset 0 1px 2px rgba(15,39,64,.15)}
@@ -1116,7 +1155,7 @@ final class HSW_Widget_Manager {
 			.hsw-wm-dirty[hidden]{display:none}
 			.hsw-wm-saveactions .button{min-height:38px;padding:0 20px;border-radius:9px;font-weight:700}
 			@media(max-width:1080px){.hsw-wm-layout{grid-template-columns:1fr}.hsw-wm-side{position:static;grid-template-columns:1fr 1fr;grid-template-areas:"nav nav" "tip warn" "reset reset"}.hsw-wm-nav{grid-area:nav}.hsw-wm-tip{grid-area:tip}.hsw-wm-tip--warn{grid-area:warn}.hsw-wm-reset{grid-area:reset;flex-direction:row;align-items:center;justify-content:space-between}.hsw-wm-multi{display:none}}
-			@media(max-width:782px){.hsw-wm-head{padding:18px}.hsw-wm-brand{align-items:flex-start}.hsw-wm-logo{display:none}.hsw-wm-side{grid-template-columns:1fr;grid-template-areas:"nav" "tip" "warn" "reset"}.hsw-wm-grouphead{padding:14px 14px 12px}.hsw-wm-groupmeta{width:100%;flex-direction:row;align-items:center;justify-content:space-between;padding-inline-start:55px}.hsw-wm-row{grid-template-columns:44px minmax(0,1fr);gap:7px}.hsw-wm-badge{grid-column:2;justify-self:start;margin-top:2px}.hsw-wm-toolbar{align-items:stretch}.hsw-wm-presets{justify-content:space-between}.hsw-wm-savebar{position:static}.hsw-wm-reset{flex-direction:column;align-items:stretch}.hsw-wm-reset .button{text-align:center}}
+			@media(max-width:782px){.hsw-wm-head{padding:18px}.hsw-wm-brand{align-items:flex-start}.hsw-wm-logo{display:none}.hsw-wm-side{grid-template-columns:1fr;grid-template-areas:"nav" "tip" "warn" "reset"}.hsw-wm-grouphead{padding:14px 14px 12px}.hsw-wm-groupmeta{width:100%;flex-direction:row;align-items:center;justify-content:space-between;padding-inline-start:55px}.hsw-wm-row{grid-template-columns:44px minmax(0,1fr);gap:7px}.hsw-wm-row--field{grid-template-columns:1fr;gap:8px}.hsw-wm-field{justify-content:flex-start}.hsw-wm-field select{min-width:0;width:100%;max-width:none}.hsw-wm-badge{grid-column:2;justify-self:start;margin-top:2px}.hsw-wm-toolbar{align-items:stretch}.hsw-wm-presets{justify-content:space-between}.hsw-wm-savebar{position:static}.hsw-wm-reset{flex-direction:column;align-items:stretch}.hsw-wm-reset .button{text-align:center}}
 			@media(prefers-reduced-motion:reduce){.hsw-wm *,.hsw-wm *::before,.hsw-wm *::after{transition:none!important;scroll-behavior:auto!important}}
 		</style>
 		<?php
