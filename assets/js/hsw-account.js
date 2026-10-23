@@ -1302,7 +1302,29 @@
 		}
 	}
 
-	if ('loading' === document.readyState) {
+	/* ---------------------------------------------------------------------------
+ * Invoice printing
+ *
+ * A delegated listener rather than a per-widget init: the invoice markup is
+ * printed server-side on the view-order endpoint, which the account widget
+ * does not re-render on navigation.
+ * ------------------------------------------------------------------------ */
+document.addEventListener('click', function (event) {
+	var btn = event.target.closest ? event.target.closest('[data-hsw-print]') : null;
+	if (!btn) {
+		return;
+	}
+	event.preventDefault();
+	document.body.classList.add('hsw-printing');
+	window.print();
+});
+
+/* Some browsers keep the class after the dialog closes; clean it up. */
+window.addEventListener('afterprint', function () {
+	document.body.classList.remove('hsw-printing');
+});
+
+if ('loading' === document.readyState) {
 		document.addEventListener('DOMContentLoaded', boot);
 	} else {
 		boot();

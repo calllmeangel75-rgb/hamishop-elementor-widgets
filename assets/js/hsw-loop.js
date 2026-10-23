@@ -135,12 +135,20 @@
 			.then(function (r) { return r.json(); })
 			.then(function (res) {
 				btn.classList.remove('is-busy');
+				/* Variable / not-purchasable: WooCommerce sends the product URL. */
 				if (res && res.error && res.product_url) { window.location.href = res.product_url; return; }
+				if (res && res.error) {
+					toast((hswData && hswData.errorText) || 'افزودن به سبد خرید ممکن نشد.');
+					return;
+				}
 				/* Let WooCommerce core refresh cart fragments everywhere */
 				if (window.jQuery) { window.jQuery(document.body).trigger('wc_fragment_refresh'); }
 				if (hswData && hswData.addedText) { toast(hswData.addedText); }
 				document.dispatchEvent(new CustomEvent('hsw_added_to_cart', { detail: { productId: id } }));
 			})
-			.catch(function () { btn.classList.remove('is-busy'); });
+			.catch(function () {
+				btn.classList.remove('is-busy');
+				toast((hswData && hswData.errorText) || 'خطا در ارتباط با سرور.');
+			});
 	});
 })();

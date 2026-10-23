@@ -89,6 +89,9 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
 
                 echo '<div class="' . esc_attr( $root ) . '">';
 
+                /* Prints and clears the WooCommerce notice queue. */
+                echo \HSW_Helpers::wc_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by WooCommerce.
+
                 if ( $this->part_on( 'ctop_' ) ) {
                         $this->print_part( 'ctop_', '\HSW_Widget_Checkout_Top' );
                 }

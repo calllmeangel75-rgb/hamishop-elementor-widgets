@@ -1977,6 +1977,184 @@ final class HSW_Account {
 	}
 
 	/**
+	 * Order view as a printable invoice.
+	 *
+	 * WooCommerce's own view-order template is a plain table with no branding
+	 * and no way to print, which is not what a customer wants when they need a
+	 * receipt for an expense claim. This renders the same data as a document:
+	 * store mark, invoice meta, both parties, line items, totals, and a print
+	 * button whose stylesheet strips the whole account shell.
+	 *
+	 * @param array $ctx Render context.
+	 * @return string
+	 */
+	private function view_order_content( $ctx ) {
+		$order_id = isset( $ctx['view_order_id'] ) ? absint( $ctx['view_order_id'] ) : 0;
+		$order    = $order_id ? wc_get_order( $order_id ) : null;
+
+		if ( ! $order || (int) $order->get_customer_id() !== (int) $ctx['user_id'] ) {
+			return '<section class="hsw-ac__card hsw-ac__empty"><span class="hsw-ac__empty-ic">' . $this->icon( 'package' ) . '</span><h2>' . esc_html__( 'سفارش پیدا نشد', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'این سفارش در حساب شما وجود ندارد.', 'hamishop-elementor-widgets' ) . '</p><a class="hsw-ac__btn hsw-ac__btn--primary" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a></section>';
+		}
+
+		$status      = $order->get_status();
+		$status_name = wc_get_order_status_name( $status );
+		$created     = $order->get_date_created();
+		$date        = $created ? $this->format_date( $created->getTimestamp(), 'j F Y' ) : '';
+		$date_full   = $created ? $this->format_date( $created->getTimestamp() ) : '';
+		$brand       = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
+		$tagline     = class_exists( 'HSW_Branding' ) ? HSW_Branding::tagline() : '';
+		$logo        = class_exists( 'HSW_Branding' ) ? HSW_Branding::logo_html( 'hsw-inv__logo' ) : '';
+
+		$billing  = $order->get_formatted_billing_address();
+		$shipping = $order->get_formatted_shipping_address();
+		if ( '' === trim( wp_strip_all_tags( (string) $shipping ) ) ) {
+			$shipping = $billing;
+		}
+
+		$payment = $order->get_payment_method_title();
+		if ( '' === trim( (string) $payment ) ) {
+			$payment = __( 'پرداخت در محل / ثبت‌نشده', 'hamishop-elementor-widgets' );
+		}
+
+		$shipping_method = '';
+		foreach ( $order->get_shipping_methods() as $method ) {
+			$shipping_method = $method->get_name();
+			break;
+		}
+		if ( '' === $shipping_method ) {
+			$shipping_method = __( 'تحویل حضوری', 'hamishop-elementor-widgets' );
+		}
+
+		$html  = '<section class="hsw-ac__invoice" id="hsw-invoice">';
+
+		/* ---------- header ---------- */
+		$html .= '<header class="hsw-inv__head">';
+		$html .= '<div class="hsw-inv__brand">' . $logo . '<div class="hsw-inv__brandtext"><strong>' . esc_html( $brand ) . '</strong>';
+		if ( '' !== trim( (string) $tagline ) ) {
+			$html .= '<span>' . esc_html( $tagline ) . '</span>';
+		}
+		$html .= '</div></div>';
+		$html .= '<div class="hsw-inv__meta">';
+		$html .= '<span class="hsw-inv__kicker">' . esc_html__( 'فاکتور فروش', 'hamishop-elementor-widgets' ) . '</span>';
+		$html .= '<strong class="hsw-inv__no" dir="ltr">#' . esc_html( HSW_Helpers::fa_num( $order->get_order_number() ) ) . '</strong>';
+		$html .= '<span class="hsw-inv__date">' . esc_html( sprintf( 'تاریخ صدور: %s', $date ) ) . '</span>';
+		$html .= '<span class="hsw-inv__status is-' . esc_attr( $this->order_tone( $status ) ) . '">' . esc_html( $status_name ) . '</span>';
+		$html .= '</div></header>';
+
+		/* ---------- parties ---------- */
+		$html .= '<div class="hsw-inv__parties">';
+		$html .= '<div class="hsw-inv__party"><h3>' . esc_html__( 'صورتحساب برای', 'hamishop-elementor-widgets' ) . '</h3><address>' . wp_kses_post( $billing ? $billing : '—' ) . '</address>';
+		if ( $order->get_billing_phone() ) {
+			$html .= '<p class="hsw-inv__line" dir="ltr">' . esc_html( $order->get_billing_phone() ) . '</p>';
+		}
+		if ( $order->get_billing_email() ) {
+			$html .= '<p class="hsw-inv__line" dir="ltr">' . esc_html( $order->get_billing_email() ) . '</p>';
+		}
+		$html .= '</div>';
+
+		$html .= '<div class="hsw-inv__party"><h3>' . esc_html__( 'تحویل به', 'hamishop-elementor-widgets' ) . '</h3><address>' . wp_kses_post( $shipping ? $shipping : '—' ) . '</address></div>';
+
+		$html .= '<div class="hsw-inv__party"><h3>' . esc_html__( 'روش پرداخت', 'hamishop-elementor-widgets' ) . '</h3><p class="hsw-inv__line">' . esc_html( $payment ) . '</p>';
+		$html .= '<h3 class="hsw-inv__h3--gap">' . esc_html__( 'روش ارسال', 'hamishop-elementor-widgets' ) . '</h3><p class="hsw-inv__line">' . esc_html( $shipping_method ) . '</p>';
+		$html .= '</div></div>';
+
+		/* ---------- items ---------- */
+		$html .= '<table class="hsw-inv__items"><thead><tr>';
+		$html .= '<th class="hsw-inv__c-num">#</th>';
+		$html .= '<th class="hsw-inv__c-name">' . esc_html__( 'کالا', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-qty">' . esc_html__( 'تعداد', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-price">' . esc_html__( 'قیمت واحد', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '<th class="hsw-inv__c-total">' . esc_html__( 'جمع', 'hamishop-elementor-widgets' ) . '</th>';
+		$html .= '</tr></thead><tbody>';
+
+		$i = 0;
+		foreach ( $order->get_items() as $item ) {
+			$i++;
+			$product = $item->get_product();
+			$qty     = (int) $item->get_quantity();
+			$line    = (float) $item->get_total();
+			$unit    = $qty > 0 ? $line / $qty : $line;
+
+			$html .= '<tr>';
+			$html .= '<td class="hsw-inv__c-num">' . esc_html( HSW_Helpers::fa_num( $i ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-name"><span class="hsw-inv__pname">' . esc_html( $item->get_name() ) . '</span>';
+			$meta = wc_display_item_meta( $item, array( 'echo' => false, 'before' => '', 'separator' => ' · ', 'after' => '' ) );
+			if ( '' !== trim( (string) $meta ) ) {
+				$html .= '<span class="hsw-inv__pmeta">' . wp_kses_post( wp_strip_all_tags( $meta ) ) . '</span>';
+			}
+			$html .= '</td>';
+			$html .= '<td class="hsw-inv__c-qty">' . esc_html( HSW_Helpers::fa_num( $qty ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-price">' . wp_kses_post( wc_price( $unit, array( 'currency' => $order->get_currency() ) ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-total">' . wp_kses_post( wc_price( $line, array( 'currency' => $order->get_currency() ) ) ) . '</td>';
+			$html .= '</tr>';
+		}
+		$html .= '</tbody></table>';
+
+		/* ---------- totals ---------- */
+		$rows = array();
+		$rows[] = array( __( 'جمع اقلام', 'hamishop-elementor-widgets' ), $order->get_subtotal() );
+
+		$discount = (float) $order->get_discount_total();
+		if ( $discount > 0 ) {
+			$rows[] = array( __( 'تخفیف', 'hamishop-elementor-widgets' ), -$discount );
+		}
+
+		$ship_total = (float) $order->get_shipping_total();
+		$rows[]     = array( __( 'هزینه ارسال', 'hamishop-elementor-widgets' ), $ship_total );
+
+		$tax = (float) $order->get_total_tax();
+		if ( $tax > 0 ) {
+			$rows[] = array( __( 'مالیات', 'hamishop-elementor-widgets' ), $tax );
+		}
+
+		$html .= '<div class="hsw-inv__foot">';
+		$html .= '<div class="hsw-inv__note">';
+		if ( $date_full ) {
+			$html .= '<p>' . esc_html( sprintf( 'این فاکتور در تاریخ %s صادر شده است.', $date_full ) ) . '</p>';
+		}
+		$html .= '<p class="hsw-inv__muted">' . esc_html( sprintf( 'شناسهٔ سفارش: #%s', HSW_Helpers::fa_num( $order->get_order_number() ) ) ) . '</p>';
+		$html .= '</div>';
+
+		$html .= '<table class="hsw-inv__totals"><tbody>';
+		foreach ( $rows as $row ) {
+			$value  = (float) $row[1];
+			$html  .= '<tr><th>' . esc_html( $row[0] ) . '</th><td>' . wp_kses_post( $value < 0 ? '− ' . wc_price( abs( $value ), array( 'currency' => $order->get_currency() ) ) : ( 0.0 === $value ? esc_html__( 'رایگان', 'hamishop-elementor-widgets' ) : wc_price( $value, array( 'currency' => $order->get_currency() ) ) ) ) . '</td></tr>';
+		}
+		$html .= '<tr class="hsw-inv__grand"><th>' . esc_html__( 'مبلغ قابل پرداخت', 'hamishop-elementor-widgets' ) . '</th><td>' . wp_kses_post( $order->get_formatted_order_total() ) . '</td></tr>';
+		$html .= '</tbody></table></div>';
+
+		/* ---------- actions ---------- */
+		$html .= '<footer class="hsw-inv__actions no-print">';
+		$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
+		$html .= '<a class="hsw-ac__btn hsw-ac__btn--ghost" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a>';
+		$html .= '</footer>';
+
+		$html .= '<p class="hsw-inv__thanks">' . esc_html( sprintf( 'از خرید شما سپاسگزاریم — %s', $brand ) ) . '</p>';
+
+		return $html . '</section>';
+	}
+
+	/**
+	 * Status tone for the invoice pill (matches the order cards).
+	 *
+	 * @param string $status Order status without the `wc-` prefix.
+	 * @return string
+	 */
+	private function order_tone( $status ) {
+		$map = array(
+			'completed'  => 'success',
+			'processing' => 'info',
+			'on-hold'    => 'warning',
+			'pending'    => 'warning',
+			'cancelled'  => 'muted',
+			'refunded'   => 'muted',
+			'failed'     => 'danger',
+		);
+
+		return isset( $map[ $status ] ) ? $map[ $status ] : 'info';
+	}
+
+	/**
 	 * Address list page. The native billing/shipping forms are still rendered
 	 * by WooCommerce when the customer opens an address editor.
 	 */
@@ -2124,6 +2302,9 @@ final class HSW_Account {
 		}
 		if ( 'orders' === $endpoint ) {
 			return '<div class="hsw-ac__content">' . $verify . $this->orders_content( $ctx ) . '</div>';
+		}
+		if ( 'view-order' === $endpoint && ! empty( $ctx['view_order_id'] ) ) {
+			return '<div class="hsw-ac__content">' . $this->view_order_content( $ctx ) . '</div>';
 		}
 		if ( 'edit-address' === $endpoint && '' === trim( (string) $this->endpoint_value( 'edit-address' ) ) ) {
 			return '<div class="hsw-ac__content">' . $this->addresses_content( $ctx ) . '</div>';

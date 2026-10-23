@@ -56,3 +56,116 @@
 /* «ارث‌بری فونت از قالب» — per-widget switch (hsw_font_mode = inherit).
    Icons keep Material Symbols; everything else follows the theme font. */
 .hsw-font-inherit, .hsw-font-inherit *:not(.hsw-ic) { font-family: inherit !important; }
+
+/* -------------------------------------------------------------------------
+ * WooCommerce session notices (shared by cart / checkout / pay)
+ *
+ * HSW_Helpers::wc_notices() prints the queue, which is also what clears it.
+ * The custom cart template never did, so a rejected coupon produced no
+ * feedback at all while every "cart updated" message stayed in the session and
+ * eventually surfaced on an unrelated page.
+ * ---------------------------------------------------------------------- */
+.hsw-notices {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0 0 18px;
+}
+
+.hsw-notices:empty {
+	display: none;
+}
+
+.hsw-notices .woocommerce-message,
+.hsw-notices .woocommerce-info,
+.hsw-notices .woocommerce-error,
+.hsw-notices .woocommerce-NoticeGroup {
+	list-style: none;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 9px;
+	margin: 0 !important;
+	padding: 12px 15px !important;
+	background: #fff;
+	border: 1px solid var(--hsw-pal-border, #e4e7ec);
+	border-inline-start: 4px solid var(--hsw-pal-primary, #2563eb);
+	border-radius: 11px;
+	font-size: 13px;
+	line-height: 1.9;
+	color: var(--hsw-pal-text, #191c1e);
+	box-shadow: 0 4px 14px rgba(15, 23, 42, .04);
+}
+
+.hsw-notices .woocommerce-message {
+	border-inline-start-color: var(--hsw-pal-success, #0f9f6e);
+	background: #f6fdfa;
+}
+
+.hsw-notices .woocommerce-error {
+	display: block;
+	border-inline-start-color: var(--hsw-pal-danger, #ba1a1a);
+	background: #fff7f7;
+	color: #8a1c24;
+}
+
+.hsw-notices .woocommerce-error li {
+	margin: 0;
+}
+
+.hsw-notices .woocommerce-message::before,
+.hsw-notices .woocommerce-info::before,
+.hsw-notices .woocommerce-error::before {
+	display: none !important;
+	content: none !important;
+}
+
+.hsw-notices .button {
+	margin-inline-start: auto;
+	background: var(--hsw-pal-primary, #2563eb);
+	border: 0;
+	color: #fff !important;
+	border-radius: 9px;
+	padding: 6px 14px;
+	font-size: 12px;
+	font-weight: 700;
+	text-decoration: none;
+	line-height: 1.7;
+}
+
+/* -------------------------------------------------------------------------
+ * Toast — add-to-cart feedback shared by every suite
+ *
+ * It used to live in hsw-loop.css only, so the product archive (which loads
+ * hsw-archive.css) had no styling for it and the archive handler never showed
+ * one at all.
+ * ---------------------------------------------------------------------- */
+.hsw-toast {
+	position: fixed;
+	inset-inline-start: 16px;
+	bottom: 16px;
+	z-index: 99999;
+	background: var(--hsw-inverse, #0e2a47);
+	color: var(--hsw-on-inverse, #fff);
+	padding: 10px 16px;
+	border-radius: 12px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.9;
+	max-width: min(22rem, calc(100vw - 32px));
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .2);
+	opacity: 0;
+	transform: translateY(8px);
+	transition: all .25s;
+	pointer-events: none;
+}
+
+.hsw-toast.is-show {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.hsw-toast.is-error {
+	background: var(--hsw-pal-danger, #ba1a1a);
+	color: #fff;
+}

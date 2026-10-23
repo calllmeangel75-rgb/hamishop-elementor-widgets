@@ -752,21 +752,4 @@
 /* Busy state while fetching tab fragment */
 .hsw-track.is-busy { opacity: .55; pointer-events: none; }
 
-/* Small toast feedback */
-.hsw-toast {
-        position: fixed;
-        inset-inline-start: 16px;
-        bottom: 16px;
-        z-index: 99999;
-        background: var(--hsw-inverse);
-        color: var(--hsw-on-inverse);
-        padding: 10px 16px;
-        border-radius: 12px;
-        font-size: 13px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .2);
-        opacity: 0;
-        transform: translateY(8px);
-        transition: all .25s;
-        pointer-events: none;
-}
-.hsw-toast.is-show { opacity: 1; transform: translateY(0); }
+/* Toast lives in hsw-fonts.css — it is shared by the loop and archive suites. */

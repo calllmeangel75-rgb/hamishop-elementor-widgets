@@ -87,6 +87,124 @@ class HSW_Checkout_Rest {
                                 ),
                         )
                 );
+
+                /*
+                 * The address step used to be a read-only card that linked away
+                 * to the account page; a customer with no saved address reached
+                 * the pay step with nothing to deliver to. This route lets the
+                 * checkout collect it in place.
+                 */
+                register_rest_route(
+                        self::NS,
+                        '/checkout/address',
+                        array(
+                                'methods'             => 'POST',
+                                'callback'            => array( $this, 'save_address' ),
+                                'permission_callback' => array( $this, 'can_checkout' ),
+                                'args'                => array(
+                                        'first_name' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'last_name'  => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'phone'      => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'state'      => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'city'       => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'address_1'  => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'address_2'  => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'postcode'   => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                        'country'    => array( 'sanitize_callback' => 'sanitize_text_field' ),
+                                ),
+                        )
+                );
+        }
+
+        /**
+         * Save the delivery address entered during checkout.
+         *
+         * Writes to billing **and** shipping so the order, the account address
+         * book and the pay step all agree, then recalculates shipping because
+         * the province/city decide the rate.
+         *
+         * @param WP_REST_Request $request Request.
+         * @return WP_REST_Response|WP_Error
+         */
+        public function save_address( $request ) {
+                if ( ! function_exists( 'WC' ) || ! WC()->customer ) {
+                        return new WP_Error( 'hsw_no_customer', __( 'مشتری یافت نشد.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+                }
+
+                $customer = WC()->customer;
+
+                $country = strtoupper( (string) $request->get_param( 'country' ) );
+                if ( '' === $country ) {
+                        $base    = function_exists( 'wc_get_base_location' ) ? wc_get_base_location() : array( 'country' => 'IR' );
+                        $country = isset( $base['country'] ) && '' !== $base['country'] ? (string) $base['country'] : 'IR';
+                }
+
+                $values = array(
+                        'first_name' => trim( (string) $request->get_param( 'first_name' ) ),
+                        'last_name'  => trim( (string) $request->get_param( 'last_name' ) ),
+                        'phone'      => trim( (string) $request->get_param( 'phone' ) ),
+                        'state'      => trim( (string) $request->get_param( 'state' ) ),
+                        'city'       => trim( (string) $request->get_param( 'city' ) ),
+                        'address_1'  => trim( (string) $request->get_param( 'address_1' ) ),
+                        'address_2'  => trim( (string) $request->get_param( 'address_2' ) ),
+                        'postcode'   => trim( (string) $request->get_param( 'postcode' ) ),
+                );
+
+                /* Only the fields a delivery cannot work without. */
+                $required = array(
+                        'first_name' => __( 'نام گیرنده', 'hamishop-elementor-widgets' ),
+                        'phone'      => __( 'شماره تماس', 'hamishop-elementor-widgets' ),
+                        'state'      => __( 'استان', 'hamishop-elementor-widgets' ),
+                        'city'       => __( 'شهر', 'hamishop-elementor-widgets' ),
+                        'address_1'  => __( 'نشانی', 'hamishop-elementor-widgets' ),
+                );
+                foreach ( $required as $key => $label ) {
+                        if ( '' === $values[ $key ] ) {
+                                return new WP_Error(
+                                        'hsw_address_' . $key,
+                                        sprintf(
+                                                /* translators: %s: field label. */
+                                                __( '%s را وارد کنید.', 'hamishop-elementor-widgets' ),
+                                                $label
+                                        ),
+                                        array( 'status' => 400 )
+                                );
+                        }
+                }
+
+                foreach ( $values as $key => $value ) {
+                        foreach ( array( 'set_billing_', 'set_shipping_' ) as $prefix ) {
+                                $setter = $prefix . $key;
+                                if ( method_exists( $customer, $setter ) ) {
+                                        $customer->$setter( $value );
+                                }
+                        }
+                }
+
+                foreach ( array( 'set_billing_country', 'set_shipping_country' ) as $setter ) {
+                        if ( method_exists( $customer, $setter ) ) {
+                                $customer->$setter( $country );
+                        }
+                }
+
+                /* Persists to user meta for logged-in customers, session otherwise. */
+                $customer->save();
+
+                if ( WC()->cart ) {
+                        WC()->cart->calculate_shipping();
+                        WC()->cart->calculate_totals();
+                }
+
+                return rest_ensure_response(
+                        array(
+                                'ok'      => true,
+                                'name'    => trim( $values['first_name'] . ' ' . $values['last_name'] ),
+                                'phone'   => $values['phone'],
+                                'postcode' => $values['postcode'],
+                                'line'    => implode( '، ', array_filter( array( $values['state'], $values['city'], $values['address_1'], $values['address_2'] ) ) ),
+                                'message' => __( 'آدرس ذخیره شد.', 'hamishop-elementor-widgets' ),
+                        )
+                );
         }
 
         /**

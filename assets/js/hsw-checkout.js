@@ -681,4 +681,62 @@
                                 );
                         } );
         } );
+        /* =====================================================
+         * Delivery address form (shown while none is saved)
+         * ===================================================== */
+        ( function () {
+                var form = document.querySelector( '[data-hsw-address-form]' );
+                if ( ! form ) {
+                        return;
+                }
+                var msg = form.querySelector( '[data-hsw-address-msg]' );
+                var btn = form.querySelector( '.hsw-ckaddr__fsubmit' );
+                var FIELDS = [ 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' ];
+
+                function say( text ) {
+                        if ( ! msg ) {
+                                return;
+                        }
+                        msg.textContent = text || '';
+                        msg.hidden = ! text;
+                }
+
+                form.addEventListener( 'submit', function ( event ) {
+                        event.preventDefault();
+                        if ( isEditor ) {
+                                return;
+                        }
+
+                        var body = {};
+                        FIELDS.forEach( function ( key ) {
+                                var el = form.querySelector( '[name="' + key + '"]' );
+                                body[ key ] = el ? el.value.trim() : '';
+                        } );
+
+                        if ( ! body.first_name || ! body.phone || ! body.state || ! body.city || ! body.address_1 ) {
+                                say( CFG.addressRequired || 'نام، شماره تماس، استان، شهر و نشانی را کامل کنید.' );
+                                return;
+                        }
+
+                        say( '' );
+                        if ( btn ) {
+                                btn.disabled = true;
+                                btn.classList.add( 'is-busy' );
+                        }
+
+                        post( '/checkout/address', body )
+                                .then( function () {
+                                        /* Reload so the summary, shipping rates and the
+                                           pay step all pick up the new address. */
+                                        window.location.reload();
+                                } )
+                                .catch( function ( err ) {
+                                        if ( btn ) {
+                                                btn.disabled = false;
+                                                btn.classList.remove( 'is-busy' );
+                                        }
+                                        say( ( err && err.message ) ? err.message : ( CFG.errorText || 'ذخیرهٔ آدرس انجام نشد.' ) );
+                                } );
+                } );
+        } )();
 })();

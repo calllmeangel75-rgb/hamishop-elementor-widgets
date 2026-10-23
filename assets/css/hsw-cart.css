@@ -32,6 +32,16 @@
         --hswc-fixed: #ffdad3;          /* secondary-fixed */
         --hswc-btn: #0f2042;            /* primary-container */
         --hswc-on-btn: #ffffff;         /* on-primary */
+        /*
+         * Purchase-step CTAs. One source of truth (HamiShop → پالت رنگی →
+         * «CTA مراحل خرید») so the cart, checkout and pay buttons cannot drift
+         * apart — they used to mix the accent orange with the dark navy, and
+         * their hover state left the label colour to whatever the theme's
+         * `a:hover` rule decided (black on one button, white on the next).
+         */
+        --hswc-cta: var(--hsw-cta, #0f2042);
+        --hswc-cta-hover: var(--hsw-cta-hover, #1c3566);
+        --hswc-on-cta: var(--hsw-on-cta, #ffffff);
         --hswc-on-btn2: #7389b0;        /* on-primary-container */
         --hswc-error: #ba1a1a;          /* error */
         --hswc-error-bg: #ffdad6;       /* error-container */
@@ -308,10 +318,17 @@
         font-size: .875rem; line-height: 1.375rem; font-weight: 600; font-weight: 700;
         color: var(--hswc-primary); background: transparent;
         -moz-appearance: textfield; appearance: textfield; margin: 0;
+        cursor: text; border-radius: .375rem;
+        transition: background .15s, box-shadow .15s;
 }
 .hsw-c .hsw-c-qty__in::-webkit-inner-spin-button,
 .hsw-c .hsw-c-qty__in::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.hsw-c .hsw-c-qty__in:focus { outline: none; box-shadow: none; }
+/* The field is editable now, so it needs a visible focus state. */
+.hsw-c .hsw-c-qty__in:focus {
+        outline: none;
+        background: var(--hswc-card);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--hswc-primary), transparent 72%);
+}
 
 .hsw-citems__acts { display: flex; align-items: center; gap: .25rem; border-right: 1px solid var(--hswc-border); padding-right: .75rem; margin-right: .375rem; }
 .hsw-citems__acts button,
@@ -421,13 +438,14 @@
 @media (min-width: 640px) { .hsw-ccoupon__form .hsw-ccoupon__in { width: 16rem; } }
 .hsw-c .hsw-ccoupon__btn {
         height: 2.75rem; padding-inline: 1.5rem; flex-shrink: 0; white-space: nowrap;
-        background: var(--hswc-btn); color: var(--hswc-on-btn);
+        background: var(--hswc-cta); color: var(--hswc-on-cta);
         border-radius: var(--hswc-r-s);
         font-size: .875rem; line-height: 1.375rem; font-weight: 600; font-weight: 700;
         display: flex; align-items: center; justify-content: center;
         transition: all .15s;
 }
-.hsw-c .hsw-ccoupon__btn:hover { opacity: .9; }
+.hsw-c .hsw-ccoupon__btn:hover,
+.hsw-c .hsw-ccoupon__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
 .hsw-c .hsw-ccoupon__btn:active { transform: scale(.95); }
 
 .hsw-ccoupon__foot { padding-top: .375rem; display: flex; justify-content: space-between; align-items: center; font-size: .75rem; line-height: 1.25rem; font-weight: 400; }
@@ -495,14 +513,16 @@
 
 .hsw-csummary__cta {
         width: 100%; height: 3rem;
-        background: var(--hswc-accent); color: var(--hswc-on-accent);
+        background: var(--hswc-cta); color: var(--hswc-on-cta);
         border-radius: var(--hswc-r);
         font-size: 1rem; line-height: 1.625rem; font-weight: 600; font-weight: 700;
         display: flex; align-items: center; justify-content: center; gap: .375rem;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         transition: all .15s;
 }
-.hsw-csummary__cta:hover { opacity: .95; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
+/* Darker fill, label stays white — `color` is spelled out so a theme `a:hover` cannot repaint it. */
+.hsw-csummary__cta:hover,
+.hsw-csummary__cta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
 .hsw-csummary__cta:active { transform: scale(.98); }
 .hsw-csummary__cta .hsw-ic { font-size: 1.25rem; }
 
@@ -584,14 +604,15 @@
 .hsw-csummary__mbar-v .hsw-c-cur { color: var(--hswc-text2); }
 .hsw-csummary__mcta {
         flex: 1 1 0; max-width: 13.125rem; height: 3rem;
-        background: var(--hswc-btn); color: var(--hswc-on-btn);
+        background: var(--hswc-cta); color: var(--hswc-on-cta);
         border-radius: var(--hswc-r);
         display: flex; align-items: center; justify-content: center; gap: .5rem;
         font-size: .875rem; line-height: 1.375rem; font-weight: 600;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         transition: all .15s;
 }
-.hsw-csummary__mcta:hover { opacity: .95; }
+.hsw-csummary__mcta:hover,
+.hsw-csummary__mcta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
 .hsw-csummary__mcta:active { transform: scale(.95); }
 .hsw-csummary__mcta .hsw-ic { font-size: 1rem; line-height: 1.625rem; font-weight: 600; }
 
@@ -618,10 +639,11 @@
 .hsw-c-empty__btn {
         display: inline-flex; align-items: center; gap: .375rem;
         height: 2.75rem; padding-inline: 1.5rem; margin-top: .5rem;
-        background: var(--hswc-btn); color: var(--hswc-on-btn);
+        background: var(--hswc-cta); color: var(--hswc-on-cta);
         border-radius: var(--hswc-r);
         font-size: .875rem; line-height: 1.375rem; font-weight: 600; font-weight: 700;
         transition: all .15s;
 }
-.hsw-c-empty__btn:hover { opacity: .9; }
+.hsw-c-empty__btn:hover,
+.hsw-c-empty__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
 .hsw-c-empty__btn .hsw-ic { font-size: 1.25rem; }

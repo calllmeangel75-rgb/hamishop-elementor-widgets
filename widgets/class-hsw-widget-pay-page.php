@@ -103,6 +103,9 @@ class HSW_Widget_Pay_Page extends HSW_Pay_Base {
 
                 echo '<div class="' . esc_attr( $root ) . '">';
 
+                /* Prints and clears the WooCommerce notice queue. */
+                echo \HSW_Helpers::wc_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by WooCommerce.
+
                 if ( $this->part_on( 'paytop_' ) ) {
                         $this->print_part( 'paytop_', '\HSW_Widget_Pay_Top' );
                 }

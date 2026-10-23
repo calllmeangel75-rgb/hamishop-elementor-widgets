@@ -172,6 +172,15 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
                 $s         = $this->effective_settings();
                 $show_foot = ( 'yes' === ( $s['show_foot'] ?? 'yes' ) );
                 ?>
+
+                <?php
+                /*
+                 * Coupon feedback. The page root usually prints the queue first;
+                 * this covers a page built from individual widgets, where the
+                 * coupon block would otherwise stay silent on a wrong code.
+                 */
+                echo \HSW_Helpers::wc_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by WooCommerce.
+                ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'ccoupon' ) ); ?>">
 
                         <!-- =================== DESKTOP =================== -->

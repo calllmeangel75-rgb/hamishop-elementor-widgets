@@ -48,6 +48,47 @@ class HSW_Helpers {
         }
 
         /**
+         * WooCommerce session notices, printed once per request.
+         *
+         * `wc_print_notices()` both prints AND clears the session queue. The
+         * custom cart/checkout templates never called it, which had two
+         * consequences: a wrong coupon code showed nothing at all, and every
+         * "cart updated" notice stayed in the session forever — piling up until
+         * the customer opened a completely unrelated page (the address book),
+         * where all twenty of them were finally dumped at once.
+         *
+         * Printing here is therefore not just cosmetic; it is what drains the
+         * queue. The static flag keeps a page that renders several widgets from
+         * emitting the same block twice.
+         *
+         * @return string
+         */
+        public static function wc_notices() {
+                static $printed = false;
+
+                if ( $printed || ! function_exists( 'wc_print_notices' ) || ! function_exists( 'wc_get_notices' ) ) {
+                        return '';
+                }
+
+                $queue = wc_get_notices();
+                if ( empty( $queue ) ) {
+                        return '';
+                }
+
+                $printed = true;
+
+                ob_start();
+                wc_print_notices();
+                $html = trim( (string) ob_get_clean() );
+
+                if ( '' === $html ) {
+                        return '';
+                }
+
+                return '<div class="hsw-notices" role="status" aria-live="polite">' . $html . '</div>';
+        }
+
+        /**
          * Material Symbols icon markup (bundled subset font, zero external requests).
          *
          * The subset is a ligature font: the span's text IS the icon name, and the

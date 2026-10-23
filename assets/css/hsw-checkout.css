@@ -39,6 +39,15 @@
         --hswk-fixed: #d9e2ff;      /* primary-fixed */
         --hswk-accent: var(--hsw-accent, #fc593a);     /* secondary-container (CTA) */
         --hswk-on-accent: #ffffff;  /* on-secondary */
+        /*
+         * Purchase-step CTA (HamiShop → پالت رنگی → «CTA مراحل خرید»).
+         * Shared with the cart and pay suites so the button does not change
+         * colour between steps, and the hover state is a darker fill rather
+         * than a colour the theme gets to choose.
+         */
+        --hswk-cta: var(--hsw-cta, #0f2042);
+        --hswk-cta-hover: var(--hsw-cta-hover, #1c3566);
+        --hswk-on-cta: var(--hsw-on-cta, #ffffff);
         --hswk-accent2: #b5260b;    /* secondary */
         --hswk-accentbg: #ffdad3;   /* secondary-fixed */
         --hswk-on-accentbg: #3e0400;/* on-secondary-fixed */
@@ -725,15 +734,16 @@
 
 .hsw-cksum__cta {
         width: 100%; height: 48px;
-        background: var(--hswk-accent);
-        color: var(--hswk-on-accent);
+        background: var(--hswk-cta);
+        color: var(--hswk-on-cta);
         border-radius: var(--hswk-r-s);
         font-size: .875rem; line-height: 1.375rem; font-weight: 700;
         display: flex; align-items: center; justify-content: center; gap: .5rem;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         transition: background-color .15s, transform .15s;
 }
-.hsw-cksum__cta:hover { background: var(--hswk-accent2); }
+.hsw-cksum__cta:hover,
+.hsw-cksum__cta:focus-visible { background: var(--hswk-cta-hover); color: var(--hswk-on-cta); }
 .hsw-cksum__cta:active { transform: scale(.95); }
 .hsw-cksum__cta .hsw-ic { font-size: 1.25rem; transition: transform .15s; }
 .hsw-cksum__cta:hover .hsw-ic { transform: translateX(-4px); }
@@ -790,7 +800,8 @@
         font-size: 1rem; line-height: 1.625rem; font-weight: 700;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1);
 }
-.hsw-cksum__cta--m:hover { opacity: .95; }
+.hsw-cksum__cta--m:hover,
+.hsw-cksum__cta--m:focus-visible { background: var(--hswk-cta-hover); color: var(--hswk-on-cta); }
 .hsw-cksum__cta--m:active { transform: scale(.98); }
 
 /* ============================================================
@@ -1469,14 +1480,15 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 
 .hsw-psum__cta {
         width: 100%; height: 3rem;
-        background: var(--hswk-accent); color: var(--hswk-on-accent);
+        background: var(--hswk-cta); color: var(--hswk-on-cta);
         border-radius: var(--hswk-r);
         font-size: .875rem; line-height: 1.375rem; font-weight: 700;
         display: flex; align-items: center; justify-content: center; gap: .5rem;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         transition: background-color .15s, transform .15s;
 }
-.hsw-psum__cta:hover { background: var(--hswk-accent2); }
+.hsw-psum__cta:hover,
+.hsw-psum__cta:focus-visible { background: var(--hswk-cta-hover); color: var(--hswk-on-cta); }
 .hsw-psum__cta:active { transform: scale(.98); }
 .hsw-psum__cta .hsw-ic { font-size: 1.25rem; }
 .hsw-psum__cta:disabled { opacity: .6; }
@@ -1548,12 +1560,13 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 .hsw-psum__mbar-v .hsw-c-cur { font-size: .6875rem; line-height: 1rem; font-weight: 500; color: var(--hswk-text2); }
 .hsw-psum__cta--m {
         flex: 1 1 auto; height: 3rem;
-        background: var(--hswk-accent); color: var(--hswk-on-accent);
+        background: var(--hswk-cta); color: var(--hswk-on-cta);
         border-radius: var(--hswk-r);
         font-size: .875rem; line-height: 1.375rem; font-weight: 700;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1);
 }
-.hsw-psum__cta--m:hover { opacity: .95; background: var(--hswk-accent); }
+.hsw-psum__cta--m:hover,
+.hsw-psum__cta--m:focus-visible { background: var(--hswk-cta-hover); color: var(--hswk-on-cta); }
 .hsw-psum__cta--m:active { transform: scale(.95); }
 .hsw-psum__mtrust {
         max-width: var(--hswk-mshell); margin-inline: auto;
@@ -1665,3 +1678,141 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 .hsw-done-final__btn.is-primary:hover { background: var(--hswk-accent2); }
 .hsw-done-final__btn.is-ghost { border: 1px solid var(--hswk-border); background: var(--hswk-card); color: var(--hswk-text); }
 .hsw-done-final__btn.is-ghost:hover { border-color: var(--hswk-accent); color: var(--hswk-accent); }
+
+/* -------------------------------------------------------------------------
+ * Inline delivery-address form
+ *
+ * Shown only while the customer has no address. Without it the checkout was a
+ * dead end: the card linked to the account page and the pay step then had
+ * nothing to deliver to.
+ * ---------------------------------------------------------------------- */
+.hsw-ckaddr__formhint {
+	margin: 0 0 16px;
+	font-size: .8125rem;
+	line-height: 1.9;
+	color: var(--hswk-text2);
+}
+
+.hsw-ckaddr__form {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+.hsw-ckaddr__frow {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.hsw-ckaddr__fcell {
+	min-width: 0;
+}
+
+.hsw-ckaddr__fcell--wide {
+	grid-column: 1 / -1;
+}
+
+.hsw-ckaddr__fl {
+	display: block;
+	margin: 0 0 7px;
+	font-size: .78125rem;
+	font-weight: 700;
+	color: var(--hswk-text);
+}
+
+.hsw-ckaddr__fi {
+	width: 100%;
+	min-height: 50px;
+	padding: 0 14px;
+	border: 1px solid var(--hswk-border);
+	border-radius: 12px;
+	background-color: var(--hswk-surface);
+	font-family: inherit;
+	font-size: .84375rem;
+	font-weight: 600;
+	color: var(--hswk-text);
+	transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.hsw-ckaddr__fi::placeholder {
+	color: var(--hswk-muted);
+	font-weight: 500;
+}
+
+.hsw-ckaddr__fi:hover {
+	background-color: var(--hswk-card2);
+}
+
+.hsw-ckaddr__fi:focus {
+	background-color: var(--hswk-card);
+	border-color: var(--hswk-primary);
+	box-shadow: 0 0 0 4px var(--hsw-pal-primary-ring, rgba(37, 99, 235, .14));
+	outline: 0;
+}
+
+/* Native arrow lands on the rounded border in RTL — draw our own. */
+.hsw-ckaddr__fi select,
+select.hsw-ckaddr__fi {
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2375777f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: left 14px center;
+	background-size: 16px;
+	padding-inline: 14px 38px;
+}
+
+.hsw-ckaddr__fmsg {
+	margin: 0;
+	padding: 9px 12px;
+	border-radius: 10px;
+	background: #fff3f3;
+	color: #8a1c24;
+	font-size: .8125rem;
+	font-weight: 600;
+	line-height: 1.8;
+}
+
+.hsw-ckaddr__fsubmit {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: .5rem;
+	min-height: 48px;
+	padding-inline: 26px;
+	border: 0;
+	border-radius: 12px;
+	background: var(--hswk-cta);
+	color: var(--hswk-on-cta);
+	font-family: inherit;
+	font-size: .875rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background-color .15s, transform .15s;
+}
+
+.hsw-ckaddr__fsubmit:hover,
+.hsw-ckaddr__fsubmit:focus-visible {
+	background: var(--hswk-cta-hover);
+	color: var(--hswk-on-cta);
+}
+
+.hsw-ckaddr__fsubmit:active {
+	transform: scale(.98);
+}
+
+.hsw-ckaddr__fsubmit.is-busy {
+	opacity: .7;
+	pointer-events: none;
+}
+
+.hsw-ckaddr__fsubmit .hsw-ic {
+	font-size: 1.125rem;
+}
+
+@media (max-width: 767.98px) {
+	.hsw-ckaddr__frow {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

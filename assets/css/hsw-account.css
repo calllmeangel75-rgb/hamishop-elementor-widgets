@@ -5450,3 +5450,552 @@ a.hsw-ac__stat:hover {
 	color: #fff;
 }
 
+
+/* -------------------------------------------------------------------------
+ * Native address editor (edit-address → billing / shipping)
+ *
+ * WooCommerce renders these forms itself, so they kept the default 4px radius,
+ * 42px height and browser border while every other field in the panel had
+ * already moved to the 52px / 13px language. Styling them here keeps the whole
+ * account area consistent without forking the template.
+ * ---------------------------------------------------------------------- */
+.hsw-ac .woocommerce-address-fields__field-wrapper {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px 16px;
+}
+
+.hsw-ac .woocommerce-address-fields .form-row {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	float: none;
+}
+
+/* Street, notes and country span both columns. */
+.hsw-ac .woocommerce-address-fields .form-row-wide {
+	grid-column: 1 / -1;
+}
+
+/*
+ * WooCommerce marks country/state/city/postcode as "wide" for the Iranian
+ * locale, which left four full-width boxes holding one short word each. They
+ * pair up nicely instead.
+ */
+.hsw-ac .woocommerce-address-fields #billing_country_field,
+.hsw-ac .woocommerce-address-fields #billing_state_field,
+.hsw-ac .woocommerce-address-fields #billing_city_field,
+.hsw-ac .woocommerce-address-fields #billing_postcode_field,
+.hsw-ac .woocommerce-address-fields #shipping_country_field,
+.hsw-ac .woocommerce-address-fields #shipping_state_field,
+.hsw-ac .woocommerce-address-fields #shipping_city_field,
+.hsw-ac .woocommerce-address-fields #shipping_postcode_field {
+	grid-column: span 1;
+}
+
+.hsw-ac .woocommerce-address-fields label {
+	display: block;
+	margin: 0 0 7px;
+	font-size: 12.5px;
+	font-weight: 700;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac .woocommerce-address-fields .required {
+	color: var(--hsw-ac-danger);
+	text-decoration: none;
+}
+
+.hsw-ac .woocommerce-address-fields input.input-text,
+.hsw-ac .woocommerce-address-fields textarea,
+.hsw-ac .woocommerce-address-fields select {
+	width: 100%;
+	min-height: 52px;
+	padding: 0 14px;
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background-color: #f7f9fc;
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--hsw-ac-ink);
+	transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.hsw-ac .woocommerce-address-fields textarea {
+	min-height: 96px;
+	padding: 13px 14px;
+	line-height: 1.9;
+}
+
+/* Native arrow sits on the border in RTL; draw our own instead. */
+.hsw-ac .woocommerce-address-fields select {
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235b6b80' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: left 14px center;
+	background-size: 16px;
+	padding-inline: 14px 38px;
+}
+
+.hsw-ac .woocommerce-address-fields input.input-text:hover,
+.hsw-ac .woocommerce-address-fields select:hover {
+	background-color: #f1f5fa;
+	border-color: #d7e0ea;
+}
+
+.hsw-ac .woocommerce-address-fields input.input-text:focus,
+.hsw-ac .woocommerce-address-fields textarea:focus,
+.hsw-ac .woocommerce-address-fields select:focus {
+	background-color: #fff;
+	border-color: var(--hsw-ac-primary);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--hsw-ac-primary) 12%, transparent);
+	outline: 0;
+}
+
+/* select2 replaces the country/state selects with its own markup. */
+.hsw-ac .woocommerce-address-fields .select2-selection--single {
+	height: 52px;
+	border: 1px solid #e3e8ef;
+	border-radius: 13px;
+	background: #f7f9fc;
+}
+
+.hsw-ac .woocommerce-address-fields .select2-selection__rendered {
+	line-height: 50px !important;
+	padding-inline: 14px !important;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-ac .woocommerce-address-fields .select2-selection__arrow {
+	height: 50px !important;
+	inset-inline-end: 8px;
+}
+
+.hsw-ac .woocommerce-address-fields button[type="submit"],
+.hsw-ac .woocommerce-address-fields .button {
+	min-height: 48px;
+	padding: 0 26px;
+	border: 0;
+	border-radius: 13px;
+	background: var(--hsw-ac-primary);
+	color: #fff !important;
+	font-family: inherit;
+	font-size: 13.5px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background .18s ease, transform .18s ease;
+}
+
+.hsw-ac .woocommerce-address-fields button[type="submit"]:hover,
+.hsw-ac .woocommerce-address-fields .button:hover {
+	background: var(--hsw-ac-accent);
+	color: #fff !important;
+	transform: translateY(-1px);
+}
+
+@media (max-width: 767.98px) {
+	.hsw-ac .woocommerce-address-fields__field-wrapper {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Order view as an invoice
+ *
+ * Replaces WooCommerce's plain view-order table. The document is designed to
+ * be printed: the @media print block below hides the entire account shell and
+ * lifts the invoice to the top of the sheet.
+ * ---------------------------------------------------------------------- */
+.hsw-ac__invoice {
+	background: var(--hsw-ac-card);
+	border: 1px solid var(--hsw-ac-line);
+	border-radius: var(--hsw-ac-radius);
+	padding: 28px 30px 22px;
+	box-shadow: 0 8px 30px rgba(15, 23, 42, .05);
+	color: var(--hsw-ac-ink);
+}
+
+/* ---------- header ---------- */
+.hsw-inv__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 20px;
+	flex-wrap: wrap;
+	padding-bottom: 20px;
+	border-bottom: 2px solid var(--hsw-ac-line);
+}
+
+.hsw-inv__brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.hsw-inv__logo {
+	max-height: 48px;
+	width: auto;
+	display: block;
+}
+
+.hsw-inv__brandtext {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.5;
+}
+
+.hsw-inv__brandtext strong {
+	font-size: 17px;
+	font-weight: 800;
+}
+
+.hsw-inv__brandtext span {
+	font-size: 11.5px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 3px;
+	text-align: end;
+}
+
+.hsw-inv__kicker {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__no {
+	font-size: 22px;
+	font-weight: 800;
+	letter-spacing: -.01em;
+	color: var(--hsw-ac-primary);
+}
+
+.hsw-inv__date {
+	font-size: 11.5px;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 4px;
+	padding: 3px 11px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	background: #eef2f7;
+	color: #3c4a5e;
+}
+
+.hsw-inv__status::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.hsw-inv__status.is-success { background: #e7f6ef; color: #0b7a4b; }
+.hsw-inv__status.is-info    { background: #e8f0fe; color: #1a56b8; }
+.hsw-inv__status.is-warning { background: #fdf3e2; color: #9a5b06; }
+.hsw-inv__status.is-danger  { background: #fdeceb; color: #a8231f; }
+.hsw-inv__status.is-muted   { background: #eef0f3; color: #5b6675; }
+
+/* ---------- parties ---------- */
+.hsw-inv__parties {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 18px 24px;
+	padding: 20px 0;
+	border-bottom: 1px solid var(--hsw-ac-line);
+}
+
+.hsw-inv__party h3 {
+	margin: 0 0 6px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .04em;
+	text-transform: uppercase;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__party h3.hsw-inv__h3--gap {
+	margin-top: 14px;
+}
+
+.hsw-inv__party address {
+	font-style: normal;
+	font-size: 12.5px;
+	line-height: 1.95;
+	color: var(--hsw-ac-ink);
+}
+
+.hsw-inv__line {
+	margin: 2px 0 0;
+	font-size: 12.5px;
+	font-weight: 600;
+	color: var(--hsw-ac-ink);
+	word-break: break-word;
+}
+
+/* ---------- items ---------- */
+.hsw-inv__items {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 20px 0 4px;
+	font-size: 12.5px;
+}
+
+.hsw-inv__items thead th {
+	padding: 9px 10px;
+	background: #f6f8fb;
+	border-bottom: 1px solid var(--hsw-ac-line);
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--hsw-ac-muted);
+	text-align: start;
+	white-space: nowrap;
+}
+
+.hsw-inv__items thead th:first-child {
+	border-start-start-radius: 10px;
+}
+
+.hsw-inv__items thead th:last-child {
+	border-start-end-radius: 10px;
+}
+
+.hsw-inv__items tbody td {
+	padding: 12px 10px;
+	border-bottom: 1px solid #f1f4f8;
+	vertical-align: top;
+	text-align: start;
+}
+
+.hsw-inv__items tbody tr:last-child td {
+	border-bottom: 1px solid var(--hsw-ac-line);
+}
+
+.hsw-inv__c-num   { width: 42px; color: var(--hsw-ac-muted); }
+.hsw-inv__c-qty   { width: 70px; text-align: center !important; }
+.hsw-inv__c-price { width: 130px; white-space: nowrap; }
+.hsw-inv__c-total { width: 130px; white-space: nowrap; font-weight: 700; }
+
+.hsw-inv__pname {
+	display: block;
+	font-weight: 700;
+	line-height: 1.8;
+}
+
+.hsw-inv__pmeta {
+	display: block;
+	margin-top: 2px;
+	font-size: 11px;
+	color: var(--hsw-ac-muted);
+	line-height: 1.8;
+}
+
+/* ---------- totals ---------- */
+.hsw-inv__foot {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+	flex-wrap: wrap;
+	padding-top: 16px;
+}
+
+.hsw-inv__note {
+	flex: 1 1 240px;
+	font-size: 11.5px;
+	line-height: 1.95;
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__note p {
+	margin: 0 0 4px;
+}
+
+.hsw-inv__muted {
+	color: var(--hsw-ac-muted);
+}
+
+.hsw-inv__totals {
+	min-width: 260px;
+	border-collapse: collapse;
+	font-size: 12.5px;
+}
+
+.hsw-inv__totals th,
+.hsw-inv__totals td {
+	padding: 7px 10px;
+	text-align: start;
+	font-weight: 500;
+}
+
+.hsw-inv__totals td {
+	text-align: end;
+	white-space: nowrap;
+	font-weight: 600;
+}
+
+.hsw-inv__totals tr + tr th,
+.hsw-inv__totals tr + tr td {
+	border-top: 1px solid #f1f4f8;
+}
+
+.hsw-inv__grand th,
+.hsw-inv__grand td {
+	padding-top: 11px;
+	border-top: 2px solid var(--hsw-ac-line) !important;
+	font-size: 14px;
+	font-weight: 800;
+	color: var(--hsw-ac-primary);
+}
+
+/* ---------- actions ---------- */
+.hsw-inv__actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 22px;
+	padding-top: 18px;
+	border-top: 1px dashed var(--hsw-ac-line);
+}
+
+.hsw-inv__print {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 46px;
+	padding: 0 22px;
+	border: 0;
+	border-radius: 12px;
+	background: var(--hsw-cta, var(--hsw-ac-primary));
+	color: #fff;
+	font-family: inherit;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background-color .18s ease, transform .18s ease;
+}
+
+.hsw-inv__print:hover {
+	background: var(--hsw-cta-hover, var(--hsw-ac-accent));
+	color: #fff;
+	transform: translateY(-1px);
+}
+
+.hsw-inv__print .hsw-ic {
+	font-size: 1.15rem;
+}
+
+.hsw-inv__thanks {
+	margin: 18px 0 0;
+	padding-top: 14px;
+	border-top: 1px solid var(--hsw-ac-line);
+	font-size: 11.5px;
+	text-align: center;
+	color: var(--hsw-ac-muted);
+}
+
+@media (max-width: 767.98px) {
+	.hsw-ac__invoice {
+		padding: 20px 16px 16px;
+	}
+
+	.hsw-inv__parties {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.hsw-inv__c-price,
+	.hsw-inv__items thead th.hsw-inv__c-price {
+		display: none;
+	}
+
+	.hsw-inv__foot {
+		flex-direction: column;
+	}
+
+	.hsw-inv__totals {
+		width: 100%;
+	}
+}
+
+/* ---------- print ---------- */
+@media print {
+	html,
+	body {
+		margin: 0 !important;
+		padding: 0 !important;
+		background: #fff !important;
+	}
+
+	/*
+	 * "Print only this element" without moving it in the DOM.
+	 *
+	 * Hiding everything with `visibility` leaves the hidden boxes occupying
+	 * their space, so the invoice lands on page two of a mostly blank sheet.
+	 * `display: none` collapses them properly, and :has() is what keeps the
+	 * invoice's own ancestor chain alive while every sibling disappears — the
+	 * theme header, the account hero and the sidebar all go with it.
+	 *
+	 * Browsers without :has() drop the rule and simply print the page as-is.
+	 */
+	body *:not(:has(#hsw-invoice)):not(#hsw-invoice):not(#hsw-invoice *) {
+		display: none !important;
+	}
+
+	/* The surviving shell must stop looking like a card. */
+	.hsw-ac,
+	.hsw-ac__wrap,
+	.hsw-ac__grid,
+	.hsw-ac__main,
+	.hsw-ac__content {
+		display: block !important;
+		width: auto !important;
+		max-width: none !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		background: #fff !important;
+		border: 0 !important;
+		box-shadow: none !important;
+	}
+
+	.hsw-ac__invoice {
+		margin: 0 !important;
+		padding: 0 !important;
+		border: 0 !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	.hsw-inv__actions,
+	.no-print {
+		display: none !important;
+	}
+
+	.hsw-inv__items tbody tr {
+		break-inside: avoid;
+	}
+
+	@page {
+		margin: 12mm;
+	}
+}

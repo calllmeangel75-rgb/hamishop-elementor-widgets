@@ -397,9 +397,32 @@
 
         /* ======================= ADD TO CART (AJAX) ======================= */
 
+        /* Shared toast — the archive had none, so a click produced no feedback. */
+        var toastEl = null;
+        function toast(msg, tone) {
+                if (!msg) { return; }
+                if (!toastEl) {
+                        toastEl = document.createElement('div');
+                        toastEl.className = 'hsw-toast';
+                        document.body.appendChild(toastEl);
+                }
+                toastEl.textContent = msg;
+                toastEl.classList.toggle('is-error', tone === 'error');
+                toastEl.classList.add('is-show');
+                clearTimeout(toastEl._t);
+                toastEl._t = setTimeout(function () { toastEl.classList.remove('is-show'); }, 2600);
+        }
+
+        function resetBtn(btn) {
+                btn.classList.remove('is-added', 'is-busy');
+                btn.style.pointerEvents = '';
+                var ic = btn.querySelector('.hsw-ic');
+                if (ic) { ic.textContent = btn.classList.contains('hsw-ag__cta--m') ? 'add' : 'add_shopping_cart'; }
+        }
+
         function addToCart(btn) {
                 var pid = parseInt(btn.getAttribute('data-hsw-add'), 10) || 0;
-                if (!pid) { return; }
+                if (!pid || btn.classList.contains('is-busy')) { return; }
                 var data = (window.hswArchiveData || {});
                 var endpoint = data.wcAjax || '/?wc-ajax=add_to_cart';
                 btn.classList.add('is-busy');
@@ -412,23 +435,48 @@
                         credentials: 'same-origin',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                         body: body.toString()
-                }).then(function () {
-                        btn.classList.add('is-added');
-                        if (data.addedText) {
-                                var ic = btn.querySelector('.hsw-ic');
-                                if (ic) { ic.textContent = 'check_circle'; }
-                                btn.setAttribute('title', data.addedText);
+                }).then(function (r) {
+                        return r.json();
+                }).then(function (res) {
+                        /*
+                         * Variable products (and anything that cannot be added
+                         * from a listing) come back as {error:true, product_url}.
+                         * The old handler threw the response away, so the button
+                         * flashed a tick and nothing else happened — the customer
+                         * had to work out on their own that they needed the
+                         * product page.
+                         */
+                        if (res && res.error && res.product_url) {
+                                window.location.href = res.product_url;
+                                return;
                         }
-                        if (window.jQuery) { window.jQuery(document.body).trigger('wc_fragment_refresh'); }
-                        setTimeout(function () {
-                                btn.classList.remove('is-added', 'is-busy');
-                                btn.style.pointerEvents = '';
-                                var ic = btn.querySelector('.hsw-ic');
-                                if (ic) { ic.textContent = btn.classList.contains('hsw-ag__cta--m') ? 'add' : 'add_shopping_cart'; }
-                        }, 1800);
+                        if (res && res.error) {
+                                resetBtn(btn);
+                                toast(data.errorText || 'افزودن به سبد خرید ممکن نشد.', 'error');
+                                return;
+                        }
+
+                        btn.classList.add('is-added');
+                        var ic = btn.querySelector('.hsw-ic');
+                        if (ic) { ic.textContent = 'check_circle'; }
+                        btn.setAttribute('title', data.addedText || '');
+
+                        /*
+                         * One of the two, never both: the fragments reply already
+                         * carries the fresh cart markup, so reusing it avoids a
+                         * second round-trip to rebuild the header badge.
+                         */
+                        if (window.jQuery && res && res.fragments) {
+                                window.jQuery(document.body).trigger('added_to_cart', [res.fragments, res.cart_hash]);
+                        } else {
+                                document.dispatchEvent(new CustomEvent('hsw_added_to_cart', { detail: { productId: pid } }));
+                        }
+
+                        toast(data.addedText);
+                        setTimeout(function () { resetBtn(btn); }, 1800);
                 }).catch(function () {
-                        btn.classList.remove('is-busy');
-                        btn.style.pointerEvents = '';
+                        resetBtn(btn);
+                        toast(data.errorText || 'خطا در ارتباط با سرور.', 'error');
                 });
         }
 

@@ -485,6 +485,7 @@ class HSW_Assets {
                                 'rest'        => esc_url_raw( rest_url( 'hsw/v1' ) ),
                                 'nonce'       => wp_create_nonce( 'wp_rest' ),
                                 'errorText'   => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
+                                'addressRequired' => __( 'نام، شماره تماس، استان، شهر و نشانی را کامل کنید.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -502,6 +503,7 @@ class HSW_Assets {
                         array(
                                 'wcAjax'    => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
                                 'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
+                                'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -522,9 +524,10 @@ class HSW_Assets {
                         'hsw-archive',
                         'hswArchiveData',
                         array(
-                                'wcAjax'   => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
+                                'wcAjax'    => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
                                 'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
-                                'currency' => function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol() : '',
+                                'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
+                                'currency'  => function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol() : '',
                         )
                 );
         }

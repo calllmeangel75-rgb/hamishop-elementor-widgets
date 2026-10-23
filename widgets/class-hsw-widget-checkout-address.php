@@ -221,8 +221,19 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                 $edit      = $this->opt( 'edit_label', __( 'ویرایش', 'hamishop-elementor-widgets' ) );
                 $show_edit = ( 'yes' === ( $s['show_edit'] ?? '' ) );
                 $manage    = $this->manage_url();
+
+                /*
+                 * No saved address → ask for it here. Linking to the account
+                 * page mid-checkout lost the customer, and the pay step then
+                 * had nothing to deliver to.
+                 */
+                $has_address = $demo || $this->customer_has_address();
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'ckaddr' ) ); ?>">
+
+                <?php if ( ! $has_address ) : ?>
+                        <?php echo $this->address_form_html( $title_d ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
+                <?php else : ?>
 
                         <!-- =================== DESKTOP =================== -->
                         <article class="hsw-ckaddr__card hsw-d">
@@ -313,7 +324,152 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 <?php endif; ?>
                         </div>
 
+                <?php endif; ?>
                 </section>
                 <?php
+        }
+
+        /**
+         * Inline delivery-address form, shown while the customer has no address.
+         *
+         * Deliberately short: the five fields a courier needs. Everything else
+         * (company, second line, notes) stays optional in the account editor.
+         *
+         * @param string $title Section title.
+         * @return string
+         */
+        protected function address_form_html( $title ) {
+                $country = '';
+                $state   = '';
+                $city    = '';
+                $line1   = '';
+                $line2   = '';
+                $postcode = '';
+                $first   = '';
+                $last    = '';
+                $phone   = '';
+
+                if ( function_exists( 'WC' ) && WC()->customer ) {
+                        $c        = WC()->customer;
+                        $country  = (string) $c->get_shipping_country();
+                        $state    = (string) $c->get_shipping_state();
+                        $city     = (string) $c->get_shipping_city();
+                        $line1    = (string) $c->get_shipping_address_1();
+                        $line2    = (string) $c->get_shipping_address_2();
+                        $postcode = (string) $c->get_shipping_postcode();
+                        $first    = (string) $c->get_shipping_first_name();
+                        $last     = (string) $c->get_shipping_last_name();
+
+                        /* Fall back to the billing half when shipping is empty. */
+                        if ( '' === trim( $first . $last . $city . $line1 ) ) {
+                                $first    = (string) $c->get_billing_first_name();
+                                $last     = (string) $c->get_billing_last_name();
+                                $city     = (string) $c->get_billing_city();
+                                $line1    = (string) $c->get_billing_address_1();
+                                $line2    = (string) $c->get_billing_address_2();
+                                $postcode = (string) $c->get_billing_postcode();
+                                $state    = (string) $c->get_billing_state();
+                        }
+
+                        if ( '' === trim( $phone ) ) {
+                                $phone = (string) $c->get_billing_phone();
+                        }
+                }
+
+                if ( '' === $country ) {
+                        $base    = function_exists( 'wc_get_base_location' ) ? wc_get_base_location() : array( 'country' => 'IR' );
+                        $country = isset( $base['country'] ) && '' !== $base['country'] ? (string) $base['country'] : 'IR';
+                }
+
+                $states = array();
+                if ( function_exists( 'WC' ) && WC()->countries ) {
+                        $list = WC()->countries->get_states( $country );
+                        if ( is_array( $list ) ) {
+                                $states = $list;
+                        }
+                }
+
+                $field = function ( $name, $label, $value, $type = 'text', $extra = '' ) {
+                        $html  = '<label class="hsw-ckaddr__fl" for="hsw-ckaddr-' . esc_attr( $name ) . '">' . esc_html( $label ) . '</label>';
+                        $html .= '<input class="hsw-ckaddr__fi" id="hsw-ckaddr-' . esc_attr( $name ) . '" type="' . esc_attr( $type ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '"' . $extra . '>';
+                        return $html;
+                };
+
+                ob_start();
+                ?>
+                <article class="hsw-ckaddr__card hsw-ckaddr__card--form">
+                        <div class="hsw-ckaddr__hd">
+                                <div class="hsw-ckaddr__hd-r">
+                                        <i class="hsw-ic is-fill" aria-hidden="true">location_on</i>
+                                        <h2 class="hsw-ckaddr__hd-t"><?php echo esc_html( $title ); ?></h2>
+                                </div>
+                        </div>
+
+                        <p class="hsw-ckaddr__formhint">
+                                <?php esc_html_e( 'برای ادامهٔ خرید، نشانی تحویل را کامل کنید. این آدرس در حساب کاربری شما هم ذخیره می‌شود.', 'hamishop-elementor-widgets' ); ?>
+                        </p>
+
+                        <form class="hsw-ckaddr__form" data-hsw-address-form novalidate>
+                                <div class="hsw-ckaddr__frow">
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'first_name', __( 'نام', 'hamishop-elementor-widgets' ), $first, 'text', ' required autocomplete="given-name"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'last_name', __( 'نام خانوادگی', 'hamishop-elementor-widgets' ), $last, 'text', ' autocomplete="family-name"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                </div>
+
+                                <div class="hsw-ckaddr__frow">
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' required inputmode="tel" dir="ltr" autocomplete="tel"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'postcode', __( 'کد پستی', 'hamishop-elementor-widgets' ), $postcode, 'text', ' inputmode="numeric" dir="ltr" autocomplete="postal-code"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                </div>
+
+                                <div class="hsw-ckaddr__frow">
+                                        <div class="hsw-ckaddr__fcell">
+                                                <label class="hsw-ckaddr__fl" for="hsw-ckaddr-state"><?php esc_html_e( 'استان', 'hamishop-elementor-widgets' ); ?></label>
+                                                <?php if ( $states ) : ?>
+                                                        <select class="hsw-ckaddr__fi" id="hsw-ckaddr-state" name="state" required>
+                                                                <option value=""><?php esc_html_e( 'انتخاب کنید', 'hamishop-elementor-widgets' ); ?></option>
+                                                                <?php foreach ( $states as $code => $label ) : ?>
+                                                                        <option value="<?php echo esc_attr( $code ); ?>"<?php selected( $state, $code ); ?>><?php echo esc_html( $label ); ?></option>
+                                                                <?php endforeach; ?>
+                                                        </select>
+                                                <?php else : ?>
+                                                        <?php echo $field( 'state', __( 'استان', 'hamishop-elementor-widgets' ), $state, 'text', ' required' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php endif; ?>
+                                        </div>
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'city', __( 'شهر', 'hamishop-elementor-widgets' ), $city, 'text', ' required autocomplete="address-level2"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                </div>
+
+                                <div class="hsw-ckaddr__frow">
+                                        <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
+                                                <?php echo $field( 'address_1', __( 'نشانی کامل', 'hamishop-elementor-widgets' ), $line1, 'text', ' required autocomplete="street-address"' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                </div>
+
+                                <div class="hsw-ckaddr__frow">
+                                        <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
+                                                <?php echo $field( 'address_2', __( 'پلاک، واحد، طبقه (اختیاری)', 'hamishop-elementor-widgets' ), $line2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                </div>
+
+                                <input type="hidden" name="country" value="<?php echo esc_attr( $country ); ?>">
+
+                                <p class="hsw-ckaddr__fmsg" data-hsw-address-msg role="alert" hidden></p>
+
+                                <button type="submit" class="hsw-ckaddr__fsubmit">
+                                        <i class="hsw-ic" aria-hidden="true">check</i>
+                                        <span><?php esc_html_e( 'ثبت آدرس و ادامه', 'hamishop-elementor-widgets' ); ?></span>
+                                </button>
+                        </form>
+                </article>
+                <?php
+                return (string) ob_get_clean();
         }
 }

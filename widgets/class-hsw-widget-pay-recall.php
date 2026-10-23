@@ -226,6 +226,14 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                         return $s['edit_url']['url'];
                 }
                 if ( $this->has_cart() && function_exists( 'wc_get_account_endpoint_url' ) ) {
+                        /*
+                         * Nothing saved yet → send them back to the checkout
+                         * step that can actually collect it, not to the account
+                         * address book (which lost the cart context).
+                         */
+                        if ( ! $this->customer_has_address() && function_exists( 'wc_get_checkout_url' ) ) {
+                                return wc_get_checkout_url();
+                        }
                         return wc_get_account_endpoint_url( 'edit-address' );
                 }
                 return '#';

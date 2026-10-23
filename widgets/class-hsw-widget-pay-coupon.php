@@ -176,6 +176,7 @@ class HSW_Widget_Pay_Coupon extends HSW_Pay_Base {
         protected function render() {
                 $applied = $this->applied_rows();
                 ?>
+                <?php echo \HSW_Helpers::wc_notices(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by WooCommerce. ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'pcpn' ) ); ?>">
 
                         <!-- =================== DESKTOP =================== -->

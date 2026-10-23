@@ -359,7 +359,15 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                                 <?php echo $this->cart_nonce(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hidden nonce inputs. ?>
                                                 <div class="hsw-c-qty">
                                                         <button type="button" class="hsw-c-qty__btn" data-dir="plus" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">add</i></button>
-                                                        <input type="number" class="hsw-c-qty__in" inputmode="numeric" name="cart[<?php echo esc_attr( $item['key'] ); ?>][qty]" value="<?php echo esc_attr( $item['qty'] ); ?>" min="<?php echo esc_attr( $item['min'] ); ?>"<?php echo ( 0 < $item['max'] ) ? ' max="' . esc_attr( $item['max'] ) . '"' : ''; ?> readonly aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
+                                                        <?php
+                                                        /*
+                                                         * The field used to be `readonly`, so the stepper was the only
+                                                         * way to change a quantity and typing a number did nothing.
+                                                         * It stays a real number input: keyboard arrows, direct typing
+                                                         * and Enter all work, and hsw-cart.js submits the form.
+                                                         */
+                                                        ?>
+                                                        <input type="number" class="hsw-c-qty__in" inputmode="numeric" step="1" name="cart[<?php echo esc_attr( $item['key'] ); ?>][qty]" value="<?php echo esc_attr( $item['qty'] ); ?>" min="<?php echo esc_attr( $item['min'] ); ?>"<?php echo ( 0 < $item['max'] ) ? ' max="' . esc_attr( $item['max'] ) . '"' : ''; ?> aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                         <button type="button" class="hsw-c-qty__btn is-minus" data-dir="minus" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">remove</i></button>
                                                 </div>
                                                 <button type="submit" name="update_cart" value="1" class="hsw-citems__update" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'به‌روزرسانی سبد', 'hamishop-elementor-widgets' ); ?></button>
