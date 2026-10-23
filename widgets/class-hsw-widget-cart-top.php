@@ -288,7 +288,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                         <div class="hsw-ctop__shell hsw-ctop__bar-in">
                                                 <div class="hsw-ctop__brand">
                                                         <a class="hsw-ctop__brand-a" href="<?php echo esc_url( $brand_url ); ?>">
-                                                                <span class="hsw-ctop__brand-ic"><i class="hsw-ic" aria-hidden="true">shopping_bag</i></span>
+                                                                <span class="hsw-ctop__brand-ic"><?php echo HSW_Helpers::icon( 'shopping_bag' ); ?></span>
                                                                 <span><?php echo esc_html( $brand_name ); ?></span>
                                                         </a>
                                                         <?php if ( '' !== trim( (string) ( $s['bar_note'] ?? '' ) ) ) : ?>
@@ -298,7 +298,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                                 </div>
                                                 <?php if ( '' !== trim( (string) ( $s['secure_text'] ?? '' ) ) ) : ?>
                                                         <div class="hsw-ctop__secure">
-                                                                <i class="hsw-ic" aria-hidden="true">verified_user</i>
+                                                                <?php echo HSW_Helpers::icon( 'verified_user' ); ?>
                                                                 <span><?php echo esc_html( $s['secure_text'] ); ?></span>
                                                         </div>
                                                 <?php endif; ?>
@@ -312,7 +312,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                                 <?php if ( $show_bc ) : ?>
                                                         <nav class="hsw-ctop__bc" aria-label="breadcrumb">
                                                                 <a href="<?php echo esc_url( $this->shop_url() ); ?>"><?php echo esc_html( $this->opt( 'bc_home', __( 'فروشگاه', 'hamishop-elementor-widgets' ) ) ); ?></a>
-                                                                <i class="hsw-ic hsw-ctop__bc-sep" aria-hidden="true">chevron_left</i>
+                                                                <?php echo HSW_Helpers::icon( 'chevron_left', 'hsw-ctop__bc-sep' ); ?>
                                                                 <span class="hsw-ctop__bc-cur"><?php echo esc_html( $this->opt( 'bc_current', __( 'سبد خرید فعلی', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         </nav>
                                                 <?php endif; ?>
@@ -342,7 +342,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                 <div class="hsw-ctop__mrow">
                                         <div class="hsw-ctop__mbrand">
                                                 <a class="hsw-ctop__mback" href="<?php echo esc_url( $this->shop_url() ); ?>" aria-label="<?php esc_attr_e( 'بازگشت', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">arrow_forward</i>
+                                                        <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                                 </a>
                                                 <div>
                                                         <h1 class="hsw-ctop__mtitle"><?php echo esc_html( $this->opt( 'm_title', __( 'سبد خرید', 'hamishop-elementor-widgets' ) ) ); ?></h1>
@@ -353,7 +353,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                                 <form method="post" action="<?php echo esc_url( $this->cart_url() ); ?>" class="hsw-citems__emptyform">
                                                         <?php echo $this->empty_nonce(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hidden nonce inputs. ?>
                                                         <button type="submit" name="hsw_empty_cart" value="1" class="hsw-ctop__mempty" title="<?php esc_attr_e( 'خالی کردن سبد', 'hamishop-elementor-widgets' ); ?>">
-                                                                <i class="hsw-ic" aria-hidden="true">delete_sweep</i>
+                                                                <?php echo HSW_Helpers::icon( 'delete_sweep' ); ?>
                                                         </button>
                                                 </form>
                                         <?php endif; ?>

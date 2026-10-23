@@ -5,7 +5,7 @@
  *   .hsw-hd--store    utility bar + search/cart row + category/nav row
  *   .hsw-hd--minimal  floating glass pill + search panel
  *
- * RTL-first, logical properties, local Vazirmatn + Material Symbols only.
+ * RTL-first, logical properties, local Vazirmatn + inline SVG icons only.
  * Everything is scoped under .hsw-h so a theme header can never be affected.
  */
 

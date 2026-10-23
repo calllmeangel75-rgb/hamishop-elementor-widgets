@@ -411,7 +411,7 @@
                 btn.classList.remove('is-added', 'is-busy');
                 btn.style.pointerEvents = '';
                 var ic = btn.querySelector('.hsw-ic');
-                if (ic) { ic.textContent = btn.classList.contains('hsw-ag__cta--m') ? 'add' : 'add_shopping_cart'; }
+                if (ic) { window.hswSetIcon(ic, btn.classList.contains('hsw-ag__cta--m') ? 'add' : 'add_shopping_cart'); }
         }
 
         function addToCart(btn) {
@@ -452,7 +452,7 @@
 
                         btn.classList.add('is-added');
                         var ic = btn.querySelector('.hsw-ic');
-                        if (ic) { ic.textContent = 'check_circle'; }
+                        if (ic) { window.hswSetIcon(ic, 'check_circle'); }
                         btn.setAttribute('title', data.addedText || '');
 
                         /*
@@ -466,7 +466,7 @@
                                 document.dispatchEvent(new CustomEvent('hsw_added_to_cart', { detail: { productId: pid } }));
                         }
 
-                        if (window.HSWFeedback) {
+                        if (window.HSWFeedback && data.modal) {
                                 window.HSWFeedback.addedToCart({
                                         fragments: res && res.fragments,
                                         cartUrl: data.cartUrl,
@@ -510,7 +510,9 @@
                 var list = wishList();
                 document.querySelectorAll('[data-hsw-wish]').forEach(function (btn) {
                         var id = btn.getAttribute('data-hsw-wish');
-                        if (id && -1 !== list.indexOf(id)) { btn.classList.add('is-active'); }
+                        var on = !!(id && -1 !== list.indexOf(id));
+                        if (on) { btn.classList.add('is-active'); }
+                        if (window.hswFill) { window.hswFill(btn.querySelector('.hsw-ic'), on); }
                 });
         }
         document.addEventListener('click', function (e) {
@@ -522,7 +524,9 @@
                 var i = list.indexOf(id);
                 if (-1 === i) { list.push(id); } else { list.splice(i, 1); }
                 saveWish(list);
-                btn.classList.toggle('is-active', -1 !== list.indexOf(id));
+                var on = -1 !== list.indexOf(id);
+                btn.classList.toggle('is-active', on);
+                if (window.hswFill) { window.hswFill(btn.querySelector('.hsw-ic'), on); }
         });
         if ('loading' !== document.readyState) { initWish(); } else { document.addEventListener('DOMContentLoaded', initWish); }
 })();

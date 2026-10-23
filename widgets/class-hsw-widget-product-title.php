@@ -251,7 +251,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                 <<?php echo esc_html( $tag ); ?> class="hsw-ptitle__h1"><?php echo esc_html( $name ); ?></<?php echo esc_html( $tag ); ?>>
                                 <div class="hsw-ptitle__ratebar">
                                         <span class="hsw-ptitle__score">
-                                                <span class="hsw-ic hsw-ic--fill hsw-ptitle__star">star</span>
+                                                <?php echo HSW_Helpers::icon( 'star', 'hsw-ptitle__star', true ); ?>
                                                 <b><?php echo esc_html( $rating ); ?></b><i>(<?php esc_html_e( 'از ۵', 'hamishop-elementor-widgets' ); ?>)</i>
                                         </span>
                                         <span class="hsw-ptitle__dot" aria-hidden="true"></span>
@@ -274,7 +274,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                         <span class="hsw-ptitle__mscore">
                                                 <span class="hsw-ptitle__mcnt">(<?php echo esc_html( $reviews ); ?> <?php esc_html_e( 'نظر', 'hamishop-elementor-widgets' ); ?>)</span>
                                                 <b><?php echo esc_html( $rating ); ?></b>
-                                                <span class="hsw-ic hsw-ic--fill">star</span>
+                                                <?php echo HSW_Helpers::icon( 'star', true ); ?>
                                         </span>
                                 </div>
                                 <h2 class="hsw-ptitle__h2"><?php echo esc_html( $name ); ?></h2>

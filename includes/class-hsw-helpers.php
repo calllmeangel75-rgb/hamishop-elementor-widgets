@@ -165,11 +165,13 @@ class HSW_Helpers {
         }
 
         /**
-         * Material Symbols icon markup (bundled subset font, zero external requests).
+         * Material Symbols icon markup, as an inline SVG symbol reference.
          *
-         * The subset is a ligature font: the span's text IS the icon name, and the
-         * font swaps it for a glyph. If a name has no glyph the browser happily
-         * paints the raw word — the "English words in the UI" bug. Two guards stop
+         * The glyphs used to come from a 94 KB ligature font: the span's text was
+         * the icon name and the font swapped it for a glyph. That meant a font
+         * request for a dozen icons and a flash of English words before it
+         * landed. The outlines now live in includes/class-hsw-icon-paths.php and
+         * the page prints a sprite with only the icons it rendered. Two guards stop
          * that here, at the single choke point every widget goes through:
          *
          *   1. friendly names are mapped to their real Material name,
@@ -184,9 +186,112 @@ class HSW_Helpers {
         public static function icon( $name, $class = '', $fill = false ) {
                 $name = self::icon_name( $name );
 
-                $style = $fill ? ' style="font-variation-settings:\'FILL\' 1;"' : '';
+                /*
+                 * Filled icons are a separate glyph, not a CSS variation: the
+                 * font's FILL axis does not exist in an SVG sprite, so the
+                 * filled outline gets its own symbol (`add` vs `add.fill`).
+                 */
+                if ( ! $fill && false !== strpos( ' ' . $class . ' ', ' is-fill ' ) ) {
+                        $fill = true;
+                        $class = trim( str_replace( 'is-fill', '', $class ) );
+                }
 
-                return '<span class="hsw-ic ' . esc_attr( $class ) . '"' . $style . '>' . esc_html( $name ) . '</span>';
+                $key = $fill ? $name . '.fill' : $name;
+                self::$icons[ $key ] = true;
+
+                /*
+                 * The sprite is printed once in the footer, so the reference is
+                 * a same-document fragment: no extra request, no CORS, and it
+                 * works in Safari (which still refuses `<use>` across files).
+                 */
+                return '<svg class="hsw-ic' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '"'
+                        . ' aria-hidden="true" focusable="false">'
+                        . '<use href="#hsw-i-' . esc_attr( $key ) . '"></use>'
+                        . '</svg>';
+        }
+
+        /**
+         * Icon keys rendered during this request.
+         *
+         * Collected by icon() and consumed by print_sprite(), so a page only
+         * carries the outlines it actually shows. A cart page with 14 icons
+         * costs ~6 KB instead of a 94 KB font request.
+         *
+         * @var array<string,bool>
+         */
+        private static $icons = array();
+
+        /**
+         * Icons that JavaScript injects at runtime.
+         *
+         * They never pass through icon(), so they have to be declared: without
+         * them the `<use>` points at a symbol that is not in the document and
+         * the icon renders as nothing.
+         *
+         * @var string[]
+         */
+        private static $runtime_icons = array(
+                'check_circle',
+                'close',
+                'delete',
+                'add',
+                'remove',
+                'shopping_cart',
+                'favorite',
+                'favorite_border',
+                'error',
+                'warning',
+        );
+
+        /**
+         * Print the sprite for the icons used on this page.
+         *
+         * Hooked to wp_footer. `display:none` (not `visibility`) keeps the
+         * symbols out of layout without disabling them — a `display:none` SVG
+         * still resolves `<use>` references.
+         */
+        public static function print_sprite() {
+                if ( empty( self::$icons ) ) {
+                        return;
+                }
+
+                /* Only pay for the runtime icons when a page has icons at all. */
+                self::register_runtime_icons();
+
+                $paths = include HSW_DIR . 'includes/class-hsw-icon-paths.php';
+                if ( ! is_array( $paths ) ) {
+                        return;
+                }
+
+                $keys = array_keys( self::$icons );
+
+                echo '<svg xmlns="http://www.w3.org/2000/svg" class="hsw-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">';
+                foreach ( $keys as $key ) {
+                        if ( ! isset( $paths[ $key ] ) ) {
+                                continue;
+                        }
+                        echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="0 -960 960 960"><path d="' . $paths[ $key ] . '"/></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- path data is generated, digits and path commands only.
+                }
+                echo '</svg>';
+
+                /* Tiny helper so scripts can build the same markup. */
+                $js = <<<'JS'
+window.hswIcon=function(n,c){return '<svg class="hsw-ic'+(c?' '+c:'')+'" aria-hidden="true" focusable="false"><use href="#hsw-i-'+n+'"></use></svg>';};
+window.hswSetIcon=function(el,n){if(!el)return;var u=el.querySelector?el.querySelector('use'):null;if(u){u.setAttribute('href','#hsw-i-'+n);}else{el.outerHTML=window.hswIcon(n);}};
+window.hswFill=function(el,on){if(!el)return;var u=el.querySelector?el.querySelector('use'):null;if(!u)return;var h=(u.getAttribute('href')||'').replace(/\.fill$/,'');u.setAttribute('href',h+(on?'.fill':''));};
+JS;
+                echo '<script>' . $js . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static script, no user input.
+        }
+
+        /**
+         * Register the runtime icons so they are always present in the sprite.
+         *
+         * Called from the footer hook before printing.
+         */
+        public static function register_runtime_icons() {
+                foreach ( self::$runtime_icons as $name ) {
+                        self::$icons[ $name ] = true;
+                }
         }
 
         /**
@@ -216,6 +321,7 @@ class HSW_Helpers {
                         'gift'           => 'redeem',
                         'grid'           => 'grid_view',
                         'heart'          => 'favorite',
+                        'favorite_border' => 'favorite',
                         'location'       => 'place',
                         'location_on'    => 'place',
                         'phone'          => 'call',

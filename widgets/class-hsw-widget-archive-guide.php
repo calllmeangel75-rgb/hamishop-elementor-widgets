@@ -167,7 +167,7 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
 
                         <!-- =================== DESKTOP FAQ BOX =================== -->
                         <section class="hsw-agd__box hsw-d">
-                                <h3 class="hsw-agd__title"><i class="hsw-ic" aria-hidden="true">help</i><?php echo esc_html( $title ); ?></h3>
+                                <h3 class="hsw-agd__title"><?php echo HSW_Helpers::icon( 'help' ); ?><?php echo esc_html( $title ); ?></h3>
                                 <div class="hsw-agd__grid">
                                         <?php foreach ( $rows as $row ) : ?>
                                                 <div class="hsw-agd__item">
@@ -184,7 +184,7 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                                 <div class="hsw-agd__panel">
                                         <div class="hsw-agd__mhead">
                                                 <h3 class="hsw-agd__mtitle"><?php esc_html_e( 'راهنمای خرید و دسته‌بندی', 'hamishop-elementor-widgets' ); ?></h3>
-                                                <button type="button" class="hsw-agd__mclose" data-hsw-close aria-label="<?php esc_attr_e( 'بستن', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">close</i></button>
+                                                <button type="button" class="hsw-agd__mclose" data-hsw-close aria-label="<?php esc_attr_e( 'بستن', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?></button>
                                         </div>
                                         <?php if ( $intro ) : ?>
                                                 <p class="hsw-agd__mtext"><?php echo esc_html( $intro ); ?></p>

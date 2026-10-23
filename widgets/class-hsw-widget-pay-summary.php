@@ -509,7 +509,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                         </div>
 
                                         <button class="hsw-psum__cta hsw-k-pay" type="button">
-                                                <i class="hsw-ic is-fill" aria-hidden="true">lock</i>
+                                                <?php echo HSW_Helpers::icon( 'lock', true ); ?>
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', '' ) ); ?></span>
                                         </button>
 
@@ -521,7 +521,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                         <?php foreach ( $badges as $b ) : ?>
                                                                 <?php if ( '' === trim( (string) ( isset( $b['title'] ) ? $b['title'] : '' ) ) ) { continue; } ?>
                                                                 <div class="hsw-psum__badge-i">
-                                                                        <i class="hsw-ic" aria-hidden="true"><?php echo esc_html( isset( $b['icon'] ) ? $b['icon'] : 'verified_user' ); ?></i>
+                                                                        <?php echo HSW_Helpers::icon( isset( $b['icon'] ) ? $b['icon'] : 'verified_user' ); ?>
                                                                         <span><?php echo esc_html( $b['title'] ); ?></span>
                                                                 </div>
                                                         <?php endforeach; ?>
@@ -531,7 +531,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
 
                                 <?php if ( 'yes' === ( $s['show_help'] ?? 'yes' ) ) : ?>
                                         <div class="hsw-psum__help">
-                                                <i class="hsw-ic" aria-hidden="true">contact_support</i>
+                                                <?php echo HSW_Helpers::icon( 'contact_support' ); ?>
                                                 <div class="hsw-psum__help-tx">
                                                         <span class="hsw-psum__help-t"><?php echo esc_html( $this->opt( 'help_title', '' ) ); ?></span>
                                                         <span class="hsw-psum__help-d"><?php echo esc_html( $this->opt( 'help_text', '' ) ); ?></span>
@@ -543,7 +543,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                         <!-- =================== MOBILE =================== -->
                         <section class="hsw-psum__mcard hsw-m">
                                 <div class="hsw-psum__mhd">
-                                        <i class="hsw-ic" aria-hidden="true">receipt_long</i>
+                                        <?php echo HSW_Helpers::icon( 'receipt_long' ); ?>
                                         <h2 class="hsw-psum__hd-t is-m"><?php echo esc_html( $this->opt( 'title_d', '' ) ); ?></h2>
                                 </div>
 
@@ -556,7 +556,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                         <?php if ( 0 < (float) $tm['discount'] ) : ?>
                                                 <div class="hsw-psum__row is-discount">
                                                         <span class="hsw-psum__lbl-ic">
-                                                                <i class="hsw-ic" aria-hidden="true">savings</i>
+                                                                <?php echo HSW_Helpers::icon( 'savings' ); ?>
                                                                 <?php echo esc_html( $this->opt( 'discount_label_m', '' ) ); ?>
                                                         </span>
                                                         <span class="hsw-psum__v" data-hswk="discount"><?php echo $this->discount_html( $tm['discount'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -607,7 +607,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 <span class="hsw-psum__mbar-v" data-hswk="total"><?php echo $this->money( (float) $tm['total'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                         </div>
                                         <button class="hsw-psum__cta hsw-psum__cta--m hsw-k-pay" type="button">
-                                                <i class="hsw-ic" aria-hidden="true">lock</i>
+                                                <?php echo HSW_Helpers::icon( 'lock' ); ?>
                                                 <span><?php echo esc_html( $this->opt( 'bar_cta', '' ) ); ?></span>
                                         </button>
                                 </div>
@@ -621,7 +621,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                                 <span class="hsw-psum__mtrust-dot" aria-hidden="true"></span>
                                                         <?php endif; ?>
                                                         <span class="hsw-psum__mtrust-i">
-                                                                <i class="hsw-ic" aria-hidden="true"><?php echo esc_html( isset( $tr['icon'] ) ? $tr['icon'] : 'verified_user' ); ?></i>
+                                                                <?php echo HSW_Helpers::icon( isset( $tr['icon'] ) ? $tr['icon'] : 'verified_user' ); ?>
                                                                 <?php echo esc_html( $tr['title'] ); ?>
                                                         </span>
                                                 <?php endforeach; ?>

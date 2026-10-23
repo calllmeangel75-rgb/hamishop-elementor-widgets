@@ -103,7 +103,7 @@ class HSW_Widget_Checkout_Items extends HSW_Checkout_Base {
                         <!-- =================== DESKTOP =================== -->
                         <article class="hsw-ckitems__card hsw-d">
                                 <div class="hsw-ckitems__hd">
-                                        <i class="hsw-ic" aria-hidden="true">inventory_2</i>
+                                        <?php echo HSW_Helpers::icon( 'inventory_2' ); ?>
                                         <h2 class="hsw-ckitems__hd-t"><?php echo esc_html( $title ); ?></h2>
                                         <span class="hsw-ckitems__count"><?php echo esc_html( $count_tpl ); ?></span>
                                 </div>
@@ -131,7 +131,7 @@ class HSW_Widget_Checkout_Items extends HSW_Checkout_Base {
                         <!-- =================== MOBILE =================== -->
                         <section class="hsw-ckitems__mcard hsw-m">
                                 <div class="hsw-ckitems__hd">
-                                        <i class="hsw-ic" aria-hidden="true">inventory_2</i>
+                                        <?php echo HSW_Helpers::icon( 'inventory_2' ); ?>
                                         <h2 class="hsw-ckitems__hd-t"><?php echo esc_html( $title ); ?></h2>
                                         <span class="hsw-ckitems__count"><?php echo esc_html( $count_tpl ); ?></span>
                                 </div>

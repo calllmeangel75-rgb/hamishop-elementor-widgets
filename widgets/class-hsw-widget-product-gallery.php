@@ -272,7 +272,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
 
                                 <?php if ( 'yes' === ( $s['show_zoom'] ?? 'yes' ) ) : ?>
                                         <button type="button" class="hsw-pgal__zoom hsw-d" data-hsw-zoom aria-label="<?php esc_attr_e( 'بزرگنمایی تصویر', 'hamishop-elementor-widgets' ); ?>">
-                                                <span class="hsw-ic">zoom_in</span>
+                                                <?php echo HSW_Helpers::icon( 'zoom_in' ); ?>
                                         </button>
                                 <?php endif; ?>
 
@@ -296,7 +296,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                                         <span class="hsw-pgal__badge"><?php echo esc_html( $badge ); ?></span>
                                                 <?php endif; ?>
                                                 <?php if ( $show_auth ) : ?>
-                                                        <span class="hsw-pgal__auth"><span class="hsw-ic hsw-ic--fill">verified</span><?php echo esc_html( $auth_text ); ?></span>
+                                                        <span class="hsw-pgal__auth"><?php echo HSW_Helpers::icon( 'verified', true ); ?><?php echo esc_html( $auth_text ); ?></span>
                                                 <?php endif; ?>
                                         </div>
                                 <?php endif; ?>

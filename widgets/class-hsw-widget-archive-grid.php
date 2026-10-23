@@ -317,7 +317,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
 
                         <?php if ( $wish ) : ?>
                                 <button type="button" class="hsw-ag__wish" aria-label="<?php esc_attr_e( 'افزودن به علاقه‌مندی‌ها', 'hamishop-elementor-widgets' ); ?>" data-hsw-wish="<?php echo esc_attr( $pid ); ?>">
-                                        <i class="hsw-ic" aria-hidden="true">favorite</i>
+                                        <?php echo HSW_Helpers::icon( 'favorite' ); ?>
                                 </button>
                         <?php endif; ?>
 
@@ -334,14 +334,14 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                                 <span class="hsw-ag__brand"><?php echo esc_html( $brand ); ?></span>
                                         <?php endif; ?>
                                         <span class="hsw-ag__rate">
-                                                <i class="hsw-ic" aria-hidden="true">star</i>
+                                                <?php echo HSW_Helpers::icon( 'star', '', true ); ?>
                                                 <b class="hsw-ag__score"><?php echo esc_html( $rating ); ?></b>
                                                 <span class="hsw-ag__revcount hsw-d">(<?php echo esc_html( $reviews ); ?>)</span>
                                         </span>
                                 </div>
                                 <h2 class="hsw-ag__title"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $name ); ?></a></h2>
                                 <div class="hsw-ag__note<?php echo $note_ok ? '' : ' is-oos'; ?>">
-                                        <i class="hsw-ic" aria-hidden="true"><?php echo esc_html( $note_ic ); ?></i>
+                                        <?php echo HSW_Helpers::icon( $note_ic ); ?>
                                         <span><?php echo esc_html( $note ); ?></span>
                                 </div>
                         </div>
@@ -364,17 +364,17 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                         </div>
                                         <?php if ( $is_demo || $addable ) : ?>
                                                 <button type="button" class="hsw-ag__cta hsw-d" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>" title="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">add_shopping_cart</i>
+                                                        <?php echo HSW_Helpers::icon( 'add_shopping_cart' ); ?>
                                                 </button>
                                                 <button type="button" class="hsw-ag__cta--m hsw-m" data-hsw-add="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">add</i>
+                                                        <?php echo HSW_Helpers::icon( 'add' ); ?>
                                                 </button>
                                         <?php else : ?>
                                                 <a class="hsw-ag__cta hsw-d" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">shopping_cart</i>
+                                                        <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
                                                 </a>
                                                 <a class="hsw-ag__cta--m hsw-m" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">shopping_cart</i>
+                                                        <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
                                                 </a>
                                         <?php endif; ?>
                                 <?php endif; ?>

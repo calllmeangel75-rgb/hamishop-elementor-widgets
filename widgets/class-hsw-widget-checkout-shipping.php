@@ -296,7 +296,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                         <!-- =================== DESKTOP =================== -->
                         <article class="hsw-ckship__card hsw-d" data-hswk-ship data-live="<?php echo $live ? '1' : '0'; ?>">
                                 <div class="hsw-ckship__hd">
-                                        <i class="hsw-ic is-fill" aria-hidden="true">local_shipping</i>
+                                        <?php echo HSW_Helpers::icon( 'local_shipping', true ); ?>
                                         <h2 class="hsw-ckship__hd-t"><?php echo esc_html( $title ); ?></h2>
                                 </div>
 
@@ -304,7 +304,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                                         <?php foreach ( $options as $i => $opt ) : ?>
                                                 <label class="hsw-ckship__opt<?php echo ! empty( $opt['chosen'] ) ? ' is-sel' : ''; ?>">
                                                         <input type="radio" class="hsw-ckship__input" name="hsw_shipping_method_d" value="<?php echo esc_attr( isset( $opt['id'] ) ? $opt['id'] : $i ); ?>"<?php checked( ! empty( $opt['chosen'] ) ); ?> />
-                                                        <span class="hsw-ckship__ic"><i class="hsw-ic" aria-hidden="true"><?php echo esc_html( $opt['icon'] ); ?></i></span>
+                                                        <span class="hsw-ckship__ic"><?php echo HSW_Helpers::icon( $opt['icon'] ); ?></span>
                                                         <span class="hsw-ckship__tx">
                                                                 <span class="hsw-ckship__trow">
                                                                         <span class="hsw-ckship__t"><?php echo esc_html( $opt['title'] ); ?></span>
@@ -326,7 +326,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                         <div class="hsw-m hsw-ckship__mwrap" data-hswk-ship data-live="<?php echo $live ? '1' : '0'; ?>">
                                 <div class="hsw-ckship__mhd">
                                         <h2 class="hsw-ckship__hd-t hsw-ckship__hd-t--m">
-                                                <i class="hsw-ic" aria-hidden="true">local_shipping</i>
+                                                <?php echo HSW_Helpers::icon( 'local_shipping' ); ?>
                                                 <?php echo esc_html( $title_m ); ?>
                                         </h2>
                                         <?php if ( '' !== trim( $hint_m ) ) : ?>

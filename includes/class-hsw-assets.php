@@ -149,7 +149,7 @@ class HSW_Assets {
          * Last line of defence: validate every `.hsw-ic` name in the final markup.
          *
          * `HSW_Helpers::icon()` already refuses unknown names, but roughly 120
-         * places write the span by hand (`<i class="hsw-ic">delete_sweep</i>`).
+         * places write the span by hand (`<?php echo HSW_Helpers::icon( 'delete_sweep' ); ?>`).
          * Those bypass the helper, so a typo — or an icon that was never added to
          * the font subset — would paint the word itself into the page. Running
          * the name through `HSW_Helpers::icon_name()` here means no widget can
@@ -271,23 +271,24 @@ class HSW_Assets {
         }
 
         /**
-         * `@font-face` for the bundled Material Symbols subset.
+         * Where the add-to-cart modal is allowed to open.
          *
-         * Printed from PHP rather than baked into a stylesheet so the URL can
-         * carry `filemtime()` of the woff2. Without that, rebuilding the subset
-         * keeps the same `?ver=1.11.x` URL and browsers serve the previous
-         * font from cache — the icons that were just added keep rendering as
-         * English words no matter how many times the file is replaced.
+         * The modal is a strong pattern on a listing (the visitor is browsing
+         * and "continue shopping" keeps them there) and a nuisance on a product
+         * page, where the visitor is already looking at the product and the
+         * modal covers the gallery they may still be reading. So the archive
+         * gets it by default and the product page is opt-in.
          *
-         * @return string
+         * @return array{archive:bool,product:bool}
          */
-        private function icon_font_face() {
-                $file = HSW_DIR . 'assets/fonts/material-symbols.woff2';
-                $ver  = file_exists( $file ) ? (string) filemtime( $file ) : HSW_VERSION;
+        public static function feedback_settings() {
+                $saved = get_option( 'hsw_add_feedback', array() );
+                $saved = is_array( $saved ) ? $saved : array();
 
-                return "@font-face{font-family:'Material Symbols Outlined';font-style:normal;font-weight:100 700;"
-                        . "font-display:block;src:url('" . HSW_URL . "assets/fonts/material-symbols.woff2?v=" . $ver . "')"
-                        . " format('woff2-variations');}";
+                return array(
+                        'archive' => ! isset( $saved['modal_archive'] ) ? true : ( 'yes' === $saved['modal_archive'] ),
+                        'product' => isset( $saved['modal_product'] ) && 'yes' === $saved['modal_product'],
+                );
         }
 
         /**
@@ -301,7 +302,6 @@ class HSW_Assets {
                         HSW_VERSION
                 );
 
-                wp_add_inline_style( 'hsw-fonts', $this->icon_font_face() );
 
                 wp_register_style(
                         'hsw-header',
@@ -533,6 +533,7 @@ class HSW_Assets {
                                 'continueText' => __( 'ادامه خرید', 'hamishop-elementor-widgets' ),
                                 'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
+                                'modal'        => self::feedback_settings()['product'],
                         )
                 );
 
@@ -550,6 +551,7 @@ class HSW_Assets {
                                 'continueText' => __( 'ادامه خرید', 'hamishop-elementor-widgets' ),
                                 'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
+                                'modal'        => self::feedback_settings()['archive'],
                         )
                 );
         }

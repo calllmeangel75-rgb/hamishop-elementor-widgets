@@ -299,7 +299,7 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                                         <span class="hsw-pfeat__title"><?php echo esc_html( $desk_title ); ?></span>
                                         <ul class="hsw-pfeat__list">
                                                 <?php foreach ( $desk as $item ) : ?>
-                                                        <li class="hsw-pfeat__item"><span class="hsw-ic hsw-pfeat__ic">check_circle</span><span><?php echo esc_html( $item['text'] ); ?></span></li>
+                                                        <li class="hsw-pfeat__item"><?php echo HSW_Helpers::icon( 'check_circle', 'hsw-pfeat__ic' ); ?><span><?php echo esc_html( $item['text'] ); ?></span></li>
                                                 <?php endforeach; ?>
                                         </ul>
                                 </div>

@@ -263,7 +263,7 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                                 <div class="hsw-cktop__shell hsw-cktop__bar-in">
                                         <div class="hsw-cktop__brand">
                                                 <a class="hsw-cktop__back" href="<?php echo esc_url( $back_url ); ?>" title="<?php esc_attr_e( 'بازگشت به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">arrow_forward</i>
+                                                        <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                                 </a>
                                                 <h1 class="hsw-cktop__title"><?php echo esc_html( $title ); ?></h1>
                                         </div>
@@ -276,7 +276,7 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                                                                 <?php endif; ?>
                                                         </div>
                                                         <a class="hsw-cktop__support-btn" href="<?php echo esc_url( $support_url ); ?>" aria-label="<?php esc_attr_e( 'پشتیبانی', 'hamishop-elementor-widgets' ); ?>">
-                                                                <i class="hsw-ic" aria-hidden="true">support_agent</i>
+                                                                <?php echo HSW_Helpers::icon( 'support_agent' ); ?>
                                                         </a>
                                                 </div>
                                         <?php endif; ?>
@@ -298,7 +298,7 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                                                         <div class="hsw-cktop__step<?php echo esc_attr( $cls ); ?>">
                                                                 <span class="hsw-cktop__dot">
                                                                         <?php if ( $n < $active ) : ?>
-                                                                                <i class="hsw-ic is-fill" aria-hidden="true">check</i>
+                                                                                <?php echo HSW_Helpers::icon( 'check', true ); ?>
                                                                         <?php else : ?>
                                                                                 <?php echo esc_html( HSW_Helpers::fa_num( $n ) ); ?>
                                                                         <?php endif; ?>
@@ -319,12 +319,12 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                         <header class="hsw-cktop__mbar hsw-m">
                                 <div class="hsw-cktop__mrow">
                                         <a class="hsw-cktop__back" href="<?php echo esc_url( $back_url ); ?>" aria-label="<?php esc_attr_e( 'بازگشت به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">arrow_forward</i>
+                                                <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                         </a>
                                         <h1 class="hsw-cktop__title"><?php echo esc_html( $title ); ?></h1>
                                         <?php if ( $show_support ) : ?>
                                                 <a class="hsw-cktop__msupport" href="<?php echo esc_url( $support_url ); ?>" aria-label="<?php esc_attr_e( 'پشتیبانی آنلاین', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">support_agent</i>
+                                                        <?php echo HSW_Helpers::icon( 'support_agent' ); ?>
                                                 </a>
                                         <?php endif; ?>
                                 </div>
@@ -342,9 +342,9 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                                                 <div class="hsw-cktop__step<?php echo esc_attr( $cls ); ?>">
                                                         <span class="hsw-cktop__dot">
                                                                 <?php if ( $n < $active ) : ?>
-                                                                        <i class="hsw-ic is-fill" aria-hidden="true">check</i>
+                                                                        <?php echo HSW_Helpers::icon( 'check', true ); ?>
                                                                 <?php elseif ( $n === $active ) : ?>
-                                                                        <i class="hsw-ic" aria-hidden="true">local_shipping</i>
+                                                                        <?php echo HSW_Helpers::icon( 'local_shipping' ); ?>
                                                                 <?php else : ?>
                                                                         <?php echo esc_html( HSW_Helpers::fa_num( $n ) ); ?>
                                                                 <?php endif; ?>

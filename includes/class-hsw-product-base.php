@@ -846,7 +846,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                 $rid = $uid . '-rating-' . $value;
                                 $comment_field .= '<input type="radio" name="rating" id="' . esc_attr( $rid ) . '" value="' . (int) $value . '"' . ( $required ? ' required' : '' ) . '>';
                                 $comment_field .= '<label for="' . esc_attr( $rid ) . '" title="' . esc_attr( $label ) . '">'
-                                        . HSW_Helpers::icon( 'star' )
+                                        . HSW_Helpers::icon( 'star', '', true )
                                         . '<span class="hsw-stars__label">' . esc_html( $label ) . '</span>'
                                         . '</label>';
                         }

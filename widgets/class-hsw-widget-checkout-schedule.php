@@ -257,7 +257,7 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
                         <!-- =================== DESKTOP =================== -->
                         <article class="hsw-cksched__card hsw-d">
                                 <div class="hsw-cksched__hd">
-                                        <i class="hsw-ic is-fill" aria-hidden="true">calendar_month</i>
+                                        <?php echo HSW_Helpers::icon( 'calendar_month', true ); ?>
                                         <h2 class="hsw-cksched__hd-t"><?php echo esc_html( $title ); ?></h2>
                                 </div>
 
@@ -307,7 +307,7 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
                         <section class="hsw-cksched__mcard hsw-m">
                                 <div class="hsw-cksched__mhd">
                                         <h2 class="hsw-cksched__hd-t hsw-cksched__hd-t--m">
-                                                <i class="hsw-ic" aria-hidden="true">calendar_month</i>
+                                                <?php echo HSW_Helpers::icon( 'calendar_month' ); ?>
                                                 <?php echo esc_html( $title_m ); ?>
                                         </h2>
                                         <?php if ( '' !== trim( $this->opt( 'hint_m', '' ) ) ) : ?>

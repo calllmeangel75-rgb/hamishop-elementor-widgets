@@ -514,7 +514,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                                         </div>
                                         <?php if ( $guide ) : ?>
                                                 <button type="button" class="hsw-ahd__guide" data-hsw-open="hsw-guide">
-                                                        <i class="hsw-ic" aria-hidden="true">help</i>
+                                                        <?php echo HSW_Helpers::icon( 'help' ); ?>
                                                         <span><?php esc_html_e( 'راهنما', 'hamishop-elementor-widgets' ); ?></span>
                                                 </button>
                                         <?php endif; ?>

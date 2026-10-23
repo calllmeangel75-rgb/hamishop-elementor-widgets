@@ -187,7 +187,7 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
                         <div class="hsw-d">
                                 <div class="hsw-ccoupon__card">
                                         <div class="hsw-ccoupon__intro">
-                                                <span class="hsw-ccoupon__ic"><i class="hsw-ic" aria-hidden="true">confirmation_number</i></span>
+                                                <span class="hsw-ccoupon__ic"><?php echo HSW_Helpers::icon( 'confirmation_number' ); ?></span>
                                                 <div>
                                                         <h4 class="hsw-ccoupon__title"><?php echo esc_html( $this->opt( 'title', __( 'کد تخفیف دارید؟', 'hamishop-elementor-widgets' ) ) ); ?></h4>
                                                         <p class="hsw-ccoupon__desc"><?php echo esc_html( $this->opt( 'desc', '' ) ); ?></p>
@@ -203,7 +203,7 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
                                 <?php if ( $show_foot ) : ?>
                                         <div class="hsw-ccoupon__foot">
                                                 <a class="hsw-ccoupon__back" href="<?php echo esc_url( $this->shop_url() ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">arrow_forward</i>
+                                                        <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                                         <span><?php echo esc_html( $this->opt( 'back_label', '' ) ); ?></span>
                                                 </a>
                                                 <?php if ( '' !== trim( (string) ( $s['tax_note'] ?? '' ) ) ) : ?>
@@ -216,7 +216,7 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
                         <!-- =================== MOBILE =================== -->
                         <div class="hsw-ccoupon__mcard hsw-m">
                                 <span class="hsw-ccoupon__mtitle">
-                                        <i class="hsw-ic" aria-hidden="true">local_activity</i>
+                                        <?php echo HSW_Helpers::icon( 'local_activity' ); ?>
                                         <?php echo esc_html( $this->opt( 'm_title', __( 'کد تخفیف یا کارت هدیه', 'hamishop-elementor-widgets' ) ) ); ?>
                                 </span>
                                 <form method="post" action="<?php echo esc_url( $this->cart_url() ); ?>" class="hsw-ccoupon__mform">

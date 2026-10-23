@@ -656,6 +656,35 @@ final class HSW_Widget_Manager {
 				'show_in_rest'      => false,
 			)
 		);
+
+		register_setting(
+			'hsw_widgets_group',
+			'hsw_add_feedback',
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_feedback' ),
+				'default'           => array(
+					'modal_archive' => 'yes',
+					'modal_product' => 'no',
+				),
+				'show_in_rest'      => false,
+			)
+		);
+	}
+
+	/**
+	 * Two checkboxes, each stored as `yes` or `no`.
+	 *
+	 * @param mixed $input Raw input.
+	 * @return array
+	 */
+	public static function sanitize_feedback( $input ) {
+		$input = is_array( $input ) ? $input : array();
+
+		return array(
+			'modal_archive' => ( isset( $input['modal_archive'] ) && 'yes' === $input['modal_archive'] ) ? 'yes' : 'no',
+			'modal_product' => ( isset( $input['modal_product'] ) && 'yes' === $input['modal_product'] ) ? 'yes' : 'no',
+		);
 	}
 
 	public function plugin_action_links( $links ) {
@@ -821,6 +850,36 @@ final class HSW_Widget_Manager {
 								</div>
 							</section>
 						<?php endforeach; ?>
+
+						<?php $fb = HSW_Assets::feedback_settings(); ?>
+						<section class="hsw-wm-group" id="hsw-group-feedback">
+							<header class="hsw-wm-grouphead">
+								<h2><?php esc_html_e( 'رفتار افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?></h2>
+								<p><?php esc_html_e( 'بعد از افزودن محصول، چه چیزی به مشتری نشان داده شود؟', 'hamishop-elementor-widgets' ); ?></p>
+							</header>
+
+							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row" for="hsw-fb-archive">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'مودال سبد خرید در آرشیو و فهرست محصولات', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پیشنهاد ما: روشن. مشتری در حال مرور است و «ادامه خرید» او را در همان صفحه نگه می‌دارد.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="checkbox" id="hsw-fb-archive" name="hsw_add_feedback[modal_archive]" value="yes" <?php checked( $fb['archive'] ); ?> />
+									</span>
+								</label>
+
+								<label class="hsw-wm-row" for="hsw-fb-product">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'مودال سبد خرید در صفحهٔ محصول', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پیش‌فرض خاموش. در صفحهٔ محصول مشتری همان کالا را می‌بیند و مودال روی گالری می‌افتد؛ اگر مودال را می‌خواهید، روشنش کنید. در حالت خاموش فقط یک پیام کوتاه نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="checkbox" id="hsw-fb-product" name="hsw_add_feedback[modal_product]" value="yes" <?php checked( $fb['product'] ); ?> />
+									</span>
+								</label>
+							</div>
+						</section>
 
 						<div class="hsw-wm-savebar">
 							<div class="hsw-wm-savecount">

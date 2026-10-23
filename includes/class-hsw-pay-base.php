@@ -185,7 +185,7 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
 
                 echo '<section class="hsw-done-final">';
                 echo '<div class="hsw-done-final__card">';
-                echo '<i class="hsw-ic hsw-done-final__ic" aria-hidden="true">check_circle</i>';
+                echo HSW_Helpers::icon( 'check_circle', 'hsw-done-final__ic', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo '<h2 class="hsw-done-final__t">' . esc_html__( 'سفارش شما ثبت شد', 'hamishop-elementor-widgets' ) . '</h2>';
 
                 if ( $order ) {

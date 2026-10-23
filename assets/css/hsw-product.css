@@ -5,7 +5,7 @@
  * Every color/size is a CSS var so Elementor controls can override it.
  */
 
-.hsw-p .hsw-ic--fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+/* Filled variants are separate symbols now; HSW_Helpers::icon() picks them. */
 
 /* ===== Responsive toggles ===== */
 @media (max-width: 767.98px) {
@@ -769,7 +769,6 @@
 
 .hsw-stars__row label .hsw-ic {
         font-size: 26px;
-        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .hsw-stars__row label:hover,

@@ -146,7 +146,7 @@ class HSW_Widget_Product_Breadcrumb extends HSW_Product_Base {
                                 <?php else : ?>
                                         <a class="hsw-pbread__link" href="<?php echo esc_url( $url ); ?>">
                                                 <?php if ( 0 === $i && 'yes' === ( $s['show_home_icon'] ?? 'yes' ) ) : ?>
-                                                        <span class="hsw-ic hsw-pbread__ic hsw-d">home</span>
+                                                        <?php echo HSW_Helpers::icon( 'home', 'hsw-pbread__ic hsw-d' ); ?>
                                                 <?php endif; ?>
                                                 <span><?php echo esc_html( $label ); ?></span>
                                         </a>
@@ -154,7 +154,7 @@ class HSW_Widget_Product_Breadcrumb extends HSW_Product_Base {
                                 <?php if ( ! $is_current ) : ?>
                                         <span class="hsw-pbread__sep" aria-hidden="true">
                                                 <span class="hsw-d"><?php echo esc_html( $sep ); ?></span>
-                                                <span class="hsw-ic hsw-m">chevron_left</span>
+                                                <?php echo HSW_Helpers::icon( 'chevron_left', 'hsw-m' ); ?>
                                         </span>
                                 <?php endif; ?>
                         <?php endforeach; ?>

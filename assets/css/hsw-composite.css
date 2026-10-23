@@ -31,7 +31,15 @@
         gap: var(--hsw-cp-gap);
 }
 
-.hsw-cp__col:empty { display: none; }
+/*
+ * No `.hsw-cp__col:empty { display: none }` here.
+ *
+ * It looked harmless, but during HTML parsing a column is briefly empty before
+ * its children arrive, so the browser hid it, then showed it — a 0.57 layout
+ * shift on the archive that only shows up on a slow connection (Lighthouse
+ * mobile caught it, a fast local page did not). The columns are only printed
+ * when they have parts, so the rule was dead weight anyway.
+ */
 
 .hsw-cp__guide { margin-top: var(--hsw-cp-gap); }
 .hsw-cp__desc { margin-top: var(--hsw-cp-gap); }

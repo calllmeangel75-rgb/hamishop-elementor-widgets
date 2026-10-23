@@ -118,12 +118,12 @@ class HSW_Widget_Archive_Breadcrumb extends HSW_Archive_Base {
                         <div class="hsw-abc__bar">
                                 <?php foreach ( $trail as $i => $item ) : ?>
                                         <?php if ( $i > 0 ) : ?>
-                                                <i class="hsw-ic hsw-abc__sep" aria-hidden="true">chevron_left</i>
+                                                <?php echo HSW_Helpers::icon( 'chevron_left', 'hsw-abc__sep' ); ?>
                                         <?php endif; ?>
                                         <?php if ( null !== $item[1] ) : ?>
                                                 <a class="hsw-abc__link<?php echo ( 0 === $i && $home_ic ) ? ' has-home' : ''; ?>" href="<?php echo esc_url( $item[1] ); ?>">
                                                         <?php if ( 0 === $i && $home_ic ) : ?>
-                                                                <i class="hsw-ic hsw-abc__ic" aria-hidden="true">home</i>
+                                                                <?php echo HSW_Helpers::icon( 'home', 'hsw-abc__ic' ); ?>
                                                         <?php endif; ?>
                                                         <span><?php echo esc_html( $item[0] ); ?></span>
                                                 </a>

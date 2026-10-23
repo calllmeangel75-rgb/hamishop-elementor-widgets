@@ -748,7 +748,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 if ( $collapsible ) {
                         $html .= '<button type="button" class="hsw-af__boxhead">';
                         $html .= '<span class="hsw-af__boxtitle">' . esc_html( $title ) . '</span>';
-                        $html .= '<i class="hsw-ic hsw-af__chev" aria-hidden="true">expand_more</i>';
+                        $html .= HSW_Helpers::icon( 'expand_more', 'hsw-af__chev' );
                         $html .= '</button>';
                 } else {
                         $html .= '<div class="hsw-af__boxhead"><span class="hsw-af__boxtitle">' . esc_html( $title ) . '</span></div>';
@@ -864,7 +864,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 if ( ! empty( $box['cats_search'] ) && count( $terms ) > 6 ) {
                         $body .= '<div class="hsw-af__search hsw-af__catsearch">';
                         $body .= '<input type="text" class="hsw-af__searchinput" placeholder="' . esc_attr__( 'جستجوی دسته...', 'hamishop-elementor-widgets' ) . '" data-hsw-catsearch aria-label="' . esc_attr__( 'جستجوی دسته‌بندی', 'hamishop-elementor-widgets' ) . '">';
-                        $body .= '<i class="hsw-ic" aria-hidden="true">search</i>';
+                        $body .= HSW_Helpers::icon( 'search' );
                         $body .= '</div>';
                 }
 
@@ -970,7 +970,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
 
                         $html .= '<div class="hsw-af__catrow">';
                         if ( $has_children ) {
-                                $html .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="' . ( $is_open ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '"><i class="hsw-ic" aria-hidden="true">expand_more</i></button>';
+                                $html .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="' . ( $is_open ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'expand_more' ) . '</button>';
                         } else {
                                 $html .= '<span class="hsw-af__catspacer" aria-hidden="true"></span>';
                         }
@@ -1031,14 +1031,14 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 if ( ! empty( $box['cats_search'] ) ) {
                         $body .= '<div class="hsw-af__search hsw-af__catsearch">';
                         $body .= '<input type="text" class="hsw-af__searchinput" placeholder="' . esc_attr__( 'جستجوی دسته...', 'hamishop-elementor-widgets' ) . '" data-hsw-catsearch aria-label="' . esc_attr__( 'جستجوی دسته‌بندی', 'hamishop-elementor-widgets' ) . '">';
-                        $body .= '<i class="hsw-ic" aria-hidden="true">search</i>';
+                        $body .= HSW_Helpers::icon( 'search' );
                         $body .= '</div>';
                 }
 
                 $body .= '<ul class="hsw-af__tree hsw-af__cattree" data-hsw-cattree role="tree">';
                 $body .= '<li class="hsw-af__catnode is-open">';
                 $body .= '<div class="hsw-af__catrow">';
-                $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '"><i class="hsw-ic" aria-hidden="true">expand_more</i></button>';
+                $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'expand_more' ) . '</button>';
                 $body .= '<a class="hsw-af__catlink" href="#" data-hsw-catname="' . esc_attr( mb_strtolower( $root['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $root['name'] ) . '</span></a>';
                 if ( $counts ) {
                         $body .= '<span class="hsw-af__cnt">(' . esc_html( HSW_Helpers::fa_num( (int) $root['count'] ) ) . ')</span>';
@@ -1047,7 +1047,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 $body .= '<ul class="hsw-af__catbranch" data-hsw-catbranch>';
                 $body .= '<li class="hsw-af__catnode is-open is-current">';
                 $body .= '<div class="hsw-af__catrow">';
-                $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '"><i class="hsw-ic" aria-hidden="true">expand_more</i></button>';
+                $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'expand_more' ) . '</button>';
                 $body .= '<a class="hsw-af__catlink is-active" href="#" aria-current="page" data-hsw-catname="' . esc_attr( mb_strtolower( $mid['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $mid['name'] ) . '</span></a>';
                 if ( $counts ) {
                         $body .= '<span class="hsw-af__badge">' . esc_html( HSW_Helpers::fa_num( (int) $mid['count'] ) ) . '</span>';
@@ -1087,7 +1087,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                         if ( $box['search'] && count( $rows ) > 6 ) {
                                 $body .= '<div class="hsw-af__search">';
                                 $body .= '<input type="text" class="hsw-af__searchinput" placeholder="' . esc_attr__( 'جستجو...', 'hamishop-elementor-widgets' ) . '" data-hsw-search>';
-                                $body .= '<i class="hsw-ic" aria-hidden="true">search</i>';
+                                $body .= HSW_Helpers::icon( 'search' );
                                 $body .= '</div>';
                         }
                         $body .= '<div class="hsw-af__checks" data-hsw-termlist>';
@@ -1192,7 +1192,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                         $body .= '<input type="checkbox" class="hsw-af__check" name="rating_filter" value="' . esc_attr( $i ) . '"' . checked( $current === $i, true, false ) . ' data-hsw-auto>';
                         $body .= '<span class="hsw-af__stars">';
                         for ( $s = 0; $s < 5; $s++ ) {
-                                $body .= '<i class="hsw-ic' . ( $s < $i ? ' is-on' : '' ) . '" aria-hidden="true">star</i>';
+                                $body .= HSW_Helpers::icon( 'star', $s < $i ? 'is-on' : '', $s < $i );
                         }
                         $body .= '</span>';
                         $body .= '</span>';
@@ -1336,8 +1336,8 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 <aside class="hsw-af__side hsw-d">
                                         <div class="hsw-af__box hsw-af__box--head">
                                                 <div class="hsw-af__headrow">
-                                                        <span class="hsw-af__headtitle"><i class="hsw-ic hsw-af__headic" aria-hidden="true">tune</i><?php echo esc_html( $f_ttl ); ?></span>
-                                                        <a class="hsw-af__reset" href="<?php echo esc_url( $reset ); ?>"><i class="hsw-ic" aria-hidden="true">close</i><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
+                                                        <span class="hsw-af__headtitle"><?php echo HSW_Helpers::icon( 'tune', 'hsw-af__headic' ); ?><?php echo esc_html( $f_ttl ); ?></span>
+                                                        <a class="hsw-af__reset" href="<?php echo esc_url( $reset ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?><?php esc_html_e( 'حذف همه', 'hamishop-elementor-widgets' ); ?></a>
                                                 </div>
                                         </div>
 
@@ -1357,7 +1357,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                                         <?php if ( $active ) : ?>
                                                                 <span class="hsw-asheet__count"><?php echo esc_html( HSW_Helpers::fa_num( $active ) ); ?> <?php esc_html_e( 'فیلتر فعال', 'hamishop-elementor-widgets' ); ?></span>
                                                         <?php endif; ?>
-                                                        <button type="button" class="hsw-asheet__close" data-hsw-close aria-label="<?php esc_attr_e( 'بستن', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">close</i></button>
+                                                        <button type="button" class="hsw-asheet__close" data-hsw-close aria-label="<?php esc_attr_e( 'بستن', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?></button>
                                                 </div>
 
                                                 <div class="hsw-asheet__body">

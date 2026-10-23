@@ -5,7 +5,6 @@
  * All colors/radii are CSS vars so Elementor controls can override them.
  */
 
-.hsw-k .hsw-ic.is-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
 /* ===== Responsive toggles (scoped so the suite works standalone) ===== */
 @media (max-width: 767.98px) {
@@ -1640,7 +1639,6 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
         font-size: 3rem;
         line-height: 1;
         color: var(--hswk-ok-strong);
-        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .hsw-done-final__t { margin: .25rem 0 0; font-size: 1.125rem; line-height: 1.75rem; font-weight: 800; color: var(--hswk-text); }
 .hsw-done-final__s { margin: 0; font-size: .8125rem; line-height: 1.9; color: var(--hswk-text2); }

@@ -381,7 +381,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                         <?php if ( '' !== trim( (string) $brand ) ) : ?>
                                                 <div class="hsw-ptop__brand">
                                                         <a class="hsw-ptop__brand-a" href="<?php echo esc_url( $brand_ur ); ?>">
-                                                                <span class="hsw-ptop__logo"><i class="hsw-ic" aria-hidden="true">shopping_bag</i></span>
+                                                                <span class="hsw-ptop__logo"><?php echo HSW_Helpers::icon( 'shopping_bag' ); ?></span>
                                                                 <span class="hsw-ptop__brand-tx"><?php echo esc_html( $brand ); ?></span>
                                                         </a>
                                                         <?php if ( '' !== trim( (string) $tag ) ) : ?>
@@ -404,7 +404,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                                 </span>
                                                         <?php else : ?>
                                                                 <a class="hsw-ptop__nav-i" href="<?php echo esc_url( $row[1] ); ?>">
-                                                                        <i class="hsw-ic is-fill" aria-hidden="true">check_circle</i>
+                                                                        <?php echo HSW_Helpers::icon( 'check_circle', true ); ?>
                                                                         <?php echo esc_html( $row[0] ); ?>
                                                                 </a>
                                                         <?php endif; ?>
@@ -414,13 +414,13 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                         <div class="hsw-ptop__end">
                                                 <?php if ( $show_ssl ) : ?>
                                                         <span class="hsw-ptop__ssl">
-                                                                <i class="hsw-ic" aria-hidden="true">lock</i>
+                                                                <?php echo HSW_Helpers::icon( 'lock' ); ?>
                                                                 <?php echo esc_html( $ssl_text ); ?>
                                                         </span>
                                                 <?php endif; ?>
                                                 <?php if ( $show_support ) : ?>
                                                         <a class="hsw-ptop__support" href="<?php echo esc_url( $support_url ); ?>" title="<?php esc_attr_e( 'پشتیبانی ۲۴ ساعته', 'hamishop-elementor-widgets' ); ?>">
-                                                                <i class="hsw-ic" aria-hidden="true">support_agent</i>
+                                                                <?php echo HSW_Helpers::icon( 'support_agent' ); ?>
                                                                 <?php if ( '' !== $support_ph ) : ?>
                                                                         <span><?php echo esc_html( $support_ph ); ?></span>
                                                                 <?php endif; ?>
@@ -444,7 +444,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                                 <div class="hsw-ptop__step<?php echo esc_attr( $cls ); ?>">
                                                                         <span class="hsw-ptop__dot">
                                                                                 <?php if ( $n < $active ) : ?>
-                                                                                        <i class="hsw-ic" aria-hidden="true">done</i>
+                                                                                        <?php echo HSW_Helpers::icon( 'done' ); ?>
                                                                                 <?php else : ?>
                                                                                         <?php echo esc_html( HSW_Helpers::fa_num( $n ) ); ?>
                                                                                 <?php endif; ?>
@@ -453,7 +453,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                                 </div>
                                                         <?php else : ?>
                                                                 <a class="hsw-ptop__step<?php echo esc_attr( $cls ); ?>" href="<?php echo esc_url( '' !== $st[2] ? $st[2] : $this->checkout_url() ); ?>">
-                                                                        <span class="hsw-ptop__dot"><i class="hsw-ic" aria-hidden="true">done</i></span>
+                                                                        <span class="hsw-ptop__dot"><?php echo HSW_Helpers::icon( 'done' ); ?></span>
                                                                         <span class="hsw-ptop__name"><?php echo esc_html( $st[0] ); ?></span>
                                                                 </a>
                                                         <?php endif; ?>
@@ -466,7 +466,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                         <header class="hsw-ptop__mbar hsw-m<?php echo $sticky ? ' is-sticky' : ''; ?>">
                                 <div class="hsw-ptop__mrow">
                                         <a class="hsw-ptop__back" href="<?php echo esc_url( $back_url ); ?>" aria-label="<?php esc_attr_e( 'بازگشت', 'hamishop-elementor-widgets' ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">arrow_forward</i>
+                                                <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                         </a>
                                         <div class="hsw-ptop__mhead">
                                                 <h1 class="hsw-ptop__mtitle"><?php echo esc_html( $m_title ); ?></h1>
@@ -476,7 +476,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                         </div>
                                         <?php if ( $show_support ) : ?>
                                                 <a class="hsw-ptop__msupport" href="<?php echo esc_url( $support_url ); ?>" aria-label="<?php esc_attr_e( 'پشتیبانی', 'hamishop-elementor-widgets' ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">support_agent</i>
+                                                        <?php echo HSW_Helpers::icon( 'support_agent' ); ?>
                                                 </a>
                                         <?php endif; ?>
                                 </div>
@@ -495,7 +495,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                 <div class="hsw-ptop__mstep<?php echo esc_attr( $cls ); ?>">
                                                         <span class="hsw-ptop__mdot">
                                                                 <?php if ( $n < $active ) : ?>
-                                                                        <i class="hsw-ic" aria-hidden="true">check</i>
+                                                                        <?php echo HSW_Helpers::icon( 'check' ); ?>
                                                                 <?php else : ?>
                                                                         <?php echo esc_html( HSW_Helpers::fa_num( $n ) ); ?>
                                                                 <?php endif; ?>

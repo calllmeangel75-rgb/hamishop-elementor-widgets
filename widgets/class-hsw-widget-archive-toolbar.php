@@ -143,7 +143,7 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                         <!-- =================== DESKTOP BAR =================== -->
                         <div class="hsw-at__bar hsw-d">
                                 <div class="hsw-at__sorts">
-                                        <span class="hsw-at__sortlabel"><i class="hsw-ic" aria-hidden="true">filter_list</i><?php esc_html_e( 'مرتب‌سازی:', 'hamishop-elementor-widgets' ); ?></span>
+                                        <span class="hsw-at__sortlabel"><?php echo HSW_Helpers::icon( 'filter_list' ); ?><?php esc_html_e( 'مرتب‌سازی:', 'hamishop-elementor-widgets' ); ?></span>
                                         <?php foreach ( $sorts as $key => $label ) : ?>
                                                 <a class="hsw-at__sort<?php echo $key === $current ? ' is-active' : ''; ?>" href="<?php echo esc_url( $this->filter_url( array( 'orderby' => $key ) ) ); ?>"><?php echo esc_html( $label ); ?></a>
                                         <?php endforeach; ?>
@@ -166,14 +166,14 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                         <!-- =================== MOBILE STICKY ROW =================== -->
                         <div class="hsw-at__mrow hsw-m">
                                 <button type="button" class="hsw-at__mbtn" data-hsw-open="hsw-filter">
-                                        <i class="hsw-ic" aria-hidden="true">tune</i>
+                                        <?php echo HSW_Helpers::icon( 'tune' ); ?>
                                         <span><?php esc_html_e( 'فیلتر پیشرفته', 'hamishop-elementor-widgets' ); ?></span>
                                         <?php if ( $active ) : ?>
                                                 <b class="hsw-at__mbadge"><?php echo esc_html( HSW_Helpers::fa_num( $active ) ); ?></b>
                                         <?php endif; ?>
                                 </button>
                                 <button type="button" class="hsw-at__mbtn" data-hsw-open="hsw-sort">
-                                        <i class="hsw-ic" aria-hidden="true">filter_list</i>
+                                        <?php echo HSW_Helpers::icon( 'filter_list' ); ?>
                                         <span><?php esc_html_e( 'مرتب‌سازی', 'hamishop-elementor-widgets' ); ?></span>
                                         <small class="hsw-at__mcur">(<?php echo esc_html( isset( $sorts[ $current ] ) ? $sorts[ $current ] : '' ); ?>)</small>
                                 </button>
@@ -185,14 +185,14 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                                 <div class="hsw-asheet__panel hsw-asheet__panel--sort">
                                         <div class="hsw-asheet__head">
                                                 <span class="hsw-asheet__ttl"><?php esc_html_e( 'مرتب‌سازی بر اساس:', 'hamishop-elementor-widgets' ); ?></span>
-                                                <button type="button" class="hsw-asheet__close" data-hsw-close aria-label="<?php esc_attr_e( 'بستن', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">close</i></button>
+                                                <button type="button" class="hsw-asheet__close" data-hsw-close aria-label="<?php esc_attr_e( 'بستن', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'close' ); ?></button>
                                         </div>
                                         <div class="hsw-asheet__opts">
                                                 <?php foreach ( $sorts as $key => $label ) : ?>
                                                         <a class="hsw-asheet__opt<?php echo $key === $current ? ' is-active' : ''; ?>" href="<?php echo esc_url( $this->filter_url( array( 'orderby' => $key ) ) ); ?>">
                                                                 <span><?php echo esc_html( $label ); ?></span>
                                                                 <?php if ( $key === $current ) : ?>
-                                                                        <i class="hsw-ic" aria-hidden="true">check_circle</i>
+                                                                        <?php echo HSW_Helpers::icon( 'check_circle' ); ?>
                                                                 <?php endif; ?>
                                                         </a>
                                                 <?php endforeach; ?>
@@ -207,7 +207,7 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                                         <?php foreach ( $tags as $tag ) : ?>
                                                 <a class="hsw-at__tag" href="<?php echo esc_url( $tag['url'] ); ?>">
                                                         <span><?php echo esc_html( $tag['label'] ); ?></span>
-                                                        <i class="hsw-ic" aria-hidden="true">close</i>
+                                                        <?php echo HSW_Helpers::icon( 'close' ); ?>
                                                 </a>
                                         <?php endforeach; ?>
                                         <a class="hsw-at__tagclear" href="<?php echo esc_url( $this->filter_url( $clear ) ); ?>"><?php esc_html_e( 'پاک‌کردن', 'hamishop-elementor-widgets' ); ?></a>

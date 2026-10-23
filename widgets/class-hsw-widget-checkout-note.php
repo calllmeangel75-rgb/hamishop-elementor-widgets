@@ -149,7 +149,7 @@ class HSW_Widget_Checkout_Note extends HSW_Checkout_Base {
                         <!-- =================== DESKTOP =================== -->
                         <article class="hsw-cknote__card hsw-d">
                                 <label class="hsw-cknote__lbl" for="hsw-ck-note-<?php echo esc_attr( $this->get_id() ); ?>">
-                                        <i class="hsw-ic" aria-hidden="true">notes</i>
+                                        <?php echo HSW_Helpers::icon( 'notes' ); ?>
                                         <?php echo esc_html( $label_d ); ?>
                                 </label>
                                 <textarea class="hsw-cknote__ta hsw-k-note-ta" id="hsw-ck-note-<?php echo esc_attr( $this->get_id() ); ?>" rows="<?php echo esc_attr( $rows_d ); ?>" placeholder="<?php echo esc_attr( $ph_d ); ?>"></textarea>
@@ -167,7 +167,7 @@ class HSW_Widget_Checkout_Note extends HSW_Checkout_Base {
                         <!-- =================== MOBILE =================== -->
                         <section class="hsw-cknote__mcard hsw-m">
                                 <label class="hsw-cknote__lbl" for="hsw-ck-notem-<?php echo esc_attr( $this->get_id() ); ?>">
-                                        <i class="hsw-ic" aria-hidden="true">edit_note</i>
+                                        <?php echo HSW_Helpers::icon( 'edit_note' ); ?>
                                         <?php echo esc_html( $label_m ); ?>
                                 </label>
                                 <textarea class="hsw-cknote__ta hsw-cknote__ta--m hsw-k-note-ta" id="hsw-ck-notem-<?php echo esc_attr( $this->get_id() ); ?>" rows="<?php echo esc_attr( $rows_m ); ?>" placeholder="<?php echo esc_attr( $ph_m ); ?>"></textarea>

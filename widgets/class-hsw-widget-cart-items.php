@@ -267,7 +267,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                                         <form method="post" action="<?php echo esc_url( $this->cart_url() ); ?>" class="hsw-citems__emptyform">
                                                                 <?php echo $this->empty_nonce(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hidden nonce inputs. ?>
                                                                 <button type="submit" name="hsw_empty_cart" value="1" class="hsw-citems__empty">
-                                                                        <i class="hsw-ic" aria-hidden="true">delete_sweep</i>
+                                                                        <?php echo HSW_Helpers::icon( 'delete_sweep' ); ?>
                                                                         <span><?php echo esc_html( $this->opt( 'empty_btn_label', __( 'خالی کردن سبد', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                                 </button>
                                                         </form>
@@ -338,7 +338,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                                                         <?php if ( '' !== $chip['hex'] ) : ?>
                                                                                 <span class="hsw-citems__dot" style="background:<?php echo esc_attr( $chip['hex'] ); ?>"></span>
                                                                         <?php elseif ( '' !== $chip['icon'] ) : ?>
-                                                                                <i class="hsw-ic hsw-citems__chip-ic" aria-hidden="true"><?php echo esc_html( $chip['icon'] ); ?></i>
+                                                                                <?php echo HSW_Helpers::icon( $chip['icon'], 'hsw-citems__chip-ic' ); ?>
                                                                         <?php endif; ?>
                                                                         <?php echo esc_html( $chip['label'] ); ?>
                                                                 </span>
@@ -365,7 +365,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                         <form method="post" action="<?php echo esc_url( $this->cart_url() ); ?>" class="hsw-citems__qtyform">
                                                 <?php echo $this->cart_nonce(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hidden nonce inputs. ?>
                                                 <div class="hsw-c-qty">
-                                                        <button type="button" class="hsw-c-qty__btn" data-dir="plus" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">add</i></button>
+                                                        <button type="button" class="hsw-c-qty__btn" data-dir="plus" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'add' ); ?></button>
                                                         <?php
                                                         /*
                                                          * The field used to be `readonly`, so the stepper was the only
@@ -375,7 +375,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                                          */
                                                         ?>
                                                         <input type="number" class="hsw-c-qty__in" inputmode="numeric" step="1" name="cart[<?php echo esc_attr( $item['key'] ); ?>][qty]" value="<?php echo esc_attr( $item['qty'] ); ?>" min="<?php echo esc_attr( $item['min'] ); ?>"<?php echo ( 0 < $item['max'] ) ? ' max="' . esc_attr( $item['max'] ) . '"' : ''; ?> aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
-                                                        <button type="button" class="hsw-c-qty__btn is-minus" data-dir="minus" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">remove</i></button>
+                                                        <button type="button" class="hsw-c-qty__btn is-minus" data-dir="minus" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'remove' ); ?></button>
                                                 </div>
                                                 <button type="submit" name="update_cart" value="1" class="hsw-citems__update" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'به‌روزرسانی سبد', 'hamishop-elementor-widgets' ); ?></button>
                                         </form>
@@ -383,10 +383,10 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                         <?php if ( $show_fav || $show_del ) : ?>
                                                 <div class="hsw-citems__acts">
                                                         <?php if ( $show_fav ) : ?>
-                                                                <button type="button" class="hsw-citems__fav" title="<?php esc_attr_e( 'ذخیره در علاقه‌مندی‌ها', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">favorite</i></button>
+                                                                <button type="button" class="hsw-citems__fav" title="<?php esc_attr_e( 'ذخیره در علاقه‌مندی‌ها', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'favorite' ); ?></button>
                                                         <?php endif; ?>
                                                         <?php if ( $show_del && '' !== $item['remove'] ) : ?>
-                                                                <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__del" title="<?php esc_attr_e( 'حذف کالا', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">delete</i></a>
+                                                                <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__del" title="<?php esc_attr_e( 'حذف کالا', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></a>
                                                         <?php endif; ?>
                                                 </div>
                                         <?php endif; ?>
@@ -437,7 +437,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
 
                         <?php if ( $show_warranty && '' !== $item['warranty'] ) : ?>
                                 <div class="hsw-citems__mwarranty">
-                                        <i class="hsw-ic" aria-hidden="true">verified_user</i>
+                                        <?php echo HSW_Helpers::icon( 'verified_user' ); ?>
                                         <span><?php echo esc_html( $item['warranty'] ); ?></span>
                                 </div>
                         <?php endif; ?>
@@ -446,11 +446,11 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                 <form method="post" action="<?php echo esc_url( $this->cart_url() ); ?>" class="hsw-citems__qtyform">
                                         <?php echo $this->cart_nonce(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hidden nonce inputs. ?>
                                         <div class="hsw-c-qty hsw-citems__mqty">
-                                                <button type="button" class="hsw-c-qty__btn is-plus" data-dir="plus" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">add</i></button>
+                                                <button type="button" class="hsw-c-qty__btn is-plus" data-dir="plus" aria-label="<?php esc_attr_e( 'افزایش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'add' ); ?></button>
                                                 <input type="hidden" name="cart[<?php echo esc_attr( $item['key'] ); ?>][qty]" value="<?php echo esc_attr( $item['qty'] ); ?>">
                                                 <span class="hsw-c-qty__v"><?php echo esc_html( HSW_Helpers::fa_num( $item['qty'] ) ); ?></span>
                                                 <?php if ( $show_del && '' !== $item['remove'] ) : ?>
-                                                        <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__mremove" aria-label="<?php esc_attr_e( 'حذف یا کاهش', 'hamishop-elementor-widgets' ); ?>"><i class="hsw-ic" aria-hidden="true">delete</i></a>
+                                                        <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__mremove" aria-label="<?php esc_attr_e( 'حذف یا کاهش', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></a>
                                                 <?php endif; ?>
                                         </div>
                                         <button type="submit" name="update_cart" value="1" class="hsw-citems__update" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'به‌روزرسانی سبد', 'hamishop-elementor-widgets' ); ?></button>
@@ -477,12 +477,12 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'citems' ) ); ?>">
                         <div class="hsw-c-empty">
-                                <span class="hsw-c-empty__ic"><i class="hsw-ic" aria-hidden="true">shopping_bag</i></span>
+                                <span class="hsw-c-empty__ic"><?php echo HSW_Helpers::icon( 'shopping_bag' ); ?></span>
                                 <h3 class="hsw-c-empty__title"><?php echo esc_html( $this->opt( 'empty_title', __( 'سبد خرید شما خالی است!', 'hamishop-elementor-widgets' ) ) ); ?></h3>
                                 <p class="hsw-c-empty__desc"><?php echo esc_html( $this->opt( 'empty_desc', '' ) ); ?></p>
                                 <a class="hsw-c-empty__btn" href="<?php echo esc_url( $this->shop_url() ); ?>">
                                         <span><?php echo esc_html( $this->opt( 'empty_btn', __( 'بازگشت به فروشگاه', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                        <i class="hsw-ic" aria-hidden="true">arrow_back</i>
+                                        <?php echo HSW_Helpers::icon( 'arrow_back' ); ?>
                                 </a>
                         </div>
                 </section>

@@ -272,24 +272,24 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                         <div class="hsw-prec__card hsw-d">
                                 <div class="hsw-prec__hd">
                                         <div class="hsw-prec__hd-r">
-                                                <i class="hsw-ic" aria-hidden="true">local_shipping</i>
+                                                <?php echo HSW_Helpers::icon( 'local_shipping' ); ?>
                                                 <h2 class="hsw-prec__hd-t"><?php echo esc_html( $this->opt( 'title_d', __( 'مشخصات تحویل سفارش', 'hamishop-elementor-widgets' ) ) ); ?></h2>
                                         </div>
                                         <a class="hsw-prec__edit" href="<?php echo esc_url( $this->edit_url() ); ?>">
                                                 <span><?php echo esc_html( $this->opt( 'edit_label', __( 'تغییر اطلاعات یا آدرس', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                <i class="hsw-ic" aria-hidden="true">edit_note</i>
+                                                <?php echo HSW_Helpers::icon( 'edit_note' ); ?>
                                         </a>
                                 </div>
 
                                 <div class="hsw-prec__grid">
                                         <div class="hsw-prec__col">
                                                 <div class="hsw-prec__row">
-                                                        <i class="hsw-ic" aria-hidden="true">person</i>
+                                                        <?php echo HSW_Helpers::icon( 'person' ); ?>
                                                         <span class="hsw-prec__lbl"><?php echo esc_html( $this->opt( 'name_label', __( 'تحویل‌گیرنده:', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         <span><?php echo esc_html( trim( $name . ( $phone ? ' (' . $phone . ')' : '' ) ) ); ?></span>
                                                 </div>
                                                 <div class="hsw-prec__row is-start">
-                                                        <i class="hsw-ic" aria-hidden="true">pin_drop</i>
+                                                        <?php echo HSW_Helpers::icon( 'pin_drop' ); ?>
                                                         <span class="hsw-prec__lbl"><?php echo esc_html( $this->opt( 'addr_label', __( 'آدرس:', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         <span class="hsw-prec__addr"><?php echo esc_html( $addr ); ?></span>
                                                 </div>
@@ -298,14 +298,14 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                                         <div class="hsw-prec__box">
                                                 <div class="hsw-prec__box-r">
                                                         <span class="hsw-prec__lbl is-icon">
-                                                                <i class="hsw-ic" aria-hidden="true">rocket_launch</i>
+                                                                <?php echo HSW_Helpers::icon( 'rocket_launch' ); ?>
                                                                 <?php echo esc_html( $this->opt( 'method_label', __( 'شیوه ارسال:', 'hamishop-elementor-widgets' ) ) ); ?>
                                                         </span>
                                                         <span class="hsw-prec__method"><?php echo esc_html( $method ); ?></span>
                                                 </div>
                                                 <div class="hsw-prec__box-r">
                                                         <span class="hsw-prec__lbl is-icon">
-                                                                <i class="hsw-ic" aria-hidden="true">schedule</i>
+                                                                <?php echo HSW_Helpers::icon( 'schedule' ); ?>
                                                                 <?php echo esc_html( $this->opt( 'slot_label', __( 'بازه زمانی منتخب:', 'hamishop-elementor-widgets' ) ) ); ?>
                                                         </span>
                                                         <span><?php echo esc_html( $slot ); ?></span>
@@ -318,23 +318,23 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                         <section class="hsw-prec__mcard hsw-m">
                                 <div class="hsw-prec__mhd">
                                         <div class="hsw-prec__hd-r">
-                                                <i class="hsw-ic" aria-hidden="true">local_shipping</i>
+                                                <?php echo HSW_Helpers::icon( 'local_shipping' ); ?>
                                                 <h2 class="hsw-prec__hd-t is-m"><?php echo esc_html( $this->opt( 'title_m', __( 'اطلاعات مرسوله', 'hamishop-elementor-widgets' ) ) ); ?></h2>
                                         </div>
                                         <a class="hsw-prec__medit" href="<?php echo esc_url( $this->edit_url() ); ?>">
                                                 <span><?php echo esc_html( $this->opt( 'm_edit_label', __( 'ویرایش', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                <i class="hsw-ic" aria-hidden="true">arrow_back</i>
+                                                <?php echo HSW_Helpers::icon( 'arrow_back' ); ?>
                                         </a>
                                 </div>
 
                                 <div class="hsw-prec__mbody">
                                         <div class="hsw-prec__mrow">
-                                                <i class="hsw-ic" aria-hidden="true">location_on</i>
+                                                <?php echo HSW_Helpers::icon( 'location_on' ); ?>
                                                 <p class="hsw-prec__maddr"><?php echo esc_html( $addr ); ?></p>
                                         </div>
                                         <div class="hsw-prec__mfoot">
                                                 <span class="hsw-prec__mdeliv">
-                                                        <i class="hsw-ic" aria-hidden="true">schedule</i>
+                                                        <?php echo HSW_Helpers::icon( 'schedule' ); ?>
                                                         <?php echo esc_html( $this->m_delivery_line() ); ?>
                                                 </span>
                                                 <?php if ( $ship_free ) : ?>

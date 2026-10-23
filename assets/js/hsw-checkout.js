@@ -379,12 +379,12 @@
         function couponRowHTML( c ) {
                 return '<div class="hsw-pcpn__applied" data-hswk-coupon="' + escAttr( c.code ) + '">' +
                         '<span class="hsw-pcpn__applied-l">' +
-                        '<i class="hsw-ic" aria-hidden="true">check_circle</i>' +
+                        window.hswIcon('check_circle') +
                         '<span class="hsw-pcpn__applied-tx">کد تخفیف <b class="hsw-pcpn__code">' + escHtml( c.code ) + '</b> اعمال شد</span>' +
                         ( ( c.amount_html && '۰' !== c.amount_html ) ? '<span class="hsw-pcpn__deduct"><span class="hsw-pcpn__amt">' + c.amount_html + '</span> تومان کسر شد</span>' : '' ) +
                         '</span>' +
                         '<button class="hsw-pcpn__remove" type="button" data-hswk-coupon-remove="' + escAttr( c.code ) + '">' +
-                        '<i class="hsw-ic" aria-hidden="true">close</i><span>حذف تخفیف</span>' +
+                        window.hswIcon('close') + '<span>حذف تخفیف</span>' +
                         '</button>' +
                         '</div>';
         }

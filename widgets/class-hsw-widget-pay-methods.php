@@ -384,7 +384,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                         <div class="hsw-pm__card hsw-d">
                                 <div class="hsw-pm__hd">
                                         <div class="hsw-pm__hd-r">
-                                                <i class="hsw-ic" aria-hidden="true">payments</i>
+                                                <?php echo HSW_Helpers::icon( 'payments' ); ?>
                                                 <h2 class="hsw-pm__hd-t"><?php echo esc_html( $this->opt( 'title', __( 'انتخاب روش پرداخت', 'hamishop-elementor-widgets' ) ) ); ?></h2>
                                         </div>
                                         <?php if ( '' !== trim( $this->opt( 'shaparak_note', '' ) ) ) : ?>
@@ -421,7 +421,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                                                 <?php foreach ( $banks as $b ) : ?>
                                                                                         <label class="hsw-pm__bank<?php echo $b[5] ? ' is-sel' : ''; ?>">
                                                                                                 <input type="radio" name="hsw_pay_bank_d" class="hsw-pm__bank-radio" value="<?php echo esc_attr( $b[0] ); ?>"<?php checked( $b[5], true ); ?> />
-                                                                                                <span class="hsw-pm__bank-ic"><i class="hsw-ic" aria-hidden="true"><?php echo esc_html( $b[2] ); ?></i></span>
+                                                                                                <span class="hsw-pm__bank-ic"><?php echo HSW_Helpers::icon( $b[2] ); ?></span>
                                                                                                 <span class="hsw-pm__bank-tx"><?php echo esc_html( $b[0] ); ?></span>
                                                                                                 <?php if ( '' !== $b[3] ) : ?>
                                                                                                         <?php if ( $b[4] ) : ?>
@@ -481,7 +481,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                 <!-- Wallet deduction row -->
                                                 <div class="hsw-pm__wallet">
                                                         <span class="hsw-pm__wallet-main">
-                                                                <i class="hsw-ic" aria-hidden="true">account_balance_wallet</i>
+                                                                <?php echo HSW_Helpers::icon( 'account_balance_wallet' ); ?>
                                                                 <span class="hsw-pm__wallet-tx">
                                                                         <span class="hsw-pm__wallet-head">
                                                                                 <span class="hsw-pm__opt-t"><?php echo esc_html( $this->opt( 'wallet_title', '' ) ); ?></span>
@@ -506,7 +506,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                         <?php if ( $show_w ) : ?>
                                 <section class="hsw-pm__mwallet hsw-m">
                                         <span class="hsw-pm__mw-main">
-                                                <span class="hsw-pm__mw-ic"><i class="hsw-ic" aria-hidden="true">account_balance_wallet</i></span>
+                                                <span class="hsw-pm__mw-ic"><?php echo HSW_Helpers::icon( 'account_balance_wallet' ); ?></span>
                                                 <span class="hsw-pm__mw-tx">
                                                         <span class="hsw-pm__mw-head">
                                                                 <span class="hsw-pm__opt-t"><?php echo esc_html( $this->opt( 'wallet_title_m', '' ) ); ?></span>
@@ -526,7 +526,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
 
                         <section class="hsw-pm__mcard hsw-m">
                                 <div class="hsw-pm__mhd">
-                                        <i class="hsw-ic" aria-hidden="true">credit_card</i>
+                                        <?php echo HSW_Helpers::icon( 'credit_card' ); ?>
                                         <h2 class="hsw-pm__hd-t is-m"><?php echo esc_html( $this->opt( 'm_title', __( 'شیوه پرداخت', 'hamishop-elementor-widgets' ) ) ); ?></h2>
                                 </div>
 

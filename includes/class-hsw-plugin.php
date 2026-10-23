@@ -41,6 +41,9 @@ final class HSW_Plugin {
                 HSW_Throttle::instance();
                 HSW_Wallet::instance();
                 HSW_Coupon_Messages::instance();
+
+                /* One SVG sprite per page, containing only the icons it rendered. */
+                add_action( 'wp_footer', array( 'HSW_Helpers', 'print_sprite' ), 5 );
                 new HSW_Rest();
                 new HSW_Assets();
 

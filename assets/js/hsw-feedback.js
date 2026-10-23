@@ -85,14 +85,17 @@
 			'aria-atomic': 'true'
 		});
 
-		var icon = el('span', 'hsw-toast__ic hsw-ic', { 'aria-hidden': 'true' });
-		icon.textContent = opts.tone === 'error' ? 'error' : 'check_circle';
+		var iconName = opts.tone === 'error' ? 'error' : 'check_circle';
+		var icon = document.createElement('span');
+		icon.className = 'hsw-toast__ic';
+		icon.setAttribute('aria-hidden', 'true');
+		icon.innerHTML = window.hswIcon ? window.hswIcon(iconName, 'hsw-toast__ic__glyph') : '';
 
 		var text = el('span', 'hsw-toast__msg');
 		text.textContent = message;
 
 		var close = el('button', 'hsw-toast__close', { type: 'button', 'aria-label': opts.closeLabel || 'بستن' });
-		close.innerHTML = '<span class="hsw-ic" aria-hidden="true">close</span>';
+		close.innerHTML = window.hswIcon ? window.hswIcon('close') : '';
 		close.addEventListener('click', closeToast);
 
 		toastEl.appendChild(icon);
@@ -156,7 +159,7 @@
 			type: 'button',
 			'aria-label': config.closeLabel || 'بستن'
 		});
-		close.innerHTML = '<span class="hsw-ic" aria-hidden="true">close</span>';
+		close.innerHTML = window.hswIcon ? window.hswIcon('close') : '';
 		close.addEventListener('click', closeModal);
 
 		head.appendChild(title);

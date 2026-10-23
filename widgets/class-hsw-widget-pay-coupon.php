@@ -157,14 +157,14 @@ class HSW_Widget_Pay_Coupon extends HSW_Pay_Base {
                         ?>
                         <div class="hsw-pcpn__applied" data-hswk-coupon="<?php echo esc_attr( $c['code'] ); ?>">
                                 <span class="hsw-pcpn__applied-l">
-                                        <i class="hsw-ic" aria-hidden="true">check_circle</i>
+                                        <?php echo HSW_Helpers::icon( 'check_circle' ); ?>
                                         <span class="hsw-pcpn__applied-tx"><?php echo $line; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                         <?php if ( 0 < (float) $c['amount'] ) : ?>
                                                 <span class="hsw-pcpn__deduct"><?php echo $deduct; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                         <?php endif; ?>
                                 </span>
                                 <button class="hsw-pcpn__remove" type="button" data-hswk-coupon-remove="<?php echo esc_attr( $c['code'] ); ?>">
-                                        <i class="hsw-ic" aria-hidden="true">close</i>
+                                        <?php echo HSW_Helpers::icon( 'close' ); ?>
                                         <span><?php echo esc_html( $rm_label ); ?></span>
                                 </button>
                         </div>
@@ -182,7 +182,7 @@ class HSW_Widget_Pay_Coupon extends HSW_Pay_Base {
                         <!-- =================== DESKTOP =================== -->
                         <div class="hsw-pcpn__card hsw-d">
                                 <div class="hsw-pcpn__hd">
-                                        <i class="hsw-ic" aria-hidden="true">loyalty</i>
+                                        <?php echo HSW_Helpers::icon( 'loyalty' ); ?>
                                         <h2 class="hsw-pcpn__hd-t"><?php echo esc_html( $this->opt( 'title', __( 'کد تخفیف یا کارت هدیه', 'hamishop-elementor-widgets' ) ) ); ?></h2>
                                 </div>
 
@@ -191,7 +191,7 @@ class HSW_Widget_Pay_Coupon extends HSW_Pay_Base {
 
                                         <div class="hsw-pcpn__form">
                                                 <span class="hsw-pcpn__field">
-                                                        <i class="hsw-ic" aria-hidden="true">confirmation_number</i>
+                                                        <?php echo HSW_Helpers::icon( 'confirmation_number' ); ?>
                                                         <input class="hsw-pcpn__input" type="text" name="hsw_coupon_code" autocomplete="off" placeholder="<?php echo esc_attr( $this->opt( 'placeholder', '' ) ); ?>" />
                                                 </span>
                                                 <button class="hsw-pcpn__btn" type="button" data-hswk-coupon-apply><?php echo esc_html( $this->opt( 'button_label', '' ) ); ?></button>
@@ -205,7 +205,7 @@ class HSW_Widget_Pay_Coupon extends HSW_Pay_Base {
                         <section class="hsw-pcpn__mcard hsw-m">
                                 <div class="hsw-pcpn__mhd">
                                         <label class="hsw-pcpn__mlabel" for="hsw-coupon-input-m">
-                                                <i class="hsw-ic" aria-hidden="true">local_activity</i>
+                                                <?php echo HSW_Helpers::icon( 'local_activity' ); ?>
                                                 <span><?php echo esc_html( $this->opt( 'title', '' ) ); ?></span>
                                         </label>
                                 </div>

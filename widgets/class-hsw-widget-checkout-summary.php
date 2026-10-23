@@ -453,7 +453,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                         <span class="hsw-cksum__tip">
                                                                 <?php echo esc_html( $this->opt( 'shipping_label', __( 'هزینه ارسال:', 'hamishop-elementor-widgets' ) ) ); ?>
                                                                 <?php if ( '' !== trim( $this->opt( 'shipping_tip', '' ) ) ) : ?>
-                                                                        <i class="hsw-ic" data-tip="<?php echo esc_attr( $this->opt( 'shipping_tip', '' ) ); ?>" title="<?php echo esc_attr( $this->opt( 'shipping_tip', '' ) ); ?>" aria-hidden="true">info</i>
+                                                                        <span class="hsw-cksum__tipic" data-tip="<?php echo esc_attr( $this->opt( 'shipping_tip', '' ) ); ?>" title="<?php echo esc_attr( $this->opt( 'shipping_tip', '' ) ); ?>"><?php echo HSW_Helpers::icon( 'info' ); ?></span>
                                                                 <?php endif; ?>
                                                         </span>
                                                         <span class="hsw-cksum__v" data-hswk="shipping"><?php echo $shipping_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -472,7 +472,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
 
                                         <a class="hsw-cksum__cta hsw-k-cta" href="<?php echo esc_url( $cta_url ); ?>">
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', __( 'ادامه و ورود به مرحله پرداخت', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                <i class="hsw-ic" aria-hidden="true">arrow_back</i>
+                                                <?php echo HSW_Helpers::icon( 'arrow_back' ); ?>
                                         </a>
 
                                         <?php if ( '' !== trim( $this->opt( 'cta_note', '' ) ) ) : ?>
@@ -486,7 +486,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                 <?php foreach ( $trust as $i => $tr ) : ?>
                                                         <?php if ( '' === trim( (string) ( isset( $tr['title'] ) ? $tr['title'] : '' ) ) ) { continue; } ?>
                                                         <div class="hsw-cksum__trust-i<?php echo ( 0 < $i ) ? ' is-divided' : ''; ?>">
-                                                                <i class="hsw-ic" aria-hidden="true"><?php echo esc_html( isset( $tr['icon'] ) ? $tr['icon'] : 'verified_user' ); ?></i>
+                                                                <?php echo HSW_Helpers::icon( isset( $tr['icon'] ) ? $tr['icon'] : 'verified_user' ); ?>
                                                                 <div>
                                                                         <span class="hsw-cksum__trust-t"><?php echo esc_html( $tr['title'] ); ?></span>
                                                                         <?php if ( '' !== trim( (string) ( isset( $tr['text'] ) ? $tr['text'] : '' ) ) ) : ?>
@@ -512,7 +512,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                         <?php if ( 0 < (float) $t['discount'] ) : ?>
                                                 <div class="hsw-cksum__row is-discount">
                                                         <span class="hsw-cksum__tip">
-                                                                <i class="hsw-ic" aria-hidden="true">sell</i>
+                                                                <?php echo HSW_Helpers::icon( 'sell' ); ?>
                                                                 <?php echo esc_html( $this->opt( 'discount_label_m', __( 'تخفیف کالاها', 'hamishop-elementor-widgets' ) ) ); ?>
                                                         </span>
                                                         <span class="hsw-cksum__v" data-hswk="discount"><?php echo $this->discount_html( $t['discount'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -541,7 +541,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                         </div>
                                         <a class="hsw-cksum__cta hsw-cksum__cta--m hsw-k-cta" href="<?php echo esc_url( $cta_url ); ?>">
                                                 <span><?php echo esc_html( $this->opt( 'bar_cta', __( 'تأیید و پرداخت نهایی', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                <i class="hsw-ic" aria-hidden="true">chevron_left</i>
+                                                <?php echo HSW_Helpers::icon( 'chevron_left' ); ?>
                                         </a>
                                 </div>
                         </aside>

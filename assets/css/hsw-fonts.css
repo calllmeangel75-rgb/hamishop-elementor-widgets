@@ -17,44 +17,41 @@
 }
 
 /*
- * Material Symbols base.
+ * Icons — inline SVG sprite, not a font.
  *
- * This MUST live here, unscoped. The per-suite copies used to be scoped to
- * `.hsw-c .hsw-ic`, `.hsw-k .hsw-ic`, `.hsw-p .hsw-ic`, … but the markup never
- * emits those wrapper classes, so the rule matched nothing outside the archive
- * and the icon names were painted as literal English words. One unscoped rule
- * covers every widget, including ones added later.
+ * Every icon is `<svg class="hsw-ic"><use href="#hsw-i-name"></use></svg>` and
+ * the symbols are printed once in the footer, only for the icons the page
+ * actually rendered. Compared with the 94 KB icon font this used to load:
  *
- * `font-family` is `!important` on purpose: themes ship rules like
- * `.woodmart a { font-family: … }` that would otherwise win and turn the icon
- * name back into text. Nothing else should ever restyle our own icon element.
+ *   - no font request, no ligature lookup, no flash of English words before
+ *     the font lands (the old failure mode was `add_shopping_cart` painted as
+ *     text for a few hundred milliseconds),
+ *   - `fill: currentColor`, so an icon inherits the text colour the moment it
+ *     paints instead of waiting for a variable-font axis,
+ *   - 4–8 KB of path data on a typical page instead of 94 KB.
  *
- * The matching `@font-face` is printed from PHP (HSW_Assets::icon_font_face())
- * so its URL can carry a `filemtime()` cache-buster — a rebuilt subset must
- * reach browsers immediately.
+ * Sizing is unchanged on purpose: every stylesheet sizes icons with
+ * `font-size`, and 1em keeps that working.
  */
 .hsw-ic {
-        font-family: 'Material Symbols Outlined' !important;
-        font-weight: normal;
-        font-style: normal;
-        line-height: 1;
+        width: 1em;
+        height: 1em;
         display: inline-block;
-        letter-spacing: normal;
-        text-transform: none;
-        white-space: nowrap;
-        word-wrap: normal;
-        direction: ltr;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        font-feature-settings: 'liga', 'rlig';
-        -webkit-font-feature-settings: 'liga', 'rlig';
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        user-select: none;
+        vertical-align: -0.125em;
+        fill: currentColor;
+        stroke: none;
+        overflow: visible;
         flex-shrink: 0;
+        line-height: 1;
+        user-select: none;
+}
+
+.hsw-ic use {
+        pointer-events: none;
 }
 
 /* «ارث‌بری فونت از قالب» — per-widget switch (hsw_font_mode = inherit).
-   Icons keep Material Symbols; everything else follows the theme font. */
+   Icons are SVG sprites; everything else follows the theme font. */
 .hsw-font-inherit, .hsw-font-inherit *:not(.hsw-ic) { font-family: inherit !important; }
 
 /* -------------------------------------------------------------------------

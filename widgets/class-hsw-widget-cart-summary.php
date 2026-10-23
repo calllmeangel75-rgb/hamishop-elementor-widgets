@@ -480,7 +480,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                         <div class="hsw-csummary__row is-save">
                                                                 <span class="hsw-csummary__lbl is-save-lbl">
                                                                         <span><?php echo esc_html( $this->opt( 'savings_label', __( 'سود شما از این خرید', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                                        <i class="hsw-ic" aria-hidden="true">percent</i>
+                                                                        <?php echo HSW_Helpers::icon( 'percent' ); ?>
                                                                 </span>
                                                                 <span class="hsw-csummary__val is-save-v"><?php echo esc_html( $this->money( -1 * $t['savings'], false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
                                                         </div>
@@ -529,7 +529,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
 
                                         <a class="hsw-csummary__cta" href="<?php echo esc_url( $next_url ); ?>">
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', __( 'تکمیل سفارش و ثبت آدرس', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                <i class="hsw-ic" aria-hidden="true">arrow_back</i>
+                                                <?php echo HSW_Helpers::icon( 'arrow_back' ); ?>
                                         </a>
 
                                         <?php $trust = ( isset( $s['trust'] ) && is_array( $s['trust'] ) ) ? $s['trust'] : array(); ?>
@@ -537,7 +537,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                 <div class="hsw-csummary__trust">
                                                         <?php foreach ( $trust as $row ) : ?>
                                                                 <div class="hsw-csummary__trust-i">
-                                                                        <i class="hsw-ic" aria-hidden="true"><?php echo esc_html( isset( $row['icon'] ) ? $row['icon'] : 'lock' ); ?></i>
+                                                                        <?php echo HSW_Helpers::icon( isset( $row['icon'] ) ? $row['icon'] : 'lock' ); ?>
                                                                         <span class="hsw-csummary__trust-t"><?php echo esc_html( isset( $row['title'] ) ? $row['title'] : '' ); ?></span>
                                                                         <?php if ( ! empty( $row['sub'] ) ) : ?>
                                                                                 <span class="hsw-csummary__trust-s"><?php echo esc_html( $row['sub'] ); ?></span>
@@ -550,7 +550,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
 
                                 <?php if ( 'yes' === ( $s['show_help'] ?? 'yes' ) ) : ?>
                                         <div class="hsw-csummary__help">
-                                                <span class="hsw-csummary__help-ic"><i class="hsw-ic" aria-hidden="true">support_agent</i></span>
+                                                <span class="hsw-csummary__help-ic"><?php echo HSW_Helpers::icon( 'support_agent' ); ?></span>
                                                 <div class="hsw-csummary__help-b">
                                                         <p class="hsw-csummary__help-t"><?php echo esc_html( $this->opt( 'help_title', '' ) ); ?></p>
                                                         <p class="hsw-csummary__help-x">
@@ -567,7 +567,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                         <!-- =================== MOBILE =================== -->
                         <section class="hsw-csummary__mcard hsw-m" aria-label="<?php esc_attr_e( 'خلاصه فاکتور', 'hamishop-elementor-widgets' ); ?>">
                                 <h3 class="hsw-csummary__mtitle">
-                                        <i class="hsw-ic" aria-hidden="true">receipt_long</i>
+                                        <?php echo HSW_Helpers::icon( 'receipt_long' ); ?>
                                         <?php esc_html_e( 'خلاصه فاکتور سفارش', 'hamishop-elementor-widgets' ); ?>
                                 </h3>
 
@@ -579,7 +579,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                 <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < $t['savings'] ) ) : ?>
                                         <div class="hsw-csummary__mrow is-save">
                                                 <span class="hsw-csummary__lbl is-save-lbl">
-                                                        <i class="hsw-ic" aria-hidden="true">savings</i>
+                                                        <?php echo HSW_Helpers::icon( 'savings' ); ?>
                                                         <span><?php echo esc_html( $this->opt( 'savings_label', __( 'سود شما از این خرید', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                 </span>
                                                 <span class="hsw-csummary__mval is-save-v"><?php echo esc_html( $this->money( -1 * $t['savings'], false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
@@ -588,7 +588,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
 
                                 <div class="hsw-csummary__mrow">
                                         <span class="hsw-csummary__lbl">
-                                                <i class="hsw-ic" aria-hidden="true">local_shipping</i>
+                                                <?php echo HSW_Helpers::icon( 'local_shipping' ); ?>
                                                 <span><?php echo esc_html( $this->opt( 'ship_label_m', __( 'هزینه ارسال اکسپرس', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                         </span>
                                         <?php if ( 'amount' === $t['shipping'][0] ) : ?>
@@ -608,7 +608,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
 
                                 <?php if ( 'yes' === ( $s['show_guarantee'] ?? 'yes' ) && '' !== trim( (string) ( $s['guarantee_text'] ?? '' ) ) ) : ?>
                                         <div class="hsw-csummary__guarantee">
-                                                <i class="hsw-ic" aria-hidden="true">verified</i>
+                                                <?php echo HSW_Helpers::icon( 'verified' ); ?>
                                                 <span><?php echo esc_html( $s['guarantee_text'] ); ?></span>
                                         </div>
                                 <?php endif; ?>
@@ -623,7 +623,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                 </div>
                                                 <a class="hsw-csummary__mcta" href="<?php echo esc_url( $next_url ); ?>">
                                                         <span><?php echo esc_html( $this->opt( 'mbar_cta', __( 'ثبت سفارش و ادامه', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                        <i class="hsw-ic" aria-hidden="true">arrow_back</i>
+                                                        <?php echo HSW_Helpers::icon( 'arrow_back' ); ?>
                                                 </a>
                                         </div>
                                 </aside>

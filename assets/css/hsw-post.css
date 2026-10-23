@@ -1435,9 +1435,7 @@
 	color: var(--hsw-pp-accent);
 }
 
-.hsw-pp__dockbtn.is-on .hsw-ic {
-	font-variation-settings: 'FILL' 1;
-}
+
 
 .hsw-pp__dockbtn .hsw-ic {
 	font-size: 21px;

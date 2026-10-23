@@ -273,7 +273,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		}
 
 		$out .= '<div class="hsw-hd__searchfield">';
-		$out .= '<span class="hsw-hd__searchicon hsw-ic" aria-hidden="true">search</span>';
+		$out .= HSW_Helpers::icon( 'search', 'hsw-hd__searchicon' );
 		$out .= '<input type="search" name="s" value="' . esc_attr( get_search_query() ) . '" placeholder="' . esc_attr( $placeholder ) . '" aria-label="' . esc_attr__( 'جستجو در محصولات', 'hamishop-elementor-widgets' ) . '" autocomplete="off">';
 		$out .= '</div>';
 		/*

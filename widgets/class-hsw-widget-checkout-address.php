@@ -239,12 +239,12 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         <article class="hsw-ckaddr__card hsw-d">
                                 <div class="hsw-ckaddr__hd">
                                         <div class="hsw-ckaddr__hd-r">
-                                                <i class="hsw-ic is-fill" aria-hidden="true">location_on</i>
+                                                <?php echo HSW_Helpers::icon( 'location_on', true ); ?>
                                                 <h2 class="hsw-ckaddr__hd-t"><?php echo esc_html( $title_d ); ?></h2>
                                         </div>
                                         <?php if ( '' !== trim( $add_d ) ) : ?>
                                                 <a class="hsw-ckaddr__add" href="<?php echo esc_url( $manage ); ?>">
-                                                        <i class="hsw-ic" aria-hidden="true">add_circle</i>
+                                                        <?php echo HSW_Helpers::icon( 'add_circle' ); ?>
                                                         <span><?php echo esc_html( $add_d ); ?></span>
                                                 </a>
                                         <?php endif; ?>
@@ -253,7 +253,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 <div class="hsw-ckaddr__box">
                                         <div class="hsw-ckaddr__box-top">
                                                 <div class="hsw-ckaddr__who">
-                                                        <span class="hsw-ckaddr__check" aria-hidden="true"><i class="hsw-ic" aria-hidden="true">check</i></span>
+                                                        <span class="hsw-ckaddr__check" aria-hidden="true"><?php echo HSW_Helpers::icon( 'check' ); ?></span>
                                                         <?php if ( '' !== trim( (string) $addr['chip'] ) ) : ?>
                                                                 <span class="hsw-ckaddr__chip"><?php echo esc_html( $addr['chip'] ); ?></span>
                                                         <?php endif; ?>
@@ -262,7 +262,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                                 <div class="hsw-ckaddr__ops">
                                                         <?php if ( $show_edit ) : ?>
                                                                 <a class="hsw-ckaddr__op" href="<?php echo esc_url( $manage ); ?>">
-                                                                        <i class="hsw-ic" aria-hidden="true">edit</i>
+                                                                        <?php echo HSW_Helpers::icon( 'edit' ); ?>
                                                                         <span><?php echo esc_html( $edit ); ?></span>
                                                                 </a>
                                                                 <span class="hsw-ckaddr__sep" aria-hidden="true">|</span>
@@ -277,13 +277,13 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
 
                                         <div class="hsw-ckaddr__meta">
                                                 <span class="hsw-ckaddr__meta-i">
-                                                        <i class="hsw-ic" aria-hidden="true">phone_iphone</i>
+                                                        <?php echo HSW_Helpers::icon( 'phone_iphone' ); ?>
                                                         <span><?php echo esc_html( $this->opt( 'phone_label', __( 'شماره تماس:', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                         <b class="hsw-ckaddr__ltr"><?php echo esc_html( $addr['phone'] ); ?></b>
                                                 </span>
                                                 <?php if ( 'yes' === ( $s['show_postcode'] ?? '' ) ) : ?>
                                                         <span class="hsw-ckaddr__meta-i">
-                                                                <i class="hsw-ic" aria-hidden="true">mail</i>
+                                                                <?php echo HSW_Helpers::icon( 'mail' ); ?>
                                                                 <span><?php echo esc_html( $this->opt( 'postcode_label', __( 'کد پستی:', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                                 <b><?php echo esc_html( $addr['postcode'] ); ?></b>
                                                         </span>
@@ -296,7 +296,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         <div class="hsw-m hsw-ckaddr__mwrap">
                                 <div class="hsw-ckaddr__mhd">
                                         <h2 class="hsw-ckaddr__hd-t hsw-ckaddr__hd-t--m">
-                                                <i class="hsw-ic is-fill" aria-hidden="true">location_on</i>
+                                                <?php echo HSW_Helpers::icon( 'location_on', true ); ?>
                                                 <?php echo esc_html( $title_m ); ?>
                                         </h2>
                                         <a class="hsw-ckaddr__mchange" href="<?php echo esc_url( $manage ); ?>"><?php echo esc_html( $change ); ?></a>
@@ -306,11 +306,11 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                         <p class="hsw-ckaddr__line hsw-ckaddr__line--m"><?php echo ( '' !== trim( (string) $addr['line'] ) ) ? esc_html( $addr['line'] ) : '—'; ?></p>
                                         <div class="hsw-ckaddr__mmeta">
                                                 <span class="hsw-ckaddr__meta-i">
-                                                        <i class="hsw-ic" aria-hidden="true">person</i>
+                                                        <?php echo HSW_Helpers::icon( 'person' ); ?>
                                                         <span><?php echo esc_html( $addr['name'] ); ?></span>
                                                 </span>
                                                 <span class="hsw-ckaddr__meta-i">
-                                                        <i class="hsw-ic" aria-hidden="true">phone_iphone</i>
+                                                        <?php echo HSW_Helpers::icon( 'phone_iphone' ); ?>
                                                         <b class="hsw-ckaddr__ltr"><?php echo esc_html( $addr['phone'] ); ?></b>
                                                 </span>
                                         </div>
@@ -318,7 +318,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
 
                                 <?php if ( '' !== trim( $add_m ) ) : ?>
                                         <a class="hsw-ckaddr__madd" href="<?php echo esc_url( $manage ); ?>">
-                                                <i class="hsw-ic" aria-hidden="true">add_circle</i>
+                                                <?php echo HSW_Helpers::icon( 'add_circle' ); ?>
                                                 <span><?php echo esc_html( $add_m ); ?></span>
                                         </a>
                                 <?php endif; ?>
@@ -401,7 +401,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                 <article class="hsw-ckaddr__card hsw-ckaddr__card--form">
                         <div class="hsw-ckaddr__hd">
                                 <div class="hsw-ckaddr__hd-r">
-                                        <i class="hsw-ic is-fill" aria-hidden="true">location_on</i>
+                                        <?php echo HSW_Helpers::icon( 'location_on', true ); ?>
                                         <h2 class="hsw-ckaddr__hd-t"><?php echo esc_html( $title ); ?></h2>
                                 </div>
                         </div>
@@ -465,7 +465,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 <p class="hsw-ckaddr__fmsg" data-hsw-address-msg role="alert" hidden></p>
 
                                 <button type="submit" class="hsw-ckaddr__fsubmit">
-                                        <i class="hsw-ic" aria-hidden="true">check</i>
+                                        <?php echo HSW_Helpers::icon( 'check' ); ?>
                                         <span><?php esc_html_e( 'ثبت آدرس و ادامه', 'hamishop-elementor-widgets' ); ?></span>
                                 </button>
                         </form>

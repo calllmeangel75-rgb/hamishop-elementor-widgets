@@ -680,7 +680,7 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
                         <button type="button" class="<?php echo esc_attr( $button ); ?>" data-hsw-seo data-hsw-close-txt="<?php echo esc_attr( $less ); ?>" aria-expanded="false">
                                 <span><?php echo esc_html( $more ); ?></span>
                                 <?php if ( ! $is_mobile ) : ?>
-                                        <i class="hsw-ic" aria-hidden="true">expand_more</i>
+                                        <?php echo HSW_Helpers::icon( 'expand_more' ); ?>
                                 <?php endif; ?>
                         </button>
                 </div>

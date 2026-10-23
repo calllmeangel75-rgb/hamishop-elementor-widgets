@@ -196,7 +196,7 @@
 		if (wish) {
 			var ic = wish.querySelector('.hsw-ic');
 			var on = wish.classList.toggle('is-active');
-			if (ic) { ic.style.fontVariationSettings = on ? "'FILL' 1" : "'FILL' 0"; ic.style.color = on ? 'var(--hsw-secondary)' : ''; }
+			if (ic) { window.hswFill(ic, on); ic.style.color = on ? 'var(--hsw-secondary)' : ''; }
 			return;
 		}
 
@@ -370,7 +370,12 @@
 	 * cannot disagree and the toast and the cart modal never both appear.
 	 */
 	function showAdded(btn, pid, res) {
-		if (window.HSWFeedback) {
+		/*
+		 * The cart modal is opt-in on this page (HamiShop → کنترل ویجت‌ها):
+		 * on a product page the visitor is already looking at what they added,
+		 * so a dialog over the gallery is noise. Default is a plain toast.
+		 */
+		if (window.HSWFeedback && D.modal) {
 			window.HSWFeedback.addedToCart({
 				fragments: res && res.fragments,
 				cartUrl: D.cartUrl,
@@ -386,6 +391,9 @@
 			return;
 		}
 		if (btn) { flashAdded(btn); }
+		if (window.HSWFeedback && D.addedText) {
+			window.HSWFeedback.toast(D.addedText);
+		}
 	}
 
 	/* ================= ZOOM OVERLAY ================= */

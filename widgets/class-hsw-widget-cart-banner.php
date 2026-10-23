@@ -183,7 +183,7 @@ class HSW_Widget_Cart_Banner extends HSW_Cart_Base {
                         <div class="hsw-cbanner__card hsw-d">
                                 <div class="hsw-cbanner__head">
                                         <div class="hsw-cbanner__head-l">
-                                                <span class="hsw-cbanner__ic"><i class="hsw-ic" aria-hidden="true">local_shipping</i></span>
+                                                <span class="hsw-cbanner__ic"><?php echo HSW_Helpers::icon( 'local_shipping' ); ?></span>
                                                 <span class="hsw-cbanner__title"><?php echo esc_html( $state['title'] ); ?></span>
                                         </div>
                                         <?php if ( 'yes' === ( $this->effective_settings()['show_pct'] ?? 'yes' ) ) : ?>

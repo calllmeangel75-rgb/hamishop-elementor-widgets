@@ -172,8 +172,8 @@
 				button.setAttribute('aria-pressed', on ? 'true' : 'false');
 				var icon = button.querySelector('.hsw-ic');
 				if (icon) {
-					icon.textContent = on ? 'bookmark_added' : 'bookmark';
-					icon.style.fontVariationSettings = on ? "'FILL' 1" : '';
+					window.hswSetIcon(icon, on ? 'bookmark_added' : 'bookmark');
+					window.hswFill(icon, on);
 				}
 			});
 		};

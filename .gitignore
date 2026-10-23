@@ -4,3 +4,5 @@ tools/_subset.woff2
 tools/_ms.css
 *.zip
 tests/_shots/
+tools/_vazirmatn-src.woff2
+tests/_lh-*.json
