@@ -278,8 +278,11 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			array(
 				'label'      => __( 'عرض محتوا', 'hamishop-elementor-widgets' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 640, 'max' => 1400 ) ),
+				'size_units' => array( 'px', '%' ),
+				'range'      => array(
+					'px' => array( 'min' => 640, 'max' => 1400 ),
+					'%'  => array( 'min' => 50, 'max' => 100 ),
+				),
 				'default'    => array( 'size' => 1120, 'unit' => 'px' ),
 				'selectors'  => array(
 					'{{WRAPPER}} .hsw-pp' => '--hsw-pp-width: {{SIZE}}{{UNIT}};',

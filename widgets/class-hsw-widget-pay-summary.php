@@ -369,6 +369,9 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                 );
 
                 $this->a_box( 'card', '{{WRAPPER}} .hsw-psum__card' );
+                $this->style_color_var( 'sav_c', __( 'رنگ «سود شما از خرید»', 'hamishop-elementor-widgets' ), 'hsw-savings-color' );
+                $this->style_typo_var( 'sav_fs', __( 'اندازه فونت «سود شما از خرید»', 'hamishop-elementor-widgets' ), 'hsw-savings-fs', array( 'default' => 13 ) );
+
                 $this->a_text( 'hd', '{{WRAPPER}} .hsw-psum__hd-t', array( 'default' => 16 ) );
                 $this->a_text( 'row', '{{WRAPPER}} .hsw-psum__row', array( 'default' => 14 ) );
                 $this->a_color( 'discount_c', __( 'ردیف تخفیف', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-psum__row.is-discount' );
@@ -448,6 +451,8 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                         <span><?php echo esc_html( $this->with_count( $this->opt( 'subtotal_tpl', '' ), $t['count'] ) ); ?></span>
                                                         <span class="hsw-psum__v" data-hswk="subtotal"><?php echo $this->money( (float) $t['subtotal'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                                 </div>
+
+                                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--pay' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
 
                                                 <?php if ( 0 < (float) $t['discount'] ) : ?>
                                                         <div class="hsw-psum__row is-discount">

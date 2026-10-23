@@ -72,12 +72,15 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                 $this->add_responsive_control(
                         'cp_cols',
                         array(
-                                'label'      => __( 'نسبت ستون تصاویر (دسکتاپ)', 'hamishop-elementor-widgets' ),
+                                'label'      => __( 'عرض ستون تصاویر (دسکتاپ)', 'hamishop-elementor-widgets' ),
                                 'type'       => Controls_Manager::SLIDER,
-                                'size_units' => array( '%' ),
-                                'range'      => array( '%' => array( 'min' => 25, 'max' => 75 ) ),
+                                'size_units' => array( '%', 'px' ),
+                                'range'      => array(
+                                        '%' => array( 'min' => 25, 'max' => 75 ),
+                                        'px' => array( 'min' => 280, 'max' => 960 ),
+                                ),
                                 'default'    => array( 'size' => 42, 'unit' => '%' ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-cp__hero' => '--hsw-cp-cols: {{SIZE}}%;' ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-cp__hero' => '--hsw-cp-cols: {{SIZE}}{{UNIT}};' ),
                         )
                 );
 

@@ -347,6 +347,19 @@ class HSW_Assets {
                         true
                 );
 
+                /*
+                 * Shared add-to-cart feedback (toast + cart modal). It is only a
+                 * dependency of the families that add to the cart from a
+                 * listing, so a page without them never downloads it.
+                 */
+                wp_register_script(
+                        'hsw-feedback',
+                        $this->asset( 'assets/js/hsw-feedback.js' ),
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
                 wp_register_style(
                         'hsw-loop',
                         $this->asset( 'assets/css/hsw-loop.css' ),
@@ -357,7 +370,7 @@ class HSW_Assets {
                 wp_register_script(
                         'hsw-loop',
                         $this->asset( 'assets/js/hsw-loop.js' ),
-                        array(),
+                        array( 'hsw-feedback' ),
                         HSW_VERSION,
                         true
                 );
@@ -379,7 +392,7 @@ class HSW_Assets {
                 wp_register_script(
                         'hsw-archive',
                         $this->asset( 'assets/js/hsw-archive.js' ),
-                        array(),
+                        array( 'hsw-feedback' ),
                         HSW_VERSION,
                         true
                 );
@@ -492,7 +505,7 @@ class HSW_Assets {
                 wp_register_script(
                         'hsw-product',
                         $this->asset( 'assets/js/hsw-product.js' ),
-                        array(),
+                        array( 'hsw-feedback' ),
                         HSW_VERSION,
                         true
                 );
@@ -517,6 +530,9 @@ class HSW_Assets {
                                 'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),
                                 'addedText'   => __( 'محصول به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'viewCart'    => __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ),
+                                'continueText' => __( 'ادامه خرید', 'hamishop-elementor-widgets' ),
+                                'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
+                                'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -528,6 +544,12 @@ class HSW_Assets {
                                 'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
                                 'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
                                 'currency'  => function_exists( 'get_woocommerce_currency_symbol' ) ? get_woocommerce_currency_symbol() : '',
+                                /* Shared feedback module (toast + cart modal). */
+                                'cartUrl'      => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),
+                                'viewCart'     => __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ),
+                                'continueText' => __( 'ادامه خرید', 'hamishop-elementor-widgets' ),
+                                'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
+                                'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                         )
                 );
         }

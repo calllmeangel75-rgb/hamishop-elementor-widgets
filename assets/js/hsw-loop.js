@@ -67,18 +67,13 @@
 	});
 	if (!document.hidden) { startTick(); }
 
-	/* ---------- Toast ---------- */
-	var toastEl = null;
-	function toast(msg) {
-		if (!toastEl) {
-			toastEl = document.createElement('div');
-			toastEl.className = 'hsw-toast';
-			document.body.appendChild(toastEl);
+	/* ---------- Feedback ---------- */
+	/* Owned by assets/js/hsw-feedback.js so the toast and the cart modal never
+	   appear at the same time. */
+	function toast(msg, tone) {
+		if (window.HSWFeedback) {
+			window.HSWFeedback.toast(msg, { tone: tone });
 		}
-		toastEl.textContent = msg;
-		toastEl.classList.add('is-show');
-		clearTimeout(toastEl._t);
-		toastEl._t = setTimeout(function () { toastEl.classList.remove('is-show'); }, 2200);
 	}
 
 	/* ---------- Tabs (Section 3) ---------- */
@@ -143,8 +138,24 @@
 				}
 				/* Let WooCommerce core refresh cart fragments everywhere */
 				if (window.jQuery) { window.jQuery(document.body).trigger('wc_fragment_refresh'); }
-				if (hswData && hswData.addedText) { toast(hswData.addedText); }
 				document.dispatchEvent(new CustomEvent('hsw_added_to_cart', { detail: { productId: id } }));
+
+				if (window.HSWFeedback) {
+					window.HSWFeedback.addedToCart({
+						fragments: res && res.fragments,
+						cartUrl: hswData && hswData.cartUrl,
+						message: hswData && hswData.addedText,
+						labels: {
+							modalTitle: hswData && hswData.modalTitle,
+							viewCart: hswData && hswData.viewCart,
+							continue: hswData && hswData.continueText,
+							close: hswData && hswData.closeText,
+							added: hswData && hswData.addedText
+						}
+					});
+				} else if (hswData && hswData.addedText) {
+					toast(hswData.addedText);
+				}
 			})
 			.catch(function () {
 				btn.classList.remove('is-busy');

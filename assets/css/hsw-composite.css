@@ -60,3 +60,31 @@
         }
         .hsw-cp--archive .hsw-cp__col--side { position: sticky; top: 16px; align-self: start; }
 }
+
+/* -------------------------------------------------------------------------
+ * Family typography
+ *
+ * The page widgets (cart / checkout / pay / complete) expose four font-size
+ * controls that write CSS variables on the wrapper. Only elements whose
+ * designed size already equals the control's default are listed here, so the
+ * defaults change nothing on an existing page; moving a slider then scales
+ * that group. Everything else keeps its own per-element size control.
+ * ---------------------------------------------------------------------- */
+.hsw-cp .hsw-csummary__title,
+.hsw-cp .hsw-ckaddr__hd-t,
+.hsw-cp .hsw-ckship__hd-t {
+	font-size: var(--hsw-cp-title-fs, 1rem);
+}
+
+.hsw-cp .hsw-citems__name,
+.hsw-cp .hsw-ckaddr__line {
+	font-size: var(--hsw-cp-text-fs, .875rem);
+}
+
+.hsw-cp .hsw-csummary__final-v {
+	font-size: var(--hsw-cp-price-fs, 1.125rem);
+}
+
+.hsw-cp .hsw-csummary__cta {
+	font-size: var(--hsw-cp-button-fs, 1rem);
+}

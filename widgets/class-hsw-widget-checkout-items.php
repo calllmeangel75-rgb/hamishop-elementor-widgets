@@ -67,6 +67,9 @@ class HSW_Widget_Checkout_Items extends HSW_Checkout_Base {
                 );
 
                 $this->a_box( 'card', '{{WRAPPER}} .hsw-ckitems__card' );
+                $this->style_color_var( 'sav_c', __( 'رنگ «سود شما از خرید»', 'hamishop-elementor-widgets' ), 'hsw-savings-color' );
+                $this->style_typo_var( 'sav_fs', __( 'اندازه فونت «سود شما از خرید»', 'hamishop-elementor-widgets' ), 'hsw-savings-fs', array( 'default' => 13 ) );
+
                 $this->a_color( 'hd_ic', __( 'آیکن عنوان', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckitems__hd .hsw-ic' );
                 $this->a_text( 'hd_tx', '{{WRAPPER}} .hsw-ckitems__hd-t', array( 'default' => 14 ) );
                 $this->a_text( 'item_tx', '{{WRAPPER}} .hsw-ckitems__name', array( 'default' => 14 ) );
@@ -121,6 +124,8 @@ class HSW_Widget_Checkout_Items extends HSW_Checkout_Base {
                                                 </a>
                                         <?php endforeach; ?>
                                 </div>
+
+                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--checkout' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
                         </article>
 
                         <!-- =================== MOBILE =================== -->

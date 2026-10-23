@@ -212,6 +212,9 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 );
 
                 $this->a_box( 'box', '{{WRAPPER}} .hsw-citems__box, {{WRAPPER}} .hsw-citems__mitem' );
+                $this->style_color_var( 'sav_c', __( 'رنگ «سود شما از خرید»', 'hamishop-elementor-widgets' ), 'hsw-savings-color' );
+                $this->style_typo_var( 'sav_fs', __( 'اندازه فونت «سود شما از خرید»', 'hamishop-elementor-widgets' ), 'hsw-savings-fs', array( 'default' => 13 ) );
+
                 $this->a_color( 'head_bg', __( 'پس‌زمینه سربرگ باکس', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__head', 'background-color' );
                 $this->a_text( 'head_t', '{{WRAPPER}} .hsw-citems__t', array( 'default' => 16 ) );
                 $this->a_color( 'head_count_bg', __( 'پس‌زمینه شمارنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__count', 'background-color' );
@@ -274,6 +277,8 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                         <?php foreach ( $items as $item ) : ?>
                                                 <?php $this->render_row( $item ); ?>
                                         <?php endforeach; ?>
+
+                                        <?php echo HSW_Helpers::savings_html( 'hsw-savings--cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
                                 </div>
                         </div>
 
@@ -282,6 +287,8 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                 <?php foreach ( $items as $item ) : ?>
                                         <?php $this->render_mcard( $item ); ?>
                                 <?php endforeach; ?>
+
+                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
                         </div>
 
                 </section>

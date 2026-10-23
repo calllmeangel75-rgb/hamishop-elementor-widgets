@@ -40,6 +40,7 @@ final class HSW_Plugin {
                 HSW_Cache_Guard::instance();
                 HSW_Throttle::instance();
                 HSW_Wallet::instance();
+                HSW_Coupon_Messages::instance();
                 new HSW_Rest();
                 new HSW_Assets();
 
@@ -179,11 +180,13 @@ final class HSW_Plugin {
                  */
                 require_once HSW_DIR . 'includes/class-hsw-icon-set.php';
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
+                require_once HSW_DIR . 'includes/trait-hsw-style-kit.php';
                 require_once HSW_DIR . 'includes/class-hsw-branding.php';
                 require_once HSW_DIR . 'includes/class-hsw-security.php';
                 require_once HSW_DIR . 'includes/class-hsw-cache-guard.php';
                 require_once HSW_DIR . 'includes/class-hsw-throttle.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet.php';
+                require_once HSW_DIR . 'includes/class-hsw-coupon-messages.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';

@@ -48,6 +48,82 @@ class HSW_Helpers {
         }
 
         /**
+         * How much the customer is saving on the current cart.
+         *
+         * Two sources, added together:
+         *  - product discount: regular price minus the price actually charged,
+         *  - coupon discount: `get_discount_total()` (already excluding tax).
+         *
+         * Reading the regular price per item is the only way to know what the
+         * shop "would have" charged; `get_subtotal()` alone cannot tell a sale
+         * apart from a cheaper product. The loop is over cart items (a handful)
+         * and only runs when a summary is rendered.
+         *
+         * @return array{product:float,coupon:float,total:float}
+         */
+        public static function savings() {
+                $empty = array(
+                        'product' => 0.0,
+                        'coupon'  => 0.0,
+                        'total'   => 0.0,
+                );
+
+                if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+                        return $empty;
+                }
+
+                $product_saving = 0.0;
+
+                foreach ( WC()->cart->get_cart() as $item ) {
+                        $product = isset( $item['data'] ) ? $item['data'] : null;
+                        if ( ! $product instanceof WC_Product ) {
+                                continue;
+                        }
+
+                        $regular = (float) $product->get_regular_price();
+                        $price   = (float) $product->get_price();
+                        $qty     = isset( $item['quantity'] ) ? (int) $item['quantity'] : 0;
+
+                        if ( $regular > $price && $qty > 0 ) {
+                                $product_saving += ( $regular - $price ) * $qty;
+                        }
+                }
+
+                $coupon_saving = (float) WC()->cart->get_discount_total();
+
+                return array(
+                        'product' => $product_saving,
+                        'coupon'  => $coupon_saving,
+                        'total'   => $product_saving + $coupon_saving,
+                );
+        }
+
+        /**
+         * The "سود شما از خرید" row, or an empty string when there is no saving.
+         *
+         * Returning '' instead of a zero row keeps the summary honest: a shop
+         * with no active sale never shows the line at all.
+         *
+         * @param string $extra_class Extra class for family-specific styling.
+         * @return string
+         */
+        public static function savings_html( $extra_class = '' ) {
+                $saving = self::savings();
+
+                if ( $saving['total'] <= 0 || ! function_exists( 'wc_price' ) ) {
+                        return '';
+                }
+
+                $amount = self::fa_num( html_entity_decode( (string) wc_price( $saving['total'] ), ENT_QUOTES, 'UTF-8' ) );
+
+                return '<div class="hsw-savings ' . esc_attr( $extra_class ) . '">'
+                        . '<span class="hsw-savings__ic">' . self::icon( 'savings' ) . '</span>'
+                        . '<span class="hsw-savings__label">' . esc_html__( 'سود شما از خرید', 'hamishop-elementor-widgets' ) . '</span>'
+                        . '<span class="hsw-savings__amount">' . wp_kses_post( $amount ) . '</span>'
+                        . '</div>';
+        }
+
+        /**
          * WooCommerce session notices, printed once per request.
          *
          * `wc_print_notices()` both prints AND clears the session queue. The

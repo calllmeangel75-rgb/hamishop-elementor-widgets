@@ -185,6 +185,18 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 			)
 		);
 		$this->add_control(
+			'ac_side_unit',
+			array(
+				'label'   => __( 'واحد عرض ستون کناری', 'hamishop-elementor-widgets' ),
+				'type'    => Controls_Manager::SELECT,
+				'options' => array(
+					''  => __( 'پیکسل (px)', 'hamishop-elementor-widgets' ),
+					'%' => __( 'درصد (%)', 'hamishop-elementor-widgets' ),
+				),
+				'default' => '',
+			)
+		);
+		$this->add_control(
 			'ac_gap',
 			array(
 				'label'       => __( 'فاصلهٔ ستون‌ها (px)', 'hamishop-elementor-widgets' ),
@@ -204,6 +216,18 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 				'max'         => 1600,
 				'default'     => '',
 				'placeholder' => '1280',
+			)
+		);
+		$this->add_control(
+			'ac_max_unit',
+			array(
+				'label'   => __( 'واحد حداکثر عرض', 'hamishop-elementor-widgets' ),
+				'type'    => Controls_Manager::SELECT,
+				'options' => array(
+					''  => __( 'پیکسل (px)', 'hamishop-elementor-widgets' ),
+					'%' => __( 'درصد (%)', 'hamishop-elementor-widgets' ),
+				),
+				'default' => '',
 			)
 		);
 		$this->add_control(
@@ -421,16 +445,29 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 
 	private function inline_vars( $s ) {
 		$vars = array();
+		/*
+		 * Each entry: CSS variable, min, max, and the control that carries its
+		 * unit. The unit is a separate select because a NUMBER control cannot
+		 * hold one — with `%` the same sidebar is a third of a 1600px screen and
+		 * a half of a 1024px one, which is exactly what the shop owner needs to
+		 * be able to choose.
+		 */
 		$map  = array(
-			'ac_side_width' => array( '--hsw-ac-side', 240, 420 ),
-			'ac_gap'        => array( '--hsw-ac-gap', 0, 64 ),
-			'ac_max_width'  => array( '--hsw-ac-max', 960, 1600 ),
-			'ac_radius'     => array( '--hsw-ac-radius', 0, 40 ),
+			'ac_side_width' => array( '--hsw-ac-side', 240, 420, 'ac_side_unit' ),
+			'ac_gap'        => array( '--hsw-ac-gap', 0, 64, '' ),
+			'ac_max_width'  => array( '--hsw-ac-max', 960, 1600, 'ac_max_unit' ),
+			'ac_radius'     => array( '--hsw-ac-radius', 0, 40, '' ),
 		);
 		foreach ( $map as $key => $item ) {
 			if ( isset( $s[ $key ] ) && '' !== $s[ $key ] && is_numeric( $s[ $key ] ) ) {
-				$value = max( $item[1], min( $item[2], absint( $s[ $key ] ) ) );
-				$vars[ $item[0] ] = $value . 'px';
+				$unit  = ( '' !== $item[3] && isset( $s[ $item[3] ] ) && '%' === $s[ $item[3] ] ) ? '%' : 'px';
+				$value = absint( $s[ $key ] );
+				if ( '%' === $unit ) {
+					$value = max( 15, min( 95, $value ) );
+				} else {
+					$value = max( $item[1], min( $item[2], $value ) );
+				}
+				$vars[ $item[0] ] = $value . $unit;
 			}
 		}
 		$colors = array(

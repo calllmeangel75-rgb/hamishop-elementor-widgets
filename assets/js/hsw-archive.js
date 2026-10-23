@@ -397,20 +397,14 @@
 
         /* ======================= ADD TO CART (AJAX) ======================= */
 
-        /* Shared toast — the archive had none, so a click produced no feedback. */
-        var toastEl = null;
+        /*
+         * Feedback is owned by the shared module (assets/js/hsw-feedback.js),
+         * which guarantees the toast and the cart modal never both appear.
+         */
         function toast(msg, tone) {
-                if (!msg) { return; }
-                if (!toastEl) {
-                        toastEl = document.createElement('div');
-                        toastEl.className = 'hsw-toast';
-                        document.body.appendChild(toastEl);
+                if (window.HSWFeedback) {
+                        window.HSWFeedback.toast(msg, { tone: tone });
                 }
-                toastEl.textContent = msg;
-                toastEl.classList.toggle('is-error', tone === 'error');
-                toastEl.classList.add('is-show');
-                clearTimeout(toastEl._t);
-                toastEl._t = setTimeout(function () { toastEl.classList.remove('is-show'); }, 2600);
         }
 
         function resetBtn(btn) {
@@ -462,9 +456,9 @@
                         btn.setAttribute('title', data.addedText || '');
 
                         /*
-                         * One of the two, never both: the fragments reply already
-                         * carries the fresh cart markup, so reusing it avoids a
-                         * second round-trip to rebuild the header badge.
+                         * The fragments reply already carries the fresh cart
+                         * markup, so reusing it updates the header badge without
+                         * a second round-trip.
                          */
                         if (window.jQuery && res && res.fragments) {
                                 window.jQuery(document.body).trigger('added_to_cart', [res.fragments, res.cart_hash]);
@@ -472,7 +466,23 @@
                                 document.dispatchEvent(new CustomEvent('hsw_added_to_cart', { detail: { productId: pid } }));
                         }
 
-                        toast(data.addedText);
+                        if (window.HSWFeedback) {
+                                window.HSWFeedback.addedToCart({
+                                        fragments: res && res.fragments,
+                                        cartUrl: data.cartUrl,
+                                        message: data.addedText,
+                                        labels: {
+                                                modalTitle: data.modalTitle,
+                                                viewCart: data.viewCart,
+                                                continue: data.continueText,
+                                                close: data.closeText,
+                                                added: data.addedText
+                                        }
+                                });
+                        } else {
+                                toast(data.addedText);
+                        }
+
                         setTimeout(function () { resetBtn(btn); }, 1800);
                 }).catch(function () {
                         resetBtn(btn);

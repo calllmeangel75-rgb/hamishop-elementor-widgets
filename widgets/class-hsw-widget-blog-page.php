@@ -54,28 +54,17 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                         array( 'label' => __( 'چیدمان صفحه', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
                 );
 
-                $this->add_responsive_control(
-                        'cp_side',
-                        array(
-                                'label'      => __( 'عرض سایدبار (دسکتاپ)', 'hamishop-elementor-widgets' ),
-                                'type'       => Controls_Manager::SLIDER,
-                                'size_units' => array( 'px' ),
-                                'range'      => array( 'px' => array( 'min' => 200, 'max' => 420 ) ),
-                                'default'    => array( 'size' => 300, 'unit' => 'px' ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-cp__body' => '--hsw-cp-side: {{SIZE}}{{UNIT}};' ),
-                        )
-                );
-
-                $this->add_responsive_control(
-                        'cp_gap',
-                        array(
-                                'label'      => __( 'فاصله ستون‌ها', 'hamishop-elementor-widgets' ),
-                                'type'       => Controls_Manager::SLIDER,
-                                'size_units' => array( 'px' ),
-                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 64 ) ),
-                                'default'    => array( 'size' => 24, 'unit' => 'px' ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-cp__body' => 'gap: {{SIZE}}{{UNIT}};' ),
-                        )
+                $this->style_columns(
+                	'cp',
+                	__( 'عرض سایدبار (دسکتاپ)', 'hamishop-elementor-widgets' ),
+                	array(
+                		'side'       => 300,
+                		'gap'        => 24,
+                		'side_range' => array(
+                			'px' => array( 'min' => 200, 'max' => 420 ),
+                			'%'  => array( 'min' => 15, 'max' => 50 ),
+                		),
+                	)
                 );
 
                 $this->end_controls_section();

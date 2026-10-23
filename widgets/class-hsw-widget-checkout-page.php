@@ -54,31 +54,33 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
                         array( 'label' => __( 'چیدمان صفحه', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
                 );
 
-                $this->add_responsive_control(
-                        'cp_side',
-                        array(
-                                'label'      => __( 'عرض ستون خلاصه (دسکتاپ)', 'hamishop-elementor-widgets' ),
-                                'type'       => Controls_Manager::SLIDER,
-                                'size_units' => array( 'px' ),
-                                'range'      => array( 'px' => array( 'min' => 280, 'max' => 520 ) ),
-                                'default'    => array( 'size' => 380, 'unit' => 'px' ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-cp__body' => '--hsw-cp-side: {{SIZE}}{{UNIT}};' ),
-                        )
+                $this->style_columns(
+                	'cp',
+                	__( 'عرض ستون خلاصه (دسکتاپ)', 'hamishop-elementor-widgets' ),
+                	array(
+                		'side'       => 380,
+                		'gap'        => 24,
+                		'side_range' => array(
+                			'px' => array( 'min' => 280, 'max' => 520 ),
+                			'%'  => array( 'min' => 15, 'max' => 50 ),
+                		),
+                	)
                 );
-
-                $this->add_responsive_control(
-                        'cp_gap',
-                        array(
-                                'label'      => __( 'فاصله ستون‌ها', 'hamishop-elementor-widgets' ),
-                                'type'       => Controls_Manager::SLIDER,
-                                'size_units' => array( 'px' ),
-                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 64 ) ),
-                                'default'    => array( 'size' => 24, 'unit' => 'px' ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-cp__body' => 'gap: {{SIZE}}{{UNIT}};' ),
-                        )
-                );
-
                 $this->end_controls_section();
+
+                /*
+                 * One type scale for the whole page: the variables land on the wrapper and
+                 * every child widget inherits them.
+                 */
+                $this->style_typography_section(
+                	'cp',
+                	array(
+                		'title'  => array( __( 'عنوان بخش‌ها', 'hamishop-elementor-widgets' ), 16 ),
+                		'text'   => array( __( 'متن‌ها', 'hamishop-elementor-widgets' ), 14 ),
+                		'price'  => array( __( 'قیمت‌ها', 'hamishop-elementor-widgets' ), 18 ),
+                		'button' => array( __( 'دکمه‌ها', 'hamishop-elementor-widgets' ), 14 ),
+                	)
+                );
         }
 
         /**

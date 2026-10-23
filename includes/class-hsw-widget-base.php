@@ -16,6 +16,8 @@ use Elementor\Repeater;
 
 abstract class HSW_Widget_Base extends Widget_Base {
 
+	use HSW_Style_Kit;
+
         public function get_categories() {
                 return array( 'hamishop-loop' );
         }
@@ -2020,5 +2022,109 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'selector' => $selector,
                         )
                 );
+        }
+        /**
+         * Single color control bound to a selector.
+         */
+        protected function a_color( $id, $label, $selector, $prop = 'color', $args = array() ) {
+                // $prop may be a single property ("color") or a full declaration
+                // block for palette tokens ("--var: {{VALUE}}; …"). Only append
+                // the value placeholder when it is not already part of $prop;
+                // otherwise the generated CSS gets a stray ": value;" fragment.
+                $decls = false !== strpos( $prop, '{{VALUE}}' ) ? $prop : $prop . ': {{VALUE}};';
+
+                $this->add_control(
+                        $id,
+                        wp_parse_args(
+                                $args,
+                                array(
+                                        'label'     => $label,
+                                        'type'      => Controls_Manager::COLOR,
+                                        'selectors' => array( $selector => $decls ),
+                                )
+                        )
+                );
+        }
+
+        /**
+         * Box styles: background + border color/width + radius.
+         */
+        protected function a_box( $id, $selector, $opts = array() ) {
+                $opts = wp_parse_args( $opts, array( 'border' => true, 'radius' => true, 'bg' => true ) );
+                if ( $opts['bg'] ) {
+                        $this->a_color( $id . '_bg', __( 'پس‌زمینه', 'hamishop-elementor-widgets' ), $selector, 'background-color' );
+                }
+                if ( $opts['border'] ) {
+                        $this->a_color( $id . '_bc', __( 'رنگ حاشیه', 'hamishop-elementor-widgets' ), $selector, 'border-color' );
+                }
+                if ( $opts['radius'] ) {
+                        $this->add_responsive_control(
+                                $id . '_br',
+                                array(
+                                        'label'      => __( 'گردی گوشه‌ها', 'hamishop-elementor-widgets' ),
+                                        'type'       => Controls_Manager::SLIDER,
+                                        'size_units' => array( 'px' ),
+                                        'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                        'selectors'  => array( $selector => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                                )
+                        );
+                }
+        }
+
+        /**
+         * Text style: color + size + weight.
+         */
+        protected function a_text( $id, $selector, $args = array() ) {
+                $args = wp_parse_args(
+                        $args,
+                        array(
+                                'size'    => array( 'min' => 8, 'max' => 40 ),
+                                'default' => 12,
+                                'weight'  => true,
+                        )
+                );
+                $this->a_color( $id . '_c', __( 'رنگ متن', 'hamishop-elementor-widgets' ), $selector );
+                /*
+                 * px / em / rem. `rem` respects the visitor's browser font-size
+                 * setting, `em` scales with the parent — both matter on Persian
+                 * storefronts where the theme often sets a larger base size than
+                 * the design assumed. The control id and its px default are
+                 * unchanged, so saved pages keep their exact value.
+                 */
+                $this->add_control(
+                        $id . '_s',
+                        array(
+                                'label'      => __( 'اندازه فونت', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px', 'em', 'rem' ),
+                                'range'      => array(
+                                        'px'  => $args['size'],
+                                        'em'  => array( 'min' => 0.5, 'max' => 4, 'step' => 0.05 ),
+                                        'rem' => array( 'min' => 0.5, 'max' => 4, 'step' => 0.05 ),
+                                ),
+                                'default'    => array( 'size' => $args['default'], 'unit' => 'px' ),
+                                'selectors'  => array( $selector => 'font-size: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                if ( $args['weight'] ) {
+                        $this->add_control(
+                                $id . '_w',
+                                array(
+                                        'label'     => __( 'ضخامت فونت', 'hamishop-elementor-widgets' ),
+                                        'type'      => Controls_Manager::SELECT,
+                                        'default'   => '',
+                                        'options'   => array(
+                                                ''    => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ),
+                                                '400' => '400',
+                                                '500' => '500',
+                                                '600' => '600',
+                                                '700' => '700',
+                                                '800' => '800',
+                                                '900' => '900',
+                                        ),
+                                        'selectors' => array( $selector => 'font-weight: {{VALUE}};' ),
+                                )
+                        );
+                }
         }
 }
