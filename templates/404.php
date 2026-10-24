@@ -9,6 +9,13 @@ defined( 'ABSPATH' ) || exit;
 
 $hsw_shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
 $hsw_home = home_url( '/' );
+
+/* Editable in HamiShop → کنترل ویجت‌ها → صفحهٔ ۴۰۴. */
+$hsw_title   = trim( (string) get_option( 'hsw_404_title', '' ) );
+$hsw_text    = trim( (string) get_option( 'hsw_404_text', '' ) );
+$hsw_cta     = trim( (string) get_option( 'hsw_404_cta', '' ) );
+$hsw_back    = trim( (string) get_option( 'hsw_404_home', '' ) );
+$hsw_search  = trim( (string) get_option( 'hsw_404_search_ph', '' ) );
 ?>
 <?php get_header(); ?>
 <style id="hsw-404-css"><?php echo HSW_404::styles(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static CSS. ?></style>
@@ -19,19 +26,19 @@ $hsw_home = home_url( '/' );
 
 	<section class="hsw-404__card">
 		<span class="hsw-404__code" aria-hidden="true">۴۰۴</span>
-		<h1 class="hsw-404__title"><?php esc_html_e( 'صفحه‌ای که دنبالش بودید پیدا نشد!', 'hamishop-elementor-widgets' ); ?></h1>
-		<p class="hsw-404__desc"><?php esc_html_e( 'ممکن است آدرس را اشتباه وارد کرده باشید یا این صفحه جابه‌جا شده باشد. از جستجوی زیر استفاده کنید یا به فروشگاه برگردید.', 'hamishop-elementor-widgets' ); ?></p>
+		<h1 class="hsw-404__title"><?php echo esc_html( '' !== $hsw_title ? $hsw_title : __( 'صفحه‌ای که دنبالش بودید پیدا نشد!', 'hamishop-elementor-widgets' ) ); ?></h1>
+		<p class="hsw-404__desc"><?php echo esc_html( '' !== $hsw_text ? $hsw_text : __( 'ممکن است آدرس را اشتباه وارد کرده باشید یا این صفحه جابه‌جا شده باشد. از جستجوی زیر استفاده کنید یا به فروشگاه برگردید.', 'hamishop-elementor-widgets' ) ); ?></p>
 
 		<form class="hsw-404__search" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 			<label class="screen-reader-text" for="hsw-404-s"><?php esc_html_e( 'جستجوی محصول', 'hamishop-elementor-widgets' ); ?></label>
-			<input type="search" id="hsw-404-s" name="s" placeholder="<?php esc_attr_e( 'نام محصول را جستجو کنید…', 'hamishop-elementor-widgets' ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>">
+			<input type="search" id="hsw-404-s" name="s" placeholder="<?php echo esc_attr( '' !== $hsw_search ? $hsw_search : __( 'نام محصول را جستجو کنید…', 'hamishop-elementor-widgets' ) ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>">
 			<input type="hidden" name="post_type" value="product">
 			<button type="submit"><?php esc_html_e( 'جستجو', 'hamishop-elementor-widgets' ); ?></button>
 		</form>
 
 		<div class="hsw-404__actions">
-			<a class="hsw-404__cta" href="<?php echo esc_url( $hsw_shop ); ?>"><?php esc_html_e( 'ورود به فروشگاه', 'hamishop-elementor-widgets' ); ?></a>
-			<a class="hsw-404__ghost" href="<?php echo esc_url( $hsw_home ); ?>"><?php esc_html_e( 'بازگشت به صفحهٔ اصلی', 'hamishop-elementor-widgets' ); ?></a>
+			<a class="hsw-404__cta" href="<?php echo esc_url( $hsw_shop ); ?>"><?php echo esc_html( '' !== $hsw_cta ? $hsw_cta : __( 'ورود به فروشگاه', 'hamishop-elementor-widgets' ) ); ?></a>
+			<a class="hsw-404__ghost" href="<?php echo esc_url( $hsw_home ); ?>"><?php echo esc_html( '' !== $hsw_back ? $hsw_back : __( 'بازگشت به صفحهٔ اصلی', 'hamishop-elementor-widgets' ) ); ?></a>
 		</div>
 	</section>
 </main>

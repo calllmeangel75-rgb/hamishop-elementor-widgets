@@ -55,6 +55,8 @@ class HSW_404 {
 	 */
 	public static function styles() {
 		return '
+		@font-face{font-family:"Vazirmatn HSW";src:url(' . esc_url( HSW_URL . 'assets/fonts/vazirmatn.woff2' ) . ') format("woff2-variations");font-weight:100 900;font-style:normal;font-display:swap}
+		.hsw-404,.hsw-404 *{font-family:"Vazirmatn HSW",Vazirmatn,Tahoma,sans-serif}
 		.hsw-404{position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:72px 18px;background:
 			radial-gradient(900px 520px at 12% 8%, color-mix(in srgb, var(--hsw-pal-accent, #f97316) 26%, transparent), transparent 60%),
 			radial-gradient(760px 480px at 88% 18%, color-mix(in srgb, var(--hsw-primary, #2563eb) 30%, transparent), transparent 62%),

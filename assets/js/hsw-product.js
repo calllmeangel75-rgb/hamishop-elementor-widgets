@@ -600,16 +600,19 @@
 			'<div class="hsw-sheet__backdrop" data-hsw-sheet-close></div>' +
 			'<div class="hsw-sheet__panel" role="dialog" aria-modal="true" aria-label="' + (D.sheetAdded || '') + '">' +
 				'<span class="hsw-sheet__grab" aria-hidden="true"></span>' +
+				/* One row, facing each other: X + «کالا اضافه شد» on the right, cart pill on the left. */
 				'<div class="hsw-sheet__head">' +
-					'<span class="hsw-sheet__ok"><span class="hsw-sheet__okic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg></span>' + (D.sheetAdded || '') + '</span>' +
-					'<button type="button" class="hsw-sheet__x" data-hsw-sheet-close aria-label="' + (D.closeText || 'بستن') + '">' +
-						'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>' +
-					'</button>' +
+					'<span class="hsw-sheet__state">' +
+						'<button type="button" class="hsw-sheet__x" data-hsw-sheet-close aria-label="' + (D.closeText || 'بستن') + '">' +
+							'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>' +
+						'</button>' +
+						'<span class="hsw-sheet__ok"><span class="hsw-sheet__okic"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg></span>' + (D.sheetAdded || '') + '</span>' +
+					'</span>' +
+					'<a class="hsw-sheet__cart" href="' + (D.cartUrl || '#') + '">' +
+						'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>' +
+						(D.sheetCart || '') +
+					'</a>' +
 				'</div>' +
-				'<a class="hsw-sheet__cart" href="' + (D.cartUrl || '#') + '">' +
-					'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>' +
-					(D.sheetCart || '') +
-				'</a>' +
 				'<p class="hsw-sheet__title">' + (D.sheetTitle || '') + '</p>' +
 				'<div class="hsw-sheet__list" data-hsw-sheet-list></div>' +
 			'</div>';
@@ -629,6 +632,12 @@
 	function openSheet(pid) {
 		if (!sheetAllowed() || !pid) { return false; }
 		buildSheet();
+
+		/* The stepper lives in the sticky bar; the sheet must stop above it. */
+		var bar = document.querySelector('.hsw-psticky');
+		var gap = bar ? Math.round(bar.getBoundingClientRect().height) + 10 : 0;
+		sheetEl.style.paddingBottom = gap ? gap + 'px' : '';
+
 		sheetEl.classList.add('is-open');
 		document.documentElement.classList.add('hsw-sheet-open');
 		loadRelated(pid);
@@ -661,20 +670,31 @@
 				}
 				sheetEl.classList.remove('is-empty');
 				list.innerHTML = items.map(function (p) {
+					var stars = '';
+					if (p.rating > 0) {
+						stars = '<span class="hsw-sheet__rate">' +
+							'<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5 4.7 1.3 6.8L12 17.3 5.9 20.6 7.2 13.8l-5-4.7 6.9-.8z"></path></svg>' +
+							fa(p.rating) +
+						'</span>';
+					}
+					var off = p.off > 0 ? '<span class="hsw-sheet__off">٪' + fa(p.off) + '</span>' : '';
+					var old = (p.off > 0 && p.regular) ? '<del>' + p.regular + '</del>' : '';
 					var action = p.add
-						? '<button type="button" class="hsw-sheet__add" data-hsw-sheet-add="' + p.id + '">+</button>'
-						: '<a class="hsw-sheet__add" href="' + p.url + '">+</a>';
+						? '<button type="button" class="hsw-sheet__add" data-hsw-sheet-add="' + p.id + '">' +
+							'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>' +
+							(D.sheetMore || 'افزودن') + '</button>'
+						: '<a class="hsw-sheet__add" href="' + p.url + '">' + (D.viewProduct || 'مشاهده') + '</a>';
+
 					return '<article class="hsw-sheet__card">' +
 						'<a class="hsw-sheet__media" href="' + p.url + '">' +
 							(p.image ? '<img src="' + p.image + '" alt="" loading="lazy">' : '') +
 						'</a>' +
 						'<div class="hsw-sheet__body">' +
 							'<a class="hsw-sheet__name" href="' + p.url + '">' + p.name + '</a>' +
-							'<div class="hsw-sheet__price">' + p.price + '</div>' +
-							'<div class="hsw-sheet__actions">' +
-								'<a class="hsw-sheet__view" href="' + p.url + '">' + (D.viewProduct || 'مشاهده') + '</a>' +
-								action +
-							'</div>' +
+							stars +
+							action +
+							'<div class="hsw-sheet__prices">' + off + '<span class="hsw-sheet__price">' + p.price + '</span></div>' +
+							old +
 						'</div>' +
 					'</article>';
 				}).join('');

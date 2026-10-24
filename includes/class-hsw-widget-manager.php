@@ -712,6 +712,19 @@ final class HSW_Widget_Manager {
 			)
 		);
 
+		foreach ( array( 'hsw_404_title', 'hsw_404_text', 'hsw_404_cta', 'hsw_404_home', 'hsw_404_search_ph' ) as $hsw_404_key ) {
+			register_setting(
+				'hsw_widgets_group',
+				$hsw_404_key,
+				array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+					'default'           => '',
+					'show_in_rest'      => false,
+				)
+			);
+		}
+
 		register_setting(
 			'hsw_widgets_group',
 			'hsw_custom_404_enabled',
@@ -1101,6 +1114,56 @@ final class HSW_Widget_Manager {
 										<span class="hsw-wm-track" aria-hidden="true"></span>
 									</span>
 								</label>
+
+								<div class="hsw-wm-row hsw-wm-row--field">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'عنوان صفحه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'خالی بگذارید تا متن پیش‌فرض استفاده شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-field">
+										<input type="text" name="hsw_404_title" value="<?php echo esc_attr( get_option( 'hsw_404_title', '' ) ); ?>" placeholder="<?php esc_attr_e( 'صفحه‌ای که دنبالش بودید پیدا نشد!', 'hamishop-elementor-widgets' ); ?>" />
+									</span>
+								</div>
+
+								<div class="hsw-wm-row hsw-wm-row--field">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'توضیح صفحه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'جملهٔ کوتاه زیر عنوان.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-field">
+										<input type="text" name="hsw_404_text" value="<?php echo esc_attr( get_option( 'hsw_404_text', '' ) ); ?>" placeholder="<?php esc_attr_e( 'ممکن است آدرس اشتباه باشد یا صفحه جابه‌جا شده باشد.', 'hamishop-elementor-widgets' ); ?>" />
+									</span>
+								</div>
+
+								<div class="hsw-wm-row hsw-wm-row--field">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'متن دکمهٔ اصلی', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'دکمهٔ برجسته که به فروشگاه می‌رود.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-field">
+										<input type="text" name="hsw_404_cta" value="<?php echo esc_attr( get_option( 'hsw_404_cta', '' ) ); ?>" placeholder="<?php esc_attr_e( 'ورود به فروشگاه', 'hamishop-elementor-widgets' ); ?>" />
+									</span>
+								</div>
+
+								<div class="hsw-wm-row hsw-wm-row--field">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'متن دکمهٔ فرعی', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'دکمهٔ شیشه‌ای که به صفحهٔ اصلی برمی‌گردد.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-field">
+										<input type="text" name="hsw_404_home" value="<?php echo esc_attr( get_option( 'hsw_404_home', '' ) ); ?>" placeholder="<?php esc_attr_e( 'بازگشت به صفحهٔ اصلی', 'hamishop-elementor-widgets' ); ?>" />
+									</span>
+								</div>
+
+								<div class="hsw-wm-row hsw-wm-row--field">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'متن کادر جستجو', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'متن راهنمای داخل فیلد جستجوی محصول.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-field">
+										<input type="text" name="hsw_404_search_ph" value="<?php echo esc_attr( get_option( 'hsw_404_search_ph', '' ) ); ?>" placeholder="<?php esc_attr_e( 'نام محصول را جستجو کنید…', 'hamishop-elementor-widgets' ); ?>" />
+									</span>
+								</div>
 							</div>
 						</section>
 

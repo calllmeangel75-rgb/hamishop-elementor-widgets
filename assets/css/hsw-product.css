@@ -1935,3 +1935,146 @@ html.hsw-sheet-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
 	.hsw-sheet__panel, .hsw-sheet__backdrop { transition: none; }
 }
+
+/* =========================================================================
+ * Sheet v2 — matches the reference: one header row, two cards side by side,
+ * Vazirmatn, and it stops above the sticky purchase bar.
+ * ====================================================================== */
+.hsw-sheet,
+.hsw-sheet * {
+	font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important;
+}
+.hsw-sheet__panel { max-width: 640px; padding: 10px 14px 16px; }
+
+.hsw-sheet__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	direction: rtl;
+}
+.hsw-sheet__state {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+.hsw-sheet__x { order: 1; }
+.hsw-sheet__ok {
+	order: 2;
+	font-size: 13.5px;
+	gap: 6px;
+	white-space: nowrap;
+}
+.hsw-sheet__okic { width: 18px; height: 18px; flex: 0 0 18px; }
+
+.hsw-sheet__cart {
+	order: 3;
+	margin: 0;
+	padding: 8px 14px;
+	font-size: 11.5px;
+	font-weight: 700;
+	background: var(--hsw-surface-low, #f1f3f5);
+	color: var(--hsw-on-surface-variant, #45464e) !important;
+	white-space: nowrap;
+}
+.hsw-sheet__cart svg { width: 13px; height: 13px; }
+
+.hsw-sheet__title {
+	margin: 16px 0 10px;
+	font-size: 13.5px;
+	font-weight: 800;
+	text-align: right;
+}
+
+/* Two cards per row, image on the right of each card. */
+.hsw-sheet__list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+.hsw-sheet__card {
+	display: flex;
+	align-items: stretch;
+	gap: 8px;
+	padding: 10px;
+	border: 1px solid var(--hsw-surface-variant, #e7e8ea);
+	border-radius: 12px;
+	background: var(--hsw-surface-lowest, #fff);
+}
+.hsw-sheet__card:first-child { border-top: 1px solid var(--hsw-surface-variant, #e7e8ea); }
+.hsw-sheet__media {
+	flex: 0 0 58px;
+	width: 58px;
+	height: 58px;
+	border-radius: 9px;
+	background: var(--hsw-surface-low, #f5f6f8);
+}
+.hsw-sheet__media img { object-fit: contain; padding: 3px; }
+.hsw-sheet__body { gap: 5px; }
+
+.hsw-sheet__name {
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.7;
+	-webkit-line-clamp: 2;
+}
+.hsw-sheet__rate {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	font-size: 10.5px;
+	font-weight: 700;
+	color: #f59e0b;
+}
+.hsw-sheet__add {
+	align-self: flex-start;
+	width: auto;
+	height: 26px;
+	flex: 0 0 auto;
+	padding: 0 9px;
+	border-radius: 7px;
+	border: 0;
+	background: var(--hsw-cta, var(--hsw-primary, #143ee4));
+	color: #fff !important;
+	font-size: 10.5px;
+	font-weight: 700;
+	gap: 4px;
+}
+.hsw-sheet__add:hover,
+.hsw-sheet__add:focus-visible { background: var(--hsw-cta-hover, var(--hsw-cta, var(--hsw-primary))); }
+.hsw-sheet__add.is-done { background: var(--hsw-emerald, #0f9f6e); font-size: 12px; }
+
+.hsw-sheet__prices {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	flex-wrap: wrap;
+}
+.hsw-sheet__off {
+	background: var(--hsw-pal-danger, #d92d20);
+	color: #fff;
+	font-size: 9.5px;
+	font-weight: 800;
+	padding: 1px 5px;
+	border-radius: 5px;
+	line-height: 1.7;
+}
+.hsw-sheet__price {
+	font-size: 11px;
+	font-weight: 800;
+	color: var(--hsw-on-surface, #191c1e);
+	white-space: nowrap;
+	display: inline-block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.hsw-sheet__body { min-width: 0; }
+.hsw-sheet__price .woocommerce-Price-currencySymbol { font-size: 9px; font-weight: 600; }
+.hsw-sheet__card del {
+	font-size: 9.5px;
+	color: var(--hsw-outline, #9aa0a6);
+	text-decoration: line-through;
+}
+.hsw-sheet__view { display: none; }

@@ -306,14 +306,22 @@ class HSW_Rest {
 
                         $image = get_the_post_thumbnail_url( $pid, 'woocommerce_thumbnail' );
 
+                        $regular = (float) $product->get_regular_price();
+                        $sale    = (float) $product->get_price();
+                        $off     = ( $regular > 0 && $sale > 0 && $sale < $regular ) ? (int) round( ( ( $regular - $sale ) / $regular ) * 100 ) : 0;
+
                         $out[] = array(
-                                'id'    => (int) $pid,
-                                'name'  => $product->get_name(),
-                                'price' => wp_strip_all_tags( $product->get_price_html() ),
-                                'image' => $image ? $image : '',
-                                'url'   => get_permalink( $pid ),
-                                'add'   => ( $product->is_type( 'simple' ) && $product->is_in_stock() ),
-                                'on_sale' => $product->is_on_sale(),
+                                'id'       => (int) $pid,
+                                'name'     => $product->get_name(),
+                                'price'    => wp_strip_all_tags( $product->get_price_html() ),
+                                'regular'  => $regular > 0 ? wp_strip_all_tags( wc_price( $regular ) ) : '',
+                                'off'      => $off,
+                                'rating'   => (float) $product->get_average_rating(),
+                                'reviews'  => (int) $product->get_review_count(),
+                                'image'    => $image ? $image : '',
+                                'url'      => get_permalink( $pid ),
+                                'add'      => ( $product->is_type( 'simple' ) && $product->is_in_stock() ),
+                                'on_sale'  => $product->is_on_sale(),
                         );
                 }
 
