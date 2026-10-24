@@ -83,7 +83,15 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
          * Render the full cart page.
          */
         protected function render() {
-                $root = $this->root_class( 'ccart', 'hsw-cp hsw-cp--cart' );
+                /*
+                 * An empty cart must not keep the two-column grid: the empty
+                 * state ended up in the main column with a summary beside it.
+                 * In that case only the items block renders, full width and
+                 * centred.
+                 */
+                $is_empty = ( ! $this->is_demo() && function_exists( 'WC' ) && WC()->cart && WC()->cart->is_empty() );
+
+                $root = $this->root_class( 'ccart', 'hsw-cp hsw-cp--cart' . ( $is_empty ? ' is-empty' : '' ) );
 
                 echo '<div class="' . esc_attr( $root ) . '">';
 
@@ -97,8 +105,18 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
                 if ( $this->part_on( 'ctop_' ) ) {
                         $this->print_part( 'ctop_', '\HSW_Widget_Cart_Top' );
                 }
-                if ( $this->part_on( 'cbanner_' ) ) {
+                if ( ! $is_empty && $this->part_on( 'cbanner_' ) ) {
                         $this->print_part( 'cbanner_', '\HSW_Widget_Cart_Banner' );
+                }
+
+                if ( $is_empty ) {
+                        /* Full-width, centred empty state; no coupon, no summary. */
+                        echo '<div class="hsw-cp__body hsw-cp__body--empty">';
+                        if ( $this->part_on( 'citems_' ) ) {
+                                $this->print_part( 'citems_', '\HSW_Widget_Cart_Items' );
+                        }
+                        echo '</div></div>';
+                        return;
                 }
 
                 echo '<div class="hsw-cp__body">';

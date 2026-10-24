@@ -95,6 +95,34 @@ final class HSW_Account_Auth {
 		return '' !== trim( (string) $this->s( 'whatsapp_token' ) ) && '' !== trim( (string) $this->s( 'whatsapp_phone_id' ) );
 	}
 
+	/**
+	 * Channels a customer may pick for OTP / 2FA (public alias).
+	 *
+	 * @return array<string,string>
+	 */
+	public function enabled_channels() {
+		return $this->available_channels();
+	}
+
+	/**
+	 * Where a 2FA code goes for this channel.
+	 *
+	 * @param int    $user_id User.
+	 * @param string $channel Channel.
+	 * @param string $typed   Phone typed in the form (sms only).
+	 * @return string Email, phone or chat id.
+	 */
+	public function two_factor_recipient( $user_id, $channel, $typed = '' ) {
+		if ( 'email' === $channel ) {
+			$user = get_user_by( 'id', $user_id );
+			return $user ? (string) $user->user_email : '';
+		}
+		if ( 'sms' === $channel ) {
+			return '' !== $typed ? $typed : $this->user_phone( $user_id );
+		}
+		return $this->two_factor_phone( $user_id );
+	}
+
 	public function available_channels() {
 		$out = array();
 		/* SMS first: a third-party plugin already owns the number. */
@@ -927,7 +955,17 @@ final class HSW_Account_Auth {
 		$parts = preg_split( '/\s+/u', $name, 2 );
 		$first = $parts[0];
 		$last  = isset( $parts[1] ) ? $parts[1] : '';
-		$base  = 'hsw_' . substr( $phone, -10 );
+		/*
+		 * Username: for an email signup use the local part (not the last 10
+		 * characters of the address — every `…@gmail.com` produced the same
+		 * `hsw_@gmail.com`), for a phone the last ten digits.
+		 */
+		if ( 'email' === $channel ) {
+			$base = sanitize_user( current( explode( '@', $email ) ), true );
+		} else {
+			$base = 'hsw_' . substr( $phone, -10 );
+		}
+		$base  = $base ? $base : 'hsw_user';
 		$login = $base;
 		$i     = 1;
 		while ( username_exists( $login ) ) {
@@ -952,13 +990,19 @@ final class HSW_Account_Auth {
 		}
 
 		$user_id = (int) $new_user;
-		update_user_meta( $user_id, 'billing_phone', $phone );
 		update_user_meta( $user_id, 'billing_first_name', $first );
 		update_user_meta( $user_id, 'billing_last_name', $last );
-		update_user_meta( $user_id, '_hsw_auth_phone', $phone );
-		$chat = $this->telegram_chat_id( 0, $phone );
-		if ( $chat ) {
-			update_user_meta( $user_id, '_hsw_telegram_chat_id', $chat );
+
+		if ( 'email' === $channel ) {
+			/* The address proved ownership through the code; it is not a phone. */
+			update_user_meta( $user_id, '_hsw_email_verified', time() );
+		} else {
+			update_user_meta( $user_id, 'billing_phone', $phone );
+			update_user_meta( $user_id, '_hsw_auth_phone', $phone );
+			$chat = $this->telegram_chat_id( 0, $phone );
+			if ( $chat ) {
+				update_user_meta( $user_id, '_hsw_telegram_chat_id', $chat );
+			}
 		}
 
 		$user = get_user_by( 'id', $user_id );
@@ -1025,11 +1069,11 @@ final class HSW_Account_Auth {
 			return;
 		}
 		$channel = (string) get_user_meta( $user->ID, '_hsw_2fa_channel', true );
-		if ( ! in_array( $channel, array( 'telegram', 'whatsapp' ), true ) || 'yes' !== get_user_meta( $user->ID, '_hsw_2fa_enabled', true ) ) {
+		if ( ! in_array( $channel, array( 'telegram', 'whatsapp', 'email', 'sms' ), true ) || 'yes' !== get_user_meta( $user->ID, '_hsw_2fa_enabled', true ) ) {
 			return;
 		}
-		/* Its own key: the second factor is never the login number by accident. */
-		$phone = $this->two_factor_phone( $user->ID );
+		/* Email needs no phone; the rest do. */
+		$phone = $this->two_factor_recipient( $user->ID, $channel );
 		if ( ! $phone ) {
 			return;
 		}
@@ -1161,17 +1205,25 @@ final class HSW_Account_Auth {
 		 * one may type it here: the code proves ownership and, on success, the
 		 * number is claimed as the account's login identity as well.
 		 */
-		$phone = $this->user_phone( $user_id );
-		if ( ! $phone ) {
-			$typed = isset( $_POST['phone'] ) ? $this->normalize_phone( wp_unslash( $_POST['phone'] ) ) : '';
-			if ( ! $typed ) {
-				wp_send_json_error( array( 'message' => __( 'برای فعال‌سازی، شماره موبایل خود را وارد کنید.', 'hamishop-elementor-widgets' ) ), 400 );
+		if ( 'email' === $channel ) {
+			$user  = get_user_by( 'id', $user_id );
+			$phone = $user ? (string) $user->user_email : '';
+			if ( ! $phone || ! is_email( $phone ) ) {
+				wp_send_json_error( array( 'message' => __( 'برای این حساب ایمیل معتبری ثبت نشده است.', 'hamishop-elementor-widgets' ) ), 400 );
 			}
-			$owner = $this->phone_owner( $typed );
-			if ( $owner && $owner !== (int) $user_id ) {
-				wp_send_json_error( array( 'message' => __( 'این شماره قبلاً روی حساب دیگری تأیید شده است. با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) ), 409 );
+		} else {
+			$phone = $this->user_phone( $user_id );
+			if ( ! $phone ) {
+				$typed = isset( $_POST['phone'] ) ? $this->normalize_phone( wp_unslash( $_POST['phone'] ) ) : '';
+				if ( ! $typed ) {
+					wp_send_json_error( array( 'message' => __( 'برای فعال‌سازی، شماره موبایل خود را وارد کنید.', 'hamishop-elementor-widgets' ) ), 400 );
+				}
+				$owner = $this->phone_owner( $typed );
+				if ( $owner && $owner !== (int) $user_id ) {
+					wp_send_json_error( array( 'message' => __( 'این شماره قبلاً روی حساب دیگری تأیید شده است. با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) ), 409 );
+				}
+				$phone = $typed;
 			}
-			$phone = $typed;
 		}
 		if ( 'telegram' === $channel && ! $this->telegram_chat_id( $user_id, $phone ) ) {
 			$token = $this->telegram_link_token( $user_id );
@@ -1239,14 +1291,18 @@ final class HSW_Account_Auth {
 		 * same act claims it as the login identity. A number already verified on
 		 * another account is refused here too, not only when it was typed.
 		 */
-		$claim = $this->claim_phone( $user_id, (string) $data['phone'] );
-		if ( is_wp_error( $claim ) ) {
-			wp_send_json_error( array( 'message' => $claim->get_error_message() ), 409 );
+		if ( 'email' !== $data['channel'] ) {
+			$claim = $this->claim_phone( $user_id, (string) $data['phone'] );
+			if ( is_wp_error( $claim ) ) {
+				wp_send_json_error( array( 'message' => $claim->get_error_message() ), 409 );
+			}
+			update_user_meta( $user_id, '_hsw_2fa_phone', $data['phone'] );
+		} else {
+			update_user_meta( $user_id, '_hsw_email_verified', time() );
 		}
 
 		update_user_meta( $user_id, '_hsw_2fa_enabled', 'yes' );
 		update_user_meta( $user_id, '_hsw_2fa_channel', $data['channel'] );
-		update_user_meta( $user_id, '_hsw_2fa_phone', $data['phone'] );
 		wp_send_json_success( array( 'message' => __( 'ورود دوعاملی فعال شد.', 'hamishop-elementor-widgets' ), 'reload' => true ) );
 	}
 
@@ -1441,7 +1497,7 @@ final class HSW_Account_Auth {
 		$active   = (string) get_user_meta( $user_id, '_hsw_2fa_channel', true );
 		$verified = $this->user_phone( $user_id );
 		/* What the code is sent to: the 2FA number once enabled, else the verified one. */
-		$phone    = $enabled ? $this->two_factor_phone( $user_id ) : $verified;
+		$phone    = $enabled ? $this->two_factor_recipient( $user_id, $active ) : $verified;
 		$chat     = $this->telegram_chat_id( $user_id, '' !== $verified ? $verified : $phone );
 		$default  = isset( $channels[ $active ] ) ? $active : $this->default_channel();
 		$link     = ( ! $chat && isset( $channels['telegram'] ) ) ? $this->telegram_link( $this->telegram_link_token( $user_id ) ) : '';
@@ -1450,7 +1506,8 @@ final class HSW_Account_Auth {
 		$html .= '<header class="hsw-ac__card-head"><div><h2 class="hsw-ac__card-title">' . esc_html__( 'امنیت حساب', 'hamishop-elementor-widgets' ) . '</h2><p>' . esc_html__( 'ورود دوعاملی، امنیت حساب شما را بیشتر می‌کند.', 'hamishop-elementor-widgets' ) . '</p></div><span class="hsw-ac__card-head-ic">' . $this->account->icon( 'shield' ) . '</span></header>';
 
 		if ( $enabled ) {
-			$html .= '<div class="hsw-ac__security-active"><span class="hsw-ac__security-dot"></span><div><strong>' . esc_html__( 'ورود دوعاملی فعال است', 'hamishop-elementor-widgets' ) . '</strong><p>' . esc_html( sprintf( 'کد ورود از طریق %s به %s ارسال می‌شود.', $this->channel_label( $active ), $this->mask_phone( $phone ) ) ) . '</p></div></div>';
+			$where = ( 'email' === $active ) ? $phone : $this->mask_phone( $phone );
+			$html .= '<div class="hsw-ac__security-active"><span class="hsw-ac__security-dot"></span><div><strong>' . esc_html__( 'ورود دوعاملی فعال است', 'hamishop-elementor-widgets' ) . '</strong><p>' . esc_html( sprintf( 'کد ورود از طریق %s به %s ارسال می‌شود.', $this->channel_label( $active ), $where ) ) . '</p></div></div>';
 			$html .= '<button type="button" class="hsw-ac__btn hsw-ac__btn--ghost" data-hsw-2fa-disable>' . $this->account->icon( 'x' ) . esc_html__( 'غیرفعال کردن', 'hamishop-elementor-widgets' ) . '</button>';
 			$html .= '<p class="hsw-ac-otp__message" data-hsw-2fa-message role="status" aria-live="polite"></p>';
 			return $html . '</section>';
@@ -1464,7 +1521,8 @@ final class HSW_Account_Auth {
 		 * login number — that is the migration path for customers whose old
 		 * `billing_phone` was never verified.
 		 */
-		if ( '' === $verified ) {
+		$needs_phone = ( '' === $verified && ( isset( $channels['sms'] ) || isset( $channels['telegram'] ) || isset( $channels['whatsapp'] ) ) );
+		if ( $needs_phone ) {
 			$html .= '<div class="hsw-ac-field"><label for="hsw-2fa-phone">' . esc_html__( 'شماره موبایل', 'hamishop-elementor-widgets' ) . '</label>';
 			$html .= '<div class="hsw-ac-input-wrap">' . $this->account->icon( 'phone' ) . '<input type="tel" id="hsw-2fa-phone" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="09121234567" data-hsw-2fa-phone></div>';
 			$html .= '<p class="hsw-ac__security-note">' . esc_html__( 'این شماره با کد تأیید می‌شود و به‌عنوان شمارهٔ ورود حساب ثبت می‌گردد.', 'hamishop-elementor-widgets' ) . '</p></div>';
@@ -1493,7 +1551,8 @@ final class HSW_Account_Auth {
 		if ( ! is_array( $data ) ) {
 			return '';
 		}
-		$phone = $this->mask_phone( isset( $data['phone'] ) ? $data['phone'] : '' );
+		$raw     = isset( $data['phone'] ) ? (string) $data['phone'] : '';
+		$phone   = ( 'email' === ( $data['channel'] ?? '' ) ) ? $raw : $this->mask_phone( $raw );
 		$channel = isset( $data['channel'] ) ? $this->channel_label( $data['channel'] ) : '';
 		$html  = '<div class="hsw-ac hsw-ac--auth"><div class="hsw-ac-auth hsw-ac-auth--slim"><div class="hsw-ac-auth__panel-wrap"><div class="hsw-ac-auth__panel">';
 		$html .= '<div class="hsw-ac-auth__heading"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'تأیید دوعاملی', 'hamishop-elementor-widgets' ) . '</span><h1>' . esc_html__( 'کد تأیید را وارد کنید', 'hamishop-elementor-widgets' ) . '</h1><p>' . esc_html( sprintf( 'کد ورود از طریق %s به %s ارسال شد.', $channel, $phone ) ) . '</p></div>';

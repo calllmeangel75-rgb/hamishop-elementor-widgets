@@ -62,6 +62,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                 $this->part_section( 'pac_', __( '۹. آکاردئون‌ها (موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Accordions', array( 'vis', 'acc_specs_title', 'acc_warranty_title', 'acc_reviews_title', 'acc_specs', 'acc_warranty', 'acc_reviews', 'reviews_count2', 'warranty_items' ) );
 
                 $this->part_section( 'pst_', __( '۱۰. نوار خرید چسبان', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Sticky', array( 'vis', 'sticky_fixed', 'cart_text' ) );
+                $this->part_section( 'prel_', __( '۱۱. محصولات مرتبط', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Related', array( 'vis', 'title', 'sub', 'source', 'count', 'more_text' ) );
 
                 /* ------------------- چیدمان ------------------- */
                 $this->start_controls_section(
@@ -264,6 +265,11 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 if ( $this->part_on( 'pst_' ) ) {
                         $this->print_part( 'pst_', '\HSW_Widget_Product_Sticky' );
+                }
+
+                /* 11. Related products — the last block on the page. */
+                if ( $this->part_on( 'prel_' ) ) {
+                        $this->print_part( 'prel_', '\HSW_Widget_Product_Related' );
                 }
 
                 echo '</div>';

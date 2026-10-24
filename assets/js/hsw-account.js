@@ -758,6 +758,31 @@
 			panel.classList.toggle('is-active', active);
 			panel.hidden = !active;
 		});
+		authHeading(auth, name);
+	}
+
+	/* The card heading follows the tab: one title, never a second one below. */
+	function authHeading(auth, mode) {
+		var head = auth.querySelector('.hsw-ac-auth__heading');
+		if (!head) {
+			return;
+		}
+		var isReg = 'register' === mode;
+		var title = head.getAttribute(isReg ? 'data-register-title' : 'data-login-title');
+		var sub = head.getAttribute(isReg ? 'data-register-sub' : 'data-login-sub');
+		var h1 = head.querySelector('h1');
+		var p = head.querySelector('p');
+		if (h1 && title) { h1.textContent = title; }
+		if (p && sub !== null) { p.textContent = sub; }
+	}
+
+	/* OTP ⇄ password inside one panel: exactly one form is visible. */
+	function authMode(panel, mode) {
+		panel.querySelectorAll('[data-hsw-auth-mode]').forEach(function (box) {
+			var on = box.getAttribute('data-hsw-auth-mode') === mode;
+			box.classList.toggle('is-active', on);
+			box.hidden = !on;
+		});
 	}
 
 	function switchMember(tab) {
@@ -859,6 +884,15 @@
 			return '';
 		}
 	}
+
+	function initOtp(box) {
+		var channel = box.getAttribute('data-channel') || activeOtpChannel(box);
+		if (channel) { otpField(box, channel); }
+	}
+
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('[data-hsw-otp]').forEach(initOtp);
+	});
 
 	function setOtpChannel(box, channel) {
 		box.setAttribute('data-channel', channel);
@@ -1232,6 +1266,16 @@
 					.catch(function () {
 						setMessage(disableMessage, data().networkError || 'خطا در ارتباط با سرور.', 'error');
 					});
+			}
+			return;
+		}
+
+		var modeSwitch = event.target.closest('[data-hsw-auth-mode-switch]');
+		if (modeSwitch) {
+			event.preventDefault();
+			var panel = modeSwitch.closest('[data-hsw-auth-panel]');
+			if (panel) {
+				authMode(panel, modeSwitch.getAttribute('data-hsw-auth-mode-switch'));
 			}
 			return;
 		}

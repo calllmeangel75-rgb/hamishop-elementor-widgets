@@ -204,6 +204,10 @@ final class HSW_Widget_Manager {
 								'label' => __( 'آکاردئون‌ها (موبایل)', 'hamishop-elementor-widgets' ),
 								'desc'  => __( 'نسخه موبایل مشخصات، گارانتی و دیدگاه‌ها.', 'hamishop-elementor-widgets' ),
 							),
+							'hsw-product-related'     => array(
+								'label' => __( 'محصولات مرتبط', 'hamishop-elementor-widgets' ),
+								'desc'  => __( 'کاروسل محصولات مرتبط، هم‌دسته، تشویقی یا پرفروش.', 'hamishop-elementor-widgets' ),
+							),
 							'hsw-product-sticky'      => array(
 								'label' => __( 'نوار خرید چسبان', 'hamishop-elementor-widgets' ),
 								'desc'  => __( 'نوار همیشه‌درمعرض قیمت و افزودن به سبد.', 'hamishop-elementor-widgets' ),
@@ -710,6 +714,17 @@ final class HSW_Widget_Manager {
 
 		register_setting(
 			'hsw_widgets_group',
+			'hsw_custom_404_enabled',
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_yes_no' ),
+				'default'           => 'yes',
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_setting(
+			'hsw_widgets_group',
 			'hsw_add_feedback',
 			array(
 				'type'              => 'array',
@@ -854,6 +869,7 @@ final class HSW_Widget_Manager {
 						<a href="#hsw-group-feedback"><span class="dashicons dashicons-cart" aria-hidden="true"></span><span><?php esc_html_e( 'رفتار افزودن به سبد', 'hamishop-elementor-widgets' ); ?></span></a>
 						<a href="#hsw-group-catalog"><span class="dashicons dashicons-sort" aria-hidden="true"></span><span><?php esc_html_e( 'ترتیب محصولات', 'hamishop-elementor-widgets' ); ?></span></a>
 						<a href="#hsw-group-shipping"><span class="dashicons dashicons-car" aria-hidden="true"></span><span><?php esc_html_e( 'ارسال رایگان', 'hamishop-elementor-widgets' ); ?></span></a>
+						<a href="#hsw-group-404"><span class="dashicons dashicons-warning" aria-hidden="true"></span><span><?php esc_html_e( 'صفحهٔ ۴۰۴', 'hamishop-elementor-widgets' ); ?></span></a>
 					</nav>
 
 					<div class="hsw-wm-tip">
@@ -1062,6 +1078,30 @@ final class HSW_Widget_Manager {
 									<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>"><?php esc_html_e( 'ویرایش روش‌های ارسال', 'hamishop-elementor-widgets' ); ?></a>
 								</p>
 							<?php endif; ?>
+						</section>
+
+						<section class="hsw-wm-group" id="hsw-group-404" style="--hsw-wm-accent:#dc2626">
+							<header class="hsw-wm-grouphead">
+								<span class="hsw-wm-groupicon dashicons dashicons-warning" aria-hidden="true"></span>
+								<div class="hsw-wm-grouptitle">
+									<h2><?php esc_html_e( 'صفحهٔ ۴۰۴ اختصاصی', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'به جای صفحهٔ ۴۰۴ سادهٔ قالب، یک صفحهٔ گلس‌مورفیسم با جستجوی محصول و دکمهٔ بازگشت به فروشگاه نشان داده می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
+							</header>
+
+							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-custom-404">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'استفاده از صفحهٔ ۴۰۴ اختصاصی', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'هدر و فوتر سایت حفظ می‌شوند؛ فقط محتوای صفحه عوض می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="hidden" name="hsw_custom_404_enabled" value="no" />
+										<input type="checkbox" id="hsw-custom-404" name="hsw_custom_404_enabled" value="yes" <?php checked( 'yes', get_option( 'hsw_custom_404_enabled', 'yes' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
+									</span>
+								</label>
+							</div>
 						</section>
 
 						<div class="hsw-wm-savebar">

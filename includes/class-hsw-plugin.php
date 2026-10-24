@@ -42,6 +42,7 @@ final class HSW_Plugin {
                 HSW_Wallet::instance();
                 new HSW_Wallet_Topup();
                 new HSW_Free_Shipping();
+                new HSW_404();
                 HSW_Coupon_Messages::instance();
 
                 /* One SVG sprite per page, containing only the icons it rendered. */
@@ -193,6 +194,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-wallet.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet-pay.php';
                 require_once HSW_DIR . 'includes/class-hsw-free-shipping.php';
+                require_once HSW_DIR . 'includes/class-hsw-404.php';
                 require_once HSW_DIR . 'includes/class-hsw-coupon-messages.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
@@ -307,6 +309,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-product-tabs.php',
                         HSW_DIR . 'widgets/class-hsw-widget-product-accordions.php',
                         HSW_DIR . 'widgets/class-hsw-widget-product-sticky.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-product-related.php',
                         HSW_DIR . 'widgets/class-hsw-widget-product-page.php',
 
                         HSW_DIR . 'widgets/class-hsw-widget-archive-breadcrumb.php',
@@ -395,6 +398,7 @@ final class HSW_Plugin {
                         '\HSW_Widget_Product_Tabs',
                         '\HSW_Widget_Product_Accordions',
                         '\HSW_Widget_Product_Sticky',
+                        '\HSW_Widget_Product_Related',
                         '\HSW_Widget_Product_Page',
                         '\HSW_Widget_Archive_Breadcrumb',
                         '\HSW_Widget_Archive_Header',

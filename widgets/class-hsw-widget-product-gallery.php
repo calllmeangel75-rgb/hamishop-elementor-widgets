@@ -264,7 +264,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                 $thumbs = ( $limit > 0 ) ? array_slice( $images, 0, $limit ) : $images;
                 $badge  = '٪' . HSW_Helpers::fa_num( $discount ) . ' تخفیف';
                 ?>
-                <section class="<?php echo esc_attr( $this->root_class( 'pgal' ) ); ?>">
+                <section class="<?php echo esc_attr( $this->root_class( 'pgal' ) ); ?>" data-hsw-images="<?php echo esc_attr( (string) wp_json_encode( array_values( $images ) ) ); ?>">
                         <div class="hsw-pgal__card">
                                 <?php if ( $discount > 0 ) : ?>
                                         <span class="hsw-pgal__badge hsw-d"><?php echo esc_html( $badge ); ?></span>
@@ -281,12 +281,18 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                 </button>
 
                                 <?php if ( count( $images ) > 1 ) : ?>
-                                        <div class="hsw-pgal__thumbs hsw-d">
-                                                <?php foreach ( $thumbs as $i => $url ) : ?>
-                                                        <button type="button" class="hsw-pgal__thumb<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>">
-                                                                <img src="<?php echo esc_url( $url ); ?>" alt="" loading="lazy" decoding="async">
-                                                        </button>
-                                                <?php endforeach; ?>
+                                        <div class="hsw-pgal__wrap">
+                                                <div class="hsw-pgal__thumbs" data-hsw-track>
+                                                        <?php foreach ( $thumbs as $i => $url ) : ?>
+                                                                <button type="button" class="hsw-pgal__thumb<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>">
+                                                                        <img src="<?php echo esc_url( $url ); ?>" alt="" loading="lazy" decoding="async">
+                                                                </button>
+                                                        <?php endforeach; ?>
+                                                </div>
+                                                <span class="hsw-pgal__thumbs-fade hsw-pgal__thumbs-fade--left" data-hsw-fade="next" aria-hidden="true"></span>
+                                                <span class="hsw-pgal__thumbs-fade hsw-pgal__thumbs-fade--right" data-hsw-fade="prev" aria-hidden="true"></span>
+                                                <button type="button" class="hsw-pgal__thumbs-nav hsw-pgal__thumbs-nav--next" data-hsw-nav="next" aria-label="<?php esc_attr_e( 'تصاویر بعدی', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'chevron_left' ); ?></button>
+                                                <button type="button" class="hsw-pgal__thumbs-nav hsw-pgal__thumbs-nav--prev" data-hsw-nav="prev" aria-label="<?php esc_attr_e( 'تصاویر قبلی', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'chevron_right' ); ?></button>
                                         </div>
                                 <?php endif; ?>
 

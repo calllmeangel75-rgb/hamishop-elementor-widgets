@@ -3214,7 +3214,14 @@ final class HSW_Account {
 			$html .= '</div>';
 			$html .= '<a class="hsw-ac-auth__back" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">' . $this->icon( 'arrow-right' ) . esc_html__( 'بازگشت به ورود', 'hamishop-elementor-widgets' ) . '</a>';
 		} else {
-			$html .= '<div class="hsw-ac-auth__heading"><span class="hsw-ac-auth__eyebrow">' . esc_html__( 'حساب کاربری', 'hamishop-elementor-widgets' ) . '</span><h1>' . esc_html( $opts['auth']['login_title'] ) . '</h1><p>' . esc_html( $opts['auth']['login_subtitle'] ) . '</p></div>';
+			$html .= '<div class="hsw-ac-auth__heading"'
+				. ' data-login-title="' . esc_attr( $opts['auth']['login_title'] ) . '"'
+				. ' data-login-sub="' . esc_attr( $opts['auth']['login_subtitle'] ) . '"'
+				. ' data-register-title="' . esc_attr( $opts['auth']['register_title'] ) . '"'
+				. ' data-register-sub="' . esc_attr( $opts['auth']['register_subtitle'] ) . '">'
+				. '<span class="hsw-ac-auth__eyebrow">' . esc_html__( 'حساب کاربری', 'hamishop-elementor-widgets' ) . '</span>'
+				. '<h1>' . esc_html( 'register' === $active ? $opts['auth']['register_title'] : $opts['auth']['login_title'] ) . '</h1>'
+				. '<p>' . esc_html( 'register' === $active ? $opts['auth']['register_subtitle'] : $opts['auth']['login_subtitle'] ) . '</p></div>';
 
 			if ( $show_register ) {
 				$html .= '<div class="hsw-ac-auth__tabs" role="tablist" aria-label="' . esc_attr__( 'ورود یا ثبت‌نام', 'hamishop-elementor-widgets' ) . '">';
@@ -3223,18 +3230,34 @@ final class HSW_Account {
 				$html .= '</div>';
 			}
 
+			$otp_on = ( $this->auth && $this->auth->enabled() );
+
+			/*
+			 * One form at a time. The password form used to sit *under* the OTP
+			 * box, so both were visible and the panel read like two sign-ups.
+			 * OTP is the primary path now; the classic form hides behind a
+			 * switcher and comes back with one click.
+			 */
 			$html .= '<div class="hsw-ac-auth__forms">';
-			$html .= '<div class="hsw-ac-auth__form-panel' . ( 'login' === $active ? ' is-active' : '' ) . '" data-hsw-auth-panel="login" role="tabpanel">' . $this->auth_login_form();
-			if ( $this->auth && $this->auth->enabled() ) {
-				$html .= $this->auth->otp_box( 'login' );
+			$html .= '<div class="hsw-ac-auth__form-panel' . ( 'login' === $active ? ' is-active' : '' ) . '" data-hsw-auth-panel="login" role="tabpanel">';
+			if ( $otp_on ) {
+				$html .= '<div class="hsw-ac-auth__mode is-active" data-hsw-auth-mode="otp">' . $this->auth->otp_box( 'login' );
+				$html .= '<button type="button" class="hsw-ac-auth__switch" data-hsw-auth-mode-switch="password">' . $this->icon( 'lock' ) . esc_html__( 'ورود با رمز عبور ثابت', 'hamishop-elementor-widgets' ) . $this->icon( 'arrow-left' ) . '</button></div>';
+				$html .= '<div class="hsw-ac-auth__mode" data-hsw-auth-mode="password" hidden>' . $this->auth_login_form();
+				$html .= '<button type="button" class="hsw-ac-auth__switch" data-hsw-auth-mode-switch="otp">' . $this->icon( 'shield' ) . esc_html__( 'ورود سریع با کد یکبارمصرف', 'hamishop-elementor-widgets' ) . $this->icon( 'arrow-left' ) . '</button></div>';
+			} else {
+				$html .= $this->auth_login_form();
 			}
 			$html .= '</div>';
 			if ( $show_register ) {
 				$html .= '<div class="hsw-ac-auth__form-panel' . ( 'register' === $active ? ' is-active' : '' ) . '" data-hsw-auth-panel="register" role="tabpanel">';
-				$html .= '<div class="hsw-ac-auth__form-title"><h2>' . esc_html( $opts['auth']['register_title'] ) . '</h2><p>' . esc_html( $opts['auth']['register_subtitle'] ) . '</p></div>';
-				$html .= $this->auth_register_form();
-				if ( $this->auth && $this->auth->enabled() ) {
-					$html .= $this->auth->otp_box( 'register' );
+				if ( $otp_on ) {
+					$html .= '<div class="hsw-ac-auth__mode is-active" data-hsw-auth-mode="otp">' . $this->auth->otp_box( 'register' );
+					$html .= '<button type="button" class="hsw-ac-auth__switch" data-hsw-auth-mode-switch="password">' . $this->icon( 'lock' ) . esc_html__( 'ثبت‌نام با رمز عبور ثابت', 'hamishop-elementor-widgets' ) . $this->icon( 'arrow-left' ) . '</button></div>';
+					$html .= '<div class="hsw-ac-auth__mode" data-hsw-auth-mode="password" hidden>' . $this->auth_register_form();
+					$html .= '<button type="button" class="hsw-ac-auth__switch" data-hsw-auth-mode-switch="otp">' . $this->icon( 'shield' ) . esc_html__( 'ثبت‌نام سریع با کد یکبارمصرف', 'hamishop-elementor-widgets' ) . $this->icon( 'arrow-left' ) . '</button></div>';
+				} else {
+					$html .= $this->auth_register_form();
 				}
 				$html .= '</div>';
 			}

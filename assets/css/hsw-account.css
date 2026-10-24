@@ -6348,3 +6348,122 @@ a.hsw-ac__stat:hover {
 	max-width: none;
 	flex: 0 0 auto;
 }
+
+/* =========================================================================
+ * Auth panel — one form at a time (OTP first, password behind a switcher).
+ * ====================================================================== */
+.hsw-ac-auth__mode[hidden] { display: none !important; }
+.hsw-ac-auth__form-title { display: none !important; }
+
+.hsw-ac-auth__switch {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	margin-top: 14px;
+	padding: 12px 14px;
+	border: 1px solid var(--hsw-ac-line, #e6ebf2);
+	border-radius: 12px;
+	background: transparent !important;
+	background-color: transparent !important;
+	color: var(--hsw-ac-muted, #5b6b80) !important;
+	font: inherit;
+	font-size: 12.5px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background-color .15s, color .15s, border-color .15s;
+}
+.hsw-ac-auth__switch:hover,
+.hsw-ac-auth__switch:focus,
+.hsw-ac-auth__switch:focus-visible,
+.hsw-ac-auth__switch:active {
+	background-color: color-mix(in srgb, var(--hsw-ac-primary, #0e2a47) 6%, transparent) !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+	border-color: color-mix(in srgb, var(--hsw-ac-primary, #0e2a47) 35%, transparent) !important;
+}
+
+/* OTP block is the main form now: no divider, no extra top margin. */
+.hsw-ac-auth__mode .hsw-ac-otp { border-top: 0 !important; margin-top: 0 !important; padding-top: 0 !important; }
+
+/* Channels as a segmented control; hidden when there is only one. */
+.hsw-ac-otp__channels {
+	display: flex !important;
+	gap: 4px !important;
+	padding: 4px !important;
+	border-radius: 12px !important;
+	background: var(--hsw-ac-bg, #f3f6fa) !important;
+	border: 1px solid var(--hsw-ac-line, #e6ebf2) !important;
+}
+.hsw-ac-otp__channels:has(> .hsw-ac-otp__channel:only-child) { display: none !important; }
+.hsw-ac-otp__channel {
+	flex: 1 1 0 !important;
+	min-width: 0 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 6px !important;
+	padding: 9px 10px !important;
+	border: 0 !important;
+	border-radius: 9px !important;
+	background: transparent !important;
+	background-color: transparent !important;
+	color: var(--hsw-ac-muted, #5b6b80) !important;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+	cursor: pointer !important;
+	box-shadow: none !important;
+}
+.hsw-ac-otp__channel:hover,
+.hsw-ac-otp__channel:focus,
+.hsw-ac-otp__channel:focus-visible,
+.hsw-ac-otp__channel:active {
+	background-color: transparent !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+}
+.hsw-ac-otp__channel.is-active {
+	background-color: #fff !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+	box-shadow: 0 1px 3px rgba(15, 39, 64, .14) !important;
+}
+
+/* The 6-digit code field. */
+.hsw-ac-otp [data-hsw-otp-code],
+.hsw-ac-otp--challenge [data-hsw-2fa-code] {
+	letter-spacing: .45em !important;
+	font-size: 20px !important;
+	font-weight: 800 !important;
+	text-align: center !important;
+	direction: ltr !important;
+	padding-inline: 8px !important;
+}
+
+/* Hello Elementor paints every button #c36 on hover/focus. */
+.hsw-ac .hsw-ac-auth__tabs button,
+.hsw-ac .hsw-ac-otp__channel,
+.hsw-ac .hsw-ac-otp__resend,
+.hsw-ac .hsw-ac-pass-toggle,
+.hsw-ac .hsw-ac-auth__switch,
+.hsw-ac .hsw-ac-auth__tabs button:is(:hover, :focus, :focus-visible, :active),
+.hsw-ac .hsw-ac-otp__resend:is(:hover, :focus, :focus-visible, :active),
+.hsw-ac .hsw-ac-pass-toggle:is(:hover, :focus, :focus-visible, :active) {
+	background-image: none !important;
+	box-shadow: none !important;
+}
+.hsw-ac .hsw-ac-auth__tabs button {
+	background-color: transparent !important;
+	color: var(--hsw-ac-muted, #5b6b80) !important;
+}
+.hsw-ac .hsw-ac-auth__tabs button.is-active {
+	background-color: #fff !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+}
+.hsw-ac .hsw-ac-auth__tabs button:is(:hover, :focus, :focus-visible) {
+	background-color: transparent !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+}
+.hsw-ac .hsw-ac-otp__resend,
+.hsw-ac .hsw-ac-pass-toggle {
+	background-color: transparent !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+}
