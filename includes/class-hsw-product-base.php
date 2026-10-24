@@ -159,6 +159,18 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         return array();
                 }
                 $cfp = HSW_Helpers::is_call_for_price( $product );
+
+                /* How many of each variation the cart already holds. */
+                $cart_qty = array();
+                if ( function_exists( 'WC' ) && WC()->cart ) {
+                        foreach ( WC()->cart->get_cart() as $line ) {
+                                $vid = isset( $line['variation_id'] ) ? (int) $line['variation_id'] : 0;
+                                if ( $vid > 0 ) {
+                                        $cart_qty[ $vid ] = ( isset( $cart_qty[ $vid ] ) ? $cart_qty[ $vid ] : 0 ) + (int) $line['quantity'];
+                                }
+                        }
+                }
+
                 $out = array();
                 foreach ( $product->get_available_variations() as $v ) {
                         if ( empty( $v['variation_id'] ) ) {
@@ -220,14 +232,22 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         $regular = (float) $var->get_regular_price();
                         $sale    = (float) $var->get_price();
                         $img_id  = $var->get_image_id() ? $var->get_image_id() : $product->get_image_id();
+                        $save    = ( ! $cfp && $regular > 0 && $sale > 0 && $sale < $regular ) ? ( $regular - $sale ) : 0;
                         $out[]   = array(
-                                'id'       => $var->get_id(),
-                                'price'    => $cfp ? '' : HSW_Helpers::price_num( $sale > 0 ? $sale : $regular ),
-                                'regular'  => $cfp ? '' : HSW_Helpers::price_num( $regular ),
-                                'discount' => $cfp ? 0 : HSW_Helpers::discount_percent( $var ),
-                                'image'    => $img_id ? wp_get_attachment_image_url( $img_id, 'woocommerce_single' ) : '',
-                                'in_stock' => $var->is_in_stock(),
-                                'attrs'    => $attrs,
+                                'id'        => $var->get_id(),
+                                'price'     => $cfp ? '' : HSW_Helpers::price_num( $sale > 0 ? $sale : $regular ),
+                                'regular'   => $cfp ? '' : HSW_Helpers::price_num( $regular ),
+                                'discount'  => $cfp ? 0 : HSW_Helpers::discount_percent( $var ),
+                                'image'     => $img_id ? wp_get_attachment_image_url( $img_id, 'woocommerce_single' ) : '',
+                                'in_stock'  => $var->is_in_stock(),
+                                'attrs'     => $attrs,
+                                /*
+                                 * The stepper follows the *selected* variation:
+                                 * switching from a variation that is in the cart
+                                 * to one that is not must close it again.
+                                 */
+                                'cart_qty'  => isset( $cart_qty[ $var->get_id() ] ) ? (int) $cart_qty[ $var->get_id() ] : 0,
+                                'save_html' => $save > 0 ? HSW_Helpers::price_num( $save ) . ' ' . __( 'تومان تخفیف ویژه', 'hamishop-elementor-widgets' ) : '',
                         );
                 }
                 return $out;

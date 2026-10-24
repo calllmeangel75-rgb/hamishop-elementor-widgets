@@ -656,3 +656,41 @@ body.hsw-scroll-lock {
 .hsw-toast--thin.is-error .hsw-toast__ic {
 	color: var(--hsw-pal-danger, #ba1a1a);
 }
+
+/* =========================================================================
+ * Hello Elementor button reset — store-wide safety net.
+ *
+ * theme.min.css ships
+ *   [type=button]:hover, [type=submit]:hover, button:hover { background:#c36;
+ *   color:#fff }
+ * (0,2,0). The product page already declares its own states; every other
+ * container relied on "our stylesheet loads later", which is not guaranteed.
+ * The :not() chain keeps primary CTAs (__cta/__apply/__ok/__update/__pay/
+ * __cart) and active states out of the reset, so only buttons that never
+ * defined a hover lose the theme fill.
+ * ====================================================================== */
+:is(.hsw-a, .hsw-c, .hsw-k, .hsw-loop, .hsw-h, .hsw-ac, .hsw-p, .hsw-toast, .hsw-modal)
+	:is(button, input[type="submit"], input[type="button"]):not([class*="__cta"]):not([class*="__apply"]):not([class*="__ok"]):not([class*="__update"]):not([class*="__pay"]):not([class*="__cart"]):not(.is-active)
+	:is(:hover, :focus, :focus-visible) {
+	background-color: transparent;
+	color: inherit;
+}
+
+/* Primary CTAs keep their own fill on hover/focus. */
+.hsw-a .hsw-af__apply:is(:hover, :focus, :focus-visible),
+.hsw-a .hsw-af__apply--side:is(:hover, :focus, :focus-visible),
+.hsw-a .hsw-agd__ok:is(:hover, :focus, :focus-visible) {
+	background-color: var(--hswa-primary, var(--hsw-primary)) !important;
+	color: #fff !important;
+}
+
+.hsw-c .hsw-citems__update:is(:hover, :focus, :focus-visible) {
+	background-color: var(--hswc-primary, var(--hsw-primary)) !important;
+	color: #fff !important;
+}
+
+/* Header icon buttons: their palette background, not the theme's pink. */
+.hsw-h .hsw-hd__burger:is(:hover, :focus, :focus-visible) {
+	background: var(--hsw-hd-act-bg, var(--hsw-hd-icon-bg, var(--hsw-hd-search))) !important;
+	color: var(--hsw-hd-act-icon, var(--hsw-hd-icon, var(--hsw-hd-text))) !important;
+}

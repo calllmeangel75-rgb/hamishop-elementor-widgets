@@ -243,7 +243,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                                 <h2 class="hsw-ckaddr__hd-t"><?php echo esc_html( $title_d ); ?></h2>
                                         </div>
                                         <?php if ( '' !== trim( $add_d ) ) : ?>
-                                                <a class="hsw-ckaddr__add" href="<?php echo esc_url( $manage ); ?>">
+                                                <a class="hsw-ckaddr__add" href="#hsw-ckaddr-form" data-hsw-address-edit="1">
                                                         <?php echo HSW_Helpers::icon( 'add_circle' ); ?>
                                                         <span><?php echo esc_html( $add_d ); ?></span>
                                                 </a>
@@ -261,13 +261,13 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                                 </div>
                                                 <div class="hsw-ckaddr__ops">
                                                         <?php if ( $show_edit ) : ?>
-                                                                <a class="hsw-ckaddr__op" href="<?php echo esc_url( $manage ); ?>">
+                                                                <a class="hsw-ckaddr__op" href="#hsw-ckaddr-form" data-hsw-address-edit="1">
                                                                         <?php echo HSW_Helpers::icon( 'edit' ); ?>
                                                                         <span><?php echo esc_html( $edit ); ?></span>
                                                                 </a>
                                                                 <span class="hsw-ckaddr__sep" aria-hidden="true">|</span>
                                                         <?php endif; ?>
-                                                        <a class="hsw-ckaddr__op" href="<?php echo esc_url( $manage ); ?>">
+                                                        <a class="hsw-ckaddr__op" href="#hsw-ckaddr-form" data-hsw-address-edit="1">
                                                                 <span><?php echo esc_html( $change ); ?></span>
                                                         </a>
                                                 </div>
@@ -299,7 +299,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                                 <?php echo HSW_Helpers::icon( 'location_on', true ); ?>
                                                 <?php echo esc_html( $title_m ); ?>
                                         </h2>
-                                        <a class="hsw-ckaddr__mchange" href="<?php echo esc_url( $manage ); ?>"><?php echo esc_html( $change ); ?></a>
+                                        <a class="hsw-ckaddr__mchange" href="#hsw-ckaddr-form" data-hsw-address-edit="1"><?php echo esc_html( $change ); ?></a>
                                 </div>
 
                                 <div class="hsw-ckaddr__mcard">
@@ -317,11 +317,23 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 </div>
 
                                 <?php if ( '' !== trim( $add_m ) ) : ?>
-                                        <a class="hsw-ckaddr__madd" href="<?php echo esc_url( $manage ); ?>">
+                                        <a class="hsw-ckaddr__madd" href="#hsw-ckaddr-form" data-hsw-address-edit="1">
                                                 <?php echo HSW_Helpers::icon( 'add_circle' ); ?>
                                                 <span><?php echo esc_html( $add_m ); ?></span>
                                         </a>
                                 <?php endif; ?>
+                        </div>
+
+                        <?php
+                        /*
+                         * The same form is always available, hidden: «ویرایش» used
+                         * to send the customer to the account address book and
+                         * lose the checkout context. Opening it here keeps the
+                         * cart, the schedule and the shipping rates intact.
+                         */
+                        ?>
+                        <div class="hsw-ckaddr__drawer" data-hsw-address-drawer hidden>
+                                <?php echo $this->address_form_html( $this->opt( 'edit_title', __( 'ویرایش نشانی تحویل', 'hamishop-elementor-widgets' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
                         </div>
 
                 <?php endif; ?>
@@ -410,7 +422,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 <?php esc_html_e( 'برای ادامهٔ خرید، نشانی تحویل را کامل کنید. این آدرس در حساب کاربری شما هم ذخیره می‌شود.', 'hamishop-elementor-widgets' ); ?>
                         </p>
 
-                        <form class="hsw-ckaddr__form" data-hsw-address-form novalidate>
+                        <form class="hsw-ckaddr__form" id="hsw-ckaddr-form" data-hsw-address-form novalidate>
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
                                                 <?php echo $field( 'first_name', __( 'نام', 'hamishop-elementor-widgets' ), $first, 'text', ' autocomplete="given-name"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

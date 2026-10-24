@@ -33,12 +33,12 @@
         --hswa-body: #475569;
         --hswa-soft: var(--hsw-pal-muted, #64748b);
         --hswa-faint: #cbd5e1;
-        --hswa-line: #e2e8f0;
-        --hswa-line-soft: #f1f5f9;
-        --hswa-card: #ffffff;
+        --hswa-line: var(--hsw-pal-border, #e2e8f0);
+        --hswa-line-soft: color-mix(in srgb, var(--hsw-pal-border, #e2e8f0) 45%, #fff);
+        --hswa-card: var(--hsw-pal-surface, #ffffff);
         --hswa-page: #f8fafc;
         --hswa-rose: #be123c;
-        --hswa-emerald: #047857;
+        --hswa-emerald: var(--hsw-pal-success, #047857);
         --hswa-amber: #f59e0b;
         --hswa-r-xl: 12px;
         --hswa-r-2xl: 16px;

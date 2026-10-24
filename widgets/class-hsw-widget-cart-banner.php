@@ -136,18 +136,27 @@ class HSW_Widget_Cart_Banner extends HSW_Cart_Base {
          * @return array{active:bool,percent:int,title:string,desc:string,pct:string}|null
          */
         protected function banner_state() {
-                $threshold = (float) $this->opt( 'threshold', 1000000 );
-                if ( $threshold <= 0 ) {
-                        return null;
-                }
+                /*
+                 * HamiShop → کنترل ویجت‌ها → ارسال رایگان owns the number.
+                 * The widget's own control is only a demo/fallback value: a
+                 * banner that promises free shipping at 1,000,000 while the
+                 * global threshold is 0 (off) is a lie the customer acts on.
+                 */
+                $global = class_exists( 'HSW_Free_Shipping' ) ? (float) HSW_Free_Shipping::threshold() : 0.0;
 
                 if ( $this->is_demo() ) {
-                        $subtotal = 67210000;
+                        $threshold = $global > 0 ? $global : (float) $this->opt( 'threshold', 1000000 );
+                        $subtotal  = 67210000;
                 } else {
-                        if ( ! $this->has_cart() ) {
+                        if ( $global <= 0 || ! $this->has_cart() ) {
                                 return null;
                         }
-                        $subtotal = (float) WC()->cart->get_displayed_subtotal();
+                        $threshold = $global;
+                        $subtotal  = (float) WC()->cart->get_displayed_subtotal();
+                }
+
+                if ( $threshold <= 0 ) {
+                        return null;
                 }
 
                 $active    = ( $subtotal >= $threshold );

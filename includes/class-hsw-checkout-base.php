@@ -141,12 +141,38 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 if ( ! $c ) {
                         return false;
                 }
-                foreach ( array( 'get_shipping_city', 'get_shipping_address_1', 'get_billing_city', 'get_billing_address_1' ) as $g ) {
-                        if ( '' !== trim( (string) $c->$g() ) ) {
-                                return true;
+
+                /*
+                 * Every field a courier needs must be there. The old check was
+                 * an OR: a city alone counted as "has address", the customer
+                 * reached the pay step, and the order had no street or phone.
+                 * Each field falls back to billing when shipping is empty.
+                 */
+                $required = array(
+                        'first_name' => array( 'get_shipping_first_name', 'get_billing_first_name' ),
+                        'phone'      => array( 'get_shipping_phone', 'get_billing_phone' ),
+                        'state'      => array( 'get_shipping_state', 'get_billing_state' ),
+                        'city'       => array( 'get_shipping_city', 'get_billing_city' ),
+                        'address_1'  => array( 'get_shipping_address_1', 'get_billing_address_1' ),
+                );
+
+                foreach ( $required as $getters ) {
+                        $value = '';
+                        foreach ( $getters as $getter ) {
+                                if ( ! is_callable( array( $c, $getter ) ) ) {
+                                        continue;
+                                }
+                                $value = trim( (string) $c->$getter() );
+                                if ( '' !== $value ) {
+                                        break;
+                                }
+                        }
+                        if ( '' === $value ) {
+                                return false;
                         }
                 }
-                return false;
+
+                return true;
         }
 
         /**

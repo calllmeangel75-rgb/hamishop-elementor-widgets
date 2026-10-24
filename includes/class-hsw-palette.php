@@ -73,6 +73,8 @@ class HSW_Palette {
 			 * The account panel used to keep its own two hero colours; they live
 			 * here now so one palette paints the storefront *and* the account.
 			 */
+			'header_icon_color' => array( __( 'رنگ آیکون دکمه‌های هدر', 'hamishop-elementor-widgets' ), '#0f172a', __( 'سبد خرید، حساب کاربری و منوی همبرگری', 'hamishop-elementor-widgets' ) ),
+			'header_icon_bg'    => array( __( 'پس‌زمینه دکمه‌های هدر', 'hamishop-elementor-widgets' ), '#f8fafc', __( 'دکمه‌های گرد سبد خرید، حساب کاربری و منو', 'hamishop-elementor-widgets' ) ),
 			'hero_a'       => array( __( 'گرادیان هدر حساب (شروع)', 'hamishop-elementor-widgets' ), '#0b2036', __( 'رنگ اول گرادیان هدر پنل حساب کاربری', 'hamishop-elementor-widgets' ) ),
 			'hero_b'       => array( __( 'گرادیان هدر حساب (پایان)', 'hamishop-elementor-widgets' ), '#173b5c', __( 'رنگ دوم گرادیان هدر پنل حساب کاربری', 'hamishop-elementor-widgets' ) ),
 		);
@@ -151,6 +153,10 @@ class HSW_Palette {
 			'--hsw-pal-success'        => $p['success'],
 			'--hsw-pal-warning'        => $p['warning'],
 			'--hsw-pal-danger'         => $p['danger'],
+
+			/* Functional header buttons (cart / account / burger). */
+			'--hsw-hd-act-icon'        => $p['header_icon_color'],
+			'--hsw-hd-act-bg'          => $p['header_icon_bg'],
 
 			/* Derived tints so families do not need their own maths. */
 			'--hsw-pal-primary-50'     => 'color-mix(in srgb, ' . $p['primary'] . ', #fff 92%)',

@@ -231,7 +231,12 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                          * step that can actually collect it, not to the account
                          * address book (which lost the cart context).
                          */
-                        if ( ! $this->customer_has_address() && function_exists( 'wc_get_checkout_url' ) ) {
+                        /*
+                         * Always back to the checkout step: editing the address
+                         * in the account lost the cart/schedule context, and the
+                         * checkout now has an inline form for exactly this.
+                         */
+                        if ( function_exists( 'wc_get_checkout_url' ) ) {
                                 return wc_get_checkout_url();
                         }
                         return wc_get_account_endpoint_url( 'edit-address' );

@@ -753,11 +753,18 @@ final class HSW_Widget_Manager {
 	 */
 	public static function sanitize_feedback( $input ) {
 		$input = is_array( $input ) ? $input : array();
+		$modes = array( 'modal', 'bar', 'off' );
+
+		$archive = isset( $input['archive'] ) && in_array( $input['archive'], $modes, true ) ? $input['archive'] : 'modal';
+		$product = isset( $input['product'] ) && in_array( $input['product'], $modes, true ) ? $input['product'] : 'off';
 
 		return array(
-			'modal_archive' => ( isset( $input['modal_archive'] ) && 'yes' === $input['modal_archive'] ) ? 'yes' : 'no',
-			'modal_product' => ( isset( $input['modal_product'] ) && 'yes' === $input['modal_product'] ) ? 'yes' : 'no',
-			'style'         => ( isset( $input['style'] ) && 'toast' === $input['style'] ) ? 'toast' : 'modal',
+			'archive'       => $archive,
+			'product'       => $product,
+			/* Legacy mirrors, so older templates keep working. */
+			'modal_archive' => 'off' !== $archive ? 'yes' : 'no',
+			'modal_product' => 'off' !== $product ? 'yes' : 'no',
+			'style'         => 'bar' === $archive ? 'toast' : 'modal',
 		);
 	}
 
@@ -950,45 +957,41 @@ final class HSW_Widget_Manager {
 								</div>
 							</header>
 
-							<?php $fb_style = HSW_Assets::feedback_settings()['style']; ?>
+							<?php
+							$fb_modes = array(
+								'modal' => __( 'مودال میان‌صفحه', 'hamishop-elementor-widgets' ),
+								'bar'   => __( 'نوار تک‌خطی', 'hamishop-elementor-widgets' ),
+								'off'   => __( 'غیرفعال', 'hamishop-elementor-widgets' ),
+							);
+							?>
 							<div class="hsw-wm-rows">
 								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
-										<strong><?php esc_html_e( 'شکل نمایش', 'hamishop-elementor-widgets' ); ?></strong>
-										<small><?php esc_html_e( 'مودال: پنجرهٔ شیشه‌ای با محتوای سبد. نوار تک‌خطی: یک خط بالای صفحه با نوار سبز ۵ ثانیه‌ای و لینک «مشاهده سبد خرید».', 'hamishop-elementor-widgets' ); ?></small>
+										<strong><?php esc_html_e( 'در آرشیو و فهرست محصولات', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'مودال: پنجرهٔ شیشه‌ای با محتوای سبد. نوار: یک خط بالای صفحه با لینک «مشاهده سبد خرید». غیرفعال: هیچ بازخوردی نمایش داده نمی‌شود.', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
 									<span class="hsw-wm-field">
-										<select name="hsw_add_feedback[style]" id="hsw-fb-style">
-											<option value="modal" <?php selected( $fb_style, 'modal' ); ?>><?php esc_html_e( 'مودال سبد خرید', 'hamishop-elementor-widgets' ); ?></option>
-											<option value="toast" <?php selected( $fb_style, 'toast' ); ?>><?php esc_html_e( 'نوار تک‌خطی', 'hamishop-elementor-widgets' ); ?></option>
+										<select name="hsw_add_feedback[archive]" id="hsw-fb-archive">
+											<?php foreach ( $fb_modes as $mode => $label ) : ?>
+												<option value="<?php echo esc_attr( $mode ); ?>" <?php selected( $fb['archive_style'], $mode ); ?>><?php echo esc_html( $label ); ?></option>
+											<?php endforeach; ?>
 										</select>
 									</span>
 								</div>
 
-								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-fb-archive">
+								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
-										<strong><?php esc_html_e( 'مودال سبد خرید در آرشیو و فهرست محصولات', 'hamishop-elementor-widgets' ); ?></strong>
-										<small><?php esc_html_e( 'پیشنهاد ما: روشن. مشتری در حال مرور است و «ادامه خرید» او را در همان صفحه نگه می‌دارد.', 'hamishop-elementor-widgets' ); ?></small>
+										<strong><?php esc_html_e( 'در صفحهٔ محصول', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پیش‌فرض «غیرفعال»: مشتری همان کالا را می‌بیند و مودال روی گالری می‌افتد. اگر بازخورد می‌خواهید، مودال یا نوار را انتخاب کنید.', 'hamishop-elementor-widgets' ); ?></small>
 									</span>
-									<span class="hsw-wm-switch">
-										<?php /* Hidden "no" first: an unchecked box posts nothing, so the option would keep its old value forever. */ ?>
-										<input type="hidden" name="hsw_add_feedback[modal_archive]" value="no" />
-										<input type="checkbox" id="hsw-fb-archive" name="hsw_add_feedback[modal_archive]" value="yes" <?php checked( $fb['archive'] ); ?> />
-										<span class="hsw-wm-track" aria-hidden="true"></span>
+									<span class="hsw-wm-field">
+										<select name="hsw_add_feedback[product]" id="hsw-fb-product">
+											<?php foreach ( $fb_modes as $mode => $label ) : ?>
+												<option value="<?php echo esc_attr( $mode ); ?>" <?php selected( $fb['product_style'], $mode ); ?>><?php echo esc_html( $label ); ?></option>
+											<?php endforeach; ?>
+										</select>
 									</span>
-								</label>
-
-								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-fb-product">
-									<span class="hsw-wm-rowtext">
-										<strong><?php esc_html_e( 'مودال سبد خرید در صفحهٔ محصول', 'hamishop-elementor-widgets' ); ?></strong>
-										<small><?php esc_html_e( 'پیش‌فرض خاموش. در صفحهٔ محصول مشتری همان کالا را می‌بیند و مودال روی گالری می‌افتد؛ اگر مودال را می‌خواهید، روشنش کنید. در حالت خاموش فقط یک پیام کوتاه نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
-									</span>
-									<span class="hsw-wm-switch">
-										<input type="hidden" name="hsw_add_feedback[modal_product]" value="no" />
-										<input type="checkbox" id="hsw-fb-product" name="hsw_add_feedback[modal_product]" value="yes" <?php checked( $fb['product'] ); ?> />
-										<span class="hsw-wm-track" aria-hidden="true"></span>
-									</span>
-								</label>
+								</div>
 							</div>
 						</section>
 

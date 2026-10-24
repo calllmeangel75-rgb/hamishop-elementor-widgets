@@ -241,10 +241,100 @@
 
         /* Day pills (desktop buttons + mobile pills share one selectable order) */
         /*
+ * «ادامه و ورود به مرحله پرداخت» must not leave the page while the delivery
+ * address is incomplete. With a filled form we save it first and then continue
+ * to the pay step; otherwise we bring the form into view and point at the
+ * empty fields.
+ */
+document.addEventListener( 'click', function ( event ) {
+	var cta = event.target.closest( '.hsw-k-cta' );
+	if ( ! cta ) { return; }
+	if ( document.body.classList.contains( 'elementor-editor-active' ) ) { return; }
+
+	var has    = cta.getAttribute( 'data-has-address' ) === '1';
+	var form   = document.querySelector( '[data-hsw-address-form]' );
+	var drawer = form ? form.closest( '[data-hsw-address-drawer]' ) : null;
+	var open   = !!( form && form.offsetParent !== null );
+
+	if ( has && ! open ) { return; }
+
+	event.preventDefault();
+
+	var payUrl = cta.getAttribute( 'data-hsw-pay-url' ) || cta.getAttribute( 'href' ) || '';
+	if ( ! form ) { window.location.href = payUrl; return; }
+
+	if ( drawer ) { drawer.hidden = false; }
+
+	var keys = [ 'first_name', 'phone', 'state', 'city', 'address_1' ];
+	var body = {};
+	var missing = [];
+	keys.forEach( function ( key ) {
+		var el = form.querySelector( '[name="' + key + '"]' );
+		body[ key ] = el ? el.value.trim() : '';
+		if ( ! body[ key ] ) {
+			missing.push( key );
+			if ( el ) { el.classList.add( 'is-missing' ); }
+		} else if ( el ) {
+			el.classList.remove( 'is-missing' );
+		}
+	} );
+
+	var msg = document.querySelector( '[data-hsw-address-msg]' );
+
+	if ( missing.length ) {
+		if ( form.scrollIntoView ) { form.scrollIntoView( { behavior: 'smooth', block: 'center' } ); }
+		var first = form.querySelector( '[name="' + missing[0] + '"]' );
+		if ( first && first.focus ) { first.focus( { preventScroll: true } ); }
+		if ( msg ) {
+			msg.hidden = false;
+			msg.textContent = 'لطفاً برای ادامه و ورود به مرحله پرداخت، اطلاعات و نشانی تحویل سفارش را تکمیل کنید.';
+		}
+		return;
+	}
+
+	/* All five fields are there: save, then continue. */
+	var btn = form.querySelector( '.hsw-ckaddr__fsubmit' );
+	if ( btn ) { btn.disabled = true; btn.classList.add( 'is-busy' ); }
+	if ( msg ) { msg.hidden = true; }
+
+	var extra = {};
+	var sched = ( typeof savedSchedule === 'function' ) ? savedSchedule() : null;
+	if ( sched && ( sched.day || sched.slot ) ) {
+		extra.schedule_day  = sched.day || '';
+		extra.schedule_slot = sched.slot || '';
+	}
+
+	var req = ( typeof post === 'function' ) ? post( '/checkout/address', Object.assign( {}, body, extra ) ) : Promise.reject( new Error( 'no transport' ) );
+	req.then( function () {
+		window.location.href = payUrl;
+	} ).catch( function () {
+		if ( btn ) { btn.disabled = false; btn.classList.remove( 'is-busy' ); }
+		if ( msg ) {
+			msg.hidden = false;
+			msg.textContent = 'ذخیرهٔ نشانی انجام نشد؛ دوباره تلاش کنید.';
+		}
+	} );
+} );
+
+/*
  * The checkout CTA refuses to move on without a delivery address: the pay page
  * builds the order from that address, so the customer used to arrive there and
  * be told to go add one in the account. Bring the inline form into view instead.
  */
+/* «ویرایش / تغییر آدرس» opens the inline form instead of leaving checkout. */
+document.addEventListener( 'click', function ( event ) {
+	var edit = event.target.closest( '[data-hsw-address-edit]' );
+	if ( ! edit ) { return; }
+	var form = document.querySelector( '[data-hsw-address-form]' );
+	if ( ! form ) { return; }
+	event.preventDefault();
+	var drawer = form.closest( '[data-hsw-address-drawer]' );
+	if ( drawer ) { drawer.hidden = false; }
+	if ( form.scrollIntoView ) { form.scrollIntoView( { behavior: 'smooth', block: 'center' } ); }
+	var first = form.querySelector( '[name="first_name"]' );
+	if ( first && first.focus ) { first.focus( { preventScroll: true } ); }
+} );
+
 document.addEventListener( 'click', function ( event ) {
 	var link = event.target.closest( '[data-hsw-need-address]' );
 	if ( ! link ) { return; }

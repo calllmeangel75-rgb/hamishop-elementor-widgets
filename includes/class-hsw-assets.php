@@ -285,10 +285,32 @@ class HSW_Assets {
                 $saved = get_option( 'hsw_add_feedback', array() );
                 $saved = is_array( $saved ) ? $saved : array();
 
+                /*
+                 * Three explicit states per context: modal / bar / off. The old
+                 * pair of checkboxes plus one global style select could not say
+                 * "bar in the archive, nothing on the product page".
+                 */
+                $modes = array( 'modal', 'bar', 'off' );
+
+                $archive = isset( $saved['archive'] ) ? (string) $saved['archive'] : '';
+                if ( ! in_array( $archive, $modes, true ) ) {
+                        /* Legacy: modal_archive=yes + style=modal|toast. */
+                        $legacy_on = ! isset( $saved['modal_archive'] ) ? true : ( 'yes' === $saved['modal_archive'] );
+                        $legacy_st = ( isset( $saved['style'] ) && 'toast' === $saved['style'] ) ? 'bar' : 'modal';
+                        $archive   = $legacy_on ? $legacy_st : 'off';
+                }
+
+                $product = isset( $saved['product'] ) ? (string) $saved['product'] : '';
+                if ( ! in_array( $product, $modes, true ) ) {
+                        $product = ( isset( $saved['modal_product'] ) && 'yes' === $saved['modal_product'] ) ? 'modal' : 'off';
+                }
+
                 return array(
-                        'archive' => ! isset( $saved['modal_archive'] ) ? true : ( 'yes' === $saved['modal_archive'] ),
-                        'product' => isset( $saved['modal_product'] ) && 'yes' === $saved['modal_product'],
-                        'style'   => ( isset( $saved['style'] ) && 'toast' === $saved['style'] ) ? 'toast' : 'modal',
+                        'archive'       => 'off' !== $archive,
+                        'product'       => 'off' !== $product,
+                        'archive_style' => $archive,
+                        'product_style' => $product,
+                        'style'         => 'bar' === $archive ? 'toast' : 'modal',
                 );
         }
 
@@ -538,7 +560,7 @@ class HSW_Assets {
                                 'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'modal'        => self::feedback_settings()['product'],
-                                'feedbackStyle' => self::feedback_settings()['style'],
+                                'feedbackStyle' => self::feedback_settings()['product_style'],
                         )
                 );
 
@@ -557,7 +579,7 @@ class HSW_Assets {
                                 'closeText'    => __( 'بستن', 'hamishop-elementor-widgets' ),
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'modal'        => self::feedback_settings()['archive'],
-                                'feedbackStyle' => self::feedback_settings()['style'],
+                                'feedbackStyle' => self::feedback_settings()['archive_style'],
                         )
                 );
         }

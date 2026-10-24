@@ -1094,6 +1094,33 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		/*
+		 * Dedicated pair for the three functional buttons. The palette already
+		 * ships defaults (`--hsw-hd-act-icon` / `--hsw-hd-act-bg`); these two
+		 * controls override them per header.
+		 */
+		$this->add_control(
+			'action_icon_color',
+			array(
+				'label'       => __( 'رنگ آیکون دکمه‌های هدر (سبد خرید، حساب کاربری، همبرگری)', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-act-icon: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'action_icon_bg',
+			array(
+				'label'       => __( 'رنگ پس‌زمینهٔ دکمه‌های هدر (سبد خرید، حساب کاربری، همبرگری)', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-act-bg: {{VALUE}};',
+				),
+			)
+		);
+
+		/*
 		 * The three round icon buttons (menu, account, cart) also accept a
 		 * background: on a light header they are invisible without one, and the
 		 * customer asked for both knobs in one place.

@@ -14,7 +14,7 @@
 	/* ---------- per-product state ---------- */
 	var states = {};
 	function state(pid) {
-		if (!states[pid]) { states[pid] = { qty: 1, color: '', storage: '', chips: {}, variation: null, data: null }; }
+		if (!states[pid]) { states[pid] = { qty: 1, color: '', storage: '', chips: {}, variation: null, data: null, cartQty: 0, cartVariationId: 0 }; }
 		if (!states[pid].chips) { states[pid].chips = {}; }
 		return states[pid];
 	}
@@ -85,6 +85,7 @@
 					old.style.display = (variation.discount > 0) ? '' : 'none';
 				}
 				if (save) {
+					if (variation.save_html) { save.textContent = variation.save_html; }
 					save.style.display = (variation.discount > 0) ? '' : 'none';
 				}
 				if (off) {
@@ -97,6 +98,24 @@
 			if (variation && variation.image) {
 				var img = root.querySelector('.hsw-pgal__img');
 				if (img) { img.src = variation.image; }
+			}
+
+			/*
+			 * The stepper belongs to the selected variation, not to the
+			 * product: switching to a variation that is not in the cart must
+			 * close it again (and seed it with the real line quantity when it
+			 * is).
+			 */
+			if (variation) {
+				/*
+				 * The line belongs to one variation. Switching to a different
+				 * one must close the stepper even if the product (or another
+				 * variation) is in the cart.
+				 */
+				var own = (st.cartVariationId && variation.id === st.cartVariationId) ? (st.cartQty || 0) : 0;
+				var cq  = Math.max(parseInt(variation.cart_qty || 0, 10) || 0, own);
+				root.classList.toggle('is-not-in-cart', cq <= 0);
+				root.setAttribute('data-hsw-in-cart', String(cq));
 			}
 		});
 		document.dispatchEvent(new CustomEvent('hsw:variant', { detail: { product: pid, variation: variation, state: st } }));
@@ -407,6 +426,11 @@
 	function setRootInCart(pid, inCart, qty) {
 		var n = parseInt(qty, 10);
 		if (isNaN(n) || n < 0) { n = 1; }
+		/* Mirror the real quantity onto the selected variation. */
+		var st = state(pid);
+		if (st.variation) { st.variation.cart_qty = inCart ? n : 0; }
+		st.cartQty = inCart ? n : 0;
+		st.cartVariationId = inCart && st.variation ? st.variation.id : 0;
 		roots(pid).forEach(function (r) {
 			r.classList.toggle('is-not-in-cart', !inCart);
 			/* The real cart quantity, never a boolean: addToCart() reads it back. */

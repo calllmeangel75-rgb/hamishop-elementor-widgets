@@ -152,9 +152,10 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 $this->add_control(
                         'shipping_tip',
                         array(
-                                'label'   => __( 'راهنمای آیکن ارسال', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'ارسال بالای ۱ میلیون رایگان است', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'راهنمای آیکن ارسال', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'خالی بگذارید تا خودکار از سقف «ارسال رایگان» ساخته شود؛ اگر آن سقف صفر باشد، آیکن نمایش داده نمی‌شود.', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => '',
                         )
                 );
 
@@ -407,11 +408,15 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                  * produced «برو حساب کاربری آدرس بزن». The CTA now lands on the
                  * inline address form instead of the next step.
                  */
-                $need_address = ( ! $this->is_demo() && ! $this->customer_has_address() );
+                $has_address  = $this->customer_has_address();
+                $need_address = ( ! $this->is_demo() && ! $has_address );
+                $pay_url      = $cta_url;
                 if ( $need_address ) {
                         $cta_url = '#hsw-ckaddr-first_name';
                 }
-                $cta_attr = $need_address ? ' data-hsw-need-address="1"' : '';
+                $cta_attr = ' data-has-address="' . ( $has_address ? '1' : '0' ) . '"'
+                        . ' data-hsw-pay-url="' . esc_url( $pay_url ) . '"'
+                        . ( $need_address ? ' data-hsw-need-address="1"' : '' );
                 $taxes_on = ( ! $this->is_demo() ) && $this->taxes_total() > 0;
 
                 $shipping_html = ( 'free' === $t['shipping'][0] )
@@ -462,10 +467,30 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                 <?php endif; ?>
 
                                                 <div class="hsw-cksum__row">
+                                                        <?php
+                                                        /*
+                                                         * The tip only exists when free shipping is actually
+                                                         * on. A template saved with the old default text
+                                                         * («ارسال بالای ۱ میلیون رایگان است») must not keep
+                                                         * promising it after the threshold is set to 0.
+                                                         */
+                                                        $free_min = class_exists( 'HSW_Free_Shipping' ) ? (float) HSW_Free_Shipping::threshold() : 0.0;
+                                                        $tip_text = trim( (string) $this->opt( 'shipping_tip', '' ) );
+                                                        if ( '' === $tip_text && $free_min > 0 ) {
+                                                                $tip_text = sprintf(
+                                                                        /* translators: %s: amount. */
+                                                                        __( 'ارسال بالای %s تومان رایگان است', 'hamishop-elementor-widgets' ),
+                                                                        HSW_Helpers::price_num( $free_min )
+                                                                );
+                                                        }
+                                                        if ( $free_min <= 0 ) {
+                                                                $tip_text = '';
+                                                        }
+                                                        ?>
                                                         <span class="hsw-cksum__tip">
                                                                 <?php echo esc_html( $this->opt( 'shipping_label', __( 'هزینه ارسال:', 'hamishop-elementor-widgets' ) ) ); ?>
-                                                                <?php if ( '' !== trim( $this->opt( 'shipping_tip', '' ) ) ) : ?>
-                                                                        <span class="hsw-cksum__tipic" data-tip="<?php echo esc_attr( $this->opt( 'shipping_tip', '' ) ); ?>" title="<?php echo esc_attr( $this->opt( 'shipping_tip', '' ) ); ?>"><?php echo HSW_Helpers::icon( 'info' ); ?></span>
+                                                                <?php if ( '' !== $tip_text ) : ?>
+                                                                        <span class="hsw-cksum__tipic" data-tip="<?php echo esc_attr( $tip_text ); ?>" title="<?php echo esc_attr( $tip_text ); ?>"><?php echo HSW_Helpers::icon( 'info' ); ?></span>
                                                                 <?php endif; ?>
                                                         </span>
                                                         <span class="hsw-cksum__v" data-hswk="shipping"><?php echo $shipping_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>

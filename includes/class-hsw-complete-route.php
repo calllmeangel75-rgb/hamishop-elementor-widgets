@@ -30,6 +30,7 @@ final class HSW_Complete_Route {
         add_filter( 'woocommerce_get_checkout_order_received_url', array( $this, 'route_url' ), 20, 2 );
         add_action( 'template_redirect', array( $this, 'route_request' ) );
         add_action( 'template_redirect', array( $this, 'guard_pay_address' ), 5 );
+        add_action( 'template_redirect', array( $this, 'guard_checkout_login' ), 4 );
     }
 
     /* =========================================================================
@@ -142,6 +143,43 @@ final class HSW_Complete_Route {
         }
         $url = get_permalink( $id );
         return $url ? (string) $url : '';
+    }
+
+    /**
+     * Checkout needs an account.
+     *
+     * A guest could fill the address form, reach the pay step and only then
+     * discover that the order has nowhere to live. Sending them to the login
+     * screen with `redirect_to` brings them straight back with the cart intact.
+     *
+     * @return void
+     */
+    public function guard_checkout_login() {
+        if ( is_admin() || is_user_logged_in() ) {
+            return;
+        }
+        if ( ! apply_filters( 'hsw_require_login_checkout', true ) ) {
+            return;
+        }
+        if ( ! function_exists( 'wc_get_page_id' ) || ! function_exists( 'WC' ) || ! WC()->cart ) {
+            return;
+        }
+        if ( WC()->cart->is_empty() ) {
+            return;
+        }
+
+        $checkout_id = (int) wc_get_page_id( 'checkout' );
+        if ( $checkout_id <= 0 || ! is_page( $checkout_id ) ) {
+            return;
+        }
+
+        $login = wc_get_page_permalink( 'myaccount' );
+        if ( ! $login ) {
+            return;
+        }
+
+        wp_safe_redirect( add_query_arg( 'redirect_to', wc_get_checkout_url(), $login ) );
+        exit;
     }
 
     /**
