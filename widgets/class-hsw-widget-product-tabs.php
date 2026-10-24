@@ -108,6 +108,44 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 );
 
                 $this->add_control(
+                        'tab_warranty',
+                        array(
+                                'label'   => __( 'تب گارانتی و خدمات', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::SWITCHER,
+                                'default' => 'yes',
+                        )
+                );
+
+                $this->add_control(
+                        'lbl_warranty',
+                        array(
+                                'label'   => __( 'عنوان تب گارانتی', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::TEXT,
+                                'default' => __( 'گارانتی و خدمات', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'warranty_title',
+                        array(
+                                'label'   => __( 'عنوان پنل گارانتی', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::TEXT,
+                                'default' => __( 'گارانتی و خدمات پس از فروش', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'warranty_text',
+                        array(
+                                'label'       => __( 'متن گارانتی (هر خط یک مورد)', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXTAREA,
+                                'rows'        => 6,
+                                'label_block' => true,
+                                'default'     => "گارانتی اصالت و سلامت کالا\nخدمات پس از فروش در مراکز مجاز\nبازگشت کالا تا ۷ روز",
+                        )
+                );
+
+                $this->add_control(
                         'specs_title',
                         array(
                                 'label'   => __( 'عنوان جدول مشخصات', 'hamishop-elementor-widgets' ),
@@ -239,12 +277,26 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 $lbl_comments = isset( $s['lbl_comments'] ) && '' !== trim( (string) $s['lbl_comments'] ) ? $s['lbl_comments'] : __( 'دیدگاه‌ها و نظرات خریداران', 'hamishop-elementor-widgets' );
                 $specs_title  = isset( $s['specs_title'] ) && '' !== trim( (string) $s['specs_title'] ) ? $s['specs_title'] : __( 'مشخصات کلیدی و فنی کالا', 'hamishop-elementor-widgets' );
 
+                $lbl_warranty   = isset( $s['lbl_warranty'] ) && '' !== trim( (string) $s['lbl_warranty'] ) ? $s['lbl_warranty'] : __( 'گارانتی و خدمات', 'hamishop-elementor-widgets' );
+                $warranty_title = isset( $s['warranty_title'] ) && '' !== trim( (string) $s['warranty_title'] ) ? $s['warranty_title'] : __( 'گارانتی و خدمات پس از فروش', 'hamishop-elementor-widgets' );
+                $warranty_text  = isset( $s['warranty_text'] ) && '' !== trim( (string) $s['warranty_text'] ) ? (string) $s['warranty_text'] : "گارانتی اصالت و سلامت کالا\nخدمات پس از فروش در مراکز مجاز\nبازگشت کالا تا ۷ روز";
+
                 $show_specs    = ( 'yes' === ( $s['tab_specs'] ?? 'yes' ) );
+                $show_warranty = ( 'yes' === ( $s['tab_warranty'] ?? 'yes' ) );
                 $show_review   = ( 'yes' === ( $s['tab_review'] ?? 'yes' ) );
                 $show_comments = ( 'yes' === ( $s['tab_comments'] ?? 'yes' ) );
                 ?>
-                <section class="<?php echo esc_attr( $this->root_class( 'ptabs', 'hsw-d' ) ); ?>">
-                        <div class="hsw-ptabs__nav">
+                <?php
+                /*
+                 * One tab strip for every viewport. The mobile build used to be a
+                 * separate accordion with different content; now both breakpoints
+                 * read the same tabs, and on a narrow screen the strip scrolls
+                 * sideways with a thin chevron hinting there is more.
+                 */
+                ?>
+                <section class="<?php echo esc_attr( $this->root_class( 'ptabs' ) ); ?>" data-hsw-ptabs>
+                        <div class="hsw-ptabs__navwrap">
+                        <div class="hsw-ptabs__nav" data-hsw-tabs-scroll>
                                 <?php if ( $show_specs ) : ?>
                                         <button type="button" class="hsw-ptabs__btn is-active" data-hsw-tab="specs">
                                                 <?php echo HSW_Helpers::icon( 'tune' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
@@ -257,12 +309,22 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                                 <span><?php echo esc_html( $lbl_review ); ?></span>
                                         </button>
                                 <?php endif; ?>
+                                <?php if ( $show_warranty ) : ?>
+                                        <button type="button" class="hsw-ptabs__btn" data-hsw-tab="warranty">
+                                                <?php echo HSW_Helpers::icon( 'verified_user' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                <span><?php echo esc_html( $lbl_warranty ); ?></span>
+                                        </button>
+                                <?php endif; ?>
                                 <?php if ( $show_comments ) : ?>
                                         <button type="button" class="hsw-ptabs__btn" data-hsw-tab="comments">
                                                 <?php echo HSW_Helpers::icon( 'rate_review' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                 <span><?php echo esc_html( $lbl_comments ); ?></span>
                                         </button>
                                 <?php endif; ?>
+                        </div>
+                        <button type="button" class="hsw-ptabs__more" data-hsw-tabs-more aria-label="<?php esc_attr_e( 'تب‌های بیشتر', 'hamishop-elementor-widgets' ); ?>">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 6l-6 6 6 6"></path><path d="M19 6l-6 6 6 6" opacity=".4"></path></svg>
+                        </button>
                         </div>
 
                         <?php if ( $show_specs ) : ?>
@@ -303,6 +365,25 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                                         <?php endif; ?>
                                                 <?php endif; ?>
                                         </div>
+                                </div>
+                        <?php endif; ?>
+
+                        <?php if ( $show_warranty ) : ?>
+                                <div class="hsw-ptabs__panel" data-hsw-panel="warranty">
+                                        <h2 class="hsw-ptabs__h2"><?php echo esc_html( $warranty_title ); ?></h2>
+                                        <?php
+                                        $w_lines = preg_split( '/\r\n|\r|\n/', trim( (string) $warranty_text ) );
+                                        $w_lines = array_filter( array_map( 'trim', (array) $w_lines ) );
+                                        ?>
+                                        <?php if ( empty( $w_lines ) ) : ?>
+                                                <p><?php esc_html_e( 'اطلاعاتی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
+                                        <?php else : ?>
+                                                <ul class="hsw-ptabs__warranty">
+                                                        <?php foreach ( $w_lines as $line ) : ?>
+                                                                <li><?php echo HSW_Helpers::icon( 'check_circle' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php echo esc_html( $line ); ?></span></li>
+                                                        <?php endforeach; ?>
+                                                </ul>
+                                        <?php endif; ?>
                                 </div>
                         <?php endif; ?>
 

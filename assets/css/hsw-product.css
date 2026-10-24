@@ -807,13 +807,72 @@
         box-shadow: var(--hsw-card-shadow);
         overflow: hidden;
 }
+.hsw-ptabs__navwrap { position: relative; }
+
 .hsw-ptabs__nav {
         display: flex;
         align-items: center;
+        gap: 2px;
         border-bottom: 1px solid var(--hsw-surface-variant);
         padding-inline: 16px;
         background: var(--hsw-tabnav-bg, var(--hsw-surface-bright));
         overflow-x: auto;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+}
+.hsw-ptabs__nav::-webkit-scrollbar { display: none; }
+.hsw-ptabs__btn { flex: 0 0 auto; white-space: nowrap; scroll-snap-align: start; }
+
+/* «there is more» — two thin chevrons fading in from the edge, no circle. */
+.hsw-ptabs__more {
+        position: absolute;
+        top: 0;
+        bottom: 1px;
+        left: 0;
+        width: 52px;
+        display: none;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 0 8px;
+        border: 0;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--hsw-tabnav-bg, var(--hsw-surface-bright)) 58%);
+        color: var(--hsw-on-surface-variant);
+        cursor: pointer;
+        transition: opacity .2s, color .15s;
+}
+.hsw-ptabs__navwrap.is-scrollable .hsw-ptabs__more { display: flex; }
+.hsw-ptabs__more:hover,
+.hsw-ptabs__more:focus-visible { color: var(--hsw-primary); }
+.hsw-ptabs__more.is-off { opacity: 0; pointer-events: none; }
+.hsw-ptabs__more svg { display: block; }
+
+/* Warranty tab list. */
+.hsw-ptabs__warranty {
+        list-style: none;
+        margin: 14px 0 0;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+}
+.hsw-ptabs__warranty li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        background: var(--hsw-surface-low, #f3f4f6);
+        border: 1px solid var(--hsw-outline-variant);
+        font-size: 13px;
+        color: var(--hsw-on-surface);
+}
+.hsw-ptabs__warranty .hsw-ic { color: var(--hsw-emerald, #059669); flex: 0 0 auto; }
+
+@media (max-width: 767.98px) {
+        .hsw-ptabs__nav { padding-inline: 12px; }
+        .hsw-ptabs__more { width: 46px; }
 }
 .hsw-ptabs__btn {
         display: flex;

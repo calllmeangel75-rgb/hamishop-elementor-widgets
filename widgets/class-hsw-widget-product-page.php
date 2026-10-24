@@ -57,7 +57,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 $this->part_section( 'ptr_', __( '۷. سیگنال‌های اعتماد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Trust', array( 'vis', 'trust_items' ) );
 
-                $this->part_section( 'ptb_', __( '۸. تب‌ها (دسکتاپ)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Tabs', array( 'vis', 'specs_title', 'lbl_specs', 'lbl_review', 'lbl_comments', 'tab_specs', 'tab_review', 'tab_comments', 'reviews_count' ) );
+                $this->part_section( 'ptb_', __( '۸. تب‌ها (دسکتاپ و موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Tabs', array( 'vis', 'specs_title', 'lbl_specs', 'lbl_review', 'lbl_comments', 'tab_specs', 'tab_review', 'tab_comments', 'reviews_count' ) );
 
                 $this->part_section( 'pac_', __( '۹. آکاردئون‌ها (موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Accordions', array( 'vis', 'acc_specs_title', 'acc_warranty_title', 'acc_reviews_title', 'acc_specs', 'acc_warranty', 'acc_reviews', 'reviews_count2', 'warranty_items' ) );
 
@@ -252,14 +252,14 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 echo '</div>'; // .hsw-cp__hero
 
-                if ( $this->part_on( 'ptb_' ) || $this->part_on( 'pac_' ) ) {
+                /*
+                 * One tab strip for both breakpoints. The mobile accordion is no
+                 * longer printed: it carried a different set of sections, which
+                 * made the phone and desktop pages say different things.
+                 */
+                if ( $this->part_on( 'ptb_' ) ) {
                         echo '<div class="hsw-cp__panels">';
-                        if ( $this->part_on( 'ptb_' ) ) {
-                                $this->print_part( 'ptb_', '\HSW_Widget_Product_Tabs' );
-                        }
-                        if ( $this->part_on( 'pac_' ) ) {
-                                $this->print_part( 'pac_', '\HSW_Widget_Product_Accordions' );
-                        }
+                        $this->print_part( 'ptb_', '\HSW_Widget_Product_Tabs' );
                         echo '</div>';
                 }
 

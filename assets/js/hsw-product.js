@@ -758,6 +758,9 @@
 		/* Carousels (related products, gallery thumbs). init() runs on load and
 		   again after every Elementor re-render, so this cannot be missed. */
 		document.querySelectorAll('[data-hsw-carousel], .hsw-pgal__wrap').forEach(initCarousel);
+
+		/* Product tabs: one strip, scrolls sideways on narrow screens. */
+		document.querySelectorAll('[data-hsw-ptabs]').forEach(initTabs);
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);
@@ -770,6 +773,59 @@
 			window.elementorFrontend && window.elementorFrontend.hooks.addAction('frontend/element_ready/global', function () { init(); });
 		});
 
+	}
+
+	/* ================= PRODUCT TABS ================= */
+
+	/*
+	 * The same tab strip on every screen. When it does not fit, it scrolls and a
+	 * thin double-chevron appears at the reading edge; it fades away once the
+	 * last tab is reached. Clicking a tab also centres it in the strip.
+	 */
+	function initTabs(root) {
+		if (!root || root.getAttribute('data-hsw-tabs-ready') === '1') { return; }
+		var nav = root.querySelector('[data-hsw-tabs-scroll]');
+		if (!nav) { return; }
+		root.setAttribute('data-hsw-tabs-ready', '1');
+
+		var wrap = nav.closest('.hsw-ptabs__navwrap');
+		var more = root.querySelector('[data-hsw-tabs-more]');
+
+		function rtl() {
+			return 'rtl' === (getComputedStyle(nav).direction || 'rtl');
+		}
+
+		function sync() {
+			var max = nav.scrollWidth - nav.clientWidth;
+			var scrollable = max > 4;
+			if (wrap) { wrap.classList.toggle('is-scrollable', scrollable); }
+			if (!more) { return; }
+			var off = Math.abs(nav.scrollLeft);
+			more.classList.toggle('is-off', !scrollable || off >= max - 4);
+		}
+
+		nav.addEventListener('scroll', sync, { passive: true });
+		window.addEventListener('resize', sync);
+
+		if (more) {
+			more.addEventListener('click', function () {
+				var step = Math.max(120, Math.round(nav.clientWidth * 0.6));
+				nav.scrollBy({ left: rtl() ? -step : step, behavior: 'smooth' });
+				setTimeout(sync, 340);
+			});
+		}
+
+		root.querySelectorAll('[data-hsw-tab]').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				if (btn.scrollIntoView) {
+					btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+				}
+				setTimeout(sync, 340);
+			});
+		});
+
+		sync();
+		setTimeout(sync, 200);
 	}
 
 	/* ================= CAROUSEL ================= */
