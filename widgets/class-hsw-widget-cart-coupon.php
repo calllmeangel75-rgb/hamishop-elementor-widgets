@@ -164,6 +164,11 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
         }
 
         protected function render() {
+                /* Empty cart → no coupon box. */
+                if ( ! $this->is_demo() && ( ! $this->has_cart() || 0 === $this->cart_count() ) ) {
+                        return;
+                }
+
                 /* Coupons disabled → nothing to render (dynamic behavior). */
                 if ( $this->has_cart() && function_exists( 'wc_coupons_enabled' ) && ! wc_coupons_enabled() ) {
                         return;

@@ -183,6 +183,11 @@ class HSW_Widget_Cart_Banner extends HSW_Cart_Base {
         }
 
         protected function render() {
+                /* Empty cart → no «تنها X تومان تا ارسال رایگان» promise. */
+                if ( ! $this->is_demo() && ( ! $this->has_cart() || 0 === $this->cart_count() ) ) {
+                        return;
+                }
+
                 $state = $this->banner_state();
                 if ( null === $state ) {
                         return;

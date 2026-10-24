@@ -307,13 +307,12 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                         </div>
                                 <?php endif; ?>
 
-                                <?php if ( count( $images ) > 1 ) : ?>
-                                        <div class="hsw-pgal__dots hsw-m">
-                                                <?php foreach ( $images as $i => $url ) : ?>
-                                                        <button type="button" class="hsw-pgal__dot<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>"></button>
-                                                <?php endforeach; ?>
-                                        </div>
-                                <?php endif; ?>
+                                <?php
+                                /*
+                                 * No dot strip: the thumbnail carousel is now visible on
+                                 * mobile too, so the dots were a second, redundant control.
+                                 */
+                                ?>
                         </div>
                 </section>
                 <?php

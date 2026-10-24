@@ -869,11 +869,8 @@
 		if (phoneField) { setHidden(phoneField, isEmail); }
 		if (emailField) { setHidden(emailField, !isEmail); }
 		/* Register form: the account email *is* the recipient on this channel. */
-		var regEmail = box.querySelector('[data-hsw-otp-regemail]');
-		if (regEmail) {
-			var wrap = regEmail.closest('.hsw-ac-field');
-			if (wrap) { setHidden(wrap, isEmail); }
-		}
+		var regWrap = box.querySelector('[data-hsw-otp-regemail-wrap]');
+		if (regWrap) { setHidden(regWrap, isEmail); }
 		return isEmail ? box.querySelector('[data-hsw-otp-emailid]') : box.querySelector('[data-hsw-otp-phone]');
 	}
 
@@ -1149,6 +1146,16 @@
 	}
 
 	document.addEventListener('click', function (event) {
+		var faChannel = event.target.closest('[data-hsw-2fa-channel]');
+		if (faChannel) {
+			var faBox = faChannel.closest('[data-hsw-2fa]');
+			if (faBox) {
+				var ch = faChannel.getAttribute('data-hsw-2fa-channel');
+				var wrap = faBox.querySelector('[data-hsw-2fa-phone-wrap]');
+				if (wrap) { setHidden(wrap, 'sms' !== ch); }
+			}
+		}
+
 		var otpChannel = event.target.closest('[data-hsw-otp-channel]');
 		if (otpChannel) {
 			event.preventDefault();

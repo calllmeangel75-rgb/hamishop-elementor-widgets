@@ -6458,8 +6458,19 @@ a.hsw-ac__stat:hover {
 	background-color: #fff !important;
 	color: var(--hsw-ac-primary, #0e2a47) !important;
 }
-.hsw-ac .hsw-ac-auth__tabs button:is(:hover, :focus, :focus-visible) {
+.hsw-ac .hsw-ac-auth__tabs button:not(.is-active):is(:hover, :focus, :focus-visible) {
 	background-color: transparent !important;
+	color: var(--hsw-ac-primary, #0e2a47) !important;
+}
+/* The active pill keeps its white background on hover/focus — the generic
+   hover rule above used to erase it the moment the pointer touched the tab. */
+.hsw-ac .hsw-ac-auth__tabs button.is-active:is(:hover, :focus, :focus-visible) {
+	background-color: var(--hsw-ac-card, #ffffff) !important;
+	color: var(--hsw-ac-ink, #0f172a) !important;
+}
+.hsw-ac .hsw-ac-otp__channel.is-active:is(:hover, :focus, :focus-visible),
+.hsw-ac [data-hsw-2fa-channel].is-active:is(:hover, :focus, :focus-visible) {
+	background-color: #ffffff !important;
 	color: var(--hsw-ac-primary, #0e2a47) !important;
 }
 .hsw-ac .hsw-ac-otp__resend,

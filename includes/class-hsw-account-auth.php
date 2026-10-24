@@ -1460,7 +1460,7 @@ final class HSW_Account_Auth {
 
 		$is_email_default = ( 'email' === $default );
 		$html  = '<section class="hsw-ac-otp" data-hsw-otp data-context="' . esc_attr( $context ) . '" data-channel="' . esc_attr( $default ) . '" data-channels="' . esc_attr( implode( ',', array_keys( $channels ) ) ) . '">';
-		$html .= '<div class="hsw-ac-otp__head"><span class="hsw-ac-otp__eyebrow">' . esc_html__( 'ورود سریع', 'hamishop-elementor-widgets' ) . '</span><h2>' . esc_html( 'register' === $context ? __( 'ثبت‌نام با شماره موبایل', 'hamishop-elementor-widgets' ) : __( 'ورود با کد یکبارمصرف', 'hamishop-elementor-widgets' ) ) . '</h2><p>' . esc_html__( 'کد تأیید به ایمیل، تلگرام یا پیامک شما ارسال می‌شود؛ نیازی به رمز عبور نیست.', 'hamishop-elementor-widgets' ) . '</p></div>';
+		$html .= '<div class="hsw-ac-otp__head"><span class="hsw-ac-otp__eyebrow">' . esc_html__( 'ورود سریع', 'hamishop-elementor-widgets' ) . '</span><h2>' . esc_html( 'register' === $context ? __( 'ثبت‌نام سریع با کد یکبارمصرف', 'hamishop-elementor-widgets' ) : __( 'ورود با کد یکبارمصرف', 'hamishop-elementor-widgets' ) ) . '</h2><p>' . esc_html__( 'کد تأیید به ایمیل، تلگرام یا پیامک شما ارسال می‌شود؛ نیازی به رمز عبور نیست.', 'hamishop-elementor-widgets' ) . '</p></div>';
 		$html .= '<div class="hsw-ac-otp__channels" role="radiogroup" aria-label="' . esc_attr__( 'کانال دریافت کد', 'hamishop-elementor-widgets' ) . '">';
 		foreach ( $channels as $key => $label ) {
 			$html .= '<button type="button" class="hsw-ac-otp__channel' . ( $key === $default ? ' is-active' : '' ) . '" data-hsw-otp-channel="' . esc_attr( $key ) . '" aria-pressed="' . ( $key === $default ? 'true' : 'false' ) . '">' . $this->account->icon( 'telegram' === $key ? 'send' : ( 'email' === $key ? 'mail' : 'phone' ) ) . esc_html( $label ) . '</button>';
@@ -1470,7 +1470,7 @@ final class HSW_Account_Auth {
 		$html .= '<div class="hsw-ac-otp__form" data-hsw-otp-form>';
 		if ( 'register' === $context ) {
 			$html .= '<div class="hsw-ac-field"><label for="' . esc_attr( $id ) . '-name">' . esc_html__( 'نام و نام خانوادگی', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'user' ) . '<input type="text" id="' . esc_attr( $id ) . '-name" name="name" autocomplete="name" data-hsw-otp-name></div></div>';
-			$html .= '<div class="hsw-ac-field"><label for="' . esc_attr( $id ) . '-email">' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'mail' ) . '<input type="email" id="' . esc_attr( $id ) . '-email" name="email" autocomplete="email" data-hsw-otp-email data-hsw-otp-regemail></div></div>';
+			$html .= '<div class="hsw-ac-field"' . ( $is_email_default ? ' hidden' : '' ) . ' data-hsw-otp-regemail-wrap><label for="' . esc_attr( $id ) . '-email">' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'mail' ) . '<input type="email" id="' . esc_attr( $id ) . '-email" name="email" autocomplete="email" data-hsw-otp-email data-hsw-otp-regemail></div></div>';
 		}
 		$html .= '<div class="hsw-ac-field"' . ( $is_email_default ? ' hidden' : '' ) . ' data-hsw-otp-phone-field><label for="' . esc_attr( $id ) . '-phone">' . esc_html__( 'شماره موبایل', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'phone' ) . '<input type="tel" id="' . esc_attr( $id ) . '-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="09121234567" dir="ltr" data-hsw-otp-phone></div></div>';
 		$html .= '<div class="hsw-ac-field" data-hsw-otp-email-field' . ( $is_email_default ? '' : ' hidden' ) . '><label for="' . esc_attr( $id ) . '-emailid">' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'mail' ) . '<input type="email" id="' . esc_attr( $id ) . '-emailid" name="email_id" autocomplete="email" placeholder="you@example.com" dir="ltr" data-hsw-otp-emailid></div></div>';
@@ -1523,7 +1523,9 @@ final class HSW_Account_Auth {
 		 */
 		$needs_phone = ( '' === $verified && ( isset( $channels['sms'] ) || isset( $channels['telegram'] ) || isset( $channels['whatsapp'] ) ) );
 		if ( $needs_phone ) {
-			$html .= '<div class="hsw-ac-field"><label for="hsw-2fa-phone">' . esc_html__( 'شماره موبایل', 'hamishop-elementor-widgets' ) . '</label>';
+			/* Only the SMS channel needs a number here: email uses the account
+			   address, Telegram/WhatsApp use the bot link. */
+			$html .= '<div class="hsw-ac-field"' . ( 'sms' !== $default ? ' hidden' : '' ) . ' data-hsw-2fa-phone-wrap><label for="hsw-2fa-phone">' . esc_html__( 'شماره موبایل', 'hamishop-elementor-widgets' ) . '</label>';
 			$html .= '<div class="hsw-ac-input-wrap">' . $this->account->icon( 'phone' ) . '<input type="tel" id="hsw-2fa-phone" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="09121234567" data-hsw-2fa-phone></div>';
 			$html .= '<p class="hsw-ac__security-note">' . esc_html__( 'این شماره با کد تأیید می‌شود و به‌عنوان شمارهٔ ورود حساب ثبت می‌گردد.', 'hamishop-elementor-widgets' ) . '</p></div>';
 		}

@@ -700,3 +700,26 @@
 	box-shadow: 0 12px 36px rgba(15, 32, 66, .06);
 	text-align: center;
 }
+
+/* =========================================================================
+ * Empty cart built from separate Elementor widgets.
+ *
+ * The summary column still exists in the layout (its widget returns nothing),
+ * so the empty card ended up in the wide column with an empty column beside it.
+ * These rules hide that empty column and centre the card.
+ * ====================================================================== */
+.e-con:has(.elementor-widget-hsw-cart-summary):not(:has(.hsw-csummary)),
+.elementor-column:has(.elementor-widget-hsw-cart-summary):not(:has(.hsw-csummary)) {
+	display: none !important;
+}
+.e-con:has(.hsw-c-empty),
+.elementor-section:has(.hsw-c-empty) .elementor-container {
+	justify-content: center !important;
+	align-items: center !important;
+}
+.e-con > .e-con:has(.hsw-c-empty),
+.elementor-column:has(.hsw-c-empty) {
+	width: 100% !important;
+	max-width: 680px !important;
+	margin-inline: auto !important;
+}

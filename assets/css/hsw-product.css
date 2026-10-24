@@ -1530,10 +1530,22 @@
 .hsw-prel__price del { font-size: 11px; font-weight: 500; color: var(--hsw-outline); margin-inline-start: 6px; }
 .hsw-prel__cta { margin-top: auto; display: flex; align-items: center; justify-content: center; height: 36px; border-radius: 9px; background: var(--hsw-cta, var(--hsw-primary)); color: #fff !important; font-size: 11.5px; font-weight: 700; text-decoration: none; }
 
+/* Physical left/right: in RTL `inset-inline-start` is the *right* edge, which
+   put both fades and both arrows on the wrong sides. */
 .hsw-prel__fade { position: absolute; top: 0; bottom: 10px; width: 64px; pointer-events: none; opacity: 0; transition: opacity .2s; }
 .hsw-prel__fade.is-on { opacity: 1; }
-.hsw-prel__fade--left { inset-inline-start: 0; background: linear-gradient(to left, transparent, var(--hsw-surface, #fff) 78%); }
-.hsw-prel__fade--right { inset-inline-end: 0; background: linear-gradient(to right, transparent, var(--hsw-surface, #fff) 78%); }
+.hsw-p .hsw-prel__fade--left,
+.hsw-p .hsw-pgal__thumbs-fade--left {
+	left: 0;
+	right: auto;
+	background: linear-gradient(to right, var(--hsw-surface-lowest, #ffffff) 15%, rgba(255, 255, 255, 0));
+}
+.hsw-p .hsw-prel__fade--right,
+.hsw-p .hsw-pgal__thumbs-fade--right {
+	right: 0;
+	left: auto;
+	background: linear-gradient(to left, var(--hsw-surface-lowest, #ffffff) 15%, rgba(255, 255, 255, 0));
+}
 
 .hsw-prel__nav,
 .hsw-pgal__thumbs-nav {
@@ -1556,10 +1568,16 @@
 	opacity: 0;
 	transition: opacity .2s, transform .2s, background-color .15s;
 }
-.hsw-prel__nav--next { inset-inline-start: -10px; }
-.hsw-prel__nav--prev { inset-inline-end: -10px; }
-.hsw-prel__wrap:hover .hsw-prel__nav,
-.hsw-prel__nav:focus-visible { opacity: 1; }
+/* Arrows must be visible without hovering: the customer needs to see that the
+   row continues. Only a disabled arrow disappears. */
+.hsw-p .hsw-prel__nav,
+.hsw-p .hsw-pgal__thumbs-nav { opacity: 1; pointer-events: auto; }
+.hsw-p .hsw-prel__nav[disabled],
+.hsw-p .hsw-pgal__thumbs-nav[disabled] { opacity: 0 !important; pointer-events: none !important; }
+.hsw-p .hsw-prel__nav--next,
+.hsw-p .hsw-pgal__thumbs-nav--next { left: 6px; right: auto; }
+.hsw-p .hsw-prel__nav--prev,
+.hsw-p .hsw-pgal__thumbs-nav--prev { right: 6px; left: auto; }
 .hsw-prel__nav:is(:hover, :focus, :focus-visible, :active) {
 	background: var(--hsw-surface-lowest, #fff) !important;
 	background-color: var(--hsw-surface-lowest, #fff) !important;
@@ -1572,9 +1590,9 @@
 }
 @media (max-width: 767.98px) {
 	.hsw-prel__card { flex: 0 0 calc((100% - 12px) / 1.5); max-width: calc((100% - 12px) / 1.5); }
-	.hsw-prel__nav { opacity: 1; width: 34px; height: 34px; }
-	.hsw-prel__nav--next { inset-inline-start: -4px; }
-	.hsw-prel__nav--prev { inset-inline-end: -4px; }
+	.hsw-prel__nav { width: 34px; height: 34px; }
+	.hsw-p .hsw-prel__nav--next { left: 2px; right: auto; }
+	.hsw-p .hsw-prel__nav--prev { right: 2px; left: auto; }
 }
 
 /* =========================================================================
@@ -1595,13 +1613,9 @@
 .hsw-pgal__thumb { flex: 0 0 auto; scroll-snap-align: start; }
 .hsw-pgal__thumbs-fade { position: absolute; top: 0; bottom: 0; width: 46px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 2; }
 .hsw-pgal__thumbs-fade.is-on { opacity: 1; }
-.hsw-pgal__thumbs-fade--left { inset-inline-start: 0; background: linear-gradient(to left, transparent, var(--hsw-surface-lowest, #fff) 78%); }
-.hsw-pgal__thumbs-fade--right { inset-inline-end: 0; background: linear-gradient(to right, transparent, var(--hsw-surface-lowest, #fff) 78%); }
-.hsw-pgal__thumbs-nav { width: 30px !important; height: 30px !important; opacity: 0; }
-.hsw-pgal__wrap:hover .hsw-pgal__thumbs-nav,
-.hsw-pgal__thumbs-nav:focus-visible { opacity: 1; }
+.hsw-pgal__thumbs-nav { width: 30px !important; height: 30px !important; }
 @media (max-width: 767.98px) {
-	.hsw-pgal__thumbs-nav { opacity: 1; width: 28px !important; height: 28px !important; }
+	.hsw-pgal__thumbs-nav { width: 28px !important; height: 28px !important; }
 }
 
 .hsw-zoom__bar { position: absolute; top: 14px; inset-inline: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; z-index: 3; }

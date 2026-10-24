@@ -216,6 +216,10 @@
 			var img = gal && gal.querySelector('.hsw-pgal__img');
 			gal.querySelectorAll('.hsw-pgal__thumb, .hsw-pgal__dot').forEach(function (b) { b.classList.toggle('is-active', b === thumb); });
 			if (img && src) { img.src = src; }
+			/* Keep the chosen thumbnail centred in its own carousel row. */
+			if (thumb.classList.contains('hsw-pgal__thumb') && thumb.scrollIntoView) {
+				thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+			}
 			return;
 		}
 
@@ -575,21 +579,29 @@
 	var zoomIndex = 0;
 	var zoomScale = 1;
 	var panX = 0, panY = 0;
+	/* True while the pointer actually dragged: the click that follows a pan
+	   must not be treated as "toggle zoom" (the image jumped back to 1x). */
+	var panMoved = false;
 
 	function zoomBuild() {
 		if (zoomEl) { return zoomEl; }
 		zoomEl = document.createElement('div');
 		zoomEl.className = 'hsw-zoom';
+		var svgZoomIn = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6M11 8v6M8 11h6"></path></svg>';
+		var svgClose = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
+		var svgPrev = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>';
+		var svgNext = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>';
+
 		zoomEl.innerHTML =
 			'<div class="hsw-zoom__bar">' +
 				'<span class="hsw-zoom__count" data-hsw-zoom-count></span>' +
 				'<span class="hsw-zoom__tools">' +
-					'<button type="button" class="hsw-zoom__btn" data-hsw-zoom-scale aria-label="بزرگ‌نمایی"><span class="hsw-ic">+</span></button>' +
-					'<button type="button" class="hsw-zoom__btn" data-hsw-zoom-close aria-label="بستن"><span class="hsw-ic">✕</span></button>' +
+					'<button type="button" class="hsw-zoom__btn" data-hsw-zoom-scale aria-label="بزرگ‌نمایی">' + svgZoomIn + '</button>' +
+					'<button type="button" class="hsw-zoom__btn" data-hsw-zoom-close aria-label="بستن">' + svgClose + '</button>' +
 				'</span>' +
 			'</div>' +
-			'<button type="button" class="hsw-zoom__nav hsw-zoom__nav--prev" data-hsw-zoom-prev aria-label="قبلی"><span class="hsw-ic">‹</span></button>' +
-			'<button type="button" class="hsw-zoom__nav hsw-zoom__nav--next" data-hsw-zoom-next aria-label="بعدی"><span class="hsw-ic">›</span></button>' +
+			'<button type="button" class="hsw-zoom__nav hsw-zoom__nav--prev" data-hsw-zoom-prev aria-label="قبلی">' + svgPrev + '</button>' +
+			'<button type="button" class="hsw-zoom__nav hsw-zoom__nav--next" data-hsw-zoom-next aria-label="بعدی">' + svgNext + '</button>' +
 			'<div class="hsw-zoom__stage"><img class="hsw-zoom__img" alt=""></div>' +
 			'<div class="hsw-zoom__thumbs" data-hsw-zoom-thumbs></div>';
 		document.body.appendChild(zoomEl);
@@ -598,7 +610,14 @@
 			if (e.target.closest('[data-hsw-zoom-close]') || e.target === zoomEl) { closeZoom(); return; }
 			if (e.target.closest('[data-hsw-zoom-prev]')) { zoomGo(-1); return; }
 			if (e.target.closest('[data-hsw-zoom-next]')) { zoomGo(1); return; }
-			if (e.target.closest('[data-hsw-zoom-scale]') || e.target.closest('.hsw-zoom__img')) {
+			if (e.target.closest('[data-hsw-zoom-scale]')) {
+				zoomScale = zoomScale > 1 ? 1 : 2.5;
+				panX = 0; panY = 0;
+				zoomApply();
+				return;
+			}
+			if (e.target.closest('.hsw-zoom__img')) {
+				if (panMoved) { panMoved = false; return; }
 				zoomScale = zoomScale > 1 ? 1 : 2.5;
 				panX = 0; panY = 0;
 				zoomApply();
@@ -665,13 +684,13 @@
 		document.addEventListener('touchstart', function (e) {
 			if (!zoomEl || !zoomEl.classList.contains('is-open') || e.touches.length !== 1) { return; }
 			sx = e.touches[0].clientX; sy = e.touches[0].clientY;
-			dragging = true; moved = false;
+			dragging = true; moved = false; panMoved = false;
 		}, { passive: true });
 		document.addEventListener('touchmove', function (e) {
 			if (!dragging || !zoomEl || e.touches.length !== 1) { return; }
 			var dx = e.touches[0].clientX - sx;
 			var dy = e.touches[0].clientY - sy;
-			if (Math.abs(dx) > 6 || Math.abs(dy) > 6) { moved = true; }
+			if (Math.abs(dx) > 6 || Math.abs(dy) > 6) { moved = true; panMoved = true; }
 			if (zoomScale > 1) {
 				panX += e.touches[0].clientX - sx;
 				panY += e.touches[0].clientY - sy;
@@ -688,16 +707,21 @@
 		}, { passive: true });
 
 		/* Mouse drag to pan when zoomed. */
-		var mx = 0, my = 0, mdrag = false;
+		var mx = 0, my = 0, mdrag = false, mdist = 0;
 		document.addEventListener('mousedown', function (e) {
 			if (!zoomEl || !zoomEl.classList.contains('is-open') || zoomScale <= 1) { return; }
 			if (!e.target.closest('.hsw-zoom__img')) { return; }
-			mdrag = true; mx = e.clientX; my = e.clientY;
+			mdrag = true; mdist = 0; panMoved = false;
+			mx = e.clientX; my = e.clientY;
 			e.preventDefault();
 		});
 		document.addEventListener('mousemove', function (e) {
 			if (!mdrag) { return; }
-			panX += e.clientX - mx; panY += e.clientY - my;
+			var dx = e.clientX - mx;
+			var dy = e.clientY - my;
+			mdist += Math.abs(dx) + Math.abs(dy);
+			if (mdist > 4) { panMoved = true; }
+			panX += dx; panY += dy;
 			mx = e.clientX; my = e.clientY;
 			zoomApply();
 		});
@@ -728,6 +752,10 @@
 
 			applyVariant(pid, matchVariation(st.data, map, st));
 		});
+
+		/* Carousels (related products, gallery thumbs). init() runs on load and
+		   again after every Elementor re-render, so this cannot be missed. */
+		document.querySelectorAll('[data-hsw-carousel], .hsw-pgal__wrap').forEach(initCarousel);
 	}
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);
@@ -740,10 +768,6 @@
 			window.elementorFrontend && window.elementorFrontend.hooks.addAction('frontend/element_ready/global', function () { init(); });
 		});
 
-		/* Carousels (related products, gallery thumbs) — same behaviour. */
-		document.addEventListener('DOMContentLoaded', function () {
-			document.querySelectorAll('[data-hsw-carousel], .hsw-pgal__wrap').forEach(initCarousel);
-		});
 	}
 
 	/* ================= CAROUSEL ================= */
@@ -783,8 +807,10 @@
 			/* «next» = further along the reading direction (left in RTL). */
 			if (fadeNext) { fadeNext.classList.toggle('is-on', !atEnd); }
 			if (fadePrev) { fadePrev.classList.toggle('is-on', !atStart); }
-			if (next) { next.disabled = atEnd; next.style.opacity = atEnd ? '.35' : ''; }
-			if (prev) { prev.disabled = atStart; prev.style.opacity = atStart ? '.35' : ''; }
+			if (next) { next.disabled = atEnd; }
+			if (prev) { prev.disabled = atStart; }
+			/* The right fade only matters when we can go back. */
+			if (fadePrev) { fadePrev.hidden = atStart; }
 		}
 
 		function step(dir) {
@@ -802,6 +828,12 @@
 		track.addEventListener('scroll', sync, { passive: true });
 		window.addEventListener('resize', sync);
 		sync();
+		/* Flex widths are only final after layout/images settle. */
+		setTimeout(sync, 150);
+		track.querySelectorAll('img').forEach(function (img) {
+			if (img.complete) { return; }
+			img.addEventListener('load', sync, { once: true });
+		});
 
 		/* Mouse drag (desktop). Touch already scrolls natively. */
 		var down = false, startX = 0, startScroll = 0, moved = 0;

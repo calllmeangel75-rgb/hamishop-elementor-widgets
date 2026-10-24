@@ -214,7 +214,7 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 					<?php endif; ?>
 				</div>
 				<?php if ( '' !== trim( $more ) ) : ?>
-					<a class="hsw-prel__more" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $more ); ?><?php echo HSW_Helpers::icon( 'arrow-left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
+					<a class="hsw-prel__more" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $more ); ?><?php echo HSW_Helpers::icon( 'arrow_back' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></a>
 				<?php endif; ?>
 			</header>
 
@@ -247,6 +247,7 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 				</div>
 
 				<span class="hsw-prel__fade hsw-prel__fade--left" data-hsw-fade="next" aria-hidden="true"></span>
+				<span class="hsw-prel__fade hsw-prel__fade--right" data-hsw-fade="prev" aria-hidden="true" hidden></span>
 				<button type="button" class="hsw-prel__nav hsw-prel__nav--next" data-hsw-nav="next" aria-label="<?php esc_attr_e( 'بعدی', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'chevron_left' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 				<button type="button" class="hsw-prel__nav hsw-prel__nav--prev" data-hsw-nav="prev" aria-label="<?php esc_attr_e( 'قبلی', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'chevron_right' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 			</div>
