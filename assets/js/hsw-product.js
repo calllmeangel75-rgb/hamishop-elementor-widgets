@@ -540,6 +540,14 @@
 	 */
 	function showAdded(btn, pid, res) {
 		/*
+		 * Mobile: the buy button becomes the stepper and a bottom sheet slides
+		 * up with «کالا اضافه شد» + related products. Desktop keeps the button
+		 * morph only — no sheet over the gallery.
+		 */
+		if (btn) { flashAdded(btn); }
+		if (openSheet(pid)) { return; }
+
+		/*
 		 * The cart modal is opt-in on this page (HamiShop → کنترل ویجت‌ها):
 		 * on a product page the visitor is already looking at what they added,
 		 * so a dialog over the gallery is noise. Default is a plain toast.
@@ -567,6 +575,143 @@
 			window.HSWFeedback.toast(D.addedText);
 		}
 	}
+
+	/* ================= ADD-TO-CART SHEET (mobile) ================= */
+
+	/*
+	 * Bottom sheet shown right after an add on a phone: a success line, a link
+	 * to the cart, and «خریدت رو کامل‌تر کن» with related products that can be
+	 * added without leaving the page. Desktop never sees it.
+	 */
+	var sheetEl = null;
+	var sheetBusy = false;
+
+	function sheetAllowed() {
+		return !!(D.sheet && D.relatedUrl) && window.matchMedia('(max-width: 767.98px)').matches;
+	}
+
+	function buildSheet() {
+		if (sheetEl) { return sheetEl; }
+
+		sheetEl = document.createElement('div');
+		sheetEl.className = 'hsw-sheet';
+		sheetEl.setAttribute('data-hsw-sheet', '');
+		sheetEl.innerHTML =
+			'<div class="hsw-sheet__backdrop" data-hsw-sheet-close></div>' +
+			'<div class="hsw-sheet__panel" role="dialog" aria-modal="true" aria-label="' + (D.sheetAdded || '') + '">' +
+				'<span class="hsw-sheet__grab" aria-hidden="true"></span>' +
+				'<div class="hsw-sheet__head">' +
+					'<span class="hsw-sheet__ok"><span class="hsw-sheet__okic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg></span>' + (D.sheetAdded || '') + '</span>' +
+					'<button type="button" class="hsw-sheet__x" data-hsw-sheet-close aria-label="' + (D.closeText || 'بستن') + '">' +
+						'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>' +
+					'</button>' +
+				'</div>' +
+				'<a class="hsw-sheet__cart" href="' + (D.cartUrl || '#') + '">' +
+					'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>' +
+					(D.sheetCart || '') +
+				'</a>' +
+				'<p class="hsw-sheet__title">' + (D.sheetTitle || '') + '</p>' +
+				'<div class="hsw-sheet__list" data-hsw-sheet-list></div>' +
+			'</div>';
+
+		document.body.appendChild(sheetEl);
+
+		sheetEl.addEventListener('click', function (e) {
+			if (e.target.closest('[data-hsw-sheet-close]')) { closeSheet(); return; }
+
+			var add = e.target.closest('[data-hsw-sheet-add]');
+			if (add) { sheetAdd(add); }
+		});
+
+		return sheetEl;
+	}
+
+	function openSheet(pid) {
+		if (!sheetAllowed() || !pid) { return false; }
+		buildSheet();
+		sheetEl.classList.add('is-open');
+		document.documentElement.classList.add('hsw-sheet-open');
+		loadRelated(pid);
+		return true;
+	}
+
+	function closeSheet() {
+		if (!sheetEl) { return; }
+		sheetEl.classList.remove('is-open');
+		document.documentElement.classList.remove('hsw-sheet-open');
+	}
+
+	function loadRelated(pid) {
+		var list = sheetEl.querySelector('[data-hsw-sheet-list]');
+		if (!list) { return; }
+		if (list.getAttribute('data-for') === String(pid)) { return; }
+		list.setAttribute('data-for', String(pid));
+		list.innerHTML = '<span class="hsw-sheet__loading"></span>';
+
+		var url = D.relatedUrl + (D.relatedUrl.indexOf('?') > -1 ? '&' : '?') + 'product=' + encodeURIComponent(pid) + '&limit=4';
+
+		fetch(url, { credentials: 'same-origin' })
+			.then(function (r) { return r.json(); })
+			.then(function (res) {
+				var items = (res && res.items) || [];
+				if (!items.length) {
+					list.innerHTML = '';
+					sheetEl.classList.add('is-empty');
+					return;
+				}
+				sheetEl.classList.remove('is-empty');
+				list.innerHTML = items.map(function (p) {
+					var action = p.add
+						? '<button type="button" class="hsw-sheet__add" data-hsw-sheet-add="' + p.id + '">+</button>'
+						: '<a class="hsw-sheet__add" href="' + p.url + '">+</a>';
+					return '<article class="hsw-sheet__card">' +
+						'<a class="hsw-sheet__media" href="' + p.url + '">' +
+							(p.image ? '<img src="' + p.image + '" alt="" loading="lazy">' : '') +
+						'</a>' +
+						'<div class="hsw-sheet__body">' +
+							'<a class="hsw-sheet__name" href="' + p.url + '">' + p.name + '</a>' +
+							'<div class="hsw-sheet__price">' + p.price + '</div>' +
+							'<div class="hsw-sheet__actions">' +
+								'<a class="hsw-sheet__view" href="' + p.url + '">' + (D.viewProduct || 'مشاهده') + '</a>' +
+								action +
+							'</div>' +
+						'</div>' +
+					'</article>';
+				}).join('');
+			})
+			.catch(function () { list.innerHTML = ''; });
+	}
+
+	function sheetAdd(btn) {
+		var id = btn.getAttribute('data-hsw-sheet-add');
+		if (!id || btn.classList.contains('is-busy') || sheetBusy) { return; }
+		sheetBusy = true;
+		btn.classList.add('is-busy');
+
+		var body = new URLSearchParams();
+		body.set('product_id', id);
+		body.set('quantity', '1');
+
+		fetch(D.wcAjax || '/?wc-ajax=add_to_cart', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+			body: body.toString()
+		}).then(function (r) { return r.json(); }).then(function (res) {
+			sheetBusy = false;
+			btn.classList.remove('is-busy');
+			btn.classList.add('is-done');
+			btn.textContent = '✓';
+			if (res && res.fragments) { applyFragments(res.fragments); }
+		}).catch(function () {
+			sheetBusy = false;
+			btn.classList.remove('is-busy');
+		});
+	}
+
+	document.addEventListener('keydown', function (e) {
+		if ('Escape' === e.key) { closeSheet(); }
+	});
 
 	/* ================= LIGHTBOX ================= */
 

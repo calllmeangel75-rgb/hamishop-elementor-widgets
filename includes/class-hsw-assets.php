@@ -561,6 +561,15 @@ class HSW_Assets {
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'modal'        => self::feedback_settings()['product'],
                                 'feedbackStyle' => self::feedback_settings()['product_style'],
+
+                                /* Mobile «کالا اضافه شد» bottom sheet. */
+                                'relatedUrl'  => esc_url_raw( rest_url( 'hsw/v1/related' ) ),
+                                'sheet'       => (bool) apply_filters( 'hsw_product_sheet', true ),
+                                'sheetTitle'  => __( 'خریدت رو کامل‌تر کن', 'hamishop-elementor-widgets' ),
+                                'sheetAdded'  => __( 'کالا اضافه شد!', 'hamishop-elementor-widgets' ),
+                                'sheetCart'   => __( 'برو به سبد خرید', 'hamishop-elementor-widgets' ),
+                                'sheetMore'   => __( 'افزودن', 'hamishop-elementor-widgets' ),
+                                'sheetDone'   => __( 'افزوده شد', 'hamishop-elementor-widgets' ),
                         )
                 );
 

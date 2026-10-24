@@ -46,6 +46,34 @@ class HSW_Rest {
                         )
                 );
 
+                /*
+                 * Related products for the mobile «کالا اضافه شد» sheet.
+                 * Public: it only exposes products that are already public.
+                 */
+                register_rest_route(
+                        self::NS,
+                        '/related',
+                        array(
+                                'methods'             => 'GET',
+                                'callback'            => array( $this, 'related' ),
+                                'permission_callback' => '__return_true',
+                                'args'                => array(
+                                        'product' => array(
+                                                'type'              => 'integer',
+                                                'required'          => true,
+                                                'sanitize_callback' => 'absint',
+                                        ),
+                                        'limit'   => array(
+                                                'type'              => 'integer',
+                                                'default'           => 4,
+                                                'minimum'           => 1,
+                                                'maximum'           => 8,
+                                                'sanitize_callback' => 'absint',
+                                        ),
+                                ),
+                        )
+                );
+
                 register_rest_route(
                         self::NS,
                         '/loop',
@@ -231,6 +259,67 @@ class HSW_Rest {
          * @param WP_REST_Request $request Request.
          * @return WP_REST_Response|WP_Error
          */
+        /**
+         * Related products for the post-add sheet.
+         *
+         * @param WP_REST_Request $request Request.
+         * @return WP_REST_Response
+         */
+        public function related( $request ) {
+                $id    = (int) $request['product'];
+                $limit = (int) $request['limit'];
+                $out   = array();
+
+                if ( ! function_exists( 'wc_get_related_products' ) || ! $id ) {
+                        return rest_ensure_response( array( 'items' => array() ) );
+                }
+
+                $ids = wc_get_related_products( $id, $limit, array( $id ) );
+                if ( empty( $ids ) ) {
+                        /* Fall back to the same category so the sheet is never empty. */
+                        $terms = wp_get_post_terms( $id, 'product_cat', array( 'fields' => 'ids' ) );
+                        if ( $terms && ! is_wp_error( $terms ) ) {
+                                $ids = get_posts(
+                                        array(
+                                                'post_type'      => 'product',
+                                                'posts_per_page' => $limit,
+                                                'post__not_in'   => array( $id ),
+                                                'fields'         => 'ids',
+                                                'no_found_rows'  => true,
+                                                'tax_query'      => array(
+                                                        array(
+                                                                'taxonomy' => 'product_cat',
+                                                                'field'    => 'term_id',
+                                                                'terms'    => $terms,
+                                                        ),
+                                                ),
+                                        )
+                                );
+                        }
+                }
+
+                foreach ( (array) $ids as $pid ) {
+                        $product = wc_get_product( $pid );
+                        if ( ! $product || ! $product->is_visible() ) {
+                                continue;
+                        }
+
+                        $image = get_the_post_thumbnail_url( $pid, 'woocommerce_thumbnail' );
+
+                        $out[] = array(
+                                'id'    => (int) $pid,
+                                'name'  => $product->get_name(),
+                                'price' => wp_strip_all_tags( $product->get_price_html() ),
+                                'image' => $image ? $image : '',
+                                'url'   => get_permalink( $pid ),
+                                'add'   => ( $product->is_type( 'simple' ) && $product->is_in_stock() ),
+                                'on_sale' => $product->is_on_sale(),
+                        );
+                }
+
+                return rest_ensure_response( array( 'items' => $out ) );
+        }
+
         public function loop_fragment( $request ) {
                 $type      = (string) $request->get_param( 'type' );
                 $source    = (string) $request->get_param( 'source' );
