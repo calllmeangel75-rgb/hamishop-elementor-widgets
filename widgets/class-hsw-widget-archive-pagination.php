@@ -56,8 +56,8 @@ class HSW_Widget_Archive_Pagination extends HSW_Archive_Base {
                 );
 
                 $this->a_box( 'pg', '{{WRAPPER}} .hsw-ap__bar' );
-                $this->a_color( 'pg_active', __( 'پس‌زمینه صفحه فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ap__bar .page-numbers.current', 'background-color' );
-                $this->a_color( 'pg_idle', __( 'متن صفحات دیگر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ap__bar .page-numbers' );
+                $this->a_color( 'pg_active', __( 'پس‌زمینه صفحه فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ap__bar .hsw-pg__pill', 'background-color' );
+                $this->a_color( 'pg_idle', __( 'متن صفحات دیگر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ap__bar .hsw-pg__num' );
                 $this->a_color( 'pg_state', __( 'متن وضعیت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ap__state' );
 
                 $this->end_controls_section();
@@ -75,6 +75,15 @@ class HSW_Widget_Archive_Pagination extends HSW_Archive_Base {
 
                 $params = $this->current_params();
                 unset( $params['paged'] );
+
+                $pg_html = HSW_Pagination::render(
+                        array(
+                                'total'    => $total,
+                                'current'  => $cur,
+                                'mid_size' => 1,
+                                'add_args' => $params,
+                        )
+                );
 
                 $links = paginate_links(
                         array(
@@ -112,12 +121,8 @@ class HSW_Widget_Archive_Pagination extends HSW_Archive_Base {
                                         <?php if ( 'yes' === ( $s['show_state'] ?? 'yes' ) ) : ?>
                                                 <span class="hsw-ap__state"><?php echo esc_html( sprintf( __( 'صفحه %1$s از %2$s', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( $cur ), HSW_Helpers::fa_num( $total ) ) ); ?></span>
                                         <?php endif; ?>
-                                        <?php if ( ! empty( $links ) ) : ?>
-                                                <nav class="hsw-ap__links" aria-label="<?php esc_attr_e( 'صفحه‌بندی', 'hamishop-elementor-widgets' ); ?>">
-                                                        <?php foreach ( $links as $link ) : ?>
-                                                                <?php echo $link; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- paginate_links safe output. ?>
-                                                        <?php endforeach; ?>
-                                                </nav>
+                                        <?php if ( '' !== $pg_html ) : ?>
+                                                <div class="hsw-ap__links"><?php echo $pg_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?></div>
                                         <?php endif; ?>
                                 </div>
                         <?php endif; ?>

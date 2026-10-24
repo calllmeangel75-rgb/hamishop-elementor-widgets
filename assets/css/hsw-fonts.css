@@ -694,3 +694,123 @@ body.hsw-scroll-lock {
 	background: var(--hsw-hd-act-bg, var(--hsw-hd-icon-bg, var(--hsw-hd-search))) !important;
 	color: var(--hsw-hd-act-icon, var(--hsw-hd-icon, var(--hsw-hd-text))) !important;
 }
+
+/* =========================================================================
+ * Product-loop pagination (HSW_Pagination) — one clean pill bar for every
+ * WooCommerce loop: sliding indicator, arrows at both ends, no scroll jump.
+ * ====================================================================== */
+.hsw-pg {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	margin: 26px auto 6px;
+	width: 100%;
+}
+.hsw-pg__track {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 4px;
+	border-radius: 999px;
+	background: var(--hsw-pal-surface, #fff);
+	border: 1px solid var(--hsw-pal-border, #e1e2e4);
+	box-shadow: 0 6px 20px -14px rgba(15, 32, 66, .45);
+}
+.hsw-pg__pill {
+	position: absolute;
+	top: 4px;
+	left: 0;
+	width: 0;
+	height: 0;
+	border-radius: 999px;
+	background: var(--hsw-cta, var(--hsw-primary, #0f2042));
+	opacity: 0;
+	transition: transform .38s cubic-bezier(.22, .61, .36, 1), width .38s cubic-bezier(.22, .61, .36, 1), opacity .2s;
+	pointer-events: none;
+}
+.hsw-pg__pill.is-ready { opacity: 1; }
+.hsw-pg__num {
+	position: relative;
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 38px;
+	height: 38px;
+	padding: 0 6px;
+	border-radius: 999px;
+	color: var(--hsw-pal-muted, #75777f) !important;
+	font-size: 13px;
+	font-weight: 700;
+	text-decoration: none !important;
+	transition: color .2s;
+}
+.hsw-pg__num:hover,
+.hsw-pg__num:focus-visible { color: var(--hsw-cta, var(--hsw-primary)) !important; }
+.hsw-pg__num.is-active { color: #fff !important; cursor: default; }
+.hsw-pg__dots {
+	display: inline-flex;
+	align-items: flex-end;
+	justify-content: center;
+	min-width: 24px;
+	height: 38px;
+	color: var(--hsw-pal-muted, #75777f);
+	font-weight: 700;
+	line-height: 1;
+	user-select: none;
+}
+.hsw-pg__arrow {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	flex: 0 0 40px;
+	border-radius: 50%;
+	border: 1px solid var(--hsw-pal-border, #e1e2e4);
+	background: var(--hsw-pal-surface, #fff);
+	color: var(--hsw-on-surface, #191c1e) !important;
+	text-decoration: none !important;
+	transition: border-color .15s, color .15s, transform .15s, box-shadow .15s;
+}
+.hsw-pg__arrow:hover,
+.hsw-pg__arrow:focus-visible {
+	color: var(--hsw-cta, var(--hsw-primary)) !important;
+	border-color: var(--hsw-cta, var(--hsw-primary));
+	transform: translateY(-1px);
+	box-shadow: 0 8px 18px -12px rgba(15, 32, 66, .5);
+}
+.hsw-pg__arrow.is-disabled {
+	opacity: .3;
+	pointer-events: none;
+}
+.hsw-pg__arrow .hsw-ic { font-size: 20px !important; }
+
+/* Soft exit while the next page loads. */
+.hsw-loop.is-pg-leaving,
+ul.products.is-pg-leaving,
+.hsw-p.is-pg-leaving {
+	opacity: .35;
+	transform: translateY(6px);
+	transition: opacity .18s ease, transform .18s ease;
+	pointer-events: none;
+}
+
+/* Archive widget wrapper: the state text sits beside the pills. */
+.hsw-ap__links { display: flex; align-items: center; justify-content: flex-end; }
+.hsw-ap__links .hsw-pg { margin: 0; justify-content: flex-end; }
+
+@media (max-width: 767.98px) {
+	.hsw-pg { gap: 6px; margin-top: 20px; }
+	.hsw-pg__num { min-width: 34px; height: 34px; font-size: 12px; }
+	.hsw-pg__arrow { width: 36px; height: 36px; flex-basis: 36px; }
+	.hsw-pg__track { padding: 3px; }
+	.hsw-pg__pill { top: 3px; }
+	.hsw-ap__links { width: 100%; justify-content: center; }
+	.hsw-ap__links .hsw-pg { justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.hsw-pg__pill, .hsw-pg__arrow, .hsw-loop.is-pg-leaving { transition: none !important; }
+}
