@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.63
+Stable tag: 1.11.64
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.64 =
+* **بج تخفیف و دکمهٔ خرید طبق طراحی.**
+  - مبلغ تخفیف حالا در یک قرص قرمز (`border-radius: 999px`، پدینگ `3px 12px 1px`،
+    متن سفید) بالای قیمت نمایش داده می‌شود و متنش «… تومان تخفیف» شد.
+  - قیمت خط‌خورده کنار قیمت اصلی آمد (نه بالای آن).
+  - آیکون سبد خرید به لبهٔ چپ دکمهٔ «خرید آنلاین» منتقل شد و متن وسط‌چین ماند.
+  - عنوان هدر پنل حساب (`.hsw-ac__hero-title`) همیشه سفید است (با سایهٔ ملایم)
+    تا روی گرادیانت تیره خوانا بماند.
 
 = 1.11.63 =
 * **اصلاح چیدمان فرم ورود/ثبت‌نام با کد یکبارمصرف.**

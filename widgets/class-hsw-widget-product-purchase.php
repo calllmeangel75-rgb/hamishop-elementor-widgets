@@ -352,13 +352,18 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                         <?php else : ?>
                                 <div class="hsw-ppurch__top">
                                         <div>
-                                                <div class="hsw-ppurch__oldrow">
-                                                        <span class="hsw-ppurch__old" data-hsw-old<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $regular ); ?></span>
-                                                        <span class="hsw-ppurch__save" data-hsw-save<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $save ); ?> <?php esc_html_e( 'تومان تخفیف ویژه', 'hamishop-elementor-widgets' ); ?></span>
-                                                </div>
+                                                <?php
+                                                /*
+                                                 * The discount sits in a red pill above the price;
+                                                 * the struck regular price lines up next to the
+                                                 * current one, exactly like the reference.
+                                                 */
+                                                ?>
+                                                <div class="hsw-ppurch__save" data-hsw-save<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $save ); ?> <?php esc_html_e( 'تومان تخفیف', 'hamishop-elementor-widgets' ); ?></div>
                                                 <div class="hsw-ppurch__row">
                                                         <span class="hsw-ppurch__main" data-hsw-price><?php echo esc_html( $sale ); ?></span>
                                                         <span class="hsw-ppurch__unit"><?php esc_html_e( 'تومان', 'hamishop-elementor-widgets' ); ?></span>
+                                                        <span class="hsw-ppurch__old" data-hsw-old<?php echo $hide_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $regular ); ?></span>
                                                 </div>
                                         </div>
                                 </div>
@@ -388,8 +393,9 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                                 </div>
                                         </div>
                                         <button type="button" class="hsw-ppurch__cart" data-hsw-add>
-                                                <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
+                                                <?php /* Icon after the label: in RTL it lands on the left edge, like the reference. */ ?>
                                                 <span><?php echo esc_html( $cart_text ); ?></span>
+                                                <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
                                         </button>
                                 <?php endif; ?>
                         </div>

@@ -511,7 +511,10 @@
 	font-weight: 800;
 	line-height: 1.5;
 	letter-spacing: -.2px;
-	color: #fff;
+	/* Always white: the hero is a dark gradient and the theme/palette text
+	   colour would otherwise make it unreadable. */
+	color: #fff !important;
+	text-shadow: 0 1px 2px rgba(15, 23, 42, .25);
 }
 
 .hsw-ac__hero-sub {

@@ -592,16 +592,31 @@
         border-bottom: 1px solid var(--hsw-surface-variant);
 }
 .hsw-ppurch__oldrow { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.hsw-ppurch__old { font-size: 12px; line-height: 20px; color: var(--hsw-old-c, var(--hsw-outline)); text-decoration: line-through; }
-.hsw-ppurch__save {
-        background: rgba(181, 38, 11, .1);
-        color: var(--hsw-save-c, var(--hsw-secondary));
-        font-size: 11px;
-        line-height: 16px;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 4px;
+.hsw-ppurch__old {
+	font-size: 12px;
+	line-height: 20px;
+	color: var(--hsw-old-c, var(--hsw-outline));
+	text-decoration: line-through;
+	margin-inline-start: 8px;
 }
+
+/* «۱۲,۷۹۸,۵۰۰ تومان تخفیف» — red pill above the price. */
+.hsw-ppurch__save {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: fit-content;
+	margin: 0 0 8px;
+	padding: 3px 12px 1px;
+	border-radius: 999px;
+	background: var(--hsw-pal-danger, #c8102e);
+	color: #fff !important;
+	font-size: 12px;
+	line-height: 1.9;
+	font-weight: 700;
+	white-space: nowrap;
+}
+.hsw-ppurch__save[style*="display: none"] { margin: 0; }
 .hsw-ppurch__row { display: flex; align-items: baseline; gap: 6px; color: var(--hsw-price-c, var(--hsw-primary)); }
 .hsw-ppurch__main { font-size: 32px; line-height: 48px; font-weight: 800; letter-spacing: -.02em; }
 .hsw-ppurch__unit { font-size: 16px; line-height: 26px; font-weight: 600; color: var(--hsw-unit-c, var(--hsw-on-surface-variant)); }
@@ -2143,3 +2158,22 @@ html.hsw-sheet-open { overflow: hidden; }
 /* Keep the purchase bar above the sheet and its backdrop. */
 .hsw-psticky { z-index: 9995 !important; }
 .hsw-sheet { z-index: 9990; }
+
+/* Cart icon inside the buy button: pinned to the left edge, label centred —
+   same composition as the reference button. */
+.hsw-ppurch__cart {
+	position: relative;
+	padding-inline: 48px;
+}
+.hsw-ppurch__cart .hsw-ic {
+	position: absolute;
+	inset-inline-start: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	color: currentColor;
+	fill: currentColor;
+}
+.hsw-ppurch__cart span { line-height: 1.2; }

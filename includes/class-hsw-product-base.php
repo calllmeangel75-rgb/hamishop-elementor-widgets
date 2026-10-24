@@ -247,7 +247,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                  * to one that is not must close it again.
                                  */
                                 'cart_qty'  => isset( $cart_qty[ $var->get_id() ] ) ? (int) $cart_qty[ $var->get_id() ] : 0,
-                                'save_html' => $save > 0 ? HSW_Helpers::price_num( $save ) . ' ' . __( 'تومان تخفیف ویژه', 'hamishop-elementor-widgets' ) : '',
+                                'save_html' => $save > 0 ? HSW_Helpers::price_num( $save ) . ' ' . __( 'تومان تخفیف', 'hamishop-elementor-widgets' ) : '',
                         );
                 }
                 return $out;
