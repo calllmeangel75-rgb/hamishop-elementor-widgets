@@ -608,6 +608,8 @@
 
 		zoomEl.addEventListener('click', function (e) {
 			if (e.target.closest('[data-hsw-zoom-close]') || e.target === zoomEl) { closeZoom(); return; }
+			/* Click / tap anywhere outside the picture closes the lightbox. */
+			if (e.target.closest('.hsw-zoom__stage') && !e.target.closest('.hsw-zoom__img')) { closeZoom(); return; }
 			if (e.target.closest('[data-hsw-zoom-prev]')) { zoomGo(-1); return; }
 			if (e.target.closest('[data-hsw-zoom-next]')) { zoomGo(1); return; }
 			if (e.target.closest('[data-hsw-zoom-scale]')) {

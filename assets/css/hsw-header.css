@@ -1408,6 +1408,21 @@ html.hsw-hd-lock body {
 	z-index: 10000;
 	visibility: hidden;
 	pointer-events: none;
+	/*
+	 * The panel slides in from the edge with translateX(100%). While it is
+	 * closed that box sits outside the viewport, and Chrome counts it in the
+	 * document's scroll width — on a phone the page then renders at ~1370px
+	 * and every breakpoint is lost. Clipping the fixed container keeps the
+	 * animation and stops the overflow.
+	 */
+	overflow: hidden;
+}
+
+/* Safety net for any other off-canvas element. `clip` (unlike `hidden`)
+   does not create a scroll container, so position: sticky keeps working. */
+html { overflow-x: clip; }
+@supports not (overflow-x: clip) {
+	html { overflow-x: hidden; }
 }
 
 .hsw-hd__drawer.is-open {

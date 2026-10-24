@@ -1622,10 +1622,17 @@
 .hsw-zoom__count { color: #fff; font-size: 12.5px; font-weight: 700; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .22); padding: 5px 12px; border-radius: 999px; }
 .hsw-zoom__tools { display: flex; gap: 8px; }
 .hsw-zoom__btn {
-	width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-	border-radius: 50%; border: 1px solid rgba(255, 255, 255, .24) !important;
-	background: rgba(255, 255, 255, .14) !important; color: #fff !important; cursor: pointer;
+	width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+	border-radius: 50%; border: 1px solid rgba(255, 255, 255, .34) !important;
+	background: rgba(255, 255, 255, .2) !important; color: #fff !important; cursor: pointer;
+	backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+	transition: background-color .15s, transform .15s;
 }
+.hsw-zoom__btn:hover, .hsw-zoom__btn:focus { transform: scale(1.05); }
+.hsw-zoom__btn svg { width: 22px; height: 22px; display: block; }
+/* The stage is the click-to-close area around the image. */
+.hsw-zoom__stage { cursor: zoom-out; }
+.hsw-zoom__img { cursor: zoom-in; }
 .hsw-zoom__btn:hover, .hsw-zoom__btn:focus { background: rgba(255, 255, 255, .26) !important; color: #fff !important; }
 .hsw-zoom__stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 64px 60px 92px; overflow: hidden; }
 .hsw-zoom__img { max-width: 100%; max-height: 100%; transition: transform .2s ease; transform-origin: center center; user-select: none; -webkit-user-drag: none; }
