@@ -372,8 +372,27 @@ class HSW_Helpers {
 
                 $keys = array_keys( self::$icons );
 
+                /*
+                 * A few icons are Iconsax-style stroke art on a 24×24 grid, so
+                 * they cannot share the filled Material paths. They carry their
+                 * own viewBox and body here; everything else still comes from
+                 * the generated path table.
+                 */
+                $raw = array();
+                $raw_file = HSW_DIR . 'includes/class-hsw-icon-raw.php';
+                if ( file_exists( $raw_file ) ) {
+                        require_once $raw_file;
+                        if ( function_exists( 'hsw_icon_raw_map' ) ) {
+                                $raw = hsw_icon_raw_map();
+                        }
+                }
+
                 echo '<svg xmlns="http://www.w3.org/2000/svg" class="hsw-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">';
                 foreach ( $keys as $key ) {
+                        if ( isset( $raw[ $key ] ) ) {
+                                echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="' . esc_attr( $raw[ $key ]['viewBox'] ) . '"><g style="fill:none">' . $raw[ $key ]['body'] . '</g></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- local icon markup.
+                                continue;
+                        }
                         if ( ! isset( $paths[ $key ] ) ) {
                                 continue;
                         }
@@ -439,6 +458,11 @@ JS;
                         'trash'          => 'delete',
                         'truck'          => 'local_shipping',
                         'user'           => 'person',
+                        'wallet'         => 'account_balance_wallet',
+                        'shop'           => 'storefront',
+                        'store'          => 'storefront',
+                        'settings'       => 'settings',
+                        'gear'           => 'settings',
                         'arrow-left'     => 'arrow_back',
                         'arrow-right'    => 'arrow_forward',
                         'arrow-left-alt' => 'arrow_left_alt',

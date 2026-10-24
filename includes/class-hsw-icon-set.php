@@ -99,6 +99,8 @@ class HSW_Icon_Set {
 			'schedule',
 			'search',
 			'security',
+			'settings',
+			'cart',
 			'sell',
 			'shield',
 			'shopping_bag',
