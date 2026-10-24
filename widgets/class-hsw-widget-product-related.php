@@ -128,12 +128,14 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 	 * @return WC_Product[]
 	 */
 	protected function products( $limit ) {
-		$product = $this->product();
-		if ( ! $product ) {
+		/* HSW_Product_Base exposes product_or_demo(), not product(). */
+		list( $product ) = $this->product_or_demo();
+		if ( ! $product instanceof WC_Product ) {
 			return array();
 		}
 
-		$source = (string) $this->opt( 'source', 'related' );
+		$settings = $this->effective_settings();
+		$source   = isset( $settings['source'] ) ? (string) $settings['source'] : 'related';
 		$ids    = array();
 
 		if ( 'upsells' === $source ) {
@@ -189,20 +191,27 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 	 * Render.
 	 */
 	protected function render() {
-		if ( 'yes' !== $this->opt( 'vis', 'yes' ) ) {
+		/*
+		 * HSW_Product_Base has no opt() helper (that lives on the archive/cart
+		 * bases); settings come from effective_settings(), which is also what
+		 * the other product widgets use.
+		 */
+		$s = $this->effective_settings();
+
+		if ( isset( $s['vis'] ) && 'yes' !== $s['vis'] ) {
 			return;
 		}
 
-		$limit    = max( 2, min( 20, (int) $this->opt( 'count', 8 ) ) );
+		$limit    = max( 2, min( 20, isset( $s['count'] ) ? (int) $s['count'] : 8 ) );
 		$products = $this->products( $limit );
 
 		if ( empty( $products ) ) {
 			return;
 		}
 
-		$title = (string) $this->opt( 'title', __( 'محصولات مرتبط', 'hamishop-elementor-widgets' ) );
-		$sub   = (string) $this->opt( 'sub', '' );
-		$more  = (string) $this->opt( 'more_text', '' );
+		$title = ( isset( $s['title'] ) && '' !== trim( (string) $s['title'] ) ) ? (string) $s['title'] : __( 'محصولات مرتبط', 'hamishop-elementor-widgets' );
+		$sub   = isset( $s['sub'] ) ? (string) $s['sub'] : '';
+		$more  = isset( $s['more_text'] ) ? (string) $s['more_text'] : '';
 		$url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
 		?>
 		<section class="<?php echo esc_attr( $this->root_class( 'prel' ) ); ?>" data-hsw-carousel>

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.52
+Stable tag: 1.11.53
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.53 =
+* **رفع خطای ویجت «محصولات مرتبط»:** ویجت از `$this->opt()` استفاده می‌کرد که
+  روی `HSW_Product_Base` وجود ندارد (فقط در بیس آرشیو/سبد هست) و همچنین
+  `$this->product()` که متد بیس نیست. حالا تنظیمات از `effective_settings()`
+  و محصول از `product_or_demo()` خوانده می‌شود؛ خطای «Call to undefined method
+  HSW_Widget_Product_Related::opt()» برطرف شد.
 
 = 1.11.52 =
 * **اصلاح ۵ باگ کاروسل، لایت‌باکس، سبد خالی و ورود.**
