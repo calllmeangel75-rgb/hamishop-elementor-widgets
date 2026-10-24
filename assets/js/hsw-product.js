@@ -669,34 +669,21 @@
 					return;
 				}
 				sheetEl.classList.remove('is-empty');
+				/*
+				 * A plain list: picture, name, price. No add button — the shopper
+				 * adds with the stepper in the sticky bar, which stays above the
+				 * sheet.
+				 */
 				list.innerHTML = items.map(function (p) {
-					var stars = '';
-					if (p.rating > 0) {
-						stars = '<span class="hsw-sheet__rate">' +
-							'<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5 4.7 1.3 6.8L12 17.3 5.9 20.6 7.2 13.8l-5-4.7 6.9-.8z"></path></svg>' +
-							fa(p.rating) +
-						'</span>';
-					}
-					var off = p.off > 0 ? '<span class="hsw-sheet__off">٪' + fa(p.off) + '</span>' : '';
-					var old = (p.off > 0 && p.regular) ? '<del>' + p.regular + '</del>' : '';
-					var action = p.add
-						? '<button type="button" class="hsw-sheet__add" data-hsw-sheet-add="' + p.id + '">' +
-							'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>' +
-							(D.sheetMore || 'افزودن') + '</button>'
-						: '<a class="hsw-sheet__add" href="' + p.url + '">' + (D.viewProduct || 'مشاهده') + '</a>';
-
-					return '<article class="hsw-sheet__card">' +
-						'<a class="hsw-sheet__media" href="' + p.url + '">' +
+					return '<a class="hsw-sheet__card" href="' + p.url + '">' +
+						'<span class="hsw-sheet__media">' +
 							(p.image ? '<img src="' + p.image + '" alt="" loading="lazy">' : '') +
-						'</a>' +
-						'<div class="hsw-sheet__body">' +
-							'<a class="hsw-sheet__name" href="' + p.url + '">' + p.name + '</a>' +
-							stars +
-							action +
-							'<div class="hsw-sheet__prices">' + off + '<span class="hsw-sheet__price">' + p.price + '</span></div>' +
-							old +
-						'</div>' +
-					'</article>';
+						'</span>' +
+						'<span class="hsw-sheet__body">' +
+							'<span class="hsw-sheet__name">' + p.name + '</span>' +
+							'<span class="hsw-sheet__price">' + p.price + '</span>' +
+						'</span>' +
+					'</a>';
 				}).join('');
 			})
 			.catch(function () { list.innerHTML = ''; });

@@ -313,7 +313,8 @@ class HSW_Rest {
                         $out[] = array(
                                 'id'       => (int) $pid,
                                 'name'     => $product->get_name(),
-                                'price'    => wp_strip_all_tags( $product->get_price_html() ),
+                                /* Clean price only: get_price_html() adds «قیمت اصلی … بود» for sales. */
+                                'price'    => wp_strip_all_tags( wc_price( (float) $product->get_price() ) ),
                                 'regular'  => $regular > 0 ? wp_strip_all_tags( wc_price( $regular ) ) : '',
                                 'off'      => $off,
                                 'rating'   => (float) $product->get_average_rating(),

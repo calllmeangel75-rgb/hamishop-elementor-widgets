@@ -2078,3 +2078,68 @@ html.hsw-sheet-open { overflow: hidden; }
 	text-decoration: line-through;
 }
 .hsw-sheet__view { display: none; }
+
+/* =========================================================================
+ * Sheet v3 — the related products are a plain vertical list (picture, name,
+ * price). The sticky purchase bar sits above the sheet so the stepper can be
+ * used while the list is open.
+ * ====================================================================== */
+.hsw-sheet__list {
+	display: flex !important;
+	flex-direction: column;
+	gap: 0 !important;
+}
+.hsw-sheet__card {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 2px !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	border-bottom: 1px solid var(--hsw-surface-variant, #eceef2) !important;
+	background: transparent !important;
+	text-decoration: none !important;
+}
+.hsw-sheet__card:last-child { border-bottom: 0 !important; }
+.hsw-sheet__media {
+	flex: 0 0 56px;
+	width: 56px;
+	height: 56px;
+	border-radius: 10px;
+	background: var(--hsw-surface-low, #f5f6f8);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+.hsw-sheet__media img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.hsw-sheet__body {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+.hsw-sheet__name {
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.8;
+	color: var(--hsw-on-surface, #191c1e) !important;
+	text-decoration: none !important;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.hsw-sheet__price {
+	font-size: 11.5px;
+	font-weight: 800;
+	color: var(--hsw-price-c, var(--hsw-on-surface, #191c1e)) !important;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Keep the purchase bar above the sheet and its backdrop. */
+.hsw-psticky { z-index: 9995 !important; }
+.hsw-sheet { z-index: 9990; }
