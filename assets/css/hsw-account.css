@@ -6478,3 +6478,103 @@ a.hsw-ac__stat:hover {
 	background-color: transparent !important;
 	color: var(--hsw-ac-primary, #0e2a47) !important;
 }
+
+/* =========================================================================
+ * OTP form rhythm — labels, fields and buttons were drifting apart on mobile
+ * (giant inputs, floating labels, a send button that was not full width).
+ * ====================================================================== */
+.hsw-ac-otp__form {
+	display: flex !important;
+	flex-direction: column;
+	gap: 16px;
+}
+.hsw-ac-otp__form .hsw-ac-field {
+	margin: 0 !important;
+	display: flex !important;
+	flex-direction: column;
+	gap: 6px;
+}
+/* `display:flex !important` would otherwise beat the [hidden] attribute. */
+.hsw-ac-otp__form .hsw-ac-field[hidden] { display: none !important; }
+.hsw-ac-otp__form .hsw-ac-field label {
+	margin: 0 !important;
+	font-size: 11.5px !important;
+	font-weight: 600;
+	color: var(--hsw-ac-muted, #5b6b80);
+}
+.hsw-ac-otp__form .hsw-ac-input-wrap {
+	height: 46px !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	border-radius: 11px;
+}
+.hsw-ac-otp__form .hsw-ac-input-wrap input {
+	height: 46px !important;
+	line-height: 46px !important;
+	padding: 0 40px 0 14px !important;
+	font-size: 13px !important;
+	border-radius: 11px;
+	background: transparent;
+}
+.hsw-ac-otp__form .hsw-ac-input-wrap .hsw-ic,
+.hsw-ac-otp__form .hsw-ac-input-wrap svg {
+	inset-inline-start: 14px;
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+/* Primary action: full width, same height as the fields. */
+.hsw-ac-otp__send {
+	width: 100% !important;
+	align-self: stretch !important;
+	justify-content: center !important;
+	height: 46px;
+	margin-top: 2px;
+	border-radius: 11px;
+	font-size: 13px !important;
+}
+
+/* Code step */
+.hsw-ac-otp__code-step {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-top: 4px;
+}
+.hsw-ac-otp__code-step > label {
+	margin: 0;
+	font-size: 11.5px;
+	font-weight: 600;
+	color: var(--hsw-ac-muted, #5b6b80);
+}
+.hsw-ac-otp__actions {
+	display: flex !important;
+	gap: 8px;
+	align-items: stretch;
+}
+.hsw-ac-otp__actions .hsw-ac__btn {
+	flex: 1 1 auto;
+	height: 44px;
+	border-radius: 11px;
+	font-size: 12.5px;
+	justify-content: center;
+}
+.hsw-ac-otp__resend {
+	flex: 0 0 auto;
+	height: 44px;
+	padding: 0 14px;
+	border-radius: 11px;
+	border: 1px solid var(--hsw-ac-line, #e6ebf2);
+	background: #fff;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+/* Heading: smaller on phones so «ثبت‌نام سریع با کد یکبارمصرف» fits on one line. */
+@media (max-width: 767.98px) {
+	.hsw-ac-otp__head h2 { font-size: 19px !important; line-height: 1.7 !important; }
+	.hsw-ac-otp__head p { font-size: 12px !important; line-height: 2 !important; }
+	.hsw-ac-auth__panel { min-height: 0 !important; }
+	.hsw-ac-otp { padding-bottom: 8px; }
+}
