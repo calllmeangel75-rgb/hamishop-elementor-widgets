@@ -44,6 +44,8 @@ final class HSW_Plugin {
                 new HSW_Free_Shipping();
                 new HSW_404();
                 new HSW_Pagination();
+                new HSW_Rebrand();
+                new HSW_Request_Blocker();
                 HSW_Coupon_Messages::instance();
 
                 /* One SVG sprite per page, containing only the icons it rendered. */
@@ -197,6 +199,8 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-free-shipping.php';
                 require_once HSW_DIR . 'includes/class-hsw-404.php';
                 require_once HSW_DIR . 'includes/class-hsw-pagination.php';
+                require_once HSW_DIR . 'includes/class-hsw-rebrand.php';
+                require_once HSW_DIR . 'includes/class-hsw-request-blocker.php';
                 require_once HSW_DIR . 'includes/class-hsw-coupon-messages.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';

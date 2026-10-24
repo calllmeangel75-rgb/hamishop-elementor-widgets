@@ -92,6 +92,9 @@ class HSW_Branding {
 			'store_phone'   => '',
 			'store_email'   => (string) get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
 			'stamp_url'     => '',
+			/* White-label switches — off by default. */
+			'rebrand'        => 'no',
+			'no_block_editor' => 'no',
 		);
 	}
 
@@ -339,6 +342,8 @@ class HSW_Branding {
 				'store_phone'   => sanitize_text_field( $in['store_phone'] ?? '' ),
 				'store_email'   => sanitize_email( $in['store_email'] ?? '' ),
 				'stamp_url'     => esc_url_raw( $in['stamp_url'] ?? '' ),
+				'rebrand'        => ( 'yes' === ( $in['rebrand'] ?? '' ) ) ? 'yes' : 'no',
+				'no_block_editor' => ( 'yes' === ( $in['no_block_editor'] ?? '' ) ) ? 'yes' : 'no',
 			),
 			false
 		);
@@ -539,6 +544,42 @@ class HSW_Branding {
 									<div class="hsw-pal__field">
 										<input class="hsw-pal__input" type="url" id="hsw-brand-stamp" name="hsw_brand[stamp_url]"
 											value="<?php echo esc_attr( $b['stamp_url'] ); ?>" placeholder="https://" dir="ltr" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-translation" aria-hidden="true"></span><?php esc_html_e( 'تنظیمات نام حامی', 'hamishop-elementor-widgets' ); ?></h2>
+								<span class="hsw-pal__count"><?php esc_html_e( 'اختیاری', 'hamishop-elementor-widgets' ); ?></span>
+							</div>
+
+							<div class="hsw-pal__rows">
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'تغییر نام‌ها به نام فروشگاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'در متن‌های ترجمه‌شده، «ووکامرس» به «فروشگاه» و در پیشخوان «وردپرس» به «پنل مدیریت» تبدیل می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<label class="hsw-brand__switch">
+											<input type="hidden" name="hsw_brand[rebrand]" value="no" />
+											<input type="checkbox" name="hsw_brand[rebrand]" value="yes" <?php checked( 'yes', $b['rebrand'] ); ?> />
+											<span class="hsw-brand__track" aria-hidden="true"></span>
+										</label>
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'غیرفعال‌کردن ویرایشگر بلوک (گوتنبرگ)', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'نوشته‌ها، برگه‌ها و محصولات با ویرایشگر کلاسیک باز می‌شوند. ویرایشگر المنتور مستقل است و دست‌نخورده می‌ماند.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<label class="hsw-brand__switch">
+											<input type="hidden" name="hsw_brand[no_block_editor]" value="no" />
+											<input type="checkbox" name="hsw_brand[no_block_editor]" value="yes" <?php checked( 'yes', $b['no_block_editor'] ); ?> />
+											<span class="hsw-brand__track" aria-hidden="true"></span>
+										</label>
 									</div>
 								</div>
 							</div>

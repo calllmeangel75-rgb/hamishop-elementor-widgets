@@ -42,6 +42,11 @@ class HSW_Security {
 		add_filter( 'rest_endpoints', array( $this, 'filter_rest_users' ) );
 		add_action( 'admin_notices', array( $this, 'rewrite_notice' ) );
 
+		/* Optional: hide the WordPress logo from the admin bar. */
+		if ( 'yes' === ( self::get()['hide_wp_logo'] ?? 'no' ) ) {
+			add_action( 'wp_before_admin_bar_render', array( $this, 'hide_wp_logo' ), 0 );
+		}
+
 		/*
 		 * Everything below touches the admin URL. When the escape hatch is set in
 		 * wp-config.php the whole mechanism has to stay inert — not just the 404
@@ -399,6 +404,10 @@ class HSW_Security {
 			'clean_assets'     => 'no',
 			'clean_widgets'    => 'no',
 			'font_swap'        => 'no',
+			/* Admin polish + national-net mode — off until ticked. */
+			'hide_wp_logo'     => 'no',
+			'block_external'   => 'no',
+			'block_hosts'      => '',
 		);
 	}
 
@@ -923,6 +932,16 @@ class HSW_Security {
 	 * Admin
 	 * ------------------------------------------------------------------ */
 
+	/**
+	 * Drop the WordPress logo (and its dropdown) from the admin bar.
+	 */
+	public function hide_wp_logo() {
+		global $wp_admin_bar;
+		if ( $wp_admin_bar ) {
+			$wp_admin_bar->remove_menu( 'wp-logo' );
+		}
+	}
+
 	public function menu() {
 		add_submenu_page(
 			'hamishop',
@@ -1015,6 +1034,9 @@ class HSW_Security {
 				'clean_assets'     => ( 'yes' === ( $in['clean_assets'] ?? '' ) ) ? 'yes' : 'no',
 				'clean_widgets'    => ( 'yes' === ( $in['clean_widgets'] ?? '' ) ) ? 'yes' : 'no',
 				'font_swap'        => ( 'yes' === ( $in['font_swap'] ?? '' ) ) ? 'yes' : 'no',
+				'hide_wp_logo'     => ( 'yes' === ( $in['hide_wp_logo'] ?? '' ) ) ? 'yes' : 'no',
+				'block_external'   => ( 'yes' === ( $in['block_external'] ?? '' ) ) ? 'yes' : 'no',
+				'block_hosts'      => HSW_Request_Blocker::sanitize_hosts( $in['block_hosts'] ?? '' ),
 			),
 			false
 		);
@@ -1166,6 +1188,53 @@ class HSW_Security {
 							<p class="description" style="margin-top:12px">
 								<strong><?php esc_html_e( 'هزینهٔ کارایی:', 'hamishop-elementor-widgets' ); ?></strong>
 								<?php esc_html_e( 'صفر. این گزینه‌ها فقط چیزهایی را که وردپرس اضافه می‌کند حذف می‌کنند؛ هیچ کوئری یا فایلی اضافه نمی‌شود و در ویرایشگر المنتور هم اجرا نمی‌شوند.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'ظاهر پیشخوان', 'hamishop-elementor-widgets' ); ?></th>
+						<td>
+							<label>
+								<input type="hidden" name="hsw_security[hide_wp_logo]" value="no" />
+								<input type="checkbox" name="hsw_security[hide_wp_logo]" value="yes" <?php checked( 'yes', $s['hide_wp_logo'] ); ?> />
+								<?php esc_html_e( 'حذف لوگوی وردپرس از نوار بالای پیشخوان', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'فقط آیکن و منوی «وردپرس» از نوار ادمین حذف می‌شود؛ روی سایت اثری ندارد.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row"><?php esc_html_e( 'قفل درخواست‌های خارجی', 'hamishop-elementor-widgets' ); ?></th>
+						<td>
+							<label>
+								<input type="hidden" name="hsw_security[block_external]" value="no" />
+								<input type="checkbox" name="hsw_security[block_external]" value="yes" <?php checked( 'yes', $s['block_external'] ); ?> />
+								<?php esc_html_e( 'فعال‌سازی حالت «نت ملی»', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'درخواست‌های سمت سرور به سرورهای آپدیت، لایسنس، آمار و CDN مسدود می‌شوند تا هنگام قطعی اینترنت، سایت و پیشخوان پشت تایم‌اوت نمانند. تا وقتی تیک نخورده، هیچ هوکی ثبت نمی‌شود (سربار صفر).', 'hamishop-elementor-widgets' ); ?>
+							</p>
+							<p class="description" style="margin-top:8px">
+								<strong><?php esc_html_e( 'توجه:', 'hamishop-elementor-widgets' ); ?></strong>
+								<?php esc_html_e( 'با روشن بودن این گزینه، به‌روزرسانی خودکار وردپرس/افزونه‌ها و اتصال درگاه‌هایی که به سرور خارجی وصل می‌شوند کار نمی‌کند. دامنهٔ خود سایت هرگز مسدود نمی‌شود.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+
+							<p style="margin-top:12px">
+								<label for="hsw-sec-block-hosts"><strong><?php esc_html_e( 'دامنه‌های اضافه (هر خط یک دامنه)', 'hamishop-elementor-widgets' ); ?></strong></label><br />
+								<textarea id="hsw-sec-block-hosts" name="hsw_security[block_hosts]" rows="4" class="large-text code" dir="ltr" placeholder="example.com"><?php echo esc_textarea( (string) $s['block_hosts'] ); ?></textarea>
+							</p>
+							<p class="description">
+								<?php
+								echo esc_html(
+									sprintf(
+										/* translators: %s: comma separated host list. */
+										__( 'فهرست پیش‌فرض: %s', 'hamishop-elementor-widgets' ),
+										implode( ', ', HSW_Request_Blocker::default_hosts() )
+									)
+								);
+								?>
 							</p>
 						</td>
 					</tr>
