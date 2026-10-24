@@ -207,10 +207,10 @@ class HSW_Palette {
 		 * One local stylesheet, one local font file — no CDN, no framework.
 		 */
 		wp_enqueue_style(
-			'hsw-admin-palette',
-			HSW_URL . 'assets/css/hsw-admin-palette.css',
+			'hsw-admin-ui',
+			HSW_URL . 'assets/css/hsw-admin-ui.css',
 			array(),
-			(string) @filemtime( HSW_DIR . 'assets/css/hsw-admin-palette.css' )
+			(string) @filemtime( HSW_DIR . 'assets/css/hsw-admin-ui.css' )
 		);
 	}
 
@@ -297,6 +297,28 @@ class HSW_Palette {
 	/**
 	 * Persist the palette (nonce + capability checked).
 	 */
+
+	/**
+	 * Form action for this screen.
+	 *
+	 * With the custom dashboard slug the guard rewrites the request to
+	 * /wp-admin/…, and a POST there is redirected and lost. Posting to the
+	 * public slug path keeps the save working in both setups.
+	 *
+	 * @param string $page Page slug.
+	 * @return string
+	 */
+	protected static function form_action( $page ) {
+		if ( class_exists( 'HSW_Security' ) ) {
+			$security = HSW_Security::get();
+			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
+			if ( '' !== $slug ) {
+				return home_url( '/' . $slug . '/admin.php?page=' . $page );
+			}
+		}
+		return '';
+	}
+
 	public function maybe_save() {
 		if ( ! isset( $_POST['hsw_palette_nonce'] ) ) {
 			return;
@@ -381,7 +403,7 @@ class HSW_Palette {
 				</div>
 			</div>
 
-			<form method="post">
+			<form method="post" action="<?php echo esc_url( self::form_action( 'hamishop-palette' ) ); ?>">
 				<?php wp_nonce_field( 'hsw_save_palette', 'hsw_palette_nonce' ); ?>
 
 				<div class="hsw-pal__grid">

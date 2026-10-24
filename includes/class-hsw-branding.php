@@ -224,6 +224,14 @@ class HSW_Branding {
 			return;
 		}
 		wp_enqueue_media();
+
+		/* Same shell as the palette screen: local CSS, local font, no CDN. */
+		wp_enqueue_style(
+			'hsw-admin-ui',
+			HSW_URL . 'assets/css/hsw-admin-ui.css',
+			array(),
+			(string) @filemtime( HSW_DIR . 'assets/css/hsw-admin-ui.css' )
+		);
 	}
 
 	/**
@@ -280,11 +288,39 @@ class HSW_Branding {
 	/**
 	 * Persist the branding (nonce + capability checked).
 	 */
+
+	/**
+	 * Form action for this screen.
+	 *
+	 * With the custom dashboard slug the guard rewrites the request to
+	 * /wp-admin/…, and a POST there is redirected and lost. Posting to the
+	 * public slug path keeps the save working in both setups.
+	 *
+	 * @param string $page Page slug.
+	 * @return string
+	 */
+	protected static function form_action( $page ) {
+		if ( class_exists( 'HSW_Security' ) ) {
+			$security = HSW_Security::get();
+			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
+			if ( '' !== $slug ) {
+				return home_url( '/' . $slug . '/admin.php?page=' . $page );
+			}
+		}
+		return '';
+	}
+
 	public function maybe_save() {
 		if ( ! isset( $_POST['hsw_brand_nonce'] ) || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 		if ( ! check_admin_referer( 'hsw_save_brand', 'hsw_brand_nonce' ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['hsw_brand_reset'] ) ) {
+			delete_option( self::OPTION );
+			add_settings_error( 'hsw_brand', 'reset', __( 'برند به مقدار پیش‌فرض بازگشت.', 'hamishop-elementor-widgets' ), 'updated' );
 			return;
 		}
 
@@ -314,142 +350,245 @@ class HSW_Branding {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$b   = self::get();
-		$url = self::logo_url( 'medium' );
+		$b    = self::get();
+		$url  = self::logo_url( 'medium' );
+		$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'برند و لوگو', 'hamishop-elementor-widgets' ); ?></h1>
-			<p class="description" style="max-width:760px">
-				<?php esc_html_e( 'نام و لوگوی فروشگاه شما در پنل حساب کاربری، صفحهٔ ورود و اعلان‌های داخل افزونه استفاده می‌شود. اگر خالی بگذارید، نام و لوگوی خود قالب وردپرس نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?>
-			</p>
+		<div class="wrap hsw-pal" id="hsw-brand-root">
+			<div class="hsw-pal__head">
+				<div>
+					<h1 class="hsw-pal__title"><?php esc_html_e( 'برند و لوگو', 'hamishop-elementor-widgets' ); ?></h1>
+					<p class="hsw-pal__sub"><?php esc_html_e( 'نام و لوگوی فروشگاه شما در پنل حساب کاربری، صفحهٔ ورود و اعلان‌های داخل افزونه استفاده می‌شود. اگر خالی بگذارید، نام و لوگوی خود قالب وردپرس نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
+				</div>
+				<div class="hsw-pal__meta">
+					<span class="hsw-pal__pill"><?php esc_html_e( 'فعال در پنل کاربری', 'hamishop-elementor-widgets' ); ?></span>
+				</div>
+			</div>
 
 			<?php settings_errors( 'hsw_brand' ); ?>
 
-			<form method="post">
+			<form method="post" action="<?php echo esc_url( self::form_action( 'hamishop-brand' ) ); ?>">
 				<?php wp_nonce_field( 'hsw_save_brand', 'hsw_brand_nonce' ); ?>
-				<table class="form-table" role="presentation">
-					<tbody>
-					<tr>
-						<th scope="row"><label for="hsw-brand-name"><?php esc_html_e( 'نام برند', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="text" class="regular-text" id="hsw-brand-name" name="hsw_brand[name]"
-								value="<?php echo esc_attr( $b['name'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" />
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="hsw-brand-tagline"><?php esc_html_e( 'شعار کوتاه', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="text" class="regular-text" id="hsw-brand-tagline" name="hsw_brand[tagline]"
-								value="<?php echo esc_attr( $b['tagline'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'description' ) ); ?>" />
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><?php esc_html_e( 'لوگو', 'hamishop-elementor-widgets' ); ?></th>
-						<td>
-							<input type="hidden" id="hsw-brand-logo-id" name="hsw_brand[logo_id]" value="<?php echo esc_attr( (int) $b['logo_id'] ); ?>" />
-							<div id="hsw-brand-preview" class="hsw-brand-preview<?php echo $url ? '' : ' is-empty'; ?>">
-								<?php if ( $url ) : ?>
-									<img src="<?php echo esc_url( $url ); ?>" alt="" />
-								<?php endif; ?>
+
+				<div class="hsw-pal__grid">
+					<div style="display:flex;flex-direction:column;gap:18px">
+
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-badge" aria-hidden="true"></span><?php esc_html_e( 'هویت و نماد بصری برند', 'hamishop-elementor-widgets' ); ?></h2>
 							</div>
-							<p>
-								<button type="button" class="button" id="hsw-brand-pick"><?php esc_html_e( 'انتخاب از کتابخانه', 'hamishop-elementor-widgets' ); ?></button>
-								<button type="button" class="button-link" id="hsw-brand-clear"><?php esc_html_e( 'حذف', 'hamishop-elementor-widgets' ); ?></button>
-							</p>
-							<p class="description"><?php esc_html_e( 'اگر لوگویی انتخاب نکنید، لوگوی سفارشی قالب استفاده می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="hsw-brand-logo-url"><?php esc_html_e( 'یا آدرس تصویر لوگو', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="url" class="regular-text" id="hsw-brand-logo-url" name="hsw_brand[logo_url]"
-								value="<?php echo esc_attr( $b['logo_url'] ); ?>" placeholder="https://" dir="ltr" />
-							<p class="description"><?php esc_html_e( 'فقط وقتی استفاده می‌شود که لوگویی از کتابخانه انتخاب نشده باشد.', 'hamishop-elementor-widgets' ); ?></p>
-						</td>
-					</tr>
-					</tbody>
-				</table>
 
-				<h2><?php esc_html_e( 'ایمیل فرستنده', 'hamishop-elementor-widgets' ); ?></h2>
-				<p class="description" style="max-width:780px">
-					<?php esc_html_e( 'آدرس و نامی که وردپرس با آن ایمیل می‌فرستد. به‌صورت پیش‌فرض wordpress@دامنه است که بسیاری از سرورها آن را اسپم می‌کنند؛ اینجا آدرس واقعی فروشگاه را بگذارید. این تنظیم روی همهٔ ایمیل‌های سایت اثر دارد (سفارش، بازیابی رمز، کد تأیید ایمیل).', 'hamishop-elementor-widgets' ); ?>
-				</p>
-				<table class="form-table" role="presentation">
-					<tbody>
-					<tr>
-						<th scope="row"><label for="hsw-brand-from-email"><?php esc_html_e( 'آدرس فرستنده', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="email" class="regular-text" id="hsw-brand-from-email" name="hsw_brand[from_email]"
-								value="<?php echo esc_attr( $b['from_email'] ); ?>" placeholder="no-reply@<?php echo esc_attr( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ); ?>" dir="ltr" />
-							<p class="description">
-								<?php
-								printf(
-									/* translators: %s: current from address. */
-									esc_html__( 'خالی بگذارید تا مقدار پیش‌فرض وردپرس (%s) استفاده شود. برای تحویل بهتر، آدرس باید روی دامنهٔ همین سایت باشد.', 'hamishop-elementor-widgets' ),
-									'<code dir="ltr">wordpress@' . esc_html( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) . '</code>'
-								);
-								?>
-							</p>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="hsw-brand-from-name"><?php esc_html_e( 'نام فرستنده', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="text" class="regular-text" id="hsw-brand-from-name" name="hsw_brand[from_name]"
-								value="<?php echo esc_attr( $b['from_name'] ); ?>" placeholder="<?php echo esc_attr( self::name() ); ?>" />
-							<p class="description"><?php esc_html_e( 'خالی بگذارید تا نام برند بالا استفاده شود.', 'hamishop-elementor-widgets' ); ?></p>
-						</td>
-					</tr>
-					</tbody>
-				</table>
+							<div class="hsw-pal__rows">
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'نام برند', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'عنوان اصلی کسب‌وکار که در هدر پنل کاربری، پیامک‌ها و پیش‌فاکتورها ظاهر می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="text" id="hsw-brand-name" name="hsw_brand[name]"
+											value="<?php echo esc_attr( $b['name'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" />
+									</div>
+								</div>
 
-				<h2><?php esc_html_e( 'اطلاعات فروشنده (فاکتور)', 'hamishop-elementor-widgets' ); ?></h2>
-				<p class="description" style="max-width:780px">
-					<?php esc_html_e( 'این اطلاعات در ستون «فروشنده» فاکتور چاپی چاپ می‌شود. اگر خالی بگذارید، نشانی از تنظیمات ووکامرس و ایمیل از آدرس فرستندهٔ فروشگاه خوانده می‌شود.', 'hamishop-elementor-widgets' ); ?>
-				</p>
-				<table class="form-table" role="presentation">
-					<tbody>
-					<tr>
-						<th scope="row"><label for="hsw-brand-store-address"><?php esc_html_e( 'نشانی فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<textarea class="large-text" rows="2" id="hsw-brand-store-address" name="hsw_brand[store_address]" placeholder="<?php echo esc_attr( self::default_store_address() ); ?>"><?php echo esc_textarea( $b['store_address'] ); ?></textarea>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="hsw-brand-store-phone"><?php esc_html_e( 'تلفن فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="text" class="regular-text" id="hsw-brand-store-phone" name="hsw_brand[store_phone]"
-								value="<?php echo esc_attr( $b['store_phone'] ); ?>" dir="ltr" placeholder="021-00000000" />
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="hsw-brand-store-email"><?php esc_html_e( 'ایمیل فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="email" class="regular-text" id="hsw-brand-store-email" name="hsw_brand[store_email]"
-								value="<?php echo esc_attr( $b['store_email'] ); ?>" dir="ltr" />
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="hsw-brand-stamp"><?php esc_html_e( 'تصویر مهر فروشگاه', 'hamishop-elementor-widgets' ); ?></label></th>
-						<td>
-							<input type="url" class="regular-text" id="hsw-brand-stamp" name="hsw_brand[stamp_url]"
-								value="<?php echo esc_attr( $b['stamp_url'] ); ?>" placeholder="https://" dir="ltr" />
-							<p class="description"><?php esc_html_e( 'اختیاری. اگر خالی باشد، جای مهر در فاکتور خالی می‌ماند.', 'hamishop-elementor-widgets' ); ?></p>
-						</td>
-					</tr>
-					</tbody>
-				</table>
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'شعار کوتاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'عبارت تکمیلی یا پیام خوش‌آمدگویی زیر عنوان فروشگاه در صفحهٔ ورود و ثبت‌نام.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="text" id="hsw-brand-tagline" name="hsw_brand[tagline]"
+											value="<?php echo esc_attr( $b['tagline'] ); ?>" placeholder="<?php echo esc_attr( get_bloginfo( 'description' ) ); ?>" />
+									</div>
+								</div>
 
-				<p class="submit">
-					<?php submit_button( __( 'ذخیره برند', 'hamishop-elementor-widgets' ), 'primary', 'submit', false ); ?>
-				</p>
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'لوگو', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'اگر لوگویی انتخاب نکنید، لوگوی سفارشی قالب استفاده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<div class="hsw-brand__logo">
+											<input type="hidden" id="hsw-brand-logo-id" name="hsw_brand[logo_id]" value="<?php echo esc_attr( (int) $b['logo_id'] ); ?>" />
+											<div id="hsw-brand-preview" class="hsw-brand__preview<?php echo $url ? '' : ' is-empty'; ?>">
+												<?php if ( $url ) : ?>
+													<img src="<?php echo esc_url( $url ); ?>" alt="" />
+												<?php else : ?>
+													<span class="hsw-brand__preview-empty"><?php esc_html_e( 'لوگویی انتخاب نشده است', 'hamishop-elementor-widgets' ); ?></span>
+												<?php endif; ?>
+											</div>
+											<div class="hsw-brand__actions">
+												<button type="button" class="button" id="hsw-brand-pick">
+													<span class="dashicons dashicons-format-image" aria-hidden="true"></span>
+													<?php esc_html_e( 'انتخاب از کتابخانه', 'hamishop-elementor-widgets' ); ?>
+												</button>
+												<button type="button" class="button button-link-delete" id="hsw-brand-clear">
+													<span class="dashicons dashicons-trash" aria-hidden="true"></span>
+													<?php esc_html_e( 'حذف', 'hamishop-elementor-widgets' ); ?>
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'یا آدرس تصویر لوگو', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'فقط وقتی استفاده می‌شود که لوگویی از کتابخانه انتخاب نشده باشد.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="url" id="hsw-brand-logo-url" name="hsw_brand[logo_url]"
+											value="<?php echo esc_attr( $b['logo_url'] ); ?>" placeholder="https://" dir="ltr" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-email" aria-hidden="true"></span><?php esc_html_e( 'ایمیل فرستنده', 'hamishop-elementor-widgets' ); ?></h2>
+								<span class="hsw-pal__count"><?php esc_html_e( 'اثر بر همهٔ ایمیل‌ها', 'hamishop-elementor-widgets' ); ?></span>
+							</div>
+
+							<div class="hsw-pal__rows">
+								<div class="hsw-pal__row" style="display:block">
+									<p class="hsw-pal__sub" style="max-width:none">
+										<?php
+										printf(
+											/* translators: %s: current from address. */
+											esc_html__( 'آدرس و نامی که وردپرس با آن ایمیل می‌فرستد. به‌صورت پیش‌فرض %s است که بسیاری از سرورها آن را اسپم می‌کنند؛ اینجا آدرس واقعی فروشگاه را بگذارید. این تنظیم روی همهٔ ایمیل‌های سایت اثر دارد (سفارش، بازیابی رمز، کد تأیید ایمیل).', 'hamishop-elementor-widgets' ),
+											'<code dir="ltr">wordpress@' . esc_html( $host ) . '</code>'
+										);
+										?>
+									</p>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'آدرس فرستنده', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'خالی بگذارید تا مقدار پیش‌فرض وردپرس استفاده شود؛ برای تحویل بهتر باید روی دامنهٔ همین سایت باشد.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="email" id="hsw-brand-from-email" name="hsw_brand[from_email]"
+											value="<?php echo esc_attr( $b['from_email'] ); ?>" placeholder="no-reply@<?php echo esc_attr( $host ); ?>" dir="ltr" />
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'نام فرستنده', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'خالی بگذارید تا نام برند بالا استفاده شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="text" id="hsw-brand-from-name" name="hsw_brand[from_name]"
+											value="<?php echo esc_attr( $b['from_name'] ); ?>" placeholder="<?php echo esc_attr( self::name() ); ?>" />
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-media-text" aria-hidden="true"></span><?php esc_html_e( 'اطلاعات فروشنده (فاکتور)', 'hamishop-elementor-widgets' ); ?></h2>
+								<span class="hsw-pal__count"><?php esc_html_e( 'قالب فاکتور رسمی', 'hamishop-elementor-widgets' ); ?></span>
+							</div>
+
+							<div class="hsw-pal__rows">
+								<div class="hsw-pal__row" style="display:block">
+									<p class="hsw-pal__sub" style="max-width:none">
+										<?php esc_html_e( 'این اطلاعات در ستون «فروشنده» فاکتور چاپی چاپ می‌شود. اگر خالی بگذارید، نشانی از تنظیمات ووکامرس و ایمیل از آدرس فرستندهٔ فروشگاه خوانده می‌شود.', 'hamishop-elementor-widgets' ); ?>
+									</p>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'نشانی فروشگاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'آدرس دقیق ثبتی، کد پستی و مشخصات دفتر مرکزی برای سربرگ فاکتور.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<textarea class="hsw-pal__textarea" rows="3" id="hsw-brand-store-address" name="hsw_brand[store_address]" placeholder="<?php echo esc_attr( self::default_store_address() ); ?>"><?php echo esc_textarea( $b['store_address'] ); ?></textarea>
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'تلفن فروشگاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'شماره‌های تماس اداری یا پشتیبانی مشتریان روی فاکتورها.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="text" id="hsw-brand-store-phone" name="hsw_brand[store_phone]"
+											value="<?php echo esc_attr( $b['store_phone'] ); ?>" dir="ltr" placeholder="021-00000000" />
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'ایمیل فروشگاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پست الکترونیکی امور مالی برای پرسش‌های حسابداری خریداران.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="email" id="hsw-brand-store-email" name="hsw_brand[store_email]"
+											value="<?php echo esc_attr( $b['store_email'] ); ?>" dir="ltr" />
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'تصویر مهر فروشگاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'اختیاری. اگر خالی باشد، جای مهر در فاکتور خالی می‌ماند.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="url" id="hsw-brand-stamp" name="hsw_brand[stamp_url]"
+											value="<?php echo esc_attr( $b['stamp_url'] ); ?>" placeholder="https://" dir="ltr" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="hsw-pal__side">
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-visibility" aria-hidden="true"></span><?php esc_html_e( 'پیش‌نمایش برند', 'hamishop-elementor-widgets' ); ?></h2>
+								<span class="hsw-pal__count"><?php esc_html_e( 'نمایشی', 'hamishop-elementor-widgets' ); ?></span>
+							</div>
+							<div class="hsw-pal__live">
+								<p class="hsw-pl-caption"><?php esc_html_e( 'جایی که برند دیده می‌شود', 'hamishop-elementor-widgets' ); ?></p>
+								<div class="hsw-pl-card" style="gap:10px">
+									<div style="display:flex;align-items:center;gap:10px">
+										<span class="hsw-brand__mark" id="hsw-brand-mark">
+											<?php if ( $url ) : ?>
+												<img src="<?php echo esc_url( $url ); ?>" alt="" />
+											<?php else : ?>
+												<span class="dashicons dashicons-store"></span>
+											<?php endif; ?>
+										</span>
+										<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+											<strong id="hsw-brand-mark-name" style="font-size:12.5px;color:var(--pal-text);line-height:1.7"><?php echo esc_html( self::name() ); ?></strong>
+											<small id="hsw-brand-mark-tag" style="font-size:10.5px;color:var(--pal-muted)"><?php echo esc_html( self::tagline() ); ?></small>
+										</span>
+									</div>
+									<div class="hsw-pl-divider"></div>
+									<p class="hsw-pl-caption" style="margin:0">
+										<?php esc_html_e( 'در صفحهٔ ورود و پنل حساب کاربری همین نام و لوگو نمایش داده می‌شود. تغییرات پس از ذخیره اعمال می‌شوند.', 'hamishop-elementor-widgets' ); ?>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="hsw-pal__actions hsw-pal__actions--sticky">
+					<div style="display:flex;gap:10px;align-items:center">
+						<?php submit_button( __( 'ذخیره برند', 'hamishop-elementor-widgets' ), 'primary', 'submit', false ); ?>
+						<button type="submit" name="hsw_brand_reset" value="1" class="button button-secondary"
+							onclick="return confirm('<?php echo esc_js( __( 'برند به پیش‌فرض بازگردد؟', 'hamishop-elementor-widgets' ) ); ?>');">
+							<?php esc_html_e( 'بازنشانی به پیش‌فرض', 'hamishop-elementor-widgets' ); ?>
+						</button>
+					</div>
+					<span class="hsw-pal__hint"><?php esc_html_e( 'خالی گذاشتن هر فیلد یعنی استفاده از مقدار پیش‌فرض وردپرس/قالب.', 'hamishop-elementor-widgets' ); ?></span>
+				</div>
 			</form>
 		</div>
-		<style>
-			.hsw-brand-preview { display: flex; align-items: center; justify-content: center; width: 180px; height: 90px; margin-bottom: 10px; padding: 10px; border: 1px dashed #c3c4c7; border-radius: 10px; background: #fff; }
-			.hsw-brand-preview.is-empty { background: repeating-linear-gradient(45deg, #f6f7f7, #f6f7f7 8px, #fff 8px, #fff 16px); }
-			.hsw-brand-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
-		</style>
 		<?php
 	}
 }
