@@ -201,8 +201,17 @@ class HSW_Palette {
 		if ( 'hamishop_page_hamishop-palette' !== $hook && false === strpos( (string) $hook, 'hamishop-palette' ) ) {
 			return;
 		}
-		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_script( 'wp-color-picker' );
+		/*
+		 * Native <input type="color"> instead of iris: the picker is the OS's
+		 * own, so this page loads no extra script and no popover to fight.
+		 * One local stylesheet, one local font file — no CDN, no framework.
+		 */
+		wp_enqueue_style(
+			'hsw-admin-palette',
+			HSW_URL . 'assets/css/hsw-admin-palette.css',
+			array(),
+			(string) @filemtime( HSW_DIR . 'assets/css/hsw-admin-palette.css' )
+		);
 	}
 
 	/**
@@ -220,8 +229,66 @@ class HSW_Palette {
 		?>
 		<script>
 		( function () {
-			if ( ! window.jQuery || ! jQuery.fn.wpColorPicker ) { return; }
-			jQuery( '.hsw-color-field' ).wpColorPicker();
+			/* token key → CSS custom property used by the preview column */
+			var MAP = {
+				primary: '--pal-primary', primary_dark: '--pal-primary-dark', accent: '--pal-accent',
+				hover: '--pal-hover', cta: '--pal-cta', cta_hover: '--pal-cta-hover',
+				cta_active: '--pal-cta-active', text: '--pal-text', muted: '--pal-muted',
+				border: '--pal-border', surface: '--pal-surface', surface_alt: '--pal-surface-alt',
+				success: '--pal-success', warning: '--pal-warning', danger: '--pal-danger',
+				header_icon_color: '--pal-hic', header_icon_bg: '--pal-hib',
+				hero_a: '--pal-hero-a', hero_b: '--pal-hero-b'
+			};
+
+			var root = document.getElementById( 'hsw-pal-root' );
+			if ( ! root ) { return; }
+
+			function hex( value ) {
+				value = ( value || '' ).trim();
+				return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test( value ) ? value : '';
+			}
+
+			function paint( key, value ) {
+				if ( ! MAP[ key ] || ! hex( value ) ) { return; }
+				root.style.setProperty( MAP[ key ], value );
+				var chip = document.querySelector( '[data-chip="' + key + '"]' );
+				if ( chip ) { chip.style.background = value; }
+			}
+
+			function syncFromText( input ) {
+				var key = input.getAttribute( 'data-key' );
+				var value = hex( input.value );
+				if ( ! value ) { return; }
+				paint( key, value );
+				var pick = document.querySelector( '[data-pick="' + key + '"]' );
+				if ( pick ) { pick.value = value; }
+			}
+
+			document.addEventListener( 'input', function ( e ) {
+				var el = e.target;
+				if ( ! el || ! el.classList ) { return; }
+
+				if ( el.classList.contains( 'hsw-color-field' ) ) {
+					syncFromText( el );
+					return;
+				}
+
+				if ( el.classList.contains( 'hsw-pal__pick' ) ) {
+					var key = el.getAttribute( 'data-pick' );
+					var field = document.querySelector( '.hsw-color-field[data-key="' + key + '"]' );
+					if ( field ) { field.value = el.value; }
+					paint( key, el.value );
+				}
+			} );
+
+			/* Typing a short hex (#abc) only resolves on blur/Enter. */
+			document.addEventListener( 'change', function ( e ) {
+				if ( e.target && e.target.classList && e.target.classList.contains( 'hsw-color-field' ) ) {
+					syncFromText( e.target );
+				}
+			} );
+
+			document.querySelectorAll( '.hsw-color-field' ).forEach( syncFromText );
 		} )();
 		</script>
 		<?php
@@ -244,7 +311,9 @@ class HSW_Palette {
 		$clean = array();
 
 		if ( isset( $_POST['hsw_reset'] ) ) {
-			update_option( self::OPTION, self::defaults() );
+			$defaults            = self::defaults();
+			$defaults['_saved']  = time();
+			update_option( self::OPTION, $defaults );
 			add_settings_error( 'hsw_palette', 'reset', __( 'پالت به مقدار پیش‌فرض بازگشت.', 'hamishop-elementor-widgets' ), 'updated' );
 			return;
 		}
@@ -256,6 +325,7 @@ class HSW_Palette {
 			$clean[ $key ] = $value ? $value : $default;
 		}
 
+		$clean['_saved'] = time();
 		update_option( self::OPTION, $clean );
 		add_settings_error( 'hsw_palette', 'saved', __( 'پالت رنگی ذخیره شد.', 'hamishop-elementor-widgets' ), 'updated' );
 	}
@@ -264,66 +334,196 @@ class HSW_Palette {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$p = self::get();
+		$p     = self::get();
+		$raw   = get_option( self::OPTION, array() );
+		$saved = ( is_array( $raw ) && isset( $raw['_saved'] ) ) ? (int) $raw['_saved'] : 0;
+
+		$groups = array(
+			__( 'برند و تعامل', 'hamishop-elementor-widgets' )        => array( 'primary', 'primary_dark', 'accent', 'hover' ),
+			__( 'مراحل خرید', 'hamishop-elementor-widgets' )          => array( 'cta', 'cta_hover', 'cta_active' ),
+			__( 'متن و سطوح', 'hamishop-elementor-widgets' )          => array( 'text', 'muted', 'border', 'surface', 'surface_alt' ),
+			__( 'وضعیت‌ها', 'hamishop-elementor-widgets' )            => array( 'success', 'warning', 'danger' ),
+			__( 'هدر و پنل حساب', 'hamishop-elementor-widgets' )      => array( 'header_icon_color', 'header_icon_bg', 'hero_a', 'hero_b' ),
+		);
+		$tokens = self::tokens();
 		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'پالت رنگی HamiShop', 'hamishop-elementor-widgets' ); ?></h1>
-			<p style="max-width:760px">
-				<?php esc_html_e( 'این رنگ‌ها به همهٔ ویجت‌های HamiShop اعمال می‌شوند. اگر برای یک ویجت خاص رنگ جداگانه‌ای در تنظیمات المنتور انتخاب کرده باشید، همان رنگ اولویت دارد.', 'hamishop-elementor-widgets' ); ?>
-			</p>
+		<div class="wrap hsw-pal" id="hsw-pal-root">
+			<div class="hsw-pal__head">
+				<div>
+					<h1 class="hsw-pal__title"><?php esc_html_e( 'پالت رنگی HamiShop', 'hamishop-elementor-widgets' ); ?></h1>
+					<p class="hsw-pal__sub"><?php esc_html_e( 'این رنگ‌ها به همهٔ ویجت‌های HamiShop اعمال می‌شوند. اگر برای یک ویجت خاص رنگ جداگانه‌ای در تنظیمات المنتور انتخاب کرده باشید، همان رنگ اولویت دارد.', 'hamishop-elementor-widgets' ); ?></p>
+				</div>
+				<div class="hsw-pal__meta">
+					<span class="hsw-pal__pill"><?php esc_html_e( 'سازگار با قالب و ویجت‌های المنتور', 'hamishop-elementor-widgets' ); ?></span>
+					<?php if ( $saved ) : ?>
+						<span class="hsw-pal__saved">
+							<?php
+							echo esc_html(
+								sprintf(
+									/* translators: %s: date/time. */
+									__( 'آخرین ذخیره‌سازی: %s', 'hamishop-elementor-widgets' ),
+									date_i18n( 'j F Y — H:i', $saved )
+								)
+							);
+							?>
+						</span>
+					<?php endif; ?>
+				</div>
+			</div>
 
 			<?php settings_errors( 'hsw_palette' ); ?>
 
+			<div class="hsw-pal__note">
+				<span class="dashicons dashicons-info-outline" aria-hidden="true"></span>
+				<div>
+					<p><?php esc_html_e( 'هر رنگ را از دکمهٔ گزینش رنگ یا با وارد کردن کد HEX تغییر دهید؛ ستون کنار، همان لحظه نشان می‌دهد هر رنگ کجای سایت استفاده می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
+					<p><?php esc_html_e( 'پیش‌نمایش این صفحه فقط نمایشی است و هیچ تغییری در فروشگاه ایجاد نمی‌کند تا زمانی که «ذخیره پالت» را بزنید.', 'hamishop-elementor-widgets' ); ?></p>
+				</div>
+			</div>
+
 			<form method="post">
 				<?php wp_nonce_field( 'hsw_save_palette', 'hsw_palette_nonce' ); ?>
-				<table class="form-table" role="presentation">
-					<tbody>
-					<?php foreach ( self::tokens() as $key => $def ) : ?>
-						<?php list( $label, $default, $help ) = $def; ?>
-						<tr>
-							<th scope="row">
-								<label for="hsw-pal-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label>
-							</th>
-							<td>
-								<input
-									type="text"
-									class="hsw-color-field"
-									id="hsw-pal-<?php echo esc_attr( $key ); ?>"
-									name="hsw_palette[<?php echo esc_attr( $key ); ?>]"
-									value="<?php echo esc_attr( $p[ $key ] ); ?>"
-									data-default-color="<?php echo esc_attr( $default ); ?>"
-								/>
-								<?php if ( '' !== $help ) : ?>
-									<p class="description"><?php echo esc_html( $help ); ?></p>
-								<?php endif; ?>
-							</td>
-						</tr>
-					<?php endforeach; ?>
-					</tbody>
-				</table>
 
-				<p class="submit" style="display:flex;gap:10px;align-items:center">
-					<?php submit_button( __( 'ذخیره پالت', 'hamishop-elementor-widgets' ), 'primary', 'submit', false ); ?>
-					<button type="submit" name="hsw_reset" value="1" class="button button-secondary"
-						onclick="return confirm('<?php echo esc_js( __( 'پالت به پیش‌فرض بازگردد؟', 'hamishop-elementor-widgets' ) ); ?>');">
-						<?php esc_html_e( 'بازنشانی به پیش‌فرض', 'hamishop-elementor-widgets' ); ?>
-					</button>
-				</p>
-			</form>
+				<div class="hsw-pal__grid">
+					<div class="hsw-pal__card">
+						<div class="hsw-pal__card-head">
+							<h2><span class="dashicons dashicons-art" aria-hidden="true"></span><?php esc_html_e( 'تنظیم متغیرهای رنگی', 'hamishop-elementor-widgets' ); ?></h2>
+							<span class="hsw-pal__count"><?php echo esc_html( sprintf( __( '%s رنگ', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( count( $tokens ) ) ) ); ?></span>
+						</div>
 
-			<hr />
-			<h2><?php esc_html_e( 'پیش‌نمایش', 'hamishop-elementor-widgets' ); ?></h2>
-			<div class="hsw-pal-preview" style="display:flex;flex-wrap:wrap;gap:10px;max-width:760px">
-				<?php foreach ( self::tokens() as $key => $def ) : ?>
-					<div style="flex:1 1 120px;border:1px solid <?php echo esc_attr( $p['border'] ); ?>;border-radius:10px;overflow:hidden;background:#fff">
-						<div style="height:56px;background:<?php echo esc_attr( $p[ $key ] ); ?>"></div>
-						<div style="padding:6px 8px;font-size:11px;color:#444">
-							<strong style="display:block"><?php echo esc_html( $def[0] ); ?></strong>
-							<code style="font-size:10px"><?php echo esc_html( $p[ $key ] ); ?></code>
+						<div class="hsw-pal__rows">
+							<?php foreach ( $tokens as $key => $def ) : ?>
+								<?php list( $label, $default, $help ) = $def; ?>
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php echo esc_html( $label ); ?></strong>
+										<?php if ( '' !== $help ) : ?>
+											<small><?php echo esc_html( $help ); ?></small>
+										<?php endif; ?>
+									</div>
+									<div class="hsw-pal__field">
+										<input
+											type="color"
+											class="hsw-pal__pick"
+											value="<?php echo esc_attr( $p[ $key ] ); ?>"
+											data-pick="<?php echo esc_attr( $key ); ?>"
+											aria-label="<?php echo esc_attr( $label ); ?>"
+										/>
+										<input
+											type="text"
+											class="hsw-color-field"
+											id="hsw-pal-<?php echo esc_attr( $key ); ?>"
+											name="hsw_palette[<?php echo esc_attr( $key ); ?>]"
+											value="<?php echo esc_attr( $p[ $key ] ); ?>"
+											data-key="<?php echo esc_attr( $key ); ?>"
+											data-default-color="<?php echo esc_attr( $default ); ?>"
+											dir="ltr"
+											spellcheck="false"
+											autocomplete="off"
+										/>
+									</div>
+								</div>
+							<?php endforeach; ?>
+						</div>
+
+						<div class="hsw-pal__actions">
+							<div style="display:flex;gap:10px;align-items:center">
+								<?php submit_button( __( 'ذخیره پالت', 'hamishop-elementor-widgets' ), 'primary', 'submit', false ); ?>
+								<button type="submit" name="hsw_reset" value="1" class="button button-secondary"
+									onclick="return confirm('<?php echo esc_js( __( 'پالت به پیش‌فرض بازگردد؟', 'hamishop-elementor-widgets' ) ); ?>');">
+									<?php esc_html_e( 'بازنشانی به پیش‌فرض', 'hamishop-elementor-widgets' ); ?>
+								</button>
+							</div>
+							<span class="hsw-pal__hint"><?php esc_html_e( 'تغییرات پس از ذخیره، بلافاصله در فروشگاه اعمال می‌شود.', 'hamishop-elementor-widgets' ); ?></span>
 						</div>
 					</div>
-				<?php endforeach; ?>
-			</div>
+
+					<div class="hsw-pal__side">
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-grid-view" aria-hidden="true"></span><?php esc_html_e( 'هر رنگ کجا دیده می‌شود', 'hamishop-elementor-widgets' ); ?></h2>
+							</div>
+							<div class="hsw-pal__map">
+								<?php foreach ( $groups as $group => $keys ) : ?>
+									<div class="hsw-pal__group">
+										<h3><?php echo esc_html( $group ); ?></h3>
+										<div class="hsw-pal__chips">
+											<?php foreach ( $keys as $key ) : ?>
+												<?php if ( ! isset( $tokens[ $key ] ) ) : ?>
+													<?php continue; ?>
+												<?php endif; ?>
+												<span class="hsw-pal__chip">
+													<i data-chip="<?php echo esc_attr( $key ); ?>" style="background:<?php echo esc_attr( $p[ $key ] ); ?>"></i>
+													<?php echo esc_html( $tokens[ $key ][0] ); ?>
+												</span>
+											<?php endforeach; ?>
+										</div>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						</div>
+
+						<div class="hsw-pal__card">
+							<div class="hsw-pal__card-head">
+								<h2><span class="dashicons dashicons-visibility" aria-hidden="true"></span><?php esc_html_e( 'پیش‌نمایش زنده', 'hamishop-elementor-widgets' ); ?></h2>
+								<span class="hsw-pal__count"><?php esc_html_e( 'نمایشی', 'hamishop-elementor-widgets' ); ?></span>
+							</div>
+
+							<div class="hsw-pal__live">
+								<p class="hsw-pl-caption"><?php esc_html_e( 'دکمه‌ها و لینک‌ها', 'hamishop-elementor-widgets' ); ?></p>
+								<div style="display:flex;gap:8px;flex-wrap:wrap">
+									<span class="hsw-pl-btn hsw-pl-btn--primary"><?php esc_html_e( 'دکمهٔ اصلی', 'hamishop-elementor-widgets' ); ?></span>
+									<span class="hsw-pl-btn hsw-pl-btn--cta"><?php esc_html_e( 'ادامه و پرداخت', 'hamishop-elementor-widgets' ); ?></span>
+									<span class="hsw-pl-btn hsw-pl-btn--ghost"><?php esc_html_e( 'دکمهٔ فرعی', 'hamishop-elementor-widgets' ); ?></span>
+								</div>
+
+								<div class="hsw-pl-divider"></div>
+
+								<p class="hsw-pl-caption"><?php esc_html_e( 'تب‌های صفحهٔ محصول', 'hamishop-elementor-widgets' ); ?></p>
+								<div class="hsw-pl-tabs">
+									<span class="is-active"><?php esc_html_e( 'مشخصات', 'hamishop-elementor-widgets' ); ?></span>
+									<span><?php esc_html_e( 'نظرات', 'hamishop-elementor-widgets' ); ?></span>
+									<span><?php esc_html_e( 'ارسال', 'hamishop-elementor-widgets' ); ?></span>
+								</div>
+
+								<div class="hsw-pl-divider"></div>
+
+								<p class="hsw-pl-caption"><?php esc_html_e( 'وضعیت‌ها و برچسب‌ها', 'hamishop-elementor-widgets' ); ?></p>
+								<div class="hsw-pl-badges">
+									<span class="hsw-pl-badge hsw-pl-badge--ok"><?php esc_html_e( 'موجود', 'hamishop-elementor-widgets' ); ?></span>
+									<span class="hsw-pl-badge hsw-pl-badge--warn"><?php esc_html_e( '۳ روز مانده', 'hamishop-elementor-widgets' ); ?></span>
+									<span class="hsw-pl-badge hsw-pl-badge--err"><?php esc_html_e( 'ناموجود', 'hamishop-elementor-widgets' ); ?></span>
+									<span class="hsw-pl-badge hsw-pl-badge--accent"><?php esc_html_e( '۲۰٪ تخفیف', 'hamishop-elementor-widgets' ); ?></span>
+								</div>
+
+								<div class="hsw-pl-divider"></div>
+
+								<p class="hsw-pl-caption"><?php esc_html_e( 'کارت محصول', 'hamishop-elementor-widgets' ); ?></p>
+								<div class="hsw-pl-card">
+									<div class="hsw-pl-card__media"></div>
+									<span class="hsw-pl-card__name"><?php esc_html_e( 'دستگاه فشارسنج دیجیتال بازویی', 'hamishop-elementor-widgets' ); ?></span>
+									<span class="hsw-pl-card__meta"><?php esc_html_e( 'گارانتی ۱۸ ماهه · ارسال سریع', 'hamishop-elementor-widgets' ); ?></span>
+									<div class="hsw-pl-card__foot">
+										<span class="hsw-pl-card__price"><del>۲,۸۵۰,۰۰۰</del>۲,۲۸۰,۰۰۰</span>
+										<span class="hsw-pl-btn hsw-pl-btn--cta" style="height:30px;padding:0 10px"><?php esc_html_e( 'خرید', 'hamishop-elementor-widgets' ); ?></span>
+									</div>
+								</div>
+
+								<div class="hsw-pl-divider"></div>
+
+								<p class="hsw-pl-caption"><?php esc_html_e( 'آیکون‌های هدر و هدر پنل حساب', 'hamishop-elementor-widgets' ); ?></p>
+								<div class="hsw-pl-icons">
+									<span class="hsw-pl-icon"><span class="dashicons dashicons-search"></span></span>
+									<span class="hsw-pl-icon"><span class="dashicons dashicons-admin-users"></span></span>
+									<span class="hsw-pl-icon"><span class="dashicons dashicons-cart"></span></span>
+									<span class="hsw-pl-icon"><span class="dashicons dashicons-menu"></span></span>
+								</div>
+								<div class="hsw-pl-hero"><?php esc_html_e( 'سلام، به حساب کاربری خوش آمدید', 'hamishop-elementor-widgets' ); ?></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
 		</div>
 		<?php
 	}
