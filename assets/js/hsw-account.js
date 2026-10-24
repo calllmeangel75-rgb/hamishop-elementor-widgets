@@ -837,6 +837,29 @@
 		return active ? active.getAttribute('data-hsw-otp-channel') : (box.getAttribute('data-channel') || '');
 	}
 
+	function otpField(box, channel) {
+		var isEmail = 'email' === channel;
+		var phoneField = box.querySelector('[data-hsw-otp-phone-field]');
+		var emailField = box.querySelector('[data-hsw-otp-email-field]');
+		if (phoneField) { setHidden(phoneField, isEmail); }
+		if (emailField) { setHidden(emailField, !isEmail); }
+		/* Register form: the account email *is* the recipient on this channel. */
+		var regEmail = box.querySelector('[data-hsw-otp-regemail]');
+		if (regEmail) {
+			var wrap = regEmail.closest('.hsw-ac-field');
+			if (wrap) { setHidden(wrap, isEmail); }
+		}
+		return isEmail ? box.querySelector('[data-hsw-otp-emailid]') : box.querySelector('[data-hsw-otp-phone]');
+	}
+
+	function otpRedirect() {
+		try {
+			return new URLSearchParams(window.location.search).get('redirect_to') || '';
+		} catch (e) {
+			return '';
+		}
+	}
+
 	function setOtpChannel(box, channel) {
 		box.setAttribute('data-channel', channel);
 		box.querySelectorAll('[data-hsw-otp-channel]').forEach(function (button) {
@@ -844,6 +867,8 @@
 			button.classList.toggle('is-active', on);
 			button.setAttribute('aria-pressed', on ? 'true' : 'false');
 		});
+		var field = otpField(box, channel);
+		if (field) { field.focus({ preventScroll: true }); }
 		var step = box.querySelector('[data-hsw-otp-code-step]');
 		if (step) {
 			setHidden(step, true);
@@ -854,14 +879,20 @@
 	function sendOtp(box) {
 		var button = box.querySelector('[data-hsw-otp-send]');
 		var message = box.querySelector('[data-hsw-otp-message]');
-		var phone = box.querySelector('[data-hsw-otp-phone]');
 		var channel = activeOtpChannel(box);
 		var context = box.getAttribute('data-context') || 'login';
+		var phone = otpField(box, channel);
+		var isEmail = 'email' === channel;
 		if (!phone || !phone.value.trim()) {
-			setMessage(message, data().phoneRequired || 'شماره موبایل را وارد کنید.', 'error');
+			setMessage(message, isEmail ? 'ایمیل خود را وارد کنید.' : (data().phoneRequired || 'شماره موبایل را وارد کنید.'), 'error');
 			if (phone) {
 				phone.focus();
 			}
+			return;
+		}
+		if (isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(phone.value.trim())) {
+			setMessage(message, 'ایمیل وارد‌شده معتبر نیست.', 'error');
+			phone.focus();
 			return;
 		}
 		if (!channel) {
@@ -872,7 +903,7 @@
 			button.disabled = true;
 		}
 		setMessage(message, data().sending || 'در حال ارسال کد...');
-		ajax('hsw_otp_send', { phone: phone.value.trim(), channel: channel, context: context }, data().otpNonce)
+		ajax('hsw_otp_send', { phone: phone.value.trim(), email: isEmail ? phone.value.trim() : '', channel: channel, context: context }, data().otpNonce)
 			.then(function (payload) {
 				if (!payload || !payload.success) {
 					var error = payload && payload.data ? payload.data : {};
@@ -908,11 +939,11 @@
 	function verifyOtp(box) {
 		var button = box.querySelector('[data-hsw-otp-verify]');
 		var message = box.querySelector('[data-hsw-otp-message]');
-		var phone = box.querySelector('[data-hsw-otp-phone]');
+		var channel = activeOtpChannel(box);
+		var phone = otpField(box, channel);
 		var code = box.querySelector('[data-hsw-otp-code]');
 		var name = box.querySelector('[data-hsw-otp-name]');
 		var email = box.querySelector('[data-hsw-otp-email]');
-		var channel = activeOtpChannel(box);
 		var context = box.getAttribute('data-context') || 'login';
 		if (!code || !code.value.trim()) {
 			setMessage(message, data().codeRequired || 'کد تأیید را وارد کنید.', 'error');
@@ -926,12 +957,13 @@
 		}
 		setMessage(message, data().verifying || 'در حال بررسی کد...');
 		ajax('hsw_otp_verify', {
-			phone: phone ? phone.value.trim() : '',
+			phone: ('email' === channel) ? '' : (phone ? phone.value.trim() : ''),
+			email: ('email' === channel) ? (phone ? phone.value.trim() : '') : (email ? email.value.trim() : ''),
 			channel: channel,
 			context: context,
 			code: code.value.trim(),
 			name: name ? name.value.trim() : '',
-			email: email ? email.value.trim() : ''
+			redirect_to: otpRedirect()
 		}, data().otpNonce)
 			.then(function (payload) {
 				if (!payload || !payload.success) {

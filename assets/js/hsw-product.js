@@ -116,6 +116,8 @@
 				var cq  = Math.max(parseInt(variation.cart_qty || 0, 10) || 0, own);
 				root.classList.toggle('is-not-in-cart', cq <= 0);
 				root.setAttribute('data-hsw-in-cart', String(cq));
+				/* The input and the bin/minus state must follow the variation too. */
+				setQty(pid, cq > 0 ? cq : 1);
 			}
 		});
 		document.dispatchEvent(new CustomEvent('hsw:variant', { detail: { product: pid, variation: variation, state: st } }));

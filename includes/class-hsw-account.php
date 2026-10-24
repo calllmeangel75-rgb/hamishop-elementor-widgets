@@ -215,16 +215,20 @@ final class HSW_Account {
 				'otp_login'         => 'yes',
 				'otp_register'      => 'yes',
 				'otp_2fa'           => 'yes',
-				'otp_bale'          => 'no',
+				'otp_sms'           => 'no',
+				'otp_email'         => 'yes',
+				'otp_telegram'      => 'no',
 				'otp_whatsapp'      => 'no',
-				'otp_default_channel' => 'bale',
+				'otp_default_channel' => 'email',
+				'email_from_address' => '',
+				'email_from_name'   => '',
 				'otp_ttl'           => 300,
 				'otp_resend'        => 60,
 				'otp_max_attempts'  => 5,
 				'otp_message'       => "کد ورود شما به {site}: {code}\nاین کد را در اختیار دیگران قرار ندهید.",
-				'bale_token'        => '',
-				'bale_bot'          => '',
-				'bale_secret'       => '',
+				'telegram_token'    => '',
+				'telegram_bot'      => '',
+				'telegram_secret'   => '',
 				'whatsapp_provider' => 'cloud',
 				'whatsapp_token'    => '',
 				'whatsapp_phone_id' => '',
@@ -453,19 +457,27 @@ final class HSW_Account {
 			$out['auth']['benefits']      = $this->clean_lines( $a['benefits'] ?? '', $out['auth']['benefits'] );
 			$out['auth']['show_register'] = $this->yes_no( $a['show_register'] ?? $out['auth']['show_register'] );
 
-			foreach ( array( 'otp_enabled', 'otp_login', 'otp_register', 'otp_2fa', 'otp_bale', 'otp_whatsapp' ) as $key ) {
+			foreach ( array( 'otp_enabled', 'otp_login', 'otp_register', 'otp_2fa', 'otp_sms', 'otp_email', 'otp_telegram', 'otp_whatsapp' ) as $key ) {
 				$out['auth'][ $key ] = $this->yes_no( $a[ $key ] ?? $out['auth'][ $key ] );
 			}
-			$out['auth']['otp_default_channel'] = in_array( ( $a['otp_default_channel'] ?? '' ), array( 'bale', 'whatsapp' ), true ) ? $a['otp_default_channel'] : $out['auth']['otp_default_channel'];
+			$out['auth']['otp_default_channel'] = in_array( ( $a['otp_default_channel'] ?? '' ), array( 'sms', 'email', 'telegram', 'whatsapp' ), true ) ? $a['otp_default_channel'] : $out['auth']['otp_default_channel'];
 			$out['auth']['otp_ttl']             = $this->clean_int( $a['otp_ttl'] ?? $out['auth']['otp_ttl'], 60, 900, 300 );
 			$out['auth']['otp_resend']          = $this->clean_int( $a['otp_resend'] ?? $out['auth']['otp_resend'], 20, 900, 60 );
 			$out['auth']['otp_max_attempts']    = $this->clean_int( $a['otp_max_attempts'] ?? $out['auth']['otp_max_attempts'], 1, 20, 5 );
 			$out['auth']['otp_message']         = $this->clean_textarea( $a['otp_message'] ?? '', $out['auth']['otp_message'] );
-			$out['auth']['bale_token']          = sanitize_text_field( wp_unslash( (string) ( $a['bale_token'] ?? '' ) ) );
-			$out['auth']['bale_bot']            = preg_replace( '/[^a-zA-Z0-9_]/', '', sanitize_text_field( wp_unslash( (string) ( $a['bale_bot'] ?? '' ) ) ) );
-			$out['auth']['bale_secret']         = sanitize_text_field( wp_unslash( (string) ( $a['bale_secret'] ?? '' ) ) );
-			if ( '' === $out['auth']['bale_secret'] ) {
-				$out['auth']['bale_secret'] = wp_generate_password( 40, false, false );
+			$out['auth']['email_from_address']  = sanitize_email( wp_unslash( (string) ( $a['email_from_address'] ?? '' ) ) );
+			if ( '' === $out['auth']['email_from_address'] ) {
+				$out['auth']['email_from_address'] = (string) get_option( 'admin_email' );
+			}
+			$out['auth']['email_from_name']     = sanitize_text_field( wp_unslash( (string) ( $a['email_from_name'] ?? '' ) ) );
+			if ( '' === $out['auth']['email_from_name'] ) {
+				$out['auth']['email_from_name'] = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+			}
+			$out['auth']['telegram_token']      = sanitize_text_field( wp_unslash( (string) ( $a['telegram_token'] ?? '' ) ) );
+			$out['auth']['telegram_bot']        = ltrim( preg_replace( '/[^a-zA-Z0-9_]/', '', sanitize_text_field( wp_unslash( (string) ( $a['telegram_bot'] ?? '' ) ) ) ), '@' );
+			$out['auth']['telegram_secret']     = sanitize_text_field( wp_unslash( (string) ( $a['telegram_secret'] ?? '' ) ) );
+			if ( '' === $out['auth']['telegram_secret'] ) {
+				$out['auth']['telegram_secret'] = wp_generate_password( 40, false, false );
 			}
 			$out['auth']['whatsapp_provider'] = in_array( ( $a['whatsapp_provider'] ?? '' ), array( 'cloud', 'bridge' ), true ) ? $a['whatsapp_provider'] : 'cloud';
 			$out['auth']['whatsapp_token']    = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_token'] ?? '' ) ) );

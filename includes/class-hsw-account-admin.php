@@ -565,7 +565,7 @@ final class HSW_Account_Admin {
 			</div>
 
 			<h3 style="margin:22px 0 6px">پیامک شارژ</h3>
-			<p class="hsw-admin-desc">هنگام شارژ گروهی، به هر مشتری یک پیامک اطلاع‌رسانی فرستاده می‌شود. هر پنل پیامکی یا پل بله که یک <code>POST</code> با بدنهٔ <code>{"phone","text","secret"}</code> بپذیرد کار می‌کند؛ اگر آدرس را خالی بگذارید پیامکی ارسال نمی‌شود و شارژ انجام می‌شود.</p>
+			<p class="hsw-admin-desc">هنگام شارژ گروهی، به هر مشتری یک پیامک اطلاع‌رسانی فرستاده می‌شود. هر پنل پیامکی یا وب‌هوک دلخواه که یک <code>POST</code> با بدنهٔ <code>{"phone","text","secret"}</code> بپذیرد کار می‌کند؛ اگر آدرس را خالی بگذارید پیامکی ارسال نمی‌شود و شارژ انجام می‌شود.</p>
 			<div class="hsw-admin-grid">
 				<?php $this->text_field( $s, 'wallet', 'sms_url', 'آدرس وب‌هوک پیامک', 'مثلاً آدرس وبهوک n8n یا پنل پیامکی.', 'url' ); ?>
 				<?php $this->text_field( $s, 'wallet', 'sms_secret', 'کلید وب‌هوک (اختیاری)', 'در بدنهٔ درخواست به‌عنوان secret فرستاده می‌شود.' ); ?>
@@ -575,41 +575,60 @@ final class HSW_Account_Admin {
 	}
 
 	private function tab_auth( $s ) {
-		$secret  = $this->val( $s, 'auth', 'bale_secret' );
-		$webhook = $secret ? add_query_arg( array( 'hsw_bale_webhook' => 1, 'secret' => $secret ), home_url( '/' ) ) : '';
-		$bot     = $this->val( $s, 'auth', 'bale_bot' );
+		$secret  = $this->val( $s, 'auth', 'telegram_secret' );
+		$webhook = $secret ? add_query_arg( array( 'hsw_telegram_webhook' => 1, 'secret' => $secret ), home_url( '/' ) ) : '';
+		$bot     = $this->val( $s, 'auth', 'telegram_bot' );
+		$sms     = ( HSW_Account::instance()->auth && HSW_Account::instance()->auth->third_party_sms_active() );
+		$channels = array( 'email' => 'ایمیل', 'telegram' => 'تلگرام', 'whatsapp' => 'واتساپ' );
+		if ( $sms ) {
+			$channels = array( 'sms' => 'پیامک (افزونهٔ فعال)' ) + $channels;
+		}
 		?>
 		<div class="hsw-admin-card">
 			<h2>ورود با کد یکبارمصرف</h2>
-			<p class="hsw-admin-desc">ورود و ثبت‌نام با شماره موبایل از طریق بله (رایگان) یا واتساپ. کدها ۶ رقمی، یکبارمصرف و دارای محدودیت تلاش هستند.</p>
+			<p class="hsw-admin-desc">ورود و ثبت‌نام با کد ۶ رقمی از طریق ایمیل (رایگان)، تلگرام، پیامک (افزونهٔ فعال) یا واتساپ. کدها یکبارمصرف و دارای محدودیت تلاش هستند.</p>
 			<div class="hsw-admin-grid">
 				<?php $this->switch_field( $s, 'auth', 'otp_enabled', 'فعال‌سازی ورود با کد یکبارمصرف', 'در صورت فعال بودن، فرم ورود سریع در کنار فرم رمز عبور نمایش داده می‌شود.' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_login', 'اجازهٔ ورود با کد' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_register', 'اجازهٔ ثبت‌نام با کد' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_2fa', 'امکان ورود دوعاملی برای کاربران' ); ?>
-				<?php $this->switch_field( $s, 'auth', 'otp_bale', 'فعال‌سازی کانال بله' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_email', 'فعال‌سازی کانال ایمیل', 'رایگان و بدون نیاز به کلید API؛ پیشنهاد می‌شود.' ); ?>
+				<?php $this->switch_field( $s, 'auth', 'otp_telegram', 'فعال‌سازی کانال تلگرام' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_whatsapp', 'فعال‌سازی کانال واتساپ' ); ?>
-				<?php $this->select_field( $s, 'auth', 'otp_default_channel', 'کانال پیش‌فرض', array( 'bale' => 'بله', 'whatsapp' => 'واتساپ' ) ); ?>
+				<?php if ( $sms ) : ?>
+					<?php $this->switch_field( $s, 'auth', 'otp_sms', 'استفاده از افزونهٔ پیامکی فعال', 'افزونهٔ پیامک/OTP روی سایت شناسایی شد؛ ارسال از همان انجام می‌شود و اولویت دارد.' ); ?>
+				<?php endif; ?>
+				<?php $this->select_field( $s, 'auth', 'otp_default_channel', 'کانال پیش‌فرض', $channels ); ?>
 			</div>
 		</div>
 
 		<div class="hsw-admin-card">
-			<h2>ربات بله (رایگان)</h2>
-			<p class="hsw-admin-desc">یک ربات در بله بسازید، توکن را از BotFather بله دریافت کنید و آدرس وبهوک زیر را در پنل ربات ثبت کنید. کاربر برای دریافت کد باید یک‌بار ربات را باز کند و شماره خود را ارسال کند.</p>
+			<h2>کد تایید ایمیلی (رایگان)</h2>
+			<p class="hsw-admin-desc">کد ۶ رقمی با یک ایمیل HTML راست‌چین به آدرس مشتری فرستاده می‌شود. فرستنده و موضوع از همین دو فیلد خوانده می‌شوند و روی بقیهٔ ایمیل‌های سایت اثری ندارند.</p>
 			<div class="hsw-admin-grid">
-				<?php $this->text_field( $s, 'auth', 'bale_bot', 'نام کاربری ربات (بدون @)', 'مثلاً hamishop_bot' ); ?>
-				<?php $this->text_field( $s, 'auth', 'bale_token', 'توکن ربات بله', 'توکن را در صفحهٔ عمومی قرار ندهید.' ); ?>
-				<?php $this->text_field( $s, 'auth', 'bale_secret', 'کلید امنیتی وبهوک' ); ?>
+				<?php $this->text_field( $s, 'auth', 'email_from_address', 'ایمیل فرستنده (From Email)', 'مثلاً noreply@example.com — بهتر است با دامنهٔ سایت هم‌خوان باشد.', 'email' ); ?>
+				<?php $this->text_field( $s, 'auth', 'email_from_name', 'نام / عنوان فرستنده', 'مثلاً «فروشگاه حامی‌شاپ — کد تایید ورود».' ); ?>
+			</div>
+			<p class="description">اگر فیلدها خالی بمانند، ایمیل مدیریت و نام فروشگاه استفاده می‌شود.</p>
+		</div>
+
+		<div class="hsw-admin-card">
+			<h2>ربات تلگرام (رایگان)</h2>
+			<p class="hsw-admin-desc">در تلگرام با <code>@BotFather</code> یک ربات بسازید، توکن را اینجا وارد کنید و آدرس وبهوک زیر را با متد <code>setWebhook</code> روی ربات ثبت کنید. کاربر برای دریافت کد باید یک‌بار ربات را باز کند و شماره خود را ارسال کند.</p>
+			<div class="hsw-admin-grid">
+				<?php $this->text_field( $s, 'auth', 'telegram_bot', 'نام کاربری ربات (بدون @)', 'مثلاً hamishop_bot' ); ?>
+				<?php $this->text_field( $s, 'auth', 'telegram_token', 'توکن ربات (BotFather)', 'این مقدار را در هیچ صفحهٔ عمومی قرار ندهید.' ); ?>
+				<?php $this->text_field( $s, 'auth', 'telegram_secret', 'کلید امنیتی وبهوک', 'در هدر X-Telegram-Bot-Api-Secret-Token هم پذیرفته می‌شود.' ); ?>
 			</div>
 			<?php if ( $webhook ) : ?>
-				<p><strong>آدرس وبهوک بله:</strong></p>
+				<p><strong>آدرس وبهوک تلگرام:</strong></p>
 				<code class="hsw-code"><?php echo esc_html( $webhook ); ?></code>
-				<p class="description">این آدرس را در متد setWebhook ربات بله تنظیم کنید. اگر آدرس سایت HTTPS نیست، بله ممکن است وبهوک را نپذیرد.</p>
+				<p class="description">با <code>https://api.telegram.org/bot&lt;TOKEN&gt;/setWebhook?url=&lt;آدرس بالا&gt;</code> ثبت کنید. سایت باید HTTPS باشد.</p>
 			<?php else : ?>
 				<p class="hsw-notice">پس از ذخیرهٔ تنظیمات، کلید امنیتی و آدرس وبهوک ساخته می‌شود.</p>
 			<?php endif; ?>
 			<?php if ( $bot ) : ?>
-				<p class="description">لینک ربات: <code>https://ble.ir/<?php echo esc_html( $bot ); ?></code></p>
+				<p class="description">لینک ربات: <code>https://t.me/<?php echo esc_html( $bot ); ?></code></p>
 			<?php endif; ?>
 		</div>
 
@@ -694,7 +713,7 @@ final class HSW_Account_Admin {
 			<p class="description">پارامترهای اختیاری: <code>layout="left|right"</code>، <code>show_header="yes|no"</code>، <code>show_menu="yes|no"</code>، <code>show_stats="yes|no"</code>، <code>hide="downloads,wallet"</code>، <code>class="..."</code></p>
 			<p class="description">با <code>hide</code> می‌توانید هر بخش را مستقیم از شورت‌کد مخفی کنید: <code>downloads</code>، <code>orders</code>، <code>address</code>، <code>wishlist</code>، <code>wallet</code>، <code>support</code>، <code>notifications</code>، <code>payments</code>، <code>account</code>.</p>
 			<p class="description">اگر افزونهٔ ورود پیامکی فعال باشد و ورود با کد HamiShop روشن نباشد، فرم ورود و ثبت‌نام این پنل به‌صورت خودکار نمایش داده نمی‌شود و ورود به‌طور کامل به افزونهٔ پیامکی واگذار می‌شود.</p>
-			<p class="description">برای فعال‌کردن ورود/ثبت‌نام با بله یا واتساپ به تب <strong>ورود و امنیت</strong> بروید. بله رایگان است؛ برای واتساپ به Meta Cloud API یا پل self-hosted نیاز دارید.</p>
+			<p class="description">برای فعال‌کردن ورود/ثبت‌نام با ایمیل، تلگرام یا پیامک به تب <strong>ورود و امنیت</strong> بروید. ایمیل و تلگرام رایگان‌اند؛ برای واتساپ به Meta Cloud API یا پل self-hosted نیاز دارید.</p>
 		</div>
 		<div class="hsw-admin-card">
 			<h2>وضعیت صفحهٔ حساب</h2>
@@ -703,7 +722,7 @@ final class HSW_Account_Admin {
 				<li><span>شناسهٔ برگه</span><code><?php echo esc_html( HSW_Helpers::fa_num( $account_id ) ); ?></code></li>
 				<li><span>وضعیت شورت‌کد</span><code><?php echo $native ? 'شورت‌کد پیش‌فرض ووکامرس' : 'آماده'; ?></code></li>
 				<li><span>ورود پیامکی</span><code><?php echo $otp_enabled ? 'HamiShop OTP فعال' : ( $sms_active ? 'فعال — فرم پنل غیرفعال است' : 'غیرفعال / شناسایی نشد' ); ?></code></li>
-				<li><span>ورود با بله / واتساپ</span><code><?php echo $otp_enabled ? 'فعال' : 'غیرفعال'; ?></code></li>
+				<li><span>ورود با ایمیل / تلگرام / پیامک</span><code><?php echo $otp_enabled ? 'فعال' : 'غیرفعال'; ?></code></li>
 				<li><span>تیکت‌های پشتیبانی</span><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=hsw_ticket' ) ); ?>">مدیریت تیکت‌ها</a></li>
 			</ul>
 			<?php if ( $native ) : ?>
