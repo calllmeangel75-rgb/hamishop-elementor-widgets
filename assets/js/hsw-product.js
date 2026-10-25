@@ -462,19 +462,61 @@
 		body.set('quantity', qty);
 		body.set('security', D.qtyNonce || '');
 
-		return fetch(D.qtyAjax, {
-			method: 'POST',
-			credentials: 'same-origin',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: body.toString()
+		function send() {
+			return fetch(D.qtyAjax, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+				body: body.toString()
+			});
+		}
+
+		/*
+		 * A page served from a full-page cache carries an expired nonce. Refresh it
+		 * once (never in a loop) and replay the same request.
+		 */
+		function withFreshNonce() {
+			if (!D.nonceUrl) { return Promise.reject(new Error('no-nonce-endpoint')); }
+			return fetch(D.nonceUrl, { credentials: 'same-origin' })
+				.then(function (r) { return r.json(); })
+				.then(function (j) {
+					var n = j && (j.nonce || (j.data && j.data.nonce));
+					if (!n) { throw new Error('no-nonce'); }
+					D.qtyNonce = n;
+					body.set('security', n);
+					return send();
+				});
+		}
+
+		return send().then(function (r) {
+			if (r.status === 403) {
+				return withFreshNonce().then(function (r2) {
+					if (r2.status === 403) { throw new Error('nonce'); }
+					return r2;
+				});
+			}
+			return r;
 		}).then(function (r) { return r.json(); }).then(function (res) {
-			if (!res || !res.success) { return null; }
+			if (!res || !res.success) {
+				var msg = res && res.data && res.data.message ? res.data.message : '';
+				if (msg && typeof toast === 'function') { toast(msg); }
+				return null;
+			}
 			applyFragments(res.data && res.data.fragments);
 			var qty = res.data && typeof res.data.quantity === 'number' ? res.data.quantity : 0;
+			/* The server is the source of truth for the ceiling. */
+			if (res.data && typeof res.data.max === 'number' && res.data.max > 0) {
+				D.maxQty = res.data.max;
+			}
 			setRootInCart(pid, !!(res.data && res.data.in_cart), qty);
 			if (qty > 0) { setQty(pid, qty); }
 			return res.data;
-		}).catch(function () { return null; });
+		}).catch(function (err) {
+			if (err && err.message === 'nonce' && typeof toast === 'function') {
+				toast('نشست شما منقضی شده است؛ صفحه را یک‌بار تازه کنید.');
+			}
+			return null;
+		});
 	}
 
 	/* ================= ADD TO CART ================= */

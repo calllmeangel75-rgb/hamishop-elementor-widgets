@@ -560,6 +560,7 @@ class HSW_Assets {
                                 /* Quantity stepper → real cart line (0 removes it). */
                                 'qtyAjax'     => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'hsw_set_qty' ) : '/?wc-ajax=hsw_set_qty',
                                 'qtyNonce'    => wp_create_nonce( 'hsw-cart-qty' ),
+                                'nonceUrl'    => esc_url_raw( rest_url( 'hsw/v1/qty-nonce' ) ),
                                 'faDigits'    => true,
                                 /* Feedback after a successful add — the product page had none. */
                                 'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),

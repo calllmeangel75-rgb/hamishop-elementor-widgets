@@ -52,6 +52,16 @@ class HSW_Rest {
                  */
                 register_rest_route(
                         self::NS,
+                        '/qty-nonce',
+                        array(
+                                'methods'             => 'GET',
+                                'callback'            => array( $this, 'qty_nonce' ),
+                                'permission_callback' => '__return_true',
+                        )
+                );
+
+                register_rest_route(
+                        self::NS,
                         '/related',
                         array(
                                 'methods'             => 'GET',
@@ -265,6 +275,15 @@ class HSW_Rest {
          * @param WP_REST_Request $request Request.
          * @return WP_REST_Response
          */
+        /**
+         * Fresh cart-quantity nonce for pages served from a full-page cache.
+         *
+         * @return WP_REST_Response
+         */
+        public function qty_nonce() {
+                return new WP_REST_Response( array( 'nonce' => wp_create_nonce( 'hsw-cart-qty' ) ), 200 );
+        }
+
         public function related( $request ) {
                 $id    = (int) $request['product'];
                 $limit = (int) $request['limit'];

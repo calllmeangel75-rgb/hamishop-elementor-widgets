@@ -82,7 +82,58 @@ class HSW_Cart_Actions {
 			wp_send_json_error( array( 'message' => 'not_in_cart' ), 404 );
 		}
 
-		$quantity = max( 0, min( 999, $quantity ) );
+		/* ---- Server-side ceiling: product rules win over the client ---- */
+		$item      = $cart->get_cart_item( $key );
+		$product   = $item ? $item['data'] : null;
+		$max       = 999;
+		$remaining = 999;
+		$in_stock  = true;
+
+		if ( $product instanceof WC_Product ) {
+			$in_stock  = $product->is_in_stock() || $product->backorders_allowed();
+			$max       = (int) $product->get_max_purchase_quantity(); // -1 = unlimited
+			$sold_one  = $product->is_sold_individually();
+			$stock     = $product->get_stock_quantity();
+			$limit     = ( $max > 0 ) ? $max : 999;
+			if ( null !== $stock && ! $product->backorders_allowed() ) {
+				$limit = min( $limit, (int) $stock );
+			}
+			if ( $sold_one ) {
+				$limit = 1;
+			}
+			$max       = $limit;
+			$remaining = max( 0, $limit );
+		}
+
+		if ( ! $in_stock ) {
+			wp_send_json_error(
+				array(
+					'message'   => __( 'این محصول موجود نیست.', 'hamishop-elementor-widgets' ),
+					'quantity'  => 0,
+					'max'       => 0,
+					'remaining' => 0,
+				),
+				409
+			);
+		}
+
+		$quantity = max( 0, min( $max, $quantity ) );
+
+		/* WooCommerce's own validation (stock, sold individually, plugins). */
+		$passed = apply_filters( 'woocommerce_update_cart_validation', true, $key, $item ? $item : array(), $quantity );
+		if ( ! $passed ) {
+			$notices = function_exists( 'wc_get_notices' ) ? wc_get_notices( 'error' ) : array();
+			$msg     = $notices ? wp_strip_all_tags( (string) ( $notices[0]['notice'] ?? '' ) ) : '';
+			wp_send_json_error(
+				array(
+					'message'   => '' !== $msg ? $msg : __( 'تعداد درخواستی مجاز نیست.', 'hamishop-elementor-widgets' ),
+					'quantity'  => (int) ( $item['quantity'] ?? 0 ),
+					'max'       => $max,
+					'remaining' => $remaining,
+				),
+				400
+			);
+		}
 
 		if ( 0 === $quantity ) {
 			$cart->remove_cart_item( $key );
@@ -105,6 +156,9 @@ class HSW_Cart_Actions {
 		wp_send_json_success(
 			array(
 				'quantity'  => $new_qty,
+				'max'       => $max,
+				'remaining' => $remaining,
+				'message'   => '',
 				'in_cart'   => $new_qty > 0,
 				'count'     => (int) $cart->get_cart_contents_count(),
 				'fragments' => is_array( $fragments ) ? $fragments : array(),

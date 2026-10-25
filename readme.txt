@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.92
+Stable tag: 1.11.93
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.93 =
+* **B1 — سقف تعداد سمت سرور.**
+  - `ajax_set_qty` حالا `get_max_purchase_quantity()`، موجودی، `sold_individually`
+    و فیلتر `woocommerce_update_cart_validation` را اعمال می‌کند.
+  - پاسخ JSON: `quantity`, `max`, `remaining`, `message` (فارسی) + کد 409 برای
+    ناموجود و 400 برای تعداد غیرمجاز.
+* **B2 — نانس روی صفحات کش‌شده.**
+  - مسیر REST جدید `GET /wp-json/hsw/v1/qty-nonce` برای گرفتن نانس تازه.
+  - JS در پاسخ 403 **فقط یک‌بار** نانس را تازه می‌کند و همان درخواست را تکرار
+    می‌کند؛ اگر باز 403 شد پیام «نشست منقضی شده…» می‌دهد (بدون حلقه).
+* **`STAGING-CHECKLIST.md`** با ۲۰ سناریوی دستی برای پیش از لایو.
 
 = 1.11.92 =
 * **پایان لود سراسری دارایی‌ها (باگ عملکردی).**
