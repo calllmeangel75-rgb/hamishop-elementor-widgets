@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.76
+Stable tag: 1.11.77
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.77 =
+* **هدر: کنترل فاصلهٔ آیکن‌ها/اکشن‌ها** (واکنش‌گرا) زیر «چیدمان افقی هدر».
+* مستندات (README و WIDGET-GUIDE) با فوتر چسبان، فونت سراسری و کنترل‌های جدید
+  هدر به‌روز شد.
 
 = 1.11.76 =
 * **آیکون خانهٔ Iconsax + حالت شیشه‌ای فوتر + فونت پیش‌فرض همهٔ ویجت‌ها.**
