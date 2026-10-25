@@ -20,7 +20,24 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
                 return 'hsw-popular';
         }
 
-        public function get_title() {
+        	/**
+	 * Loop bundle (CSS + JS) — declared here because the base no longer defaults
+	 * to hsw-loop for every widget.
+	 *
+	 * @return array
+	 */
+	public function get_style_depends() {
+		return array( 'hsw-fonts', 'hsw-loop' );
+	}
+
+	/**
+	 * @return array
+	 */
+	public function get_script_depends() {
+		return array( 'hsw-loop' );
+	}
+
+public function get_title() {
                 return __( 'محبوب‌ترین‌ها / منتخب (HamiShop)', 'hamishop-elementor-widgets' );
         }
 

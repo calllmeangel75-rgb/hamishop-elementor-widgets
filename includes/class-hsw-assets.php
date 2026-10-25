@@ -480,10 +480,9 @@ class HSW_Assets {
                         true
                 );
 
-                wp_localize_script(
+                wp_add_inline_script(
                         'hsw-account',
-                        'hswAccountData',
-                        array(
+                        'window.hswAccountData=' . wp_json_encode( array(
                                 'rest'         => esc_url_raw( rest_url( 'hsw/v1' ) ),
                                 'nonce'        => wp_create_nonce( 'wp_rest' ),
                                 'faDigits'     => true,
@@ -519,19 +518,20 @@ class HSW_Assets {
                                 'verifyError'  => __( 'کد تأیید نامعتبر است.', 'hamishop-elementor-widgets' ),
                                 'networkError' => __( 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
                                 'openLink'     => __( 'باز کردن لینک', 'hamishop-elementor-widgets' ),
-                        )
-                );
+                        ) ) . ';',
+                        'before'
+                );;
 
-                wp_localize_script(
+                wp_add_inline_script(
                         'hsw-checkout',
-                        'hswCheckoutData',
-                        array(
+                        'window.hswCheckoutData=' . wp_json_encode( array(
                                 'rest'        => esc_url_raw( rest_url( 'hsw/v1' ) ),
                                 'nonce'       => wp_create_nonce( 'wp_rest' ),
                                 'errorText'   => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
                                 'addressRequired' => __( 'نام، شماره تماس، استان، شهر و نشانی را کامل کنید.', 'hamishop-elementor-widgets' ),
-                        )
-                );
+                        ) ) . ';',
+                        'before'
+                );;
 
                 wp_register_script(
                         'hsw-product',
@@ -553,10 +553,9 @@ class HSW_Assets {
                 );
                 wp_add_inline_script( 'hsw-loop', 'window.hswData=' . wp_json_encode( $hsw_data ) . ';', 'before' );
 
-                wp_localize_script(
+                wp_add_inline_script(
                         'hsw-product',
-                        'hswProductData',
-                        array(
+                        'window.hswProductData=' . wp_json_encode( array(
                                 'wcAjax'      => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
                                 /* Quantity stepper → real cart line (0 removes it). */
                                 'qtyAjax'     => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'hsw_set_qty' ) : '/?wc-ajax=hsw_set_qty',
@@ -580,13 +579,13 @@ class HSW_Assets {
                                 'sheetCart'   => __( 'برو به سبد خرید', 'hamishop-elementor-widgets' ),
                                 'sheetMore'   => __( 'افزودن', 'hamishop-elementor-widgets' ),
                                 'sheetDone'   => __( 'افزوده شد', 'hamishop-elementor-widgets' ),
-                        )
-                );
+                        ) ) . ';',
+                        'before'
+                );;
 
-                wp_localize_script(
+                wp_add_inline_script(
                         'hsw-archive',
-                        'hswArchiveData',
-                        array(
+                        'window.hswArchiveData=' . wp_json_encode( array(
                                 'wcAjax'    => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
                                 'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
                                 'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
@@ -599,8 +598,9 @@ class HSW_Assets {
                                 'modalTitle'   => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
                                 'modal'        => self::feedback_settings()['archive'],
                                 'feedbackStyle' => self::feedback_settings()['archive_style'],
-                        )
-                );
+                        ) ) . ';',
+                        'before'
+                );;
         }
 
         /**

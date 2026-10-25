@@ -345,12 +345,21 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 }
         }
 
+        /**
+         * No assets by default: a widget must declare what it needs, otherwise the
+         * loop bundle (CSS + JS) used to load on every page of the site.
+         *
+         * @return array
+         */
         public function get_style_depends() {
-                return array( 'hsw-loop' );
+                return array();
         }
 
+        /**
+         * @return array
+         */
         public function get_script_depends() {
-                return array( 'hsw-loop' );
+                return array();
         }
 
         /* =========================================================================
