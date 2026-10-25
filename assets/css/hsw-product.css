@@ -850,10 +850,10 @@
         width: 52px;
         display: none;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: flex-start;
         padding: 0 8px;
         border: 0;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--hsw-tabnav-bg, var(--hsw-surface-bright)) 58%);
+        background: linear-gradient(to right, var(--hsw-tabnav-bg, var(--hsw-surface-bright)) 40%, rgba(255, 255, 255, 0));
         color: var(--hsw-on-surface-variant);
         cursor: pointer;
         transition: opacity .2s, color .15s;
@@ -2167,13 +2167,14 @@ html.hsw-sheet-open { overflow: hidden; }
 }
 .hsw-ppurch__cart .hsw-ic {
 	position: absolute;
-	inset-inline-start: 16px;
+	left: 16px;
+	right: auto;
 	top: 50%;
 	transform: translateY(-50%);
 	width: 20px;
 	height: 20px;
 	font-size: 20px;
 	color: currentColor;
-	fill: currentColor;
+	fill: none;
 }
 .hsw-ppurch__cart span { line-height: 1.2; }

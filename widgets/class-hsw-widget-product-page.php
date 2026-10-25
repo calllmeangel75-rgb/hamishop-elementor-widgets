@@ -57,7 +57,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 $this->part_section( 'ptr_', __( '۷. سیگنال‌های اعتماد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Trust', array( 'vis', 'trust_items' ) );
 
-                $this->part_section( 'ptb_', __( '۸. تب‌ها (دسکتاپ و موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Tabs', array( 'vis', 'specs_title', 'lbl_specs', 'lbl_review', 'lbl_comments', 'tab_specs', 'tab_review', 'tab_comments', 'reviews_count' ) );
+                $this->part_section( 'ptb_', __( '۸. تب‌ها (دسکتاپ و موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Tabs', array( 'vis', 'specs_title', 'lbl_specs', 'lbl_review', 'lbl_comments', 'tab_specs', 'tab_review', 'tab_warranty', 'lbl_warranty', 'warranty_title', 'warranty_text', 'tab_comments', 'reviews_count' ) );
 
                 $this->part_section( 'pac_', __( '۹. آکاردئون‌ها (موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Accordions', array( 'vis', 'acc_specs_title', 'acc_warranty_title', 'acc_reviews_title', 'acc_specs', 'acc_warranty', 'acc_reviews', 'reviews_count2', 'warranty_items' ) );
 

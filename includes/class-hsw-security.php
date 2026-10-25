@@ -944,6 +944,23 @@ class HSW_Security {
 		}
 	}
 
+	/**
+	 * Post target that survives the custom dashboard slug.
+	 *
+	 * @param string $page Page slug.
+	 * @return string
+	 */
+	protected static function form_action( $page ) {
+		if ( class_exists( 'HSW_Security' ) ) {
+			$security = self::get();
+			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
+			if ( '' !== $slug ) {
+				return home_url( '/' . $slug . '/admin.php?page=' . $page );
+			}
+		}
+		return '';
+	}
+
 	public function menu() {
 		add_submenu_page(
 			'hamishop',
@@ -1073,7 +1090,7 @@ class HSW_Security {
 				</div>
 			<?php endif; ?>
 
-			<form method="post">
+			<form method="post" action="<?php echo esc_url( self::form_action( 'hamishop-security' ) ); ?>">
 				<?php wp_nonce_field( 'hsw_save_security', 'hsw_security_nonce' ); ?>
 
 				<h2><?php esc_html_e( 'آدرس پیشخوان', 'hamishop-elementor-widgets' ); ?></h2>

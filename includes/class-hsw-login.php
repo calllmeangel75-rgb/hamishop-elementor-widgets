@@ -22,7 +22,6 @@ class HSW_Login {
 		/* login_head runs after wp-login.css is printed, so our rules win ties. */
 		add_action( 'login_head', array( $this, 'styles' ), 99 );
 		add_action( 'login_header', array( $this, 'topbar' ) );
-		add_action( 'login_form', array( $this, 'extras' ) );
 		add_filter( 'login_headerurl', array( $this, 'home_url' ) );
 		add_filter( 'login_headertext', array( $this, 'site_name' ) );
 		add_filter( 'login_message', array( $this, 'brand_block' ) );
@@ -69,7 +68,15 @@ class HSW_Login {
 
 		$out  = '<div class="hsw-login__head">';
 		$out .= '<span class="hsw-login__badge">' . $mark . '</span>';
-		$out .= '<div class="hsw-login__title">ورود به داشبورد پنل</div>';
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the screen only.
+		$titles = array(
+			'lostpassword' => 'بازیابی رمز عبور',
+			'rp'           => 'تعیین رمز عبور جدید',
+			'resetpass'    => 'تعیین رمز عبور جدید',
+			'register'     => 'ساخت حساب کاربری',
+		);
+		$title = isset( $titles[ $action ] ) ? $titles[ $action ] : 'ورود به داشبورد پنل';
+		$out .= '<div class="hsw-login__title">' . esc_html( $title ) . '</div>';
 		$out .= '<div class="hsw-login__sub">' . esc_html( '' !== trim( (string) $tag ) ? $tag : $name ) . '</div>';
 		$out .= '</div>';
 
@@ -80,27 +87,6 @@ class HSW_Login {
 		$out .= '</div>';
 
 		return $out . $message;
-	}
-
-	/**
-	 * Rows after the submit button: divider, passkey/SSO tiles, status strip.
-	 * The tiles mirror the design and stay inert (no provider configured).
-	 */
-	public function extras() {
-		?>
-		<div class="hsw-login__divider"><span>یا ورود از طریق</span></div>
-		<div class="hsw-login__tiles">
-			<button type="button" class="hsw-login__tile" title="به‌زودی">
-				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><path d="M14 17.5h7M17.5 14v7"></path></svg>
-				<span>ورود یکپارچه (SSO)</span>
-			</button>
-			<button type="button" class="hsw-login__tile" title="به‌زودی">
-				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3a4 4 0 0 0-4 4v3"></path><path d="M8 14a4 4 0 0 0 8 0v-3"></path><circle cx="12" cy="11" r="1.2"></circle><path d="M12 12.2V15"></path></svg>
-				<span>کلید عبور (Passkey)</span>
-			</button>
-		</div>
-		<div class="hsw-login__status"><span class="hsw-login__dot"></span><span>سرورها در وضعیت آنلاین و ایمن</span><span class="hsw-login__lat">LATENCY: 18ms</span></div>
-		<?php
 	}
 
 	/**

@@ -28,7 +28,14 @@ class HSW_Pagination {
 			return;
 		}
 		remove_action( 'woocommerce_after_shop_loop', 'woocommerce_pagination', 10 );
-		add_action( 'woocommerce_after_shop_loop', array( __CLASS__, 'render' ), 10 );
+		add_action( 'woocommerce_after_shop_loop', array( __CLASS__, 'output' ), 10 );
+	}
+
+	/**
+	 * Print the pagination (the action callback must echo, render() returns).
+	 */
+	public static function output() {
+		echo self::render(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside.
 	}
 
 	/**
