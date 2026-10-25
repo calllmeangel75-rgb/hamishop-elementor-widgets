@@ -839,7 +839,7 @@
 }
 .hsw-ptop__logo {
         width: 2rem; height: 2rem; border-radius: var(--hswk-r-s);
-        background: var(--hswk-btn); color: var(--hswk-on-btn);
+        background: var(--hsw-pcpn-btn-bg, var(--hswk-btn)); color: var(--hsw-pcpn-btn-c, var(--hswk-on-btn));
         display: flex; align-items: center; justify-content: center;
 }
 .hsw-ptop__logo .hsw-ic { font-size: 1.25rem; }
@@ -1805,8 +1805,8 @@ select.hsw-ckaddr__fi {
 	padding-inline: 26px;
 	border: 0;
 	border-radius: 12px;
-	background: var(--hswk-cta);
-	color: var(--hswk-on-cta);
+	background: var(--hsw-ck-submit-bg, var(--hswk-cta));
+	color: var(--hsw-ck-submit-tx, var(--hswk-on-cta));
 	font-family: inherit;
 	font-size: .875rem;
 	font-weight: 700;

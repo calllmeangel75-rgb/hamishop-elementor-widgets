@@ -176,6 +176,8 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                 $this->a_color( 'chip_bg', __( 'پس‌زمینه برچسب', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__chip', 'background-color' );
                 $this->a_text( 'line_tx', '{{WRAPPER}} .hsw-ckaddr__line', array( 'default' => 14 ) );
                 $this->a_color( 'meta_c', __( 'متن ردیف تماس/کدپستی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__meta' );
+                $this->a_color( 'fsubmit_bg', __( 'دکمهٔ «ثبت آدرس» — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__fsubmit', '--hsw-ck-submit-bg' );
+                $this->a_color( 'fsubmit_c', __( 'دکمهٔ «ثبت آدرس» — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__fsubmit', '--hsw-ck-submit-tx' );
 
                 $this->end_controls_section();
         }

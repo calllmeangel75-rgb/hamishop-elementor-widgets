@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.83
+Stable tag: 1.11.84
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,16 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.84 =
+* **فرم تسویه: رنگ دکمه‌ها تفکیک شد.**
+  - «ثبت آدرس» (`hsw-ckaddr__fsubmit`) متغیرهای اختصاصی
+    `--hsw-ck-submit-bg` / `--hsw-ck-submit-tx` گرفت و دو کنترل رنگ در ویجت
+    آدرس اضافه شد.
+  - دکمهٔ «اعمال کد» در صفحهٔ پرداخت (`hsw-pcpn__btn`) هم به متغیرهای اختصاصی
+    `--hsw-pcpn-btn-bg` / `--hsw-pcpn-btn-c` وصل شد.
+  - دکمهٔ نهایی «ثبت سفارش» خود ووکامرس است (`#place_order`) و استایلش دست ما
+    نیست؛ اگر بخواهید می‌توانیم استایل اختصاصی برایش بنویسیم.
 
 = 1.11.83 =
 * **ویجت کد تخفیف: رنگ دکمهٔ «اعمال کد» تفکیک شد.**

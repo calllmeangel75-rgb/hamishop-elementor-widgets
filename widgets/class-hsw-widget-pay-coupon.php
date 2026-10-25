@@ -133,8 +133,8 @@ class HSW_Widget_Pay_Coupon extends HSW_Pay_Base {
 
                 $this->a_box( 'card', '{{WRAPPER}} .hsw-pcpn__card' );
                 $this->a_text( 'hd', '{{WRAPPER}} .hsw-pcpn__hd-t', array( 'default' => 16 ) );
-                $this->a_color( 'btn_bg', __( 'پس‌زمینه دکمه (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pcpn__btn', 'background-color' );
-                $this->a_color( 'btn_c', __( 'متن دکمه (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pcpn__btn' );
+                $this->a_color( 'btn_bg', __( 'دکمهٔ «اعمال کد» — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pcpn__btn', '--hsw-pcpn-btn-bg' );
+                $this->a_color( 'btn_c', __( 'دکمهٔ «اعمال کد» — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pcpn__btn', '--hsw-pcpn-btn-c' );
                 $this->a_color( 'm_btn_bg', __( 'پس‌زمینه دکمه (موبایل)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pcpn__mbtn', 'background-color' );
 
                 $this->end_controls_section();
