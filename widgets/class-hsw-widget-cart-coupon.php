@@ -144,8 +144,9 @@ class HSW_Widget_Cart_Coupon extends HSW_Cart_Base {
 
                 $this->a_color( 'cp_in_bg', __( 'پس‌زمینه فیلد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__in', 'background-color' );
                 $this->a_color( 'cp_in_bd', __( 'حاشیه فیلد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__in', 'border-color' );
-                $this->a_color( 'cp_btn_bg', __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__btn', 'background-color' );
-                $this->a_color( 'cp_btn_tx', __( 'متن دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__btn' );
+                $this->a_color( 'cp_btn_bg', __( 'دکمهٔ «اعمال کد» — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__btn', '--hsw-cp-btn-bg' );
+                $this->a_color( 'cp_btn_tx', __( 'دکمهٔ «اعمال کد» — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__btn', '--hsw-cp-btn-tx' );
+                $this->a_color( 'cp_btn_h', __( 'دکمهٔ «اعمال کد» — پس‌زمینهٔ هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ccoupon__btn:hover', '--hsw-cp-btn-h' );
                 $this->add_responsive_control(
                         'cp_btn_br',
                         array(

@@ -443,14 +443,18 @@
 @media (min-width: 640px) { .hsw-ccoupon__form .hsw-ccoupon__in { width: 16rem; } }
 .hsw-c .hsw-ccoupon__btn {
         height: 2.75rem; padding-inline: 1.5rem; flex-shrink: 0; white-space: nowrap;
-        background: var(--hswc-cta); color: var(--hswc-on-cta);
+        background: var(--hsw-cp-btn-bg, var(--hswc-cta));
+        color: var(--hsw-cp-btn-tx, var(--hswc-on-cta));
         border-radius: var(--hswc-r-s);
         font-size: .875rem; line-height: 1.375rem; font-weight: 600; font-weight: 700;
         display: flex; align-items: center; justify-content: center;
         transition: all .15s;
 }
 .hsw-c .hsw-ccoupon__btn:hover,
-.hsw-c .hsw-ccoupon__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
+.hsw-c .hsw-ccoupon__btn:focus-visible {
+        background: var(--hsw-cp-btn-h, var(--hswc-cta-hover));
+        color: var(--hsw-cp-btn-tx, var(--hswc-on-cta));
+}
 .hsw-c .hsw-ccoupon__btn:active { transform: scale(.95); }
 
 .hsw-ccoupon__foot { padding-top: .375rem; display: flex; justify-content: space-between; align-items: center; font-size: .75rem; line-height: 1.25rem; font-weight: 400; }
