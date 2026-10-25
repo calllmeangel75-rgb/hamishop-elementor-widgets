@@ -53,15 +53,19 @@ class HSW_Login {
 	 */
 	public function brand_block( $message ) {
 		$name = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
-		$tag  = class_exists( 'HSW_Branding' ) ? HSW_Branding::tagline() : get_bloginfo( 'description' );
+		$logo = class_exists( 'HSW_Branding' ) ? HSW_Branding::logo_html( 'hsw-login__logoimg' ) : '';
+		$tag  = class_exists( 'HSW_Branding' ) ? HSW_Branding::tagline() : '';
 
-		$block  = '<div class="hsw-login__brand"><span class="hsw-login__mark" aria-hidden="true">';
-		$block .= '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1 11H5L4 9Z"></path><path d="M8 9V7a4 4 0 0 1 8 0v2"></path></svg>';
-		$block .= '</span><strong>' . esc_html( $name ) . '</strong>';
-		if ( '' !== trim( (string) $tag ) ) {
-			$block .= '<small>' . esc_html( $tag ) . '</small>';
-		}
+		$mark = '' !== $logo
+			? $logo
+			: '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1 11H5L4 9Z"></path><path d="M8 9V7a4 4 0 0 1 8 0v2"></path></svg>';
+
+		$block  = '<div class="hsw-login__head">';
+		$block .= '<span class="hsw-login__badge"><span class="hsw-login__badgeinner">' . $mark . '</span></span>';
+		$block .= '<div class="hsw-login__title">' . esc_html( 'ورود به پنل مدیریت' ) . '</div>';
+		$block .= '<p class="hsw-login__sub">' . esc_html( '' !== trim( (string) $tag ) ? $tag : $name ) . '</p>';
 		$block .= '</div>';
+		$block .= '<div class="hsw-login__notice"><span class="hsw-login__dot"></span><span>' . esc_html__( 'اتصال امن و رمزنگاری‌شده برقرار است', 'hamishop-elementor-widgets' ) . '</span></div>';
 
 		return $block . $message;
 	}
@@ -85,93 +89,107 @@ class HSW_Login {
 		<style id="hsw-login-css">
 		@font-face{font-family:"Vazirmatn HSW";src:url("<?php echo esc_url( $font ); ?>") format("woff2-variations");font-weight:100 900;font-display:swap}
 		body.login{
-			display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;
-			font-family:"Vazirmatn HSW",Vazirmatn,Tahoma,sans-serif;
+			display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:32px 18px;
+			font-family:"Vazirmatn HSW",Vazirmatn,Tahoma,sans-serif;color:#dfe2f1;
+			background:#070913;background-attachment:fixed;
+		}
+		/* Chromatic liquid-light orbs. */
+		body.login::before{
+			content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 			background:
-				radial-gradient(900px 520px at 12% 6%, color-mix(in srgb, <?php echo esc_attr( $accent ); ?> 30%, transparent), transparent 62%),
-				radial-gradient(760px 480px at 88% 14%, rgba(34,211,238,.22), transparent 64%),
-				linear-gradient(140deg, <?php echo esc_attr( $hero_a ); ?>, <?php echo esc_attr( $hero_b ); ?> 58%, #050d18);
-			background-attachment:fixed;
+				radial-gradient(580px 580px at 30% 0%, rgba(99,102,241,.30), transparent 62%),
+				radial-gradient(520px 520px at 92% 45%, rgba(6,182,212,.24), transparent 64%),
+				radial-gradient(600px 600px at 12% 95%, rgba(124,58,237,.24), transparent 66%),
+				radial-gradient(320px 320px at 6% 25%, rgba(244,63,94,.12), transparent 70%);
+			animation:hsw-login-glow 16s ease-in-out infinite alternate;
 		}
-		/* Floating light orbs. */
-		body.login::before,
-		body.login::after{
-			content:"";position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;
-		}
-		body.login::before{width:340px;height:340px;background:<?php echo esc_attr( $accent ); ?>;opacity:.45;top:-90px;inset-inline-start:-60px;animation:hsw-login-float 14s ease-in-out infinite}
-		body.login::after{width:420px;height:420px;background:#22d3ee;opacity:.28;bottom:-150px;inset-inline-end:-90px;animation:hsw-login-float 18s ease-in-out infinite reverse}
-		@keyframes hsw-login-float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-26px,0)}}
+		@keyframes hsw-login-glow{from{opacity:.85;transform:translate3d(0,0,0)}to{opacity:1;transform:translate3d(0,-14px,0)}}
 
-		#login{position:relative;z-index:2;width:100%;max-width:372px;margin:0;padding:30px 26px 26px;
-			background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:24px;
-			backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
-			box-shadow:0 24px 80px rgba(0,0,0,.38),0 0 40px rgba(59,130,246,.16);
+		#login{position:relative;z-index:2;width:100%;max-width:420px;margin:0;padding:34px 30px 28px;
+			background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:26px;
+			backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+			box-shadow:0 25px 60px -15px rgba(0,0,0,.7), inset 0 1px 1px 0 rgba(255,255,255,.22);
 			animation:hsw-login-in .5s cubic-bezier(.22,.61,.36,1) both;
 		}
-		@keyframes hsw-login-in{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+		@keyframes hsw-login-in{from{opacity:0;transform:translateY(16px) scale(.99)}to{opacity:1;transform:none}}
 
-		/* No WordPress logo. */
 		#login h1,#login h1 a{display:none!important}
 
-		/* The language switcher is a flex child of body and used to push the
-		   card off-centre; pin it to the corner instead. */
-		body.login .language-switcher{position:fixed;top:16px;inset-inline-start:16px;margin:0;z-index:3}
+		/* Brand block: logo badge + title + subtitle + security notice. */
+		.hsw-login__head{display:flex;flex-direction:column;align-items:center;text-align:center;margin:0 0 20px}
+		.hsw-login__badge{position:relative;display:flex;align-items:center;justify-content:center;width:66px;height:66px;margin-bottom:16px}
+		.hsw-login__badge::before{content:"";position:absolute;inset:-3px;border-radius:50%;
+			background:linear-gradient(135deg,#6366f1,#06b6d4);filter:blur(10px);opacity:.55}
+		.hsw-login__badgeinner{position:relative;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+			background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);
+			box-shadow:inset 0 1px 1px rgba(255,255,255,.3),0 0 25px rgba(6,182,212,.35);overflow:hidden;color:#fff}
+		.hsw-login__logoimg{max-width:38px;max-height:38px;object-fit:contain;filter:drop-shadow(0 2px 10px rgba(255,255,255,.35))}
+		.hsw-login__title{margin:0 0 6px;font-size:23px;font-weight:800;color:#fff;line-height:1.5;letter-spacing:-.2px}
+		.hsw-login__sub{margin:0;font-size:13px;color:#c7c4d7;line-height:1.9}
+
+		.hsw-login__notice{position:relative;display:flex;align-items:center;gap:8px;margin:0 0 22px;padding:10px 12px;border-radius:12px;
+			background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-inline-start:2px solid #4cd7f6;
+			color:#c7c4d7;font-size:11px;line-height:1.7}
+		.hsw-login__dot{width:8px;height:8px;border-radius:50%;background:#34d399;flex:0 0 8px;box-shadow:0 0 0 3px rgba(52,211,153,.18)}
+
+		#loginform,#registerform,#lostpasswordform{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0}
+		#login form p{margin:0 0 16px;display:flex;flex-direction:column;gap:7px}
+		#login form p.forgetmenot,#login form p.submit{display:block}
+		.login label{color:#dfe2f1!important;font-size:13px!important;font-weight:500;margin:0;display:block}
+
+		.login input[type=text],.login input[type=password],.login input[type=email]{
+			width:100%;height:48px;padding:0 14px;border-radius:12px;font-size:13px;
+			background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.12)!important;
+			color:#fff!important;box-shadow:inset 0 1px 1px 0 rgba(255,255,255,.06)!important;
+			transition:border-color .18s,box-shadow .18s,background-color .18s;
+		}
+		.login input[type=text]:focus,.login input[type=password]:focus,.login input[type=email]:focus{
+			background:rgba(255,255,255,.08)!important;border-color:rgba(99,102,241,.7)!important;
+			box-shadow:0 0 0 3px rgba(99,102,241,.25)!important;outline:none;
+		}
+		.login input::placeholder{color:#8a8f9c}
+		.wp-pwd button.wp-hide-pw{color:#94a3b8!important;height:34px;border:0;background:transparent!important}
+
+		.wp-core-ui .button-primary,.wp-core-ui .button-primary:focus{
+			width:100%;height:48px;border:0!important;border-radius:12px!important;font-size:13.5px;font-weight:700;letter-spacing:.2px;
+			background:linear-gradient(135deg,#6366f1 0%,#06b6d4 100%)!important;color:#fff!important;text-shadow:none!important;
+			box-shadow:0 8px 24px -4px rgba(99,102,241,.5), inset 0 1px 0 rgba(255,255,255,.35)!important;
+			transition:filter .18s,transform .15s,box-shadow .2s;
+		}
+		.wp-core-ui .button-primary:hover{filter:brightness(1.1);transform:translateY(-1px);
+			box-shadow:0 12px 30px -2px rgba(99,102,241,.65), inset 0 1px 0 rgba(255,255,255,.45)!important}
+
+		.login .forgetmenot{display:flex;align-items:center;gap:7px}
+		.login .forgetmenot label{color:#c7c4d7!important;font-size:12px!important;margin:0}
+		.login input[type=checkbox]{width:17px;height:17px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
+			background:rgba(255,255,255,.08);box-shadow:none}
+		.login input[type=checkbox]:checked{background:#6366f1;border-color:#6366f1}
+		.login .submit{margin:6px 0 0}
+
+		.login #nav,.login #backtoblog{padding:0;margin:16px 0 0;text-align:center}
+		.login #nav a,.login #backtoblog a,.login .privacy-policy-page-link a{color:#4cd7f6!important;font-size:12px;text-decoration:none}
+		.login #nav a:hover,.login #backtoblog a:hover{color:#acedff!important}
+
+		.login .message,.login .notice,.login .success,.login #login_error{
+			background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.1)!important;
+			border-inline-start:3px solid #06b6d4!important;border-radius:12px;
+			color:#dfe2f1!important;box-shadow:none!important;margin:0 0 18px;font-size:12px;
+		}
+		.login #login_error{border-inline-start-color:#f43f5e!important}
+
+		body.login .language-switcher{position:fixed;top:18px;inset-inline-start:18px;margin:0;z-index:3}
 		body.login .language-switcher select{
-			height:34px;border-radius:9px;padding:0 10px;
-			background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:12px;
+			height:36px;border-radius:12px;padding:0 12px;font-size:12px;
+			background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#dfe2f1;
 		}
 		body.login .language-switcher select option{color:#0f172a}
 
-		.hsw-login__brand{display:flex;flex-direction:column;align-items:center;gap:4px;margin:0 0 26px!important;text-align:center}
-		.hsw-login__mark{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
-			background:linear-gradient(135deg,<?php echo esc_attr( $accent ); ?>,#22d3ee);color:#fff;
-			box-shadow:0 10px 24px -12px rgba(59,130,246,.9);margin-bottom:6px}
-		.hsw-login__brand strong{color:#fff;font-size:17px;font-weight:800;line-height:1.6}
-		.hsw-login__brand small{color:rgba(255,255,255,.6);font-size:11.5px}
-
-		#loginform,#registerform,#lostpasswordform{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0}
-		#login form p{margin:0 0 14px;display:flex;flex-direction:column;gap:6px}
-		#login form p.forgetmenot,#login form p.submit{display:block}
-		.login label{color:rgba(255,255,255,.82)!important;font-size:12px!important;font-weight:600;margin-bottom:6px;display:block}
-		.login input[type=text],.login input[type=password],.login input[type=email]{
-			width:100%;height:44px;padding:0 12px;border-radius:11px;
-			background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.22)!important;
-			color:#fff!important;font-size:13px;box-shadow:none!important;margin:0!important;
-		}
-		.login input[type=text]:focus,.login input[type=password]:focus,.login input[type=email]:focus{
-			border-color:rgba(255,255,255,.6)!important;background:rgba(255,255,255,.16)!important;outline:none
-		}
-		.login input::placeholder{color:rgba(255,255,255,.45)}
-
-		.wp-core-ui .button-primary,.wp-core-ui .button-primary:focus{
-			width:100%;height:44px;border:0!important;border-radius:11px!important;font-size:13px;font-weight:700;
-			background:linear-gradient(135deg,<?php echo esc_attr( $accent ); ?>,#22d3ee)!important;
-			box-shadow:0 14px 30px -14px rgba(59,130,246,.9)!important;text-shadow:none!important;
-			transition:transform .15s,box-shadow .2s;
-		}
-		.wp-core-ui .button-primary:hover{transform:translateY(-1px);box-shadow:0 18px 36px -16px rgba(59,130,246,1)!important}
-
-		.login .forgetmenot{display:flex;align-items:center;gap:6px}
-		.login .forgetmenot label{color:rgba(255,255,255,.75)!important;margin:0;font-weight:500}
-		.login input[type=checkbox]{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1)}
-		.login .submit{margin:4px 0 0}
-
-		.login #nav,.login #backtoblog{padding:0;margin:14px 0 0;text-align:center}
-		.login #nav a,.login #backtoblog a,.login .privacy-policy-page-link a{color:rgba(255,255,255,.72)!important;font-size:12px}
-		.login #nav a:hover,.login #backtoblog a:hover{color:#fff!important}
-
-		.login .message,.login .notice,.login .success,.login #login_error{
-			background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.18)!important;
-			border-inline-start:3px solid <?php echo esc_attr( $accent ); ?>!important;border-radius:10px;
-			color:#fff!important;box-shadow:none!important;margin:0 0 16px;font-size:12px;
-		}
-		.login #login_error{border-inline-start-color:#f87171!important}
-
 		@media (max-width:420px){
-			#login{padding:24px 18px;border-radius:20px}
+			#login{padding:26px 20px;border-radius:22px}
+			.hsw-login__title{font-size:20px}
 		}
 		@media (prefers-reduced-motion:reduce){
-			#login,body.login::before,body.login::after{animation:none!important}
+			#login,body.login::before{animation:none!important}
 		}
 		</style>
 		<?php
