@@ -127,6 +127,10 @@ final class HSW_Widget_Manager {
 						'label' => __( 'هدر مینیمال شیشه‌ای', 'hamishop-elementor-widgets' ),
 						'desc'  => __( 'پیل شیشه‌ای شناور، منوی واقعی و پنل جستجوی سبک.', 'hamishop-elementor-widgets' ),
 					),
+					'hsw-footer-sticky'  => array(
+						'label' => __( 'فوتر چسبان (نوار پایین موبایل)', 'hamishop-elementor-widgets' ),
+						'desc'  => __( 'پنج لینک سریع: خانه، فروشگاه، سبد خرید، علاقه‌مندی‌ها و حساب کاربری. فقط در موبایل/تبلت نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
+					),
 				),
 				'parts'       => array(),
 			),

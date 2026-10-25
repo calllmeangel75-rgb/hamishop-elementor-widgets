@@ -32,7 +32,8 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 	}
 
 	public function get_categories() {
-		return array( 'hamishop' );
+		/* Must be a registered category, otherwise Elementor hides the widget. */
+		return array( 'hamishop-header' );
 	}
 
 	public function get_keywords() {

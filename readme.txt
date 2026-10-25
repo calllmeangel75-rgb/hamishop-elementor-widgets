@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.73
+Stable tag: 1.11.74
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.74 =
+* **رفع دیده‌نشدن ویجت «فوتر چسبان».**
+  - دستهٔ ویجت از `hamishop` (ثبت‌نشده) به `hamishop-header` (دستهٔ واقعی
+    المنتور) تغییر کرد؛ قبلاً ویجت در پنل المنتور نمایش داده نمی‌شد.
+  - ویجت به فهرست «کنترل ویجت‌ها» در پیشخوان اضافه شد (گروه «هدر و ناوبری»)
+    تا بتوان روشن/خاموشش کرد.
 
 = 1.11.73 =
 * **ویجت جدید: «فوتر چسبان» (HamiShop) برای نوار پایین موبایل.**
