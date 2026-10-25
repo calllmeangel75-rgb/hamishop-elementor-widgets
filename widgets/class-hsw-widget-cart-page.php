@@ -65,6 +65,35 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
                 $this->end_controls_section();
 
                 /*
+                 * The place-order button lives inside the summary widget, which sits in
+                 * this page — so the controls target it from here as well. Empty by
+                 * default: no CSS is emitted until a colour is chosen.
+                 */
+                $this->start_controls_section(
+                        'sec_page_buttons',
+                        array( 'label' => __( 'دکمه‌های سفارش', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->a_color( 'po_bg', __( 'دکمهٔ «تکمیل سفارش» — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', 'background-color' );
+                $this->a_color( 'po_tx', __( 'دکمهٔ «تکمیل سفارش» — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta' );
+                $this->a_color( 'po_hover_bg', __( 'دکمهٔ «تکمیل سفارش» — پس‌زمینهٔ هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta:hover', 'background-color' );
+                $this->add_responsive_control(
+                        'po_radius',
+                        array(
+                                'label'      => __( 'گردی گوشه‌های دکمه', 'hamishop-elementor-widgets' ),
+                                'type'       => \Elementor\Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-csummary__cta' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->a_color( 'po_mbg', __( 'نوار پایین موبایل — پس‌زمینهٔ دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta', 'background-color' );
+                $this->a_color( 'po_mtx', __( 'نوار پایین موبایل — متن دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta' );
+
+                $this->end_controls_section();
+
+                /*
                  * One type scale for the whole page: the variables land on the wrapper and
                  * every child widget inherits them.
                  */

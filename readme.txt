@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.85
+Stable tag: 1.11.86
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.86 =
+* **کنترل رنگ دکمهٔ «تکمیل سفارش» در خود ویجت «صفحهٔ کامل سبد خرید».**
+  - بخش استایل جدید «دکمه‌های سفارش»: پس‌زمینه، متن، هاور و گردی گوشه‌های دکمهٔ
+    تکمیل سفارش، به‌همراه پس‌زمینه/متن همان دکمه در نوار پایین موبایل.
+  - چون دکمه در ویجت «خلاصهٔ سبد» رندر می‌شود، از اینجا هم با سلکتور
+    `{{WRAPPER}} .hsw-csummary__cta` قابل تنظیم است؛ کنترل‌ها خالی‌اند و تا رنگی
+    انتخاب نکنید هیچ CSSای تولید نمی‌شود.
 
 = 1.11.85 =
 * **کنترل رنگ دکمهٔ «ثبت سفارش» (خود ووکامرس) در ویجت صفحهٔ تسویه.**
