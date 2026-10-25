@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.74
+Stable tag: 1.11.75
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.75 =
+* **آیکون‌های پیش‌فرض ویجت فوتر چسبان درست شد.**
+  - کنترل آیکن از `ICONS` (که فقط کتابخانه‌های ثبت‌شدهٔ المنتور را می‌شناسد و
+    برای اسپرایت خودمان خالی می‌ماند) به **لیست انتخاب آیکون‌های خود افزونه**
+    تغییر کرد؛ حالا هر پنج آیتم پیش‌فرض با آیکن درست رندر می‌شوند.
+  - گزینهٔ «بدون آیکن» اضافه شد و آیکن «سفارش‌ها» به `local_shipping` (آیکن
+    موجود در مجموعه) اصلاح شد.
 
 = 1.11.74 =
 * **رفع دیده‌نشدن ویجت «فوتر چسبان».**

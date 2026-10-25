@@ -89,7 +89,36 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 		$rep = new Repeater();
 		$rep->add_control( 'text', array( 'label' => __( 'متن لینک', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::TEXT, 'default' => 'خانه', 'label_block' => true ) );
 		$rep->add_control( 'url', array( 'label' => __( 'آدرس', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::URL, 'default' => array( 'url' => '#' ), 'label_block' => true ) );
-		$rep->add_control( 'icon', array( 'label' => __( 'آیکن', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::ICONS, 'default' => array( 'value' => 'home', 'library' => 'hsw' ) ) );
+		/*
+		 * Our sprite is not an Elementor icon library, so the ICONS control
+		 * would render an empty picker and drop the default. A select of the
+		 * plugin's own icon names keeps the defaults working and the UI clear.
+		 */
+		$rep->add_control(
+			'icon',
+			array(
+				'label'   => __( 'آیکن', 'hamishop-elementor-widgets' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'home',
+				'options' => array(
+					'home'          => __( 'خانه', 'hamishop-elementor-widgets' ),
+					'storefront'    => __( 'فروشگاه', 'hamishop-elementor-widgets' ),
+					'shopping_cart' => __( 'سبد خرید', 'hamishop-elementor-widgets' ),
+					'heart'         => __( 'قلب / علاقه‌مندی', 'hamishop-elementor-widgets' ),
+					'person'        => __( 'کاربر', 'hamishop-elementor-widgets' ),
+					'wallet'        => __( 'کیف پول', 'hamishop-elementor-widgets' ),
+					'settings'      => __( 'تنظیمات', 'hamishop-elementor-widgets' ),
+					'grid_view'     => __( 'دسته‌بندی', 'hamishop-elementor-widgets' ),
+					'local_shipping' => __( 'سفارش‌ها / ارسال', 'hamishop-elementor-widgets' ),
+					'support_agent' => __( 'پشتیبانی', 'hamishop-elementor-widgets' ),
+					'search'        => __( 'جستجو', 'hamishop-elementor-widgets' ),
+					'star'          => __( 'ستاره', 'hamishop-elementor-widgets' ),
+					'logout'        => __( 'خروج', 'hamishop-elementor-widgets' ),
+					'check'         => __( 'تیک', 'hamishop-elementor-widgets' ),
+					'none'          => __( 'بدون آیکن', 'hamishop-elementor-widgets' ),
+				),
+			)
+		);
 		$rep->add_control( 'new_tab', array( 'label' => __( 'بازشدن در تب جدید', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::SWITCHER ) );
 		$rep->add_control( 'nofollow', array( 'label' => __( 'nofollow', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::SWITCHER ) );
 
@@ -308,6 +337,9 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			$url    = is_array( $item['url'] ?? null ) ? ( $item['url']['url'] ?? '' ) : (string) ( $item['url'] ?? '' );
 			$text   = (string) ( $item['text'] ?? '' );
 			$icon   = is_array( $item['icon'] ?? null ) ? ( $item['icon']['value'] ?? '' ) : (string) ( $item['icon'] ?? '' );
+			if ( 'none' === $icon ) {
+				$icon = '';
+			}
 			$target = ! empty( $item['new_tab'] ) && 'yes' === $item['new_tab'] ? ' target="_blank" rel="noopener"' : '';
 			$rel    = ( ! empty( $item['nofollow'] ) && 'yes' === $item['nofollow'] ) ? ' rel="nofollow"' : '';
 
