@@ -50,5 +50,9 @@ function hsw_icon_raw_map() {
 			'viewBox' => '0 0 24 24',
 			'body'    => '<path d="M9.02 2.84 3.63 7.04C2.73 7.74 2 9.23 2 10.36v7.41c0 2.28 1.86 4.14 4.14 4.14h11.72c2.28 0 4.14-1.86 4.14-4.14v-7.26c0-1.2-.78-2.74-1.73-3.52L14.9 2.88C13.29 1.55 10.57 1.53 9.02 2.84Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 18v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>',
 		),
+		'favorite.fill' => array(
+			'viewBox' => '0 0 24 24',
+			'body'    => '<path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24 1.01-1.36 2.62-2.24 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12Z" fill="currentColor" stroke="none"></path>',
+		),
 	);
 }

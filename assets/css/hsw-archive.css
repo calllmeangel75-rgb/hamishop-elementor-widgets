@@ -1017,7 +1017,7 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         color: var(--hswa-faint);
         transition: color .15s;
 }
-.hsw-ag__wish:hover, .hsw-ag__wish.is-active { color: var(--hswa-rose); }
+.hsw-ag__wish:hover, .hsw-ag__wish.is-active { color: var(--hswa-rose, #e11d48); }
 .hsw-ag__wish .hsw-ic { font-size: 16px; }
 /* The filled heart is a different symbol now; hswFill() swaps the <use> href. */
 .hsw-ag__media {

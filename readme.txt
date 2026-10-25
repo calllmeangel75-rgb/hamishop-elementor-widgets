@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.99
+Stable tag: 1.11.100
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.100 =
+* **قلب علاقه‌مندی‌ها دیگر محو نمی‌شود و قرمز پر می‌شود.**
+  - علت: `hswFill()` آدرس `<use>` را به `#hsw-i-favorite.fill` عوض می‌کرد ولی
+    چنین سمبلی در اسپرایت وجود نداشت → آیکون کاملاً ناپدید می‌شد.
+  - سمبل توپُر `favorite.fill` (با `fill="currentColor"` درون مسیر تا از
+    `<g style="fill:none">` رد نشود) اضافه شد و `print_sprite()` هرجا قلب خطی
+    چاپ شود، نسخهٔ توپُر را هم می‌آورد.
+  - `hswFill()` حالا وجود سمبل را چک می‌کند؛ اگر نبود، آیکون خطی می‌ماند
+    (دیگر هرگز خالی نمی‌شود).
+  - رنگ فعال: `var(--hswa-rose, #e11d48)` — قرمز پیش‌فرض.
 
 = 1.11.99 =
 * **ارسال رایگان افزونه حالا کلید خاموش/روشن دارد و پیش‌فرض خاموش است.**

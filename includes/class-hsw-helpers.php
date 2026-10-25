@@ -362,6 +362,16 @@ class HSW_Helpers {
                         return;
                 }
 
+                /*
+                 * hswFill() swaps <use href="#hsw-i-favorite"> to
+                 * "#hsw-i-favorite.fill" when the heart is active. The fill
+                 * variant is only referenced from JS, so it never gets
+                 * registered by icon() — add it here or the icon disappears.
+                 */
+                if ( isset( self::$icons['favorite'] ) ) {
+                        self::$icons['favorite.fill'] = true;
+                }
+
                 /* Only pay for the runtime icons when a page has icons at all. */
                 self::register_runtime_icons();
 
@@ -404,7 +414,7 @@ class HSW_Helpers {
                 $js = <<<'JS'
 window.hswIcon=function(n,c){return '<svg class="hsw-ic'+(c?' '+c:'')+'" aria-hidden="true" focusable="false"><use href="#hsw-i-'+n+'"></use></svg>';};
 window.hswSetIcon=function(el,n){if(!el)return;var u=el.querySelector?el.querySelector('use'):null;if(u){u.setAttribute('href','#hsw-i-'+n);}else{el.outerHTML=window.hswIcon(n);}};
-window.hswFill=function(el,on){if(!el)return;var u=el.querySelector?el.querySelector('use'):null;if(!u)return;var h=(u.getAttribute('href')||'').replace(/\.fill$/,'');u.setAttribute('href',h+(on?'.fill':''));};
+window.hswFill=function(el,on){if(!el)return;var u=el.querySelector?el.querySelector('use'):null;if(!u)return;var h=(u.getAttribute('href')||'').replace(/\.fill$/,'');var next=h+(on?'.fill':'');var id=next.replace(/^#/,'');if(on&&!document.getElementById(id)){next=h;}u.setAttribute('href',next);};
 JS;
                 echo '<script>' . $js . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static script, no user input.
         }
