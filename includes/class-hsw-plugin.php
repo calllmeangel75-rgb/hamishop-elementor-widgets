@@ -302,6 +302,7 @@ final class HSW_Plugin {
                 $widget_files = array(
                         HSW_DIR . 'widgets/class-hsw-widget-header-store.php',
                         HSW_DIR . 'widgets/class-hsw-widget-header-minimal.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-footer-sticky.php',
 
                         HSW_DIR . 'widgets/class-hsw-wonder-deals.php',
                         HSW_DIR . 'widgets/class-hsw-best-sellers.php',
@@ -393,6 +394,7 @@ final class HSW_Plugin {
                 foreach ( array(
                         '\HSW_Widget_Header_Store',
                         '\HSW_Widget_Header_Minimal',
+                        '\HSW_Widget_Footer_Sticky',
                         '\HSW_Widget_Wonder_Deals',
                         '\HSW_Widget_Best_Sellers',
                         '\HSW_Widget_Popular',
