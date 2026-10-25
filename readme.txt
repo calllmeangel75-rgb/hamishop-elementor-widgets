@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.70
+Stable tag: 1.11.71
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,16 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.71 =
+* **اصلاح ریشه‌ای فاصله‌های صفحهٔ ورود.**
+  - استایل‌ها روی `login_head` (بعد از wp-login.css) چاپ می‌شوند؛ قبلاً قبل از
+    آن بود و قواعد وردپرس برنده می‌شدند — علت «چسبیده بودن» همه‌چیز همین بود.
+  - فاصله‌ها مطابق طرح: کارت ۳۵۲px با پدینگ ۳۴/۳۰، فاصلهٔ فیلدها ۲۲px،
+    برچسب تا کادر ۹px، نوار اطمینان با پدینگ ۱۲px و فاصلهٔ ۲۶px، دکمه و
+    کاشی‌ها ۴۶–۴۸px.
+  - آیکون داخل فیلدها با `background-image` (به‌جای mask که مربع می‌شد) و
+    `background-color` جدا تا آیکون دیده شود.
 
 = 1.11.70 =
 * **صفحهٔ ورود دقیقاً با ساختار طرح: نوار بالا، کارت باریک و بلند، فونت وزیر.**

@@ -19,7 +19,8 @@ class HSW_Login {
 			return;
 		}
 
-		add_action( 'login_enqueue_scripts', array( $this, 'styles' ), 20 );
+		/* login_head runs after wp-login.css is printed, so our rules win ties. */
+		add_action( 'login_head', array( $this, 'styles' ), 99 );
 		add_action( 'login_header', array( $this, 'topbar' ) );
 		add_action( 'login_form', array( $this, 'extras' ) );
 		add_filter( 'login_headerurl', array( $this, 'home_url' ) );
@@ -132,7 +133,7 @@ class HSW_Login {
 		.hsw-login__toplink,.hsw-login__topchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#c7c4d7;text-decoration:none;padding:7px 11px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
 		.hsw-login__toplink:hover,.hsw-login__topchip:hover{color:#fff;border-color:rgba(255,255,255,.22)}
 
-		#login{position:relative;z-index:2;width:100%;max-width:372px;margin:0;padding:28px 26px 24px;
+		#login{position:relative;z-index:2;width:100%;max-width:352px;margin:0;padding:34px 30px 28px;
 			background:linear-gradient(180deg,rgba(30,36,64,.72),rgba(15,20,34,.94));
 			border:1px solid rgba(255,255,255,.1);border-radius:28px;
 			backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);
@@ -141,13 +142,13 @@ class HSW_Login {
 		@keyframes hsw-login-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 		#login h1,#login h1 a{display:none!important}
 
-		.hsw-login__head{display:flex;flex-direction:column;align-items:center;text-align:center;margin:0 0 16px}
-		.hsw-login__badge{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:14px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.35);box-shadow:0 0 0 6px rgba(255,255,255,.06),0 10px 30px -10px rgba(99,102,241,.9);overflow:hidden;color:#3b3bd6}
+		.hsw-login__head{display:flex;flex-direction:column;align-items:center;text-align:center;margin:0 0 20px}
+		.hsw-login__badge{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:18px;background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.35);box-shadow:0 0 0 6px rgba(255,255,255,.06),0 10px 30px -10px rgba(99,102,241,.9);overflow:hidden;color:#3b3bd6}
 		.hsw-login__logoimg{max-width:34px;max-height:34px;object-fit:contain}
-		.hsw-login__title{font-size:19px;font-weight:800;color:#fff;line-height:1.6;margin:0 0 4px}
-		.hsw-login__sub{font-size:11.5px;color:#b9bccd;line-height:1.9;max-width:250px}
+		.hsw-login__title{font-size:21px;font-weight:800;color:#fff;line-height:1.6;margin:0 0 6px}
+		.hsw-login__sub{font-size:11.5px;color:#b9bccd;line-height:1.95;max-width:260px;margin:0 auto}
 
-		.hsw-login__notice{display:flex;align-items:center;gap:7px;margin:0 0 18px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-inline-end:2px solid #4cd7f6;color:#c7c4d7;font-size:10.5px;line-height:1.8}
+		.hsw-login__notice{display:flex;align-items:center;gap:8px;margin:0 0 26px;padding:12px 12px;border-radius:11px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-inline-end:2px solid #4cd7f6;color:#c7c4d7;font-size:10.5px;line-height:1.8}
 		.hsw-login__noticemark{color:#4cd7f6;display:inline-flex;flex:0 0 auto}
 		.hsw-login__info{margin-inline-start:auto;width:15px;height:15px;border-radius:50%;flex:0 0 15px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#9aa0b4;border:1px solid rgba(255,255,255,.22)}
 
@@ -159,31 +160,35 @@ class HSW_Login {
 		.hsw-login__tiles{order:2}
 		.hsw-login__status{order:3}
 		#loginform p.submit{order:0}
-		#login form p{position:relative;margin:0 0 14px;display:flex;flex-direction:column;gap:6px}
+		#login form p{position:relative;margin:0 0 22px;display:flex;flex-direction:column;gap:9px}
 		#login form p.forgetmenot,#login form p.submit{display:block}
-		.login label{color:#e7e9f5!important;font-size:12px!important;font-weight:600;margin:0;display:block}
-		.login form .forgetmenot{margin:2px 0 16px}
+		.login label{color:#e7e9f5!important;font-size:12px!important;font-weight:600;margin:0;display:block;line-height:1.6}
+		.login form .forgetmenot{margin:0 0 22px}
 		.login .forgetmenot label{font-size:11px!important;font-weight:500;color:#b9bccd!important}
 
-		.login input[type=text],.login input[type=password],.login input[type=email]{width:100%;height:46px;padding:0 14px 0 40px;border-radius:11px;font-size:12.5px;background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.06)!important;transition:border-color .18s,box-shadow .18s,background-color .18s}
-		.login input[type=text]:focus,.login input[type=password]:focus,.login input[type=email]:focus{background:rgba(255,255,255,.07)!important;border-color:rgba(99,102,241,.75)!important;box-shadow:0 0 0 3px rgba(99,102,241,.22)!important;outline:none}
+		.login input[type=text],.login input[type=password],.login input[type=email]{width:100%;height:48px;padding:0 44px 0 14px;border-radius:11px;font-size:12.5px;background-color:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:inset 0 1px 1px rgba(255,255,255,.06)!important;transition:border-color .18s,box-shadow .18s,background-color .18s}
+		.login input[type=text]:focus,.login input[type=password]:focus,.login input[type=email]:focus{background-color:rgba(255,255,255,.07)!important;border-color:rgba(99,102,241,.75)!important;box-shadow:0 0 0 3px rgba(99,102,241,.22)!important;outline:none}
+
+		/* Field icons: background-image (mask rendered as a grey square). */
+		#loginform .user-login input{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:17px!important}
+		#loginform .user-pass input{background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='1.7' stroke-linecap='round'%3E%3Crect x='4' y='10' width='16' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 14px center!important;background-size:17px!important}
 		.login input::placeholder{color:#8a8f9c}
 		.wp-pwd button.wp-hide-pw{color:#94a3b8!important;border:0;background:transparent!important;height:32px;top:7px}
 
-		.wp-core-ui .button-primary,.wp-core-ui .button-primary:focus{width:100%;height:46px;border:0!important;border-radius:11px!important;font-size:13px;font-weight:800;background:linear-gradient(135deg,#6366f1 0%,#06b6d4 100%)!important;color:#fff!important;text-shadow:none!important;box-shadow:0 10px 26px -6px rgba(99,102,241,.55), inset 0 1px 0 rgba(255,255,255,.35)!important;transition:filter .18s,transform .15s}
+		.wp-core-ui .button-primary,.wp-core-ui .button-primary:focus{width:100%;height:48px;border:0!important;border-radius:11px!important;font-size:13px;font-weight:800;background:linear-gradient(135deg,#6366f1 0%,#06b6d4 100%)!important;color:#fff!important;text-shadow:none!important;box-shadow:0 10px 26px -6px rgba(99,102,241,.55), inset 0 1px 0 rgba(255,255,255,.35)!important;transition:filter .18s,transform .15s}
 		.wp-core-ui .button-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
 
 		.login input[type=checkbox]{width:16px;height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);box-shadow:none}
 		.login input[type=checkbox]:checked{background:#6366f1;border-color:#6366f1}
 
-		.hsw-login__divider{position:relative;display:flex;align-items:center;justify-content:center;margin:18px 0 14px}
+		.hsw-login__divider{position:relative;display:flex;align-items:center;justify-content:center;margin:24px 0 18px}
 		.hsw-login__divider::before{content:"";position:absolute;inset-inline:0;top:50%;height:1px;background:rgba(255,255,255,.08)}
 		.hsw-login__divider span{position:relative;padding:0 10px;font-size:10px;color:#8a8f9c;background:#0f1422;border-radius:999px;border:1px solid rgba(255,255,255,.06)}
-		.hsw-login__tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-		.hsw-login__tile{display:flex;align-items:center;justify-content:center;gap:7px;height:42px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#dfe2f1;font-size:10.5px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
+		.hsw-login__tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+		.hsw-login__tile{display:flex;align-items:center;justify-content:center;gap:8px;height:46px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#dfe2f1;font-size:10.5px;font-weight:600;cursor:pointer;transition:background-color .15s,border-color .15s}
 		.hsw-login__tile:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
 		.hsw-login__tile svg{color:#c0c1ff;flex:0 0 auto}
-		.hsw-login__status{display:flex;align-items:center;gap:7px;margin:14px 0 0;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);font-size:9.5px;color:#8a8f9c}
+		.hsw-login__status{display:flex;align-items:center;gap:8px;margin:18px 0 0;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);font-size:9.5px;color:#8a8f9c}
 		.hsw-login__dot{width:7px;height:7px;border-radius:50%;background:#34d399;flex:0 0 7px;box-shadow:0 0 0 3px rgba(52,211,153,.15)}
 		.hsw-login__lat{margin-inline-start:auto;font-family:ui-monospace,Menlo,monospace;letter-spacing:.3px}
 
