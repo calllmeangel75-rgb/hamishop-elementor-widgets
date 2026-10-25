@@ -210,8 +210,9 @@ class HSW_Assets {
                         array(
                                 'label'   => __( 'فونت پایه ویجت', 'hamishop-elementor-widgets' ),
                                 'type'    => \Elementor\Controls_Manager::SELECT,
-                                'default' => 'design',
+                                'default' => 'palette',
                                 'options' => array(
+                                        'palette' => __( 'فونت پالت (سراسری)', 'hamishop-elementor-widgets' ),
                                         'design'  => __( 'فونت طرح (وزیرمتن لوکال)', 'hamishop-elementor-widgets' ),
                                         'custom'  => __( 'فونت سفارشی', 'hamishop-elementor-widgets' ),
                                         'inherit' => __( 'ارث‌بری فونت از قالب سایت', 'hamishop-elementor-widgets' ),

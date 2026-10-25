@@ -90,8 +90,8 @@ class HSW_Palette {
 		foreach ( self::tokens() as $key => $def ) {
 			$out[ $key ] = $def[1];
 		}
-		/* Global font family — empty means «whatever the theme uses». */
-		$out['font'] = '';
+		/* Global font family — the plugin's Vazirmatn by default. */
+		$out['font'] = 'Vazirmatn HSW';
 		return $out;
 	}
 

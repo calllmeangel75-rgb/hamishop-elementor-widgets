@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.79
+Stable tag: 1.11.80
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.80 =
+* **فونت پالت حالا پیش‌فرض همهٔ ویجت‌هاست.**
+  - گزینهٔ «فونت پالت (سراسری)» به کنترل «فونت پایه ویجت» اضافه و **پیش‌فرض**
+    شد؛ یعنی هر ویجت فونت پالت را می‌خواند مگر اینکه خودش «فونت طرح» یا
+    «فونت سفارشی» را انتخاب کند.
+  - فونت پیش‌فرض پالت روی «وزیرمتن HSW» تنظیم شد تا ظاهر فعلی حفظ شود.
 
 = 1.11.79 =
 * **لیست فونت‌های المنتور در انتخابگر پالت.** فونت‌های آپلودی المنتور در
