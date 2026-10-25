@@ -927,6 +927,19 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->add_responsive_control(
+			'hd_actions_gap',
+			array(
+				'label'      => __( 'فاصلهٔ آیکن‌ها / اکشن‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-hd__actions' => 'gap: {{SIZE}}{{UNIT}};' ),
+				'separator'  => 'before',
+				'description' => __( 'فاصلهٔ بین آیکون‌های سبد، حساب، جستجو و برگر را تنظیم می‌کند؛ برای موبایل/تبلت/دسکتاپ جداگانه قابل تنظیم است.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_responsive_control(
 			'hd_align',
 			array(
 				'label'     => __( 'چیدمان افقی هدر', 'hamishop-elementor-widgets' ),

@@ -1220,3 +1220,14 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 ## صفحهٔ ورود
 - `HSW_Login` فقط وقتی `hsw_security[login_style] === 'yes'` فعال است؛ CSS را
   درون `wp-login.php` چاپ می‌کند و لوگوی فروشگاه را جای لوگوی وردپرس می‌گذارد.
+
+## ۱۳) فوتر چسبان و فونت سراسری
+
+- `HSW_Widget_Footer_Sticky` (`hsw-footer-sticky`) در دستهٔ `hamishop-header`؛
+  کلاس ریشه `.hsw-sf` با `z-index: 9000`. فهرست آیتم‌ها از `items` (Repeater)
+  می‌آید؛ آیکن‌ها با `HSW_Helpers::icon()` و از لیست انتخاب خود افزونه (کنترل
+  `ICONS` المنتور برای اسپرایت ما کار نمی‌کند).
+- فونت سراسری: `HSW_Palette::font_choices()` + `--hsw-font` روی `html:root`؛
+  ریشه‌های ویجت در `hsw-fonts.css` این متغیر را می‌خوانند.
+- هدر: کنترل‌های `hd_align` و `hd_actions_gap` (هر دو responsive) روی
+  `.hsw-hd__maininner` و `.hsw-hd__actions`.
