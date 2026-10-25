@@ -65,35 +65,6 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
                 $this->end_controls_section();
 
                 /*
-                 * The place-order button lives inside the summary widget, which sits in
-                 * this page — so the controls target it from here as well. Empty by
-                 * default: no CSS is emitted until a colour is chosen.
-                 */
-                $this->start_controls_section(
-                        'sec_page_buttons',
-                        array( 'label' => __( 'دکمه‌های سفارش', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
-                );
-
-                $this->a_color( 'po_bg', __( 'دکمهٔ «تکمیل سفارش» — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', 'background-color' );
-                $this->a_color( 'po_tx', __( 'دکمهٔ «تکمیل سفارش» — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta' );
-                $this->a_color( 'po_hover_bg', __( 'دکمهٔ «تکمیل سفارش» — پس‌زمینهٔ هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta:hover', 'background-color' );
-                $this->add_responsive_control(
-                        'po_radius',
-                        array(
-                                'label'      => __( 'گردی گوشه‌های دکمه', 'hamishop-elementor-widgets' ),
-                                'type'       => \Elementor\Controls_Manager::SLIDER,
-                                'size_units' => array( 'px' ),
-                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-csummary__cta' => 'border-radius: {{SIZE}}{{UNIT}};' ),
-                        )
-                );
-
-                $this->a_color( 'po_mbg', __( 'نوار پایین موبایل — پس‌زمینهٔ دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta', 'background-color' );
-                $this->a_color( 'po_mtx', __( 'نوار پایین موبایل — متن دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta' );
-
-                $this->end_controls_section();
-
-                /*
                  * One type scale for the whole page: the variables land on the wrapper and
                  * every child widget inherits them.
                  */
@@ -106,6 +77,83 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
                 		'button' => array( __( 'دکمه‌ها', 'hamishop-elementor-widgets' ), 14 ),
                 	)
                 );
+
+                /* ---- دکمه‌های سفارش (آخرین سکشن استایل) ---- */
+                $this->start_controls_section(
+                        'sec_order_buttons',
+                        array(
+                                'label' => __( 'دکمه‌های سفارش', 'hamishop-elementor-widgets' ),
+                                'tab'   => Controls_Manager::TAB_STYLE,
+                        )
+                );
+
+                $this->add_control(
+                        'ob_note',
+                        array(
+                                'type'            => \Elementor\Controls_Manager::RAW_HTML,
+                                'raw'             => '<small>' . esc_html__( 'رنگ‌ها خالی‌اند؛ تا رنگی انتخاب نکنید ظاهر فعلی دست‌نخورده می‌ماند.', 'hamishop-elementor-widgets' ) . '</small>',
+                                'content_classes' => 'elementor-descriptor',
+                        )
+                );
+
+                $this->add_control(
+                        'ob_bg',
+                        array(
+                                'label'     => __( 'دکمهٔ «تکمیل سفارش» — پس‌زمینه', 'hamishop-elementor-widgets' ),
+                                'type'      => \Elementor\Controls_Manager::COLOR,
+                                'selectors' => array( '{{WRAPPER}} .hsw-csummary__cta' => 'background-color: {{VALUE}} !important;' ),
+                        )
+                );
+
+                $this->add_control(
+                        'ob_tx',
+                        array(
+                                'label'     => __( 'دکمهٔ «تکمیل سفارش» — متن', 'hamishop-elementor-widgets' ),
+                                'type'      => \Elementor\Controls_Manager::COLOR,
+                                'selectors' => array( '{{WRAPPER}} .hsw-csummary__cta' => 'color: {{VALUE}} !important;' ),
+                        )
+                );
+
+                $this->add_control(
+                        'ob_hover_bg',
+                        array(
+                                'label'     => __( 'دکمهٔ «تکمیل سفارش» — پس‌زمینهٔ هاور', 'hamishop-elementor-widgets' ),
+                                'type'      => \Elementor\Controls_Manager::COLOR,
+                                'selectors' => array( '{{WRAPPER}} .hsw-csummary__cta:hover' => 'background-color: {{VALUE}} !important;' ),
+                        )
+                );
+
+                $this->add_responsive_control(
+                        'ob_radius',
+                        array(
+                                'label'      => __( 'گردی گوشه‌های دکمه', 'hamishop-elementor-widgets' ),
+                                'type'       => \Elementor\Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-csummary__cta' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->add_control(
+                        'ob_mbg',
+                        array(
+                                'label'     => __( 'نوار پایین موبایل — پس‌زمینهٔ دکمه', 'hamishop-elementor-widgets' ),
+                                'type'      => \Elementor\Controls_Manager::COLOR,
+                                'separator' => 'before',
+                                'selectors' => array( '{{WRAPPER}} .hsw-csummary__mcta' => 'background-color: {{VALUE}} !important;' ),
+                        )
+                );
+
+                $this->add_control(
+                        'ob_mtx',
+                        array(
+                                'label'     => __( 'نوار پایین موبایل — متن دکمه', 'hamishop-elementor-widgets' ),
+                                'type'      => \Elementor\Controls_Manager::COLOR,
+                                'selectors' => array( '{{WRAPPER}} .hsw-csummary__mcta' => 'color: {{VALUE}} !important;' ),
+                        )
+                );
+
+                $this->end_controls_section();
         }
 
         /**
