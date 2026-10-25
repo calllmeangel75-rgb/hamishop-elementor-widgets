@@ -1185,3 +1185,38 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 - `showToast()` اول toast داخل ویجت (نوار چسبان) را امتحان می‌کند و اگر دیده نشود
   (`offsetParent === null`) به toast سراسری می‌افتد.
 - بعد از اعمال fragmentها، کلاس `is-empty` روی `.hsw-hd__cart` با `data-count` همگام می‌شود.
+
+---
+
+# 12) قراردادهای جدید (۱.۱۱.۵۱ تا ۱.۱۱.۶۹)
+
+## تب‌های محصول — یک نوار برای همه
+- کلاس `hsw-ptabs` دیگر `hsw-d` ندارد؛ موبایل و دسکتاپ همان تب‌ها را می‌بینند.
+- ساختار: `.hsw-ptabs__navwrap > .hsw-ptabs__nav[data-hsw-tabs-scroll]` + دکمهٔ
+  `[data-hsw-tabs-more]`. تب فعال `[data-hsw-tab]` با `is-active` و پنل
+  `[data-hsw-panel]` هم‌نام.
+- JS: `initTabs()` در `init()` صدا زده می‌شود؛ کلاس `is-scrollable` روی
+  `navwrap` و `is-off` روی نشانگر.
+
+## شیت خرید موبایل
+- بعد از افزودن، `[data-hsw-sheet]` ساخته می‌شود (فقط `max-width: 767.98px`).
+- هدر: `.hsw-sheet__state` (ضربدر + «کالا اضافه شد») راست، `.hsw-sheet__cart` چپ.
+- لیست: `.hsw-sheet__list > a.hsw-sheet__card` (تصویر، نام، قیمت) — بدون دکمهٔ افزودن.
+- `z-index`: شیت ۹۹۹۰ و نوار خرید `.hsw-psticky` ۹۹۹۵ تا استپر بالای شیت بماند.
+
+## آیکون‌ها
+- `HSW_Helpers::icon( $name )` یک `<svg class="hsw-ic"><use href="#hsw-i-…">` می‌دهد.
+- اسپرایت per-request است: فقط آیکون‌های همان صفحه چاپ می‌شوند.
+- آیکون‌های Iconsax (خطی، ۲۴×۲۴) در `includes/class-hsw-icon-raw.php` هستند و
+  با `stroke="currentColor"` رنگ می‌گیرند؛ بقیه از جدول مسیر Material می‌آیند.
+- پنل حساب نقشهٔ آیکون مستقل خودش را در `HSW_Account::icon()` دارد (همان چهار
+  آیکون آنجا هم Iconsax شده‌اند).
+
+## صفحه‌بندی
+- `HSW_Pagination::render()` markup تولید می‌کند: `.hsw-pg > .hsw-pg__arrow` +
+  `.hsw-pg__track > .hsw-pg__pill + .hsw-pg__num`.
+- روی `woocommerce_after_shop_loop` جای صفحه‌بندی ووکامرس را می‌گیرد.
+
+## صفحهٔ ورود
+- `HSW_Login` فقط وقتی `hsw_security[login_style] === 'yes'` فعال است؛ CSS را
+  درون `wp-login.php` چاپ می‌کند و لوگوی فروشگاه را جای لوگوی وردپرس می‌گذارد.
