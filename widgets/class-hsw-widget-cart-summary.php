@@ -401,8 +401,8 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 $this->a_color( 'sm_mfree', __( 'متن برچسب رایگان (موبایل)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mbadge' );
                 $this->a_color( 'sm_final', __( 'مبلغ نهایی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__final-v, {{WRAPPER}} .hsw-csummary__mtotal-v' );
 
-                $this->a_color( 'cta_bg', __( 'پس‌زمینه دکمه پرداخت (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', 'background-color' );
-                $this->a_color( 'cta_tx', __( 'متن دکمه پرداخت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta' );
+                $this->a_color( 'cta_bg', __( 'پس‌زمینهٔ دکمهٔ «تکمیل سفارش» (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-bg' );
+                $this->a_color( 'cta_tx', __( 'متن دکمهٔ «تکمیل سفارش»', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-tx' );
                 $this->add_responsive_control(
                         'cta_br',
                         array(

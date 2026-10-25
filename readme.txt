@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.80
+Stable tag: 1.11.81
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.81 =
+* **پایلوت «رنگ دکمه‌های مستقل» روی ویجت خلاصهٔ سبد خرید.**
+  - دکمهٔ «تکمیل سفارش و ثبت آدرس» حالا متغیر اختصاصی خودش را دارد
+    (`--hsw-cs-cta-bg` / `--hsw-cs-cta-tx`) با فالبک به توکن CTA پالت؛
+    کنترل‌های ویجت هم به همین متغیرها وصل شدند، پس دیگر رنگ پالت رویش
+    اثر نمی‌گذارد و برعکس.
+  - این اولین ویجت از برنامهٔ «تفکیک رنگ دکمه‌ها، ویجت به ویجت» است.
 
 = 1.11.80 =
 * **فونت پالت حالا پیش‌فرض همهٔ ویجت‌هاست.**
