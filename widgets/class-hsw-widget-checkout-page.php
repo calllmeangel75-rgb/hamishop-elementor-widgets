@@ -69,6 +69,32 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
                 $this->end_controls_section();
 
                 /*
+                 * «ثبت سفارش» is WooCommerce's own #place_order — the theme styles it, so
+                 * these controls stay empty by default and only emit CSS when a colour is
+                 * picked (no visual change out of the box).
+                 */
+                $this->start_controls_section(
+                        'sec_place_order',
+                        array( 'label' => __( 'دکمهٔ ثبت سفارش (ووکامرس)', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->a_color( 'po_bg', __( 'پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} #place_order', 'background-color' );
+                $this->a_color( 'po_tx', __( 'متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} #place_order' );
+                $this->a_color( 'po_hover_bg', __( 'پس‌زمینهٔ هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} #place_order:hover', 'background-color' );
+                $this->add_responsive_control(
+                        'po_radius',
+                        array(
+                                'label'      => __( 'گردی گوشه‌ها', 'hamishop-elementor-widgets' ),
+                                'type'       => \Elementor\Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'selectors'  => array( '{{WRAPPER}} #place_order' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->end_controls_section();
+
+                /*
                  * One type scale for the whole page: the variables land on the wrapper and
                  * every child widget inherits them.
                  */
