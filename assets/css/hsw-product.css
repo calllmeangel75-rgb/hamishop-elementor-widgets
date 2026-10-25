@@ -1287,15 +1287,19 @@
 .hsw-psticky__qbtn--del:disabled { opacity: .35; }
 
 /*
- * Quantity 1: nothing to decrease, so the bin takes the minus's place. The
- * markup carries both buttons and the class decides which one is visible —
- * cheaper than re-rendering the row on every tap.
+ * Sticky bar: always show «−». The bin used to replace the minus at quantity 1
+ * and, because `is-min` went stale after an AJAX update, it stayed visible at
+ * quantity 6 and wiped the whole line. The minus now decrements and the server
+ * removes the line when it reaches zero.
  */
-.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--minus { display: none; }
-.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--del { display: flex; }
+.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--minus { display: flex; }
+.hsw-psticky__stepper .hsw-psticky__qbtn--del { display: none !important; }
+
+/* In cart → the stepper replaces the buy button instead of sitting beside it. */
+.hsw-psticky:not(.is-not-in-cart) .hsw-psticky__cart { display: none !important; }
 .hsw-psticky__qbtn:hover { background: var(--hsw-surface-c); }
 .hsw-psticky__qbtn:active { transform: scale(.9); }
-.hsw-psticky__qbtn .hsw-ic { font-size: 18px !important; }
+.hsw-psticky__qbtn .hsw-ic { font-size: 18px; }
 /* Two classes + an explicit basis: the theme's `input[type="text"]{width:100%}`
    used to stretch this to 310px and squeeze the buy button to 16px. */
 .hsw-psticky .hsw-psticky__qval {

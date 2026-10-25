@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.93
+Stable tag: 1.11.94
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.94 =
+* **نوار خرید چسبان موبایل: استپر درست شد.**
+  - دکمهٔ «−» همیشه نمایش داده می‌شود و سبد‌خالی‌کن (bin) هرگز جای آن را
+    نمی‌گیرد. علت باگ: کلاس `is-min` بعد از به‌روزرسانی AJAX کهنه می‌ماند و در
+    تعداد ۶ هم bin می‌ماند که کل خط را حذف می‌کرد.
+  - وقتی محصول در سبد است، دکمهٔ «خرید آنلاین» در همان نوار **مخفی** می‌شود و
+    فقط استپر می‌ماند (مثل طرح مرجع).
+  - `font-size` آیکون استپر بدون `!important`.
 
 = 1.11.93 =
 * **B1 — سقف تعداد سمت سرور.**
