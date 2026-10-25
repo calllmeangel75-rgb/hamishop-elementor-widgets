@@ -61,6 +61,7 @@ class HSW_Palette {
 			'cta'          => array( __( 'CTA مراحل خرید', 'hamishop-elementor-widgets' ), '#0f2042', __( 'دکمه‌های «ادامه و پرداخت» در سبد خرید، تسویه حساب و پرداخت', 'hamishop-elementor-widgets' ) ),
 			'cta_hover'    => array( __( 'CTA مراحل خرید (هاور)', 'hamishop-elementor-widgets' ), '#1c3566', __( 'رنگ دکمه‌های خرید هنگام نگه‌داشتن ماوس', 'hamishop-elementor-widgets' ) ),
 			'cta_active'   => array( __( 'CTA مراحل خرید (کلیک)', 'hamishop-elementor-widgets' ), '#0a1730', __( 'رنگ دکمه‌های خرید در لحظهٔ کلیک', 'hamishop-elementor-widgets' ) ),
+			'cta_text'     => array( __( 'متن روی دکمه‌های خرید', 'hamishop-elementor-widgets' ), '#ffffff', __( 'رنگ نوشتهٔ دکمه‌های «ادامه، پرداخت و تکمیل سفارش»', 'hamishop-elementor-widgets' ) ),
 			'text'         => array( __( 'رنگ متن', 'hamishop-elementor-widgets' ), '#191c1e', __( 'متن اصلی', 'hamishop-elementor-widgets' ) ),
 			'muted'        => array( __( 'متن کم‌رنگ', 'hamishop-elementor-widgets' ), '#75777f', __( 'توضیحات، متادیتا', 'hamishop-elementor-widgets' ) ),
 			'border'       => array( __( 'رنگ حاشیه', 'hamishop-elementor-widgets' ), '#e1e2e4', __( 'خطوط و کادرها', 'hamishop-elementor-widgets' ) ),
@@ -230,7 +231,7 @@ class HSW_Palette {
 			'--hsw-cta'                => $p['cta'],
 			'--hsw-cta-hover'          => $p['cta_hover'],
 			'--hsw-cta-active'         => $p['cta_active'],
-			'--hsw-on-cta'             => '#ffffff',
+			'--hsw-on-cta'             => ( $p['cta_text'] ?? '#ffffff' ),
 
 			'--hsw-pal-surface'        => $p['surface'],
 			'--hsw-pal-surface-alt'    => $p['surface_alt'],

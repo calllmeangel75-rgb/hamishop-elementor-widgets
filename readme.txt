@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.87
+Stable tag: 1.11.88
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.88 =
+* **پالت رنگی: توکن «متن روی دکمه‌های خرید».**
+  - تا امروز رنگ متن دکمه‌های خرید در کد **سفید ثابت** بود (`--hsw-on-cta`).
+    حالا یک ردیف مستقل در پالت اضافه شده و همان متغیر را می‌نویسد، پس رنگ
+    نوشتهٔ دکمه‌های «ادامه، پرداخت و تکمیل سفارش» از پیشخوان قابل تغییر است.
+  - پیش‌فرض همان سفید است؛ ظاهر فعلی عوض نمی‌شود.
 
 = 1.11.87 =
 * **سکشن «دکمه‌های سفارش» در ویجت «صفحهٔ کامل سبد خرید» بازسازی شد.**
