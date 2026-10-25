@@ -450,6 +450,14 @@
 			r.setAttribute('data-hsw-in-cart', inCart ? String(n) : '0');
 			/* A page cached before the first add may carry a disabled bin. */
 			r.querySelectorAll('[data-hsw-del][disabled]').forEach(function (b) { b.removeAttribute('disabled'); });
+			/*
+			 * The bin replaces the minus at quantity 1 only. This class used to be
+			 * rendered server-side and never updated, so the bin stayed at 6 and
+			 * removed the whole line.
+			 */
+			r.querySelectorAll('.hsw-psticky__stepper').forEach(function (st) {
+				st.classList.toggle('is-min', n <= 1);
+			});
 		});
 	}
 

@@ -665,7 +665,8 @@
 
 /* The stepper only exists once the product is really in the cart. */
 .hsw-ppurch.is-not-in-cart .hsw-ppurch__qty--inline,
-.hsw-psticky.is-not-in-cart .hsw-psticky__stepper { display: none !important; }
+.hsw-psticky.is-not-in-cart .hsw-psticky__stepper {
+	height: 44px; display: none !important; }
 /* Two classes: themes ship `input[type="text"] { width: 100% }` and win otherwise. */
 .hsw-ppurch .hsw-ppurch__qval {
         width: 2.25rem; flex: 0 0 2.25rem; min-width: 0; text-align: center;
@@ -1256,23 +1257,24 @@
 .hsw-psticky__prow { display: flex; align-items: baseline; gap: 4px; }
 .hsw-psticky__pval { font-size: 20px; line-height: 28px; font-weight: 800; color: var(--hsw-price-c, var(--hsw-primary)); letter-spacing: -.02em; }
 .hsw-psticky__unit { font-size: 11px; line-height: 16px; color: var(--hsw-on-surface-variant); }
-.hsw-psticky__side { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
+.hsw-psticky__side { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; justify-content: flex-end; order: 1; }
+.hsw-psticky__price { order: 2; }
 .hsw-psticky__stepper {
         display: flex;
         align-items: center;
         flex: 0 0 auto;
         gap: 2px;
         border: 1px solid var(--hsw-outline-variant);
-        border-radius: 12px;
+        border-radius: 14px;
         background: var(--hsw-surface-lowest);
-        height: 44px;
-        padding-inline: 4px;
+        height: 48px;
+        padding-inline: 6px;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .05);
         flex-shrink: 0;
 }
 .hsw-psticky__qbtn {
-        width: 32px;
-        height: 32px;
+        width: 38px;
+        height: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1287,24 +1289,24 @@
 .hsw-psticky__qbtn--del:disabled { opacity: .35; }
 
 /*
- * Sticky bar: always show «−». The bin used to replace the minus at quantity 1
- * and, because `is-min` went stale after an AJAX update, it stayed visible at
- * quantity 6 and wiped the whole line. The minus now decrements and the server
- * removes the line when it reaches zero.
+ * Quantity 1: the minus has nothing to do, so the bin takes its place — that is
+ * the designed behaviour. It used to stick at quantity 6 because `is-min` was
+ * only rendered server-side; hsw-product.js now toggles it after every AJAX
+ * update, so the bin only ever appears at 1.
  */
-.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--minus { display: flex; }
-.hsw-psticky__stepper .hsw-psticky__qbtn--del { display: none !important; }
+.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--minus { display: none; }
+.hsw-psticky__stepper.is-min .hsw-psticky__qbtn--del { display: flex; }
 
 /* In cart → the stepper replaces the buy button instead of sitting beside it. */
 .hsw-psticky:not(.is-not-in-cart) .hsw-psticky__cart { display: none !important; }
 .hsw-psticky__qbtn:hover { background: var(--hsw-surface-c); }
 .hsw-psticky__qbtn:active { transform: scale(.9); }
-.hsw-psticky__qbtn .hsw-ic { font-size: 18px; }
+.hsw-psticky__qbtn .hsw-ic { font-size: 20px; }
 /* Two classes + an explicit basis: the theme's `input[type="text"]{width:100%}`
    used to stretch this to 310px and squeeze the buy button to 16px. */
 .hsw-psticky .hsw-psticky__qval {
-        width: 2rem; flex: 0 0 2rem; min-width: 0;
-        text-align: center; font-weight: 700; font-size: 14px; line-height: 22px;
+        width: 2.5rem; flex: 0 0 2.5rem; min-width: 0;
+        text-align: center; font-weight: 700; font-size: 15px; line-height: 24px;
         border: 0 !important; padding: 0; background: transparent; color: inherit; font-family: inherit;
         box-shadow: none;
         appearance: textfield; -moz-appearance: textfield; border-radius: 6px; cursor: text;

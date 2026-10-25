@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.94
+Stable tag: 1.11.95
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.95 =
+* **نوار خرید چسبان: bin در تعداد ۱، استپر بزرگ‌تر، جابه‌جایی با قیمت.**
+  - در تعداد ۱ دکمهٔ سطل زباله جای «−» می‌آید (طرح اصلی) و با حذف، دکمهٔ
+    «خرید آنلاین» برمی‌گردد. باگ قبلی از کهنه‌ماندن `is-min` بود؛ حالا JS بعد از
+    هر به‌روزرسانی آن را ست می‌کند، پس bin هرگز در تعداد ۶ نمی‌ماند.
+  - استپر بزرگ‌تر: ارتفاع ۴۸px، دکمه‌ها ۳۸px، آیکون ۲۰px، فیلد عدد ۲.۵rem/۱۵px.
+  - جای استپر و قیمت عوض شد: استپر سمت راست (شروع RTL)، قیمت و تخفیف سمت چپ.
 
 = 1.11.94 =
 * **نوار خرید چسبان موبایل: استپر درست شد.**
