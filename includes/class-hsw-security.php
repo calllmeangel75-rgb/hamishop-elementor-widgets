@@ -408,6 +408,8 @@ class HSW_Security {
 			'hide_wp_logo'     => 'no',
 			'block_external'   => 'no',
 			'block_hosts'      => '',
+			/* Custom wp-login screen — off until ticked. */
+			'login_style'      => 'no',
 		);
 	}
 
@@ -1037,6 +1039,7 @@ class HSW_Security {
 				'hide_wp_logo'     => ( 'yes' === ( $in['hide_wp_logo'] ?? '' ) ) ? 'yes' : 'no',
 				'block_external'   => ( 'yes' === ( $in['block_external'] ?? '' ) ) ? 'yes' : 'no',
 				'block_hosts'      => HSW_Request_Blocker::sanitize_hosts( $in['block_hosts'] ?? '' ),
+				'login_style'      => ( 'yes' === ( $in['login_style'] ?? '' ) ) ? 'yes' : 'no',
 			),
 			false
 		);
@@ -1201,6 +1204,20 @@ class HSW_Security {
 							</label>
 							<p class="description">
 								<?php esc_html_e( 'فقط آیکن و منوی «وردپرس» از نوار ادمین حذف می‌شود؛ روی سایت اثری ندارد.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+						</td>
+					</tr>
+
+					<tr>
+						<th scope="row"><?php esc_html_e( 'صفحهٔ ورود سفارشی', 'hamishop-elementor-widgets' ); ?></th>
+						<td>
+							<label>
+								<input type="hidden" name="hsw_security[login_style]" value="no" />
+								<input type="checkbox" name="hsw_security[login_style]" value="yes" <?php checked( 'yes', $s['login_style'] ); ?> />
+								<?php esc_html_e( 'استفاده از صفحهٔ ورود شیشه‌ای با گرادیانت آبی', 'hamishop-elementor-widgets' ); ?>
+							</label>
+							<p class="description">
+								<?php esc_html_e( 'لوگوی وردپرس حذف می‌شود و فرم ورود به‌صورت کارت گلس‌مورفیسم روی گرادیانت آبی با انیمیشن ملایم نمایش داده می‌شود. فقط روی صفحهٔ wp-login اثر دارد و هیچ فایل اضافه‌ای لود نمی‌کند.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 						</td>
 					</tr>
