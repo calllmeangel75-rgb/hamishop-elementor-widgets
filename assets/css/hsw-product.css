@@ -1257,8 +1257,19 @@
 .hsw-psticky__prow { display: flex; align-items: baseline; gap: 4px; }
 .hsw-psticky__pval { font-size: 20px; line-height: 28px; font-weight: 800; color: var(--hsw-price-c, var(--hsw-primary)); letter-spacing: -.02em; }
 .hsw-psticky__unit { font-size: 11px; line-height: 16px; color: var(--hsw-on-surface-variant); }
-.hsw-psticky__side { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; justify-content: flex-end; order: 1; }
-.hsw-psticky__price { order: 2; }
+/* Width split requested by the client: side (stepper + buy) 50%, price 45%. */
+.hsw-psticky__side {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 0 0 50%;
+	max-width: 50%;
+	min-width: 0;
+	justify-content: flex-end;
+	order: 1;
+}
+.hsw-psticky__price { order: 2; flex: 0 0 45%; max-width: 45%; min-width: 0; }
+.hsw-psticky__main { gap: 5%; }
 .hsw-psticky__stepper {
         display: flex;
         align-items: center;
