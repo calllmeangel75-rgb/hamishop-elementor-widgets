@@ -541,15 +541,17 @@ class HSW_Assets {
                         true
                 );
 
-                wp_localize_script(
-                        'hsw-loop',
-                        'hswData',
-                        array(
-                                'wcAjax'    => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
-                                'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
-                                'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
-                        )
+                /*
+                 * wp_localize_script() **enqueues** the handle, which pulled
+                 * hsw-loop.js into every page of the site. An inline script only
+                 * attaches to the handle and prints when the widget enqueues it.
+                 */
+                $hsw_data = array(
+                        'wcAjax'    => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
+                        'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
+                        'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
                 );
+                wp_add_inline_script( 'hsw-loop', 'window.hswData=' . wp_json_encode( $hsw_data ) . ';', 'before' );
 
                 wp_localize_script(
                         'hsw-product',

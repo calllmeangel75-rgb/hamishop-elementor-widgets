@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.90
+Stable tag: 1.11.91
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.91 =
+* **hsw-loop دیگر در همهٔ صفحات لود نمی‌شود.**
+  - `wp_localize_script( 'hsw-loop', … )` خودش handle را enqueue می‌کرد؛ به
+    `wp_add_inline_script` تغییر کرد تا داده فقط وقتی ویجت لوپ روی صفحه است چاپ
+    شود. (پس از این تغییر، اگر هنوز hsw-loop دیده می‌شود یعنی ویجت لوپ در
+    قالب هدر/فوتر سایت وجود دارد.)
 
 = 1.11.90 =
 * **مرحلهٔ A (سه اصلاح کم‌ریسک).**
