@@ -1265,10 +1265,25 @@
 	flex: 0 0 50%;
 	max-width: 50%;
 	min-width: 0;
-	justify-content: flex-end;
+	justify-content: stretch;
 	order: 1;
 }
-.hsw-psticky__price { order: 2; flex: 0 0 45%; max-width: 45%; min-width: 0; }
+/* The stepper fills the whole 50% instead of hugging its content. */
+.hsw-psticky__side > .hsw-psticky__stepper,
+.hsw-psticky__side > .hsw-psticky__cart { flex: 1 1 auto; width: 100%; }
+.hsw-psticky__stepper { justify-content: space-between; }
+.hsw-psticky__stepper .hsw-psticky__qbtn { width: 42px; height: 42px; }
+.hsw-psticky__stepper .hsw-psticky__qval { flex: 1 1 auto; width: auto; }
+
+/* Price block sits on the physical left edge (cross-end in RTL). */
+.hsw-psticky__price {
+	order: 2;
+	flex: 0 0 45%;
+	max-width: 45%;
+	min-width: 0;
+	align-items: flex-end;
+	text-align: left;
+}
 .hsw-psticky__main { gap: 5%; }
 .hsw-psticky__stepper {
         display: flex;

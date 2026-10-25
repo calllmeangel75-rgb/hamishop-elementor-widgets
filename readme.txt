@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.96
+Stable tag: 1.11.97
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.97 =
+* **نوار چسبان: استپر تمام‌عرض و قیمت در لبهٔ چپ.**
+  - استپر و دکمهٔ خرید کل ۵۰٪ را پر می‌کنند (`flex:1 1 auto; width:100%`) و
+    محتوای استپر با `space-between` پخش می‌شود؛ دکمه‌ها ۴۲px.
+  - بلوک قیمت/تخفیف با `align-items:flex-end` و `text-align:left` به لبهٔ چپ
+    می‌چسبد (در RTL یعنی انتهای محور).
 
 = 1.11.96 =
 * **نوار خرید چسبان: تقسیم عرض ۵۰٪ / ۴۵٪.**
