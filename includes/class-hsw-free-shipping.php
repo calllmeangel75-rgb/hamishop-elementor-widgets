@@ -22,8 +22,30 @@ class HSW_Free_Shipping {
 
 	const OPTION = 'hsw_free_shipping_min';
 
+	/**
+	 * Master switch. Off by default: most stores already configured free
+	 * shipping inside WooCommerce's own zones, and this filter rewrites the
+	 * final rates (it would override weight / shipping-class conditions).
+	 */
+	const ENABLED = 'hsw_free_shipping_on';
+
 	public function __construct() {
+		if ( ! self::is_enabled() ) {
+			return;
+		}
+
 		add_filter( 'woocommerce_package_rates', array( $this, 'apply' ), 20, 2 );
+	}
+
+	/**
+	 * Whether the plugin may touch the shipping rates at all.
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled() {
+		$on = 'yes' === get_option( self::ENABLED, 'no' );
+
+		return (bool) apply_filters( 'hsw_free_shipping_enabled', $on );
 	}
 
 	/**

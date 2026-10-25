@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.98
+Stable tag: 1.11.99
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.99 =
+* **ارسال رایگان افزونه حالا کلید خاموش/روشن دارد و پیش‌فرض خاموش است.**
+  - آپشن جدید `hsw_free_shipping_on` (پیش‌فرض `no`) + فیلتر
+    `hsw_free_shipping_enabled`. تا روشن نشود، فیلتر
+    `woocommerce_package_rates` اصلاً ثبت نمی‌شود؛ یعنی نرخ‌ها، کلاس‌های ارسال،
+    وزن و شرط‌های متدهای ووکامرس دست‌نخورده می‌مانند.
+  - کلید در «کنترل ویجت‌ها» بالای فیلدهای صفحهٔ ۴۰۴ اضافه شد.
 
 = 1.11.98 =
 * **یکدست‌سازی رویداد سبد در صفحهٔ محصول.**

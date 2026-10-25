@@ -707,6 +707,17 @@ final class HSW_Widget_Manager {
 
 		register_setting(
 			'hsw_widgets_group',
+			HSW_Free_Shipping::ENABLED,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_yes_no' ),
+				'default'           => 'no',
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_setting(
+			'hsw_widgets_group',
 			HSW_Free_Shipping::OPTION,
 			array(
 				'type'              => 'number',
@@ -1118,6 +1129,19 @@ final class HSW_Widget_Manager {
 										<span class="hsw-wm-track" aria-hidden="true"></span>
 									</span>
 								</label>
+
+								<div class="hsw-wm-row hsw-wm-row--field">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'ارسال رایگان افزونه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پیش‌فرض خاموش است. اگر روش ارسال رایگان را در ووکامرس تنظیم کرده‌اید، خاموش بگذارید تا افزونه نرخ‌ها را بازنویسی نکند.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-field">
+										<label>
+											<input type="checkbox" name="<?php echo esc_attr( HSW_Free_Shipping::ENABLED ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Free_Shipping::ENABLED, 'no' ) ); ?> />
+											<?php esc_html_e( 'فعال باشد', 'hamishop-elementor-widgets' ); ?>
+										</label>
+									</span>
+								</div>
 
 								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
