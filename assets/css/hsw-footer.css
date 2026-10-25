@@ -9,14 +9,14 @@
 
 /* =========================================================================
  * Sticky footer bar (HSW_Widget_Footer_Sticky) — scoped under .hsw-sf.
- * z-index 9000: below the add-to-cart sheet (9990) and the product purchase
- * bar (9995), so it never covers them.
+ * z-index 90: below the header (100) and therefore below the mobile drawer,
+ * which lives inside the header's stacking context. Content sits at auto/0.
  * ====================================================================== */
 .hsw-sf {
 	position: fixed;
 	inset-inline: 0;
 	bottom: 0;
-	z-index: 8000;
+	z-index: 90;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -80,5 +80,8 @@
 @media (prefers-reduced-motion: reduce) {
 	.hsw-sf__item, .hsw-sf__ic { transition: none; }
 
-/* Hidden while the mobile drawer is open (drawer z-index is 10000). */
-html.hsw-hd-lock .hsw-sf { display: none; }
+/*
+ * While the drawer is open the bar stays mounted but underneath it — the drawer
+ * paints in the header's stacking context (z-index 100), the bar at 90.
+ * No display:none, so there is no layout jump when it closes.
+ */

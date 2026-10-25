@@ -204,11 +204,11 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			array(
 				'label'       => __( 'لایه (z-index)', 'hamishop-elementor-widgets' ),
 				'type'        => Controls_Manager::NUMBER,
-				'default'     => 8000,
+				'default'     => 90,
 				'min'         => 1,
 				'max'         => 99999,
 				'selectors'   => array( '{{WRAPPER}} .hsw-sf' => 'z-index: {{VALUE}};' ),
-				'description' => __( 'پیش‌فرض ۸۰۰۰ است؛ کمتر از منوی موبایل هدر (۱۰۰۰۰) تا منو روی فوتر باز شود.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'پیش‌فرض ۹۰ است تا همیشه زیر هدر و منوی موبایل بماند (هدر ۱۰۰).', 'hamishop-elementor-widgets' ),
 			)
 		);
 

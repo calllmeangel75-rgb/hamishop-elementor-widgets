@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.100
+Stable tag: 1.11.101
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.101 =
+* **فوتر چسبان حالا زیر منوی موبایل می‌نشیند (پیش‌فرض).**
+  - `z-index` پیش‌فرض از ۸۰۰۰ به **۹۰** آمد؛ هدر ۱۰۰ است و منوی موبایل داخل
+    همان stacking context رندر می‌شود، پس منو همیشه روی فوتر می‌افتد.
+  - قاعدهٔ `html.hsw-hd-lock .hsw-sf { display:none }` حذف شد؛ حالا فوتر هنگام
+    باز بودن منو حذف نمی‌شود، فقط **زیر** آن می‌ماند (بدون پرش چیدمان).
 
 = 1.11.100 =
 * **قلب علاقه‌مندی‌ها دیگر محو نمی‌شود و قرمز پر می‌شود.**
