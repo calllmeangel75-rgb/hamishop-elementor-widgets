@@ -422,6 +422,13 @@ class HSW_Assets {
                 );
 
                 wp_register_style(
+                        'hsw-footer',
+                        $this->asset( 'assets/css/hsw-footer.css' ),
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_style(
                         'hsw-cart',
                         $this->asset( 'assets/css/hsw-cart.css' ),
                         array( 'hsw-fonts' ),

@@ -41,6 +41,24 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 	}
 
 	/**
+	 * Only the shared font base + its own stylesheet — hsw-loop is not needed.
+	 *
+	 * @return array
+	 */
+	public function get_style_depends() {
+		return array( 'hsw-fonts', 'hsw-footer' );
+	}
+
+	/**
+	 * The bar is pure CSS (no JS).
+	 *
+	 * @return array
+	 */
+	public function get_script_depends() {
+		return array();
+	}
+
+	/**
 	 * Default items: the five shortcuts the shop needs.
 	 *
 	 * @return array
@@ -407,8 +425,17 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			if ( 'none' === $icon ) {
 				$icon = '';
 			}
-			$target = ! empty( $item['new_tab'] ) && 'yes' === $item['new_tab'] ? ' target="_blank" rel="noopener"' : '';
-			$rel    = ( ! empty( $item['nofollow'] ) && 'yes' === $item['nofollow'] ) ? ' rel="nofollow"' : '';
+			/* One rel attribute only: noopener for _blank, nofollow on demand. */
+			$new_tab = ! empty( $item['new_tab'] ) && 'yes' === $item['new_tab'];
+			$rels    = array();
+			if ( $new_tab ) {
+				$rels[] = 'noopener';
+			}
+			if ( ! empty( $item['nofollow'] ) && 'yes' === $item['nofollow'] ) {
+				$rels[] = 'nofollow';
+			}
+			$target = $new_tab ? ' target="_blank"' : '';
+			$rel    = $rels ? ' rel="' . esc_attr( implode( ' ', $rels ) ) . '"' : '';
 
 			echo '<a class="hsw-sf__item" href="' . esc_url( $url ? $url : '#' ) . '"' . $target . $rel . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- attributes are literals.
 			if ( 'before' === $pos && '' !== $icon ) {

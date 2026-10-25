@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.89
+Stable tag: 1.11.90
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,19 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.90 =
+* **مرحلهٔ A (سه اصلاح کم‌ریسک).**
+  - **A1 فوتر:** به‌جای دو صفت `rel`، یک صفت ساخته می‌شود (`noopener` برای تب
+    جدید، `nofollow` در صورت نیاز) — HTML معتبر.
+  - **A2 آیکون‌ها:** `font-size !important` از `.hsw-ptrust__ic`، `.hsw-pfeat__ic`
+    و `.hsw-pacc__title .hsw-ic` برداشته شد؛ اندازهٔ پیش‌فرض همان ۲۶/۱۸/۲۰px
+    ماند (تست computed style: بدون `!important`).
+  - **A3 فوتر:** استایل `.hsw-sf*` از `hsw-fonts.css` به `assets/css/hsw-footer.css`
+    منتقل و در `HSW_Assets` ثبت شد؛ ویجت `get_style_depends()` = `hsw-fonts` +
+    `hsw-footer` گرفت (دیگر `hsw-loop` ارث نمی‌برد). `!important` رنگ لینک
+    برداشته شد و به `var(--hsw-sf-c, …)` / `var(--hsw-sf-c-hover, …)` تبدیل شد
+    تا کنترل‌های `link_c` / `link_hover_c` اثر کنند.
 
 = 1.11.89 =
 * **پالت: توکن مستقل برای دکمه‌های ووکامرس و دکمه‌های معمولی.**
