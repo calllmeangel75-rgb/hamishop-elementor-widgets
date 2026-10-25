@@ -824,7 +824,7 @@ ul.products.is-pg-leaving,
 	position: fixed;
 	inset-inline: 0;
 	bottom: 0;
-	z-index: 9000;
+	z-index: 8000;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -889,6 +889,12 @@ ul.products.is-pg-leaving,
 	.hsw-sf__item, .hsw-sf__ic { transition: none; }
 }
 
-/* Global font from HamiShop → پالت رنگی (--hsw-font). Widget controls win. */
+/* Global font from HamiShop → پالت رنگی (--hsw-font).
+   The Elementor wrapper is the one element every instance has, so this catches
+   all widgets (the inner root class differed from widget to widget). */
+.elementor-widget[class*="elementor-widget-hsw-"],
+.elementor-widget[class*="elementor-widget-hsw-"] :where(h1,h2,h3,h4,h5,h6,p,span,a,button,input,select,textarea,li,strong,small,label,div) {
+	font-family: var(--hsw-font, inherit);
+}
 .hsw-h, .hsw-p, .hsw-ac, .hsw-loop, .hsw-sf, .hsw-ptabs, .hsw-ap,
 .hsw-sheet, .hsw-pg, .hsw-404 { font-family: var(--hsw-font, inherit); }

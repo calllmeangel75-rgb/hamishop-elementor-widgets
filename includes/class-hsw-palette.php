@@ -102,6 +102,24 @@ class HSW_Palette {
 	 *
 	 * @return array<string,string>
 	 */
+	/**
+	 * Turn the saved family into a valid CSS value: a stack stays as-is, a bare
+	 * name with spaces gets quoted (`Vazirmatn HSW` → `"Vazirmatn HSW"`).
+	 *
+	 * @param string $font Saved value.
+	 * @return string
+	 */
+	public static function font_css( $font ) {
+		$font = trim( (string) $font );
+		if ( '' === $font ) {
+			return 'inherit';
+		}
+		if ( false !== strpos( $font, ',' ) || '"' === $font[0] || "'" === $font[0] ) {
+			return $font;
+		}
+		return '"' . $font . '"';
+	}
+
 	public static function font_choices() {
 		$choices = array(
 			''              => __( 'پیش‌فرض قالب', 'hamishop-elementor-widgets' ),
@@ -134,7 +152,15 @@ class HSW_Palette {
 		$saved = is_array( $saved ) ? $saved : array();
 		$out   = self::defaults();
 
+		/* The font is a family name, not a colour — keep it out of the hex loop. */
+		if ( isset( $saved['font'] ) && is_string( $saved['font'] ) ) {
+			$out['font'] = sanitize_text_field( $saved['font'] );
+		}
+
 		foreach ( $out as $key => $default ) {
+			if ( 'font' === $key ) {
+				continue;
+			}
 			if ( isset( $saved[ $key ] ) && is_string( $saved[ $key ] ) ) {
 				$color = sanitize_hex_color( $saved[ $key ] );
 				if ( $color ) {
@@ -197,7 +223,7 @@ class HSW_Palette {
 			'--hsw-pal-accent-soft'    => 'color-mix(in srgb, ' . $p['accent'] . ', #fff 86%)',
 
 			/* Global font for every HamiShop widget. */
-			'--hsw-font'               => ( ! empty( $p['font'] ) ? $p['font'] : 'inherit' ),
+			'--hsw-font'               => self::font_css( $p['font'] ?? '' ),
 		);
 
 		$decls = '';

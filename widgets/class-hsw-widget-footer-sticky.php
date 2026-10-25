@@ -171,6 +171,30 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
+			'show_on_checkout',
+			array(
+				'label'       => __( 'نمایش در سبد، پرداخت و حساب کاربری', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => '',
+				'description' => __( 'به‌صورت پیش‌فرض در این صفحات پنهان است تا مزاحم تکمیل سفارش نشود.', 'hamishop-elementor-widgets' ),
+				'separator'   => 'before',
+			)
+		);
+
+		$this->add_control(
+			'z_index',
+			array(
+				'label'       => __( 'لایه (z-index)', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::NUMBER,
+				'default'     => 8000,
+				'min'         => 1,
+				'max'         => 99999,
+				'selectors'   => array( '{{WRAPPER}} .hsw-sf' => 'z-index: {{VALUE}};' ),
+				'description' => __( 'پیش‌فرض ۸۰۰۰ است؛ کمتر از منوی موبایل هدر (۱۰۰۰۰) تا منو روی فوتر باز شود.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
 			'glass',
 			array(
 				'label'       => __( 'حالت شیشه‌ای', 'hamishop-elementor-widgets' ),
@@ -342,7 +366,19 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 	}
 
 	protected function render() {
-		$s     = $this->get_settings_for_display();
+		$s = $this->get_settings_for_display();
+
+		/* Hidden on cart / checkout / order-received / account unless asked. */
+		if ( 'yes' !== ( $s['show_on_checkout'] ?? '' ) ) {
+			$hide = ( function_exists( 'is_cart' ) && is_cart() )
+				|| ( function_exists( 'is_checkout' ) && is_checkout() )
+				|| ( function_exists( 'is_account_page' ) && is_account_page() )
+				|| ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) );
+			if ( $hide ) {
+				return;
+			}
+		}
+
 		$items = isset( $s['items'] ) && is_array( $s['items'] ) ? $s['items'] : array();
 		if ( empty( $items ) ) {
 			$items = $this->defaults();
