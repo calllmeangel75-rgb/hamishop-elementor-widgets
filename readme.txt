@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.97
+Stable tag: 1.11.98
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.98 =
+* **یکدست‌سازی رویداد سبد در صفحهٔ محصول.**
+  - `hsw-product.js` هم بعد از افزودن، `hsw_added_to_cart` را dispatch می‌کند
+    (مثل ویجت لوپ و آرشیو) تا badge هدر از یک مسیر به‌روز شود.
+  - رویداد اشتباه `wc_fragment_refresh` به `wc_fragments_refreshed` (نامی که
+    ووکامرس می‌شنود) اصلاح شد.
 
 = 1.11.97 =
 * **نوار چسبان: استپر تمام‌عرض و قیمت در لبهٔ چپ.**

@@ -433,7 +433,12 @@
 			var n = badge ? parseInt(badge.getAttribute('data-count') || '0', 10) : 0;
 			cart.classList.toggle('is-empty', !n);
 		});
-		document.body.dispatchEvent(new Event('wc_fragment_refresh'));
+		/*
+		 * WooCommerce listens for `wc_fragments_refreshed`; the old name was a
+		 * no-op. Also tell the header widget explicitly, exactly like the loop
+		 * and archive widgets do after their own add-to-cart.
+		 */
+		document.body.dispatchEvent(new Event('wc_fragments_refreshed'));
 	}
 
 	function setRootInCart(pid, inCart, qty) {
@@ -557,6 +562,9 @@
 			if (res && res.error && res.product_url) { window.location = res.product_url; return; }
 			flashAdded(btn);
 			showAdded(btn, pid, res);
+			/* Same event the loop and archive widgets fire, so the header badge
+			   refreshes through one code path. */
+			document.dispatchEvent(new CustomEvent('hsw_added_to_cart', { detail: { productId: pid } }));
 
 			/*
 			 * The item is in the cart now: reveal the stepper (it is hidden
