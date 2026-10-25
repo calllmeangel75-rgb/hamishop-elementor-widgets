@@ -170,6 +170,29 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			array( 'label' => __( 'نوار', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
 		);
 
+		$this->add_control(
+			'glass',
+			array(
+				'label'       => __( 'حالت شیشه‌ای', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'description' => __( 'پس‌زمینهٔ نیمه‌شفاف با بلور پشت نوار.', 'hamishop-elementor-widgets' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-sf' => 'backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%);',
+				),
+			)
+		);
+
+		$this->add_control(
+			'glass_bg',
+			array(
+				'label'     => __( 'رنگ پس‌زمینهٔ شیشه', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => 'rgba(255,255,255,.72)',
+				'condition' => array( 'glass' => 'yes' ),
+				'selectors' => array( '{{WRAPPER}} .hsw-sf' => 'background: {{VALUE}};' ),
+			)
+		);
+
 		$this->add_group_control(
 			\Elementor\Group_Control_Background::get_type(),
 			array( 'name' => 'bar_bg', 'types' => array( 'classic', 'gradient' ), 'selector' => '{{WRAPPER}} .hsw-sf' )

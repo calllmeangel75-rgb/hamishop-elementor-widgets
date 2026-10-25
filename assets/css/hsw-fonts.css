@@ -888,3 +888,7 @@ ul.products.is-pg-leaving,
 @media (prefers-reduced-motion: reduce) {
 	.hsw-sf__item, .hsw-sf__ic { transition: none; }
 }
+
+/* Global font from HamiShop → پالت رنگی (--hsw-font). Widget controls win. */
+.hsw-h, .hsw-p, .hsw-ac, .hsw-loop, .hsw-sf, .hsw-ptabs, .hsw-ap,
+.hsw-sheet, .hsw-pg, .hsw-404 { font-family: var(--hsw-font, inherit); }

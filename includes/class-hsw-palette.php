@@ -90,7 +90,38 @@ class HSW_Palette {
 		foreach ( self::tokens() as $key => $def ) {
 			$out[ $key ] = $def[1];
 		}
+		/* Global font family — empty means «whatever the theme uses». */
+		$out['font'] = '';
 		return $out;
+	}
+
+	/**
+	 * Font families the shop owner can pick: the plugin's own Vazirmatn plus
+	 * whatever the theme/Elementor already loaded (block theme font library),
+	 * and anything added through the `hsw_font_choices` filter.
+	 *
+	 * @return array<string,string>
+	 */
+	public static function font_choices() {
+		$choices = array(
+			''              => __( 'پیش‌فرض قالب', 'hamishop-elementor-widgets' ),
+			'Vazirmatn HSW' => __( 'وزیرمتن (افزونه)', 'hamishop-elementor-widgets' ),
+		);
+
+		if ( function_exists( 'wp_get_global_settings' ) ) {
+			$settings = wp_get_global_settings();
+			$families = $settings['typography']['fontFamilies']['theme'] ?? array();
+			foreach ( (array) $families as $family ) {
+				$name = is_array( $family ) ? ( $family['fontFamily'] ?? '' ) : (string) $family;
+				$slug = is_array( $family ) ? ( $family['name'] ?? $name ) : $name;
+				$name = trim( (string) $name );
+				if ( '' !== $name ) {
+					$choices[ $name ] = (string) $slug;
+				}
+			}
+		}
+
+		return (array) apply_filters( 'hsw_font_choices', $choices );
 	}
 
 	/**
@@ -164,6 +195,9 @@ class HSW_Palette {
 			'--hsw-pal-primary-light'  => 'color-mix(in srgb, ' . $p['primary'] . ', #fff 94%)',
 			'--hsw-pal-primary-ring'   => 'color-mix(in srgb, ' . $p['primary'] . ', transparent 72%)',
 			'--hsw-pal-accent-soft'    => 'color-mix(in srgb, ' . $p['accent'] . ', #fff 86%)',
+
+			/* Global font for every HamiShop widget. */
+			'--hsw-font'               => ( ! empty( $p['font'] ) ? $p['font'] : 'inherit' ),
 		);
 
 		$decls = '';
@@ -347,6 +381,7 @@ class HSW_Palette {
 			$clean[ $key ] = $value ? $value : $default;
 		}
 
+		$clean['font']   = isset( $incoming['font'] ) ? sanitize_text_field( (string) $incoming['font'] ) : '';
 		$clean['_saved'] = time();
 		update_option( self::OPTION, $clean );
 		add_settings_error( 'hsw_palette', 'saved', __( 'پالت رنگی ذخیره شد.', 'hamishop-elementor-widgets' ), 'updated' );
@@ -414,6 +449,20 @@ class HSW_Palette {
 						</div>
 
 						<div class="hsw-pal__rows">
+							<div class="hsw-pal__row">
+								<div class="hsw-pal__label">
+									<strong><?php esc_html_e( 'فونت پیش‌فرض ویجت‌ها', 'hamishop-elementor-widgets' ); ?></strong>
+									<small><?php esc_html_e( 'هر فونت که روی سایت بارگذاری شده باشد اینجا فهرست می‌شود و روی همهٔ ویجت‌های HamiShop اعمال می‌گردد. کنترل فونت هر ویجت، در صورت تنظیم، اولویت دارد.', 'hamishop-elementor-widgets' ); ?></small>
+								</div>
+								<div class="hsw-pal__field">
+									<select class="hsw-pal__select" name="hsw_palette[font]">
+										<?php foreach ( self::font_choices() as $family => $label ) : ?>
+											<option value="<?php echo esc_attr( $family ); ?>" <?php selected( (string) ( $p['font'] ?? '' ), (string) $family ); ?>><?php echo esc_html( $label ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+							</div>
+
 							<?php foreach ( $tokens as $key => $def ) : ?>
 								<?php list( $label, $default, $help ) = $def; ?>
 								<div class="hsw-pal__row">

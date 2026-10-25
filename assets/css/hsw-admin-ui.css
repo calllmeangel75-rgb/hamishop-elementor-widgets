@@ -589,3 +589,17 @@
 .hsw-brand__switch input:checked + .hsw-brand__track::after { transform: translateX(-20px); }
 [dir="ltr"] .hsw-brand__switch input:checked + .hsw-brand__track::after { transform: translateX(20px); }
 .hsw-brand__switch input:focus-visible + .hsw-brand__track { box-shadow: 0 0 0 2px rgba(37, 99, 235, .35); }
+
+/* Font picker on the palette screen. */
+.hsw-pal__select {
+	height: 38px;
+	min-width: 220px;
+	padding: 0 10px;
+	border-radius: 9px;
+	border: 1px solid #dcdcde;
+	background: #fff;
+	font-family: inherit;
+	font-size: 12.5px;
+	color: #1d2327;
+}
+.hsw-pal__select:focus { border-color: var(--pal-primary); box-shadow: 0 0 0 1px var(--pal-primary); outline: none; }

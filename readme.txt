@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.75
+Stable tag: 1.11.76
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.76 =
+* **آیکون خانهٔ Iconsax + حالت شیشه‌ای فوتر + فونت پیش‌فرض همهٔ ویجت‌ها.**
+  - کلید `home` با آیکون خطی Iconsax جایگزین شد، پس هر جا آیکون خانه بود
+    (از جمله پنج آیتم پیش‌فرض فوتر چسبان) عوض شد.
+  - ویجت فوتر چسبان: کنترل «حالت شیشه‌ای» + «رنگ پس‌زمینهٔ شیشه» با
+    `backdrop-filter` و رنگ انتخابی.
+  - پالت رنگی: انتخابگر **فونت پیش‌فرض ویجت‌ها**؛ فونت‌های بارگذاری‌شدهٔ قالب
+    (از font library وردپرس) + وزیرمتن افزونه + فیلتر `hsw_font_choices`.
+    مقدار انتخابی به‌صورت `--hsw-font` روی `html:root` چاپ و در همهٔ ویجت‌ها
+    اعمال می‌شود؛ کنترل فونت هر ویجت اولویت دارد.
 
 = 1.11.75 =
 * **آیکون‌های پیش‌فرض ویجت فوتر چسبان درست شد.**
