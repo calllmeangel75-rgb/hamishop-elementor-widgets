@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.65
+Stable tag: 1.11.66
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.66 =
+* **آیکون سبد خرید همه‌جا Iconsax شد + آیکون‌های پنل حساب.**
+  - کلید `shopping_cart` (دکمهٔ خرید آنلاین، ویجت‌های هدر، سبد و…) با آیکون
+    جدید جایگزین شد، پس یک‌جا همهٔ نقاط عوض شدند.
+  - پنل حساب کاربری نقشهٔ آیکون محلی خودش را داشت و به همین دلیل «قلب، کیف پول،
+    کاربر و تنظیمات» آنجا عوض نشده بود؛ حالا همان چهار آیکون هم Iconsax شدند.
+  - همه با `stroke="currentColor"` رنگ می‌گیرند، یعنی کنترل رنگ آیکون در
+    ویجت‌های المنتور و رنگ متن پنل (پالت) روی آن‌ها اثر می‌گذارد.
 
 = 1.11.65 =
 * **آیکون‌های Iconsax به‌صورت محلی (بدون CDN) جایگزین شدند.**
