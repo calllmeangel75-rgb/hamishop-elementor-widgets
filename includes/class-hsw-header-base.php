@@ -685,7 +685,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= '<div class="hsw-hd__drawerfoot">';
 		if ( $show_cart ) {
 			$count = $this->cart_count();
-			$out  .= '<a class="hsw-hd__drawercart" href="' . esc_url( $this->cart_url() ) . '">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span>' . esc_html__( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ) . '</span><span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a>';
+			$out  .= '<a class="hsw-hd__drawercart" href="' . esc_url( $this->cart_url() ) . '">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span>' . esc_html( isset( $s['drawer_cart_text'] ) && '' !== trim( (string) $s['drawer_cart_text'] ) ? $s['drawer_cart_text'] : __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ) ) . '</span><span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a>';
 		}
 		$out .= '<div class="hsw-hd__drawerlinks">';
 		if ( $show_acct ) {
@@ -824,6 +824,16 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
+			'drawer_cart_text',
+			array(
+				'label'       => __( 'متن دکمهٔ سبد خرید (منوی موبایل)', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::TEXT,
+				'default'     => __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ),
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
 			'drawer_cats',
 			array(
 				'label'     => __( 'نمایش دسته‌بندی محصولات در منوی موبایل', 'hamishop-elementor-widgets' ),
@@ -832,6 +842,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 				'separator' => 'before',
 			)
 		);
+
 
 		/*
 		 * Control id must stay prefixed: Elementor Pro registers its own
@@ -882,6 +893,72 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->ctrl_visibility();
+
+		$this->end_controls_section();
+
+		/* --------------------- منوی موبایل: رنگ‌ها --------------------- */
+		$this->start_controls_section(
+			'sec_drawer_style',
+			array(
+				'label' => __( 'منوی موبایل (رنگ‌ها)', 'hamishop-elementor-widgets' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_control(
+			'drawer_cart_bg',
+			array(
+				'label'     => __( 'پس‌زمینهٔ دکمهٔ سبد خرید', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .hsw-hd__drawercart' => 'background: {{VALUE}} !important;' ),
+			)
+		);
+
+		$this->add_control(
+			'drawer_cart_c',
+			array(
+				'label'     => __( 'رنگ متن و آیکون دکمهٔ سبد خرید', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd__drawercart'          => 'color: {{VALUE}} !important;',
+					'{{WRAPPER}} .hsw-hd__drawercart .hsw-ic'  => 'color: {{VALUE}} !important;',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'hd_align',
+			array(
+				'label'     => __( 'چیدمان افقی هدر', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::CHOOSE,
+				'options'   => array(
+					'flex-start' => array( 'title' => __( 'راست', 'hamishop-elementor-widgets' ), 'icon' => 'eicon-h-align-right' ),
+					'center'     => array( 'title' => __( 'وسط', 'hamishop-elementor-widgets' ), 'icon' => 'eicon-h-align-center' ),
+					'flex-end'   => array( 'title' => __( 'چپ', 'hamishop-elementor-widgets' ), 'icon' => 'eicon-h-align-left' ),
+				),
+				'selectors' => array( '{{WRAPPER}} .hsw-hd__maininner' => 'justify-content: {{VALUE}};' ),
+				'separator' => 'before',
+				'description' => __( 'برای وسط‌چین کردن هدر در موبایل، آیکون «وسط» را در حالت موبایل (آیکون گوشی) انتخاب کنید.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
+			'drawer_search_c',
+			array(
+				'label'     => __( 'رنگ آیکون جستجو', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .hsw-hd__drawersearch .hsw-ic' => 'color: {{VALUE}} !important;' ),
+			)
+		);
+
+		$this->add_control(
+			'drawer_close_c',
+			array(
+				'label'     => __( 'رنگ آیکون بستن (×)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .hsw-hd__drawerclose' => 'color: {{VALUE}} !important;' ),
+			)
+		);
 
 		$this->end_controls_section();
 	}
