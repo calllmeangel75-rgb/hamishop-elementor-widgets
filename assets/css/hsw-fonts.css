@@ -898,3 +898,6 @@ ul.products.is-pg-leaving,
 }
 .hsw-h, .hsw-p, .hsw-ac, .hsw-loop, .hsw-sf, .hsw-ptabs, .hsw-ap,
 .hsw-sheet, .hsw-pg, .hsw-404 { font-family: var(--hsw-font, inherit); }
+
+/* The mobile drawer must always win: hide the sticky footer while it is open. */
+html.hsw-hd-lock .hsw-sf { display: none !important; }

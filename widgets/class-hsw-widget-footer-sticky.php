@@ -373,7 +373,15 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			$hide = ( function_exists( 'is_cart' ) && is_cart() )
 				|| ( function_exists( 'is_checkout' ) && is_checkout() )
 				|| ( function_exists( 'is_account_page' ) && is_account_page() )
-				|| ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) );
+				|| ( function_exists( 'is_wc_endpoint_url' ) && ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) );
+
+			/* Custom «payment / checkout / cart» pages built with Elementor. */
+			if ( ! $hide ) {
+				$slug = (string) get_post_field( 'post_name', get_queried_object_id() );
+				if ( '' !== $slug && preg_match( '/^(payment|checkout|cart|my-account|order-pay)/', $slug ) ) {
+					$hide = true;
+				}
+			}
 			if ( $hide ) {
 				return;
 			}

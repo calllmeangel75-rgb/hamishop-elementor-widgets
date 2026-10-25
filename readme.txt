@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.78
+Stable tag: 1.11.79
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.79 =
+* **لیست فونت‌های المنتور در انتخابگر پالت.** فونت‌های آپلودی المنتور در
+  `elementor_fonts_manager_fonts` ذخیره می‌شوند و جزو font library وردپرس
+  نیستند؛ حالا آن‌ها هم خوانده می‌شوند، به‌همراه تایپوگرافی کیت المنتور.
+* **فوتر چسبان:** در `order-pay` و صفحه‌های سفارشی با اسلاگ payment/checkout/
+  cart/order-pay هم پنهان می‌شود، و هنگام باز بودن منوی موبایل
+  (`html.hsw-hd-lock`) کاملاً کنار می‌رود تا هیچ‌وقت روی منو نیفتد.
 
 = 1.11.78 =
 * **رفع ریشه‌ای فونت پیش‌فرض ویجت‌ها.**

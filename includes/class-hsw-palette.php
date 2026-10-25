@@ -139,6 +139,35 @@ class HSW_Palette {
 			}
 		}
 
+		/*
+		 * Elementor keeps its uploaded fonts in this option (each entry has a
+		 * `name`), and they are NOT part of wp_get_global_settings().
+		 */
+		$elementor = get_option( 'elementor_fonts_manager_fonts', array() );
+		if ( is_array( $elementor ) ) {
+			foreach ( $elementor as $font ) {
+				$name = is_array( $font ) ? ( $font['name'] ?? '' ) : (string) $font;
+				$name = trim( (string) $name );
+				if ( '' !== $name && ! isset( $choices[ $name ] ) ) {
+					$choices[ $name ] = $name;
+				}
+			}
+		}
+
+		/* Elementor kit typography (custom + system families). */
+		$kit_id = (int) get_option( 'elementor_active_kit' );
+		if ( $kit_id ) {
+			$kit = get_post_meta( $kit_id, '_elementor_page_settings', true );
+			$families = is_array( $kit ) ? ( $kit['system_typography'] ?? array() ) : array();
+			foreach ( (array) $families as $row ) {
+				$name = is_array( $row ) ? ( $row['typography_font_family'] ?? '' ) : '';
+				$name = trim( (string) $name );
+				if ( '' !== $name && ! isset( $choices[ $name ] ) ) {
+					$choices[ $name ] = $name;
+				}
+			}
+		}
+
 		return (array) apply_filters( 'hsw_font_choices', $choices );
 	}
 
