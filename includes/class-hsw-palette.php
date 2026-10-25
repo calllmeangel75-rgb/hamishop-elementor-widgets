@@ -62,6 +62,15 @@ class HSW_Palette {
 			'cta_hover'    => array( __( 'CTA مراحل خرید (هاور)', 'hamishop-elementor-widgets' ), '#1c3566', __( 'رنگ دکمه‌های خرید هنگام نگه‌داشتن ماوس', 'hamishop-elementor-widgets' ) ),
 			'cta_active'   => array( __( 'CTA مراحل خرید (کلیک)', 'hamishop-elementor-widgets' ), '#0a1730', __( 'رنگ دکمه‌های خرید در لحظهٔ کلیک', 'hamishop-elementor-widgets' ) ),
 			'cta_text'     => array( __( 'متن روی دکمه‌های خرید', 'hamishop-elementor-widgets' ), '#ffffff', __( 'رنگ نوشتهٔ دکمه‌های «ادامه، پرداخت و تکمیل سفارش»', 'hamishop-elementor-widgets' ) ),
+			/* WooCommerce buttons outside the purchase flow (apply coupon, update cart, view cart…). */
+			'woo_btn_bg'    => array( __( 'دکمه‌های ووکامرس — پس‌زمینه', 'hamishop-elementor-widgets' ), '#4d85ff', __( 'دکمه‌هایی که خود ووکامرس می‌سازد: اعمال کد، به‌روزرسانی سبد، مشاهده سبد', 'hamishop-elementor-widgets' ) ),
+			'woo_btn_text'  => array( __( 'دکمه‌های ووکامرس — متن', 'hamishop-elementor-widgets' ), '#ffffff', __( 'رنگ نوشتهٔ همان دکمه‌ها', 'hamishop-elementor-widgets' ) ),
+			'woo_btn_hover' => array( __( 'دکمه‌های ووکامرس — هاور', 'hamishop-elementor-widgets' ), '#1d4ed8', __( 'حالت نگه‌داشتن ماوس', 'hamishop-elementor-widgets' ) ),
+			/* Normal (secondary) buttons used across the widgets. */
+			'btn_bg'        => array( __( 'دکمه‌های معمولی — پس‌زمینه', 'hamishop-elementor-widgets' ), '#ffffff', __( 'دکمه‌های ثانویه: بازگشت، مشاهده همه، انصراف', 'hamishop-elementor-widgets' ) ),
+			'btn_text'      => array( __( 'دکمه‌های معمولی — متن', 'hamishop-elementor-widgets' ), '#191c1e', __( 'رنگ نوشتهٔ دکمه‌های ثانویه', 'hamishop-elementor-widgets' ) ),
+			'btn_border'    => array( __( 'دکمه‌های معمولی — حاشیه', 'hamishop-elementor-widgets' ), '#e1e2e4', __( 'خط دور دکمه‌های ثانویه', 'hamishop-elementor-widgets' ) ),
+			'btn_hover_bg'  => array( __( 'دکمه‌های معمولی — هاور', 'hamishop-elementor-widgets' ), '#f3f4f6', __( 'پس‌زمینهٔ دکمه‌های ثانویه هنگام هاور', 'hamishop-elementor-widgets' ) ),
 			'text'         => array( __( 'رنگ متن', 'hamishop-elementor-widgets' ), '#191c1e', __( 'متن اصلی', 'hamishop-elementor-widgets' ) ),
 			'muted'        => array( __( 'متن کم‌رنگ', 'hamishop-elementor-widgets' ), '#75777f', __( 'توضیحات، متادیتا', 'hamishop-elementor-widgets' ) ),
 			'border'       => array( __( 'رنگ حاشیه', 'hamishop-elementor-widgets' ), '#e1e2e4', __( 'خطوط و کادرها', 'hamishop-elementor-widgets' ) ),
@@ -251,6 +260,15 @@ class HSW_Palette {
 			'--hsw-pal-primary-light'  => 'color-mix(in srgb, ' . $p['primary'] . ', #fff 94%)',
 			'--hsw-pal-primary-ring'   => 'color-mix(in srgb, ' . $p['primary'] . ', transparent 72%)',
 			'--hsw-pal-accent-soft'    => 'color-mix(in srgb, ' . $p['accent'] . ', #fff 86%)',
+
+			/* WooCommerce + secondary buttons (separate from the purchase-flow CTA). */
+			'--hsw-woo-btn-bg'         => $p['woo_btn_bg'],
+			'--hsw-woo-btn-c'          => $p['woo_btn_text'],
+			'--hsw-woo-btn-hover'      => $p['woo_btn_hover'],
+			'--hsw-btn-bg'             => $p['btn_bg'],
+			'--hsw-btn-c'              => $p['btn_text'],
+			'--hsw-btn-bd'             => $p['btn_border'],
+			'--hsw-btn-hover-bg'       => $p['btn_hover_bg'],
 
 			/* Global font for every HamiShop widget. */
 			'--hsw-font'               => self::font_css( $p['font'] ?? '' ),

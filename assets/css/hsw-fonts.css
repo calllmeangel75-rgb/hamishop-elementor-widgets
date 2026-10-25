@@ -901,3 +901,40 @@ ul.products.is-pg-leaving,
 
 /* The mobile drawer must always win: hide the sticky footer while it is open. */
 html.hsw-hd-lock .hsw-sf { display: none !important; }
+
+/* =========================================================================
+ * Button colours from the admin palette (۱.۱۱.۸۹)
+ *   --hsw-cta-*        purchase-flow CTA (cart → checkout → place order)
+ *   --hsw-woo-btn-*    other WooCommerce buttons (apply coupon, update cart…)
+ *   --hsw-btn-*        secondary buttons (back, view all, cancel)
+ * All scoped to HamiShop containers so the theme is never touched.
+ * ====================================================================== */
+.hsw-c .button,
+.hsw-cp .button,
+.hsw-ac .button,
+.hsw-c input[type="submit"].button {
+	background: var(--hsw-woo-btn-bg, #4d85ff);
+	color: var(--hsw-woo-btn-c, #fff);
+	border: 0;
+}
+.hsw-c .button:hover,
+.hsw-cp .button:hover,
+.hsw-ac .button:hover,
+.hsw-c input[type="submit"].button:hover {
+	background: var(--hsw-woo-btn-hover, #1d4ed8);
+	color: var(--hsw-woo-btn-c, #fff);
+}
+
+/* Secondary buttons: everything that is not the primary CTA. */
+.hsw-ac__btn:not(.hsw-ac__btn--primary),
+.hsw-c__back,
+.hsw-citems__back {
+	background: var(--hsw-btn-bg, #fff);
+	color: var(--hsw-btn-c, #191c1e);
+	border: 1px solid var(--hsw-btn-bd, #e1e2e4);
+}
+.hsw-ac__btn:not(.hsw-ac__btn--primary):hover,
+.hsw-c__back:hover,
+.hsw-citems__back:hover {
+	background: var(--hsw-btn-hover-bg, #f3f4f6);
+}

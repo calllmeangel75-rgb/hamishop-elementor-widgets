@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.88
+Stable tag: 1.11.89
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.89 =
+* **پالت: توکن مستقل برای دکمه‌های ووکامرس و دکمه‌های معمولی.**
+  - «دکمه‌های ووکامرس»: پس‌زمینه، متن و هاور (`--hsw-woo-btn-*`) برای دکمه‌هایی
+    که خود ووکامرس می‌سازد (اعمال کد، به‌روزرسانی سبد، مشاهده سبد).
+  - «دکمه‌های معمولی»: پس‌زمینه، متن، حاشیه و هاور (`--hsw-btn-*`) برای دکمه‌های
+    ثانویه.
+  - همه با اسکوپ `.hsw-c/.hsw-cp/.hsw-ac` اعمال می‌شوند؛ قالب و بقیهٔ سایت
+    دست‌نخورده می‌ماند.
+* **مستندات:** بخش «معماری افزونه» در README و «سیستم رنگ دکمه‌ها» در
+  WIDGET-GUIDE اضافه شد.
 
 = 1.11.88 =
 * **پالت رنگی: توکن «متن روی دکمه‌های خرید».**
