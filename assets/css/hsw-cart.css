@@ -247,9 +247,9 @@
 .hsw-citems__empty {
         display: flex; align-items: center; gap: .25rem;
         font-size: .8125rem; line-height: 1.25rem; font-weight: 500;
-        color: var(--hswc-text2); transition: color .15s;
+        color: var(--hsw-ci-empty-c, var(--hswc-text2)); transition: color .15s;
 }
-.hsw-citems__empty:hover { color: var(--hswc-accent2); }
+.hsw-citems__empty:hover { color: var(--hsw-ci-empty-h, var(--hswc-accent2)); }
 .hsw-citems__empty .hsw-ic { font-size: 1.125rem; }
 
 /* --- desktop rows --- */

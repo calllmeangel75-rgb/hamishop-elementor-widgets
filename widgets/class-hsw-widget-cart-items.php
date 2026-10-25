@@ -219,7 +219,8 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 $this->a_text( 'head_t', '{{WRAPPER}} .hsw-citems__t', array( 'default' => 16 ) );
                 $this->a_color( 'head_count_bg', __( 'پس‌زمینه شمارنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__count', 'background-color' );
                 $this->a_text( 'head_count', '{{WRAPPER}} .hsw-citems__count', array( 'default' => 11 ) );
-                $this->a_color( 'head_empty', __( 'دکمه خالی کردن سبد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__empty' );
+                $this->a_color( 'head_empty', __( 'دکمهٔ «خالی کردن سبد» — رنگ', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__empty', '--hsw-ci-empty-c' );
+                $this->a_color( 'head_empty_h', __( 'دکمهٔ «خالی کردن سبد» — رنگ هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__empty:hover', '--hsw-ci-empty-h' );
 
                 $this->a_color( 'eyebrow', __( 'متن برند/دسته', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__eyebrow, {{WRAPPER}} .hsw-citems__meyebrow' );
                 $this->a_text( 'name', '{{WRAPPER}} .hsw-citems__name, {{WRAPPER}} .hsw-citems__mname', array( 'default' => 14 ) );
@@ -233,7 +234,8 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 $this->a_color( 'cur', __( 'واحد پول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-cur' );
 
                 $this->a_color( 'qty_bd', __( 'حاشیه شمارنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty', 'border-color' );
-                $this->a_color( 'qty_btn', __( 'دکمه‌های شمارنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn' );
+                $this->a_color( 'qty_btn', __( 'دکمه‌های شمارنده — رنگ آیکن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn' );
+                $this->a_color( 'qty_btn_bg', __( 'دکمه‌های شمارنده — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn', 'background-color' );
 
                 $this->end_controls_section();
         }

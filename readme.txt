@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.81
+Stable tag: 1.11.82
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.82 =
+* **ویجت آیتم‌های سبد: رنگ دکمه‌ها تفکیک شد.**
+  - «خالی کردن سبد»: رنگ عادی و رنگ هاور جدا شدند و به متغیرهای اختصاصی
+    (`--hsw-ci-empty-c` / `--hsw-ci-empty-h`) با فالبک پالت وصل شدند.
+  - شمارندهٔ تعداد: علاوه بر رنگ آیکن، کنترل «پس‌زمینه» اضافه شد.
+  - بدون تغییر در ساختار یا رفتار؛ فقط متغیر رنگ.
 
 = 1.11.81 =
 * **پایلوت «رنگ دکمه‌های مستقل» روی ویجت خلاصهٔ سبد خرید.**
