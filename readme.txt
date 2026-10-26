@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.105
+Stable tag: 1.11.106
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,16 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.106 =
+* **پنل کاربری در موبایل: نوار چسبان + کشوی منو.**
+  - نوار `hsw-ac__crumbs` در موبایل فقط **آخرین نقطه** (پیشخوان/سفارش‌ها/
+    دانلودها/آدرس‌ها) را نشان می‌دهد و مسیر قبلی پنهان می‌شود.
+  - به‌جای مسیر، یک دکمهٔ منو اضافه شد که سایدبار حساب را به‌صورت **کشو**
+    (off-canvas) باز می‌کند: پوشش تاریک، بستن با کلیک بیرون/Esc/انتخاب لینک،
+    و `aria-expanded` برای دسترس‌پذیری.
+  - نوار در موبایل `position: sticky; top: 0` است تا هنگام اسکرول بالا بماند.
+  - دسکتاپ دست‌نخورده: همان breadcrumb کامل.
 
 = 1.11.105 =
 * **فونت وزیرمتن دیگر با تایپوگرافی سراسری المنتور از کار نمی‌افتد.**

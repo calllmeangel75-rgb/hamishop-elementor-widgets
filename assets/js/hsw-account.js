@@ -1582,3 +1582,32 @@ if ('loading' === document.readyState) {
 		boot();
 	}
 })();
+
+/* ---------------------------------------------------------------- drawer */
+(function () {
+	var btn = document.querySelector('[data-hsw-ac-menu]');
+	var side = document.querySelector('.hsw-ac__side');
+	if (!btn || !side) { return; }
+
+	var scrim = document.createElement('div');
+	scrim.className = 'hsw-ac__scrim';
+	document.body.appendChild(scrim);
+
+	function set(open) {
+		side.classList.toggle('is-open', open);
+		scrim.classList.toggle('is-on', open);
+		btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+		document.documentElement.classList.toggle('hsw-ac-lock', open);
+	}
+
+	btn.addEventListener('click', function () {
+		set(!side.classList.contains('is-open'));
+	});
+	scrim.addEventListener('click', function () { set(false); });
+	document.addEventListener('keydown', function (e) {
+		if ('Escape' === e.key) { set(false); }
+	});
+	side.addEventListener('click', function (e) {
+		if (e.target.closest('a')) { set(false); }
+	});
+})();

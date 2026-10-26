@@ -1273,7 +1273,7 @@ final class HSW_Account {
 			. '<div class="hsw-ac__wrap">'
 			. $breadcrumb
 			. '<div class="hsw-ac__grid">'
-			. '<aside class="hsw-ac__side" aria-label="' . esc_attr__( 'حساب کاربری من', 'hamishop-elementor-widgets' ) . '">' . $side . '</aside>'
+			. '<aside id="hsw-ac-side" class="hsw-ac__side" aria-label="' . esc_attr__( 'حساب کاربری من', 'hamishop-elementor-widgets' ) . '">' . $side . '</aside>'
 			. '<div class="hsw-ac__main">' . $main . '</div>'
 			. '</div></div></div>';
 	}
@@ -1285,9 +1285,13 @@ final class HSW_Account {
 		$chev    = $this->icon( 'chevron-left', 'hsw-ac__crumb-sep' );
 
 		$html  = '<nav class="hsw-ac__crumbs" aria-label="' . esc_attr__( 'مسیر صفحه', 'hamishop-elementor-widgets' ) . '">';
+		/* Mobile: this button opens the account drawer; the path itself is hidden. */
+		$html .= '<button type="button" class="hsw-ac__menubtn" data-hsw-ac-menu aria-expanded="false" aria-controls="hsw-ac-side" aria-label="' . esc_attr__( 'منوی حساب کاربری', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'menu', 'hsw-ac__menubtn-ic' ) . '</button>';
+		$html .= '<span class="hsw-ac__path">';
 		$html .= '<a href="' . esc_url( $home ) . '">' . esc_html__( 'صفحه اصلی', 'hamishop-elementor-widgets' ) . '</a>';
 		$html .= $chev . '<a href="' . esc_url( $account ) . '">' . esc_html__( 'حساب کاربری من', 'hamishop-elementor-widgets' ) . '</a>';
-		$html .= $chev . '<span aria-current="page">' . esc_html( $label ) . '</span>';
+		$html .= $chev . '</span>';
+		$html .= '<span aria-current="page">' . esc_html( $label ) . '</span>';
 		$html .= '</nav>';
 		return $html;
 	}

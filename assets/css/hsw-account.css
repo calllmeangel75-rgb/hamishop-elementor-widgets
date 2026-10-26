@@ -6581,3 +6581,77 @@ a.hsw-ac__stat:hover {
 	.hsw-ac-auth__panel { min-height: 0 !important; }
 	.hsw-ac-otp { padding-bottom: 8px; }
 }
+
+/* =========================================================================
+ * Mobile account bar (1.11.106)
+ * Sticky single-endpoint bar + a menu button that opens the account drawer.
+ * Desktop keeps the full breadcrumb (the path span is only hidden < 1024px).
+ * ====================================================================== */
+.hsw-ac__menubtn {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	border: 1px solid var(--hsw-ac-line, #e1e2e4);
+	border-radius: 11px;
+	background: var(--hsw-ac-card, #fff);
+	color: var(--hsw-ac-ink, #191c1e);
+	cursor: pointer;
+	flex: 0 0 auto;
+	transition: background-color .15s, color .15s;
+}
+.hsw-ac__menubtn:hover { color: var(--hsw-ac-accent, #4d85ff); }
+.hsw-ac__menubtn-ic { width: 20px; height: 20px; }
+
+.hsw-ac__scrim {
+	position: fixed;
+	inset: 0;
+	z-index: 110;
+	background: rgba(10, 20, 35, .45);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity .22s, visibility .22s;
+}
+.hsw-ac__scrim.is-on { opacity: 1; visibility: visible; }
+
+@media (max-width: 1023.98px) {
+	.hsw-ac__crumbs {
+		position: sticky;
+		top: 0;
+		z-index: 40;
+		margin: 0 0 12px;
+		padding: 9px 12px;
+		background: var(--hsw-ac-card, #fff);
+		border-bottom: 1px solid var(--hsw-ac-line, #e1e2e4);
+		box-shadow: 0 6px 18px -16px rgba(15, 23, 42, .55);
+		flex-wrap: nowrap;
+		gap: 10px;
+	}
+	.hsw-ac__path { display: none !important; }
+	.hsw-ac__menubtn { display: inline-flex; }
+	.hsw-ac__crumbs span[aria-current] { font-size: 13.5px; }
+
+	/* The aside becomes an off-canvas drawer. */
+	.hsw-ac__side {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		inset-inline-start: 0;
+		width: min(86vw, 340px);
+		max-width: 340px;
+		z-index: 120;
+		display: block;
+		padding: 16px 14px 28px;
+		overflow-y: auto;
+		background: var(--hsw-ac-card, #fff);
+		box-shadow: 0 0 40px -12px rgba(15, 23, 42, .35);
+		transform: translateX(-102%);
+		transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+		visibility: hidden;
+	}
+	html[dir="rtl"] .hsw-ac__side { transform: translateX(102%); }
+	.hsw-ac__side.is-open { transform: translateX(0) !important; visibility: visible; }
+	.hsw-ac__side .hsw-ac__menu-list { grid-template-columns: 1fr; }
+}
