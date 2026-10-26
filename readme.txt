@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.123
+Stable tag: 1.11.124
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.124 =
+* **مستندات هم‌گام با کد:** مکانیزم «تسویه: امنیت و نرخ» به
+  `WIDGETS-REFERENCE.md` اضافه شد (هوک‌های پرداخت، terms، محدودیت نرخ).
 
 = 1.11.123 =
 * **امنیت تسویه: هوک‌های پرداخت، قوانین و محدودیت نرخ.**

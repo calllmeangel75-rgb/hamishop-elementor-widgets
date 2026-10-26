@@ -184,6 +184,7 @@ HSW_Palette → html:root { --hsw-primary … --hsw-cta* --hsw-woo-btn-* --hsw-b
 | **نوار خرید چسبان** | استپر «− ۱ +»؛ در تعداد ۱ جای «−» سطل زباله می‌آید و `is-min` بعد از هر AJAX در JS سوییچ می‌شود. عرض ۵۰٪ استپر / ۴۵٪ قیمت؛ استپر سمت شروع. `z-index: 90` تا زیر هدر و منوی موبایل بماند. |
 | **نوار پیشرفت مقاله** | `[data-hsw-pp-progress]` با نسبت اسکرول بدنهٔ مقاله؛ اگر بدنه کوتاه‌تر از صفحه باشد به اسکرول سند فالبک می‌کند. کارت محصول مقاله: متای `_hsw_product_id` → نام دستهٔ محصول → برچسب محصول → در نبود تطبیق مخفی. |
 | **کشوی حساب (موبایل)** | زیر ۱۰۲۴px نوار `.hsw-ac__crumbs` فقط نقطهٔ آخر را نشان می‌دهد؛ دکمهٔ منو سایدبار را off-canvas باز می‌کند (اسکریم، Esc، کلیک بیرون، `aria-expanded`) و نوار `sticky` است. |
+| **تسویه: امنیت و نرخ** | `POST /hsw/v1/checkout/complete` قبل از `create_order()` هوک‌های `woocommerce_before_checkout_process` و `woocommerce_checkout_process` را اجرا می‌کند و خطاهای `wc_notice` را ۴۰۰ برمی‌گرداند (کپچا/ضدتقلب). `terms` از ورودی خوانده می‌شود و فقط با `wc_terms_and_conditions_checkbox_enabled()` اجباری است. نرخ: complete ۲۰/۶۰s برای IP+session + شمارندهٔ IP-only ×۵ (CGNAT)، coupon ۱۰/۶۰s + قفل پس از ۱۰ خطا/۱۰ دقیقه؛ فیلتر `hsw_checkout_rate_limit`، پاسخ ۴۲۹ با `retry_after`. |
 | **ارسال رایگان (اختیاری)** | پیش‌فرض **خاموش**. با `hsw_free_shipping_on = yes` فیلتر `woocommerce_package_rates` (اولویت ۲۰) بالای آستانه همهٔ نرخ‌ها را صفر می‌کند و شرط وزن/کلاس ارسال ووکامرس را دور می‌زند — به همین دلیل پیش‌فرض خاموش است. |
 
 ## ۵) الگوهای تداخل واقعی
