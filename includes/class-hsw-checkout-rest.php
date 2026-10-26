@@ -342,6 +342,16 @@ class HSW_Checkout_Rest {
                         return new WP_Error( 'hsw_no_cart', __( 'سبد خرید یافت نشد.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
                 }
 
+                /*
+                 * Coupon guessing: 10 requests/minute per IP+session, plus a lock
+                 * after 10 wrong codes in 10 minutes. Thresholds are filterable
+                 * through `hsw_checkout_rate_limit` (same filter as /complete).
+                 */
+                $gate = $this->coupon_gate();
+                if ( is_wp_error( $gate ) ) {
+                        return $gate;
+                }
+
                 $code   = wc_format_coupon_code( wc_clean( (string) $request->get_param( 'code' ) ) );
                 $remove = wc_format_coupon_code( wc_clean( (string) $request->get_param( 'remove' ) ) );
 
@@ -365,12 +375,14 @@ class HSW_Checkout_Rest {
                         $valid     = $discounts->is_coupon_valid( $coupon );
 
                         if ( is_wp_error( $valid ) ) {
+                                $this->coupon_failed();
                                 return new WP_Error( 'hsw_bad_coupon', wp_strip_all_tags( $valid->get_error_message() ), array( 'status' => 400 ) );
                         }
                         $cart->apply_coupon( $code );
                         $cart->calculate_totals();
                         $applied = (array) $cart->get_applied_coupons();
                         if ( ! in_array( $code, $applied, true ) ) {
+                                $this->coupon_failed();
                                 return new WP_Error( 'hsw_bad_coupon', __( 'کد تخفیف وارد شده معتبر نیست.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
                         }
                 } else {
@@ -384,6 +396,82 @@ class HSW_Checkout_Rest {
                                 'totals'  => $this->totals_payload(),
                         )
                 );
+        }
+
+        /**
+         * Request limiter + wrong-code lock for the coupon endpoint.
+         *
+         * @return true|WP_Error
+         */
+        protected function coupon_gate() {
+                if ( ! class_exists( 'HSW_Throttle' ) ) {
+                        return true;
+                }
+
+                $conf = apply_filters(
+                        'hsw_checkout_rate_limit',
+                        array( 'limit' => 10, 'window' => 60, 'fail_limit' => 10, 'fail_window' => 600, 'lock' => 600 ),
+                        'coupon'
+                );
+                $conf = wp_parse_args( $conf, array( 'limit' => 10, 'window' => 60, 'fail_limit' => 10, 'fail_window' => 600, 'lock' => 600 ) );
+
+                $ip  = HSW_Throttle::ip();
+                $sid = ( WC()->session ) ? (string) WC()->session->get_customer_id() : '';
+                $key = md5( $ip . '|' . $sid );
+
+                $lock = HSW_Throttle::peek( 'hsw-ck-coupon-lock-' . $key );
+                if ( ! empty( $lock['hits'] ) ) {
+                        return $this->coupon_locked( (int) $lock['retry_after'] );
+                }
+
+                $hit = HSW_Throttle::hit( 'hsw-ck-coupon-' . $key, (int) $conf['limit'], (int) $conf['window'] );
+                if ( ! $hit['allowed'] ) {
+                        return $this->coupon_locked( (int) $hit['retry_after'] );
+                }
+
+                return true;
+        }
+
+        /**
+         * Count a wrong code; lock the session once the threshold is reached.
+         *
+         * @return void
+         */
+        protected function coupon_failed() {
+                if ( ! class_exists( 'HSW_Throttle' ) ) {
+                        return;
+                }
+
+                $conf = apply_filters(
+                        'hsw_checkout_rate_limit',
+                        array( 'limit' => 10, 'window' => 60, 'fail_limit' => 10, 'fail_window' => 600, 'lock' => 600 ),
+                        'coupon'
+                );
+                $conf = wp_parse_args( $conf, array( 'fail_limit' => 10, 'fail_window' => 600, 'lock' => 600 ) );
+
+                $key = md5( HSW_Throttle::ip() . '|' . ( ( WC()->session ) ? (string) WC()->session->get_customer_id() : '' ) );
+                $hit = HSW_Throttle::hit( 'hsw-ck-coupon-fail-' . $key, (int) $conf['fail_limit'], (int) $conf['fail_window'] );
+
+                if ( ! $hit['allowed'] ) {
+                        HSW_Throttle::hit( 'hsw-ck-coupon-lock-' . $key, 1, (int) $conf['lock'] );
+                }
+        }
+
+        /**
+         * 429 with a Persian message and Retry-After.
+         *
+         * @param int $retry Seconds.
+         * @return WP_Error
+         */
+        protected function coupon_locked( $retry ) {
+                $error = new WP_Error(
+                        'hsw_coupon_rate_limited',
+                        __( 'تلاش‌های ناموفق زیاد بود؛ چند دقیقه بعد دوباره امتحان کنید.', 'hamishop-elementor-widgets' ),
+                        array( 'status' => 429 )
+                );
+                $error->add_data( array( 'retry_after' => max( 1, (int) $retry ) ) );
+
+                return $error;
         }
 
         /**

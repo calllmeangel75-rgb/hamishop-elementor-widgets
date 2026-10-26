@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.122
+Stable tag: 1.11.123
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,22 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.123 =
+* **امنیت تسویه: هوک‌های پرداخت، قوانین و محدودیت نرخ.**
+  - `POST /hsw/v1/checkout/complete` قبل از `create_order()` حالا
+    `woocommerce_before_checkout_process` و `woocommerce_checkout_process` را
+    اجرا می‌کند و خطاهای `wc_notice` آن‌ها را به‌صورت خطای REST (۴۰۰) برمی‌گرداند
+    — تا کپچا و افزونه‌های ضدتقلب واقعاً اجرا شوند.
+  - `terms` دیگر `1` ثابت نیست: از ورودی خوانده می‌شود و **فقط** وقتی
+    `wc_terms_and_conditions_checkbox_enabled()` فعال باشد اجباری است.
+  - محدودیت نرخ با `HSW_Throttle`:
+    - `complete`: ۲۰ درخواست/۶۰ ثانیه برای IP+session و شمارندهٔ IP-only با ۵
+      برابر آستانه (برای CGNAT مشتری‌های واقعی).
+    - `coupon`: ۱۰ درخواست/۶۰ ثانیه + شمارندهٔ کد اشتباه (۱۰ خطا/۱۰ دقیقه →
+      قفل ۱۰ دقیقه).
+    - همه با فیلتر `hsw_checkout_rate_limit`؛ پاسخ ۴۲۹ با پیام فارسی و
+      `retry_after`.
 
 = 1.11.122 =
 * **مستندات فنی کامل برای توسعه‌دهنده.**

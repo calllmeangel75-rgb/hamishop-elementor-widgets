@@ -64,9 +64,80 @@ class HSW_Checkout_Complete {
 	}
 
 	/**
+	 * Two counters: a strict one per IP+session and a 5x looser one per IP only.
+	 *
+	 * Iranian mobile users often share one carrier NAT address, so an IP-only
+	 * limit as strict as the session one would block real customers. Thresholds
+	 * are filterable through `hsw_checkout_rate_limit`.
+	 *
+	 * @param string $bucket  Route name.
+	 * @param int    $limit   Requests per window.
+	 * @param int    $window  Window in seconds.
+	 * @return true|WP_Error
+	 */
+	protected function rate_gate( $bucket, $limit, $window ) {
+		if ( ! class_exists( 'HSW_Throttle' ) ) {
+			return true;
+		}
+
+		/**
+		 * Filter the checkout rate limit.
+		 *
+		 * @param array  $limit  [ 'limit' => int, 'window' => int, 'ip_multiplier' => int ].
+		 * @param string $bucket Route name.
+		 */
+		$conf = apply_filters(
+			'hsw_checkout_rate_limit',
+			array(
+				'limit'         => (int) $limit,
+				'window'        => (int) $window,
+				'ip_multiplier' => 5,
+			),
+			$bucket
+		);
+
+		$ip   = HSW_Throttle::ip();
+		$sid  = ( WC()->session ) ? (string) WC()->session->get_customer_id() : '';
+		$conf = wp_parse_args( $conf, array( 'limit' => 20, 'window' => 60, 'ip_multiplier' => 5 ) );
+
+		$retry = 0;
+
+		if ( '' !== $sid ) {
+			$hit = HSW_Throttle::hit( 'hsw-ck-' . $bucket . '-' . md5( $ip . '|' . $sid ), $conf['limit'], $conf['window'] );
+			if ( ! $hit['allowed'] ) {
+				$retry = (int) $hit['retry_after'];
+			}
+		}
+
+		/* IP-only counter, generous enough for CGNAT. */
+		$hit_ip = HSW_Throttle::hit( 'hsw-ck-ip-' . $bucket . '-' . md5( $ip ), (int) $conf['limit'] * max( 1, (int) $conf['ip_multiplier'] ), $conf['window'] );
+		if ( ! $hit_ip['allowed'] ) {
+			$retry = max( $retry, (int) $hit_ip['retry_after'] );
+		}
+
+		if ( $retry > 0 ) {
+			$error = new WP_Error(
+				'hsw_rate_limited',
+				__( 'درخواست‌های زیادی ثبت شده است؛ چند لحظه صبر کنید و دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
+				array( 'status' => 429 )
+			);
+			$error->add_data( array( 'retry_after' => $retry ) );
+
+			return $error;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Place the order and start the payment hand-off.
 	 */
 	public function complete( $request ) {
+		$gate = $this->rate_gate( 'complete', 20, 60 );
+		if ( is_wp_error( $gate ) ) {
+			return $gate;
+		}
+
 		if ( WC()->cart->is_empty() ) {
 			return new WP_Error( 'hsw_empty_cart', __( 'سبد خرید خالی است؛ ابتدا محصولی به سبد اضافه کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
 		}
@@ -76,6 +147,15 @@ class HSW_Checkout_Complete {
 		$this->store_schedule_from_request( $request );
 
 		$data = $this->order_data( $request );
+
+		/* order_data() sets terms to true when the store does not require them. */
+		if ( empty( $data['terms'] ) ) {
+			return new WP_Error(
+				'hsw_terms',
+				__( 'برای ثبت سفارش باید قوانین و شرایط فروشگاه را بپذیرید.', 'hamishop-elementor-widgets' ),
+				array( 'status' => 400 )
+			);
+		}
 
 		/* The design takes the delivery address from the customer account;
 		 * guests (and accounts without any address) get a friendly pointer. */
@@ -99,6 +179,24 @@ class HSW_Checkout_Complete {
 		$errors = $this->validate( $data );
 		if ( $errors ) {
 			return new WP_Error( 'hsw_checkout_validation', implode( ' ', array_slice( $errors, 0, 3 ) ), array( 'status' => 400 ) );
+		}
+
+		/*
+		 * Captcha / anti-fraud / validation plugins hook these two. Our endpoint
+		 * called create_order() directly, so none of them ever ran and an order
+		 * could be placed with a failing captcha.
+		 */
+		do_action( 'woocommerce_before_checkout_process' );
+		do_action( 'woocommerce_checkout_process' );
+
+		$hooked = wc_get_notices( 'error' );
+		if ( $hooked ) {
+			$messages = array();
+			foreach ( $hooked as $notice ) {
+				$messages[] = wp_strip_all_tags( (string) ( $notice['notice'] ?? '' ) );
+			}
+			wc_clear_notices();
+			return new WP_Error( 'hsw_checkout_process', implode( ' ', array_slice( array_filter( $messages ), 0, 3 ) ), array( 'status' => 400 ) );
 		}
 
 		try {
@@ -276,7 +374,13 @@ class HSW_Checkout_Complete {
 		$data['payment_method']            = $method;
 		$data['order_comments']            = $this->note_with_delivery();
 		$data['ship_to_different_address'] = false;
-		$data['terms']                     = 1;
+		/*
+		 * Terms used to be hard-coded to 1, so the server accepted orders the
+		 * customer never agreed to. Read the real input and only require it when
+		 * WooCommerce's terms checkbox is enabled for this store.
+		 */
+		$terms_required          = function_exists( 'wc_terms_and_conditions_checkbox_enabled' ) && wc_terms_and_conditions_checkbox_enabled();
+		$data['terms']           = $terms_required ? (bool) $request->get_param( 'terms' ) : true;
 
 		return $data;
 	}
