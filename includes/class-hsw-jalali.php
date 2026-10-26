@@ -158,6 +158,20 @@ class HSW_Jalali {
 		 */
 		add_filter( 'get_the_date', array( __CLASS__, 'filter_post_date' ), 10, 3 );
 		add_filter( 'get_the_modified_date', array( __CLASS__, 'filter_post_date' ), 10, 3 );
+		/* Themes and Elementor's post-info often read the time instead. */
+		add_filter( 'get_the_time', array( __CLASS__, 'filter_post_time' ), 10, 3 );
+	}
+
+	/**
+	 * Convert get_the_time() output (same shape as the date filters).
+	 *
+	 * @param string      $the_time Formatted time.
+	 * @param string      $format   Format.
+	 * @param int|WP_Post $post     Post.
+	 * @return string
+	 */
+	public static function filter_post_time( $the_time, $format, $post = null ) {
+		return self::filter_post_date( $the_time, $format, $post );
 	}
 
 	/**
@@ -173,7 +187,17 @@ class HSW_Jalali {
 			return $the_date;
 		}
 
-		if ( ! preg_match( '/[YymndjFM]/', (string) $format ) ) {
+		/*
+		 * `get_the_date( '' )` means "use the site's date format", and that is
+		 * exactly how our blog widgets call it — the empty string has to be
+		 * resolved here or the blog never converts.
+		 */
+		$format = (string) $format;
+		if ( '' === $format ) {
+			$format = (string) get_option( 'date_format', 'F j, Y' );
+		}
+
+		if ( ! preg_match( '/[YymndjFM]/', $format ) ) {
 			return $the_date;
 		}
 
@@ -207,7 +231,12 @@ class HSW_Jalali {
 			return $date;
 		}
 
-		if ( ! preg_match( '/[YymndjFM]/', (string) $fmt ) ) {
+		$fmt = (string) $fmt;
+		if ( '' === $fmt ) {
+			$fmt = (string) get_option( 'date_format', 'F j, Y' );
+		}
+
+		if ( ! preg_match( '/[YymndjFM]/', $fmt ) ) {
 			return $date;
 		}
 
