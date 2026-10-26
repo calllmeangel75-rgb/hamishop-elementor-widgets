@@ -341,7 +341,38 @@
                 }, 650);
         }
 
+        /*
+         * The filter form carries TWO copies of every field: the desktop sidebar
+         * and the mobile sheet. Both are inside the same <form>, so the browser
+         * submitted each name twice and PHP kept the LAST one — always the sheet
+         * copy. Changing a desktop control left the sheet copy stale, so the
+         * stale value won and the filter looked broken (price above all).
+         * Disabling the copy that is not visible keeps exactly one value.
+         */
+        function pruneHiddenCopy(form) {
+                ['.hsw-af__side', '.hsw-asheet--filter'].forEach(function (sel) {
+                        var box = form.querySelector(sel);
+                        if (!box) { return; }
+                        var cs = window.getComputedStyle(box);
+                        var visible = cs.display !== 'none' && cs.visibility !== 'hidden' && box.getClientRects().length > 0;
+                        if (visible) { return; }
+                        box.querySelectorAll('input, select, textarea').forEach(function (el) {
+                                if (!el.disabled) {
+                                        el.disabled = true;
+                                        el.setAttribute('data-hsw-was-enabled', '1');
+                                }
+                        });
+                });
+        }
+
+        document.addEventListener('submit', function (e) {
+                if (e.target && e.target.classList && e.target.classList.contains('hsw-af__form')) {
+                        pruneHiddenCopy(e.target);
+                }
+        }, true);
+
         function submitForm(form) {
+                pruneHiddenCopy(form);
                 if (form.requestSubmit) {
                         form.requestSubmit();
                 } else {

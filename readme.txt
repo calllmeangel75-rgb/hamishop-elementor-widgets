@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.113
+Stable tag: 1.11.114
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.114 =
+* **رفع باگ فیلترهای آرشیو: نام‌های تکراری در یک فرم.**
+  - فرم فیلتر **دو نسخه** از هر فیلد دارد: سایدبار دسکتاپ (`.hsw-af__side`) و
+    شیت موبایل (`.hsw-asheet--filter`)، هر دو داخل **یک** `<form>`. اندازه‌گیری:
+    `min_price` ×۲، `max_price` ×۲، `instock` ×۲ در یک فرم.
+  - مرورگر هر نام را دو بار می‌فرستاد و PHP **آخری** را می‌گرفت (همیشه نسخهٔ
+    شیت). پس تغییر در سایدبار دسکتاپ بی‌اثر می‌شد — دقیقاً همان حس «فیلتر قیمت
+    کار نمی‌کند».
+  - حالا قبل از submit، نسخهٔ **نامرئی** غیرفعال (`disabled`) می‌شود تا فقط یک
+    مقدار ارسال شود؛ هم برای submit خودکار و هم دکمهٔ «اعمال فیلترها».
 
 = 1.11.113 =
 * **گارد شیت‌ها از حالت سراسری به «فقط بخش آرشیو» منتقل شد.**
