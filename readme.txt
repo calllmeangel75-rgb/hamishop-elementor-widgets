@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.107
+Stable tag: 1.11.108
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.108 =
+* **رفع تداخل اولویت در دکمه‌های پنل حساب.**
+  - قاعدهٔ `۱.۱۱.۸۹` به‌صورت `.hsw-ac__btn:not(.hsw-ac__btn--primary)` نوشته
+    شده بود (specificity 0,2,0) و نسخه‌های `--light` و `--ghost-light` را هم
+    می‌گرفت؛ در نتیجه رنگ پالت «دکمه‌های معمولی» روی آن‌ها می‌نشست و متن با
+    پس‌زمینه یکی می‌شد (اصلاح ۱.۱۱.۱۰۷ هم همین‌جا خنثی می‌شد).
+  - حالا قاعده فقط `--ghost` را هدف می‌گیرد؛ `--light` و `--ghost-light` روی
+    هدر رنگی، استایل اختصاصی خودشان را دارند.
 
 = 1.11.107 =
 * **دکمهٔ «بازگشت به پیشخوان» در صفحات آدرس‌ها/دانلودها/علاقه‌مندی‌ها دیده می‌شود.**

@@ -854,14 +854,19 @@ ul.products.is-pg-leaving,
 }
 
 /* Secondary buttons: everything that is not the primary CTA. */
-.hsw-ac__btn:not(.hsw-ac__btn--primary),
+/*
+ * Only the plain secondary button follows the palette. --light and
+ * --ghost-light live on the coloured hero and keep their own rules, otherwise
+ * the palette background/text made them invisible there.
+ */
+.hsw-ac__btn--ghost,
 .hsw-c__back,
 .hsw-citems__back {
 	background: var(--hsw-btn-bg, #fff);
 	color: var(--hsw-btn-c, #191c1e);
 	border: 1px solid var(--hsw-btn-bd, #e1e2e4);
 }
-.hsw-ac__btn:not(.hsw-ac__btn--primary):hover,
+.hsw-ac__btn--ghost:hover,
 .hsw-c__back:hover,
 .hsw-citems__back:hover {
 	background: var(--hsw-btn-hover-bg, #f3f4f6);
