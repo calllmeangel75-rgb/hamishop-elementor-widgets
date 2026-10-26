@@ -6029,7 +6029,7 @@ a.hsw-ac__stat:hover {
 }
 
 .hsw-inv__print:hover {
-	background: var(--hsw-cta-hover, var(--hsw-accent));
+	background: var(--hsw-cta-hover, var(--hsw-accent, #fc593a));
 	color: #fff;
 	transform: translateY(-1px);
 }

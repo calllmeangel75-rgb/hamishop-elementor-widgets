@@ -680,12 +680,12 @@ body.hsw-scroll-lock {
 .hsw-a .hsw-af__apply:is(:hover, :focus, :focus-visible),
 .hsw-a .hsw-af__apply--side:is(:hover, :focus, :focus-visible),
 .hsw-a .hsw-agd__ok:is(:hover, :focus, :focus-visible) {
-	background-color: var(--hswa-primary, var(--hsw-primary)) !important;
+	background-color: var(--hswa-primary, var(--hsw-primary, #4d85ff)) !important;
 	color: #fff !important;
 }
 
 .hsw-c .hsw-citems__update:is(:hover, :focus, :focus-visible) {
-	background-color: var(--hswc-primary, var(--hsw-primary)) !important;
+	background-color: var(--hswc-primary, var(--hsw-primary, #4d85ff)) !important;
 	color: #fff !important;
 }
 
@@ -748,7 +748,7 @@ body.hsw-scroll-lock {
 	transition: color .2s;
 }
 .hsw-pg__num:hover,
-.hsw-pg__num:focus-visible { color: var(--hsw-cta, var(--hsw-primary)); }
+.hsw-pg__num:focus-visible { color: var(--hsw-cta, var(--hsw-primary, #4d85ff)); }
 .hsw-pg__num.is-active { color: #fff; cursor: default; }
 .hsw-pg__dots {
 	display: inline-flex;
@@ -777,8 +777,8 @@ body.hsw-scroll-lock {
 }
 .hsw-pg__arrow:hover,
 .hsw-pg__arrow:focus-visible {
-	color: var(--hsw-cta, var(--hsw-primary));
-	border-color: var(--hsw-cta, var(--hsw-primary));
+	color: var(--hsw-cta, var(--hsw-primary, #4d85ff));
+	border-color: var(--hsw-cta, var(--hsw-primary, #4d85ff));
 	transform: translateY(-1px);
 	box-shadow: 0 8px 18px -12px rgba(15, 32, 66, .5);
 }

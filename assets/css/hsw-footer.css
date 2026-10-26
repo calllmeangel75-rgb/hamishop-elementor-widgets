@@ -55,8 +55,8 @@
 	transition: color .15s, background-color .15s;
 }
 .hsw-sf__item:hover,
-.hsw-sf__item:focus-visible { color: var(--hsw-sf-c-hover, var(--hsw-primary)); background: var(--hsw-pal-primary-light, #f4f6ff); }
-.hsw-sf__item.is-active { color: var(--hsw-sf-c-hover, var(--hsw-primary)); }
+.hsw-sf__item:focus-visible { color: var(--hsw-sf-c-hover, var(--hsw-primary, #4d85ff)); background: var(--hsw-pal-primary-light, #f4f6ff); }
+.hsw-sf__item.is-active { color: var(--hsw-sf-c-hover, var(--hsw-primary, #4d85ff)); }
 .hsw-sf__item.is-active .hsw-sf__ic { transform: translateY(-1px); }
 .hsw-sf__label {
 	max-width: 100%;

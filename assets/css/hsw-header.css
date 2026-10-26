@@ -2130,7 +2130,7 @@ html { overflow-x: clip; }
 .hsw-hd__cart:active,
 .hsw-hd__catbtn:active {
 	color: var(--hsw-primary-dark, var(--hsw-hd-primary));
-	background: color-mix(in srgb, var(--hsw-primary) 9%, var(--hsw-hd-bg));
+	background: color-mix(in srgb, var(--hsw-primary, #4d85ff) 9%, var(--hsw-hd-bg));
 }
 
 .hsw-hd__cta:hover {

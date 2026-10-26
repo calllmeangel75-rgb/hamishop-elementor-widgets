@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.124
+Stable tag: 1.11.125
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.125 =
+* **صفر ارجاع بدون fallback به توکن‌های سراسری پالت.**
+  - ۳۴ توکن سراسری (`--hsw-primary` … `--hsw-btn-hover-bg`) با مقدار واقعی
+    پالت اندازه‌گیری شد و هر ارجاع بدون fallback در ۶ فایل CSS با همان مقدار
+    جانشین شد: **۱۵۲ مورد** (product 102 · loop 41 · fonts 5 · footer 2 ·
+    header 1 · account 1).
+  - نتیجه: اگر استایل پالت روی صفحه‌ای چاپ نشود (ادیتور، کش، صفحهٔ سفارشی)،
+    رنگ‌ها همان پیش‌فرض پالت را می‌گیرند، نه رنگ ارثی قالب/المنتور.
+  - **تأیید:** اسنپ‌شات ۲۸ المان روی چهار صفحه قبل/بعد → صفر تفاوت.
+  - باقی‌مانده: ارجاع به متغیرهای کامپوننتی (`--hswc-`, `--hswa-`, …) که در همان
+    فایل روی ریشهٔ کامپوننت تعریف می‌شوند (۲۱۹۴ مورد، امن).
 
 = 1.11.124 =
 * **مستندات هم‌گام با کد:** مکانیزم «تسویه: امنیت و نرخ» به
