@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.101
+Stable tag: 1.11.102
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.102 =
+* **شمارندهٔ سبد دیگر روی رفرش از ۳ به ۲ نمی‌پرد.**
+  - علت: سرور تعداد کل (۳) را چاپ می‌کرد، ولی `refreshCart()` همان HTML را با
+    `parseMiniCart()` می‌خواند و چون مینی‌کارت ووکامرس تعداد را به‌صورت متن
+    «۳ × نام» می‌نویسد (نه `input.qty`)، هر قلم را ۱ می‌شمرد → **تعداد اقلام (۲)**.
+  - حالا ابتدا `data-count` از fragment خودمان خوانده می‌شود (همان عدد سرور) و
+    فقط اگر نبود، مینی‌کارت پارس می‌شود؛ آن هم با پشتیبانی از ارقام فارسی.
 
 = 1.11.101 =
 * **فوتر چسبان حالا زیر منوی موبایل می‌نشیند (پیش‌فرض).**

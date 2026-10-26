@@ -84,7 +84,17 @@
 		var count = 0;
 		items.forEach(function (item) {
 			var qty = item.querySelector('input.qty');
-			var value = qty ? parseInt(qty.value, 10) : 1;
+			var value = qty ? parseInt(qty.value, 10) : 0;
+			if (!value) {
+				/* WC prints the quantity as "۳ × نام محصول" (Persian digits). */
+				var label = item.querySelector('.quantity');
+				var m = label ? label.textContent.match(/[0-9\u06F0-\u06F9\u0660-\u0669]+/) : null;
+				if (m) {
+					value = parseInt(m[0].replace(/[\u06F0-\u06F9]/g, function (d) {
+						return String(d.charCodeAt(0) - 0x06F0);
+					}), 10) || 0;
+				}
+			}
 			count += value > 0 ? value : 1;
 		});
 
@@ -694,6 +704,23 @@
 		}
 
 		function updateFromFragmentHtml(html) {
+			/*
+			 * Our own fragment already contains the exact count WooCommerce
+			 * reports (total quantity). Parsing the mini-cart instead gave the
+			 * number of *lines*, because WC's mini-cart prints "3 × product"
+			 * as text, not an input.qty — that is why the badge flickered from
+			 * 3 to 2 on every reload.
+			 */
+			var wrap = document.createElement('div');
+			wrap.innerHTML = html;
+			var badge = wrap.querySelector('[data-hsw-cart-count]');
+			if (badge) {
+				var raw = parseInt(badge.getAttribute('data-count') || '0', 10) || 0;
+				var totalEl = wrap.querySelector('[data-hsw-cart-total]');
+				applyCart(raw, totalEl ? totalEl.textContent.replace(/\s+/g, ' ').trim() : '');
+				return;
+			}
+
 			var data = parseMiniCart(html);
 			if (data) {
 				applyCart(data.count, data.total);
