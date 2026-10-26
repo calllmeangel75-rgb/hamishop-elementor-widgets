@@ -937,10 +937,17 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 							<ins><?php echo wp_kses_post( $product->get_price_html() ); ?></ins>
 						<?php endif; ?>
 					</div>
-					<a class="hsw-pp__prodbtn" href="<?php echo esc_url( $product->add_to_cart_url() ); ?>"
-						data-product_id="<?php echo esc_attr( (string) $product->get_id() ); ?>"
-						<?php echo $product->is_type( 'simple' ) && $product->is_purchasable() ? 'data-hsw-add' : ''; ?>>
-						<?php HSW_Helpers::the_icon( $product->is_type( 'simple' ) ? 'add_shopping_cart' : 'shopping_cart' ); ?>
+					<?php
+					/*
+					 * add_to_cart_url() on a simple product is "this page +
+					 * ?add-to-cart=ID": clicking it reloaded the article and
+					 * looked like a dead link. hsw-post.js has no add-to-cart
+					 * handler either, so the button goes to the product page —
+					 * which is what «بررسی مشخصات» promises.
+					 */
+					?>
+					<a class="hsw-pp__prodbtn" href="<?php echo esc_url( $product->get_permalink() ); ?>">
+						<?php HSW_Helpers::the_icon( 'shopping_cart' ); ?>
 						<span><?php esc_html_e( 'خرید سریع و بررسی مشخصات', 'hamishop-elementor-widgets' ); ?></span>
 					</a>
 				</div>

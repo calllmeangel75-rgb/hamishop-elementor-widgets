@@ -46,7 +46,20 @@
 				var viewport = window.innerHeight || 0;
 				var total = rect.height - viewport;
 				var passed = -rect.top;
-				var percent = total > 0 ? (passed / total) * 100 : 100;
+				/*
+				 * Short articles (body shorter than the viewport) used to report
+				 * 100% from the very top, so the bar looked like a solid line.
+				 * They now fall back to document scroll, which still gives the
+				 * reader a real position.
+				 */
+				var percent;
+				if ( total > 0 ) {
+					percent = ( passed / total ) * 100;
+				} else {
+					var doc = document.documentElement;
+					var max = ( doc.scrollHeight || 0 ) - viewport;
+					percent = max > 0 ? ( ( window.pageYOffset || doc.scrollTop || 0 ) / max ) * 100 : 0;
+				}
 
 				percent = Math.max(0, Math.min(100, percent));
 				progress.style.width = percent.toFixed(1) + '%';
