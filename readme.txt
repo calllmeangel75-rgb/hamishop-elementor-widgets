@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.103
+Stable tag: 1.11.104
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.104 =
+* **بهینه‌سازی Lighthouse (بخش افزونه).**
+  - `preconnect` به `secure.gravatar.com` دیگر روی همهٔ صفحات چاپ نمی‌شود؛ فقط
+    جایی که آواتار ممکن است رندر شود (نوشته/دیدگاه). Lighthouse این را
+    «Unused preconnect» علامت زده بود.
+  - لوگوی هدر به‌جای فایل کامل، نسخهٔ ۱۶۰px می‌گیرد + `sizes` واقعی +
+    `fetchpriority="high"`؛ روی سایت مشتری ۲۵KiB برای نمایش ۶۷px دانلود می‌شد.
 
 = 1.11.103 =
 * **رنگ متن دکمه‌های خرید دیگر از رنگ‌های سراسری المنتور ارث نمی‌برد.**

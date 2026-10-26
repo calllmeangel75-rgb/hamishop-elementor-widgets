@@ -212,13 +212,21 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			$logo_id = (int) get_theme_mod( 'custom_logo' );
 		}
 		if ( $logo_id ) {
+			/*
+			 * A 67px logo does not need the 300×300 original (25 KiB on the
+			 * client's shop). Ask for a 160px rendition and declare the real
+			 * display size so the browser stops downloading the full file.
+			 */
 			$logo = wp_get_attachment_image(
 				$logo_id,
-				'full',
+				array( 160, 160 ),
 				false,
 				array(
-					'class' => 'hsw-hd__logoimg',
-					'alt'   => $aria_name,
+					'class'         => 'hsw-hd__logoimg',
+					'alt'           => $aria_name,
+					'sizes'         => '(max-width: 767px) 96px, 120px',
+					'fetchpriority' => 'high',
+					'decoding'      => 'async',
 				)
 			);
 		}

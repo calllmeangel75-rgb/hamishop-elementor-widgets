@@ -245,9 +245,16 @@ class HSW_Assets {
          * @return array
          */
         public function resource_hints( $urls, $relation_type ) {
-                if ( 'preconnect' === $relation_type && ! in_array( 'https://secure.gravatar.com', $urls, true ) ) {
+                /*
+                 * Lighthouse flags the gravatar preconnect as unused on shop and
+                 * archive pages. Only hint it where an avatar can actually render.
+                 */
+                $needs_avatar = is_singular( 'post' ) || ( is_singular() && comments_open() );
+
+                if ( 'preconnect' === $relation_type && $needs_avatar && ! in_array( 'https://secure.gravatar.com', $urls, true ) ) {
                         $urls[] = 'https://secure.gravatar.com';
                 }
+
                 return $urls;
         }
 
