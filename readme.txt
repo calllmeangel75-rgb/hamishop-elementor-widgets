@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.106
+Stable tag: 1.11.107
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.107 =
+* **دکمهٔ «بازگشت به پیشخوان» در صفحات آدرس‌ها/دانلودها/علاقه‌مندی‌ها دیده می‌شود.**
+  - کلاس `hsw-ac__btn--ghost-light` پس‌زمینهٔ نیمه‌شفاف **سفید** با متن سفید داشت؛
+    روی هدر روشن (یا وقتی گرادیان هدر تنظیم نشده) متن با پس‌زمینه یکی می‌شد.
+  - حالا یک پیل تیرهٔ نیمه‌شفاف با بلور است که روی هدر تیره و روشن هر دو خوانا
+    است؛ هاور هم پررنگ‌تر می‌شود.
 
 = 1.11.106 =
 * **پنل کاربری در موبایل: نوار چسبان + کشوی منو.**

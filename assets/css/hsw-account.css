@@ -239,14 +239,24 @@
 	color: #fff !important;
 }
 
+/*
+ * Sits on the hero. A translucent-white pill only reads on a dark gradient —
+ * when the site's hero colours are light (or the gradient vars are empty) the
+ * white text disappeared into the background. A dark translucent pill reads on
+ * both, so the button is never invisible.
+ */
 .hsw-ac__btn--ghost-light {
-	background: rgba(255, 255, 255, .08);
-	border-color: rgba(255, 255, 255, .3);
+	background: rgba(9, 20, 38, .55);
+	border-color: rgba(255, 255, 255, .38);
 	color: #fff !important;
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
 }
 
 .hsw-ac__btn--ghost-light:hover {
-	background: rgba(255, 255, 255, .16);
+	background: rgba(9, 20, 38, .78);
+	border-color: rgba(255, 255, 255, .6);
+	color: #fff !important;
 }
 
 .hsw-ac__btn--danger {
