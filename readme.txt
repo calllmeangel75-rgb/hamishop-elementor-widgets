@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.116
+Stable tag: 1.11.117
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.117 =
+* **کلیدهای تنظیمات: ظاهر سوییچ و جای درست.**
+  - «تقویم شمسی» و «ارسال رایگان افزونه» حالا مثل بقیهٔ تنظیمات **سوییچ**
+    هستند (با `hidden` برای مقدار خاموش و `hsw-wm-track`).
+  - «ارسال رایگان افزونه» از بخش ۴۰۴ به **بخش ارسال رایگان**
+    (`#hsw-group-shipping`) منتقل شد، بالای فیلد سقف.
+  - «تقویم شمسی» به بخش **کاتالوگ/فروشگاه** (`#hsw-group-catalog`) منتقل شد.
 
 = 1.11.116 =
 * **تقویم شمسی (اختیاری، پیش‌فرض خاموش).**

@@ -1060,6 +1060,18 @@ final class HSW_Widget_Manager {
 							</header>
 
 							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-jalali-on">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'تقویم شمسی', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'تاریخ‌ها در سایت به شمسی نمایش داده می‌شوند (تبدیل سمت سرور، بدون فایل یا اسکریپت اضافه). پنل مدیریت گرگوری می‌ماند.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="hidden" name="<?php echo esc_attr( HSW_Jalali::OPTION ); ?>" value="no" />
+										<input type="checkbox" id="hsw-jalali-on" name="<?php echo esc_attr( HSW_Jalali::OPTION ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Jalali::OPTION, 'no' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
+									</span>
+								</label>
+
 								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-oos-last">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'ناموجودها انتهای فهرست', 'hamishop-elementor-widgets' ); ?></strong>
@@ -1084,6 +1096,18 @@ final class HSW_Widget_Manager {
 							</header>
 
 							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-free-ship-on">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'ارسال رایگان افزونه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پیش‌فرض خاموش است. اگر روش ارسال رایگان را در ووکامرس تنظیم کرده‌اید، خاموش بگذارید تا افزونه نرخ‌ها را بازنویسی نکند.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="hidden" name="<?php echo esc_attr( HSW_Free_Shipping::ENABLED ); ?>" value="no" />
+										<input type="checkbox" id="hsw-free-ship-on" name="<?php echo esc_attr( HSW_Free_Shipping::ENABLED ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Free_Shipping::ENABLED, 'no' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
+									</span>
+								</label>
+
 								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
 										<strong><?php esc_html_e( 'سقف ارسال رایگان (تومان)', 'hamishop-elementor-widgets' ); ?></strong>
@@ -1140,32 +1164,6 @@ final class HSW_Widget_Manager {
 										<span class="hsw-wm-track" aria-hidden="true"></span>
 									</span>
 								</label>
-
-								<div class="hsw-wm-row hsw-wm-row--field">
-									<span class="hsw-wm-rowtext">
-										<strong><?php esc_html_e( 'ارسال رایگان افزونه', 'hamishop-elementor-widgets' ); ?></strong>
-										<small><?php esc_html_e( 'پیش‌فرض خاموش است. اگر روش ارسال رایگان را در ووکامرس تنظیم کرده‌اید، خاموش بگذارید تا افزونه نرخ‌ها را بازنویسی نکند.', 'hamishop-elementor-widgets' ); ?></small>
-									</span>
-									<span class="hsw-wm-field">
-										<label>
-											<input type="checkbox" name="<?php echo esc_attr( HSW_Free_Shipping::ENABLED ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Free_Shipping::ENABLED, 'no' ) ); ?> />
-											<?php esc_html_e( 'فعال باشد', 'hamishop-elementor-widgets' ); ?>
-										</label>
-									</span>
-								</div>
-
-								<div class="hsw-wm-row hsw-wm-row--field">
-									<span class="hsw-wm-rowtext">
-										<strong><?php esc_html_e( 'تقویم شمسی', 'hamishop-elementor-widgets' ); ?></strong>
-										<small><?php esc_html_e( 'تاریخ‌ها در سایت به شمسی نمایش داده می‌شوند (تبدیل سمت سرور، بدون فایل یا اسکریپت اضافه).', 'hamishop-elementor-widgets' ); ?></small>
-									</span>
-									<span class="hsw-wm-field">
-										<label>
-											<input type="checkbox" name="<?php echo esc_attr( HSW_Jalali::OPTION ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Jalali::OPTION, 'no' ) ); ?> />
-											<?php esc_html_e( 'فعال باشد', 'hamishop-elementor-widgets' ); ?>
-										</label>
-									</span>
-								</div>
 
 								<div class="hsw-wm-row hsw-wm-row--field">
 									<span class="hsw-wm-rowtext">
