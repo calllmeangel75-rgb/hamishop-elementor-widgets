@@ -179,6 +179,7 @@ class HSW_Widget_Archive_Guide extends HSW_Archive_Base {
                         </section>
 
                         <!-- =================== MOBILE GUIDE MODAL =================== -->
+                        <?php echo HSW_Assets::sheet_guard(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal style tag. ?>
                         <div class="hsw-agd__modal hsw-m" data-hsw-sheet="hsw-guide" aria-hidden="true">
                                 <div class="hsw-agd__backdrop" data-hsw-close></div>
                                 <div class="hsw-agd__panel">

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.112
+Stable tag: 1.11.113
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.113 =
+* **گارد شیت‌ها از حالت سراسری به «فقط بخش آرشیو» منتقل شد.**
+  - در ۱.۱۱.۱۱۲ این استایل در `<head>` همهٔ صفحات چاپ می‌شد؛ حالا هر ویجتی که
+    خودش شیت دارد (فیلتر، مرتب‌سازی، راهنما) یک‌بار در همان صفحه چاپش می‌کند
+    (`HSW_Assets::sheet_guard()` با فلگ استاتیک).
+  - نتیجهٔ اندازه‌گیری: خانه **۰** · فروشگاه **۱** · محصول **۰** · سبد **۰**.
 
 = 1.11.112 =
 * **رفع «یک لحظه شیت باز میشود» در آرشیو.**

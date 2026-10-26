@@ -13,7 +13,6 @@ class HSW_Assets {
         public function __construct() {
                 add_action( 'wp_enqueue_scripts', array( $this, 'register' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'resource_hints' ), 10, 2 );
-                add_action( 'wp_head', array( $this, 'print_sheet_guard' ), 1 );
                 add_filter( 'elementor/frontend/print_google_fonts', array( $this, 'filter_google_fonts' ) );
                 add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
@@ -120,7 +119,28 @@ class HSW_Assets {
          * @return void
          */
         public function print_sheet_guard() {
-                echo '<style id="hsw-sheet-guard">.hsw-asheet:not(.is-open),.hsw-agd__modal:not(.is-open){visibility:hidden}</style>' . "\n";
+                echo self::sheet_guard(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal style tag.
+        }
+
+        /**
+         * Inline guard for the bottom sheets that live in the markup.
+         *
+         * Printed by the widget that owns the sheet, right before its markup, so
+         * it stays inside the archive section instead of shipping on every page.
+         * `:not(.is-open)` means it stops applying as soon as the sheet opens.
+         *
+         * @return string
+         */
+        public static function sheet_guard() {
+                static $done = false;
+
+                if ( $done ) {
+                        return '';
+                }
+
+                $done = true;
+
+                return '<style id="hsw-sheet-guard">.hsw-asheet:not(.is-open),.hsw-agd__modal:not(.is-open){visibility:hidden}</style>';
         }
 
         public function print_viewport() {

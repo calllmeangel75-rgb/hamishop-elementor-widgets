@@ -1370,6 +1370,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 </aside>
 
                                 <!-- =================== MOBILE BOTTOM SHEET =================== -->
+                                <?php echo HSW_Assets::sheet_guard(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal style tag. ?>
                                 <div class="hsw-asheet hsw-asheet--filter hsw-m" data-hsw-sheet="hsw-filter" aria-hidden="true">
                                         <div class="hsw-asheet__backdrop" data-hsw-close></div>
                                         <div class="hsw-asheet__panel">

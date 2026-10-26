@@ -180,6 +180,7 @@ class HSW_Widget_Archive_Toolbar extends HSW_Archive_Base {
                         </div>
 
                         <!-- =================== MOBILE SORT SHEET =================== -->
+                        <?php echo HSW_Assets::sheet_guard(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal style tag. ?>
                         <div class="hsw-asheet hsw-asheet--sort hsw-m" data-hsw-sheet="hsw-sort" aria-hidden="true">
                                 <div class="hsw-asheet__backdrop" data-hsw-close></div>
                                 <div class="hsw-asheet__panel hsw-asheet__panel--sort">
