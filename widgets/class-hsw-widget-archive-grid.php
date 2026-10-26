@@ -227,6 +227,13 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                         'class'         => $priority ? 'skip-lazy' : '',
                                         'data-no-lazy'  => $priority ? '1' : '',
                                         'decoding'      => 'async',
+                                        /*
+                                         * WooCommerce defaults to `sizes="300px"`, so a
+                                         * 196px card downloaded the 300w file. Declaring
+                                         * the real box lets the browser pick a smaller
+                                         * candidate and shrinks the LCP payload.
+                                         */
+                                        'sizes'         => '(max-width: 480px) 45vw, (max-width: 767px) 30vw, 196px',
                                 )
                         );
                         if ( $html ) {

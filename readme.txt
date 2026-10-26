@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.114
+Stable tag: 1.11.115
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.115 =
+* **کارت‌های آرشیو: `sizes` واقعی برای تصاویر.**
+  - ووکامرس به‌صورت پیش‌فرض `sizes="300px"` می‌دهد، پس کارت ۱۹۶px هم فایل 300w
+    را دانلود می‌کرد (۲۴.۴KiB اضافه در LCP).
+  - حالا `sizes="(max-width: 480px) 45vw, (max-width: 767px) 30vw, 196px"` روی
+    تصویر کارت ست می‌شود.
 
 = 1.11.114 =
 * **رفع باگ فیلترهای آرشیو: نام‌های تکراری در یک فرم.**
