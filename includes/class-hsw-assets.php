@@ -13,6 +13,7 @@ class HSW_Assets {
         public function __construct() {
                 add_action( 'wp_enqueue_scripts', array( $this, 'register' ) );
 		add_filter( 'wp_resource_hints', array( $this, 'resource_hints' ), 10, 2 );
+                add_action( 'wp_head', array( $this, 'print_sheet_guard' ), 1 );
                 add_filter( 'elementor/frontend/print_google_fonts', array( $this, 'filter_google_fonts' ) );
                 add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
@@ -98,6 +99,7 @@ class HSW_Assets {
                 if ( function_exists( 'woodmart_meta_viewport' ) ) {
                         remove_action( 'wp_head', 'woodmart_meta_viewport', 10 );
                         add_action( 'wp_head', array( $this, 'print_viewport' ), 10 );
+                        add_action( 'wp_head', array( $this, 'print_sheet_guard' ), 1 );
                 }
                 if ( function_exists( 'woodmart_get_skip_main_content_button' ) ) {
                         add_action( 'wp_body_open', array( $this, 'replace_skip_links' ), 1 );
@@ -108,6 +110,19 @@ class HSW_Assets {
         /**
          * Scalable viewport for archive pages.
          */
+        /**
+         * Bottom sheets live in the markup (filters, sort, guide) but are hidden
+         * by their own stylesheet. When that CSS is deferred or still loading,
+         * the sheet paints for a frame — the "flash" seen on archive reloads.
+         * This tiny rule lands in <head> before any stylesheet and stops
+         * applying as soon as `.is-open` is added, so it cannot break opening.
+         *
+         * @return void
+         */
+        public function print_sheet_guard() {
+                echo '<style id="hsw-sheet-guard">.hsw-asheet:not(.is-open),.hsw-agd__modal:not(.is-open){visibility:hidden}</style>' . "\n";
+        }
+
         public function print_viewport() {
                 echo '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
         }

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.111
+Stable tag: 1.11.112
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.112 =
+* **رفع «یک لحظه شیت باز میشود» در آرشیو.**
+  - شیت‌های فیلتر/مرتب‌سازی/راهنما (`hsw-asheet`, `hsw-agd__modal`) در HTML
+    هستند و فقط با CSS همان خانواده مخفی می‌شوند؛ وقتی CSS دیر برسد، یک فریم
+    دیده می‌شوند.
+  - یک گارد کوچک در `<head>` (قبل از همهٔ استایل‌ها) چاپ می‌شود:
+    `.hsw-asheet:not(.is-open), .hsw-agd__modal:not(.is-open){visibility:hidden}`
+    — با افزودن `.is-open` خودبه‌خود از کار می‌افتد، پس باز شدن شیت را خراب
+    نمی‌کند.
+  - `.hsw-sheet` (شیت «به سبد اضافه شد») اصلاً در این ماجرا نیست: فقط با JS و
+    هنگام افزودن ساخته می‌شود.
 
 = 1.11.111 =
 * **پاکسازی `!important` — مرحلهٔ ۲ (header + fonts + archive/cart/checkout).**
