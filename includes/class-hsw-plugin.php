@@ -198,6 +198,16 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-wallet.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet-pay.php';
                 require_once HSW_DIR . 'includes/class-hsw-free-shipping.php';
+
+                /*
+                 * Jalali output is opt-in: the file is tiny, but the filter is
+                 * only registered when the toggle is on, so a site that keeps
+                 * Gregorian dates runs exactly the same code path as before.
+                 */
+                require_once HSW_DIR . 'includes/class-hsw-jalali.php';
+                if ( HSW_Jalali::is_on() ) {
+                        HSW_Jalali::boot();
+                }
                 require_once HSW_DIR . 'includes/class-hsw-404.php';
                 require_once HSW_DIR . 'includes/class-hsw-pagination.php';
                 require_once HSW_DIR . 'includes/class-hsw-rebrand.php';
