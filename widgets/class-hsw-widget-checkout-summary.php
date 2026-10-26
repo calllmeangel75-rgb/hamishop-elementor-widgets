@@ -374,7 +374,9 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 $subtotal = $this->base_subtotal();
                 $total    = $this->cart_total();
                 $ship     = $this->chosen_shipping_cost();
-                $discount = $subtotal - ( $total - $ship );
+                /* Same definition as the cart page: product discount + coupons. */
+                $saving   = class_exists( 'HSW_Helpers' ) ? HSW_Helpers::savings() : array( 'total' => 0 );
+                $discount = (float) ( $saving['total'] ?? 0 );
                 return array(
                         'count'    => $this->cart_count(),
                         'subtotal' => $subtotal,

@@ -310,7 +310,16 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                                 continue;
                         }
                         $qty  = $cart_item['quantity'] ? (int) $cart_item['quantity'] : 1;
-                        $sum += (float) wc_get_price_to_display( $product, array( 'price' => $product->get_price( 'edit' ) ) ) * $qty;
+                        /*
+                         * «قیمت پایه اقلام» is the pre-discount price: using the
+                         * active price made the row equal to the sale subtotal and
+                         * broke the base − savings = total relationship.
+                         */
+                        $base = (float) $product->get_regular_price( 'edit' );
+                        if ( $base <= 0 ) {
+                                $base = (float) $product->get_price( 'edit' );
+                        }
+                        $sum += (float) wc_get_price_to_display( $product, array( 'price' => $base ) ) * $qty;
                 }
                 return $sum;
         }
@@ -319,13 +328,18 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * «سود شما از این خرید» = base subtotal − (total − shipping).
          */
         protected function savings() {
-                if ( ! $this->has_cart() ) {
+                if ( ! $this->has_cart() || ! class_exists( 'HSW_Helpers' ) ) {
                         return 0;
                 }
-                $total    = (float) WC()->cart->get_total( 'edit' );
-                $shipping = (float) WC()->cart->get_shipping_total();
-                $save     = $this->base_subtotal() - ( $total - $shipping );
-                return ( 0 < $save ) ? $save : 0;
+                /*
+                 * «سود شما از خرید» = تخفیف محصول (قیمت اصلی − قیمت فروش) + کوپن.
+                 * The old base − (total − shipping) formula missed sale prices and
+                 * counted payment fees against the customer, so the cart page and
+                 * the checkout page showed different numbers.
+                 */
+                $saving = HSW_Helpers::savings();
+
+                return (float) ( $saving['total'] ?? 0 );
         }
 
         /**
