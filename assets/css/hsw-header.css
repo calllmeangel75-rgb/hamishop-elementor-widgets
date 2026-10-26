@@ -392,8 +392,8 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	padding: 0 9px;
 	border: 0 !important;
 	border-inline-end: 1px solid var(--hsw-hd-border) !important;
-	border-radius: 0 !important;
-	background: transparent !important;
+	border-radius: 0;
+	background: transparent;
 	box-shadow: none !important;
 	color: var(--hsw-hd-muted);
 	font-size: 11px;
@@ -718,7 +718,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 }
 
 .hsw-hd__chev {
-	font-size: 17px !important;
+	font-size: 17px;
 	transition: transform .2s ease;
 }
 

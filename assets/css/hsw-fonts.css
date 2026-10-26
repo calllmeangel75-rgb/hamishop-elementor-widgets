@@ -661,7 +661,7 @@ body.hsw-scroll-lock {
  * Hello Elementor button reset — store-wide safety net.
  *
  * theme.min.css ships
- *   [type=button]:hover, [type=submit]:hover, button:hover { background:#c36;
+ *   [type=button]:hover, [type=submit]:hover, button:hover { background: #c36;
  *   color:#fff }
  * (0,2,0). The product page already declares its own states; every other
  * container relied on "our stylesheet loads later", which is not guaranteed.
@@ -741,15 +741,15 @@ body.hsw-scroll-lock {
 	height: 38px;
 	padding: 0 6px;
 	border-radius: 999px;
-	color: var(--hsw-pal-muted, #75777f) !important;
+	color: var(--hsw-pal-muted, #75777f);
 	font-size: 13px;
 	font-weight: 700;
 	text-decoration: none !important;
 	transition: color .2s;
 }
 .hsw-pg__num:hover,
-.hsw-pg__num:focus-visible { color: var(--hsw-cta, var(--hsw-primary)) !important; }
-.hsw-pg__num.is-active { color: #fff !important; cursor: default; }
+.hsw-pg__num:focus-visible { color: var(--hsw-cta, var(--hsw-primary)); }
+.hsw-pg__num.is-active { color: #fff; cursor: default; }
 .hsw-pg__dots {
 	display: inline-flex;
 	align-items: flex-end;
@@ -771,13 +771,13 @@ body.hsw-scroll-lock {
 	border-radius: 50%;
 	border: 1px solid var(--hsw-pal-border, #e1e2e4);
 	background: var(--hsw-pal-surface, #fff);
-	color: var(--hsw-on-surface, #191c1e) !important;
+	color: var(--hsw-on-surface, #191c1e);
 	text-decoration: none !important;
 	transition: border-color .15s, color .15s, transform .15s, box-shadow .15s;
 }
 .hsw-pg__arrow:hover,
 .hsw-pg__arrow:focus-visible {
-	color: var(--hsw-cta, var(--hsw-primary)) !important;
+	color: var(--hsw-cta, var(--hsw-primary));
 	border-color: var(--hsw-cta, var(--hsw-primary));
 	transform: translateY(-1px);
 	box-shadow: 0 8px 18px -12px rgba(15, 32, 66, .5);

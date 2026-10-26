@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.110
+Stable tag: 1.11.111
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.111 =
+* **پاکسازی `!important` — مرحلهٔ ۲ (header + fonts + archive/cart/checkout).**
+  - `hsw-header.css`: ۳ حذف (۱۸→۱۵) · `hsw-fonts.css`: ۵ حذف (۲۱→۱۶، رنگ‌های
+    صفحه‌بندی) · archive/cart/checkout: **۰ مورد واجد شرط** (همه در سلکتورهای
+    ترکیبی یا ویژگی‌های چیدمانی هستند).
+  - جمع کل از ابتدا: **۶۲ مورد** (۳۵۳→۳۰۲).
+  - **تأیید:** اسنپ‌شات ۲۸ المان روی چهار صفحه (خانه/فروشگاه/محصول/سبد) قبل و
+    بعد → **صفر تفاوت**.
+  - موارد باقی‌مانده عمداً دست‌نخورده‌اند: سلکتورهای ترکیبی (`.hsw-c .button`)
+    که برای غلبه بر قالب نوشته شده‌اند و ویژگی‌های `display/position/opacity`.
 
 = 1.11.110 =
 * **پاکسازی کنترل‌شدهٔ `!important` (مرحلهٔ ۱: account + product).**
