@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.109
+Stable tag: 1.11.110
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.110 =
+* **پاکسازی کنترل‌شدهٔ `!important` (مرحلهٔ ۱: account + product).**
+  - فقط روی ویژگی‌هایی که کنترل استایل المنتور مالکشان است (رنگ، پس‌زمینه،
+    فونت، فاصله، گردی) و فقط در قواعدی که سلکتورشان **فقط کلاس `.hsw-`** است.
+  - حذف‌شده: ۳۲ مورد در `hsw-account.css` و ۲۲ مورد در `hsw-product.css`
+    (account: ۱۴۴→۱۱۲، product: ۱۱۵→۹۵).
+  - موارد ریسک‌دار (ریست قالب، `input[type]`، `display/position/opacity`) دست
+    نخوردند.
+  - **تأیید:** اسنپ‌شات computed style قبل/بعد روی ۶ المان کلیدی
+    (`.hsw-ptrust__ic`, `.hsw-pfeat__ic`, `.hsw-ag__title`, `.hsw-ag__price`,
+    `.hsw-ag__wish`) → **صفر تفاوت**؛ پنج صفحه ۲۰۰ و بدون Fatal.
 
 = 1.11.109 =
 * **مستند `ARCHITECTURE-MAP.md` اضافه شد** (تولیدشده از خود کد):
