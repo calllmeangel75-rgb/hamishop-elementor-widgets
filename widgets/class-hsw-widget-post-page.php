@@ -586,45 +586,66 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			return $product instanceof WC_Product ? $product : null;
 		}
 
-		/* Auto: first published product sharing the post's category slug. */
-		$cats = wp_get_post_categories( $post->ID, array( 'fields' => 'all' ) );
-		if ( ! $cats ) {
-			return null;
+		/* Per-post override: editors can pick the exact product for an article. */
+		$meta = absint( get_post_meta( $post->ID, '_hsw_product_id', true ) );
+		if ( $meta ) {
+			$product = wc_get_product( $meta );
+			if ( $product instanceof WC_Product ) {
+				return $product;
+			}
 		}
 
-		$found = get_posts(
-			array(
-				'numberposts' => 1,
-				'post_type'   => 'product',
-				'post_status' => 'publish',
-				'tax_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-					array(
-						'taxonomy' => 'product_cat',
-						'field'    => 'slug',
-						'terms'    => array( $cats[0]->slug ),
-					),
-				),
-			)
-		);
-
-		if ( ! $found ) {
-			/* Last resort: newest published product, so the promo slot is never
-			   an empty hole on a store that has not picked one yet. */
+		/*
+		 * Auto match. Blog categories and product categories are different
+		 * taxonomies, so matching a blog slug against product_cat almost never
+		 * hit and every article fell through to «newest product» — the card
+		 * showed the same item everywhere. Match by category NAME, then by the
+		 * post's tags, and show nothing when there is no honest match.
+		 */
+		$cats = wp_get_post_categories( $post->ID, array( 'fields' => 'all' ) );
+		if ( $cats ) {
 			$found = get_posts(
 				array(
 					'numberposts' => 1,
 					'post_type'   => 'product',
 					'post_status' => 'publish',
+					'tax_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+						array(
+							'taxonomy' => 'product_cat',
+							'field'    => 'name',
+							'terms'    => wp_list_pluck( $cats, 'name' ),
+						),
+					),
 				)
 			);
+			if ( $found ) {
+				return wc_get_product( $found[0]->ID );
+			}
 		}
 
-		if ( ! $found ) {
-			return null;
+		$tags = wp_get_post_tags( $post->ID, array( 'fields' => 'names' ) );
+		if ( $tags ) {
+			$found = get_posts(
+				array(
+					'numberposts' => 1,
+					'post_type'   => 'product',
+					'post_status' => 'publish',
+					'tax_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+						array(
+							'taxonomy' => 'product_tag',
+							'field'    => 'name',
+							'terms'    => $tags,
+						),
+					),
+				)
+			);
+			if ( $found ) {
+				return wc_get_product( $found[0]->ID );
+			}
 		}
 
-		$product = wc_get_product( $found[0]->ID );
-		return $product instanceof WC_Product ? $product : null;
+		/* No honest match: hide the card instead of promoting an unrelated item. */
+		return null;
 	}
 
 	/* ---------------------------------------------------------------------

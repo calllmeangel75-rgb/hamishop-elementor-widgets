@@ -209,6 +209,24 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
          * Localized, fa-digit date of a post.
          */
         protected function post_date( $post ) {
+                $post = get_post( $post );
+                if ( ! $post instanceof WP_Post ) {
+                        return '';
+                }
+
+                /*
+                 * Format here instead of trusting the date_i18n/get_the_date
+                 * filter: Elementor and some themes print the date through their
+                 * own pipeline, and the article hero was the one place that kept
+                 * showing Gregorian even with the calendar switched on.
+                 */
+                if ( class_exists( 'HSW_Jalali' ) && HSW_Jalali::is_on() ) {
+                        $ts = strtotime( $post->post_date );
+                        if ( $ts ) {
+                                return HSW_Helpers::fa_num( HSW_Jalali::format( $ts, (string) get_option( 'date_format', 'F j, Y' ) ) );
+                        }
+                }
+
                 return HSW_Helpers::fa_num( get_the_date( '', $post ) );
         }
 
