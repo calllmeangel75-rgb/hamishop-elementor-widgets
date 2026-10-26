@@ -822,10 +822,11 @@ ul.products.is-pg-leaving,
    all widgets (the inner root class differed from widget to widget). */
 .elementor-widget[class*="elementor-widget-hsw-"],
 .elementor-widget[class*="elementor-widget-hsw-"] :where(h1,h2,h3,h4,h5,h6,p,span,a,button,input,select,textarea,li,strong,small,label,div) {
-	font-family: var(--hsw-font, inherit);
+	/* Concrete fallback: 'inherit' let Elementor's global typography win. */
+	font-family: var(--hsw-font, "Vazirmatn HSW"), Tahoma, sans-serif;
 }
 .hsw-h, .hsw-p, .hsw-ac, .hsw-loop, .hsw-sf, .hsw-ptabs, .hsw-ap,
-.hsw-sheet, .hsw-pg, .hsw-404 { font-family: var(--hsw-font, inherit); }
+.hsw-sheet, .hsw-pg, .hsw-404 { font-family: var(--hsw-font, "Vazirmatn HSW"), Tahoma, sans-serif; }
 
 /* The mobile drawer must always win: hide the sticky footer while it is open. */
 

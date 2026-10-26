@@ -122,7 +122,12 @@ class HSW_Palette {
 	public static function font_css( $font ) {
 		$font = trim( (string) $font );
 		if ( '' === $font ) {
-			return 'inherit';
+			/*
+			 * Never 'inherit': an empty value used to fall back to the theme, and
+			 * Elementor's global typography (Site Settings) then won over the
+			 * plugin's bundled Vazirmatn on every widget.
+			 */
+			return '"Vazirmatn HSW", Tahoma, sans-serif';
 		}
 		if ( false !== strpos( $font, ',' ) || '"' === $font[0] || "'" === $font[0] ) {
 			return $font;

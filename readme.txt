@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.104
+Stable tag: 1.11.105
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.105 =
+* **فونت وزیرمتن دیگر با تایپوگرافی سراسری المنتور از کار نمی‌افتد.**
+  - همان الگوی باگ رنگ: `font-family: var(--hsw-font, inherit)` و
+    `font_css('') → 'inherit'`. وقتی پالت خالی بود، `inherit` می‌شد و فونت
+    سراسری المنتور (Site Settings) برنده می‌شد.
+  - حالا مقدار جانشین **همیشه** `"Vazirmatn HSW", Tahoma, sans-serif` است؛
+    «ارث‌بری از قالب» فقط وقتی اعمال می‌شود که خودتان در ویجت انتخابش کنید
+    (`hsw_font_mode = inherit`).
 
 = 1.11.104 =
 * **بهینه‌سازی Lighthouse (بخش افزونه).**
