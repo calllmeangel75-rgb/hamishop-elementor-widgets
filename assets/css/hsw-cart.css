@@ -444,7 +444,7 @@
 .hsw-c .hsw-ccoupon__btn {
         height: 2.75rem; padding-inline: 1.5rem; flex-shrink: 0; white-space: nowrap;
         background: var(--hsw-cp-btn-bg, var(--hswc-cta));
-        color: var(--hsw-cp-btn-tx, var(--hswc-on-cta));
+        color: var(--hsw-cp-btn-tx, var(--hswc-on-cta, #fff));
         border-radius: var(--hswc-r-s);
         font-size: .875rem; line-height: 1.375rem; font-weight: 600; font-weight: 700;
         display: flex; align-items: center; justify-content: center;
@@ -453,7 +453,7 @@
 .hsw-c .hsw-ccoupon__btn:hover,
 .hsw-c .hsw-ccoupon__btn:focus-visible {
         background: var(--hsw-cp-btn-h, var(--hswc-cta-hover));
-        color: var(--hsw-cp-btn-tx, var(--hswc-on-cta));
+        color: var(--hsw-cp-btn-tx, var(--hswc-on-cta, #fff));
 }
 .hsw-c .hsw-ccoupon__btn:active { transform: scale(.95); }
 
@@ -523,7 +523,7 @@
 .hsw-csummary__cta {
         width: 100%; height: 3rem;
         background: var(--hsw-cs-cta-bg, var(--hswc-cta));
-        color: var(--hsw-cs-cta-tx, var(--hswc-on-cta));
+        color: var(--hsw-cs-cta-tx, var(--hswc-on-cta, #fff));
         border-radius: var(--hswc-r);
         font-size: 1rem; line-height: 1.625rem; font-weight: 600; font-weight: 700;
         display: flex; align-items: center; justify-content: center; gap: .375rem;
@@ -532,7 +532,7 @@
 }
 /* Darker fill, label stays white — `color` is spelled out so a theme `a:hover` cannot repaint it. */
 .hsw-csummary__cta:hover,
-.hsw-csummary__cta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
+.hsw-csummary__cta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta, #fff); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
 .hsw-csummary__cta:active { transform: scale(.98); }
 .hsw-csummary__cta .hsw-ic { font-size: 1.25rem; }
 
@@ -614,7 +614,7 @@
 .hsw-csummary__mbar-v .hsw-c-cur { color: var(--hswc-text2); }
 .hsw-csummary__mcta {
         flex: 1 1 0; max-width: 13.125rem; height: 3rem;
-        background: var(--hswc-cta); color: var(--hswc-on-cta);
+        background: var(--hswc-cta); color: var(--hswc-on-cta, #fff);
         border-radius: var(--hswc-r);
         display: flex; align-items: center; justify-content: center; gap: .5rem;
         font-size: .875rem; line-height: 1.375rem; font-weight: 600;
@@ -622,7 +622,7 @@
         transition: all .15s;
 }
 .hsw-csummary__mcta:hover,
-.hsw-csummary__mcta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
+.hsw-csummary__mcta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta, #fff); }
 .hsw-csummary__mcta:active { transform: scale(.95); }
 .hsw-csummary__mcta .hsw-ic { font-size: 1rem; line-height: 1.625rem; font-weight: 600; }
 
@@ -649,13 +649,13 @@
 .hsw-c-empty__btn {
         display: inline-flex; align-items: center; gap: .375rem;
         height: 2.75rem; padding-inline: 1.5rem; margin-top: .5rem;
-        background: var(--hswc-cta); color: var(--hswc-on-cta);
+        background: var(--hswc-cta); color: var(--hswc-on-cta, #fff);
         border-radius: var(--hswc-r);
         font-size: .875rem; line-height: 1.375rem; font-weight: 600; font-weight: 700;
         transition: all .15s;
 }
 .hsw-c-empty__btn:hover,
-.hsw-c-empty__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta); }
+.hsw-c-empty__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta, #fff); }
 .hsw-c-empty__btn .hsw-ic { font-size: 1.25rem; }
 
 /* Purchase CTA states (see the checkout stylesheet for the palette chain). */

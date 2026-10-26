@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.102
+Stable tag: 1.11.103
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.103 =
+* **رنگ متن دکمه‌های خرید دیگر از رنگ‌های سراسری المنتور ارث نمی‌برد.**
+  - علت باگ «دکمهٔ قرمز که با هیچ تنظیمی عوض نمی‌شد» پیدا شد: در CSS ما
+    `color: var(--hsw-on-cta)` **بدون مقدار جانشین** بود؛ اگر آن متغیر در صفحه
+    تعریف نشده بود، اعلان رنگ نامعتبر می‌شد و متن رنگ ارثی (رنگ دوم/Secondary
+    کیت المنتور) را می‌گرفت.
+  - حالا همهٔ `--hsw-on-cta` / `--hswc-on-cta` / `--hswk-on-cta` /
+    `--hsw-on-btn` با فالبک `#fff` نوشته شده‌اند (۱۷ مورد در دو فایل).
 
 = 1.11.102 =
 * **شمارندهٔ سبد دیگر روی رفرش از ۳ به ۲ نمی‌پرد.**
