@@ -12,6 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Elementor\Controls_Manager;
+use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Typography;
 
 class HSW_Widget_Account extends HSW_Widget_Base {
@@ -250,6 +251,241 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 		 * controls below still override.
 		 */
 
+
+		/* ------------------- LAYOUT ------------------- */
+		$this->start_controls_section(
+			'sec_ac_layout',
+			array( 'label' => __( 'چیدمان داشبورد', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->add_responsive_control(
+			'ac_gap',
+			array(
+				'label'      => __( 'فاصلهٔ محتوا و منوی کناری', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 64 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac' => '--hsw-ac-gap: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_side',
+			array(
+				'label'      => __( 'عرض منوی کناری', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', '%' ),
+				'range'      => array( 'px' => array( 'min' => 180, 'max' => 360 ), '%' => array( 'min' => 15, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac' => '--hsw-ac-side: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_stats_cols',
+			array(
+				'label'     => __( 'تعداد ستون کارت‌های آمار', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '',
+				'options'   => array( '' => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ), '2' => '۲', '3' => '۳', '4' => '۴' ),
+				'selectors' => array( '{{WRAPPER}} .hsw-ac__stats' => 'grid-template-columns: repeat({{VALUE}}, minmax(0, 1fr));' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_stats_gap',
+			array(
+				'label'      => __( 'فاصلهٔ بین کارت‌های آمار', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__stats' => 'gap: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- CARDS (shared) ------------------- */
+		$this->start_controls_section(
+			'sec_ac_cards',
+			array( 'label' => __( 'کارت‌ها (مشترک)', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->add_control(
+			'ac_cards_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => __( 'این تنظیمات روی کارت آمار، کارت سفارش و کارت‌های اطلاعات (آدرس/پروفایل) با هم اعمال می‌شود تا پنل شلوغ نشود.', 'hamishop-elementor-widgets' ),
+				'content_classes' => 'elementor-descriptor',
+			)
+		);
+
+		$this->a_color( 'ac_card_bg', __( 'پس‌زمینهٔ کارت‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac', '--hsw-ac-card' );
+		$this->a_color( 'ac_card_bd', __( 'حاشیهٔ کارت‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac', '--hsw-ac-line' );
+
+		$this->add_responsive_control(
+			'ac_card_radius',
+			array(
+				'label'      => __( 'گردی گوشهٔ کارت‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 32 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac' => '--hsw-ac-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_card_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی کارت‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__card, {{WRAPPER}} .hsw-ac__stat, {{WRAPPER}} .hsw-ac__order-card' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'ac_card_shadow',
+				'label'    => __( 'سایهٔ کارت‌ها', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-ac__card, {{WRAPPER}} .hsw-ac__stat, {{WRAPPER}} .hsw-ac__order-card',
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'ac_card_shadow_hv',
+				'label'    => __( 'سایهٔ هاور کارت‌ها', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-ac__stat:hover, {{WRAPPER}} .hsw-ac__order-card:hover',
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- HERO ------------------- */
+		$this->start_controls_section(
+			'sec_ac_hero',
+			array( 'label' => __( 'هدر خوش‌آمدگویی', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->a_color( 'ac_hero_bg', __( 'پس‌زمینهٔ هدر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__hero', 'background-color' );
+		$this->a_text( 'ac_hero_title', '{{WRAPPER}} .hsw-ac__hero-title', array( 'default' => 24 ) );
+		$this->a_text( 'ac_hero_sub', '{{WRAPPER}} .hsw-ac__hero-sub', array( 'default' => 14 ) );
+
+		$this->add_responsive_control(
+			'ac_hero_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی هدر', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__hero' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_hero_radius',
+			array(
+				'label'      => __( 'گردی گوشهٔ هدر', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__hero' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- MENU ------------------- */
+		$this->start_controls_section(
+			'sec_ac_menu',
+			array( 'label' => __( 'منوی حساب', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->a_color( 'ac_menu_bg', __( 'پس‌زمینهٔ منو', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__menu', 'background-color' );
+		$this->a_color( 'ac_menu_tx', __( 'متن گزینه‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__menu-label' );
+		$this->a_color( 'ac_menu_ic', __( 'آیکن گزینه‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__menu-ic' );
+		$this->a_color( 'ac_menu_hv', __( 'پس‌زمینهٔ هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__menu-item:hover', 'background-color' );
+		$this->a_color( 'ac_menu_on_bg', __( 'پس‌زمینهٔ گزینهٔ فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__menu-item.is-active', 'background-color' );
+		$this->a_color( 'ac_menu_on_tx', __( 'متن گزینهٔ فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__menu-item.is-active .hsw-ac__menu-label' );
+
+		$this->add_responsive_control(
+			'ac_menu_gap',
+			array(
+				'label'      => __( 'فاصلهٔ بین گزینه‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 24 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__menu-list' => 'gap: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_menu_ic_size',
+			array(
+				'label'      => __( 'اندازهٔ آیکن منو', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 12, 'max' => 32 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__menu-ic .hsw-ic' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_menu_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی منو', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__menu' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- ORDERS + BADGES ------------------- */
+		$this->start_controls_section(
+			'sec_ac_orders',
+			array( 'label' => __( 'سفارش‌ها و برچسب وضعیت', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->a_color( 'ac_order_bd', __( 'حاشیهٔ آیتم سفارش', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__order-card', 'border-color' );
+		$this->a_text( 'ac_order_id', '{{WRAPPER}} .hsw-ac__order-id', array( 'default' => 15 ) );
+		$this->a_text( 'ac_order_date', '{{WRAPPER}} .hsw-ac__order-date', array( 'default' => 13 ) );
+
+		$this->add_responsive_control(
+			'ac_order_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی آیتم سفارش', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__order-card' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->a_color( 'ac_badge_bg', __( 'پس‌زمینهٔ برچسب وضعیت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__badge', 'background-color' );
+		$this->a_color( 'ac_badge_tx', __( 'متن برچسب وضعیت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__badge' );
+
+		$this->add_responsive_control(
+			'ac_badge_radius',
+			array(
+				'label'      => __( 'گردی برچسب وضعیت', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 24 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__badge' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
 
 		$this->start_controls_section(
 			'sec_typography',
