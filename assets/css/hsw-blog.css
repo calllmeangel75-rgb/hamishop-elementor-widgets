@@ -590,9 +590,10 @@
 	}
 
 	/* Hero: text on the right, stats + search side by side on the left. */
+	.hsw-cp--blog .hsw-blog-hero,
 	.hsw-cp--blog .hsw-bhero {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+		grid-template-columns: minmax(0, 1fr) minmax(340px, 520px);
 		grid-template-areas:
 			"badge aside"
 			"title aside"
@@ -609,14 +610,18 @@
 	.hsw-cp--blog .hsw-bhero__aside {
 		grid-area: aside;
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		align-items: center;
-		gap: 20px;
+		gap: 16px;
 	}
 
 	.hsw-cp--blog .hsw-bhero__search {
-		flex: 1 1 200px;
-		min-width: 180px;
+		flex: 1 1 160px;
+		min-width: 140px;
+	}
+
+	.hsw-cp--blog .hsw-bhero__stats {
+		flex: 0 0 auto;
 	}
 
 	.hsw-cp--blog .hsw-btabs__pills {

@@ -142,7 +142,7 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                         array( 'label' => __( 'عنوان و سربرگ آرشیو', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
                 );
 
-                $this->a_color( 'bh_bg', __( 'پس‌زمینهٔ سربرگ', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bhero', 'background-color' );
+                $this->a_color( 'bh_bg', __( 'پس‌زمینهٔ سربرگ', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-blog-hero, {{WRAPPER}} .hsw-bhero', 'background: {{VALUE}};' );
                 $this->a_text( 'bh_title', '{{WRAPPER}} .hsw-bhero__title', array( 'default' => 26 ) );
                 $this->a_color( 'bh_sub', __( 'رنگ توضیح زیر عنوان', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bhero__sub' );
 
@@ -153,7 +153,7 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                                 'type'       => Controls_Manager::DIMENSIONS,
                                 'size_units' => array( 'px', 'em' ),
                                 'selectors'  => array(
-                                        '{{WRAPPER}} .hsw-bhero' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                                        '{{WRAPPER}} .hsw-blog-hero, {{WRAPPER}} .hsw-bhero' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
                                 ),
                         )
                 );
@@ -165,7 +165,61 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                                 'type'       => Controls_Manager::SLIDER,
                                 'size_units' => array( 'px' ),
                                 'range'      => array( 'px' => array( 'min' => 0, 'max' => 64 ) ),
-                                'selectors'  => array( '{{WRAPPER}} .hsw-bhero' => 'margin-bottom: {{SIZE}}{{UNIT}};' ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-blog-hero, {{WRAPPER}} .hsw-bhero' => 'margin-bottom: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->end_controls_section();
+
+                /* ------------------- SEARCH + PILLS ------------------- */
+                $this->start_controls_section(
+                        'sec_blog_controls',
+                        array( 'label' => __( 'جستجو و تب‌های دسته', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->a_color( 'bq_btn_bg', __( 'دکمهٔ جستجو — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bhero__search button', 'background-color' );
+                $this->a_color( 'bq_btn_tx', __( 'دکمهٔ جستجو — متن و آیکن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bhero__search button' );
+                $this->a_color( 'bq_ic', __( 'آیکن داخل فیلد جستجو', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bhero__search-ic' );
+                $this->a_color( 'bq_bg', __( 'پس‌زمینهٔ فیلد جستجو', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bhero__search input', 'background-color' );
+
+                $this->add_responsive_control(
+                        'bq_radius',
+                        array(
+                                'label'      => __( 'گردی فیلد و دکمهٔ جستجو', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-bhero__search input'  => 'border-radius: {{SIZE}}{{UNIT}};',
+                                        '{{WRAPPER}} .hsw-bhero__search button' => 'border-radius: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->add_responsive_control(
+                        'bq_ic_size',
+                        array(
+                                'label'      => __( 'اندازهٔ آیکن جستجو', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 12, 'max' => 28 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-bhero__search .hsw-ic' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->a_color( 'bpill_bg', __( 'قرص دسته — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-btabs__pill', 'background-color' );
+                $this->a_color( 'bpill_tx', __( 'قرص دسته — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-btabs__pill' );
+                $this->a_color( 'bpill_on_bg', __( 'قرص فعال — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-btabs__pill.is-on, {{WRAPPER}} .hsw-btabs__pill.is-active', 'background-color' );
+                $this->a_color( 'bpill_on_tx', __( 'قرص فعال — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-btabs__pill.is-on, {{WRAPPER}} .hsw-btabs__pill.is-active' );
+
+                $this->add_responsive_control(
+                        'bpill_radius',
+                        array(
+                                'label'      => __( 'گردی قرص‌های دسته', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-btabs__pill' => 'border-radius: {{SIZE}}{{UNIT}};' ),
                         )
                 );
 
@@ -350,8 +404,8 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
 
                 $this->a_color( 'bp_tx', __( 'رنگ شماره‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__pagi a, {{WRAPPER}} .hsw-bgrid__pagi span' );
                 $this->a_color( 'bp_bg', __( 'پس‌زمینهٔ دکمه‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__pagi a', 'background-color' );
-                $this->a_color( 'bp_on_bg', __( 'پس‌زمینهٔ صفحهٔ فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__pagi .is-active, {{WRAPPER}} .hsw-bgrid__pagi .current', 'background-color' );
-                $this->a_color( 'bp_on_tx', __( 'متن صفحهٔ فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__pagi .is-active, {{WRAPPER}} .hsw-bgrid__pagi .current' );
+                $this->a_color( 'bp_on_bg', __( 'پس‌زمینهٔ صفحهٔ فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__pagi .is-on, {{WRAPPER}} .hsw-bgrid__pagi .is-active, {{WRAPPER}} .hsw-bgrid__pagi .current', 'background-color' );
+                $this->a_color( 'bp_on_tx', __( 'متن صفحهٔ فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__pagi .is-on, {{WRAPPER}} .hsw-bgrid__pagi .is-active, {{WRAPPER}} .hsw-bgrid__pagi .current' );
 
                 $this->add_responsive_control(
                         'bp_radius',
