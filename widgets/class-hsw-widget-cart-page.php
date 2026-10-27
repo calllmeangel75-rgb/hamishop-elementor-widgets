@@ -84,6 +84,7 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
                 $this->style_section_mirror( 'ctop_', __( 'استایل هدر و مراحل', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Top' );
                 $this->style_section_mirror( 'cbanner_', __( 'استایل بنر ارسال رایگان', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Banner' );
                 $this->style_section_mirror( 'citems_', __( 'استایل اقلام سبد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Items' );
+                $this->style_section_mirror( 'citems_', __( 'ردیف کالا، تصویر و تعداد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Items', 'sec_row' );
                 $this->style_section_mirror( 'ccoupon_', __( 'استایل کد تخفیف', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Coupon' );
                 $this->style_section_mirror( 'csummary_', __( 'استایل خلاصه سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Summary' );
 

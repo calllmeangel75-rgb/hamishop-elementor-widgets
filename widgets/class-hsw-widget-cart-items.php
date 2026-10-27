@@ -238,6 +238,98 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 $this->a_color( 'qty_btn_bg', __( 'دکمه‌های شمارنده — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn', 'background-color' );
 
                 $this->end_controls_section();
+
+                /* ------------------- STYLE: row / image / quantity ------------------- */
+                $this->start_controls_section(
+                        'sec_row',
+                        array( 'label' => __( 'ردیف کالا، تصویر و تعداد', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->a_color( 'row_bg', __( 'پس‌زمینهٔ ردیف', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__item', 'background-color' );
+                $this->a_color( 'row_bd', __( 'خط جداکنندهٔ ردیف‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__item', 'border-bottom-color' );
+                $this->add_responsive_control(
+                        'row_radius',
+                        array(
+                                'label'      => __( 'گردی گوشهٔ ردیف', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 32 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-citems__item' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->add_responsive_control(
+                        'row_pad',
+                        array(
+                                'label'      => __( 'فاصله داخلی ردیف', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::DIMENSIONS,
+                                'size_units' => array( 'px', 'em' ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-citems__item' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                                ),
+                        )
+                );
+
+                $this->add_control(
+                        'row_img_h',
+                        array( 'label' => __( 'تصویر محصول', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
+                );
+                $this->add_responsive_control(
+                        'thumb_w',
+                        array(
+                                'label'      => __( 'اندازهٔ تصویر', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 40, 'max' => 160 ) ),
+                                'selectors'  => array(
+                                        '{{WRAPPER}} .hsw-citems__thumb' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
+                                ),
+                        )
+                );
+                $this->add_responsive_control(
+                        'thumb_radius',
+                        array(
+                                'label'      => __( 'گردی تصویر', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 32 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-citems__thumb' => 'border-radius: {{SIZE}}{{UNIT}}; overflow: hidden;' ),
+                        )
+                );
+                $this->a_color( 'thumb_bg', __( 'پس‌زمینهٔ تصویر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__thumb', 'background-color' );
+
+                $this->add_control(
+                        'row_qty_h',
+                        array( 'label' => __( 'کنترل تعداد', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
+                );
+                $this->add_responsive_control(
+                        'qty_w',
+                        array(
+                                'label'      => __( 'عرض کنترل تعداد', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 72, 'max' => 160 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-c-qty' => 'width: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->a_color( 'qty_bg', __( 'پس‌زمینهٔ فیلد تعداد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty', 'background-color' );
+                $this->a_color( 'qty_bd', __( 'حاشیهٔ فیلد تعداد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty', 'border-color' );
+                $this->a_color( 'qty_tx', __( 'متن تعداد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__in' );
+                $this->add_responsive_control(
+                        'qty_radius',
+                        array(
+                                'label'      => __( 'گردی فیلد تعداد', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 24 ) ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-c-qty' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->a_color( 'qty_btn_tx', __( 'آیکن دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn' );
+                $this->a_color( 'qty_btn_bg', __( 'پس‌زمینهٔ دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn', 'background-color' );
+                $this->a_color( 'qty_btn_hv', __( 'هاور دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn:hover', 'background-color' );
+
+                $this->end_controls_section();
+
         }
 
         /* =========================================================================
