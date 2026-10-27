@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.127
+Stable tag: 1.11.128
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,24 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.128 =
+* **آرشیو کامل از پالت رنگ تغذیه می‌شود؛ کنترل ویجت همیشه اولویت دارد.**
+  - چهار متغیری که هاردکد بودند به توکن پالت وصل شدند (مقدار قبلی به‌عنوان
+    fallback حفظ شد):
+    `--hswa-page: var(--hsw-pal-surface-alt)` ·
+    `--hswa-body: var(--hsw-pal-muted)` ·
+    `--hswa-rose: var(--hsw-pal-danger)` ·
+    `--hswa-amber: var(--hsw-pal-warning)`.
+  - زنجیره در CSS مستند شد: **پالت → پیش‌فرض `:root` → کنترل ویجت**. کنترل
+    رنگ ویجت، `--hswa-*` را روی wrapper می‌نویسد (specificity بالاتر از `:root`)
+    و بنابراین برنده است.
+  - **اثبات با مرورگر:** نشان تخفیف پیش‌فرض `rgb(186,26,26)` (پالت) و با
+    override ویجت `rgb(0,255,0)` شد.
+  - تنها تغییر بصری در اسنپ‌شات ۲۸ المان: پس‌زمینهٔ نشان تخفیف
+    `#be123c → #ba1a1a` (همان مقدار پالت).
+  - `--hswa-strong` و `--hswa-faint` هنوز مشتق/هاردکد هستند چون توکن پالتی
+    برایشان وجود ندارد.
 
 = 1.11.127 =
 * **گزارش وضعیت تأیید ویجت‌ها در `WIDGETS-REFERENCE.md`.**

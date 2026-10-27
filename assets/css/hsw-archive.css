@@ -20,6 +20,12 @@
 }
 
 /* ===== Root palette (from the design tokens) ===== */
+/*
+ * Cascade: global palette -> :root default -> widget control.
+ * Every value below reads its global palette token first, so changing the site
+ * palette restyles the archive. A per-widget colour control writes --hswa-* on
+ * the widget wrapper (more specific than :root) and therefore wins.
+ */
 /* :root copy keeps bottom-sheets/modals styled even when Elementor's
    frontend moves them outside the widget root (z-index edge cases). */
 :root {
@@ -30,16 +36,16 @@
         --hswa-primary-light: var(--hsw-pal-primary-light, #f0f6ff);
         --hswa-ink: var(--hsw-on-surface, #1e293b);
         --hswa-strong: #0f172a;
-        --hswa-body: #475569;
+        --hswa-body: var(--hsw-pal-muted, #475569);
         --hswa-soft: var(--hsw-pal-muted, #64748b);
         --hswa-faint: #cbd5e1;
         --hswa-line: var(--hsw-pal-border, #e2e8f0);
         --hswa-line-soft: color-mix(in srgb, var(--hsw-pal-border, #e2e8f0) 45%, #fff);
         --hswa-card: var(--hsw-pal-surface, #ffffff);
-        --hswa-page: #f8fafc;
-        --hswa-rose: #be123c;
+        --hswa-page: var(--hsw-pal-surface-alt, #f8fafc);
+        --hswa-rose: var(--hsw-pal-danger, #be123c);
         --hswa-emerald: var(--hsw-pal-success, #047857);
-        --hswa-amber: #f59e0b;
+        --hswa-amber: var(--hsw-pal-warning, #f59e0b);
         --hswa-r-xl: 12px;
         --hswa-r-2xl: 16px;
         --hswa-r-3xl: 24px;
