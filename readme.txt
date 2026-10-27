@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.126
+Stable tag: 1.11.127
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.127 =
+* **گزارش وضعیت تأیید ویجت‌ها در `WIDGETS-REFERENCE.md`.**
+  - بخش جدید «وضعیت تأیید»: هر ویجتِ فعال با `get_controls()` اجرا شد و تعداد
+    کنترل/سکشن/واریانت ثبت شد — **۱۵ از ۱۵** ویجت فعال بدون خطا.
+  - ۴۷ ویجت دیگر روی این نصب خاموش‌اند (در «کنترل ویجت‌ها») و فقط بازبینی
+    ایستا شده‌اند؛ این تفکیک در سند نوشته شد تا گزارش دقیق باشد.
 
 = 1.11.126 =
 * **کنترل‌های استایل ریسپانسیو در هلپرهای مشترک.**
