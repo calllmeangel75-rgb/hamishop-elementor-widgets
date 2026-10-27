@@ -487,6 +487,125 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 
 		$this->end_controls_section();
 
+		/* ------------------- INFO CARDS ------------------- */
+		$this->start_controls_section(
+			'sec_ac_info',
+			array( 'label' => __( 'کارت‌های اطلاعات (آدرس و پروفایل)', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->add_responsive_control(
+			'ac_info_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی کارت اطلاعات', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__addr-card, {{WRAPPER}} .hsw-ac__profile' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->a_color( 'ac_info_kicker', __( 'رنگ برچسب کوچک', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__addr-kicker' );
+		$this->a_text( 'ac_info_value', '{{WRAPPER}} .hsw-ac__address-lines, {{WRAPPER}} .hsw-ac__addr-body', array( 'default' => 14 ) );
+		$this->a_color( 'ac_info_link', __( 'رنگ لینک ویرایش', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__addr-edit, {{WRAPPER}} .hsw-ac__address-edit' );
+
+		$this->add_responsive_control(
+			'ac_info_row_gap',
+			array(
+				'label'      => __( 'فاصلهٔ بین ردیف‌های اطلاعات', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 24 ) ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__address-lines' => 'row-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- MESSAGES / STATES ------------------- */
+		$this->start_controls_section(
+			'sec_ac_states',
+			array( 'label' => __( 'پیام‌ها و حالت‌های ویژه', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->a_color( 'ac_note_bg', __( 'پس‌زمینهٔ پیام', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__note', 'background-color' );
+		$this->a_color( 'ac_note_tx', __( 'متن پیام', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__note' );
+
+		$this->a_color( 'ac_empty_ic', __( 'آیکن حالت خالی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__empty-ic' );
+		$this->a_text( 'ac_empty_tx', '{{WRAPPER}} .hsw-ac__empty', array( 'default' => 14 ) );
+
+		$this->add_responsive_control(
+			'ac_empty_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی حالت خالی', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__empty' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- BUTTONS / AVATAR ------------------- */
+		$this->start_controls_section(
+			'sec_ac_buttons',
+			array( 'label' => __( 'دکمه‌ها و آواتار', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->add_responsive_control(
+			'ac_btn_radius',
+			array(
+				'label'      => __( 'گردی دکمه‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__btn' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_btn_pad',
+			array(
+				'label'      => __( 'فاصلهٔ داخلی دکمه‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-ac__btn' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->a_color( 'ac_logout_bg', __( 'دکمهٔ خروج — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__btn--danger', 'background-color' );
+		$this->a_color( 'ac_logout_tx', __( 'دکمهٔ خروج — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__btn--danger' );
+
+		$this->add_responsive_control(
+			'ac_avatar_size',
+			array(
+				'label'      => __( 'اندازهٔ آواتار', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 28, 'max' => 96 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__avatar' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ac_avatar_radius',
+			array(
+				'label'      => __( 'گردی آواتار', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 50 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-ac__avatar' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
 		$this->start_controls_section(
 			'sec_typography',
 			array(
