@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.125
+Stable tag: 1.11.126
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,16 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.126 =
+* **کنترل‌های استایل ریسپانسیو در هلپرهای مشترک.**
+  - `a_text()` (اندازهٔ فونت) و `a_align()` (تراز متن) از `add_control` به
+    `add_responsive_control` تغییر کردند؛ شناسهٔ کنترل و مقدار پیش‌فرض
+    دست‌نخورده است، پس صفحات ذخیره‌شده همان مقدار قبلی را نگه می‌دارند و فقط
+    دکمه‌های Tablet/Mobile اضافه می‌شود.
+  - نتیجهٔ اندازه‌گیری: هر ۱۵ ویجتِ ثبت‌شده روی نصب تست، حالا واریانت
+    `_tablet` دارند (قبلاً ۶).
+  - **تأیید:** اسنپ‌شات ۲۸ المان / ۴ صفحه → صفر تفاوت؛ صفحات ۲۰۰ بدون Fatal.
 
 = 1.11.125 =
 * **صفر ارجاع بدون fallback به توکن‌های سراسری پالت.**

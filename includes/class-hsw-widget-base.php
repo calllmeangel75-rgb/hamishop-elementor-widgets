@@ -1730,7 +1730,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
 
-                $this->add_control(
+                $this->add_responsive_control(
                         $id . '_al_h',
                         array(
                                 'label'     => $label,
@@ -2118,7 +2118,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                  * the design assumed. The control id and its px default are
                  * unchanged, so saved pages keep their exact value.
                  */
-                $this->add_control(
+                $this->add_responsive_control(
                         $id . '_s',
                         array(
                                 'label'      => __( 'اندازه فونت', 'hamishop-elementor-widgets' ),
