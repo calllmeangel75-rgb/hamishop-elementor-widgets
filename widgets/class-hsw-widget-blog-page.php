@@ -111,15 +111,27 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                         $this->print_part( 'bhero_', '\HSW_Widget_Blog_Hero' );
                 }
 
+                /*
+                 * Tabs and the featured article span the full width, like the
+                 * magazine mock: hero → tabs → featured → two columns
+                 * (cards | sidebar). Inside the grid they used to squeeze into
+                 * the main column, so the sidebar started next to the featured
+                 * card and the archive read as a jumble.
+                 */
+                if ( $this->part_on( 'btabs_' ) ) {
+                        echo '<div class="hsw-cp--blog__wide">';
+                        $this->print_part( 'btabs_', '\HSW_Widget_Blog_Tabs' );
+                        echo '</div>';
+                }
+                if ( $this->part_on( 'bfeat_' ) ) {
+                        echo '<div class="hsw-cp--blog__wide">';
+                        $this->print_part( 'bfeat_', '\HSW_Widget_Blog_Featured' );
+                        echo '</div>';
+                }
+
                 echo '<div class="hsw-cp__body">';
 
                 echo '<div class="hsw-cp__col hsw-cp__col--main">';
-                if ( $this->part_on( 'btabs_' ) ) {
-                        $this->print_part( 'btabs_', '\HSW_Widget_Blog_Tabs' );
-                }
-                if ( $this->part_on( 'bfeat_' ) ) {
-                        $this->print_part( 'bfeat_', '\HSW_Widget_Blog_Featured' );
-                }
                 if ( $this->part_on( 'bgrid_' ) ) {
                         $this->print_part( 'bgrid_', '\HSW_Widget_Blog_Grid' );
                 }

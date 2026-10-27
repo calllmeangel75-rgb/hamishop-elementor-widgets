@@ -420,6 +420,25 @@
 /* =========================================================================
  *  SIDEBAR WIDGETS
  * ====================================================================== */
+/*
+ * Blog archive layout.
+ *
+ * The page shell only had the single-column grid from hsw-composite, so the
+ * sidebar (most read / newsletter / tags) stacked under the cards and the whole
+ * archive read as one long column. Two columns from 1024px, sidebar sticky.
+ */
+@media (min-width: 1024px) {
+	.hsw-cp--blog .hsw-cp__body {
+		grid-template-columns: minmax(0, 1fr) var(--hsw-cp-side, 340px);
+		align-items: start;
+	}
+
+	.hsw-cp--blog .hsw-cp__side {
+		position: sticky;
+		top: 24px;
+	}
+}
+
 .hsw-cp__side { gap: 20px; }
 
 .hsw-bpop,
@@ -538,4 +557,44 @@
         .hsw-bhero__search button { padding: 9px 16px; }
         .hsw-bfeat__title { font-size: calc(var(--hsw-bfeat-title-fs, 20px) * .85); }
         .hsw-cp__side { gap: 16px; }
+}
+
+/* =========================================================================
+ * Desktop layout pass — aligns the archive with the magazine mock.
+ * Appended as an override block so no existing rule is rewritten.
+ * ========================================================================= */
+@media (min-width: 1024px) {
+	/* Featured: image on the right at 58%, text on the left. */
+	.hsw-cp--blog .hsw-bfeat {
+		direction: rtl;
+		grid-template-columns: 58% minmax(0, 1fr);
+	}
+
+	/* Tabs + sort share one row: pills start, sort ends. */
+	.hsw-cp--blog .hsw-btabs {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+	}
+
+	.hsw-cp--blog .hsw-btabs__pills {
+		/* width:auto + basis 0 so the sort control stays on the same line */
+		width: auto;
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	.hsw-cp--blog .hsw-btabs__sort {
+		margin-inline-start: auto;
+		flex: 0 0 auto;
+	}
+}
+
+/* Hero stats sit next to each other instead of spreading across the row. */
+.hsw-cp--blog .hsw-bhero__stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 32px;
+	justify-content: flex-start;
 }
