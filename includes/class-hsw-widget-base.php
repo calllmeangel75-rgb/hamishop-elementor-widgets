@@ -199,6 +199,55 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * @param string $widget_class Fully-qualified part widget class.
          * @param string $section_id Child style section id.
          */
+        /**
+         * Mirror a child widget's STYLE section without the type whitelist.
+         *
+         * `part_controls()` drops anything that is not in a short allow-list and
+         * silently produced an empty section (measured: 31 style controls in the
+         * child, 0 in the composite). This variant copies the registry entry
+         * verbatim — selectors, responsive flags, size units, conditions — so a
+         * colour/slider/dimensions control behaves exactly like the child's own.
+         *
+         * @param string $prefix      Setting prefix for this part.
+         * @param string $label       Section label.
+         * @param string $widget_class Child widget class.
+         * @param string $section_id  Section to copy.
+         * @return void
+         */
+        protected function style_section_mirror( $prefix, $label, $widget_class, $section_id = 'sec_style' ) {
+                $this->start_controls_section(
+                        'hsw_style_' . $prefix,
+                        array(
+                                'label' => $label,
+                                'tab'   => Controls_Manager::TAB_STYLE,
+                        )
+                );
+
+                $controls = HSW_Composite::controls( $widget_class );
+                $skip     = array( 'section', 'tabs', 'tab', 'is_group', 'group_prefix', 'group_type', 'dynamic', 'frontend_available', 'render_type', 'name', 'inner', 'group_fields' );
+
+                foreach ( $controls as $id => $source ) {
+                        if ( ! is_array( $source ) || ! isset( $source['section'] ) || $section_id !== $source['section'] ) {
+                                continue;
+                        }
+                        if ( preg_match( '/_(tablet|mobile)$/', (string) $id ) ) {
+                                continue;
+                        }
+
+                        $args = $source;
+                        foreach ( $skip as $key ) {
+                                unset( $args[ $key ] );
+                        }
+                        if ( empty( $args['type'] ) || in_array( $args['type'], array( 'section', 'tab' ), true ) ) {
+                                continue;
+                        }
+
+                        $this->add_control( $prefix . $id, $args );
+                }
+
+                $this->end_controls_section();
+        }
+
         protected function part_style_section( $prefix, $label, $widget_class, $section_id = 'sec_style' ) {
                 $this->start_controls_section(
                         'hsw_style_' . $prefix,
@@ -255,6 +304,8 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         Controls_Manager::HEADING,
                         Controls_Manager::DIVIDER,
                         Controls_Manager::WYSIWYG,
+                        Controls_Manager::DIMENSIONS,
+                        Controls_Manager::BOX_SHADOW,
                 );
                 $pass = array(
                         'label', 'type', 'default', 'options', 'condition', 'description',

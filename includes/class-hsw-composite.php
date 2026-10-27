@@ -106,6 +106,20 @@ final class HSW_Composite {
                         \Elementor\Core\Frontend\Performance::set_use_style_controls( true );
                 }
 
+                /*
+                 * Child widgets are not registered with Elementor, so their class
+                 * file is never loaded — `class_exists()` was false and every
+                 * mirrored section (content AND style) came back empty. Load the
+                 * file by the project's naming convention before asking.
+                 */
+                if ( ! class_exists( $widget_class ) ) {
+                        $file = 'class-' . strtolower( str_replace( '_', '-', $widget_class ) ) . '.php';
+                        $path = HSW_DIR . 'widgets/' . $file;
+                        if ( file_exists( $path ) ) {
+                                require_once $path;
+                        }
+                }
+
                 $controls = array();
                 try {
                         if ( class_exists( $widget_class ) ) {

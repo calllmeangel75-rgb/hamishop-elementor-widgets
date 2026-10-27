@@ -75,6 +75,18 @@ class HSW_Widget_Cart_Page extends HSW_Cart_Base {
                  * One type scale for the whole page: the variables land on the wrapper and
                  * every child widget inherits them.
                  */
+                /*
+                 * Child widgets are not registered with Elementor, so their own
+                 * Style tab is unreachable. Mirror the five style sections into
+                 * this widget: every colour/slider/dimensions control lands here
+                 * with the same selector and responsive flags.
+                 */
+                $this->style_section_mirror( 'ctop_', __( 'استایل هدر و مراحل', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Top' );
+                $this->style_section_mirror( 'cbanner_', __( 'استایل بنر ارسال رایگان', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Banner' );
+                $this->style_section_mirror( 'citems_', __( 'استایل اقلام سبد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Items' );
+                $this->style_section_mirror( 'ccoupon_', __( 'استایل کد تخفیف', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Coupon' );
+                $this->style_section_mirror( 'csummary_', __( 'استایل خلاصه سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Cart_Summary' );
+
                 $this->style_typography_section(
                 	'cp',
                 	array(

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.132
+Stable tag: 1.11.133
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,24 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.133 =
+* **استایل بخش‌های سبد خرید بالاخره در پنل المنتور ظاهر شد.**
+  - ریشه: ویجت‌های زیرمجموعه (`cart-items`, `cart-summary`, `cart-coupon`,
+    `cart-top`, `cart-banner`) با المنتور ثبت نمی‌شوند، پس کلاسشان هم لود
+    نمی‌شد و `HSW_Composite::controls()` همیشه خالی برمی‌گشت. یک `require_once`
+    بر اساس قرارداد نام فایل اضافه شد.
+  - یک `style_section_mirror()` اضافه شد که سکشن استایل فرزند را **بدون**
+    فیلتر نوع کپی می‌کند (پس `dimensions`/`box-shadow` هم منتقل می‌شوند) و
+    `DIMENSIONS`/`BOX_SHADOW` به لیست مجاز `part_controls()` هم اضافه شد.
+  - پنج سکشن استایل به ویجت «صفحه کامل سبد» اضافه شد: هدر و مراحل · بنر ارسال
+    · اقلام سبد · کد تخفیف · خلاصه سفارش.
+  - **اندازه‌گیری:** کنترل‌های ویجت از ۴۱۰ به **۵۲۲** رسید (+۱۱۲ استایل)؛
+    شمارش به تفکیک پیشوند: `ctop_` ۳۷ · `cbanner_` ۲۳ · `citems_` ۴۹ ·
+    `ccoupon_` ۲۹ · `csummary_` ۵۳.
+  - **تلهٔ اندازه‌گیری:** `get_controls()` در حالت پیش‌فرض المنتور کنترل‌های تب
+    استایل را حذف می‌کند و برچسب سکشن‌ها هم خالی برمی‌گردد؛ تست باید با
+    `Performance::set_use_style_controls(true)` و بر اساس **id** انجام شود.
 
 = 1.11.132 =
 * **صفحهٔ سبد: کنترل‌های چیدمان بالاخره کار می‌کنند.**
