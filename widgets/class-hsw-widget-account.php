@@ -243,33 +243,13 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 		);
 		$this->end_controls_section();
 
-		$this->start_controls_section(
-			'sec_palette_account',
-			array(
-				'label' => __( 'پالت رنگ حساب', 'hamishop-elementor-widgets' ),
-				'tab'   => Controls_Manager::TAB_STYLE,
-			)
-		);
-		$colors = array(
-			'ac_primary' => array( __( 'رنگ اصلی', 'hamishop-elementor-widgets' ), __( 'هدر، منوی کناری، دکمه‌های اصلی و لینک‌های فعال.', 'hamishop-elementor-widgets' ) ),
-			'ac_accent'  => array( __( 'رنگ تاکیدی', 'hamishop-elementor-widgets' ), __( 'دکمه‌های ثانویه، وضعیت‌های فعال و جزئیات برجسته.', 'hamishop-elementor-widgets' ) ),
-			'ac_bg'      => array( __( 'پس‌زمینه صفحه', 'hamishop-elementor-widgets' ), __( 'رنگ زمینهٔ کلی پنل حساب.', 'hamishop-elementor-widgets' ) ),
-			'ac_card'    => array( __( 'پس‌زمینه کارت‌ها', 'hamishop-elementor-widgets' ), __( 'کارت آمار، سفارش‌ها، آدرس‌ها و فرم‌ها.', 'hamishop-elementor-widgets' ) ),
-			'ac_ink'     => array( __( 'رنگ متن', 'hamishop-elementor-widgets' ), __( 'متن اصلی؛ رنگ خطوط و متن ثانویه به‌صورت خودکار از آن ساخته می‌شود.', 'hamishop-elementor-widgets' ) ),
-		);
-		foreach ( $colors as $key => $item ) {
-			$this->add_control(
-				$key,
-				array(
-					'label'       => $item[0],
-					'type'        => Controls_Manager::COLOR,
-					'default'     => '',
-					'description' => $item[1],
-					'label_block' => true,
-				)
-			);
-		}
-		$this->end_controls_section();
+		/*
+		 * No palette section here on purpose: brand / accent / background / card /
+		 * ink live in the admin palette and every --hsw-ac-* token in
+		 * hsw-account.css already falls back to it. The typography and per-element
+		 * controls below still override.
+		 */
+
 
 		$this->start_controls_section(
 			'sec_typography',

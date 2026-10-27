@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.136
+Stable tag: 1.11.137
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,21 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.137 =
+* **حساب کاربری: حذف «پالت رنگ حساب» تکراری + اتصال دو توکن جامانده.**
+  - سکشن `sec_palette_account` (۵ رنگ: اصلی، تاکیدی، پس‌زمینه، کارت، متن) حذف
+    شد؛ این‌ها در پالت پیشخوان هستند و همهٔ `--hsw-ac-*` از قبل fallback دارند.
+  - دو توکنی که هاردکد مانده بودند به پالت وصل شدند (هگز قبلی fallback):
+    `--hsw-ac-bg: var(--hsw-pal-surface-alt, #f3f6fa)` و
+    `--hsw-ac-danger: var(--hsw-pal-danger, #d92d3a)`.
+  - **اثر بصری (اندازه‌گیری‌شده):** پس‌زمینه `#f3f6fa → #f3f4f6` و رنگ خطر
+    `#d92d3a → #ba1a1a`؛ بقیه بدون تغییر (`--hsw-ac-primary` = `#4d85ff` پالت).
+  - کنترل‌های پالت: صفر · سکشن‌های ویجت: ۷ (`sec_layout`, `sec_typography` …) ·
+    `/my-account/` و `/my-account/orders/` ۲۰۰ بدون Fatal.
+  - **توجه:** با حذف پالت، رنگ‌دهی این ویجت از پنل حساب فعلاً فقط از پالت
+    پیشخوان انجام می‌شود؛ اگر کنترل رنگ عنصربه‌عنصر لازم است، باید مثل سبد
+    ساخته شود.
 
 = 1.11.136 =
 * **صفحهٔ تسویه حساب: استایل هفت بخش در پنل + حذف پالت تکراری.**

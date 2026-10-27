@@ -16,14 +16,14 @@
 	--hsw-ac-primary: var(--hsw-primary, #0e2a47);
 	--hsw-ac-primary-dark: var(--hsw-primary-dark, #071a2f);
 	--hsw-ac-accent: var(--hsw-accent, #f97316);
-	--hsw-ac-bg: #f3f6fa;
+	--hsw-ac-bg: var(--hsw-pal-surface-alt, #f3f6fa);
 	--hsw-ac-card: var(--hsw-pal-surface, #fff);
 	--hsw-ac-ink: var(--hsw-on-surface, #0f172a);
 	--hsw-ac-muted: var(--hsw-pal-muted, #5b6b80);
 	--hsw-ac-line: var(--hsw-pal-border, #e6ebf2);
 	--hsw-ac-success: var(--hsw-pal-success, #0f9f6e);
 	--hsw-ac-warning: var(--hsw-pal-warning, #b45309);
-	--hsw-ac-danger: #d92d3a;
+	--hsw-ac-danger: var(--hsw-pal-danger, #d92d3a);
 	--hsw-ac-hero-a: #0b2036;
 	--hsw-ac-hero-b: #173b5c;
 	--hsw-ac-side: 320px;
