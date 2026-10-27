@@ -1184,7 +1184,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 $slide = max( 1, (int) ( $step / 10 ) );
 
                 $body  = '<div class="hsw-af__sliderwrap" data-hsw-pricerange>';
-                $body .= '<div class="hsw-af__track" aria-hidden="true"><span class="hsw-af__fill" data-hsw-pricefill></span></div>';
+                $body .= '<div class="hsw-af__pricetrack" aria-hidden="true"><span class="hsw-af__pricefill" data-hsw-pricefill></span></div>';
                 $body .= '<input type="range" class="hsw-af__range hsw-af__range--min" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" value="' . esc_attr( $price['from'] ) . '" step="' . esc_attr( $slide ) . '" data-hsw-priceminrange aria-label="' . esc_attr__( 'حداقل قیمت', 'hamishop-elementor-widgets' ) . '">';
                 $body .= '<input type="range" class="hsw-af__range hsw-af__range--max" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" value="' . esc_attr( $price['to'] ) . '" step="' . esc_attr( $slide ) . '" data-hsw-pricemax aria-label="' . esc_attr__( 'حداکثر قیمت', 'hamishop-elementor-widgets' ) . '">';
                 $body .= '</div>';

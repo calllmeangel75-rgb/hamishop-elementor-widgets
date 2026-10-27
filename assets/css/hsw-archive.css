@@ -627,7 +627,7 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         align-items: center;
 }
 /* The visible track/fill sit under the two transparent ranges. */
-.hsw-af__track {
+.hsw-af__pricetrack {
         position: absolute;
         inset-inline: 9px;
         height: 6px;
@@ -635,7 +635,7 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         background: var(--hswa-line);
         pointer-events: none;
 }
-.hsw-af__fill {
+.hsw-af__pricefill {
         position: absolute;
         top: 0;
         bottom: 0;
@@ -655,9 +655,10 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         appearance: none;
         -webkit-appearance: none;
         /* Both inputs overlap; only the thumbs take pointer events so either
-           handle can be grabbed without the top input swallowing the click. */
+           handle can be grabbed without the top input swallowing the click.
+           No `direction: ltr` here: in an RTL page the minimum handle must sit
+           on the right, next to the «از» field. */
         pointer-events: none;
-        direction: ltr;
 }
 .hsw-af__range::-webkit-slider-runnable-track { height: 6px; background: none; }
 .hsw-af__range::-moz-range-track { height: 6px; background: none; }

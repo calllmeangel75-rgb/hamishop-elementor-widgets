@@ -265,12 +265,23 @@
                 var lo = Number(p.minR.min);
                 var hi = Number(p.maxR.max);
                 var span = hi - lo || 1;
-                var a = ((Number(p.minR.value) - lo) / span) * 100;
-                var b = ((hi - Number(p.maxR.value)) / span) * 100;
+
+                /* 0..1 measured from the low end. */
+                var from = Math.min(1, Math.max(0, (Number(p.minR.value) - lo) / span));
+                var to = Math.min(1, Math.max(0, (Number(p.maxR.value) - lo) / span));
+
                 var wrap = p.minR.parentNode;
+                var rtl = wrap && 'rtl' === window.getComputedStyle(wrap).direction;
+
+                /*
+                 * Physical left/right, flipped for RTL. Logical properties were
+                 * unreliable here: the fill sits in its own formatting context, so
+                 * `inset-inline-start` resolved the wrong way and the filled band
+                 * appeared on the wrong side of the track.
+                 */
                 if (p.fill) {
-                        p.fill.style.insetInlineStart = Math.max(0, a) + '%';
-                        p.fill.style.insetInlineEnd = Math.max(0, b) + '%';
+                        p.fill.style.left = (rtl ? (1 - to) * 100 : from * 100) + '%';
+                        p.fill.style.right = (rtl ? from * 100 : (1 - to) * 100) + '%';
                 }
                 if (wrap) { wrap.classList.toggle('is-min-active', Number(p.minR.value) > lo); }
         }
