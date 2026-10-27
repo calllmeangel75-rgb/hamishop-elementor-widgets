@@ -1166,14 +1166,33 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 $min_ph    = HSW_Helpers::price_num( $price['min'] );
                 $max_ph    = HSW_Helpers::price_num( $price['max'] );
 
-                $body  = '<div class="hsw-af__sliderwrap">';
-                $body .= '<input type="range" class="hsw-af__range" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" value="' . esc_attr( $price['to'] ) . '" step="' . esc_attr( $step ) . '" data-hsw-pricemax aria-label="' . esc_attr__( 'حداکثر قیمت', 'hamishop-elementor-widgets' ) . '">';
+                /*
+                 * Dual-handle price range.
+                 *
+                 * Before: one handle (max only), and the number inputs carried
+                 * `step="10000"`, so typing 95000 made the browser refuse the
+                 * whole form with «The two nearest valid values are 90000 and
+                 * 100000». The ranges now have two handles and the number fields
+                 * use step="any" with no min/max attributes — the server already
+                 * clamps the values in price_state().
+                 */
+                /*
+                 * The handles use a finer step than the server's rounding so a
+                 * typed value (e.g. 95,500) is not snapped to the nearest 10,000
+                 * and left disagreeing with the number field.
+                 */
+                $slide = max( 1, (int) ( $step / 10 ) );
+
+                $body  = '<div class="hsw-af__sliderwrap" data-hsw-pricerange>';
+                $body .= '<div class="hsw-af__track" aria-hidden="true"><span class="hsw-af__fill" data-hsw-pricefill></span></div>';
+                $body .= '<input type="range" class="hsw-af__range hsw-af__range--min" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" value="' . esc_attr( $price['from'] ) . '" step="' . esc_attr( $slide ) . '" data-hsw-priceminrange aria-label="' . esc_attr__( 'حداقل قیمت', 'hamishop-elementor-widgets' ) . '">';
+                $body .= '<input type="range" class="hsw-af__range hsw-af__range--max" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" value="' . esc_attr( $price['to'] ) . '" step="' . esc_attr( $slide ) . '" data-hsw-pricemax aria-label="' . esc_attr__( 'حداکثر قیمت', 'hamishop-elementor-widgets' ) . '">';
                 $body .= '</div>';
                 $body .= '<div class="hsw-af__pricetwo">';
                 $body .= '<label class="hsw-af__pricecell"><span class="hsw-af__plabel">' . esc_html__( 'از:', 'hamishop-elementor-widgets' ) . '</span>';
-                $body .= '<input type="number" class="hsw-af__pnum" name="min_price" value="' . esc_attr( $min_value ) . '" placeholder="' . esc_attr( $min_ph ) . '" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" step="' . esc_attr( $step ) . '" inputmode="numeric" data-hsw-pricemin data-hsw-auto></label>';
+                $body .= '<input type="number" class="hsw-af__pnum" name="min_price" value="' . esc_attr( $min_value ) . '" placeholder="' . esc_attr( $min_ph ) . '" step="any" inputmode="numeric" data-hsw-pricemin data-hsw-auto></label>';
                 $body .= '<label class="hsw-af__pricecell is-end"><span class="hsw-af__plabel">' . esc_html__( 'تا:', 'hamishop-elementor-widgets' ) . ' <span class="hsw-af__unit">' . esc_html( $cur ) . '</span></span>';
-                $body .= '<input type="number" class="hsw-af__pnum" name="max_price" value="' . esc_attr( $max_value ) . '" placeholder="' . esc_attr( $max_ph ) . '" min="' . esc_attr( $price['min'] ) . '" max="' . esc_attr( $price['max'] ) . '" step="' . esc_attr( $step ) . '" inputmode="numeric" data-hsw-pricemaxinput data-hsw-auto></label>';
+                $body .= '<input type="number" class="hsw-af__pnum" name="max_price" value="' . esc_attr( $max_value ) . '" placeholder="' . esc_attr( $max_ph ) . '" step="any" inputmode="numeric" data-hsw-pricemaxinput data-hsw-auto></label>';
                 $body .= '</div>';
 
                 return $this->box_shell( $this->box_title( $box ), $body, $box['open'], false );

@@ -618,36 +618,73 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 /* Knob starts at the left edge; checked = slide right (matches the mock). */
 .hsw-af__switchinput:checked ~ .hsw-af__track ~ .hsw-af__knob { transform: translateX(20px); }
 
-/* Price */
-.hsw-af__sliderwrap { padding: 8px 4px; }
-.hsw-af__range {
-        width: 100%;
+/* Price — dual-handle range (min + max) */
+.hsw-af__sliderwrap {
+        position: relative;
+        height: 34px;
+        padding: 0 9px;
+        display: flex;
+        align-items: center;
+}
+/* The visible track/fill sit under the two transparent ranges. */
+.hsw-af__track {
+        position: absolute;
+        inset-inline: 9px;
         height: 6px;
-        background: var(--hswa-line);
         border-radius: 8px;
+        background: var(--hswa-line);
+        pointer-events: none;
+}
+.hsw-af__fill {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        border-radius: 8px;
+        background: var(--hswa-primary);
+        /* Filled from the min handle to the max handle; JS keeps these in sync. */
+        inset-inline-start: var(--hsw-fill-l, 0%);
+        inset-inline-end: var(--hsw-fill-r, 0%);
+}
+.hsw-af__range {
+        position: absolute;
+        inset-inline: 0;
+        width: 100%;
+        height: 34px;
+        margin: 0;
+        background: none;
         appearance: none;
         -webkit-appearance: none;
-        cursor: pointer;
+        /* Both inputs overlap; only the thumbs take pointer events so either
+           handle can be grabbed without the top input swallowing the click. */
+        pointer-events: none;
+        direction: ltr;
 }
+.hsw-af__range::-webkit-slider-runnable-track { height: 6px; background: none; }
+.hsw-af__range::-moz-range-track { height: 6px; background: none; }
 .hsw-af__range::-webkit-slider-thumb {
         appearance: none;
         -webkit-appearance: none;
+        pointer-events: auto;
         width: 18px;
         height: 18px;
+        margin-top: -6px;
         border-radius: 50%;
         background: var(--hswa-primary);
         cursor: pointer;
-        box-shadow: 0 0 4px rgba(37, 99, 235, .4);
+        box-shadow: 0 0 0 3px var(--hswa-card, #fff), 0 1px 4px rgba(15, 23, 42, .35);
         border: 0;
 }
 .hsw-af__range::-moz-range-thumb {
+        pointer-events: auto;
         width: 18px;
         height: 18px;
         border-radius: 50%;
         background: var(--hswa-primary);
         cursor: pointer;
+        box-shadow: 0 0 0 3px var(--hswa-card, #fff), 0 1px 4px rgba(15, 23, 42, .35);
         border: 0;
 }
+.hsw-af__range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--hswa-card, #fff), 0 0 0 5px color-mix(in srgb, var(--hswa-primary) 45%, transparent); }
 .hsw-af__pricetwo { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 12px; }
 .hsw-af__pricecell { background: var(--hswa-page); border: 1px solid var(--hswa-line); border-radius: 8px; padding: 8px; }
 .hsw-a .hsw-af__pricecell { display: block; margin: 0; padding: 8px; }

@@ -238,48 +238,123 @@
 
         /* ======================= PRICE SLIDER ======================= */
 
-        function priceRoot(el) {
-                return el.closest('.hsw-af__form');
+        /*
+         * Price filter — two handles.
+         *
+         * Everything is scoped to the visible container (.hsw-af__side on
+         * desktop, .hsw-asheet--filter on mobile): the form holds BOTH copies,
+         * so a form-wide querySelector used to move the desktop handle while the
+         * user dragged the mobile one.
+         */
+        function priceScope(el) {
+                return el.closest('.hsw-af__side') || el.closest('.hsw-asheet--filter') || el.closest('.hsw-af__form');
         }
 
-        function syncRange(form) {
-                var range = form.querySelector('[data-hsw-pricemax]');
-                var num = form.querySelector('[data-hsw-pricemaxinput]');
-                if (!range || !num) { return; }
-                /* At the slider ceiling the value is the bound, not a filter. */
-                num.value = Number(range.value) >= Number(range.max) ? '' : range.value;
+        function priceParts(scope) {
+                if (!scope) { return null; }
+                var minR = scope.querySelector('[data-hsw-priceminrange]');
+                var maxR = scope.querySelector('[data-hsw-pricemax]');
+                var minN = scope.querySelector('[data-hsw-pricemin]');
+                var maxN = scope.querySelector('[data-hsw-pricemaxinput]');
+                var fill = scope.querySelector('[data-hsw-pricefill]');
+                if (!minR || !maxR) { return null; }
+                return { minR: minR, maxR: maxR, minN: minN, maxN: maxN, fill: fill };
         }
 
-        function syncNumber(el) {
-                var form = priceRoot(el);
-                if (!form) { return; }
-                var range = form.querySelector('[data-hsw-pricemax]');
-                var num = form.querySelector('[data-hsw-pricemaxinput]');
-                if (!range || !num) { return; }
-                var value = String(num.value).trim();
-                if ('' === value) {
-                        range.value = range.max;
-                        return;
+        function paintPrice(p) {
+                var lo = Number(p.minR.min);
+                var hi = Number(p.maxR.max);
+                var span = hi - lo || 1;
+                var a = ((Number(p.minR.value) - lo) / span) * 100;
+                var b = ((hi - Number(p.maxR.value)) / span) * 100;
+                var wrap = p.minR.parentNode;
+                if (p.fill) {
+                        p.fill.style.insetInlineStart = Math.max(0, a) + '%';
+                        p.fill.style.insetInlineEnd = Math.max(0, b) + '%';
                 }
-                if (Number(value) >= Number(range.min) && Number(value) <= Number(range.max)) {
-                        range.value = value;
+                if (wrap) { wrap.classList.toggle('is-min-active', Number(p.minR.value) > lo); }
+        }
+
+        /* Numbers mirror the handles; an empty field means "no bound". */
+        function syncNumbers(p) {
+                var lo = Number(p.minR.min);
+                var hi = Number(p.maxR.max);
+                if (p.minN) { p.minN.value = Number(p.minR.value) > lo ? p.minR.value : ''; }
+                if (p.maxN) { p.maxN.value = Number(p.maxR.value) < hi ? p.maxR.value : ''; }
+        }
+
+        function clampPrice(p, from) {
+                var lo = Number(p.minR.min);
+                var hi = Number(p.maxR.max);
+                var a = Math.min(Math.max(Number(p.minR.value) || lo, lo), hi);
+                var b = Math.min(Math.max(Number(p.maxR.value) || hi, lo), hi);
+                if (a > b) {
+                        if (from === 'min') { b = a; } else { a = b; }
                 }
+                p.minR.value = a;
+                p.maxR.value = b;
+                paintPrice(p);
         }
 
         document.addEventListener('input', function (e) {
-                if (e.target.closest('[data-hsw-pricemax]')) {
-                        syncRange(priceRoot(e.target));
-                        queueAutoSubmit(e.target);
+                var el = e.target;
+                if (!el.matches('[data-hsw-priceminrange], [data-hsw-pricemax], [data-hsw-pricemin], [data-hsw-pricemaxinput]')) {
                         return;
                 }
-                if (e.target.closest('[data-hsw-pricemaxinput]')) {
-                        syncNumber(e.target);
+                var p = priceParts(priceScope(el));
+                if (!p) { return; }
+
+                if (el.matches('[data-hsw-priceminrange]')) {
+                        clampPrice(p, 'min');
+                        syncNumbers(p);
+                        queueAutoSubmit(el);
+                        return;
                 }
+                if (el.matches('[data-hsw-pricemax]')) {
+                        clampPrice(p, 'max');
+                        syncNumbers(p);
+                        queueAutoSubmit(el);
+                        return;
+                }
+                /*
+                 * Typed numbers: correct the field the user is editing, never the
+                 * other one. Typing 95000 while the minimum sits at 200000 used
+                 * to drag the minimum down; now the typed value is clamped into
+                 * [other bound, catalog bound] and written back only when it had
+                 * to change, so the caret is left alone while typing normally.
+                 */
+                var lo = Number(p.minR.min);
+                var hi = Number(p.maxR.max);
+                var raw = String(el.value).trim();
+                var num = parseFloat(raw.replace(/[^0-9.]/g, ''));
+
+                if ('' === raw || isNaN(num)) {
+                        if (el === p.minN) { p.minR.value = lo; } else { p.maxR.value = hi; }
+                } else if (el === p.minN) {
+                        var capped = Math.min(Math.max(num, lo), Number(p.maxR.value));
+                        p.minR.value = capped;
+                        if (String(capped) !== raw) { el.value = capped > lo ? String(capped) : ''; }
+                } else {
+                        var floored = Math.max(Math.min(num, hi), Number(p.minR.value));
+                        p.maxR.value = floored;
+                        if (String(floored) !== raw) { el.value = floored < hi ? String(floored) : ''; }
+                }
+
+                paintPrice(p);
+                if (el !== p.minN && p.minN) { p.minN.value = Number(p.minR.value) > lo ? p.minR.value : ''; }
+                if (el !== p.maxN && p.maxN) { p.maxN.value = Number(p.maxR.value) < hi ? p.maxR.value : ''; }
         });
+
         document.addEventListener('change', function (e) {
-                if (e.target.closest('[data-hsw-pricemaxinput]')) {
+                if (e.target.matches('[data-hsw-pricemin], [data-hsw-pricemaxinput]')) {
                         queueAutoSubmit(e.target);
                 }
+        });
+
+        /* Paint every price box once so the fill matches the server state. */
+        Array.prototype.forEach.call(document.querySelectorAll('[data-hsw-pricerange]'), function (box) {
+                var p = priceParts(box.parentNode);
+                if (p) { paintPrice(p); }
         });
 
         /* ======================= CHIPS / SWATCHES → HIDDEN INPUT ======================= */
