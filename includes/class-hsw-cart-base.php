@@ -474,41 +474,18 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
 
 
         /**
-         * Cart palette (--hswc-* design tokens).
+         * Cart palette.
+         *
+         * Intentionally empty: these eight colours (brand, CTA, text, borders,
+         * cards, success, error) live in the admin palette and every --hswc-*
+         * token in hsw-cart.css already falls back to it, e.g.
+         * `--hswc-card: var(--hsw-pal-surface, #fff)`. Keeping a second copy in
+         * the widget only duplicated the settings panel; per-element colour
+         * controls (row, image, quantity, totals, buttons) still override.
+         *
+         * @return array
          */
         protected function palette_map() {
-                return array(
-                        'primary' => array(
-                                'label' => __( 'رنگ اصلی (برند)', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-primary: {{VALUE}}; --hswc-btn: color-mix(in srgb, {{VALUE}}, #fff 12%);',
-                        ),
-                        'accent'  => array(
-                                'label' => __( 'رنگ تاکید (CTA)', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-accent: {{VALUE}}; --hswc-accent2: color-mix(in srgb, {{VALUE}}, #000 18%); --hswc-fixed: color-mix(in srgb, {{VALUE}}, #fff 82%);',
-                        ),
-                        'text'    => array(
-                                'label' => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-text: {{VALUE}}; --hswc-text2: color-mix(in srgb, {{VALUE}}, #fff 26%); --hswc-muted: color-mix(in srgb, {{VALUE}}, #fff 42%);',
-                        ),
-                        'border'  => array(
-                                'label' => __( 'رنگ حاشیه‌ها', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-border: {{VALUE}}; --hswc-border2: color-mix(in srgb, {{VALUE}}, #000 12%);',
-                        ),
-                        'card'    => array(
-                                'label' => __( 'رنگ کارت‌ها', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-card: {{VALUE}}; --hswc-card2: color-mix(in srgb, {{VALUE}}, #000 3%); --hswc-card3: color-mix(in srgb, {{VALUE}}, #000 5%);',
-                        ),
-                        'status_head' => array(
-                                'heading' => __( 'رنگ‌های وضعیت', 'hamishop-elementor-widgets' ),
-                        ),
-                        'ok'      => array(
-                                'label' => __( 'سبز / موفق', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-ok: {{VALUE}}; --hswc-ok-bg: color-mix(in srgb, {{VALUE}}, #fff 92%);',
-                        ),
-                        'error'   => array(
-                                'label' => __( 'قرمز / خطا', 'hamishop-elementor-widgets' ),
-                                'decls' => '--hswc-error: {{VALUE}}; --hswc-error-bg: color-mix(in srgb, {{VALUE}}, #fff 92%);',
-                        ),
-                );
+                return array();
         }
 }
