@@ -16,6 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Elementor\Controls_Manager;
+use Elementor\Group_Control_Box_Shadow;
 
 class HSW_Widget_Post_Page extends HSW_Blog_Base {
 
@@ -366,6 +367,159 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			'{{WRAPPER}} .hsw-pp__submit',
 			array( 'size' => 12, 'radius' => 9 )
 		);
+
+		$this->end_controls_section();
+
+		/* ------------------- CONTENT TYPOGRAPHY ------------------- */
+		$this->start_controls_section(
+			'sec_pp_content',
+			array( 'label' => __( 'محتوای نوشته (متن و تیترها)', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->a_typo( 'pc_p', __( 'متن پاراگراف‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__body p, {{WRAPPER}} .hsw-pp__body li', array( 'size' => 15, 'lh' => 2 ) );
+
+		$this->add_responsive_control(
+			'pc_p_gap',
+			array(
+				'label'      => __( 'فاصلهٔ بین پاراگراف‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 48 ), 'em' => array( 'min' => 0, 'max' => 3, 'step' => 0.1 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-pp__body p' => 'margin-bottom: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->a_typo( 'pc_h', __( 'تیترهای H2 تا H6', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__body h2, {{WRAPPER}} .hsw-pp__body h3, {{WRAPPER}} .hsw-pp__body h4, {{WRAPPER}} .hsw-pp__body h5, {{WRAPPER}} .hsw-pp__body h6', array( 'size' => 20, 'lh' => 1.7 ) );
+
+		$this->add_responsive_control(
+			'pc_h_gap',
+			array(
+				'label'      => __( 'فاصلهٔ بالا و پایین تیترها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-pp__body h2, {{WRAPPER}} .hsw-pp__body h3, {{WRAPPER}} .hsw-pp__body h4' => 'margin-top: {{SIZE}}{{UNIT}}; margin-bottom: calc({{SIZE}}{{UNIT}} / 2);',
+				),
+			)
+		);
+
+		$this->a_color( 'pc_link', __( 'رنگ لینک‌های متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__body a' );
+		$this->a_color( 'pc_link_hv', __( 'رنگ لینک در هاور', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__body a:hover' );
+
+		$this->add_control(
+			'pc_link_u',
+			array(
+				'label'     => __( 'زیرخط لینک‌ها', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '',
+				'options'   => array( '' => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ), 'none' => __( 'بدون زیرخط', 'hamishop-elementor-widgets' ), 'underline' => __( 'با زیرخط', 'hamishop-elementor-widgets' ) ),
+				'selectors' => array( '{{WRAPPER}} .hsw-pp__body a' => 'text-decoration: {{VALUE}};' ),
+			)
+		);
+
+		$this->a_color( 'pc_bq_bg', __( 'نقل‌قول — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__body blockquote', 'background-color' );
+		$this->a_color( 'pc_bq_bd', __( 'نقل‌قول — حاشیهٔ کناری', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__body blockquote', 'border-inline-start-color' );
+
+		$this->add_responsive_control(
+			'pc_bq_pad',
+			array(
+				'label'      => __( 'نقل‌قول — فاصلهٔ داخلی', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-pp__body blockquote' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'pc_img_r',
+			array(
+				'label'      => __( 'گردی تصاویر داخل متن', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 32 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-pp__body img' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'pc_img_m',
+			array(
+				'label'      => __( 'فاصلهٔ اطراف تصاویر داخل متن', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 64 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-pp__body img' => 'margin-top: {{SIZE}}{{UNIT}}; margin-bottom: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ------------------- RELATED ------------------- */
+		$this->start_controls_section(
+			'sec_pp_related',
+			array( 'label' => __( 'مطالب مرتبط', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+		);
+
+		$this->add_responsive_control(
+			'rel_cols',
+			array(
+				'label'     => __( 'تعداد ستون‌ها', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '',
+				'options'   => array( '' => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ), '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴' ),
+				'selectors' => array( '{{WRAPPER}} .hsw-pp__relgrid' => 'grid-template-columns: repeat({{VALUE}}, minmax(0, 1fr));' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'rel_gap',
+			array(
+				'label'      => __( 'فاصلهٔ بین کارت‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-pp__relgrid' => 'gap: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->a_color( 'rel_bg', __( 'پس‌زمینهٔ کارت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__relcard', 'background-color' );
+		$this->a_color( 'rel_bd', __( 'حاشیهٔ کارت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pp__relcard', 'border-color' );
+
+		$this->add_responsive_control(
+			'rel_radius',
+			array(
+				'label'      => __( 'گردی کارت', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 28 ) ),
+				'selectors'  => array( '{{WRAPPER}} .hsw-pp__relcard' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'rel_shadow',
+				'label'    => __( 'سایهٔ کارت', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-pp__relcard',
+			)
+		);
+
+		$this->add_responsive_control(
+			'rel_ratio',
+			array(
+				'label'     => __( 'نسبت تصویر کارت', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '',
+				'options'   => array( '' => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ), '16/9' => '۱۶:۹', '4/3' => '۴:۳', '1/1' => '۱:۱' ),
+				'selectors' => array( '{{WRAPPER}} .hsw-pp__relmedia' => 'aspect-ratio: {{VALUE}};' ),
+			)
+		);
+
+		$this->a_text( 'rel_title', '{{WRAPPER}} .hsw-pp__reltitle', array( 'default' => 14 ) );
 
 		$this->end_controls_section();
 
