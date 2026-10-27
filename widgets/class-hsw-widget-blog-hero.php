@@ -185,6 +185,13 @@ class HSW_Widget_Blog_Hero extends HSW_Blog_Base {
                         echo '<p class="hsw-bhero__sub">' . esc_html( $s['sub'] ) . '</p>';
                 }
 
+                /*
+                 * Stats and search share one block on the left of the hero, the
+                 * way the magazine mock lays them out. They used to be two
+                 * stacked rows under the title, which pushed everything down.
+                 */
+                echo '<div class="hsw-bhero__aside">';
+
                 if ( 'yes' === ( $s['show_stats'] ?? 'yes' ) ) {
                         echo '<div class="hsw-bhero__stats">';
                         printf(
@@ -228,6 +235,7 @@ class HSW_Widget_Blog_Hero extends HSW_Blog_Base {
                         }
                 }
 
+                echo '</div>'; // .hsw-bhero__aside
                 echo '</div>';
         }
 }

@@ -564,18 +564,59 @@
  * Appended as an override block so no existing rule is rewritten.
  * ========================================================================= */
 @media (min-width: 1024px) {
-	/* Featured: image on the right at 58%, text on the left. */
+	/* Featured: text left, image right at 58% — pinned with order so the
+	   result does not depend on the inherited direction. */
 	.hsw-cp--blog .hsw-bfeat {
+		direction: ltr;
+		grid-template-columns: minmax(0, 1fr) 58%;
+	}
+
+	.hsw-cp--blog .hsw-bfeat__body {
+		order: 1;
 		direction: rtl;
-		grid-template-columns: 58% minmax(0, 1fr);
+	}
+
+	.hsw-cp--blog .hsw-bfeat__media {
+		order: 2;
 	}
 
 	/* Tabs + sort share one row: pills start, sort ends. */
 	.hsw-cp--blog .hsw-btabs {
 		display: flex;
+		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
 		gap: 16px;
+	}
+
+	/* Hero: text on the right, stats + search side by side on the left. */
+	.hsw-cp--blog .hsw-bhero {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+		grid-template-areas:
+			"badge aside"
+			"title aside"
+			"sub aside";
+		align-items: start;
+		column-gap: 32px;
+		row-gap: 10px;
+	}
+
+	.hsw-cp--blog .hsw-bhero__badge { grid-area: badge; justify-self: start; }
+	.hsw-cp--blog .hsw-bhero__title { grid-area: title; }
+	.hsw-cp--blog .hsw-bhero__sub { grid-area: sub; }
+
+	.hsw-cp--blog .hsw-bhero__aside {
+		grid-area: aside;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.hsw-cp--blog .hsw-bhero__search {
+		flex: 1 1 200px;
+		min-width: 180px;
 	}
 
 	.hsw-cp--blog .hsw-btabs__pills {
