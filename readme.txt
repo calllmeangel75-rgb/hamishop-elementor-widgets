@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.135
+Stable tag: 1.11.136
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,20 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.136 =
+* **صفحهٔ تسویه حساب: استایل هفت بخش در پنل + حذف پالت تکراری.**
+  - هفت سکشن استایل زیرمجموعه mirror شد: هدر و مراحل، آدرس و گیرنده، روش ارسال،
+    زمان تحویل، یادداشت سفارش، اقلام سفارش، خلاصه سفارش.
+  - «پالت رنگ ویجت» (۸ رنگ) حذف شد؛ همان سه شرط ایمنی سبد بررسی و تأیید شد:
+    همهٔ توکن‌های `--hswk-*` در `hsw-checkout.css` به پالت fallback دارند
+    (`--hswk-card: var(--hsw-pal-surface, #fff)` …) و هیچ کدی `pal_*` را
+    نمی‌خواند.
+  - **اندازه‌گیری:** ۷ سکشن mirror · صفر `pal_*` · کنترل‌های ویجت **۵۲۵**؛
+    شمارش هر بخش: هدر ۳۳ · آدرس ۳۳ · ارسال ۲۴ · زمان ۲۴ · یادداشت ۲۰ · اقلام ۱۹
+    · خلاصه ۴۶.
+  - `/checkout/` با سبد خالی ۳۰۲ (ریدایرکت عادی)، `/cart/` و `/my-account/` ۲۰۰
+    بدون Fatal.
 
 = 1.11.135 =
 * **سبد خرید: حذف «پالت رنگ ویجت» تکراری.**

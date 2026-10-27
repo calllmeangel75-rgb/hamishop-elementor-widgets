@@ -98,6 +98,18 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
                  * One type scale for the whole page: the variables land on the wrapper and
                  * every child widget inherits them.
                  */
+                /*
+                 * Child widgets are not registered with Elementor, so their Style
+                 * tab never reaches the panel. Mirror each style section here.
+                 */
+                $this->style_section_mirror( 'ctop_', __( 'استایل هدر و مراحل', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Top' );
+                $this->style_section_mirror( 'caddr_', __( 'استایل آدرس و گیرنده', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Address' );
+                $this->style_section_mirror( 'cship_', __( 'استایل روش ارسال', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Shipping' );
+                $this->style_section_mirror( 'csched_', __( 'استایل زمان تحویل', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Schedule' );
+                $this->style_section_mirror( 'cnote_', __( 'استایل یادداشت سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Note' );
+                $this->style_section_mirror( 'citems_', __( 'استایل اقلام سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Items' );
+                $this->style_section_mirror( 'csum_', __( 'استایل خلاصه سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Summary' );
+
                 $this->style_typography_section(
                 	'cp',
                 	array(
