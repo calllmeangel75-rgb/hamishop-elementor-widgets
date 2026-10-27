@@ -68,6 +68,17 @@ class HSW_Widget_Pay_Page extends HSW_Pay_Base {
                  * One type scale for the whole page: the variables land on the wrapper and
                  * every child widget inherits them.
                  */
+                /*
+                 * Mirror each payment child's Style section: the parts are not
+                 * registered with Elementor, so without this the panel only had
+                 * layout + typography for the whole page.
+                 */
+                $this->style_section_mirror( 'paytop_', __( 'استایل هدر پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Top' );
+                $this->style_section_mirror( 'prec_', __( 'استایل یادآوری سفارش', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Recall' );
+                $this->style_section_mirror( 'pm_', __( 'استایل روش‌های پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Methods' );
+                $this->style_section_mirror( 'pcpn_', __( 'استایل کد تخفیف', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Coupon' );
+                $this->style_section_mirror( 'psum_', __( 'استایل خلاصه و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Summary' );
+
                 $this->style_typography_section(
                 	'cp',
                 	array(

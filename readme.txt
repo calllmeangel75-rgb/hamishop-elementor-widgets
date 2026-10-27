@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.137
+Stable tag: 1.11.138
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,16 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.138 =
+* **صفحهٔ پرداخت: استایل پنج بخش در پنل.**
+  - سکشن‌های استایل زیرمجموعه mirror شد: هدر پرداخت (۴۲ کنترل)، یادآوری سفارش
+    (۲۶)، روش‌های پرداخت (۲۷)، کد تخفیف (۲۰)، خلاصه و پرداخت (۴۷).
+  - پالت تکراری از قبل حذف شده بود (`HSW_Pay_Base` از `HSW_Checkout_Base` ارث
+    می‌برد و `palette_map()` خالی است) → صفر کنترل `pal_*`.
+  - **اندازه‌گیری:** ۵ سکشن mirror · ۴۷۹ کنترل ویجت.
+  - استایل پرداخت در `hsw-checkout.css` است (فایل جدا ندارد) و همان توکن‌های
+    `--hswk-*` را با fallback پالت استفاده می‌کند.
 
 = 1.11.137 =
 * **حساب کاربری: حذف «پالت رنگ حساب» تکراری + اتصال دو توکن جامانده.**
