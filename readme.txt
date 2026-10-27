@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.131
+Stable tag: 1.11.132
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.132 =
+* **صفحهٔ سبد: کنترل‌های چیدمان بالاخره کار می‌کنند.**
+  - ویجت «صفحه کامل سبد» از قبل کنترل‌های «عرض ستون خلاصه» و «فاصله» را داشت
+    (`style_columns`)، ولی **هیچ قاعدهٔ CSS‌ای** از `--hsw-cp-side` استفاده
+    نمی‌کرد؛ یعنی ستون‌بندی روی دسکتاپ وجود نداشت و کنترل‌ها مرده بودند.
+  - قاعدهٔ دو ستونی برای `≥1024px` اضافه شد:
+    `grid-template-columns: minmax(0,1fr) var(--hsw-cp-side, 380px)` + `align-items: start`.
+  - سبد خالی همان تک‌ستونی می‌ماند (قاعدهٔ `is-empty` با `!important` دست‌نخورده).
+  - **تأیید:** قاعده در `hsw-cart.min.css` مستقر ✓ · موبایل (۴۳۰px) تک‌ستونی
+    (`375.6px`) ✓ · صفحهٔ سبد ۲۰۰ بدون Fatal ✓. ستون‌بندی دسکتاپ روی نصب لوکال
+    قابل تست نبود چون سبد خالی است.
 
 = 1.11.131 =
 * **فیلتر قیمت: جهت دستگیره‌ها و ناحیهٔ پرشده در RTL + رفع خرابی سوییچ «فیلتر سریع».**

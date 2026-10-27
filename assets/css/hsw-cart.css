@@ -484,6 +484,21 @@
 /* ============================================================
    ORDER SUMMARY
    ============================================================ */
+/*
+ * Cart page layout.
+ *
+ * The shell only ever had the single-column grid from hsw-composite, so the
+ * summary sat under the items even on a 1440px screen and the «column width»
+ * idea had nothing to drive. The width is a variable so the widget control can
+ * change it per breakpoint.
+ */
+@media (min-width: 1024px) {
+        .hsw-cp--cart .hsw-cp__body {
+                grid-template-columns: minmax(0, 1fr) var(--hsw-cp-side, 380px);
+                align-items: start;
+        }
+}
+
 .hsw-csummary { display: block; }
 @media (min-width: 768px) {
         .hsw-csummary.is-sticky { position: sticky; top: 5rem; }
