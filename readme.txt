@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.128
+Stable tag: 1.11.129
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.129 =
+* **فونت: حروف لاتین هم واقعاً وزیرمتن می‌شوند.**
+  - `unicode-range` فونت بسته‌بندی‌شده، `A-Z`، `a-z`، `:` و `;` را نداشت؛ در نتیجه
+    هر متن لاتین داخل ویجت‌ها (SKU، برند، «InStock»، عنوان انگلیسی) بی‌صدا به
+    Tahoma می‌افتاد و با متن فارسی کنارش ناهمگون بود.
+  - حالا `U+0000-00FF` (لاتین پایه + Latin-1) به همراه بلوک‌های عربی پوشش داده
+    می‌شود.
+  - **اثبات اندازه‌گیری:** عرض رشتهٔ «ABC abc 123» با `"Vazirmatn HSW"` از
+    **۹۰px به ۹۲px** تغییر کرد (قبلاً دقیقاً برابر Tahoma بود = یعنی از Tahoma
+    استفاده می‌شد).
 
 = 1.11.128 =
 * **آرشیو کامل از پالت رنگ تغذیه می‌شود؛ کنترل ویجت همیشه اولویت دارد.**

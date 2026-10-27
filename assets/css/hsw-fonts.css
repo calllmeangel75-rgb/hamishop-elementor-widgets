@@ -13,7 +13,13 @@
         font-weight: 100 900;
         font-style: normal;
         font-display: swap;
-        unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+0021-002F, U+0030-0039, U+003C-0040, U+005B-0060, U+007B-007E;
+        /*
+         * Full basic Latin + Latin-1 as well as the Arabic blocks: the old range
+         * skipped A-Z, a-z, ':' and ';', so every Latin fragment inside a widget
+         * (SKU, brand, «InStock», English titles) silently fell back to Tahoma and
+         * looked different from the Persian text next to it.
+         */
+        unicode-range: U+0000-00FF, U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
 }
 
 /*
