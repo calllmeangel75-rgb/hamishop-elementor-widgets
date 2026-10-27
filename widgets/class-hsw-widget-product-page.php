@@ -15,7 +15,19 @@ defined( 'ABSPATH' ) || exit;
 
 use Elementor\Controls_Manager;
 
+require_once HSW_DIR . 'includes/trait-hsw-product-page-style.php';
+require_once HSW_DIR . 'includes/trait-hsw-product-page-style-parts-1.php';
+require_once HSW_DIR . 'includes/trait-hsw-product-page-style-parts-2.php';
+require_once HSW_DIR . 'includes/trait-hsw-product-page-style-parts-3.php';
+require_once HSW_DIR . 'includes/trait-hsw-product-page-style-parts-4.php';
+
 class HSW_Widget_Product_Page extends HSW_Product_Base {
+
+	use HSW_Product_Page_Style;
+	use HSW_Product_Page_Style_Parts_1;
+	use HSW_Product_Page_Style_Parts_2;
+	use HSW_Product_Page_Style_Parts_3;
+	use HSW_Product_Page_Style_Parts_4;
 
         public function get_name() {
                 return 'hsw-product-page';
@@ -100,6 +112,74 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                         )
                 );
 
+                $this->add_responsive_control(
+                        'cp_maxw',
+                        array(
+                                'label'      => __( 'حداکثر عرض صفحه', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px', '%', 'rem' ),
+                                'range'      => array(
+                                        'px'  => array( 'min' => 640, 'max' => 1920 ),
+                                        '%'   => array( 'min' => 50, 'max' => 100 ),
+                                        'rem' => array( 'min' => 40, 'max' => 120 ),
+                                ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-cp' => 'max-width: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
+                $this->add_responsive_control(
+                        'cp_align',
+                        array(
+                                'label'     => __( 'تراز عمودی ستون‌ها', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'options'   => array(
+                                        ''       => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ),
+                                        'start'  => __( 'بالا', 'hamishop-elementor-widgets' ),
+                                        'center' => __( 'وسط', 'hamishop-elementor-widgets' ),
+                                        'stretch' => __( 'کشیده', 'hamishop-elementor-widgets' ),
+                                ),
+                                'selectors' => array( '{{WRAPPER}} .hsw-cp__hero' => 'align-items: {{VALUE}};' ),
+                        )
+                );
+
+                $this->add_responsive_control(
+                        'cp_order_gallery',
+                        array(
+                                'label'     => __( 'ترتیب ستون گالری', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'options'   => array(
+                                        ''  => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ),
+                                        '1' => __( 'اول', 'hamishop-elementor-widgets' ),
+                                        '2' => __( 'دوم', 'hamishop-elementor-widgets' ),
+                                ),
+                                'selectors' => array( '{{WRAPPER}} .hsw-cp__col--gallery' => 'order: {{VALUE}};' ),
+                        )
+                );
+
+                $this->add_responsive_control(
+                        'cp_order_summary',
+                        array(
+                                'label'     => __( 'ترتیب ستون خرید', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'options'   => array(
+                                        ''  => __( 'پیش‌فرض', 'hamishop-elementor-widgets' ),
+                                        '1' => __( 'اول', 'hamishop-elementor-widgets' ),
+                                        '2' => __( 'دوم', 'hamishop-elementor-widgets' ),
+                                ),
+                                'selectors' => array( '{{WRAPPER}} .hsw-cp__col--summary' => 'order: {{VALUE}};' ),
+                        )
+                );
+
+                $this->add_control(
+                        'cp_box_head',
+                        array(
+                                'label'     => __( 'ظرف صفحه', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::HEADING,
+                                'separator' => 'before',
+                        )
+                );
+                $this->ctrl_box( 'cp_box', '{{WRAPPER}} .hsw-cp' );
+
                 $this->end_controls_section();
 
                 /* ---------- رنگ‌ها و فونت یکپارچه ---------- */
@@ -114,7 +194,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                                 'label' => '',
                                 'type'  => Controls_Manager::RAW_HTML,
                                 'raw'   => '<div style="font-size:11px;line-height:1.8;color:#646970">' .
-                                        esc_html__( 'این بخش رنگ و فونت همهٔ اجزای صفحهٔ محصول را یک‌جا کنترل می‌کند. برای تنظیم دقیق‌تر هر بخش، بخش‌های ۱ تا ۱۰ در تب «محتوا» را باز کنید.', 'hamishop-elementor-widgets' ) .
+                                        esc_html__( 'این بخش رنگ و فونت همهٔ اجزای صفحهٔ محصول را یک‌جا کنترل می‌کند. بخش‌های تفصیلی پایین‌تر (گالری، عنوان، قیمت، موجودی، توضیحات، ویژگی‌ها، متغیرها، خرید، پیام‌ها، تب‌ها و محصولات مرتبط) تنظیمات دقیق‌تر و حالت‌های هاور/فوکوس/انتخاب/ناموجود را دارند و در صورت پر شدن، بر این بخش اولویت می‌گیرند.', 'hamishop-elementor-widgets' ) .
                                         '</div>',
                                 'separator' => 'after',
                         )
@@ -210,6 +290,9 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                 );
 
                 $this->end_controls_section();
+
+                /* ---- detailed per-section style sections ---- */
+                $this->register_product_page_detail_style();
         }
 
         /**
@@ -219,6 +302,16 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                 $root = $this->root_class( 'cpage', 'hsw-cp hsw-cp--product' );
 
                 echo '<div class="' . esc_attr( $root ) . '">';
+
+                /*
+                 * WooCommerce notices belong to the product page. The custom
+                 * template may not print them, so show (and drain) the queue
+                 * here. HSW_Helpers::wc_notices() prints once per request.
+                 */
+                $notices = HSW_Helpers::wc_notices();
+                if ( '' !== $notices ) {
+                        echo $notices; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by WooCommerce.
+                }
 
                 if ( $this->part_on( 'pbc_' ) ) {
                         $this->print_part( 'pbc_', '\HSW_Widget_Product_Breadcrumb', 'hsw-cp__part hsw-cp__part--crumb' );

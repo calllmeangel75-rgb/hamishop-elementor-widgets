@@ -51,6 +51,14 @@ final class HSW_Plugin {
 
                 /* One SVG sprite per page, containing only the icons it rendered. */
                 add_action( 'wp_footer', array( 'HSW_Helpers', 'print_sprite' ), 5 );
+
+                /*
+                 * On a composite product page the notices belong inside the
+                 * widget, where the Style tab can reach them. Remove the
+                 * standard callback only after the product query is ready.
+                 */
+                add_action( 'template_redirect', array( 'HSW_Helpers', 'maybe_defer_product_notices' ), 5 );
+                add_action( 'wp_footer', array( 'HSW_Helpers', 'print_deferred_product_notices' ), 99 );
                 new HSW_Rest();
                 new HSW_Assets();
 

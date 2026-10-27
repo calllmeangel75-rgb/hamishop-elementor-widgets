@@ -237,6 +237,8 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                 $tag     = ( isset( $s['title_tag'] ) && 'h2' === $s['title_tag'] ) ? 'h2' : 'h1';
                 $rev_url = ( isset( $s['rev_url']['url'] ) && '' !== $s['rev_url']['url'] ) ? $s['rev_url']['url'] : '#reviews';
                 $rec_mode = ( isset( $s['recommend_mode'] ) && 'manual' === $s['recommend_mode'] ) ? 'manual' : 'auto';
+                $low_stock = false;
+                $stock_qty = null;
 
                 if ( $demo ) {
                         $name     = $d['name'];
@@ -255,6 +257,14 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                         $reviews  = HSW_Helpers::fa_num( $product->get_review_count() );
                         $in_stock = (bool) $product->is_in_stock();
 
+                        if ( $in_stock && $product->managing_stock() ) {
+                                $stock_qty = $product->get_stock_quantity();
+                                $threshold = function_exists( 'wc_get_low_stock_amount' ) ? wc_get_low_stock_amount( $product ) : 0;
+                                if ( null !== $stock_qty && $stock_qty > 0 && $threshold >= 0 && $stock_qty <= $threshold ) {
+                                        $low_stock = true;
+                                }
+                        }
+
                         if ( 'manual' === $rec_mode ) {
                                 $rec = ( isset( $s['recommend'] ) && '' !== trim( (string) $s['recommend'] ) ) ? trim( (string) $s['recommend'] ) : '';
                         } else {
@@ -267,6 +277,10 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                 $show_rating = ! isset( $s['show_rating'] ) || 'yes' === $s['show_rating'];
 
                 $stock_text = $in_stock ? __( 'موجود در انبار', 'hamishop-elementor-widgets' ) : __( 'ناموجود', 'hamishop-elementor-widgets' );
+                if ( $low_stock && null !== $stock_qty ) {
+                        /* translators: %s: remaining stock quantity. */
+                        $stock_text = sprintf( __( 'تنها %s عدد باقی مانده', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( $stock_qty ) );
+                }
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'ptitle' ) ); ?>">
                         <div class="hsw-d">
@@ -297,11 +311,17 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                         <div class="hsw-m">
                                 <div class="hsw-ptitle__mrow">
                                         <?php if ( 'yes' === ( $s['show_stock'] ?? 'yes' ) ) : ?>
-                                                <?php if ( $in_stock ) : ?>
-                                                        <span class="hsw-ptitle__stock"><i class="hsw-ptitle__pulse" aria-hidden="true"></i><?php echo esc_html( $stock_text ); ?></span>
-                                                <?php else : ?>
-                                                        <span class="hsw-ptitle__stock is-oos" style="color:var(--hsw-secondary)"><i class="hsw-ptitle__pulse" aria-hidden="true"></i><?php echo esc_html( $stock_text ); ?></span>
-                                                <?php endif; ?>
+                                                <?php
+                                                $stock_class = 'hsw-ptitle__stock';
+                                                if ( ! $in_stock ) {
+                                                        $stock_class .= ' is-oos';
+                                                } elseif ( $low_stock ) {
+                                                        $stock_class .= ' is-low-stock';
+                                                } else {
+                                                        $stock_class .= ' is-in-stock';
+                                                }
+                                                ?>
+                                                <span class="<?php echo esc_attr( $stock_class ); ?>"><i class="hsw-ptitle__pulse" aria-hidden="true"></i><?php echo esc_html( $stock_text ); ?></span>
                                         <?php endif; ?>
                                         <?php if ( $show_rating ) : ?>
                                         <span class="hsw-ptitle__mscore">

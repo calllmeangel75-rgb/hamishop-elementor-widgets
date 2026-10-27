@@ -13,6 +13,9 @@ class HSW_Helpers {
         /** Persian digits map. */
         private static $fa_digits = array( '0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹' );
 
+        /** Whether the standard product notice output was moved into the composite. */
+        private static $product_notices_deferred = false;
+
         /**
          * Convert latin digits to Persian digits.
          */
@@ -269,6 +272,112 @@ class HSW_Helpers {
                 }
 
                 return '<div class="hsw-notices" role="status" aria-live="polite">' . $html . '</div>';
+        }
+
+        /**
+         * Does the current single-product screen render the composite widget?
+         *
+         * The composite prints the WooCommerce notice queue itself, but the
+         * standard `woocommerce_output_all_notices` callback runs before the
+         * Elementor template and would drain the queue first. Only that page
+         * should skip the standard callback; every other product page keeps it.
+         *
+         * @return bool
+         */
+        public static function product_page_has_composite() {
+                if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+                        return false;
+                }
+
+                $product_id = (int) get_queried_object_id();
+                if ( $product_id && self::post_has_composite_widget( $product_id ) ) {
+                        return true;
+                }
+
+                if ( ! post_type_exists( 'elementor_library' ) ) {
+                        return false;
+                }
+
+                $template_ids = get_posts(
+                        array(
+                                'post_type'              => 'elementor_library',
+                                'post_status'            => 'publish',
+                                'posts_per_page'         => 20,
+                                'fields'                 => 'ids',
+                                'no_found_rows'          => true,
+                                'suppress_filters'       => true,
+                                'meta_key'               => '_elementor_template_type',
+                                'meta_value'             => 'product',
+                                'update_post_term_cache' => false,
+                        )
+                );
+
+                foreach ( $template_ids as $template_id ) {
+                        $conditions = get_post_meta( $template_id, '_elementor_conditions', true );
+                        if ( is_array( $conditions ) && ! empty( $conditions ) ) {
+                                $applies = false;
+                                foreach ( $conditions as $condition ) {
+                                        if ( is_string( $condition ) && 0 === strpos( $condition, 'include/product' ) ) {
+                                                $applies = true;
+                                                break;
+                                        }
+                                }
+                                if ( ! $applies ) {
+                                        continue;
+                                }
+                        }
+
+                        if ( self::post_has_composite_widget( $template_id ) ) {
+                                return true;
+                        }
+                }
+
+                return false;
+        }
+
+        /**
+         * Read Elementor data (or post content) and look for the composite.
+         *
+         * @param int $post_id Post id.
+         * @return bool
+         */
+        private static function post_has_composite_widget( $post_id ) {
+                $data = (string) get_post_meta( $post_id, '_elementor_data', true );
+                if ( '' === $data ) {
+                        $data = (string) get_post_field( 'post_content', $post_id );
+                }
+
+                return false !== strpos( $data, 'hsw-product-page' ) || false !== strpos( $data, 'hsw_widget_product_page' );
+        }
+
+        /**
+         * Move product notices from the theme wrapper into the composite.
+         *
+         * Runs on `template_redirect` before WooCommerce renders the notice
+         * callback. A footer fallback below makes sure a notice is never lost
+         * if the composite element is conditionally hidden by Elementor.
+         */
+        public static function maybe_defer_product_notices() {
+                if ( ! self::product_page_has_composite() ) {
+                        return;
+                }
+
+                remove_action( 'woocommerce_before_single_product', 'woocommerce_output_all_notices', 10 );
+                self::$product_notices_deferred = true;
+        }
+
+        /**
+         * Last-chance output for a deferred queue the composite never claimed.
+         */
+        public static function print_deferred_product_notices() {
+                if ( ! self::$product_notices_deferred ) {
+                        return;
+                }
+
+                $html = self::wc_notices();
+                if ( '' !== $html ) {
+                        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by WooCommerce.
+                }
         }
 
         /**
