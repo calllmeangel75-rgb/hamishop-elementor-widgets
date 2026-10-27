@@ -538,14 +538,14 @@ final class HSW_Account_Admin {
 			<div class="hsw-admin-grid">
 				<p>
 					<label for="hsw-wallet-topup-mode"><strong>روش شارژ</strong></label><br>
-					<select id="hsw-wallet-topup-mode" name="hsw_account[wallet][topup_mode]">
+					<select id="hsw-wallet-topup-mode" name="<?php echo esc_attr( $this->name( 'wallet', 'topup_mode' ) ); ?>">
 						<option value="gateway" <?php selected( $topup_mode, 'gateway' ); ?>>درگاه پرداخت آنلاین</option>
 						<option value="card" <?php selected( $topup_mode, 'card' ); ?>>کارت به کارت</option>
 					</select>
 				</p>
 				<p>
 					<label for="hsw-wallet-topup-gateway"><strong>درگاه شارژ</strong></label><br>
-					<select id="hsw-wallet-topup-gateway" name="hsw_account[wallet][topup_gateway]">
+					<select id="hsw-wallet-topup-gateway" name="<?php echo esc_attr( $this->name( 'wallet', 'topup_gateway' ) ); ?>">
 						<option value="">— خودکار (اولین درگاه فعال) —</option>
 						<?php foreach ( $gateways as $gid => $gtitle ) : ?>
 							<option value="<?php echo esc_attr( $gid ); ?>" <?php selected( $this->val( $s, 'wallet', 'topup_gateway' ), $gid ); ?>><?php echo esc_html( $gtitle ); ?></option>
@@ -756,7 +756,7 @@ final class HSW_Account_Admin {
 		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 			return;
 		}
-		$balance = (float) get_user_meta( $user->ID, '_hsw_wallet_balance', true );
+		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user->ID ) : (float) get_user_meta( $user->ID, '_hsw_wallet_balance', true );
 		wp_nonce_field( 'hsw_account_user_' . $user->ID, 'hsw_account_user_nonce' );
 		?>
 		<h2>حساب HamiShop</h2>
@@ -787,8 +787,34 @@ final class HSW_Account_Admin {
 			return;
 		}
 		if ( isset( $_POST['hsw_wallet_balance'] ) ) {
-			$balance = (float) wc_format_decimal( wp_unslash( $_POST['hsw_wallet_balance'] ) );
-			update_user_meta( $user_id, '_hsw_wallet_balance', max( 0, $balance ) );
+			$raw     = function_exists( 'wc_format_decimal' ) ? wc_format_decimal( wp_unslash( $_POST['hsw_wallet_balance'] ) ) : wp_unslash( $_POST['hsw_wallet_balance'] );
+			$target  = max( 0, round( (float) $raw, 2 ) );
+
+			if ( ! class_exists( 'HSW_Wallet' ) ) {
+				update_user_meta( $user_id, '_hsw_wallet_balance', $target );
+				return;
+			}
+
+			$current = HSW_Wallet::balance( $user_id );
+			$delta   = round( $target - $current, 2 );
+
+			if ( $delta > 0 ) {
+				HSW_Wallet::credit(
+					$user_id,
+					$delta,
+					'admin',
+					__( 'تنظیم دستی موجودی توسط مدیر', 'hamishop-elementor-widgets' ),
+					get_current_user_id()
+				);
+			} elseif ( $delta < 0 ) {
+				HSW_Wallet::debit(
+					$user_id,
+					abs( $delta ),
+					'admin',
+					__( 'تنظیم دستی موجودی توسط مدیر', 'hamishop-elementor-widgets' ),
+					get_current_user_id()
+				);
+			}
 		}
 	}
 

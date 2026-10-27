@@ -351,6 +351,44 @@ class HSW_Helpers {
         );
 
         /**
+         * Material Symbols paths that are not in the generated font subset.
+         *
+         * The font source is not shipped with the plugin, so additions live in
+         * one small, hand-maintained include instead of being overwritten by
+         * the next sprite rebuild. The file is optional; a missing file simply
+         * leaves the generated table as the only source.
+         *
+         * @return array{names:string[],paths:array<string,string>}
+         */
+        private static function extra_icons() {
+                static $extra = null;
+
+                if ( null !== $extra ) {
+                        return $extra;
+                }
+
+                $extra = array(
+                        'names' => array(),
+                        'paths' => array(),
+                );
+                $file  = HSW_DIR . 'includes/class-hsw-icon-extra.php';
+
+                if ( is_readable( $file ) ) {
+                        $data = include $file;
+                        if ( is_array( $data ) ) {
+                                if ( isset( $data['names'] ) && is_array( $data['names'] ) ) {
+                                        $extra['names'] = $data['names'];
+                                }
+                                if ( isset( $data['paths'] ) && is_array( $data['paths'] ) ) {
+                                        $extra['paths'] = $data['paths'];
+                                }
+                        }
+                }
+
+                return $extra;
+        }
+
+        /**
          * Print the sprite for the icons used on this page.
          *
          * Hooked to wp_footer. `display:none` (not `visibility`) keeps the
@@ -380,6 +418,11 @@ class HSW_Helpers {
                         return;
                 }
 
+                $extra = self::extra_icons();
+                if ( ! empty( $extra['paths'] ) ) {
+                        $paths = array_merge( $paths, $extra['paths'] );
+                }
+
                 $keys = array_keys( self::$icons );
 
                 /*
@@ -399,14 +442,42 @@ class HSW_Helpers {
 
                 echo '<svg xmlns="http://www.w3.org/2000/svg" class="hsw-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">';
                 foreach ( $keys as $key ) {
-                        if ( isset( $raw[ $key ] ) ) {
-                                echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="' . esc_attr( $raw[ $key ]['viewBox'] ) . '"><g style="fill:none">' . $raw[ $key ]['body'] . '</g></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- local icon markup.
+                        $raw_key = ( 'favorite_border' === $key ) ? 'favorite' : $key;
+
+                        if ( isset( $raw[ $raw_key ] ) ) {
+                                echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="' . esc_attr( $raw[ $raw_key ]['viewBox'] ) . '"><g style="fill:none">' . $raw[ $raw_key ]['body'] . '</g></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- local icon markup.
                                 continue;
                         }
-                        if ( ! isset( $paths[ $key ] ) ) {
+
+                        if ( isset( $paths[ $key ] ) ) {
+                                echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="0 -960 960 960"><path d="' . $paths[ $key ] . '"/></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- path data is local, digits and path commands only.
                                 continue;
                         }
-                        echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="0 -960 960 960"><path d="' . $paths[ $key ] . '"/></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- path data is generated, digits and path commands only.
+
+                        /*
+                         * A filled variant is optional in the source font. Falling
+                         * back to the base outline keeps the icon visible instead of
+                         * leaving an empty <use> reference.
+                         */
+                        if ( false !== strpos( $key, '.fill' ) ) {
+                                $base = substr( $key, 0, -5 );
+                                if ( isset( $raw[ $base ] ) ) {
+                                        echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="' . esc_attr( $raw[ $base ]['viewBox'] ) . '"><g style="fill:none">' . $raw[ $base ]['body'] . '</g></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- local icon markup.
+                                        continue;
+                                }
+                                if ( isset( $paths[ $base ] ) ) {
+                                        echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="0 -960 960 960"><path d="' . $paths[ $base ] . '"/></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- path data is local, digits and path commands only.
+                                        continue;
+                                }
+                        }
+
+                        /*
+                         * Last resort: a neutral circle. This only runs for a name
+                         * that bypassed icon_name() (for example a JavaScript-only
+                         * name); the page must never show a blank icon.
+                         */
+                        $fallback = 'M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z';
+                        echo '<symbol id="hsw-i-' . esc_attr( $key ) . '" viewBox="0 -960 960 960"><path d="' . $fallback . '"/></symbol>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static fallback path.
                 }
                 echo '</svg>';
 
@@ -498,6 +569,11 @@ JS;
                         return $name;
                 }
 
+                $extra = self::extra_icons();
+                if ( in_array( $name, $extra['names'], true ) || isset( $extra['paths'][ $name ] ) ) {
+                        return $name;
+                }
+
                 if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                         error_log( sprintf( '[HSW/icon] "%s" is not in the bundled icon subset — rendered as a dot. Add it to tools/_icons.txt and rebuild.', $name ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 }
@@ -529,6 +605,22 @@ JS;
                         return 0;
                 }
                 return (int) round( ( ( $regular - $sale ) / $regular ) * 100 );
+        }
+
+        /**
+         * Keep the template's H1 authoritative inside editor-managed content.
+         * A heading a client typed as H1 in a post/product body would otherwise
+         * create a second page title next to the HSW single-title H1.
+         *
+         * @param string $html Rendered content.
+         * @return string
+         */
+        public static function demote_content_h1( $html ) {
+                $html = (string) $html;
+                if ( '' === $html || false === stripos( $html, '<h1' ) ) {
+                        return $html;
+                }
+                return (string) preg_replace( '/<h1(\s[^>]*)?>(.*?)<\/h1>/is', '<h2$1>$2</h2>', $html );
         }
 
         /**

@@ -106,7 +106,7 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         'desk_auto',
                         array(
                                 'label'       => __( 'دسکتاپ: از مشخصات محصول', 'hamishop-elementor-widgets' ),
-                                'description' => __( 'روشن (پیش‌فرض): تا ۴ مشخصه‌ی محصول به شکل «نام: مقدار» — اگر محصول مشخصه نداشت، از آیتم‌های فهرست زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'روشن (پیش‌فرض): تا ۶ مشخصه‌ی محصول به شکل «نام: مقدار»؛ مشخصات محصول و فیلدهای توضیح کوتاه با هم ترکیب می‌شوند. اگر محصول مشخصه نداشت، از آیتم‌های فهرست زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SWITCHER,
                                 'default'     => 'yes',
                         )
@@ -137,7 +137,7 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         'mob_auto',
                         array(
                                 'label'       => __( 'موبایل: از مشخصات محصول', 'hamishop-elementor-widgets' ),
-                                'description' => __( 'روشن (پیش‌فرض): تا ۴ مشخصه‌ی محصول با آیکون tune — اگر محصول مشخصه نداشت، از گرید زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'روشن (پیش‌فرض): تا ۶ مشخصه‌ی محصول با آیکون tune — مشخصات و فیلدهای توضیح کوتاه با هم ترکیب می‌شوند. اگر محصول مشخصه نداشت، از گرید زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SWITCHER,
                                 'default'     => 'yes',
                         )

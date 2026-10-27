@@ -233,10 +233,6 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 $this->a_color( 'price', __( 'قیمت اصلی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-citems__price, {{WRAPPER}} .hsw-citems__mprice-v' );
                 $this->a_color( 'cur', __( 'واحد پول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-cur' );
 
-                $this->a_color( 'qty_bd', __( 'حاشیه شمارنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty', 'border-color' );
-                $this->a_color( 'qty_btn', __( 'دکمه‌های شمارنده — رنگ آیکن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn' );
-                $this->a_color( 'qty_btn_bg', __( 'دکمه‌های شمارنده — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn', 'background-color' );
-
                 $this->end_controls_section();
 
                 /* ------------------- STYLE: row / image / quantity ------------------- */
@@ -324,7 +320,7 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                 'selectors'  => array( '{{WRAPPER}} .hsw-c-qty' => 'border-radius: {{SIZE}}{{UNIT}};' ),
                         )
                 );
-                $this->a_color( 'qty_btn_tx', __( 'آیکن دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn' );
+                $this->a_color( 'qty_btn', __( 'آیکن دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn' );
                 $this->a_color( 'qty_btn_bg', __( 'پس‌زمینهٔ دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn', 'background-color' );
                 $this->a_color( 'qty_btn_hv', __( 'هاور دکمه‌های + و −', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-c-qty__btn:hover', 'background-color' );
 

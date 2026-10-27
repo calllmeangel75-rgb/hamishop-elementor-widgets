@@ -496,7 +496,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
 
                                         <div class="hsw-psum__terms">
                                                 <label class="hsw-psum__terms-l">
-                                                        <input type="checkbox" class="hsw-k-terms" checked />
+                                                        <input type="checkbox" class="hsw-k-terms" />
                                                         <span class="hsw-psum__terms-tx">
                                                                 <?php if ( '' !== $terms ) : ?>
                                                                         <a class="hsw-psum__terms-a" href="<?php echo esc_url( $terms ); ?>" target="_blank" rel="nofollow"><?php echo esc_html( $this->opt( 'terms_link', '' ) ); ?></a>
@@ -593,8 +593,14 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                 </div>
 
                                 <label class="hsw-psum__terms-l is-m">
-                                        <input type="checkbox" class="hsw-k-terms" checked />
-                                        <span class="hsw-psum__terms-tx"><?php echo esc_html( $this->opt( 'terms_text_m', '' ) ); ?></span>
+                                        <input type="checkbox" class="hsw-k-terms" />
+                                        <span class="hsw-psum__terms-tx">
+                                                <?php if ( '' !== $terms ) : ?>
+                                                        <a class="hsw-psum__terms-a" href="<?php echo esc_url( $terms ); ?>" target="_blank" rel="nofollow"><?php echo esc_html( $this->opt( 'terms_text_m', '' ) ); ?></a>
+                                                <?php else : ?>
+                                                        <?php echo esc_html( $this->opt( 'terms_text_m', '' ) ); ?>
+                                                <?php endif; ?>
+                                        </span>
                                 </label>
                         </section>
 

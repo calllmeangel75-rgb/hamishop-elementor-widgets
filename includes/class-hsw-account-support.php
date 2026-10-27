@@ -716,7 +716,7 @@ final class HSW_Account_Support {
 		);
 
 		$html  = '<aside class="hsw-ac__chat-side">';
-		$html .= '<header class="hsw-ac__chat-sidehead"><div><h2>' . esc_html__( 'گفتگوها', 'hamishop-elementor-widgets' ) . '</h2><span>' . esc_html( sprintf( '%s گفتگو', HSW_Helpers::fa_num( count( $tickets ) ) ) ) . '</span></div>';
+		$html .= '<header class="hsw-ac__chat-sidehead"><div><h2>' . esc_html__( 'گفتگوها', 'hamishop-elementor-widgets' ) . '</h2><span data-hsw-chat-count>' . esc_html( sprintf( '%s گفتگو', HSW_Helpers::fa_num( count( $tickets ) ) ) ) . '</span></div>';
 		if ( $can_new ) {
 			$html .= '<button type="button" class="hsw-ac__chat-add" data-hsw-ticket-new aria-label="' . esc_attr__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '" title="' . esc_attr__( 'تیکت جدید', 'hamishop-elementor-widgets' ) . '">' . $this->account->icon( 'plus' ) . '</button>';
 		}

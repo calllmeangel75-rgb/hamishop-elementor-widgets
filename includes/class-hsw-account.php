@@ -87,7 +87,7 @@ final class HSW_Account {
 			'support'       => 'پشتیبانی',
 			'notifications' => 'اعلان‌ها',
 			'wishlist'      => 'علاقه‌مندی‌ها',
-			'wallet'        => '<path d="M3 8.5A2.5 2.5 0 0 1 5.5 6H18a2 2 0 0 1 2 2v1"></path><path d="M3 8.5V17a2 2 0 0 0 2 2h13.5a2.5 2.5 0 0 0 2.5-2.5v-5A2.5 2.5 0 0 0 18.5 9H3"></path><path d="M16.5 13.75h.01"></path>',
+			'wallet'        => 'کیف پول',
 		);
 		foreach ( $titles as $endpoint => $title ) {
 			add_filter(
@@ -2101,7 +2101,7 @@ final class HSW_Account {
 		/* ---------- title + brand ---------- */
 		$html .= '<header class="hsw-inv__top">';
 		$html .= '<div class="hsw-inv__title-block">';
-		$html .= '<h1 class="hsw-inv__title">' . esc_html__( 'فاکتور فروش', 'hamishop-elementor-widgets' ) . '</h1>';
+		$html .= '<h2 class="hsw-inv__title">' . esc_html__( 'فاکتور فروش', 'hamishop-elementor-widgets' ) . '</h2>';
 		$html .= '<dl class="hsw-inv__meta">';
 		$html .= '<div><dt>' . esc_html__( 'شماره فاکتور', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( HSW_Helpers::fa_num( $invoice_no ) ) . '</dd></div>';
 		$html .= '<div><dt>' . esc_html__( 'تاریخ صدور', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( HSW_Helpers::fa_num( $date ) ) . '</dd></div>';
@@ -2209,7 +2209,7 @@ final class HSW_Account {
 		$words = HSW_Helpers::number_words( (float) $order->get_total() );
 
 		$html .= '<div class="hsw-inv__paidbox">';
-		$html .= '<span>' . esc_html__( 'مبلغ پرداخت‌شده به خریدار:', 'hamishop-elementor-widgets' ) . '</span>';
+		$html .= '<span>' . esc_html__( 'مبلغ پرداخت‌شده توسط خریدار:', 'hamishop-elementor-widgets' ) . '</span>';
 		$html .= '<strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong>';
 		$html .= '<p class="hsw-inv__words">' . esc_html( $words . ' ' . ( function_exists( 'get_woocommerce_currency' ) && 'IRT' === get_woocommerce_currency() ? __( 'تومان', 'hamishop-elementor-widgets' ) : get_woocommerce_currency() ) ) . '</p>';
 		$html .= '</div>';
@@ -2665,7 +2665,7 @@ final class HSW_Account {
 		$html .= '<h3>' . $this->icon( 'add' ) . esc_html__( 'شارژ کیف پول', 'hamishop-elementor-widgets' ) . '</h3>';
 
 		if ( $online ) {
-			$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را وارد کنید و از طریق درگاه پرداخت کنید؛ موجودی بلافاصله پس از پرداخت اضافه می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+			$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را وارد کنید و از طریق درگاه پرداخت کنید؛ موجودی پس از تأیید پرداخت اضافه می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
 		} else {
 			$html .= '<p class="hsw-ac__wallet-hint">' . esc_html__( 'مبلغ را واریز کنید، شمارهٔ پیگیری را ثبت کنید تا پس از تایید پشتیبانی موجودی اضافه شود.', 'hamishop-elementor-widgets' ) . '</p>';
 		}

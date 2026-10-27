@@ -509,7 +509,7 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                         <div class="hsw-ahd__mhead hsw-m">
                                 <div class="hsw-ahd__mtop">
                                         <div>
-                                                <h1 class="hsw-ahd__h1 hsw-ahd__h1--m"><?php echo esc_html( $title ); ?></h1>
+                                                <div class="hsw-ahd__h1 hsw-ahd__h1--m" role="heading" aria-level="1"><?php echo esc_html( $title ); ?></div>
                                                 <span class="hsw-ahd__mcount"><?php echo esc_html( $count ); ?> <?php esc_html_e( 'کالا موجود', 'hamishop-elementor-widgets' ); ?></span>
                                         </div>
                                         <?php if ( $guide ) : ?>

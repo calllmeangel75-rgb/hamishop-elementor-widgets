@@ -96,32 +96,45 @@ final class HSW_Composite {
                         return self::$controls_cache[ $widget_class ];
                 }
 
+                /* A composite must never take the site down when Elementor is not
+                   ready yet (CLI, health checks, an early REST request). */
+                if ( ! class_exists( '\Elementor\Widget_Base' ) ) {
+                        return array();
+                }
+
                 /* Elementor stores controls that declare `selectors` in a separate
                    “style controls” bucket on the frontend and hides them from
                    get_controls() unless this flag is on. Composite mirroring needs
                    the complete map in every context (editor, CSS, render defaults). */
+                $performance_class  = 'Elementor\Core\Frontend\Performance';
+                $can_toggle         = class_exists( $performance_class )
+                        && is_callable( array( $performance_class, 'is_use_style_controls' ) )
+                        && is_callable( array( $performance_class, 'set_use_style_controls' ) );
                 $had_style_controls = false;
-                if ( class_exists( '\Elementor\Core\Frontend\Performance' ) ) {
+                if ( $can_toggle ) {
                         $had_style_controls = \Elementor\Core\Frontend\Performance::is_use_style_controls();
                         \Elementor\Core\Frontend\Performance::set_use_style_controls( true );
                 }
 
-                /*
-                 * Child widgets are not registered with Elementor, so their class
-                 * file is never loaded — `class_exists()` was false and every
-                 * mirrored section (content AND style) came back empty. Load the
-                 * file by the project's naming convention before asking.
-                 */
-                if ( ! class_exists( $widget_class ) ) {
-                        $file = 'class-' . strtolower( str_replace( '_', '-', $widget_class ) ) . '.php';
-                        $path = HSW_DIR . 'widgets/' . $file;
-                        if ( file_exists( $path ) ) {
-                                require_once $path;
-                        }
-                }
-
                 $controls = array();
                 try {
+                        /*
+                         * Child widgets are not registered with Elementor, so their
+                         * class file is never loaded by Elementor. Load the family
+                         * bases first: a widget file that extends HSW_Cart_Base
+                         * cannot be parsed when that base is missing, and the old
+                         * require-before-try path produced a fatal error.
+                         */
+                        self::load_family_bases();
+
+                        if ( ! class_exists( $widget_class ) ) {
+                                $file = 'class-' . strtolower( str_replace( '_', '-', $widget_class ) ) . '.php';
+                                $path = HSW_DIR . 'widgets/' . $file;
+                                if ( is_readable( $path ) ) {
+                                        require_once $path;
+                                }
+                        }
+
                         if ( class_exists( $widget_class ) ) {
                                 $widget   = self::instance( $widget_class );
                                 $registry = $widget->get_controls();
@@ -130,15 +143,56 @@ final class HSW_Composite {
                                 }
                         }
                 } catch ( \Throwable $e ) {
+                        /*
+                         * Keep the editor alive and expose the failure through the
+                         * plugin's stored-error channel instead of a white screen.
+                         */
+                        self::report( $e, $widget_class );
                         $controls = array();
                 } finally {
-                        if ( class_exists( '\Elementor\Core\Frontend\Performance' ) ) {
+                        if ( $can_toggle ) {
                                 \Elementor\Core\Frontend\Performance::set_use_style_controls( $had_style_controls );
                         }
                 }
 
                 self::$controls_cache[ $widget_class ] = $controls;
                 return $controls;
+        }
+
+        /**
+         * Load the shared widget bases in dependency order.
+         *
+         * Cart -> checkout -> pay -> complete is the inheritance chain; the rest
+         * only need HSW_Widget_Base. require_once makes this safe on every call.
+         *
+         * @return void
+         */
+        private static function load_family_bases() {
+                static $loaded = false;
+
+                if ( $loaded ) {
+                        return;
+                }
+                $loaded = true;
+
+                $files = array(
+                        'class-hsw-widget-base.php',
+                        'class-hsw-cart-base.php',
+                        'class-hsw-checkout-base.php',
+                        'class-hsw-pay-base.php',
+                        'class-hsw-complete-base.php',
+                        'class-hsw-header-base.php',
+                        'class-hsw-product-base.php',
+                        'class-hsw-archive-base.php',
+                        'class-hsw-blog-base.php',
+                );
+
+                foreach ( $files as $file ) {
+                        $path = HSW_DIR . 'includes/' . $file;
+                        if ( is_readable( $path ) ) {
+                                require_once $path;
+                        }
+                }
         }
 
 	/**

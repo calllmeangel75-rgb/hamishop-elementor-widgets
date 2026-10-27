@@ -567,7 +567,10 @@
 .hsw-pfeat__mval { font-size: 14px; line-height: 22px; font-weight: 700; color: var(--hsw-on-surface, #191c1e); }
 @media (min-width: 768px) {
         .hsw-pfeat__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .hsw-pfeat__item:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
+/* A fifth item should not leave a lonely half-width hole in the 2×N grid. */
+.hsw-pfeat__cell:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
 /* ======================================================================
  *  7) PURCHASE BOX  (.hsw-ppurch)  — desktop
@@ -667,6 +670,23 @@
 .hsw-ppurch.is-not-in-cart .hsw-ppurch__qty--inline,
 .hsw-psticky.is-not-in-cart .hsw-psticky__stepper {
 	height: 44px; display: none !important; }
+/*
+ * In cart, the CTA and the stepper trade places — exactly like the sticky bar.
+ * Mobile already felt right because the stepper took the row; desktop used to
+ * keep the «خرید آنلاین» button beside it, which made it look like a second,
+ * unrelated add action. The stepper is now the only control on every viewport.
+ */
+.hsw-ppurch:not(.is-not-in-cart) .hsw-ppurch__cart {
+	display: none !important;
+}
+.hsw-ppurch:not(.is-not-in-cart) .hsw-ppurch__qty--inline {
+	width: 100%;
+	flex: 1 1 100%;
+}
+.hsw-ppurch:not(.is-not-in-cart) .hsw-ppurch__stepper {
+	width: 100%;
+	justify-content: space-between;
+}
 /* Two classes: themes ship `input[type="text"] { width: 100% }` and win otherwise. */
 .hsw-ppurch .hsw-ppurch__qval {
         width: 2.25rem; flex: 0 0 2.25rem; min-width: 0; text-align: center;

@@ -571,6 +571,10 @@
 						if (response.data.row) {
 							setRow(wrapRow(response.data.row, response.data.ticket));
 						}
+						var count = chat.querySelector('[data-hsw-chat-count]');
+						if (count && list) {
+							count.textContent = faNum(list.querySelectorAll('[data-id]').length) + ' گفتگو';
+						}
 						chat.setAttribute('data-active', response.data.ticket);
 						form.reset();
 						picked = null;

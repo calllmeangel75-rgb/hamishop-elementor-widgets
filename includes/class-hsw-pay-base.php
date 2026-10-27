@@ -137,6 +137,10 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
 
         /**
          * Terms & conditions page URL (empty when not configured).
+         *
+         * Fall back to the site privacy policy when WooCommerce has no terms
+         * page yet. The link stays actionable on new stores, while stores that
+         * configure a dedicated terms page continue to use it.
          */
         protected function terms_url() {
                 if ( function_exists( 'wc_get_page_id' ) ) {
@@ -144,6 +148,9 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
                         if ( 0 < $id && 'publish' === get_post_status( $id ) ) {
                                 return get_permalink( $id );
                         }
+                }
+                if ( function_exists( 'get_privacy_policy_url' ) ) {
+                        return get_privacy_policy_url();
                 }
                 return '';
         }

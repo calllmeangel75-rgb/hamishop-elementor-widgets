@@ -160,12 +160,12 @@ public function get_title() {
                 $this->add_control( 'tab_active_bg', array( 'label' => __( 'پس‌زمینه تب فعال', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tab.is-active' => '--hsw-tab-active-bg: {{VALUE}};' ) ) );
                 $this->add_control( 'tab_active_c', array( 'label' => __( 'رنگ تب فعال', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tab.is-active' => '--hsw-tab-active-c: {{VALUE}};' ) ) );
                 $this->add_control( 'tab_c', array( 'label' => __( 'رنگ تب غیرفعال', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tab' => '--hsw-tab-c: {{VALUE}};' ) ) );
-                $this->add_control(
-                        'tab_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
-                                'label'     => __( 'تایپوگرافی تب‌ها', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
-                                'selector'  => '{{WRAPPER}} .hsw-tab',
+                                'name'     => 'tab_typo',
+                                'label'    => __( 'تایپوگرافی تب‌ها', 'hamishop-elementor-widgets' ),
+                                'selector' => '{{WRAPPER}} .hsw-tab',
                         )
                 );
                 $this->end_controls_section();

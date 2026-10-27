@@ -137,7 +137,7 @@ class HSW_Palette {
 
 	public static function font_choices() {
 		$choices = array(
-			''              => __( 'پیش‌فرض قالب', 'hamishop-elementor-widgets' ),
+			''              => __( 'پیش‌فرض HamiShop (وزیرمتن)', 'hamishop-elementor-widgets' ),
 			'Vazirmatn HSW' => __( 'وزیرمتن (افزونه)', 'hamishop-elementor-widgets' ),
 		);
 

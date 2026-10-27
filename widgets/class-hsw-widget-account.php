@@ -198,17 +198,6 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 			)
 		);
 		$this->add_control(
-			'ac_gap',
-			array(
-				'label'       => __( 'فاصلهٔ ستون‌ها (px)', 'hamishop-elementor-widgets' ),
-				'type'        => Controls_Manager::NUMBER,
-				'min'         => 0,
-				'max'         => 64,
-				'default'     => '',
-				'placeholder' => '24',
-			)
-		);
-		$this->add_control(
 			'ac_max_width',
 			array(
 				'label'       => __( 'حداکثر عرض (px)', 'hamishop-elementor-widgets' ),

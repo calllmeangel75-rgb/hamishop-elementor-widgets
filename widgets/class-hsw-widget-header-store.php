@@ -256,7 +256,7 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 
 		echo '<button class="hsw-hd__burger" type="button" data-hsw-hd-drawer-open aria-controls="' . esc_attr( $drawer_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن منو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'menu' ) . '</button>';
 
-		echo $this->brand_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
+		echo $this->brand_html( $s, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 
 		if ( $show_search ) {
 			echo '<div class="hsw-hd__searchwrap">' . $this->search_form( $s ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -294,6 +294,9 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		echo '</div></div>';
 
 		echo $this->drawer_html( $s, 'store' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( $show_cart ) {
+			echo $this->cart_drawer_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 		echo '</div>';
 	}
 }

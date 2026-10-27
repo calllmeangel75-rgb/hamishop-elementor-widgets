@@ -72,8 +72,20 @@ class HSW_Wallet_Topup {
 			return $out;
 		}
 
+		/*
+		 * COD must never fund a wallet: its process_payment() moves the order
+		 * straight to `processing`, and this plugin treats that status as paid
+		 * (so a customer could credit the wallet for free). BACS/cheque stay
+		 * available because they wait for the shop owner to confirm receipt.
+		 * Sites with a custom offline gateway can extend the blocklist.
+		 */
+		$blocked = (array) apply_filters( 'hsw_wallet_topup_blocked_gateways', array( 'cod' ) );
+
 		foreach ( WC()->payment_gateways()->payment_gateways() as $id => $gateway ) {
-			if ( 'hsw_wallet' === $id ) {
+			if ( 'hsw_wallet' === $id || in_array( $id, $blocked, true ) ) {
+				continue;
+			}
+			if ( 'yes' !== ( $gateway->enabled ?? '' ) ) {
 				continue;
 			}
 			$out[ $id ] = $gateway->get_method_title() ? $gateway->get_method_title() : $id;
@@ -97,12 +109,13 @@ class HSW_Wallet_Topup {
 		$user_id = (int) $user_id;
 		$amount  = (float) $amount;
 		$s       = self::settings();
+		$minimum = max( 1000, (int) $s['min'] );
 
-		if ( ! $user_id || $amount < max( 1000, (int) $s['min'] ) ) {
+		if ( ! $user_id || $amount < $minimum ) {
 			return new WP_Error( 'hsw_bad_amount', sprintf(
 				/* translators: %s: minimum amount. */
 				__( 'حداقل مبلغ شارژ %s تومان است.', 'hamishop-elementor-widgets' ),
-				number_format( (int) $s['min'] )
+				number_format( $minimum )
 			) );
 		}
 
@@ -110,7 +123,24 @@ class HSW_Wallet_Topup {
 			return new WP_Error( 'hsw_no_wc', __( 'ووکامرس فعال نیست.', 'hamishop-elementor-widgets' ) );
 		}
 
-		$gateway_id = '' !== $gateway_id ? $gateway_id : (string) $s['gateway'];
+		$gateway_id = sanitize_key( (string) $gateway_id );
+		$gateways   = self::gateways();
+
+		if ( '' === $gateway_id ) {
+			$fallback = sanitize_key( (string) $s['gateway'] );
+			if ( isset( $gateways[ $fallback ] ) ) {
+				$gateway_id = $fallback;
+			} elseif ( 1 === count( $gateways ) ) {
+				$gateway_id = (string) array_key_first( $gateways );
+			}
+		}
+
+		if ( '' === $gateway_id || ! isset( $gateways[ $gateway_id ] ) ) {
+			return new WP_Error(
+				'hsw_bad_gateway',
+				__( 'درگاه پرداخت انتخاب‌شده در دسترس نیست. لطفاً درگاه دیگری انتخاب کنید.', 'hamishop-elementor-widgets' )
+			);
+		}
 
 		$order = wc_create_order( array( 'customer_id' => $user_id ) );
 		if ( is_wp_error( $order ) ) {

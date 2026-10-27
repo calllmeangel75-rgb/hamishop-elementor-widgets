@@ -215,42 +215,13 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * @return void
          */
         protected function style_section_mirror( $prefix, $label, $widget_class, $section_id = 'sec_style' ) {
-                $this->start_controls_section(
-                        'hsw_style_' . $prefix,
-                        array(
-                                'label' => $label,
-                                'tab'   => Controls_Manager::TAB_STYLE,
-                        )
-                );
-
-                $controls = HSW_Composite::controls( $widget_class );
-                $skip     = array( 'section', 'tabs', 'tab', 'is_group', 'group_prefix', 'group_type', 'dynamic', 'frontend_available', 'render_type', 'name', 'inner', 'group_fields' );
-
-                foreach ( $controls as $id => $source ) {
-                        if ( ! is_array( $source ) || ! isset( $source['section'] ) || $section_id !== $source['section'] ) {
-                                continue;
-                        }
-                        if ( preg_match( '/_(tablet|mobile)$/', (string) $id ) ) {
-                                continue;
-                        }
-
-                        $args = $source;
-                        foreach ( $skip as $key ) {
-                                unset( $args[ $key ] );
-                        }
-                        if ( empty( $args['type'] ) || in_array( $args['type'], array( 'section', 'tab' ), true ) ) {
-                                continue;
-                        }
-
-                        $this->add_control( $prefix . $id, $args );
-                }
-
-                $this->end_controls_section();
+                /* Thin alias: part_style_section owns the responsive/condition logic. */
+                $this->part_style_section( $prefix, $label, $widget_class, $section_id );
         }
 
         protected function part_style_section( $prefix, $label, $widget_class, $section_id = 'sec_style' ) {
                 $this->start_controls_section(
-                        'hsw_style_' . $prefix,
+                        'hsw_style_' . $prefix . sanitize_key( $section_id ),
                         array(
                                 'label' => $label,
                                 'tab'   => Controls_Manager::TAB_STYLE,
@@ -1172,22 +1143,22 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
 
-                $this->add_control(
-                        'hdr_title_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
+                                'name'      => 'hdr_title_typo',
                                 'label'     => __( 'تایپوگرافی عنوان', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
                                 'selector'  => '{{WRAPPER}} .hsw-hdr__title',
                                 'separator' => 'before',
                         )
                 );
                 $this->add_control( 'hdr_title_c', array( 'label' => __( 'رنگ عنوان', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-hdr__title' => 'color: {{VALUE}};' ) ) );
 
-                $this->add_control(
-                        'hdr_sub_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
+                                'name'      => 'hdr_sub_typo',
                                 'label'     => __( 'تایپوگرافی توضیح', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
                                 'selector'  => '{{WRAPPER}} .hsw-hdr__sub',
                                 'separator' => 'before',
                         )
@@ -1197,11 +1168,11 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 $this->add_control( 'hdr_badge_bg', array( 'label' => __( 'پس‌زمینه برچسب', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-hdr__badge' => '--hsw-badge-bg: {{VALUE}};' ) ) );
                 $this->add_control( 'hdr_badge_c', array( 'label' => __( 'رنگ برچسب', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-hdr__badge' => '--hsw-badge-c: {{VALUE}};' ) ) );
 
-                $this->add_control(
-                        'hdr_link_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
+                                'name'      => 'hdr_link_typo',
                                 'label'     => __( 'تایپوگرافی لینک', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
                                 'selector'  => '{{WRAPPER}} .hsw-hdr__link',
                                 'separator' => 'before',
                         )
@@ -1346,11 +1317,11 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
 
-                $this->add_control(
-                        'title_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
+                                'name'      => 'title_typo',
                                 'label'     => __( 'تایپوگرافی عنوان محصول', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
                                 'selector'  => '{{WRAPPER}} .hsw-card__title',
                                 'separator' => 'before',
                         )
@@ -1358,11 +1329,11 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 $this->add_control( 'title_c', array( 'label' => __( 'رنگ عنوان', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-card__title' => '--hsw-title-c: {{VALUE}};' ) ) );
                 $this->add_control( 'title_ch', array( 'label' => __( 'رنگ عنوان (هاور)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop' => '--hsw-title-hover: {{VALUE}};' ) ) );
 
-                $this->add_control(
-                        'brand_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
+                                'name'      => 'brand_typo',
                                 'label'     => __( 'تایپوگرافی برند', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
                                 'selector'  => '{{WRAPPER}} .hsw-brand',
                                 'separator' => 'before',
                         )
@@ -1436,12 +1407,12 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         array( 'label' => __( 'استایل قیمت و دکمه‌ها', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
                 );
 
-                $this->add_control(
-                        'price_typo',
+                $this->add_group_control(
+                        Group_Control_Typography::get_type(),
                         array(
-                                'label'     => __( 'تایپوگرافی قیمت', 'hamishop-elementor-widgets' ),
-                                'type'      => Group_Control_Typography::get_type(),
-                                'selector'  => '{{WRAPPER}} .hsw-price-new',
+                                'name'     => 'price_typo',
+                                'label'    => __( 'تایپوگرافی قیمت', 'hamishop-elementor-widgets' ),
+                                'selector' => '{{WRAPPER}} .hsw-price-new',
                         )
                 );
                 $this->add_control( 'price_c', array( 'label' => __( 'رنگ قیمت جدید', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-price-new' => '--hsw-price-c: {{VALUE}};' ) ) );

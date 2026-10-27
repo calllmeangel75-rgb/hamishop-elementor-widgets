@@ -235,7 +235,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                         array(
                                 'label'   => __( 'عنوان هدر موبایل', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'اطلاعات ارسال', 'hamishop-elementor-widgets' ),
+                                'default' => __( 'پرداخت نهایی', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -365,7 +365,11 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                 }
                 $support_url  = ( ! empty( $s['support_url']['url'] ) ) ? $s['support_url']['url'] : '#';
 
-                $m_title    = $this->opt( 'm_title', __( 'اطلاعات ارسال', 'hamishop-elementor-widgets' ) );
+                $m_title    = $this->opt( 'm_title', __( 'پرداخت نهایی', 'hamishop-elementor-widgets' ) );
+                /* Pages saved before the 1.11.x title fix keep the old shipping label. */
+                if ( 'اطلاعات ارسال' === $m_title ) {
+                        $m_title = __( 'پرداخت نهایی', 'hamishop-elementor-widgets' );
+                }
                 $m_subtitle = $this->opt( 'm_subtitle', '' );
                 $back_url   = $this->cart_url();
                 if ( ! empty( $s['back_url']['url'] ) ) {
@@ -398,10 +402,10 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                         <?php endif; ?>
                                                         <?php $is_active = ( ( $i + 1 ) === $active ); ?>
                                                         <?php if ( $is_active ) : ?>
-                                                                <span class="hsw-ptop__nav-i is-active">
+                                                                <h1 class="hsw-ptop__nav-i is-active">
                                                                         <span class="hsw-ptop__nav-badge"><?php echo esc_html( HSW_Helpers::fa_num( $i + 1 ) ); ?></span>
                                                                         <?php echo esc_html( $row[0] ); ?>
-                                                                </span>
+                                                                </h1>
                                                         <?php else : ?>
                                                                 <a class="hsw-ptop__nav-i" href="<?php echo esc_url( $row[1] ); ?>">
                                                                         <?php echo HSW_Helpers::icon( 'check_circle', true ); ?>
@@ -469,7 +473,7 @@ class HSW_Widget_Pay_Top extends HSW_Pay_Base {
                                                 <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                         </a>
                                         <div class="hsw-ptop__mhead">
-                                                <h1 class="hsw-ptop__mtitle"><?php echo esc_html( $m_title ); ?></h1>
+                                                <div class="hsw-ptop__mtitle" role="heading" aria-level="1"><?php echo esc_html( $m_title ); ?></div>
                                                 <?php if ( '' !== trim( (string) $m_subtitle ) ) : ?>
                                                         <span class="hsw-ptop__msub"><?php echo esc_html( $m_subtitle ); ?></span>
                                                 <?php endif; ?>

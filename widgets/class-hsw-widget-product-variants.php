@@ -234,6 +234,16 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
 
                 $d = $this->demo();
 
+                /*
+                 * A simple product has no variation to select. A visible
+                 * colour attribute on one is just a specification, and showing
+                 * swatches for it would promise a price/stock/cart change that
+                 * cannot happen. The specs widget still prints it.
+                 */
+                if ( $product && ! $product->is_type( 'variable' ) ) {
+                        return;
+                }
+
                 $attr_color   = ( isset( $s['attr_color'] ) && '' !== trim( (string) $s['attr_color'] ) ) ? trim( (string) $s['attr_color'] ) : 'pa_color';
                 $attr_storage = ( isset( $s['attr_storage'] ) && '' !== trim( (string) $s['attr_storage'] ) ) ? trim( (string) $s['attr_storage'] ) : 'pa_memory';
 
@@ -261,7 +271,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 }
 
                 $colors = array();
-                if ( $product ) {
+                if ( $product && $this->is_variation_attribute( $product, $attr_color ) ) {
                         foreach ( $this->attribute_terms( $product, $attr_color ) as $term ) {
                                 $colors[] = array(
                                         'name'  => $term['name'],
@@ -276,7 +286,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $storages    = array(); // primary chip group (sticky bar / legacy contract)
                 $chip_groups = array(); // every non-colour variation attribute
 
-                if ( $product ) {
+                if ( $product && $this->is_variation_attribute( $product, $attr_storage ) ) {
                         $primary = $this->attribute_terms( $product, $attr_storage );
                         if ( $primary ) {
                                 $storages      = wp_list_pluck( $primary, 'name' );

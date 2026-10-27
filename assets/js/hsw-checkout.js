@@ -766,7 +766,10 @@ document.addEventListener( 'click', function ( event ) {
                 } )
                         .catch( function () { /* keep the session default */ } )
                         .then( function () {
-                                var payload = { method: currentMethod() };
+                                var payload = {
+                                        method: currentMethod(),
+                                        terms: termsAccepted() ? 1 : 0
+                                };
                                 var sched   = savedSchedule();
                                 if ( sched && ( sched.day || sched.slot ) ) {
                                         payload.schedule_day  = sched.day || '';

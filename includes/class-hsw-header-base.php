@@ -193,10 +193,11 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 * Brand / logo markup. Uses the selected Elementor image, then the site
 	 * logo, then the bundled storefront icon.
 	 *
-	 * @param array $s Settings.
+	 * @param array $s          Settings.
+	 * @param bool  $as_heading Render the brand as the page H1 on the front page.
 	 * @return string
 	 */
-	protected function brand_html( $s ) {
+	protected function brand_html( $s, $as_heading = false ) {
 		$name    = isset( $s['brand_name'] ) ? trim( (string) $s['brand_name'] ) : '';
 		$tagline = isset( $s['brand_tagline'] ) ? trim( (string) $s['brand_tagline'] ) : '';
 		/*
@@ -238,7 +239,8 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			? '<span class="hsw-hd__logomark hsw-hd__logomark--image">' . $logo . '</span>'
 			: '<span class="hsw-hd__logomark">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
 
-		$out  = '<a class="hsw-hd__brand" href="' . esc_url( home_url( '/' ) ) . '" aria-label="' . esc_attr( $aria_name ) . '">';
+		$wrap = ( $as_heading && is_front_page() ) ? 'h1' : 'span';
+		$out  = '<' . $wrap . ' class="hsw-hd__brandwrap"><a class="hsw-hd__brand" href="' . esc_url( home_url( '/' ) ) . '" aria-label="' . esc_attr( $aria_name ) . '">';
 		$out .= $mark;
 		$out .= '<span class="hsw-hd__brandtext">';
 		if ( '' !== $name ) {
@@ -247,7 +249,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		if ( '' !== $tagline ) {
 			$out .= '<span class="hsw-hd__brandtag">' . esc_html( $tagline ) . '</span>';
 		}
-		$out .= '</span></a>';
+		$out .= '</span></a></' . $wrap . '>';
 
 		return $out;
 	}
@@ -338,8 +340,9 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$total    = $count && $subtotal ? $subtotal : __( 'خالی', 'hamishop-elementor-widgets' );
 		// Empty label = cleared on purpose: icon only, no text fallback.
 		$aria     = '' !== $label ? $label : __( 'سبد خرید', 'hamishop-elementor-widgets' );
+		$drawer   = $this->uid() . '-cartdrawer';
 
-		$out  = '<a class="hsw-hd__action hsw-hd__cart' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . ( $count ? '' : ' is-empty' ) . '" href="' . esc_url( $this->cart_url() ) . '" aria-label="' . esc_attr( $aria ) . '">';
+		$out  = '<a class="hsw-hd__action hsw-hd__cart' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . ( $count ? '' : ' is-empty' ) . '" href="' . esc_url( $this->cart_url() ) . '" data-hsw-cart-open aria-controls="' . esc_attr( $drawer ) . '" aria-expanded="false" aria-haspopup="dialog" aria-label="' . esc_attr( $aria ) . '">';
 		/*
 		 * `data-count` carries the number as a plain integer. The client reads it
 		 * to decide whether a cached badge has to be cleared for a visitor with
@@ -693,7 +696,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= '<div class="hsw-hd__drawerfoot">';
 		if ( $show_cart ) {
 			$count = $this->cart_count();
-			$out  .= '<a class="hsw-hd__drawercart" href="' . esc_url( $this->cart_url() ) . '">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span>' . esc_html( isset( $s['drawer_cart_text'] ) && '' !== trim( (string) $s['drawer_cart_text'] ) ? $s['drawer_cart_text'] : __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ) ) . '</span><span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a>';
+			$out  .= '<a class="hsw-hd__drawercart" href="' . esc_url( $this->cart_url() ) . '" data-hsw-cart-open aria-controls="' . esc_attr( $this->uid() . '-cartdrawer' ) . '" aria-expanded="false" aria-haspopup="dialog">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span>' . esc_html( isset( $s['drawer_cart_text'] ) && '' !== trim( (string) $s['drawer_cart_text'] ) ? $s['drawer_cart_text'] : __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ) ) . '</span><span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a>';
 		}
 		$out .= '<div class="hsw-hd__drawerlinks">';
 		if ( $show_acct ) {
@@ -712,6 +715,19 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= '</aside></div>';
 
 		return $out;
+	}
+
+	/**
+	 * Shared off-canvas cart sidebar, opened from the header cart icon.
+	 *
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	protected function cart_drawer_html( $s ) {
+		if ( ! class_exists( 'HSW_Cart_Drawer' ) ) {
+			return '';
+		}
+		return HSW_Cart_Drawer::render( array( 'id' => $this->uid() . '-cartdrawer' ) );
 	}
 
 	/* ---------------------------------------------------------------------

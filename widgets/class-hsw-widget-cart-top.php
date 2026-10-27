@@ -329,7 +329,11 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                                                 <?php endif; ?>
                                                                 <li class="hsw-ctop__step<?php echo esc_attr( $cls ); ?>">
                                                                         <span class="hsw-ctop__dot"><?php echo esc_html( HSW_Helpers::fa_num( $n ) ); ?></span>
-                                                                        <span><?php echo esc_html( $st[0] ); ?></span>
+                                                                        <?php if ( $n === $active ) : ?>
+                                                                                <h1 class="hsw-ctop__step-t"><?php echo esc_html( $st[0] ); ?></h1>
+                                                                        <?php else : ?>
+                                                                                <span><?php echo esc_html( $st[0] ); ?></span>
+                                                                        <?php endif; ?>
                                                                 </li>
                                                         <?php endforeach; ?>
                                                 </ol>
@@ -345,7 +349,7 @@ class HSW_Widget_Cart_Top extends HSW_Cart_Base {
                                                         <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                                 </a>
                                                 <div>
-                                                        <h1 class="hsw-ctop__mtitle"><?php echo esc_html( $this->opt( 'm_title', __( 'سبد خرید', 'hamishop-elementor-widgets' ) ) ); ?></h1>
+                                                        <div class="hsw-ctop__mtitle" role="heading" aria-level="1"><?php echo esc_html( $this->opt( 'm_title', __( 'سبد خرید', 'hamishop-elementor-widgets' ) ) ); ?></div>
                                                         <span class="hsw-ctop__msub"><?php echo esc_html( $m_count ); ?></span>
                                                 </div>
                                         </div>

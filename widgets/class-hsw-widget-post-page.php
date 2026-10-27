@@ -591,6 +591,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 	 */
 	protected function prepared_content( $post, $mode = 'slug' ) {
 		$html = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter.
+		$html = HSW_Helpers::demote_content_h1( $html );
 
 		$toc  = array();
 		$used = array();

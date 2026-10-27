@@ -801,25 +801,97 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         }
 
         /**
+         * Normalize a feature label/value for duplicate detection.
+         *
+         * @param string $text Raw text.
+         * @return string
+         */
+        protected function feature_key( $text ) {
+                $text = trim( wp_strip_all_tags( (string) $text ) );
+                $text = function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
+                $text = str_replace( array( 'ي', 'ك', '‌', ':', '：', '(', ')', '（', '）' ), array( 'ی', 'ک', ' ', '', '', '', '', '', '' ), $text );
+                $text = preg_replace( '/[\s\p{Z}]+/u', ' ', $text );
+                return trim( (string) $text );
+        }
+
+        /**
+         * Split one short-description bullet into a label/value row.
+         *
+         * Product editors commonly enter short descriptions as either
+         * `<li>طرح: ساده</li>` items or one field per line. Splitting the
+         * first colon keeps the label visible in the feature block instead of
+         * printing the whole "طرح: ساده" string as an unlabelled line.
+         *
+         * @param string $bullet Raw bullet text.
+         * @return array{ k: string, v: string }
+         */
+        protected function feature_from_bullet( $bullet ) {
+                $text = trim( wp_strip_all_tags( (string) $bullet ) );
+                $text = preg_replace( '/^\s*[-–—•*]+\s*/u', '', $text );
+                if ( preg_match( '/^([^:：]{1,40})[:：]\s*(.+)$/u', (string) $text, $m ) ) {
+                        return array( 'k' => trim( $m[1] ), 'v' => trim( $m[2] ) );
+                }
+                return array( 'k' => '', 'v' => trim( (string) $text ) );
+        }
+
+        /**
          * Dynamic feature rows for the «ویژگی‌های شاخص» widget: product
-         * attributes first, then short-description bullets as fallback.
+         * attributes merged with short-description fields.
+         *
+         * The old logic returned the attributes as soon as there was one, so
+         * extra fields such as «طرح», «ضخامت» and «تکنولوژی» disappeared even
+         * though they were real product data. Labels already present in the
+         * attributes are skipped, so «جنس» is never printed twice.
          *
          * @param WC_Product|null $product Product.
          * @param int             $limit   Max rows.
          * @return array [ ['k' => label, 'v' => value], ... ]
          */
-        protected function feature_rows( $product, $limit = 4 ) {
-                $rows = array();
-                foreach ( array_slice( $this->specs_rows( $product, true ), 0, $limit ) as $r ) {
-                        $rows[] = array( 'k' => $r['k'], 'v' => $r['v'] );
+        protected function feature_rows( $product, $limit = 6 ) {
+                if ( ! $product || $limit < 1 ) {
+                        return array();
                 }
-                if ( $rows ) {
-                        return $rows;
+
+                $rows   = array();
+                $labels = array();
+                $values = array();
+                $add    = function ( $label, $value ) use ( &$rows, &$labels, &$values, $limit ) {
+                        $label = trim( wp_strip_all_tags( (string) $label ) );
+                        $value = trim( wp_strip_all_tags( (string) $value ) );
+                        if ( '' === $value || count( $rows ) >= $limit ) {
+                                return;
+                        }
+
+                        $key       = $this->feature_key( $label );
+                        $value_key = $this->feature_key( $value );
+                        if ( '' === $key ) {
+                                $key = 'value:' . $value_key;
+                        }
+                        /* Same field, or the same fact under a longer label such
+                           as «کشور» + «کشور تولید کننده» — print it once. */
+                        if ( isset( $labels[ $key ] ) || ( '' !== $value_key && isset( $values[ $value_key ] ) ) ) {
+                                return;
+                        }
+
+                        $labels[ $key ] = true;
+                        if ( '' !== $value_key ) {
+                                $values[ $value_key ] = true;
+                        }
+                        $rows[] = array( 'k' => $label, 'v' => $value );
+                };
+
+                foreach ( $this->specs_rows( $product, true ) as $row ) {
+                        $add( $row['k'], $row['v'] );
                 }
-                foreach ( $this->short_description_bullets( $product, $limit ) as $bullet ) {
-                        $rows[] = array( 'k' => '', 'v' => $bullet );
+
+                /* Read more than the display limit so duplicate labels cannot
+                   starve the later, unique fields. */
+                foreach ( $this->short_description_bullets( $product, max( 12, $limit * 3 ) ) as $bullet ) {
+                        $row = $this->feature_from_bullet( $bullet );
+                        $add( $row['k'], $row['v'] );
                 }
-                return $rows;
+
+                return array_slice( $rows, 0, $limit );
         }
 
         /**
@@ -875,6 +947,30 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         }
                 }
                 return $out;
+        }
+
+        /**
+         * Is this attribute actually used to build variations?
+         *
+         * A visible colour attribute on a variable product can still be a
+         * non-variation attribute. It belongs in the specs table, not in a
+         * swatch picker whose selection cannot change anything.
+         *
+         * @param WC_Product|null $product  Product.
+         * @param string          $taxonomy Attribute name/slug.
+         * @return bool
+         */
+        protected function is_variation_attribute( $product, $taxonomy ) {
+                if ( ! $product || ! $product->is_type( 'variable' ) || '' === (string) $taxonomy ) {
+                        return false;
+                }
+                $needle = $this->normalize_attribute_key( $taxonomy );
+                foreach ( array_keys( $this->auto_variation_attributes( $product ) ) as $name ) {
+                        if ( $this->normalize_attribute_key( $name ) === $needle ) {
+                                return true;
+                        }
+                }
+                return false;
         }
 
         /**
@@ -1350,14 +1446,14 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         protected function ctrl_text( $id, $selector, $opts = array() ) {
                 $opts = wp_parse_args( $opts, array( 'hover' => false, 'separator' => false ) );
                 $args = array(
-                        'label'     => __( 'تایپوگرافی', 'hamishop-elementor-widgets' ),
-                        'type'      => Group_Control_Typography::get_type(),
-                        'selector'  => $selector,
+                        'name'     => $id . '_typo',
+                        'label'    => __( 'تایپوگرافی', 'hamishop-elementor-widgets' ),
+                        'selector' => $selector,
                 );
                 if ( $opts['separator'] ) {
                         $args['separator'] = 'before';
                 }
-                $this->add_control( $id . '_typo', $args );
+                $this->add_group_control( Group_Control_Typography::get_type(), $args );
                 $this->add_control( $id . '_c', array(
                         'label'     => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
                         'type'      => Controls_Manager::COLOR,

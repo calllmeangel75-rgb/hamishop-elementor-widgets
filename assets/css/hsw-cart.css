@@ -131,6 +131,7 @@
 .hsw-ctop__step { display: flex; align-items: center; gap: .375rem; font-size: .875rem; line-height: 1.375rem; font-weight: 600; color: var(--hswc-text2); opacity: .6; }
 .hsw-ctop__step.is-active { color: var(--hswc-accent); opacity: 1; font-weight: 700; }
 .hsw-ctop__step.is-done { opacity: 1; color: var(--hswc-accent); }
+.hsw-ctop__step-t { margin: 0; font: inherit; color: inherit; }
 .hsw-ctop__dot {
         width: 1.5rem; height: 1.5rem; border-radius: 999px;
         display: flex; align-items: center; justify-content: center;

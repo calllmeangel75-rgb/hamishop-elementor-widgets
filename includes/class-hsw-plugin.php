@@ -158,6 +158,13 @@ final class HSW_Plugin {
                 $fragments['[data-hsw-cart-count]'] = '<span class="hsw-hd__badge" data-hsw-cart-count data-count="' . (int) $count . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span>';
                 $fragments['[data-hsw-cart-total]'] = '<span class="hsw-hd__actionsub hsw-hd__carttotal" data-hsw-cart-total>' . wp_kses_post( $total ) . '</span>';
 
+                /* Header cart sidebar: body + count update in place on AJAX add,
+                   quantity change and remove — without reloading the page. */
+                if ( class_exists( 'HSW_Cart_Drawer' ) ) {
+                        $fragments['[data-hsw-cart-drawer-body]']  = HSW_Cart_Drawer::contents();
+                        $fragments['[data-hsw-cart-drawer-count]'] = HSW_Cart_Drawer::count_html();
+                }
+
                 return $fragments;
         }
 
@@ -190,6 +197,7 @@ final class HSW_Plugin {
                  */
                 require_once HSW_DIR . 'includes/class-hsw-icon-set.php';
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
+                require_once HSW_DIR . 'includes/class-hsw-cart-drawer.php';
                 require_once HSW_DIR . 'includes/trait-hsw-style-kit.php';
                 require_once HSW_DIR . 'includes/class-hsw-branding.php';
                 require_once HSW_DIR . 'includes/class-hsw-security.php';

@@ -850,7 +850,7 @@
 .hsw-ptop__nav-i {
         display: flex; align-items: center; gap: .375rem;
         color: var(--hswk-text2); font-size: .875rem; line-height: 1.5rem;
-        transition: color .15s;
+        margin: 0; transition: color .15s;
 }
 .hsw-ptop__nav-i:hover { color: var(--hswk-accent2); }
 .hsw-ptop__nav-i > .hsw-ic { font-size: 1.125rem; color: var(--hswk-primary); }

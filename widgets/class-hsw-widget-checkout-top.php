@@ -321,7 +321,7 @@ class HSW_Widget_Checkout_Top extends HSW_Checkout_Base {
                                         <a class="hsw-cktop__back" href="<?php echo esc_url( $back_url ); ?>" aria-label="<?php esc_attr_e( 'بازگشت به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
                                                 <?php echo HSW_Helpers::icon( 'arrow_forward' ); ?>
                                         </a>
-                                        <h1 class="hsw-cktop__title"><?php echo esc_html( $title ); ?></h1>
+                                        <div class="hsw-cktop__title" role="heading" aria-level="1"><?php echo esc_html( $title ); ?></div>
                                         <?php if ( $show_support ) : ?>
                                                 <a class="hsw-cktop__msupport" href="<?php echo esc_url( $support_url ); ?>" aria-label="<?php esc_attr_e( 'پشتیبانی آنلاین', 'hamishop-elementor-widgets' ); ?>">
                                                         <?php echo HSW_Helpers::icon( 'support_agent' ); ?>

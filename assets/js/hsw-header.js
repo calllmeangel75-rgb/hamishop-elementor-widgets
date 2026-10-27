@@ -61,7 +61,7 @@
 	}
 
 	function syncScrollLock() {
-		var anyOpen = document.querySelector('.hsw-hd__drawer.is-open');
+		var anyOpen = document.querySelector('.hsw-hd__drawer.is-open, .hsw-hd__cartdrawer.is-open');
 		document.documentElement.classList.toggle('hsw-hd-lock', !!anyOpen);
 	}
 
@@ -683,8 +683,17 @@
 		var countEls = all(root, '[data-hsw-cart-count]');
 		var totalEls = all(root, '[data-hsw-cart-total]');
 		var cartLinks = all(root, '.hsw-hd__cart');
+		var cartRefreshSeq = 0;
 
 		function applyCart(count, total) {
+			/*
+			 * WooCommerce fragments replace the badge node itself, so the
+			 * arrays captured at boot can point at detached elements after
+			 * the first AJAX add. Re-querying keeps every later update live.
+			 */
+			countEls = all(root, '[data-hsw-cart-count]');
+			totalEls = all(root, '[data-hsw-cart-total]');
+			cartLinks = all(root, '.hsw-hd__cart');
 			countEls.forEach(function (el) {
 				el.textContent = formatCount(count);
 				/* Keep the plain integer in sync so later reads stay truthful. */
@@ -727,22 +736,50 @@
 			}
 		}
 
+		function applyDrawerFragments(fragments) {
+			var drawer = root.querySelector('[data-hsw-cart-drawer]');
+			if (!drawer || !fragments) {
+				return;
+			}
+
+			/*
+			 * WooCommerce fragments replace the selected node itself, not its
+			 * children. Both selectors therefore carry the complete wrapper.
+			 */
+			['[data-hsw-cart-drawer-body]', '[data-hsw-cart-drawer-count]'].forEach(function (selector) {
+				var markup = fragments[selector];
+				if (!markup) {
+					return;
+				}
+				drawer.querySelectorAll(selector).forEach(function (node) {
+					node.outerHTML = markup;
+				});
+			});
+		}
+
 		function refreshCart() {
 			var url = root.getAttribute('data-hsw-fragments');
 			if (!url || !window.fetch) {
 				return;
 			}
+			var seq = ++cartRefreshSeq;
 			window.fetch(url, { credentials: 'same-origin' })
 				.then(function (response) {
 					return response.json();
 				})
 				.then(function (json) {
+					/* A newer refresh or a quantity action has superseded this
+					   response; applying it would overwrite the newer cart. */
+					if (seq !== cartRefreshSeq) {
+						return;
+					}
 					if (!json || !json.fragments) {
 						return;
 					}
 					var html = Object.keys(json.fragments).map(function (key) {
 						return json.fragments[key];
 					}).join('');
+					applyDrawerFragments(json.fragments);
 					updateFromFragmentHtml(html);
 				})
 				.catch(function () {});
@@ -766,6 +803,9 @@
 			var $body = window.jQuery(document.body);
 			$body.on('added_to_cart', function (event, fragments) {
 				if (fragments) {
+					if (typeof fragments === 'object') {
+						applyDrawerFragments(fragments);
+					}
 					var html = typeof fragments === 'string' ? fragments : Object.keys(fragments).map(function (key) {
 						return fragments[key];
 					}).join('');
@@ -781,6 +821,233 @@
 					if (items.length) {
 						updateFromFragmentHtml(mini.outerHTML);
 					}
+				}
+			});
+		}
+
+		/* ---------- cart sidebar ---------- */
+		var cartDrawer = root.querySelector('[data-hsw-cart-drawer]');
+		if (cartDrawer) {
+			var cartOpeners = all(root, '[data-hsw-cart-open]');
+			var cartClosers = all(cartDrawer, '[data-hsw-cart-close]');
+			var cartLastFocus = null;
+			var cartBusy = false;
+
+			function setCartExpanded(open) {
+				cartOpeners.forEach(function (button) {
+					button.setAttribute('aria-expanded', open ? 'true' : 'false');
+				});
+			}
+
+			function cartFocusable() {
+				return all(
+					cartDrawer,
+					'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+				).filter(function (el) {
+					return el.offsetParent !== null;
+				});
+			}
+
+			function openCart() {
+				if (drawer && drawer.classList.contains('is-open')) {
+					closeDrawer(false);
+				}
+				cartLastFocus = document.activeElement;
+				cartDrawer.classList.add('is-open');
+				cartDrawer.setAttribute('aria-hidden', 'false');
+				setCartExpanded(true);
+				syncScrollLock();
+				/* Pull a fresh body so a page-cached drawer never shows another
+				   visitor's cart. Cheap when the session already matches. */
+				refreshCart();
+				var closeButton = cartDrawer.querySelector('.hsw-hd__cartclose');
+				if (closeButton) {
+					window.setTimeout(function () {
+						closeButton.focus();
+					}, 40);
+				}
+			}
+
+			function closeCart(restoreFocus) {
+				cartDrawer.classList.remove('is-open');
+				cartDrawer.setAttribute('aria-hidden', 'true');
+				setCartExpanded(false);
+				syncScrollLock();
+				if (restoreFocus) {
+					var target = cartLastFocus;
+					if (!target || target.offsetParent === null) {
+						target = root.querySelector('.hsw-hd__cart');
+					}
+					if (target && typeof target.focus === 'function') {
+						target.focus();
+					}
+				}
+			}
+
+			function setCartBusy(busy) {
+				cartBusy = !!busy;
+				cartDrawer.classList.toggle('is-busy', !!busy);
+			}
+
+			function showCartError(message) {
+				if (window.HSWFeedback && typeof window.HSWFeedback.toast === 'function') {
+					window.HSWFeedback.toast(message, { tone: 'error' });
+				}
+			}
+
+			function postCartQty(productId, variationId, quantity, focusTarget) {
+				var data = window.hswHeaderData || {};
+				if (cartBusy || !data.qtyAjax || !data.qtyNonce) {
+					return;
+				}
+
+				cartRefreshSeq++;
+				setCartBusy(true);
+				var payload = new URLSearchParams();
+				payload.set('product_id', String(productId));
+				payload.set('variation_id', String(variationId || 0));
+				payload.set('quantity', String(quantity));
+				payload.set('security', data.qtyNonce);
+
+				window.fetch(data.qtyAjax, {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+					body: payload.toString()
+				})
+					.then(function (response) {
+						return response.json();
+					})
+					.then(function (json) {
+						setCartBusy(false);
+						if (!json || !json.success) {
+							showCartError((json && json.data && json.data.message) || data.errorText || '');
+							refreshCart();
+							return;
+						}
+						var fragments = json.data && json.data.fragments ? json.data.fragments : {};
+						applyDrawerFragments(fragments);
+						var html = Object.keys(fragments).map(function (key) {
+							return fragments[key];
+						}).join('');
+						updateFromFragmentHtml(html);
+						/*
+						 * The product page has its own add-to-cart state. Tell it
+						 * that a drawer quantity/removal changed this line so its
+						 * CTA and stepper do not stay out of sync.
+						 */
+						document.dispatchEvent(new CustomEvent('hsw_cart_drawer_updated', {
+							detail: {
+								productId: productId,
+								variationId: variationId,
+								qty: json.data && typeof json.data.quantity !== 'undefined' ? json.data.quantity : quantity
+							}
+						}));
+						/* Fragment replacement destroys the pressed button; put
+						   focus back on the equivalent control (or the close
+						   button after a removal) so keyboard users keep context. */
+						window.setTimeout(function () {
+							var target = null;
+							if (focusTarget && 'close' !== focusTarget) {
+								var pid = parseInt(productId, 10) || 0;
+								var vid = parseInt(variationId, 10) || 0;
+								var line = cartDrawer.querySelector('[data-hsw-cart-line][data-product-id="' + pid + '"][data-variation-id="' + vid + '"]');
+								if (line) {
+									target = line.querySelector('-1' === focusTarget ? '[data-hsw-cart-qty="-1"]' : '[data-hsw-cart-qty="1"]');
+								}
+								if (target && target.disabled) {
+									target = null;
+								}
+							}
+							if (!target) {
+								target = cartDrawer.querySelector('.hsw-hd__cartclose');
+							}
+							if (target) {
+								target.focus();
+							}
+						}, 40);
+					})
+					.catch(function () {
+						setCartBusy(false);
+						showCartError(data.errorText || '');
+					});
+			}
+
+			cartOpeners.forEach(function (button) {
+				button.addEventListener('click', function (event) {
+					if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+						return;
+					}
+					event.preventDefault();
+					if (cartDrawer.classList.contains('is-open')) {
+						closeCart(true);
+					} else {
+						openCart();
+					}
+				});
+			});
+
+			cartClosers.forEach(function (button) {
+				button.addEventListener('click', function (event) {
+					event.preventDefault();
+					closeCart(true);
+				});
+			});
+
+			cartDrawer.addEventListener('click', function (event) {
+				var qtyButton = event.target.closest ? event.target.closest('[data-hsw-cart-qty]') : null;
+				if (qtyButton) {
+					event.preventDefault();
+					var line = qtyButton.closest('[data-hsw-cart-line]');
+					var delta = parseInt(qtyButton.getAttribute('data-hsw-cart-qty'), 10) || 0;
+					var current = line ? parseInt(line.getAttribute('data-qty') || '1', 10) || 1 : 1;
+					var next = Math.max(0, current + delta);
+					if (next === current) {
+						return;
+					}
+					postCartQty(
+						qtyButton.getAttribute('data-product-id'),
+						qtyButton.getAttribute('data-variation-id'),
+						next,
+						delta > 0 ? '1' : '-1'
+					);
+					return;
+				}
+
+				var removeButton = event.target.closest ? event.target.closest('[data-hsw-cart-remove]') : null;
+				if (removeButton) {
+					event.preventDefault();
+					postCartQty(
+						removeButton.getAttribute('data-product-id'),
+						removeButton.getAttribute('data-variation-id'),
+						0,
+						'close'
+					);
+				}
+			});
+
+			cartDrawer.addEventListener('keydown', function (event) {
+				if (event.key !== 'Tab' || !cartDrawer.classList.contains('is-open')) {
+					return;
+				}
+				var focusable = cartFocusable();
+				if (!focusable.length) {
+					return;
+				}
+				var first = focusable[0];
+				var last = focusable[focusable.length - 1];
+				if (event.shiftKey && document.activeElement === first) {
+					event.preventDefault();
+					last.focus();
+				} else if (!event.shiftKey && document.activeElement === last) {
+					event.preventDefault();
+					first.focus();
+				}
+			});
+
+			document.addEventListener('keydown', function (event) {
+				if (event.key === 'Escape' && cartDrawer.classList.contains('is-open')) {
+					closeCart(true);
 				}
 			});
 		}

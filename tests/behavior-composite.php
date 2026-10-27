@@ -25,7 +25,12 @@ function esc_attr( $text ) {
 require __DIR__ . '/stubs.php';
 
 $base = dirname( __DIR__ );
+define( 'HSW_DIR', $base . '/' );
+function sanitize_key( $key ) {
+        return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $key ) );
+}
 require $base . '/includes/class-hsw-composite.php';
+require $base . '/includes/trait-hsw-style-kit.php';
 require $base . '/includes/class-hsw-widget-base.php';
 
 $failed = 0;

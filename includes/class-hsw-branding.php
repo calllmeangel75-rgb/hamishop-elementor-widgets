@@ -168,6 +168,21 @@ class HSW_Branding {
 		if ( ! empty( $b['logo_url'] ) ) {
 			return (string) $b['logo_url'];
 		}
+
+		/*
+		 * The branding screen promises the theme logo is used when no custom
+		 * logo is selected. `defaults()` only fills that in on a fresh option;
+		 * saving the form with an empty logo stores `logo_id = 0`, which would
+		 * otherwise erase the theme logo until the option is deleted.
+		 */
+		$theme_logo = (int) get_theme_mod( 'custom_logo' );
+		if ( $theme_logo ) {
+			$url = wp_get_attachment_image_url( $theme_logo, $size );
+			if ( $url ) {
+				return $url;
+			}
+		}
+
 		return '';
 	}
 

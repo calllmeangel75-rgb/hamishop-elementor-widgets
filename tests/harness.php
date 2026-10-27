@@ -29,6 +29,7 @@ $files = array(
 	'includes/class-hsw-checkout-complete.php',
 	'includes/class-hsw-complete-route.php',
 	/* ---- elementor/widgets/register: Elementor bases first ---- */
+	'includes/trait-hsw-style-kit.php',
 	'includes/class-hsw-widget-base.php',
 	'includes/class-hsw-product-base.php',
 	'includes/class-hsw-archive-base.php',

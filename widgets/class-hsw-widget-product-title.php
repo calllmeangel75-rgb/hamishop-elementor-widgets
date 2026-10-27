@@ -311,7 +311,7 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                                         </span>
                                         <?php endif; ?>
                                 </div>
-                                <h2 class="hsw-ptitle__h2"><?php echo esc_html( $name ); ?></h2>
+                                <h2 class="hsw-ptitle__h2" role="heading" aria-level="1"><?php echo esc_html( $name ); ?></h2>
                                 <?php if ( '' !== $name_en ) : ?>
                                         <p class="hsw-ptitle__men" dir="ltr"><?php echo esc_html( $name_en ); ?></p>
                                 <?php endif; ?>

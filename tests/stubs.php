@@ -90,6 +90,7 @@ class Controls_Manager {
         const URL = 'url';
         const MEDIA = 'media';
         const SELECT = 'select';
+        const SELECT2 = 'select2';
         const SWITCHER = 'switcher';
         const COLOR = 'color';
         const SLIDER = 'slider';
@@ -98,6 +99,8 @@ class Controls_Manager {
         const ICON = 'icon';
         const DATE = 'date';
         const HIDDEN = 'hidden';
+        const DIMENSIONS = 'dimensions';
+        const BOX_SHADOW = 'box_shadow';
         const HEADING = 'heading';
         const DIVIDER = 'divider';
         const CODE = 'code';

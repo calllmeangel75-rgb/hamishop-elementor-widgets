@@ -44,6 +44,7 @@ require __DIR__ . '/stubs.php';
 
 /* ---- Plugin bases + the three guarded widgets ---- */
 $base = dirname( __DIR__ );
+require $base . '/includes/trait-hsw-style-kit.php';
 require $base . '/includes/class-hsw-widget-base.php';
 require $base . '/includes/class-hsw-product-base.php';
 require $base . '/widgets/class-hsw-widget-product-gallery.php';

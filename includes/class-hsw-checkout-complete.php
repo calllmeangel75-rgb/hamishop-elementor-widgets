@@ -38,6 +38,7 @@ class HSW_Checkout_Complete {
 					'method'        => array( 'sanitize_callback' => 'sanitize_text_field' ),
 					'schedule_day'  => array( 'sanitize_callback' => 'sanitize_text_field' ),
 					'schedule_slot' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+					'terms'         => array( 'sanitize_callback' => 'rest_sanitize_boolean' ),
 				),
 			)
 		);
@@ -148,7 +149,7 @@ class HSW_Checkout_Complete {
 
 		$data = $this->order_data( $request );
 
-		/* order_data() sets terms to true when the store does not require them. */
+		/* The pay page's own terms checkbox must be accepted server-side too. */
 		if ( empty( $data['terms'] ) ) {
 			return new WP_Error(
 				'hsw_terms',
@@ -375,12 +376,12 @@ class HSW_Checkout_Complete {
 		$data['order_comments']            = $this->note_with_delivery();
 		$data['ship_to_different_address'] = false;
 		/*
-		 * Terms used to be hard-coded to 1, so the server accepted orders the
-		 * customer never agreed to. Read the real input and only require it when
-		 * WooCommerce's terms checkbox is enabled for this store.
+		 * The design pay page renders the only terms acceptance point in the HSW
+		 * flow. Its checkbox is therefore authoritative even when WooCommerce's
+		 * separate terms page is not configured; the browser gate and the REST
+		 * endpoint must agree, otherwise the client-side check is bypassable.
 		 */
-		$terms_required          = function_exists( 'wc_terms_and_conditions_checkbox_enabled' ) && wc_terms_and_conditions_checkbox_enabled();
-		$data['terms']           = $terms_required ? (bool) $request->get_param( 'terms' ) : true;
+		$data['terms'] = (bool) $request->get_param( 'terms' );
 
 		return $data;
 	}

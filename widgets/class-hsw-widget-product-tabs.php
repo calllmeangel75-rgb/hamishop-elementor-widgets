@@ -361,7 +361,7 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                                         <?php if ( '' === trim( $desc ) ) : ?>
                                                                 <p><?php esc_html_e( 'توضیحی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
                                                         <?php else : ?>
-                                                                <?php echo apply_filters( 'the_content', $desc ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- standard WP content pipeline. ?>
+                                                                <?php echo HSW_Helpers::demote_content_h1( apply_filters( 'the_content', $desc ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- standard WP content pipeline. ?>
                                                         <?php endif; ?>
                                                 <?php endif; ?>
                                         </div>

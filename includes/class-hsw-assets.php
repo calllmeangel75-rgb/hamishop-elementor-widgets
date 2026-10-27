@@ -384,6 +384,20 @@ class HSW_Assets {
                         true
                 );
 
+                wp_add_inline_script(
+                        'hsw-header',
+                        'window.hswHeaderData=' . wp_json_encode(
+                                array(
+                                        'qtyAjax'     => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'hsw_set_qty' ) : home_url( '/?wc-ajax=hsw_set_qty' ),
+                                        'qtyNonce'    => wp_create_nonce( 'hsw-cart-qty' ),
+                                        'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),
+                                        'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/checkout/' ),
+                                        'errorText'   => __( 'به‌روزرسانی سبد خرید انجام نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
+                                )
+                        ) . ';',
+                        'before'
+                );
+
                 wp_register_style(
                         'hsw-composite',
                         $this->asset( 'assets/css/hsw-composite.css' ),

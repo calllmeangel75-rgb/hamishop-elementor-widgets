@@ -466,6 +466,35 @@
 		});
 	}
 
+	/*
+	 * The header cart sidebar can remove or re-quantify the same line. Refresh
+	 * the purchase box/sticky bar immediately, otherwise they keep claiming
+	 * the product is still in the cart (CTA hidden, stepper visible) after the
+	 * visitor emptied it from the drawer.
+	 */
+	document.addEventListener('hsw_cart_drawer_updated', function (event) {
+		var d = event && event.detail ? event.detail : {};
+		var pid = parseInt(d.productId, 10) || 0;
+		if (!pid) { return; }
+		var vid = parseInt(d.variationId, 10) || 0;
+		var qty = parseInt(d.qty, 10);
+		if (isNaN(qty) || qty < 0) { qty = 0; }
+
+		var st = state(pid);
+		if (st.data && st.data.variations && vid) {
+			st.data.variations.forEach(function (v) {
+				if (parseInt(v.id, 10) === vid) { v.cart_qty = qty; }
+			});
+		}
+		/* This line belongs to another variation than the one on screen. */
+		if (vid && (!st.variation || parseInt(st.variation.id, 10) !== vid)) {
+			return;
+		}
+
+		setRootInCart(pid, qty > 0, qty > 0 ? qty : 1);
+		setQty(pid, qty > 0 ? qty : 1);
+	});
+
 	function pushQty(pid, qty) {
 		if (!D.qtyAjax) { return Promise.resolve(null); }
 		var st = state(pid);
