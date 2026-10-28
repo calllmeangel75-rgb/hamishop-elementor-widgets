@@ -170,7 +170,7 @@ def main():
     lines = [
         'msgid ""',
         'msgstr ""',
-        '"Project-Id-Version: HamiShop Elementor Widgets 1.11.151\\n"',
+        '"Project-Id-Version: HamiShop Elementor Widgets 1.11.152\\n"',
         '"Report-Msgid-Bugs-To: https://hamisys.ir/\\n"',
         '"POT-Creation-Date: 2026-10-28 00:00+0000\\n"',
         '"PO-Revision-Date: 2026-10-28 00:00+0000\\n"',

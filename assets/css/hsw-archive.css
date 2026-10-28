@@ -589,7 +589,12 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
         text-align: start;
         cursor: pointer;
 }
-.hsw-af__catmore:hover { text-decoration: underline; }
+.hsw-af__catmore:hover,
+.hsw-af__catmore:focus-visible {
+        background: transparent;
+        color: var(--hswa-primary);
+        text-decoration: underline;
+}
 .hsw-af__catmore span { color: var(--hswa-soft); font-weight: 500; }
 .hsw-af__noresult { padding: 6px 2px; color: var(--hswa-soft); font-size: 11px; }
 .hsw-af__box.is-collapsed .hsw-af__catmore,

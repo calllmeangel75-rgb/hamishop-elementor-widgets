@@ -674,10 +674,17 @@ body.hsw-scroll-lock {
  * The :not() chain keeps primary CTAs (__cta/__apply/__ok/__update/__pay/
  * __cart) and active states out of the reset, so only buttons that never
  * defined a hover lose the theme fill.
+ *
+ * Keep the selector at (0,2,0): the theme's [type="button"]:hover is also
+ * (0,2,0), so this later sheet wins, while a component rule such as
+ * `.hsw-cksched__day:hover` (0,2,0) still wins because its stylesheet loads
+ * after this one. Putting the :not() chain inside :where() preserves that
+ * specificity instead of pushing the reset above every component state.
  * ====================================================================== */
-:is(.hsw-a, .hsw-c, .hsw-k, .hsw-loop, .hsw-h, .hsw-ac, .hsw-p, .hsw-toast, .hsw-modal)
-	:is(button, input[type="submit"], input[type="button"]):not([class*="__cta"]):not([class*="__apply"]):not([class*="__ok"]):not([class*="__update"]):not([class*="__pay"]):not([class*="__cart"]):not(.is-active)
-	:is(:hover, :focus, :focus-visible) {
+:where(.hsw-a, .hsw-c, .hsw-k, .hsw-loop, .hsw-h, .hsw-ac, .hsw-p, .hsw-toast, .hsw-modal)
+	:where(button, input[type="submit"], input[type="button"])[class*="hsw-"]:where(
+		:not([class*="__cta"]):not([class*="__apply"]):not([class*="__ok"]):not([class*="__update"]):not([class*="__pay"]):not([class*="__cart"]):not(.is-active)
+	):is(:hover, :focus, :focus-visible) {
 	background-color: transparent;
 	color: inherit;
 }

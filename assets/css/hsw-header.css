@@ -1516,6 +1516,12 @@ html { overflow-x: clip; }
 	color: var(--hsw-hd-text);
 }
 
+.hsw-hd__drawerclose:hover,
+.hsw-hd__drawerclose:focus-visible {
+	background: var(--hsw-hd-search);
+	color: var(--hsw-hover, var(--hsw-hd-primary));
+}
+
 .hsw-hd__drawerclose .hsw-ic {
 	font-size: 21px;
 }
@@ -2142,8 +2148,11 @@ html { overflow-x: clip; }
 	color: var(--hsw-hover, var(--hsw-hd-primary));
 }
 
-.hsw-hd__iconbtn:hover {
+.hsw-hd__iconbtn:hover,
+.hsw-hd__iconbtn:focus-visible {
 	border-color: color-mix(in srgb, var(--hsw-hover, var(--hsw-hd-primary)) 45%, var(--hsw-hd-border));
+	background: var(--hsw-hd-search);
+	color: var(--hsw-hover, var(--hsw-hd-primary));
 }
 
 .hsw-hd__iconbtn:active,
@@ -2312,7 +2321,8 @@ html { overflow-x: clip; }
 	transition: background-color .15s, color .15s, border-color .15s;
 }
 
-.hsw-hd__cartclose:hover {
+.hsw-hd__cartclose:hover,
+.hsw-hd__cartclose:focus-visible {
 	border-color: color-mix(in srgb, var(--hsw-hd-primary, #4d85ff) 38%, var(--hsw-hd-border, #e7e8eb));
 	background: color-mix(in srgb, var(--hsw-hd-primary, #4d85ff) 7%, #fff);
 	color: var(--hsw-hd-primary, #4d85ff);
