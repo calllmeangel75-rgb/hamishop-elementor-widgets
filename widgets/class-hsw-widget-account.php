@@ -45,14 +45,6 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 		return array( 'hsw-account' );
 	}
 
-	/**
-	 * The shared palette injects into the widget wrapper; the account root
-	 * sets its own admin tokens, so this widget ships its own root palette.
-	 */
-	protected function palette_map() {
-		return array();
-	}
-
 	protected function register_controls() {
 		$this->start_controls_section(
 			'sec_preview',

@@ -405,21 +405,4 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 return '۰۲۱-۹۱۰۰۸۸۷۷';
         }
 
-        /**
-         * Checkout / pay / completion palette (--hswk-* design tokens).
-         */
-        /**
-         * Checkout palette.
-         *
-         * Intentionally empty: these colours live in the admin palette and every
-         * --hswk-* token in hsw-checkout.css already falls back to it
-         * (`--hswk-card: var(--hsw-pal-surface, #fff)` and so on). Keeping a
-         * second copy here only duplicated the settings panel; the per-element
-         * controls in each checkout widget still override the palette.
-         *
-         * @return array
-         */
-        protected function palette_map() {
-                return array();
-        }
 }

@@ -905,56 +905,6 @@ abstract class HSW_Archive_Base extends HSW_Widget_Base {
          *  SHARED CONTROLS
          * ====================================================================== */
 
-        /**
-         * Widget palette (Style tab). Overrides the archive design tokens on
-         * the widget root so every inner element — header gradient, pills,
-         * cards, buttons, boxes… — can be recolored from Style like the other
-         * HamiShop widgets. Leaving a color empty keeps the design default.
-         */
-        protected function ctrl_palette() {
-                $this->start_controls_section(
-                        'sec_palette',
-                        array( 'label' => __( 'پالت رنگ ویجت', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
-                );
-
-                $this->a_color(
-                        'pal_primary',
-                        __( 'رنگ اصلی (لینک، دکمه، قرص فعال)', 'hamishop-elementor-widgets' ),
-                        '{{WRAPPER}}',
-                        '--hswa-primary: {{VALUE}}; --hswa-primary-dark: color-mix(in srgb, {{VALUE}}, #000 14%); --hswa-primary-50: color-mix(in srgb, {{VALUE}}, #fff 92%); --hswa-primary-100: color-mix(in srgb, {{VALUE}}, #fff 82%); --hswa-primary-light: color-mix(in srgb, {{VALUE}}, #fff 96%);'
-                );
-                $this->a_color(
-                        'pal_ink',
-                        __( 'رنگ عنوان‌ها', 'hamishop-elementor-widgets' ),
-                        '{{WRAPPER}}',
-                        '--hswa-ink: {{VALUE}}; --hswa-strong: color-mix(in srgb, {{VALUE}}, #000 12%);'
-                );
-                $this->a_color(
-                        'pal_body',
-                        __( 'رنگ متن‌ها', 'hamishop-elementor-widgets' ),
-                        '{{WRAPPER}}',
-                        '--hswa-body: {{VALUE}}; --hswa-soft: color-mix(in srgb, {{VALUE}}, #fff 22%);'
-                );
-                $this->a_color(
-                        'pal_line',
-                        __( 'رنگ خطوط و حاشیه‌ها', 'hamishop-elementor-widgets' ),
-                        '{{WRAPPER}}',
-                        '--hswa-line: {{VALUE}}; --hswa-line-soft: color-mix(in srgb, {{VALUE}}, #fff 55%); --hswa-faint: color-mix(in srgb, {{VALUE}}, #000 12%);'
-                );
-                $this->a_color( 'pal_card', __( 'رنگ کارت‌ها و باکس‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-card: {{VALUE}};' );
-                $this->a_color( 'pal_page', __( 'رنگ پس‌زمینه ملایم (نوارها)', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-page: {{VALUE}};' );
-
-                $this->add_control(
-                        'pal_status_head',
-                        array( 'label' => __( 'رنگ‌های وضعیت', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
-                );
-                $this->a_color( 'pal_ok', __( 'موجود / موفق', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-emerald: {{VALUE}};' );
-                $this->a_color( 'pal_warn', __( 'امتیاز / هشدار', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-amber: {{VALUE}};' );
-                $this->a_color( 'pal_danger', __( 'تخفیف / ناموجود', 'hamishop-elementor-widgets' ), '{{WRAPPER}}', '--hswa-rose: {{VALUE}};' );
-
-                $this->end_controls_section();
-        }
-
         protected function ctrl_visibility( $default = 'auto' ) {
                 $this->add_control(
                         'vis',

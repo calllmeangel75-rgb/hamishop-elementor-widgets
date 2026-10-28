@@ -8,9 +8,10 @@
  * stylesheet order), and every widget family points its own local tokens at
  * these globals with its previous hard-coded value as the fallback.
  *
- * Result: pick a colour once in HamiShop → پالت رنگی and every widget follows,
- * while a per-widget Elementor style override still wins because those are
- * applied on the widget wrapper (deeper in the tree).
+ * Result: pick a colour once in HamiShop → پالت رنگی and every widget follows.
+ * The per-widget palette section was removed in 1.11.151, so this is the single
+ * source for the general widget colours; per-element style controls still win
+ * because those are applied on the widget wrapper (deeper in the tree).
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -487,7 +488,7 @@ class HSW_Palette {
 			<div class="hsw-pal__head">
 				<div>
 					<h1 class="hsw-pal__title"><?php esc_html_e( 'پالت رنگی HamiShop', 'hamishop-elementor-widgets' ); ?></h1>
-					<p class="hsw-pal__sub"><?php esc_html_e( 'این رنگ‌ها به همهٔ ویجت‌های HamiShop اعمال می‌شوند. اگر برای یک ویجت خاص رنگ جداگانه‌ای در تنظیمات المنتور انتخاب کرده باشید، همان رنگ اولویت دارد.', 'hamishop-elementor-widgets' ); ?></p>
+					<p class="hsw-pal__sub"><?php esc_html_e( 'این رنگ‌ها به همهٔ ویجت‌های HamiShop اعمال می‌شوند. بخش «پالت رنگ ویجت» از تنظیمات المنتور حذف شده است تا این صفحه تنها منبع رنگ باشد؛ کنترل‌های رنگی عنصربه‌عنصر (مثل بج تخفیف و دکمه‌ها) همچنان اولویت دارند.', 'hamishop-elementor-widgets' ); ?></p>
 				</div>
 				<div class="hsw-pal__meta">
 					<span class="hsw-pal__pill"><?php esc_html_e( 'سازگار با قالب و ویجت‌های المنتور', 'hamishop-elementor-widgets' ); ?></span>

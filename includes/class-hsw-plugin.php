@@ -95,7 +95,8 @@ final class HSW_Plugin {
         }
 
         /**
-         * Drop Elementor's cached element HTML whenever the plugin version moves.
+         * Drop Elementor's cached element HTML and generated CSS whenever the
+         * plugin version moves.
          *
          * Elementor stores the finished HTML of every element in
          * `_elementor_element_cache` and, on a cache hit, skips the render pass
@@ -112,6 +113,11 @@ final class HSW_Plugin {
          * every element it renders, so the next request finds a freshly populated
          * table, deletes it again, and the marker never reaches the current
          * version — the element cache would stay permanently disabled.
+         *
+         * The generated post CSS is cleared in the same pass. Removing a control
+         * (as with the 1.11.151 palette cleanup) does not rewrite CSS that was
+         * already generated from its saved value, so without this flush an old
+         * per-widget palette could keep overriding the dashboard palette.
          */
         public function maybe_flush_element_cache() {
                 if ( HSW_VERSION === get_option( 'hsw_asset_version' ) ) {
@@ -133,8 +139,27 @@ final class HSW_Plugin {
                         && ( microtime( true ) - $started ) < 5
                 );
 
+                /*
+                 * 1.11.151 removed the per-widget palette controls. Their saved
+                 * `pal_*` values can still be present in old templates, and
+                 * Elementor may keep the generated post CSS (including those
+                 * wrapper-level variables) until its files are regenerated.
+                 * Clear Elementor's CSS cache once per plugin version so those
+                 * stale overrides stop applying and every widget falls back to
+                 * HamiShop → پالت رنگی.
+                 */
+                $css_cleared = true;
+                if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->files_manager ) ) {
+                        try {
+                                \Elementor\Plugin::$instance->files_manager->clear_cache();
+                        } catch ( \Throwable $e ) {
+                                $css_cleared = false;
+                                hsw_report_fatal( $e, 'elementor-css-clear' );
+                        }
+                }
+
                 /* A failed query leaves the marker alone so the next request retries. */
-                if ( false !== $deleted ) {
+                if ( false !== $deleted && $css_cleared ) {
                         update_option( 'hsw_asset_version', HSW_VERSION, false );
                 }
         }
@@ -313,15 +338,6 @@ final class HSW_Plugin {
                 } catch ( \Throwable $e ) {
                         hsw_report_fatal( $e, 'base-load' );
                         return;
-                }
-
-                /*
-                 * Inject the family palette into every HSW widget right after
-                 * its first section. This keeps Elementor's Content tab first
-                 * and gives all widget families the same Style-tab palette.
-                 */
-                if ( class_exists( '\HSW_Widget_Base' ) ) {
-                        add_action( 'elementor/element/after_section_end', array( '\HSW_Widget_Base', 'maybe_add_palette' ), 10, 3 );
                 }
 
                 /* One broken widget file must never white-screen the site. */

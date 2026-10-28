@@ -473,19 +473,4 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
         }
 
 
-        /**
-         * Cart palette.
-         *
-         * Intentionally empty: these eight colours (brand, CTA, text, borders,
-         * cards, success, error) live in the admin palette and every --hswc-*
-         * token in hsw-cart.css already falls back to it, e.g.
-         * `--hswc-card: var(--hsw-pal-surface, #fff)`. Keeping a second copy in
-         * the widget only duplicated the settings panel; per-element colour
-         * controls (row, image, quantity, totals, buttons) still override.
-         *
-         * @return array
-         */
-        protected function palette_map() {
-                return array();
-        }
 }

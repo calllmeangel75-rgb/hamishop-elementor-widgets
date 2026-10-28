@@ -355,21 +355,4 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
                 );
         }
 
-        /**
-         * Blog palette (--hswb-* design tokens).
-         */
-        /**
-         * Blog palette.
-         *
-         * Intentionally empty: brand / accent / text / border / card / page
-         * background live in the admin palette, and every --hswb-* token in
-         * hsw-blog.css already falls back to it (`--hswb-card:
-         * var(--hsw-pal-surface, #fff)` and so on). Per-element controls still
-         * override.
-         *
-         * @return array
-         */
-        protected function palette_map() {
-                return array();
-        }
 }
