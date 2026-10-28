@@ -1,6 +1,6 @@
 # مرجع فنی ویجت‌ها — HamiShop Elementor Widgets
 
-> تولید‌شده از خود کد · **نسخهٔ 1.11.152** · 62 ویجت · 20 ویجت با Repeater · 9 ویجت با ≥۲ کنترل ریسپانسیو
+> تولید‌شده از خود کد · **نسخهٔ 1.11.154** · 62 ویجت · 20 ویجت با Repeater · 9 ویجت با ≥۲ کنترل ریسپانسیو
 
 ## ۰) نمای کلی
 
@@ -59,7 +59,7 @@ HSW_Palette → html:root { --hsw-primary … --hsw-cta* --hsw-pal-* --hsw-font 
 | ویجت | عنوان | فایل | Repeater | سکشن | ریسپانسیو | کنترل | CSS |
 |---|---|---|:--:|:--:|:--:|:--:|---|
 | `hsw-header-minimal` | هدر مینیمال شیشه‌ای (HamiShop) | class-hsw-widget-header-minimal.php | — | 2 | 0 | 4 | ارثی |
-| `hsw-header-store` | هدر فروشگاهی (HamiShop) | class-hsw-widget-header-store.php | — | 3 | 0 | 15 | ارثی |
+| `hsw-header-store` | هدر فروشگاهی (HamiShop) | class-hsw-widget-header-store.php | - | 3 | 0 | 16 | ارثی |
 
 ### لوپ محصول — `hsw-loop`
 

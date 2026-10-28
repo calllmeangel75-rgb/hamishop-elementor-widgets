@@ -249,6 +249,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
         protected function card( $kind, $item, $s, $priority = false ) {
                 $is_demo   = ( 'demo' === $kind );
                 $img_html  = '';
+                $img2_html = '';
                 $name      = '';
                 $brand     = '';
                 $rating    = '';

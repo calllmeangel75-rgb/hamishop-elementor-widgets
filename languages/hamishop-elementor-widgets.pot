@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: HamiShop Elementor Widgets 1.11.153\n"
+"Project-Id-Version: HamiShop Elementor Widgets 1.11.154\n"
 "Report-Msgid-Bugs-To: https://hamisys.ir/\n"
 "POT-Creation-Date: 2026-10-28 00:00+0000\n"
 "PO-Revision-Date: 2026-10-28 00:00+0000\n"
@@ -201,7 +201,7 @@ msgstr ""
 msgid "«متن خودکار + توضیحات دسته» یک جملهٔ ثابت برای همهٔ آرشیوها می‌گذارد و بعد توضیحات واقعی همان دسته را زیرش اضافه می‌کند؛ اگر دسته توضیح نداشته باشد فقط متن خودکار می‌ماند."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:790
+#: includes/class-hsw-header-base.php:792
 msgid "«منوی موقعیت قالب» از منوی ثبت‌شده برای هدر قالب استفاده می‌کند. برای فروشگاه معمولاً منوی دسته‌بندی محصولات مناسب‌تر است."
 msgstr ""
 
@@ -342,7 +342,7 @@ msgstr ""
 msgid "آرشیو یکپارچه با فیلتر، گرید و صفحه‌بندی."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:859
+#: includes/class-hsw-header-base.php:861
 msgid "آستانهٔ شروع (پیکسل)"
 msgstr ""
 
@@ -891,7 +891,7 @@ msgstr ""
 msgid "استایل نوار ابزار"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1093
+#: includes/class-hsw-header-base.php:1095
 msgid "استایل هدر"
 msgstr ""
 
@@ -1108,9 +1108,9 @@ msgstr ""
 
 #: includes/class-hsw-widget-base.php:658
 #: includes/class-hsw-widget-base.php:1567
-#: widgets/class-hsw-widget-archive-grid.php:400
-#: widgets/class-hsw-widget-archive-grid.php:400
-#: widgets/class-hsw-widget-archive-grid.php:403
+#: widgets/class-hsw-widget-archive-grid.php:401
+#: widgets/class-hsw-widget-archive-grid.php:401
+#: widgets/class-hsw-widget-archive-grid.php:404
 msgid "افزودن به سبد خرید"
 msgstr ""
 
@@ -1119,7 +1119,7 @@ msgstr ""
 msgid "افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-grid.php:352
+#: widgets/class-hsw-widget-archive-grid.php:353
 msgid "افزودن به علاقه‌مندی‌ها"
 msgstr ""
 
@@ -1135,7 +1135,7 @@ msgstr ""
 msgid "افزونهٔ پیامکی فعالی پیدا نشد. کانال ایمیل یا تلگرام را انتخاب کنید."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:760
+#: includes/class-hsw-header-base.php:762
 msgid "افکت شاین گرادیانت روی لوگو"
 msgstr ""
 
@@ -1234,8 +1234,12 @@ msgstr ""
 msgid "انتخاب بازه زمانی تحویل:"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:990
+#: includes/class-hsw-header-base.php:992
 msgid "انتخاب دسته‌بندی کنار جستجو"
+msgstr ""
+
+#: widgets/class-hsw-widget-header-store.php:176
+msgid "انتخاب دسته‌بندی‌های سربرگ"
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:688
@@ -1323,7 +1327,7 @@ msgstr ""
 msgid "اندازه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1788
+#: includes/class-hsw-header-base.php:1790
 #: includes/class-hsw-product-base.php:1482
 #: includes/class-hsw-widget-base.php:1130
 msgid "اندازه آیکون"
@@ -1341,11 +1345,11 @@ msgstr ""
 msgid "اندازه بندانگشتی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1937
+#: includes/class-hsw-header-base.php:1939
 msgid "اندازه تصویر محصول"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1810
+#: includes/class-hsw-header-base.php:1812
 msgid "اندازه تعداد محصولات"
 msgstr ""
 
@@ -1474,7 +1478,7 @@ msgstr ""
 msgid "اگر خالی بماند، اولین محصولِ دستهٔ همین نوشته پیشنهاد می‌شود."
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:212
+#: widgets/class-hsw-widget-header-store.php:228
 msgid "اگر خاموش باشد، منو روی خودِ دسته‌بندی تمام می‌شود و پنل محصولات باز نمی‌شود."
 msgstr ""
 
@@ -1692,7 +1696,7 @@ msgstr ""
 msgid "با احتساب مالیات بر ارزش افزوده"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:852
+#: includes/class-hsw-header-base.php:854
 msgid "با اسکرول به پایین هدر کنار می‌رود و با کوچک‌ترین اسکرول به بالا دوباره ظاهر می‌شود — موبایل و دسکتاپ."
 msgstr ""
 
@@ -1732,11 +1736,11 @@ msgstr ""
 msgid "با کلیک روی قلب محصولات، آن‌ها را برای خرید بعدی ذخیره کنید."
 msgstr ""
 
-#: includes/class-hsw-header-cascade.php:155
+#: includes/class-hsw-header-cascade.php:277
 msgid "بارگذاری این دسته ناموفق بود. دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1668
+#: includes/class-hsw-header-base.php:1670
 msgid "باز / فعال"
 msgstr ""
 
@@ -1751,7 +1755,7 @@ msgid "باز و بستن زیرشاخه‌ها"
 msgstr ""
 
 #: widgets/class-hsw-widget-header-minimal.php:150
-#: widgets/class-hsw-widget-header-store.php:315
+#: widgets/class-hsw-widget-header-store.php:331
 msgid "باز کردن جستجو"
 msgstr ""
 
@@ -1764,7 +1768,7 @@ msgid "باز کردن لینک"
 msgstr ""
 
 #: widgets/class-hsw-widget-header-minimal.php:140
-#: widgets/class-hsw-widget-header-store.php:305
+#: widgets/class-hsw-widget-header-store.php:321
 msgid "باز کردن منو"
 msgstr ""
 
@@ -2080,7 +2084,7 @@ msgstr ""
 msgid "برای ورود دوباره باید نام کاربری و رمز عبور خود را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:931
+#: includes/class-hsw-header-base.php:933
 msgid "برای وسط‌چین کردن هدر در موبایل، آیکون «وسط» را در حالت موبایل (آیکون گوشی) انتخاب کنید."
 msgstr ""
 
@@ -2129,7 +2133,7 @@ msgstr ""
 #: includes/class-hsw-branding.php:232
 #: includes/class-hsw-branding.php:233
 #: includes/class-hsw-branding.php:380
-#: includes/class-hsw-header-base.php:702
+#: includes/class-hsw-header-base.php:704
 msgid "برند و لوگو"
 msgstr ""
 
@@ -2268,7 +2272,7 @@ msgstr ""
 msgid "برچسب حالت پرداخت سفارش"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1034
+#: includes/class-hsw-header-base.php:1036
 msgid "برچسب حساب"
 msgstr ""
 
@@ -2322,7 +2326,7 @@ msgstr ""
 msgid "برچسب زبان / واحد پول"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1054
+#: includes/class-hsw-header-base.php:1056
 msgid "برچسب سبد خرید"
 msgstr ""
 
@@ -2422,7 +2426,7 @@ msgstr ""
 msgid "برچسب وقتی رایگان است"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1075
+#: includes/class-hsw-header-base.php:1077
 #: widgets/class-hsw-widget-checkout-top.php:85
 msgid "برچسب پشتیبانی"
 msgstr ""
@@ -2504,7 +2508,7 @@ msgstr ""
 msgid "بستن سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:606
+#: includes/class-hsw-header-base.php:608
 msgid "بستن منو"
 msgstr ""
 
@@ -2671,7 +2675,7 @@ msgstr ""
 msgid "تأییدیهٔ سفارش به ایمیل {email} ارسال شد."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:868
+#: includes/class-hsw-header-base.php:870
 msgid "تا این ارتفاع اسکرول، هدر همیشه می‌ماند؛ بعد از آن با اسکرول به پایین مخفی می‌شود."
 msgstr ""
 
@@ -2748,7 +2752,7 @@ msgstr ""
 msgid "تایپوگرافی توضیح"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1568
+#: includes/class-hsw-header-base.php:1570
 msgid "تایپوگرافی دسته‌بندی‌ها"
 msgstr ""
 
@@ -2779,7 +2783,7 @@ msgstr ""
 msgid "تایپوگرافی عنوان داخل پنل"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1501
+#: includes/class-hsw-header-base.php:1503
 msgid "تایپوگرافی عنوان سرستون"
 msgstr ""
 
@@ -2791,7 +2795,7 @@ msgstr ""
 msgid "تایپوگرافی قرص"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1929
+#: includes/class-hsw-header-base.php:1931
 #: includes/class-hsw-widget-base.php:1414
 #: includes/trait-hsw-product-page-style-parts-2.php:17
 msgid "تایپوگرافی قیمت"
@@ -2829,15 +2833,15 @@ msgstr ""
 msgid "تایپوگرافی متن‌ها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1335
+#: includes/class-hsw-header-base.php:1337
 msgid "تایپوگرافی منو"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1279
+#: includes/class-hsw-header-base.php:1281
 msgid "تایپوگرافی نام برند"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1908
+#: includes/class-hsw-header-base.php:1910
 msgid "تایپوگرافی نام محصول"
 msgstr ""
 
@@ -2974,7 +2978,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:2179
 #: includes/class-hsw-widget-base.php:653
-#: widgets/class-hsw-widget-archive-grid.php:344
+#: widgets/class-hsw-widget-archive-grid.php:345
 #: widgets/class-hsw-widget-product-related.php:248
 msgid "تخفیف"
 msgstr ""
@@ -3189,8 +3193,8 @@ msgstr ""
 msgid "تعداد درخواستی مجاز نیست."
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:176
-msgid "تعداد دسته‌بندی ریشه"
+#: widgets/class-hsw-widget-header-store.php:190
+msgid "تعداد دسته‌بندی پیش‌فرض"
 msgstr ""
 
 #: widgets/class-hsw-widget-blog-tabs.php:46
@@ -3227,7 +3231,7 @@ msgstr ""
 msgid "تعداد سطر (موبایل)"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:220
+#: widgets/class-hsw-widget-header-store.php:236
 msgid "تعداد محصول در پنل نهایی"
 msgstr ""
 
@@ -3759,8 +3763,8 @@ msgid "جزئیات کامل"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:278
-#: includes/class-hsw-header-base.php:963
-#: includes/class-hsw-header-base.php:1002
+#: includes/class-hsw-header-base.php:965
+#: includes/class-hsw-header-base.php:1004
 #: widgets/class-hsw-widget-blog-hero.php:219
 #: widgets/class-hsw-widget-footer-sticky.php:132
 #: templates/404.php:36
@@ -3791,7 +3795,7 @@ msgstr ""
 msgid "جستجو..."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1155
+#: includes/class-hsw-header-base.php:1157
 msgid "جستجو، حساب کاربری، سبد خرید و منو. خالی = همان رنگ متن هدر."
 msgstr ""
 
@@ -3825,7 +3829,7 @@ msgstr ""
 msgid "جستجوی محصول"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:982
+#: includes/class-hsw-header-base.php:984
 msgid "جستجوی محصول، برند یا دسته‌بندی…"
 msgstr ""
 
@@ -4113,7 +4117,7 @@ msgstr ""
 msgid "حداقل مبلغ شارژ %s تومان است."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1455
+#: includes/class-hsw-header-base.php:1457
 msgid "حداکثر ارتفاع ستون‌ها"
 msgstr ""
 
@@ -4153,7 +4157,7 @@ msgstr ""
 msgid "حداکثر قیمت"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:193
+#: widgets/class-hsw-widget-header-store.php:209
 msgid "حداکثر لایه دسته‌بندی"
 msgstr ""
 
@@ -4233,7 +4237,7 @@ msgstr ""
 #: includes/class-hsw-account.php:3226
 #: includes/class-hsw-header-base.php:321
 #: includes/class-hsw-header-base.php:505
-#: includes/class-hsw-header-base.php:1036
+#: includes/class-hsw-header-base.php:1038
 #: includes/class-hsw-widget-manager.php:459
 msgid "حساب کاربری"
 msgstr ""
@@ -4248,7 +4252,7 @@ msgstr ""
 msgid "حساب کاربری پیدا نشد."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1017
+#: includes/class-hsw-header-base.php:1019
 msgid "حساب، سبد و پشتیبانی"
 msgstr ""
 
@@ -4404,7 +4408,7 @@ msgstr ""
 msgid "خروج"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:646
+#: includes/class-hsw-header-base.php:648
 msgid "خروج از حساب"
 msgstr ""
 
@@ -4820,9 +4824,9 @@ msgid "دسته‌بندی محصول"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:538
-#: includes/class-hsw-header-base.php:570
+#: includes/class-hsw-header-base.php:572
 #: widgets/class-hsw-widget-header-store.php:154
-#: widgets/class-hsw-widget-header-store.php:297
+#: widgets/class-hsw-widget-header-store.php:313
 msgid "دسته‌بندی محصولات"
 msgstr ""
 
@@ -4840,6 +4844,10 @@ msgstr ""
 
 #: widgets/class-hsw-widget-archive-filters.php:75
 msgid "دسته‌بندی‌ها (درختی)"
+msgstr ""
+
+#: includes/class-hsw-header-cascade.php:284
+msgid "دسته‌بندی‌های فروشگاه"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-order.php:217
@@ -5057,7 +5065,7 @@ msgstr ""
 msgid "دکمهٔ ثبت سفارش (ووکامرس)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1349
+#: includes/class-hsw-header-base.php:1351
 msgid "دکمهٔ جستجو"
 msgstr ""
 
@@ -5085,7 +5093,7 @@ msgstr ""
 msgid "دکمهٔ خرید کارت محصول"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1342
+#: includes/class-hsw-header-base.php:1344
 msgid "دکمهٔ دسته‌بندی محصولات"
 msgstr ""
 
@@ -5193,7 +5201,7 @@ msgstr ""
 msgid "دکمه‌های معمولی — پس‌زمینه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1199
+#: includes/class-hsw-header-base.php:1201
 msgid "دکمه‌های منو، حساب کاربری و سبد خرید. خالی = پس‌زمینهٔ پیش‌فرض هدر."
 msgstr ""
 
@@ -5295,7 +5303,7 @@ msgstr ""
 msgid "ذخیره پالت"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:925
+#: includes/class-hsw-header-base.php:927
 #: widgets/class-hsw-widget-account.php:163
 msgid "راست"
 msgstr ""
@@ -5558,7 +5566,7 @@ msgstr ""
 msgid "رنگ آیکن‌ها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1605
+#: includes/class-hsw-header-base.php:1607
 #: includes/class-hsw-product-base.php:1476
 #: includes/class-hsw-widget-base.php:1126
 #: includes/trait-hsw-product-page-style-parts-1.php:147
@@ -5577,11 +5585,11 @@ msgstr ""
 msgid "رنگ آیکون بزرگ‌نمایی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:947
+#: includes/class-hsw-header-base.php:949
 msgid "رنگ آیکون بستن (×)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:938
+#: includes/class-hsw-header-base.php:940
 msgid "رنگ آیکون جستجو"
 msgstr ""
 
@@ -5589,7 +5597,7 @@ msgstr ""
 msgid "رنگ آیکون دکمه‌های هدر"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1171
+#: includes/class-hsw-header-base.php:1173
 msgid "رنگ آیکون دکمه‌های هدر (سبد خرید، حساب کاربری، همبرگری)"
 msgstr ""
 
@@ -5597,7 +5605,7 @@ msgstr ""
 msgid "رنگ آیکون گارانتی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1154
+#: includes/class-hsw-header-base.php:1156
 #: widgets/class-hsw-widget-archive-breadcrumb.php:71
 #: widgets/class-hsw-widget-archive-filters.php:331
 #: widgets/class-hsw-widget-archive-toolbar.php:90
@@ -5609,7 +5617,7 @@ msgstr ""
 msgid "رنگ اسکرول‌بار (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1101
+#: includes/class-hsw-header-base.php:1103
 #: includes/class-hsw-palette.php:58
 msgid "رنگ اصلی"
 msgstr ""
@@ -5677,7 +5685,7 @@ msgstr ""
 msgid "رنگ تب فعال"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1616
+#: includes/class-hsw-header-base.php:1618
 msgid "رنگ تعداد محصولات"
 msgstr ""
 
@@ -5722,7 +5730,7 @@ msgstr ""
 msgid "رنگ حاشیه دکمه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1390
+#: includes/class-hsw-header-base.php:1392
 msgid "رنگ حاشیه و جداکننده ستون‌ها"
 msgstr ""
 
@@ -5730,7 +5738,7 @@ msgstr ""
 msgid "رنگ حاشیه چیپ"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1210
+#: includes/class-hsw-header-base.php:1212
 msgid "رنگ حاشیه‌ها"
 msgstr ""
 
@@ -5772,7 +5780,7 @@ msgstr ""
 msgid "رنگ خط زیر نوار"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1297
+#: includes/class-hsw-header-base.php:1299
 msgid "رنگ درخشش"
 msgstr ""
 
@@ -5872,11 +5880,11 @@ msgstr ""
 msgid "رنگ عنوان ستون"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1489
+#: includes/class-hsw-header-base.php:1491
 msgid "رنگ عنوان سرستون"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1627
+#: includes/class-hsw-header-base.php:1629
 msgid "رنگ فلش"
 msgstr ""
 
@@ -5888,7 +5896,7 @@ msgstr ""
 msgid "رنگ فیلتر فعال"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1917
+#: includes/class-hsw-header-base.php:1919
 #: includes/trait-hsw-product-page-style-parts-2.php:18
 #: includes/trait-hsw-product-page-style-parts-4.php:164
 msgid "رنگ قیمت"
@@ -5973,8 +5981,8 @@ msgstr ""
 msgid "رنگ متا"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1125
-#: includes/class-hsw-header-base.php:1594
+#: includes/class-hsw-header-base.php:1127
+#: includes/class-hsw-header-base.php:1596
 #: includes/class-hsw-palette.php:75
 #: includes/class-hsw-product-base.php:1458
 #: includes/class-hsw-widget-base.php:1764
@@ -5991,7 +5999,7 @@ msgstr ""
 msgid "رنگ متن"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1685
+#: includes/class-hsw-header-base.php:1687
 msgid "رنگ متن (باز)"
 msgstr ""
 
@@ -5999,8 +6007,8 @@ msgstr ""
 msgid "رنگ متن (موجود)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1656
-#: includes/class-hsw-header-base.php:1893
+#: includes/class-hsw-header-base.php:1658
+#: includes/class-hsw-header-base.php:1895
 #: includes/class-hsw-product-base.php:1464
 #: includes/class-hsw-widget-base.php:1869
 #: includes/trait-hsw-product-page-style-parts-2.php:206
@@ -6039,7 +6047,7 @@ msgstr ""
 msgid "رنگ متن توست"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:2047
+#: includes/class-hsw-header-base.php:2049
 msgid "رنگ متن حالت خالی"
 msgstr ""
 
@@ -6062,7 +6070,7 @@ msgstr ""
 msgid "رنگ متن دیدگاه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1864
+#: includes/class-hsw-header-base.php:1866
 msgid "رنگ متن ردیف محصول"
 msgstr ""
 
@@ -6094,7 +6102,7 @@ msgstr ""
 msgid "رنگ متن و آیکون"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:897
+#: includes/class-hsw-header-base.php:899
 msgid "رنگ متن و آیکون دکمهٔ سبد خرید"
 msgstr ""
 
@@ -6118,7 +6126,7 @@ msgstr ""
 msgid "رنگ متن چیپ تخفیف"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1137
+#: includes/class-hsw-header-base.php:1139
 msgid "رنگ متن کم‌رنگ"
 msgstr ""
 
@@ -6225,7 +6233,7 @@ msgstr ""
 msgid "رنگ پس‌زمینه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1182
+#: includes/class-hsw-header-base.php:1184
 msgid "رنگ پس‌زمینهٔ دکمه‌های هدر (سبد خرید، حساب کاربری، همبرگری)"
 msgstr ""
 
@@ -6493,7 +6501,7 @@ msgstr ""
 msgid "سایه هاور کارت"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1403
+#: includes/class-hsw-header-base.php:1405
 msgid "سایه پنل"
 msgstr ""
 
@@ -6528,7 +6536,7 @@ msgstr ""
 
 #: includes/class-hsw-cart-drawer.php:27
 #: includes/class-hsw-header-base.php:351
-#: includes/class-hsw-header-base.php:1056
+#: includes/class-hsw-header-base.php:1058
 #: includes/class-hsw-widget-manager.php:249
 #: widgets/class-hsw-widget-cart-top.php:175
 #: widgets/class-hsw-widget-cart-top.php:175
@@ -6821,7 +6829,7 @@ msgstr ""
 msgid "شارژ کیف پول — سفارش #%s"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1287
+#: includes/class-hsw-header-base.php:1289
 msgid "شاین لوگو"
 msgstr ""
 
@@ -6867,7 +6875,7 @@ msgstr ""
 msgid "شروع سطر (راست در RTL)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:728
+#: includes/class-hsw-header-base.php:730
 msgid "شعار / زیرنویس برند"
 msgstr ""
 
@@ -6955,7 +6963,7 @@ msgstr ""
 msgid "شماره موبایل معتبر نیست."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1064
+#: includes/class-hsw-header-base.php:1066
 msgid "شماره پشتیبانی"
 msgstr ""
 
@@ -7302,7 +7310,7 @@ msgstr ""
 msgid "ضمانت اصالت و سلامت فیزیکی"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:241
+#: widgets/class-hsw-widget-header-store.php:257
 msgid "ضمانت اصالت کالا"
 msgstr ""
 
@@ -7340,8 +7348,8 @@ msgstr ""
 msgid "ظرف صفحه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1577
-#: includes/class-hsw-header-base.php:1847
+#: includes/class-hsw-header-base.php:1579
+#: includes/class-hsw-header-base.php:1849
 #: includes/class-hsw-widget-base.php:1828
 msgid "عادی"
 msgstr ""
@@ -7400,11 +7408,11 @@ msgstr ""
 msgid "عرض ستون کناری (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:738
+#: includes/class-hsw-header-base.php:740
 msgid "عرض لوگو"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1256
+#: includes/class-hsw-header-base.php:1258
 #: widgets/class-hsw-widget-post-page.php:280
 msgid "عرض محتوا"
 msgstr ""
@@ -7413,7 +7421,7 @@ msgstr ""
 msgid "عرض منوی کناری"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1433
+#: includes/class-hsw-header-base.php:1435
 msgid "عرض هر ستون"
 msgstr ""
 
@@ -7763,7 +7771,7 @@ msgstr ""
 msgid "فارسی (تومان)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1766
+#: includes/class-hsw-header-base.php:1768
 msgid "فاصله آیکون و متن"
 msgstr ""
 
@@ -7790,7 +7798,7 @@ msgstr ""
 msgid "فاصله از پایین"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1744
+#: includes/class-hsw-header-base.php:1746
 msgid "فاصله افقی ردیف"
 msgstr ""
 
@@ -7798,7 +7806,7 @@ msgstr ""
 msgid "فاصله بندانگشتی‌ها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:2003
+#: includes/class-hsw-header-base.php:2005
 msgid "فاصله بین محصولات"
 msgstr ""
 
@@ -7839,11 +7847,11 @@ msgstr ""
 msgid "فاصله داخلی ردیف"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:2025
+#: includes/class-hsw-header-base.php:2027
 msgid "فاصله داخلی ردیف محصول"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1531
+#: includes/class-hsw-header-base.php:1533
 msgid "فاصله داخلی لیست"
 msgstr ""
 
@@ -7887,7 +7895,7 @@ msgstr ""
 msgid "فاصله ستون‌ها و بخش‌ها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1722
+#: includes/class-hsw-header-base.php:1724
 msgid "فاصله عمودی ردیف"
 msgstr ""
 
@@ -7921,7 +7929,7 @@ msgstr ""
 msgid "فاصلهٔ آیکن تا متن"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:909
+#: includes/class-hsw-header-base.php:911
 msgid "فاصلهٔ آیکن‌ها / اکشن‌ها"
 msgstr ""
 
@@ -7937,7 +7945,7 @@ msgstr ""
 msgid "فاصلهٔ بالا و پایین تیترها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:915
+#: includes/class-hsw-header-base.php:917
 msgid "فاصلهٔ بین آیکون‌های سبد، حساب، جستجو و برگر را تنظیم می‌کند؛ برای موبایل/تبلت/دسکتاپ جداگانه قابل تنظیم است."
 msgstr ""
 
@@ -8080,7 +8088,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:803
 #: includes/class-hsw-header-base.php:497
-#: includes/class-hsw-header-cascade.php:163
+#: includes/class-hsw-header-cascade.php:285
 #: widgets/class-hsw-widget-cart-top.php:116
 #: widgets/class-hsw-widget-cart-top.php:314
 #: widgets/class-hsw-widget-footer-sticky.php:123
@@ -8149,7 +8157,7 @@ msgstr ""
 #: includes/class-hsw-archive-base.php:917
 #: includes/class-hsw-blog-base.php:53
 #: includes/class-hsw-cart-base.php:468
-#: includes/class-hsw-header-base.php:688
+#: includes/class-hsw-header-base.php:690
 #: includes/class-hsw-product-base.php:1343
 #: widgets/class-hsw-widget-checkout-schedule.php:51
 msgid "فقط دسکتاپ"
@@ -8170,7 +8178,7 @@ msgstr ""
 #: includes/class-hsw-archive-base.php:918
 #: includes/class-hsw-blog-base.php:54
 #: includes/class-hsw-cart-base.php:469
-#: includes/class-hsw-header-base.php:689
+#: includes/class-hsw-header-base.php:691
 #: includes/class-hsw-product-base.php:1344
 #: widgets/class-hsw-widget-checkout-schedule.php:52
 msgid "فقط موبایل"
@@ -8186,6 +8194,10 @@ msgstr ""
 
 #: widgets/class-hsw-widget-checkout-shipping.php:149
 msgid "فقط وقتی هزینه ۰ است نمایش داده می‌شود."
+msgstr ""
+
+#: widgets/class-hsw-widget-header-store.php:201
+msgid "فقط وقتی هیچ دسته‌ای در «انتخاب دسته‌بندی‌های سربرگ» انتخاب نشده باشد."
 msgstr ""
 
 #: includes/class-hsw-widget-manager.php:944
@@ -8544,7 +8556,7 @@ msgid "لوپ محصولات"
 msgstr ""
 
 #: includes/class-hsw-branding.php:426
-#: includes/class-hsw-header-base.php:710
+#: includes/class-hsw-header-base.php:712
 msgid "لوگو"
 msgstr ""
 
@@ -8573,11 +8585,11 @@ msgstr ""
 msgid "لینک (مراحل گذشته)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1509
+#: includes/class-hsw-header-base.php:1511
 msgid "لینک «مشاهده همه» — عادی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1520
+#: includes/class-hsw-header-base.php:1522
 msgid "لینک «مشاهده همه» — هاور"
 msgstr ""
 
@@ -8841,7 +8853,7 @@ msgstr ""
 msgid "متن اصلی"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:239
+#: widgets/class-hsw-widget-header-store.php:255
 msgid "متن اعتماد کنار منو"
 msgstr ""
 
@@ -9013,7 +9025,7 @@ msgstr ""
 msgid "متن دکمه بسته"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1000
+#: includes/class-hsw-header-base.php:1002
 msgid "متن دکمه جستجو"
 msgstr ""
 
@@ -9064,7 +9076,7 @@ msgstr ""
 msgid "متن دکمهٔ اصلی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:806
+#: includes/class-hsw-header-base.php:808
 msgid "متن دکمهٔ سبد خرید (منوی موبایل)"
 msgstr ""
 
@@ -9101,7 +9113,7 @@ msgstr ""
 msgid "متن راهنمای ایمیل"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:980
+#: includes/class-hsw-header-base.php:982
 #: widgets/class-hsw-widget-blog-hero.php:95
 msgid "متن راهنمای جستجو"
 msgstr ""
@@ -9497,7 +9509,7 @@ msgstr ""
 msgid "محصول به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-header-cascade.php:236
+#: includes/class-hsw-header-cascade.php:358
 msgid "محصولات %s"
 msgstr ""
 
@@ -9513,7 +9525,7 @@ msgstr ""
 msgid "محصولات سفارش و تعداد هر کدام."
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:228
+#: widgets/class-hsw-widget-header-store.php:244
 msgid "محصولات فقط وقتی بارگذاری می‌شوند که کاربر به انتهای مسیر دسته‌بندی برسد."
 msgstr ""
 
@@ -9545,11 +9557,11 @@ msgstr ""
 msgid "محصولاتی که در این مرورگر ذخیره کرده‌اید."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-grid.php:438
+#: widgets/class-hsw-widget-archive-grid.php:439
 msgid "محصولی با این فیلترها یافت نشد."
 msgstr ""
 
-#: includes/class-hsw-header-cascade.php:243
+#: includes/class-hsw-header-cascade.php:365
 msgid "محصولی برای نمایش در این دسته نیست."
 msgstr ""
 
@@ -9567,7 +9579,7 @@ msgstr ""
 msgid "مخفی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:848
+#: includes/class-hsw-header-base.php:850
 msgid "مخفی شدن هوشمند هنگام اسکرول"
 msgstr ""
 
@@ -9575,11 +9587,11 @@ msgstr ""
 msgid "مخفی‌کردن فهرست کاربران"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1310
+#: includes/class-hsw-header-base.php:1312
 msgid "مدت یک دور (ثانیه)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:613
+#: includes/class-hsw-header-base.php:615
 msgid "مدیریت حساب و سفارش‌ها"
 msgstr ""
 
@@ -9754,7 +9766,7 @@ msgid "مسیر فروشگاه و دسته‌بندی جاری."
 msgstr ""
 
 #: includes/class-hsw-account.php:2585
-#: includes/class-hsw-header-cascade.php:406
+#: includes/class-hsw-header-cascade.php:528
 #: includes/class-hsw-rest.php:704
 msgid "مشاهده"
 msgstr ""
@@ -9779,13 +9791,13 @@ msgstr ""
 #: includes/class-hsw-assets.php:624
 #: includes/class-hsw-assets.php:652
 #: includes/class-hsw-cart-drawer.php:31
-#: includes/class-hsw-header-base.php:641
-#: includes/class-hsw-header-base.php:808
+#: includes/class-hsw-header-base.php:643
+#: includes/class-hsw-header-base.php:810
 msgid "مشاهده سبد خرید"
 msgstr ""
 
 #: includes/class-hsw-account.php:2628
-#: includes/class-hsw-header-base.php:630
+#: includes/class-hsw-header-base.php:632
 #: widgets/class-hsw-widget-header-minimal.php:63
 #: widgets/class-hsw-widget-header-minimal.php:185
 msgid "مشاهده فروشگاه"
@@ -9796,8 +9808,8 @@ msgid "مشاهده فهرست کامل"
 msgstr ""
 
 #: includes/class-hsw-account.php:3067
-#: widgets/class-hsw-widget-archive-grid.php:407
-#: widgets/class-hsw-widget-archive-grid.php:410
+#: widgets/class-hsw-widget-archive-grid.php:408
+#: widgets/class-hsw-widget-archive-grid.php:411
 #: widgets/class-hsw-widget-product-related.php:253
 msgid "مشاهده محصول"
 msgstr ""
@@ -9806,13 +9818,13 @@ msgstr ""
 msgid "مشاهده محصولات"
 msgstr ""
 
-#: includes/class-hsw-header-cascade.php:262
+#: includes/class-hsw-header-cascade.php:384
 msgid "مشاهده محصولات %s"
 msgstr ""
 
 #: includes/class-hsw-account.php:1352
-#: includes/class-hsw-header-cascade.php:237
-#: includes/class-hsw-header-cascade.php:278
+#: includes/class-hsw-header-cascade.php:359
+#: includes/class-hsw-header-cascade.php:400
 #: includes/class-hsw-widget-base.php:945
 #: widgets/class-hsw-best-sellers.php:57
 #: widgets/class-hsw-widget-post-page.php:998
@@ -10002,13 +10014,13 @@ msgstr ""
 msgid "منتخب هوشمند کالاها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:778
+#: includes/class-hsw-header-base.php:780
 msgid "منو و ناوبری"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:622
+#: includes/class-hsw-header-base.php:624
 #: widgets/class-hsw-widget-header-minimal.php:145
-#: widgets/class-hsw-widget-header-store.php:337
+#: widgets/class-hsw-widget-header-store.php:353
 msgid "منوی اصلی"
 msgstr ""
 
@@ -10021,11 +10033,11 @@ msgstr ""
 msgid "منوی حساب کاربری"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:604
+#: includes/class-hsw-header-base.php:606
 msgid "منوی موبایل"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:880
+#: includes/class-hsw-header-base.php:882
 msgid "منوی موبایل (رنگ‌ها)"
 msgstr ""
 
@@ -10033,7 +10045,7 @@ msgstr ""
 msgid "منوی موقعیت قالب (پیش‌فرض)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:786
+#: includes/class-hsw-header-base.php:788
 msgid "منوی وردپرس"
 msgstr ""
 
@@ -10138,15 +10150,15 @@ msgstr ""
 msgid "موفق / موجود"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1558
+#: includes/class-hsw-header-base.php:1560
 msgid "مگامنوی آبشاری — دسته‌بندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1837
+#: includes/class-hsw-header-base.php:1839
 msgid "مگامنوی آبشاری — محصولات"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1369
+#: includes/class-hsw-header-base.php:1371
 msgid "مگامنوی آبشاری — پنل و ستون‌ها"
 msgstr ""
 
@@ -10191,7 +10203,7 @@ msgid "نام (موبایل)"
 msgstr ""
 
 #: includes/class-hsw-branding.php:404
-#: includes/class-hsw-header-base.php:718
+#: includes/class-hsw-header-base.php:720
 msgid "نام برند"
 msgstr ""
 
@@ -10294,7 +10306,7 @@ msgstr ""
 
 #: includes/class-hsw-palette.php:646
 #: widgets/class-hsw-widget-archive-grid.php:195
-#: widgets/class-hsw-widget-archive-grid.php:361
+#: widgets/class-hsw-widget-archive-grid.php:362
 #: widgets/class-hsw-widget-product-title.php:279
 msgid "ناموجود"
 msgstr ""
@@ -10522,7 +10534,7 @@ msgstr ""
 msgid "نمایش تعداد محصولات"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:971
+#: includes/class-hsw-header-base.php:973
 #: widgets/class-hsw-widget-blog-hero.php:88
 msgid "نمایش جستجو"
 msgstr ""
@@ -10531,7 +10543,7 @@ msgstr ""
 msgid "نمایش جعبه راهنما"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1025
+#: includes/class-hsw-header-base.php:1027
 msgid "نمایش حساب کاربری"
 msgstr ""
 
@@ -10543,7 +10555,7 @@ msgstr ""
 #: includes/class-hsw-archive-base.php:912
 #: includes/class-hsw-blog-base.php:48
 #: includes/class-hsw-cart-base.php:463
-#: includes/class-hsw-header-base.php:683
+#: includes/class-hsw-header-base.php:685
 #: includes/class-hsw-product-base.php:1338
 msgid "نمایش در"
 msgstr ""
@@ -10560,7 +10572,7 @@ msgstr ""
 msgid "نمایش دسته"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:816
+#: includes/class-hsw-header-base.php:818
 msgid "نمایش دسته‌بندی محصولات در منوی موبایل"
 msgstr ""
 
@@ -10586,7 +10598,7 @@ msgstr ""
 msgid "نمایش زمان مطالعه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1044
+#: includes/class-hsw-header-base.php:1046
 msgid "نمایش سبد خرید"
 msgstr ""
 
@@ -10614,7 +10626,7 @@ msgstr ""
 msgid "نمایش لینک ادامه خرید و یادداشت"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:209
+#: widgets/class-hsw-widget-header-store.php:225
 msgid "نمایش محصولات در انتهای مسیر"
 msgstr ""
 
@@ -10626,7 +10638,7 @@ msgstr ""
 msgid "نمایش مسیر صفحه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:797
+#: includes/class-hsw-header-base.php:799
 msgid "نمایش منو"
 msgstr ""
 
@@ -10716,7 +10728,7 @@ msgstr ""
 msgid "نوار اعلان بالای هدر"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:255
+#: widgets/class-hsw-widget-header-store.php:271
 msgid "نوار اعلان و ناوبری"
 msgstr ""
 
@@ -10848,8 +10860,8 @@ msgstr ""
 msgid "نیاز به راهنمایی در پرداخت دارید؟"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1639
-#: includes/class-hsw-header-base.php:1876
+#: includes/class-hsw-header-base.php:1641
+#: includes/class-hsw-header-base.php:1878
 #: includes/class-hsw-widget-base.php:1854
 msgid "هاور"
 msgstr ""
@@ -10930,12 +10942,16 @@ msgstr ""
 msgid "هدر و پنل حساب"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:832
+#: includes/class-hsw-header-base.php:834
 msgid "هدر چسبان (Sticky)"
 msgstr ""
 
 #: includes/class-hsw-account.php:2725
 msgid "هر امتیاز %1$s تومان است. امتیاز قابل تبدیل شما: %2$s"
+msgstr ""
+
+#: widgets/class-hsw-widget-header-store.php:182
+msgid "هر دسته یا زیردسته را می‌توانید انتخاب کنید. اگر خالی بماند، تعداد دسته‌های پیش‌فرض زیر نمایش داده می‌شود."
 msgstr ""
 
 #: includes/class-hsw-palette.php:516
@@ -11015,10 +11031,6 @@ msgstr ""
 
 #: widgets/class-hsw-widget-archive-filters.php:180
 msgid "همه بسته"
-msgstr ""
-
-#: includes/class-hsw-header-cascade.php:162
-msgid "همه دسته‌بندی‌ها"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:287
@@ -11166,7 +11178,7 @@ msgstr ""
 
 #: includes/class-hsw-checkout-complete.php:174
 #: includes/class-hsw-header-base.php:319
-#: includes/class-hsw-header-base.php:648
+#: includes/class-hsw-header-base.php:650
 msgid "ورود / ثبت‌نام"
 msgstr ""
 
@@ -11254,7 +11266,7 @@ msgstr ""
 msgid "وزیرمتن (افزونه)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:926
+#: includes/class-hsw-header-base.php:928
 #: widgets/class-hsw-widget-archive-header.php:291
 #: widgets/class-hsw-widget-footer-sticky.php:176
 #: widgets/class-hsw-widget-product-page.php:138
@@ -11378,7 +11390,7 @@ msgid "ویرایش نشانی تحویل"
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:654
-#: widgets/class-hsw-widget-archive-grid.php:346
+#: widgets/class-hsw-widget-archive-grid.php:347
 msgid "ویژه"
 msgstr ""
 
@@ -11640,7 +11652,7 @@ msgstr ""
 msgid "پست قبلی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1583
+#: includes/class-hsw-header-base.php:1585
 #: includes/class-hsw-product-base.php:1402
 #: includes/class-hsw-widget-base.php:1970
 #: includes/trait-hsw-product-page-style-parts-1.php:262
@@ -11657,7 +11669,7 @@ msgstr ""
 msgid "پس‌زمینه (باز / فعال)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1674
+#: includes/class-hsw-header-base.php:1676
 msgid "پس‌زمینه (باز)"
 msgstr ""
 
@@ -11665,8 +11677,8 @@ msgstr ""
 msgid "پس‌زمینه (موجود)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1645
-#: includes/class-hsw-header-base.php:1882
+#: includes/class-hsw-header-base.php:1647
+#: includes/class-hsw-header-base.php:1884
 #: includes/class-hsw-widget-base.php:1422
 #: includes/class-hsw-widget-base.php:1860
 #: includes/trait-hsw-product-page-style-parts-2.php:207
@@ -11695,7 +11707,7 @@ msgstr ""
 msgid "پس‌زمینه آیکون"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1198
+#: includes/class-hsw-header-base.php:1200
 msgid "پس‌زمینه آیکون‌ها"
 msgstr ""
 
@@ -11746,7 +11758,7 @@ msgstr ""
 msgid "پس‌زمینه تگ فعال"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1222
+#: includes/class-hsw-header-base.php:1224
 msgid "پس‌زمینه جستجو"
 msgstr ""
 
@@ -11836,11 +11848,11 @@ msgstr ""
 msgid "پس‌زمینه ردیف"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1853
+#: includes/class-hsw-header-base.php:1855
 msgid "پس‌زمینه ردیف محصول"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:275
+#: widgets/class-hsw-widget-header-store.php:291
 msgid "پس‌زمینه ردیف ناوبری"
 msgstr ""
 
@@ -11852,7 +11864,7 @@ msgstr ""
 msgid "پس‌زمینه سربرگ باکس"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1477
+#: includes/class-hsw-header-base.php:1479
 msgid "پس‌زمینه سرستون"
 msgstr ""
 
@@ -11957,7 +11969,7 @@ msgstr ""
 msgid "پس‌زمینه نوار"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:263
+#: widgets/class-hsw-widget-header-store.php:279
 msgid "پس‌زمینه نوار اعلان"
 msgstr ""
 
@@ -11973,11 +11985,11 @@ msgstr ""
 msgid "پس‌زمینه هاور"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1113
+#: includes/class-hsw-header-base.php:1115
 msgid "پس‌زمینه هدر"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1378
+#: includes/class-hsw-header-base.php:1380
 msgid "پس‌زمینه پنل"
 msgstr ""
 
@@ -12031,7 +12043,7 @@ msgstr ""
 msgid "پس‌زمینهٔ دکمهٔ «تکمیل سفارش» (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:888
+#: includes/class-hsw-header-base.php:890
 msgid "پس‌زمینهٔ دکمهٔ سبد خرید"
 msgstr ""
 
@@ -12142,7 +12154,7 @@ msgid "پشتیبانی ۲۴ ساعته"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:385
-#: includes/class-hsw-header-base.php:1077
+#: includes/class-hsw-header-base.php:1079
 msgid "پشتیبانی:"
 msgstr ""
 
@@ -12171,7 +12183,7 @@ msgstr ""
 msgid "پنل حساب کاربری HamiShop"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:201
+#: widgets/class-hsw-widget-header-store.php:217
 msgid "پنل‌ها به سمت چپ (در راست‌چین) آبشاری باز می‌شوند. هر لایه یک ستون جدید است."
 msgstr ""
 
@@ -12253,7 +12265,7 @@ msgstr ""
 msgid "پیشنهاد فروشگاه"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-grid.php:346
+#: widgets/class-hsw-widget-archive-grid.php:347
 msgid "پیشنهاد ویژه"
 msgstr ""
 
@@ -12326,7 +12338,7 @@ msgstr ""
 #: includes/class-hsw-archive-base.php:916
 #: includes/class-hsw-blog-base.php:52
 #: includes/class-hsw-cart-base.php:467
-#: includes/class-hsw-header-base.php:687
+#: includes/class-hsw-header-base.php:689
 #: includes/class-hsw-product-base.php:1342
 #: widgets/class-hsw-widget-checkout-schedule.php:50
 msgid "پیش‌فرض طرح"
@@ -12420,7 +12432,7 @@ msgstr ""
 msgid "چه چیزی محافظت نمی‌شود؟"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:927
+#: includes/class-hsw-header-base.php:929
 #: widgets/class-hsw-widget-account.php:164
 #: widgets/class-hsw-widget-archive-header.php:292
 msgid "چپ"
@@ -12443,7 +12455,7 @@ msgstr ""
 msgid "چیدمان"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:922
+#: includes/class-hsw-header-base.php:924
 msgid "چیدمان افقی هدر"
 msgstr ""
 
@@ -13049,7 +13061,7 @@ msgstr ""
 msgid "گردی تصویر"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1959
+#: includes/class-hsw-header-base.php:1961
 msgid "گردی تصویر محصول"
 msgstr ""
 
@@ -13074,7 +13086,7 @@ msgstr ""
 msgid "گردی دکمه‌های صفحه‌بندی"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1981
+#: includes/class-hsw-header-base.php:1983
 msgid "گردی ردیف محصول"
 msgstr ""
 
@@ -13125,11 +13137,11 @@ msgstr ""
 msgid "گردی گوشه دکمه"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1699
+#: includes/class-hsw-header-base.php:1701
 msgid "گردی گوشه ردیف"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1411
+#: includes/class-hsw-header-base.php:1413
 msgid "گردی گوشه پنل"
 msgstr ""
 
@@ -13153,7 +13165,7 @@ msgstr ""
 msgid "گردی گوشهٔ کارت‌ها"
 msgstr ""
 
-#: includes/class-hsw-header-base.php:1234
+#: includes/class-hsw-header-base.php:1236
 #: includes/class-hsw-product-base.php:1421
 #: includes/class-hsw-widget-base.php:1094
 #: includes/class-hsw-widget-base.php:1908
@@ -13306,7 +13318,7 @@ msgstr ""
 msgid "یک ایمیل معتبر وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-header-base.php:764
+#: includes/class-hsw-header-base.php:766
 msgid "یک درخشش گرادیانتی دوره‌ای روی نشان/تصویر لوگو حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است."
 msgstr ""
 
@@ -13342,7 +13354,7 @@ msgstr ""
 msgid "۰ = ویجت پنهان می‌شود. مبلغ با محاسبه خودکار از سبد جایگزین می‌شود."
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:197
+#: widgets/class-hsw-widget-header-store.php:213
 msgid "۱ لایه"
 msgstr ""
 
@@ -13377,7 +13389,7 @@ msgstr ""
 msgid "۱. هدر پرداخت و مراحل"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:183
+#: widgets/class-hsw-widget-header-store.php:198
 msgid "۱۰ دسته"
 msgstr ""
 
@@ -13389,7 +13401,7 @@ msgstr ""
 msgid "۱۱. محصولات مرتبط"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:184
+#: widgets/class-hsw-widget-header-store.php:199
 msgid "۱۲ دسته"
 msgstr ""
 
@@ -13402,7 +13414,7 @@ msgstr ""
 msgid "۱۸ ماه گارانتی شرکتی معتبر همراه با کد رجیستری فعال"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:198
+#: widgets/class-hsw-widget-header-store.php:214
 msgid "۲ لایه"
 msgstr ""
 
@@ -13448,11 +13460,11 @@ msgstr ""
 msgid "۳ روز مانده"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:199
+#: widgets/class-hsw-widget-header-store.php:215
 msgid "۳ لایه"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:224
+#: widgets/class-hsw-widget-header-store.php:240
 msgid "۳ محصول"
 msgstr ""
 
@@ -13510,11 +13522,11 @@ msgstr ""
 msgid "۳۵۰,۰۰۰ تومان"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:180
+#: widgets/class-hsw-widget-header-store.php:194
 msgid "۴ دسته"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:225
+#: widgets/class-hsw-widget-header-store.php:241
 msgid "۴ محصول"
 msgstr ""
 
@@ -13548,6 +13560,10 @@ msgstr ""
 msgid "۴:۳"
 msgstr ""
 
+#: widgets/class-hsw-widget-header-store.php:195
+msgid "۵ دسته"
+msgstr ""
+
 #: widgets/class-hsw-widget-cart-page.php:46
 msgid "۵. خلاصه سفارش و پرداخت"
 msgstr ""
@@ -13576,11 +13592,11 @@ msgstr ""
 msgid "۵. یادداشت سفارش و فاکتور"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:181
+#: widgets/class-hsw-widget-header-store.php:196
 msgid "۶ دسته"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:226
+#: widgets/class-hsw-widget-header-store.php:242
 msgid "۶ محصول"
 msgstr ""
 
@@ -13629,7 +13645,7 @@ msgstr ""
 msgid "۷. سیگنال‌های اعتماد"
 msgstr ""
 
-#: widgets/class-hsw-widget-header-store.php:182
+#: widgets/class-hsw-widget-header-store.php:197
 msgid "۸ دسته"
 msgstr ""
 

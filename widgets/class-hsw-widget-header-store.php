@@ -171,19 +171,35 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		);
 
 		$this->add_control(
+			'mega_cat_ids',
+			array(
+				'label'       => __( 'انتخاب دسته‌بندی‌های سربرگ', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT2,
+				'multiple'    => true,
+				'options'     => class_exists( 'HSW_Header_Cascade' ) ? HSW_Header_Cascade::category_options() : array(),
+				'default'     => array(),
+				'label_block' => true,
+				'description' => __( 'هر دسته یا زیردسته را می‌توانید انتخاب کنید. اگر خالی بماند، تعداد دسته‌های پیش‌فرض زیر نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
+				'condition'   => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'mega_cats',
 			array(
-				'label'     => __( 'تعداد دسته‌بندی ریشه', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::SELECT,
-				'default'   => '8',
-				'options'   => array(
+				'label'       => __( 'تعداد دسته‌بندی پیش‌فرض', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => '5',
+				'options'     => array(
 					'4'  => __( '۴ دسته', 'hamishop-elementor-widgets' ),
+					'5'  => __( '۵ دسته', 'hamishop-elementor-widgets' ),
 					'6'  => __( '۶ دسته', 'hamishop-elementor-widgets' ),
 					'8'  => __( '۸ دسته', 'hamishop-elementor-widgets' ),
 					'10' => __( '۱۰ دسته', 'hamishop-elementor-widgets' ),
 					'12' => __( '۱۲ دسته', 'hamishop-elementor-widgets' ),
 				),
-				'condition' => array( 'show_mega' => 'yes' ),
+				'description' => __( 'فقط وقتی هیچ دسته‌ای در «انتخاب دسته‌بندی‌های سربرگ» انتخاب نشده باشد.', 'hamishop-elementor-widgets' ),
+				'condition'   => array( 'show_mega' => 'yes' ),
 			)
 		);
 

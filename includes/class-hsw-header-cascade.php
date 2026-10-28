@@ -60,8 +60,130 @@ class HSW_Header_Cascade {
 	 * @return int
 	 */
 	public static function category_limit( $s ) {
-		$limit = isset( $s['mega_cats'] ) ? absint( $s['mega_cats'] ) : 8;
-		return in_array( $limit, array( 4, 6, 8, 10, 12 ), true ) ? $limit : 8;
+		$limit = isset( $s['mega_cats'] ) ? absint( $s['mega_cats'] ) : 5;
+		return in_array( $limit, array( 4, 5, 6, 8, 10, 12 ), true ) ? $limit : 5;
+	}
+
+	/**
+	 * All product categories offered by the Elementor selector.
+	 *
+	 * Empty categories are included on purpose: an explicitly selected term
+	 * should still appear even when it has no products yet.
+	 *
+	 * @return array<int,string>
+	 */
+	public static function category_options() {
+		static $options = null;
+
+		if ( null !== $options ) {
+			return $options;
+		}
+
+		$options = array();
+		if ( ! taxonomy_exists( 'product_cat' ) ) {
+			return $options;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+		if ( is_wp_error( $terms ) ) {
+			return $options;
+		}
+
+		$default_id = (int) get_option( 'default_product_cat', 0 );
+		foreach ( $terms as $term ) {
+			if ( $default_id && (int) $term->term_id === $default_id ) {
+				continue;
+			}
+			if ( in_array( $term->slug, array( 'uncategorized', 'بدون-دسته‌بندی' ), true ) ) {
+				continue;
+			}
+
+			$label = $term->name;
+			if ( $term->parent ) {
+				$parent = get_term( $term->parent, 'product_cat' );
+				if ( $parent instanceof WP_Term ) {
+					$label = $parent->name . ' / ' . $label;
+				}
+			}
+			$options[ (int) $term->term_id ] = $label;
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Categories explicitly chosen in Elementor, in selection order.
+	 *
+	 * @param array $s Widget settings.
+	 * @return WP_Term[]
+	 */
+	public static function selected_categories( $s ) {
+		$ids = isset( $s['mega_cat_ids'] ) ? $s['mega_cat_ids'] : array();
+		if ( ! is_array( $ids ) ) {
+			$ids = preg_split( '/[\s,]+/', (string) $ids );
+		}
+
+		$ids = array_values( array_unique( array_filter( array_map( 'absint', (array) $ids ) ) ) );
+		if ( ! $ids || ! taxonomy_exists( 'product_cat' ) ) {
+			return array();
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'include'    => $ids,
+			)
+		);
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return array();
+		}
+
+		$map = array();
+		foreach ( $terms as $term ) {
+			$map[ (int) $term->term_id ] = $term;
+		}
+
+		$default_id = (int) get_option( 'default_product_cat', 0 );
+		$out        = array();
+		foreach ( $ids as $id ) {
+			if ( ! isset( $map[ $id ] ) ) {
+				continue;
+			}
+			$term = $map[ $id ];
+			if ( $default_id && $id === $default_id ) {
+				continue;
+			}
+			if ( in_array( $term->slug, array( 'uncategorized', 'بدون-دسته‌بندی' ), true ) ) {
+				continue;
+			}
+			$out[] = $term;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Categories used by the header: explicit selection, otherwise the
+	 * configured number of top-level categories.
+	 *
+	 * @param array $s Widget settings.
+	 * @return WP_Term[]
+	 */
+	public static function header_categories( $s ) {
+		$selected = self::selected_categories( $s );
+		if ( $selected ) {
+			return $selected;
+		}
+
+		return self::categories( self::category_limit( $s ) );
 	}
 
 	/**
@@ -138,7 +260,7 @@ class HSW_Header_Cascade {
 	 * @return string
 	 */
 	public static function root_html( $s ) {
-		$categories = self::categories( self::category_limit( $s ) );
+		$categories = self::header_categories( $s );
 		if ( ! $categories ) {
 			return '';
 		}
@@ -159,7 +281,7 @@ class HSW_Header_Cascade {
 		/* Root column (rightmost in RTL, fixed while deeper columns fly left). */
 		$out .= '<div class="hsw-hd__cascadecol hsw-hd__cascadecol--root" data-hsw-hd-mega-col="0">';
 		$out .= '<div class="hsw-hd__cascadehead">';
-		$out .= '<span class="hsw-hd__cascadetitle">' . esc_html__( 'همه دسته‌بندی‌ها', 'hamishop-elementor-widgets' ) . '</span>';
+		$out .= '<span class="hsw-hd__cascadetitle">' . esc_html__( 'دسته‌بندی‌های فروشگاه', 'hamishop-elementor-widgets' ) . '</span>';
 		$out .= '<a class="hsw-hd__cascadeall" href="' . esc_url( $shop ) . '">' . esc_html__( 'فروشگاه', 'hamishop-elementor-widgets' ) . HSW_Helpers::icon( 'arrow_left_alt' ) . '</a>';
 		$out .= '</div>';
 		$out .= '<ul class="hsw-hd__cascadelist">';

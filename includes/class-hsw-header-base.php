@@ -563,7 +563,9 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 * @return string
 	 */
 	protected function drawer_categories_html( $s ) {
-		$cats = $this->product_categories( 8 );
+		$cats = class_exists( 'HSW_Header_Cascade' )
+			? HSW_Header_Cascade::header_categories( $s )
+			: $this->product_categories( 5 );
 		if ( ! $cats ) {
 			return '';
 		}
