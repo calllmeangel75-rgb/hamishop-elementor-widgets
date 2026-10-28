@@ -697,7 +697,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	/**
 	 * Brand + logo controls.
 	 */
-	protected function content_brand() {
+	protected function content_brand( $variant = 'store' ) {
 		$this->start_controls_section(
 			'sec_hd_brand',
 			array(
@@ -761,11 +761,24 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			array(
 				'label'       => __( 'افکت شاین گرادیانت روی لوگو', 'hamishop-elementor-widgets' ),
 				'type'        => Controls_Manager::SWITCHER,
-				'default'     => '',
+				'default'     => 'yes',
 				'separator'   => 'before',
 				'description' => __( 'یک درخشش گرادیانتی دوره‌ای روی نشان/تصویر لوگو حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است.', 'hamishop-elementor-widgets' ),
 			)
 		);
+
+		if ( 'store' === $variant ) {
+			$this->add_control(
+				'header_shine',
+				array(
+					'label'       => __( 'شاین گرادیانت هدر', 'hamishop-elementor-widgets' ),
+					'type'        => Controls_Manager::SWITCHER,
+					'default'     => 'yes',
+					'separator'   => 'before',
+					'description' => __( 'یک درخشش گرادیانتی ملایم روی نوار اصلی هدر حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است.', 'hamishop-elementor-widgets' ),
+				)
+			);
+		}
 
 		$this->end_controls_section();
 	}
@@ -1282,6 +1295,55 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 				'selector' => '{{WRAPPER}} .hsw-hd__brandname',
 			)
 		);
+
+		if ( 'store' === $variant ) {
+			$this->add_control(
+				'header_shine_heading',
+				array(
+					'label'     => __( 'شاین گرادیانت هدر', 'hamishop-elementor-widgets' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+					'condition' => array( 'header_shine' => 'yes' ),
+				)
+			);
+
+			$this->add_control(
+				'header_shine_color',
+				array(
+					'label'     => __( 'رنگ شاین هدر', 'hamishop-elementor-widgets' ),
+					'type'      => Controls_Manager::COLOR,
+					'default'   => 'rgba(29,78,216,0.18)',
+					'condition' => array( 'header_shine' => 'yes' ),
+					'selectors' => array(
+						'{{WRAPPER}} .hsw-hd' => '--hsw-hd-header-shine-c: {{VALUE}};',
+					),
+				)
+			);
+
+			$this->add_control(
+				'header_shine_duration',
+				array(
+					'label'      => __( 'مدت یک دور شاین هدر (ثانیه)', 'hamishop-elementor-widgets' ),
+					'type'       => Controls_Manager::SLIDER,
+					'size_units' => array( 's' ),
+					'range'      => array(
+						's' => array(
+							'min'  => 3,
+							'max'  => 15,
+							'step' => 0.5,
+						),
+					),
+					'default'    => array(
+						'size' => 7,
+						'unit' => 's',
+					),
+					'condition'  => array( 'header_shine' => 'yes' ),
+					'selectors'  => array(
+						'{{WRAPPER}} .hsw-hd' => '--hsw-hd-header-shine-dur: {{SIZE}}{{UNIT}};',
+					),
+				)
+			);
+		}
 
 		$this->add_control(
 			'logo_shine_heading',
@@ -2074,6 +2136,10 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		}
 		if ( $autohide ) {
 			$classes .= ' hsw-hd--autohide';
+		}
+		$header_shine = 'store' === $variant && ( ! isset( $s['header_shine'] ) || 'yes' === $s['header_shine'] );
+		if ( $header_shine ) {
+			$classes .= ' hsw-hd--header-shine';
 		}
 		$vis = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
 		$classes .= ' hsw-vis-' . $vis . $this->hsw_font_class();

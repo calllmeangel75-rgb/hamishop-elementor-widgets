@@ -260,11 +260,40 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
  * ====================================================================== */
 
 .hsw-hd__main {
+	position: relative;
 	background: var(--hsw-hd-bg);
 	border-bottom: 1px solid var(--hsw-hd-border);
 }
 
+/*
+ * Header shine. A dedicated, clipped layer keeps the moving gradient inside
+ * the main row without `overflow: hidden` on the row itself, which would clip
+ * the search suggestions and dropdown panels that escape the header.
+ */
+.hsw-hd__shine {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.hsw-hd--header-shine .hsw-hd__shine::before {
+	content: '';
+	position: absolute;
+	inset: -45% -25%;
+	background: linear-gradient(105deg,
+		transparent 28%,
+		var(--hsw-hd-header-shine-c, rgba(29, 78, 216, .18)) 46%,
+		transparent 64%);
+	transform: translateX(-125%) rotate(6deg);
+	animation: hsw-hd-header-shine var(--hsw-hd-header-shine-dur, 7s) ease-in-out infinite;
+	will-change: transform, opacity;
+}
+
 .hsw-hd__maininner {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	align-items: center;
 	gap: 18px;
@@ -272,6 +301,23 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	max-width: var(--hsw-hd-width);
 	margin: 0 auto;
 	padding: 13px clamp(16px, 3vw, 28px);
+}
+
+@keyframes hsw-hd-header-shine {
+	0%, 12% {
+		opacity: 0;
+		transform: translateX(-125%) rotate(6deg);
+	}
+	22% {
+		opacity: 1;
+	}
+	60% {
+		opacity: 1;
+	}
+	82%, 100% {
+		opacity: 0;
+		transform: translateX(125%) rotate(6deg);
+	}
 }
 
 .hsw-hd__burger {
@@ -1669,7 +1715,8 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.hsw-hd__logomark--shine::after {
+	.hsw-hd__logomark--shine::after,
+	.hsw-hd--header-shine .hsw-hd__shine::before {
 		display: none;
 		animation: none !important;
 	}
@@ -2619,7 +2666,9 @@ html { overflow-x: clip; }
  * Cart sidebar
  *
  * Opened by the header cart icon. The panel lives on the inline-end edge
- * (left in RTL, right in LTR) so it never collides with the mobile menu.
+ * (left in RTL, right in LTR) so it never collides with the mobile menu. It
+ * enters and leaves from that same edge; the medium-speed opacity fade is
+ * layered on top of the slide.
  * ====================================================================== */
 
 .hsw-hd__cartdrawer {
@@ -2629,8 +2678,8 @@ html { overflow-x: clip; }
 	visibility: hidden;
 	pointer-events: none;
 	overflow: hidden;
-	/* Keep the drawer visible until the closing slide has finished. */
-	transition: visibility 0s linear .52s;
+	/* Keep the drawer visible until the closing slide/fade has finished. */
+	transition: visibility 0s linear .46s;
 }
 
 .hsw-hd__cartdrawer.is-open {
@@ -2665,10 +2714,11 @@ html { overflow-x: clip; }
 	background: var(--hsw-surface-lowest, #fff);
 	color: var(--hsw-on-surface, #191c1e);
 	box-shadow: -18px 0 50px rgba(15, 23, 42, .18);
+	opacity: 0;
 	transform: translateX(100%) scale(.985);
 	transform-origin: right center;
-	transition: transform .52s cubic-bezier(.22, .61, .36, 1);
-	will-change: transform;
+	transition: transform .46s cubic-bezier(.22, .61, .36, 1), opacity .34s ease;
+	will-change: transform, opacity;
 }
 
 [dir="rtl"] .hsw-hd__cartpanel {
@@ -2678,6 +2728,7 @@ html { overflow-x: clip; }
 }
 
 .hsw-hd__cartdrawer.is-open .hsw-hd__cartpanel {
+	opacity: 1;
 	transform: translateX(0) scale(1);
 }
 
