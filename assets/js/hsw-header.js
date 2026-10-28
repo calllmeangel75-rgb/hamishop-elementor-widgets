@@ -61,8 +61,14 @@
 	}
 
 	function syncScrollLock() {
+		var root = document.documentElement;
 		var anyOpen = document.querySelector('.hsw-hd__drawer.is-open, .hsw-hd__cartdrawer.is-open');
-		document.documentElement.classList.toggle('hsw-hd-lock', !!anyOpen);
+		if (anyOpen && !root.classList.contains('hsw-hd-lock')) {
+			/* Reserve the scrollbar width before hiding it so opening a drawer
+			   does not reflow the page underneath. */
+			root.style.setProperty('--hsw-hd-scrollbar', (window.innerWidth - root.clientWidth) + 'px');
+		}
+		root.classList.toggle('hsw-hd-lock', !!anyOpen);
 	}
 
 	function parseMiniCart(html) {

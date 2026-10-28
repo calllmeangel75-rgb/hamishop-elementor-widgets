@@ -58,6 +58,14 @@ trait HSW_Product_Page_Style_Parts_4 {
 			array( 'range' => array( 'px' => array( 'min' => 0, 'max' => 8 ) ) )
 		);
 
+		$this->pps_heading( 'tb_content_h', __( 'متن پنل تب', 'hamishop-elementor-widgets' ) );
+		$this->pps_note( 'tb_content_note', __( 'تایپوگرافی عمومی پنل روی پاراگراف‌های «بررسی تخصصی» که استایل پیش‌فرض دارند اثر نمی‌کند؛ برای آن از کنترل اختصاصی «تایپوگرافی متن بررسی تخصصی» استفاده کنید.', 'hamishop-elementor-widgets' ) );
+		$this->pps_type( 'tb_panel_t', __( 'تایپوگرافی متن پنل', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__panel' );
+		$this->pps_type( 'tb_review_t', __( 'تایپوگرافی متن بررسی تخصصی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__review, {{WRAPPER}} .hsw-ptabs__review p' );
+		$this->pps_type( 'tb_h2_t', __( 'تایپوگرافی عنوان داخل پنل', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__h2' );
+		$this->pps_color( 'tb_panel_c', __( 'رنگ متن پنل', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__panel' );
+		$this->pps_color( 'tb_review_c', __( 'رنگ متن بررسی تخصصی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__review, {{WRAPPER}} .hsw-ptabs__review p' );
+
 		$this->pps_heading( 'tb_review_h', __( 'کارت‌های دیدگاه', 'hamishop-elementor-widgets' ) );
 		$this->pps_box( 'tb_rv', '{{WRAPPER}} .hsw-ptabs__rvitem', array( 'shadow' => false ) );
 		$this->pps_type( 'tb_rv_name', __( 'نام نویسنده', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__rvname' );
