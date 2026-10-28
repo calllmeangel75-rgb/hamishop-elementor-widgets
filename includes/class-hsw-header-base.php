@@ -12,6 +12,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Elementor\Controls_Manager;
+use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Typography;
 
 abstract class HSW_Header_Base extends HSW_Widget_Base {
@@ -158,6 +159,11 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 * @return WP_Term[]
 	 */
 	protected function product_categories( $limit = 0, $parent = 0 ) {
+		if ( class_exists( 'HSW_Header_Cascade' ) ) {
+			return HSW_Header_Cascade::categories( $limit, $parent );
+		}
+
+		/* Defensive fallback for a partial/older load order. */
 		if ( ! taxonomy_exists( 'product_cat' ) ) {
 			return array();
 		}
@@ -235,9 +241,12 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			$logo = '<img class="hsw-hd__logoimg" src="' . esc_url( $s['logo']['url'] ) . '" alt="' . esc_attr( $aria_name ) . '" loading="lazy" decoding="async">';
 		}
 
+		$shine       = isset( $s['logo_shine'] ) && 'yes' === $s['logo_shine'];
+		$mark_classes = 'hsw-hd__logomark' . ( $shine ? ' hsw-hd__logomark--shine' : '' );
+
 		$mark = $logo
-			? '<span class="hsw-hd__logomark hsw-hd__logomark--image">' . $logo . '</span>'
-			: '<span class="hsw-hd__logomark">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
+			? '<span class="' . esc_attr( $mark_classes . ' hsw-hd__logomark--image' ) . '">' . $logo . '</span>'
+			: '<span class="' . esc_attr( $mark_classes ) . '">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
 
 		$wrap = ( $as_heading && is_front_page() ) ? 'h1' : 'span';
 		$out  = '<' . $wrap . ' class="hsw-hd__brandwrap"><a class="hsw-hd__brand" href="' . esc_url( home_url( '/' ) ) . '" aria-label="' . esc_attr( $aria_name ) . '">';
@@ -513,77 +522,10 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	 * @return string
 	 */
 	protected function mega_html( $s ) {
-		$cats = $this->product_categories( 8 );
-		if ( ! $cats ) {
+		if ( ! class_exists( 'HSW_Header_Cascade' ) ) {
 			return '';
 		}
-
-		$per = isset( $s['mega_products'] ) ? absint( $s['mega_products'] ) : 4;
-		$per = in_array( $per, array( 3, 4, 6 ), true ) ? $per : 4;
-
-		$out  = '<div class="hsw-hd__megapanel" data-hsw-hd-mega-panel>';
-		$out .= '<div class="hsw-hd__megainner">';
-		$out .= '<div class="hsw-hd__megalayout">';
-
-		/* ---- vertical, nested category list ---- */
-		$out .= '<div class="hsw-hd__meganav">';
-		$out .= '<ul class="hsw-hd__megatree">';
-
-		foreach ( $cats as $cat ) {
-			$url = get_term_link( $cat );
-			if ( is_wp_error( $url ) ) {
-				continue;
-			}
-			$children = $this->product_categories( 8, $cat->term_id );
-
-			$out .= '<li class="hsw-hd__megaitem" data-hsw-hd-mega-item>';
-			$out .= '<button class="hsw-hd__megatoggle" type="button" data-hsw-hd-mega-cat="' . esc_attr( (string) $cat->term_id ) . '" data-hsw-hd-mega-url="' . esc_url( $url ) . '" data-hsw-hd-mega-name="' . esc_attr( $cat->name ) . '" aria-expanded="false">';
-			$out .= '<span class="hsw-hd__megaicon">' . HSW_Helpers::icon( 'category' ) . '</span>';
-			$out .= '<span class="hsw-hd__meganame">' . esc_html( $cat->name ) . '</span>';
-			$out .= '<span class="hsw-hd__megacount">' . esc_html( HSW_Helpers::fa_num( $cat->count ) ) . '</span>';
-			$out .= '<span class="hsw-hd__megachev">' . HSW_Helpers::icon( 'expand_more' ) . '</span>';
-			$out .= '</button>';
-
-			$out .= '<div class="hsw-hd__megabody" data-hsw-hd-mega-body aria-hidden="true"><div class="hsw-hd__megabodyinner">';
-			if ( $children ) {
-				$out .= '<ul class="hsw-hd__megachildren">';
-				foreach ( $children as $child ) {
-					$child_url = get_term_link( $child );
-					if ( is_wp_error( $child_url ) ) {
-						continue;
-					}
-					$out .= '<li><a href="' . esc_url( $child_url ) . '"><span>' . esc_html( $child->name ) . '</span><span class="hsw-hd__megacount">' . esc_html( HSW_Helpers::fa_num( $child->count ) ) . '</span></a></li>';
-				}
-				$out .= '</ul>';
-			}
-			$out .= '<a class="hsw-hd__megaall" href="' . esc_url( $url ) . '">' . esc_html__( 'مشاهده همهٔ محصولات این دسته', 'hamishop-elementor-widgets' ) . HSW_Helpers::icon( 'arrow_left_alt' ) . '</a>';
-			$out .= '</div></div>';
-			$out .= '</li>';
-		}
-
-		$out .= '</ul></div>';
-
-		/* ---- product preview (filled lazily by hsw-header.js) ---- */
-		$out .= '<aside class="hsw-hd__megapreview" data-hsw-hd-mega-preview>';
-		$out .= '<div class="hsw-hd__megapreviewhead">';
-		$out .= '<span class="hsw-hd__megapreviewtitle" data-hsw-hd-mega-title>' . esc_html__( 'محصولات دسته', 'hamishop-elementor-widgets' ) . '</span>';
-		$out .= '<a class="hsw-hd__megapreviewall" data-hsw-hd-mega-all href="' . esc_url( $this->shop_url() ) . '">' . esc_html__( 'مشاهده همه', 'hamishop-elementor-widgets' ) . '</a>';
-		$out .= '</div>';
-		$out .= '<div class="hsw-hd__megathumbs" data-hsw-hd-mega-products data-limit="' . esc_attr( (string) $per ) . '"></div>';
-		$out .= '<p class="hsw-hd__megahint" data-hsw-hd-mega-hint data-empty="' . esc_attr__( 'محصولی برای نمایش در این دسته نیست.', 'hamishop-elementor-widgets' ) . '">' . esc_html__( 'برای دیدن محصولات، یک دسته را باز کنید.', 'hamishop-elementor-widgets' ) . '</p>';
-		$out .= '</aside>';
-
-		$out .= '</div>';
-
-		$out .= '<a class="hsw-hd__megafoot" href="' . esc_url( $this->shop_url() ) . '">';
-		$out .= HSW_Helpers::icon( 'storefront' );
-		$out .= '<span>' . esc_html__( 'مشاهده همهٔ محصولات فروشگاه', 'hamishop-elementor-widgets' ) . '</span>';
-		$out .= HSW_Helpers::icon( 'arrow_left_alt' );
-		$out .= '</a>';
-
-		$out .= '</div></div>';
-
-		return $out;
+		return HSW_Header_Cascade::root_html( $s );
 	}
 
 	/**
@@ -603,7 +545,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$trigger = isset( $s['mega_trigger'] ) && 'click' === $s['mega_trigger'] ? 'click' : 'hover';
 
 		$out  = '<div class="hsw-hd__mega' . ( 'hover' === $trigger ? ' hsw-hd__mega--hover' : '' ) . '" data-hsw-hd-mega>';
-		$out .= '<button class="hsw-hd__catbtn" type="button" data-hsw-hd-mega-toggle aria-expanded="false">';
+		$out .= '<button class="hsw-hd__catbtn" type="button" data-hsw-hd-mega-toggle aria-haspopup="true" aria-expanded="false">';
 		$out .= HSW_Helpers::icon( 'grid_view' );
 		$out .= '<span>' . esc_html( $title ) . '</span>';
 		$out .= HSW_Helpers::icon( 'expand_more', 'hsw-hd__chev' );
@@ -809,6 +751,17 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 				'selectors'  => array(
 					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-logow: {{SIZE}}{{UNIT}};',
 				),
+			)
+		);
+
+		$this->add_control(
+			'logo_shine',
+			array(
+				'label'       => __( 'افکت شاین گرادیانت روی لوگو', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => '',
+				'separator'   => 'before',
+				'description' => __( 'یک درخشش گرادیانتی دوره‌ای روی نشان/تصویر لوگو حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است.', 'hamishop-elementor-widgets' ),
 			)
 		);
 
@@ -1328,6 +1281,53 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'logo_shine_heading',
+			array(
+				'label'     => __( 'شاین لوگو', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+				'condition' => array( 'logo_shine' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'logo_shine_color',
+			array(
+				'label'     => __( 'رنگ درخشش', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => 'rgba(255,255,255,0.82)',
+				'condition' => array( 'logo_shine' => 'yes' ),
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-shine-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'logo_shine_duration',
+			array(
+				'label'      => __( 'مدت یک دور (ثانیه)', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 's' ),
+				'range'      => array(
+					's' => array(
+						'min'  => 2,
+						'max'  => 12,
+						'step' => 0.5,
+					),
+				),
+				'default'    => array(
+					'size' => 5,
+					'unit' => 's',
+				),
+				'condition'  => array( 'logo_shine' => 'yes' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-shine-dur: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
 		$this->add_group_control(
 			Group_Control_Typography::get_type(),
 			array(
@@ -1350,6 +1350,708 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			'{{WRAPPER}} .hsw-hd__searchbtn',
 			array( 'size' => 11.5, 'radius' => 10 )
 		);
+		$this->end_controls_section();
+	}
+
+	/**
+	 * Store-header cascade menu style controls.
+	 *
+	 * Kept in the shared header base so the store widget stays small, but only
+	 * registered by the store header (the minimal header has no mega menu).
+	 */
+	protected function content_mega_style() {
+		/* ---------------------------------------------------------------
+		 * Panel / columns
+		 * ------------------------------------------------------------ */
+		$this->start_controls_section(
+			'sec_hd_mega_panel_style',
+			array(
+				'label'     => __( 'مگامنوی آبشاری — پنل و ستون‌ها', 'hamishop-elementor-widgets' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'mgs_panel_bg',
+			array(
+				'label'     => __( 'پس‌زمینه پنل', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#ffffff',
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-panel-bg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_divider_c',
+			array(
+				'label'     => __( 'رنگ حاشیه و جداکننده ستون‌ها', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#e2e8f0',
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-divider: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'mgs_panel_shadow',
+				'label'    => __( 'سایه پنل', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-hd__megapanel--cascade',
+			)
+		);
+
+		$this->add_control(
+			'mgs_panel_radius',
+			array(
+				'label'      => __( 'گردی گوشه پنل', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 36,
+					),
+				),
+				'default'    => array(
+					'size' => 16,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-radius: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_col_w',
+			array(
+				'label'      => __( 'عرض هر ستون', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 190,
+						'max' => 340,
+					),
+				),
+				'default'    => array(
+					'size' => 260,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-colw: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_col_h',
+			array(
+				'label'      => __( 'حداکثر ارتفاع ستون‌ها', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 260,
+						'max' => 760,
+					),
+				),
+				'default'    => array(
+					'size' => 520,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-maxh: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_head_bg',
+			array(
+				'label'     => __( 'پس‌زمینه سرستون', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#f8fafc',
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-head-bg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_head_c',
+			array(
+				'label'     => __( 'رنگ عنوان سرستون', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-head-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'mgs_head_typo',
+				'label'    => __( 'تایپوگرافی عنوان سرستون', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-hd__cascadetitle',
+			)
+		);
+
+		$this->add_control(
+			'mgs_all_c',
+			array(
+				'label'     => __( 'لینک «مشاهده همه» — عادی', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-all-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_all_hc',
+			array(
+				'label'     => __( 'لینک «مشاهده همه» — هاور', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-all-hc: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_list_pad',
+			array(
+				'label'      => __( 'فاصله داخلی لیست', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 20,
+					),
+				),
+				'default'    => array(
+					'size' => 6,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-list-pad: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ---------------------------------------------------------------
+		 * Category rows
+		 * ------------------------------------------------------------ */
+		$this->start_controls_section(
+			'sec_hd_mega_item_style',
+			array(
+				'label'     => __( 'مگامنوی آبشاری — دسته‌بندی‌ها', 'hamishop-elementor-widgets' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'mgs_item_typo',
+				'label'    => __( 'تایپوگرافی دسته‌بندی‌ها', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-hd__cascadenode',
+			)
+		);
+
+		$this->start_controls_tabs( 'mgs_item_tabs' );
+
+		$this->start_controls_tab(
+			'mgs_item_tab_n',
+			array( 'label' => __( 'عادی', 'hamishop-elementor-widgets' ) )
+		);
+
+		$this->add_control(
+			'mgs_item_bg',
+			array(
+				'label'     => __( 'پس‌زمینه', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-bg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_c',
+			array(
+				'label'     => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_icon_c',
+			array(
+				'label'     => __( 'رنگ آیکون', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-icon-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_count_c',
+			array(
+				'label'     => __( 'رنگ تعداد محصولات', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-count-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_chev_c',
+			array(
+				'label'     => __( 'رنگ فلش', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-chev-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'mgs_item_tab_h',
+			array( 'label' => __( 'هاور', 'hamishop-elementor-widgets' ) )
+		);
+
+		$this->add_control(
+			'mgs_item_hbg',
+			array(
+				'label'     => __( 'پس‌زمینه (هاور)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-hbg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_hc',
+			array(
+				'label'     => __( 'رنگ متن (هاور)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-hc: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'mgs_item_tab_a',
+			array( 'label' => __( 'باز / فعال', 'hamishop-elementor-widgets' ) )
+		);
+
+		$this->add_control(
+			'mgs_item_abg',
+			array(
+				'label'     => __( 'پس‌زمینه (باز)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-abg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_ac',
+			array(
+				'label'     => __( 'رنگ متن (باز)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-ac: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
+
+		$this->add_control(
+			'mgs_item_radius',
+			array(
+				'label'      => __( 'گردی گوشه ردیف', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 24,
+					),
+				),
+				'default'    => array(
+					'size' => 9,
+					'unit' => 'px',
+				),
+				'separator'  => 'before',
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-radius: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_py',
+			array(
+				'label'      => __( 'فاصله عمودی ردیف', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 3,
+						'max' => 20,
+					),
+				),
+				'default'    => array(
+					'size' => 9,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-py: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_px',
+			array(
+				'label'      => __( 'فاصله افقی ردیف', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 3,
+						'max' => 24,
+					),
+				),
+				'default'    => array(
+					'size' => 10,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-px: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_gap',
+			array(
+				'label'      => __( 'فاصله آیکون و متن', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 2,
+						'max' => 20,
+					),
+				),
+				'default'    => array(
+					'size' => 8,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-item-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_icon_size',
+			array(
+				'label'      => __( 'اندازه آیکون', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 12,
+						'max' => 30,
+					),
+				),
+				'default'    => array(
+					'size' => 18,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-icon-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_item_count_size',
+			array(
+				'label'      => __( 'اندازه تعداد محصولات', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 8,
+						'max' => 16,
+					),
+				),
+				'default'    => array(
+					'size' => 10,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-count-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		/* ---------------------------------------------------------------
+		 * Product rows
+		 * ------------------------------------------------------------ */
+		$this->start_controls_section(
+			'sec_hd_mega_product_style',
+			array(
+				'label'     => __( 'مگامنوی آبشاری — محصولات', 'hamishop-elementor-widgets' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->start_controls_tabs( 'mgs_prod_tabs' );
+
+		$this->start_controls_tab(
+			'mgs_prod_tab_n',
+			array( 'label' => __( 'عادی', 'hamishop-elementor-widgets' ) )
+		);
+
+		$this->add_control(
+			'mgs_prod_bg',
+			array(
+				'label'     => __( 'پس‌زمینه ردیف محصول', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-bg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_c',
+			array(
+				'label'     => __( 'رنگ متن ردیف محصول', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'mgs_prod_tab_h',
+			array( 'label' => __( 'هاور', 'hamishop-elementor-widgets' ) )
+		);
+
+		$this->add_control(
+			'mgs_prod_hbg',
+			array(
+				'label'     => __( 'پس‌زمینه (هاور)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-hbg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_hc',
+			array(
+				'label'     => __( 'رنگ متن (هاور)', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-hc: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'      => 'mgs_prod_name_typo',
+				'label'     => __( 'تایپوگرافی نام محصول', 'hamishop-elementor-widgets' ),
+				'selector'  => '{{WRAPPER}} .hsw-hd__cascadeproductname',
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'mgs_price_c',
+			array(
+				'label'     => __( 'رنگ قیمت', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-price-c: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'mgs_price_typo',
+				'label'    => __( 'تایپوگرافی قیمت', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-hd__cascadeproductmeta',
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_img',
+			array(
+				'label'      => __( 'اندازه تصویر محصول', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 30,
+						'max' => 80,
+					),
+				),
+				'default'    => array(
+					'size' => 46,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-img: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_imgr',
+			array(
+				'label'      => __( 'گردی تصویر محصول', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 30,
+					),
+				),
+				'default'    => array(
+					'size' => 8,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-imgr: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_radius',
+			array(
+				'label'      => __( 'گردی ردیف محصول', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 24,
+					),
+				),
+				'default'    => array(
+					'size' => 8,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-radius: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_gap',
+			array(
+				'label'      => __( 'فاصله بین محصولات', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 16,
+					),
+				),
+				'default'    => array(
+					'size' => 2,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_prod_pad',
+			array(
+				'label'      => __( 'فاصله داخلی ردیف محصول', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 2,
+						'max' => 16,
+					),
+				),
+				'default'    => array(
+					'size' => 6,
+					'unit' => 'px',
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-prod-pad: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mgs_empty_c',
+			array(
+				'label'     => __( 'رنگ متن حالت خالی', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-empty-c: {{VALUE}};',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -1384,6 +2086,6 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		 */
 		$ph = $sticky ? '<div class="hsw-hd__ph" aria-hidden="true"></div>' : '';
 
-		return $ph . '<div class="' . esc_attr( $classes ) . '" data-hsw-header data-hsw-hideoffset="' . esc_attr( $offset ) . '" data-hsw-fragments="' . esc_url( $this->fragments_url() ) . '" data-hsw-rest="' . esc_url( rest_url( 'hsw/v1/header-products' ) ) . '">';
+		return $ph . '<div class="' . esc_attr( $classes ) . '" data-hsw-header data-hsw-hideoffset="' . esc_attr( $offset ) . '" data-hsw-fragments="' . esc_url( $this->fragments_url() ) . '" data-hsw-rest="' . esc_url( rest_url( 'hsw/v1/header-cascade' ) ) . '">';
 	}
 }

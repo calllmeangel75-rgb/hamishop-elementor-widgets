@@ -171,9 +171,53 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		);
 
 		$this->add_control(
+			'mega_cats',
+			array(
+				'label'     => __( 'تعداد دسته‌بندی ریشه', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '8',
+				'options'   => array(
+					'4'  => __( '۴ دسته', 'hamishop-elementor-widgets' ),
+					'6'  => __( '۶ دسته', 'hamishop-elementor-widgets' ),
+					'8'  => __( '۸ دسته', 'hamishop-elementor-widgets' ),
+					'10' => __( '۱۰ دسته', 'hamishop-elementor-widgets' ),
+					'12' => __( '۱۲ دسته', 'hamishop-elementor-widgets' ),
+				),
+				'condition' => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'mega_depth',
+			array(
+				'label'       => __( 'حداکثر لایه دسته‌بندی', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => '3',
+				'options'     => array(
+					'1' => __( '۱ لایه', 'hamishop-elementor-widgets' ),
+					'2' => __( '۲ لایه', 'hamishop-elementor-widgets' ),
+					'3' => __( '۳ لایه', 'hamishop-elementor-widgets' ),
+				),
+				'description' => __( 'پنل‌ها به سمت چپ (در راست‌چین) آبشاری باز می‌شوند. هر لایه یک ستون جدید است.', 'hamishop-elementor-widgets' ),
+				'condition'   => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'mega_leaf_products',
+			array(
+				'label'       => __( 'نمایش محصولات در انتهای مسیر', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'اگر خاموش باشد، منو روی خودِ دسته‌بندی تمام می‌شود و پنل محصولات باز نمی‌شود.', 'hamishop-elementor-widgets' ),
+				'condition'   => array( 'show_mega' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'mega_products',
 			array(
-				'label'     => __( 'تعداد محصول در پیش‌نمایش مگامنو', 'hamishop-elementor-widgets' ),
+				'label'     => __( 'تعداد محصول در پنل نهایی', 'hamishop-elementor-widgets' ),
 				'type'      => Controls_Manager::SELECT,
 				'default'   => '4',
 				'options'   => array(
@@ -181,8 +225,11 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 					'4' => __( '۴ محصول', 'hamishop-elementor-widgets' ),
 					'6' => __( '۶ محصول', 'hamishop-elementor-widgets' ),
 				),
-				'description' => __( 'تصاویر کوچک فقط بار اولی که دسته باز می‌شود بارگذاری می‌شوند.', 'hamishop-elementor-widgets' ),
-				'condition' => array( 'show_mega' => 'yes' ),
+				'description' => __( 'محصولات فقط وقتی بارگذاری می‌شوند که کاربر به انتهای مسیر دسته‌بندی برسد.', 'hamishop-elementor-widgets' ),
+				'condition' => array(
+					'show_mega'         => 'yes',
+					'mega_leaf_products' => 'yes',
+				),
 			)
 		);
 
@@ -199,6 +246,7 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		$this->end_controls_section();
 
 		$this->content_style( 'store' );
+		$this->content_mega_style();
 
 		/* Store-specific style */
 		$this->start_controls_section(

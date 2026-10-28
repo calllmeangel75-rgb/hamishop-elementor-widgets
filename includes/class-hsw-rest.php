@@ -1,8 +1,9 @@
 <?php
 /**
  * REST routes:
- *  - /hsw/v1/search  : admin product search for the chooser control.
- *  - /hsw/v1/loop    : server-rendered cards fragment (tab switching).
+ *  - /hsw/v1/search         : admin product search for the chooser control.
+ *  - /hsw/v1/loop           : server-rendered cards fragment (tab switching).
+ *  - /hsw/v1/header-cascade : lazy column for the store-header cascade menu.
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -174,6 +175,64 @@ class HSW_Rest {
                                                 'minimum'           => 1,
                                                 'maximum'           => 8,
                                                 'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                ),
+                        )
+                );
+
+                /*
+                 * One lazy cascade column for the desktop store header. `/cat`
+                 * is the category whose children/products should be returned.
+                 * The transient mirror keeps repeat hovers free of taxonomy and
+                 * product queries, while `product_version()` expires the cache
+                 * whenever the catalogue changes.
+                 */
+                register_rest_route(
+                        self::NS,
+                        '/header-cascade',
+                        array(
+                                'methods'             => 'GET',
+                                'callback'            => array( $this, 'header_cascade' ),
+                                'permission_callback' => '__return_true',
+                                'args'                => array(
+                                        'cat'      => array(
+                                                'type'              => 'integer',
+                                                'required'          => true,
+                                                'minimum'           => 1,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => static function ( $value ) {
+                                                        return (bool) term_exists( absint( $value ), 'product_cat' );
+                                                },
+                                        ),
+                                        'level'    => array(
+                                                'type'              => 'integer',
+                                                'default'           => 1,
+                                                'minimum'           => 1,
+                                                'maximum'           => 3,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'depth'    => array(
+                                                'type'              => 'integer',
+                                                'default'           => 3,
+                                                'minimum'           => 1,
+                                                'maximum'           => 3,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'limit'    => array(
+                                                'type'              => 'integer',
+                                                'default'           => 4,
+                                                'minimum'           => 1,
+                                                'maximum'           => 8,
+                                                'sanitize_callback' => 'absint',
+                                                'validate_callback' => 'rest_validate_request_arg',
+                                        ),
+                                        'products' => array(
+                                                'type'              => 'boolean',
+                                                'default'           => true,
+                                                'sanitize_callback' => 'rest_sanitize_boolean',
                                                 'validate_callback' => 'rest_validate_request_arg',
                                         ),
                                 ),
@@ -557,6 +616,49 @@ class HSW_Rest {
                         'html'  => $html,
                         'found' => $found,
                         'count' => $count,
+                );
+
+                set_transient( $key, $payload, 5 * MINUTE_IN_SECONDS );
+                self::cache_header( 300 );
+
+                return rest_ensure_response( $payload );
+        }
+
+        /**
+         * Lazy column for the store-header cascade menu.
+         *
+         * @param WP_REST_Request $request Request.
+         * @return WP_REST_Response
+         */
+        public function header_cascade( $request ) {
+                $term_id  = absint( $request->get_param( 'cat' ) );
+                $level    = max( 1, min( 3, (int) $request->get_param( 'level' ) ) );
+                $depth    = max( 1, min( 3, (int) $request->get_param( 'depth' ) ) );
+                $limit    = max( 1, min( 8, (int) $request->get_param( 'limit' ) ) );
+                $products = (bool) $request->get_param( 'products' );
+
+                if ( ! $term_id || ! class_exists( 'HSW_Header_Cascade' ) ) {
+                        return rest_ensure_response( array( 'html' => '', 'term' => 0, 'level' => $level ) );
+                }
+
+                $term = get_term( $term_id, 'product_cat' );
+                if ( ! $term instanceof WP_Term ) {
+                        return rest_ensure_response( array( 'html' => '', 'term' => 0, 'level' => $level ) );
+                }
+
+                $locale = function_exists( 'determine_locale' ) ? determine_locale() : get_locale();
+                $key    = 'hsw_hc_' . md5( implode( '|', array( $term_id, $level, $depth, $limit, $products ? 1 : 0, self::product_version(), $locale ) ) );
+                $cached = get_transient( $key );
+
+                if ( is_array( $cached ) && isset( $cached['html'] ) ) {
+                        self::cache_header( 300 );
+                        return rest_ensure_response( $cached );
+                }
+
+                $payload = array(
+                        'html'  => HSW_Header_Cascade::column_html( $term, $level, $depth, $limit, $products ),
+                        'term'  => (int) $term->term_id,
+                        'level' => $level,
                 );
 
                 set_transient( $key, $payload, 5 * MINUTE_IN_SECONDS );

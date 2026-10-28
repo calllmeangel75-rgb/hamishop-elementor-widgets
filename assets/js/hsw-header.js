@@ -353,137 +353,238 @@
 
 		if (mega && megaButton) {
 			var megaPanel = mega.querySelector('[data-hsw-hd-mega-panel]');
-			var megaProducts = mega.querySelector('[data-hsw-hd-mega-products]');
-			var megaHint = mega.querySelector('[data-hsw-hd-mega-hint]');
-			var megaTitle = mega.querySelector('[data-hsw-hd-mega-title]');
-			var megaAll = mega.querySelector('[data-hsw-hd-mega-all]');
-			var megaItems = all(mega, '[data-hsw-hd-mega-item]');
+			var megaCascade = mega.querySelector('[data-hsw-hd-mega-cascade]');
+			var megaDepth = parseInt(megaPanel ? megaPanel.getAttribute('data-hsw-hd-mega-depth') : '', 10) || 3;
+			var megaLimit = parseInt(megaPanel ? megaPanel.getAttribute('data-hsw-hd-mega-limit') : '', 10) || 4;
+			var megaProducts = !!megaPanel && megaPanel.getAttribute('data-hsw-hd-mega-products') !== '0';
+			var megaEndpoint = root.getAttribute('data-hsw-rest') || '';
+			var megaError = megaPanel ? (megaPanel.getAttribute('data-hsw-hd-mega-error') || '') : '';
 			var megaCache = {};
-			var megaBooted = false;
+			var hoverNodeTimer = null;
 
-			var renderMegaProducts = function (html) {
-				if (!megaProducts) {
+			var cascadeColumns = function () {
+				return megaCascade ? all(megaCascade, '[data-hsw-hd-mega-col]') : [];
+			};
+
+			var itemForNode = function (node) {
+				return node ? node.closest('[data-hsw-hd-mega-item]') : null;
+			};
+
+			var setNodeOpen = function (node, open) {
+				if (!node) {
 					return;
 				}
-				megaProducts.classList.remove('is-loading');
-				megaProducts.innerHTML = html || '';
-				if (megaHint) {
-					if (html) {
-						megaHint.classList.add('is-hidden');
-					} else {
-						megaHint.classList.remove('is-hidden');
-						var empty = megaHint.getAttribute('data-empty');
-						if (empty) {
-							megaHint.textContent = empty;
-						}
+				var item = itemForNode(node);
+				if (item) {
+					item.classList.toggle('is-open', open);
+				}
+				setExpanded(node, open);
+			};
+
+			var resetCascade = function () {
+				all(mega, '[data-hsw-hd-mega-node]').forEach(function (node) {
+					setNodeOpen(node, false);
+				});
+				var cols = cascadeColumns();
+				for (var i = cols.length - 1; i > 0; i--) {
+					if (cols[i].parentNode && cols[i].parentNode.contains(cols[i])) {
+						cols[i].parentNode.removeChild(cols[i]);
 					}
 				}
 			};
 
-			var loadMegaProducts = function (button) {
-				if (!megaProducts) {
+			var removeAfter = function (col) {
+				var cols = cascadeColumns();
+				var index = cols.indexOf(col);
+				if (index < 0) {
 					return;
 				}
-				var catId = button.getAttribute('data-hsw-hd-mega-cat');
-				var name = button.getAttribute('data-hsw-hd-mega-name') || '';
-				var url = button.getAttribute('data-hsw-hd-mega-url') || '';
+				for (var i = cols.length - 1; i > index; i--) {
+					var child = cols[i];
+					if (child._hswParentNode) {
+						setNodeOpen(child._hswParentNode, false);
+					}
+					if (child.parentNode && child.parentNode.contains(child)) {
+						child.parentNode.removeChild(child);
+					}
+				}
+			};
 
-				if (megaTitle) {
-					megaTitle.textContent = name;
+			var collapseSiblings = function (node, col) {
+				all(col, '.hsw-hd__cascadeitem.is-open').forEach(function (item) {
+					var button = item.querySelector('[data-hsw-hd-mega-node]');
+					if (button && button !== node) {
+						setNodeOpen(button, false);
+					}
+				});
+			};
+
+			var focusColumn = function (col) {
+				/* Prefer a category/product row over the column's "view all" link. */
+				var first = col.querySelector('[data-hsw-hd-mega-node], a.hsw-hd__cascadenode')
+					|| col.querySelector('.hsw-hd__cascadeproduct, .hsw-hd__cascadeend')
+					|| col.querySelector('.hsw-hd__cascadeall');
+				if (!first) {
+					return;
 				}
-				if (megaAll && url) {
-					megaAll.href = url;
+				try {
+					first.focus({ preventScroll: true });
+				} catch (e) {
+					first.focus();
 				}
-				if (!catId) {
+			};
+
+			var insertColumn = function (html, node, col, focusFirst) {
+				var holder = document.createElement('div');
+				holder.innerHTML = html || '';
+				var newCol = holder.firstElementChild;
+				var loading = col.nextElementSibling;
+
+				if (!newCol || !newCol.classList || !newCol.classList.contains('hsw-hd__cascadecol')) {
+					if (loading && loading.getAttribute('data-hsw-hd-mega-loading') === '1' && loading.parentNode) {
+						loading.parentNode.removeChild(loading);
+					}
+					setNodeOpen(node, false);
 					return;
 				}
 
-				if (Object.prototype.hasOwnProperty.call(megaCache, catId)) {
-					renderMegaProducts(megaCache[catId]);
+				newCol._hswParentNode = node;
+				if (loading && loading.getAttribute('data-hsw-hd-mega-loading') === '1' && loading.parentNode) {
+					loading.parentNode.replaceChild(newCol, loading);
+				} else {
+					col.parentNode.insertBefore(newCol, col.nextSibling);
+				}
+
+				newCol.classList.add('is-entering');
+				window.requestAnimationFrame(function () {
+					newCol.classList.remove('is-entering');
+				});
+
+				if (focusFirst) {
+					focusColumn(newCol);
+				}
+			};
+
+			var loadingColumn = function (node, col) {
+				var loading = document.createElement('div');
+				loading.className = 'hsw-hd__cascadecol hsw-hd__cascadecol--loading';
+				loading.setAttribute('data-hsw-hd-mega-col', '');
+				loading.setAttribute('data-hsw-hd-mega-loading', '1');
+				loading.setAttribute('aria-hidden', 'true');
+				loading._hswParentNode = node;
+				loading.innerHTML = '<div class="hsw-hd__cascadehead"><span class="hsw-hd__cascadetitle">&hellip;</span></div>'
+					+ '<div class="hsw-hd__cascadeloading" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>';
+				col.parentNode.insertBefore(loading, col.nextSibling);
+				return loading;
+			};
+
+			var requestColumn = function (node, col, focusFirst) {
+				var catId = node.getAttribute('data-hsw-hd-mega-cat');
+				var level = parseInt(node.getAttribute('data-hsw-hd-mega-level'), 10) || 1;
+
+				if (!catId || !megaEndpoint) {
+					setNodeOpen(node, false);
 					return;
 				}
 
-				var endpoint = root.getAttribute('data-hsw-rest') || '';
-				if (!endpoint) {
+				var key = catId + '|' + level + '|' + megaDepth + '|' + megaLimit + '|' + (megaProducts ? '1' : '0');
+				if (Object.prototype.hasOwnProperty.call(megaCache, key)) {
+					insertColumn(megaCache[key], node, col, focusFirst);
 					return;
 				}
 
-				var limit = megaProducts.getAttribute('data-limit') || '4';
-				if (megaHint) {
-					megaHint.classList.add('is-hidden');
-				}
-				megaProducts.classList.add('is-loading');
+				var loading = loadingColumn(node, col);
+				loading.setAttribute('data-hsw-hd-mega-key', key);
 
-				fetch(endpoint + (endpoint.indexOf('?') === -1 ? '?' : '&') +
-					'cat=' + encodeURIComponent(catId) + '&limit=' + encodeURIComponent(limit), {
+				fetch(megaEndpoint + (megaEndpoint.indexOf('?') === -1 ? '?' : '&') +
+					'cat=' + encodeURIComponent(catId) +
+					'&level=' + encodeURIComponent(level) +
+					'&depth=' + encodeURIComponent(megaDepth) +
+					'&limit=' + encodeURIComponent(megaLimit) +
+					'&products=' + (megaProducts ? '1' : '0'), {
 					credentials: 'same-origin',
 					headers: { Accept: 'application/json' },
 				})
 					.then(function (response) {
-						return response.ok ? response.json() : null;
+						if (!response.ok) {
+							throw new Error('cascade request failed');
+						}
+						return response.json();
 					})
 					.then(function (data) {
-						var html = data && data.html ? data.html : '';
-						megaCache[catId] = html;
-						renderMegaProducts(html);
-					})
-					.catch(function () {
-						renderMegaProducts('');
-					});
-			};
-
-			var openMegaItem = function (button, open) {
-				var item = button.closest('[data-hsw-hd-mega-item]');
-				if (!item) {
-					return;
-				}
-				item.classList.toggle('is-open', open);
-				setExpanded(button, open);
-				var body = item.querySelector('[data-hsw-hd-mega-body]');
-				if (body) {
-					body.setAttribute('aria-hidden', open ? 'false' : 'true');
-				}
-				if (open) {
-					loadMegaProducts(button);
-				}
-			};
-
-			megaItems.forEach(function (item) {
-				var button = item.querySelector('[data-hsw-hd-mega-cat]');
-				if (!button) {
-					return;
-				}
-				button.addEventListener('click', function (event) {
-					event.preventDefault();
-					var willOpen = !item.classList.contains('is-open');
-
-					// Single-open accordion: keeps the panel height stable.
-					megaItems.forEach(function (other) {
-						if (other === item) {
+						if (!loading.parentNode) {
 							return;
 						}
-						var otherButton = other.querySelector('[data-hsw-hd-mega-cat]');
-						if (otherButton && other.classList.contains('is-open')) {
-							openMegaItem(otherButton, false);
+						var html = data && data.html ? data.html : '';
+						if (html) {
+							megaCache[key] = html;
+						}
+						insertColumn(html, node, col, focusFirst);
+					})
+					.catch(function () {
+						if (!loading.parentNode) {
+							return;
+						}
+						setNodeOpen(node, false);
+						loading.classList.remove('hsw-hd__cascadecol--loading');
+						loading.classList.add('hsw-hd__cascadecol--error');
+						loading.removeAttribute('aria-hidden');
+						loading.innerHTML = '<div class="hsw-hd__cascadehead"><span class="hsw-hd__cascadetitle">&hellip;</span></div>'
+							+ '<p class="hsw-hd__cascadeempty"></p>';
+						var message = loading.querySelector('.hsw-hd__cascadeempty');
+						if (message) {
+							message.textContent = megaError || '—';
 						}
 					});
+			};
 
-					openMegaItem(button, willOpen);
-				});
+			var openNode = function (node, focusFirst, toggle) {
+				var col = node.closest('[data-hsw-hd-mega-col]');
+				if (!col) {
+					return;
+				}
+
+				var isOpen = node.getAttribute('aria-expanded') === 'true';
+				if (isOpen) {
+					if (toggle) {
+						removeAfter(col);
+						setNodeOpen(node, false);
+					}
+					return;
+				}
+
+				removeAfter(col);
+				collapseSiblings(node, col);
+				setNodeOpen(node, true);
+				requestColumn(node, col, focusFirst);
+			};
+
+			mega.addEventListener('click', function (event) {
+				var node = event.target.closest ? event.target.closest('[data-hsw-hd-mega-node]') : null;
+				if (!node || !mega.contains(node)) {
+					return;
+				}
+				event.preventDefault();
+				openNode(node, event.detail === 0, true);
 			});
 
 			var setMegaOpen = function (open) {
+				if (!open) {
+					clearTimeout(hoverNodeTimer);
+					clearTimeout(hoverTimer);
+					if (megaPanel && megaPanel.contains(document.activeElement)) {
+						try {
+							megaButton.focus({ preventScroll: true });
+						} catch (e) {
+							megaButton.focus();
+						}
+					}
+					resetCascade();
+				}
 				mega.classList.toggle('is-open', open);
 				setExpanded(megaButton, open);
-
-				// First open: show the first category straight away so the
-				// panel is never an empty shell.
-				if (open && !megaBooted && megaItems.length) {
-					megaBooted = true;
-					var first = megaItems[0].querySelector('[data-hsw-hd-mega-cat]');
-					if (first) {
-						openMegaItem(first, true);
-					}
+				if (megaPanel) {
+					megaPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
 				}
 			};
 
@@ -494,9 +595,10 @@
 
 			/*
 			 * Hover mode (widget setting "با هاور"). A short grace period
-			 * bridges the gap between the trigger row and the panel, which
-			 * sits under the whole nav bar, so the menu does not snap shut
-			 * while the pointer travels down into it.
+			 * bridges the gap between the trigger row and the panel, so the
+			 * menu does not snap shut while the pointer travels down into it.
+			 * Deeper columns open only after the pointer settles on a row;
+			 * keyboard users open them with Enter/Space.
 			 */
 			if (mega.classList.contains('hsw-hd__mega--hover')) {
 				var hoverTimer = null;
@@ -508,7 +610,7 @@
 					clearTimeout(hoverTimer);
 					hoverTimer = setTimeout(function () {
 						setMegaOpen(false);
-					}, 160);
+					}, 180);
 				};
 
 				[megaButton, megaPanel].forEach(function (node) {
@@ -519,24 +621,72 @@
 					node.addEventListener('mouseleave', closeOnHover);
 				});
 
-				mega.addEventListener('focusout', function (event) {
-					if (!mega.contains(event.relatedTarget)) {
-						setMegaOpen(false);
+				mega.addEventListener('mouseover', function (event) {
+					var node = event.target.closest ? event.target.closest('[data-hsw-hd-mega-node]') : null;
+					if (!node || !mega.contains(node)) {
+						clearTimeout(hoverNodeTimer);
+						return;
 					}
+					if (event.relatedTarget && node.contains(event.relatedTarget)) {
+						return;
+					}
+					clearTimeout(hoverNodeTimer);
+					hoverNodeTimer = setTimeout(function () {
+						openNode(node, false, false);
+					}, 70);
+				});
+
+				mega.addEventListener('mouseleave', function () {
+					clearTimeout(hoverNodeTimer);
+				});
+
+				/*
+				 * Defer this check: removing a focused column moves focus to the
+				 * document body for one tick, and closing immediately would race
+				 * with the keydown handler that is about to focus the parent row.
+				 */
+				mega.addEventListener('focusout', function () {
+					window.setTimeout(function () {
+						if (mega.classList.contains('is-open') && !mega.contains(document.activeElement)) {
+							setMegaOpen(false);
+						}
+					}, 0);
 				});
 			}
 
 			document.addEventListener('click', function (event) {
 				if (mega.classList.contains('is-open') && !mega.contains(event.target)) {
-					mega.classList.remove('is-open');
-					setExpanded(megaButton, false);
+					setMegaOpen(false);
 				}
 			});
 
 			document.addEventListener('keydown', function (event) {
-				if ('Escape' === event.key && mega.classList.contains('is-open')) {
-					mega.classList.remove('is-open');
-					setExpanded(megaButton, false);
+				if ('Escape' !== event.key || !mega.classList.contains('is-open')) {
+					return;
+				}
+
+				var cols = cascadeColumns();
+				if (cols.length > 1) {
+					var last = cols[cols.length - 1];
+					var parentNode = last._hswParentNode;
+					if (last.parentNode && last.parentNode.contains(last)) {
+						last.parentNode.removeChild(last);
+					}
+					if (parentNode) {
+						setNodeOpen(parentNode, false);
+						try {
+							parentNode.focus({ preventScroll: true });
+						} catch (e) {
+							parentNode.focus();
+						}
+					}
+					return;
+				}
+
+				var hadFocus = mega.contains(document.activeElement);
+				setMegaOpen(false);
+				if (hadFocus) {
+					megaButton.focus();
 				}
 			});
 		}
@@ -546,9 +696,8 @@
 				return;
 			}
 			closeSearch(null);
-			if (mega) {
-				mega.classList.remove('is-open');
-				setExpanded(megaButton, false);
+			if (mega && megaButton && mega.classList.contains('is-open') && typeof setMegaOpen === 'function') {
+				setMegaOpen(false);
 			}
 			lastFocus = document.activeElement;
 			drawer.classList.add('is-open');
@@ -661,6 +810,10 @@
 				return;
 			}
 			if (mega && mega.classList.contains('is-open')) {
+				/* The cascade handler above owns Escape for the new panel. */
+				if (mega.querySelector('[data-hsw-hd-mega-cascade]')) {
+					return;
+				}
 				mega.classList.remove('is-open');
 				setExpanded(megaButton, false);
 				return;
