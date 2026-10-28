@@ -835,20 +835,91 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         }
 
         /**
-         * Dynamic feature rows for the «ویژگی‌های شاخص» widget: product
-         * attributes merged with short-description fields.
+         * Key/value rows from a two-column HTML table in the short description.
          *
-         * The old logic returned the attributes as soon as there was one, so
-         * extra fields such as «طرح», «ضخامت» and «تکنولوژی» disappeared even
-         * though they were real product data. Labels already present in the
-         * attributes are skipped, so «جنس» is never printed twice.
+         * Product editors often enter the short description as a table with a
+         * «ویژگی | مشخصات محصول» header and one field per row. Stripping tags
+         * turns every cell into a separate bullet, so tables need a dedicated
+         * parser before the bullet fallback runs.
          *
          * @param WC_Product|null $product Product.
-         * @param int             $limit   Max rows.
          * @return array [ ['k' => label, 'v' => value], ... ]
          */
-        protected function feature_rows( $product, $limit = 6 ) {
-                if ( ! $product || $limit < 1 ) {
+        protected function short_description_table_rows( $product ) {
+                if ( ! $product ) {
+                        return array();
+                }
+                $desc = (string) $product->get_short_description();
+                if ( '' === trim( $desc ) || false === stripos( $desc, '<table' ) ) {
+                        return array();
+                }
+
+                $sections = array();
+                if ( preg_match_all( '/<tbody\b[^>]*>(.*?)<\/tbody>/is', $desc, $matches ) ) {
+                        $sections = $matches[1];
+                } elseif ( preg_match( '/<table\b[^>]*>(.*?)<\/table>/is', $desc, $matches ) ) {
+                        $sections = array( $matches[1] );
+                }
+
+                $rows = array();
+                foreach ( $sections as $section ) {
+                        if ( ! preg_match_all( '/<tr\b[^>]*>(.*?)<\/tr>/is', $section, $trs ) ) {
+                                continue;
+                        }
+                        foreach ( $trs[1] as $tr ) {
+                                /* Header cells (`<th>`) are labels, not specs. */
+                                if ( preg_match( '/<th\b/i', $tr ) ) {
+                                        continue;
+                                }
+                                if ( ! preg_match_all( '/<t[dh]\b[^>]*>(.*?)<\/t[dh]>/is', $tr, $cells ) ) {
+                                        continue;
+                                }
+
+                                $values = array();
+                                foreach ( $cells[1] as $cell ) {
+                                        $cell    = preg_replace( '/<br\s*\/?>/i', ' ', $cell );
+                                        $text    = wp_strip_all_tags( (string) $cell );
+                                        $text    = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+                                        $text    = preg_replace( '/[\s\p{Z}]+/u', ' ', $text );
+                                        $values[] = trim( (string) $text );
+                                }
+                                if ( count( $values ) < 2 ) {
+                                        continue;
+                                }
+
+                                $label = array_shift( $values );
+                                $value = trim( implode( ' ', array_filter( $values, 'strlen' ) ) );
+                                if ( '' === $label || '' === $value ) {
+                                        continue;
+                                }
+                                $label_key = $this->feature_key( $label );
+                                $value_key = $this->feature_key( $value );
+                                if ( in_array( $label_key, array( 'ویژگی', 'ویژگی محصول', 'مشخصه' ), true )
+                                        || ( 'مشخصات' === $label_key && false !== strpos( $value_key, 'محصول' ) ) ) {
+                                        continue;
+                                }
+                                $rows[] = array( 'k' => $label, 'v' => $value );
+                        }
+                }
+
+                return $rows;
+        }
+
+        /**
+         * Dynamic feature rows for the «ویژگی‌های شاخص» widget.
+         *
+         * @param WC_Product|null $product Product.
+         * @param int             $limit   Max rows; 0 = all rows.
+         * @param string          $source  auto | attributes | short_description | manual.
+         * @return array [ ['k' => label, 'v' => value], ... ]
+         */
+        protected function feature_rows( $product, $limit = 0, $source = 'auto' ) {
+                if ( ! $product ) {
+                        return array();
+                }
+                $limit  = max( 0, (int) $limit );
+                $source = in_array( $source, array( 'auto', 'attributes', 'short_description', 'manual' ), true ) ? $source : 'auto';
+                if ( 'manual' === $source ) {
                         return array();
                 }
 
@@ -858,7 +929,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 $add    = function ( $label, $value ) use ( &$rows, &$labels, &$values, $limit ) {
                         $label = trim( wp_strip_all_tags( (string) $label ) );
                         $value = trim( wp_strip_all_tags( (string) $value ) );
-                        if ( '' === $value || count( $rows ) >= $limit ) {
+                        if ( '' === $value || ( $limit > 0 && count( $rows ) >= $limit ) ) {
                                 return;
                         }
 
@@ -880,18 +951,27 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         $rows[] = array( 'k' => $label, 'v' => $value );
                 };
 
-                foreach ( $this->specs_rows( $product, true ) as $row ) {
-                        $add( $row['k'], $row['v'] );
+                if ( 'attributes' === $source || 'auto' === $source ) {
+                        foreach ( $this->specs_rows( $product, true ) as $row ) {
+                                $add( $row['k'], $row['v'] );
+                        }
                 }
 
-                /* Read more than the display limit so duplicate labels cannot
-                   starve the later, unique fields. */
-                foreach ( $this->short_description_bullets( $product, max( 12, $limit * 3 ) ) as $bullet ) {
-                        $row = $this->feature_from_bullet( $bullet );
-                        $add( $row['k'], $row['v'] );
+                if ( 'short_description' === $source || 'auto' === $source ) {
+                        $table_rows = $this->short_description_table_rows( $product );
+                        if ( $table_rows ) {
+                                foreach ( $table_rows as $row ) {
+                                        $add( $row['k'], $row['v'] );
+                                }
+                        } else {
+                                foreach ( $this->short_description_bullets( $product, 0 ) as $bullet ) {
+                                        $row = $this->feature_from_bullet( $bullet );
+                                        $add( $row['k'], $row['v'] );
+                                }
+                        }
                 }
 
-                return array_slice( $rows, 0, $limit );
+                return $limit > 0 ? array_slice( $rows, 0, $limit ) : $rows;
         }
 
         /**
@@ -925,7 +1005,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                 }
                         }
                 }
-                return array_slice( $out, 0, $limit );
+                return $limit > 0 ? array_slice( $out, 0, $limit ) : $out;
         }
 
         /**

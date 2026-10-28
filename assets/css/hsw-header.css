@@ -1891,6 +1891,12 @@ html.hsw-hd-lock body {
 }
 
 html.hsw-hd-lock {
+	/*
+	 * Preserve the content box when the scrollbar is hidden. The page content
+	 * starts at x=0; right padding keeps its x/width unchanged after the
+	 * scrollbar disappears, in both the RTL and LTR storefronts. Padding on
+	 * the inline-end edge shifted the RTL page 15px to the right.
+	 */
 	padding-right: var(--hsw-hd-scrollbar, 0px);
 }
 
@@ -2657,9 +2663,11 @@ html { overflow-x: clip; }
  * Cart sidebar
  *
  * Opened by the header cart icon. The panel lives on the inline-end edge
- * (left in RTL, right in LTR) so it never collides with the mobile menu. It
- * enters and leaves from that same edge; the medium-speed opacity fade is
- * layered on top of the slide.
+ * (left in RTL, right in LTR) so it never collides with the mobile menu.
+ * In the RTL store it therefore enters left-to-right and leaves right-to-left
+ * along the same path; the medium-speed opacity fade is layered on the slide.
+ * Only transform/opacity animate (no scale), so the panel width never changes
+ * and the edge cannot jump while opening or closing.
  * ====================================================================== */
 
 .hsw-hd__cartdrawer {
@@ -2706,21 +2714,20 @@ html { overflow-x: clip; }
 	color: var(--hsw-on-surface, #191c1e);
 	box-shadow: -18px 0 50px rgba(15, 23, 42, .18);
 	opacity: 0;
-	transform: translateX(100%) scale(.985);
-	transform-origin: right center;
-	transition: transform .46s cubic-bezier(.22, .61, .36, 1), opacity .34s ease;
+	transform: translate3d(100%, 0, 0);
+	backface-visibility: hidden;
+	transition: transform .46s cubic-bezier(.22, .61, .36, 1), opacity .32s ease;
 	will-change: transform, opacity;
 }
 
 [dir="rtl"] .hsw-hd__cartpanel {
 	box-shadow: 18px 0 50px rgba(15, 23, 42, .18);
-	transform: translateX(-100%) scale(.985);
-	transform-origin: left center;
+	transform: translate3d(-100%, 0, 0);
 }
 
 .hsw-hd__cartdrawer.is-open .hsw-hd__cartpanel {
 	opacity: 1;
-	transform: translateX(0) scale(1);
+	transform: translate3d(0, 0, 0);
 }
 
 /* Let the drawer contents settle in just after the panel starts moving. */

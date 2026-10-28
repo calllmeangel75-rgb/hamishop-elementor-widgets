@@ -285,6 +285,13 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 $show_warranty = ( 'yes' === ( $s['tab_warranty'] ?? 'yes' ) );
                 $show_review   = ( 'yes' === ( $s['tab_review'] ?? 'yes' ) );
                 $show_comments = ( 'yes' === ( $s['tab_comments'] ?? 'yes' ) );
+
+                /*
+                 * Visual order: گارانتی → مشخصات (WooCommerce attributes) →
+                 * بررسی تخصصی → دیدگاه‌ها. The first visible tab is active so
+                 * the strip and its panel always agree.
+                 */
+                $first_tab = $show_warranty ? 'warranty' : ( $show_specs ? 'specs' : ( $show_review ? 'review' : 'comments' ) );
                 ?>
                 <?php
                 /*
@@ -297,26 +304,26 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 <section class="<?php echo esc_attr( $this->root_class( 'ptabs' ) ); ?>" data-hsw-ptabs>
                         <div class="hsw-ptabs__navwrap">
                         <div class="hsw-ptabs__nav" data-hsw-tabs-scroll>
+                                <?php if ( $show_warranty ) : ?>
+                                        <button type="button" class="hsw-ptabs__btn<?php echo 'warranty' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="warranty">
+                                                <?php echo HSW_Helpers::icon( 'verified_user' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                <span><?php echo esc_html( $lbl_warranty ); ?></span>
+                                        </button>
+                                <?php endif; ?>
                                 <?php if ( $show_specs ) : ?>
-                                        <button type="button" class="hsw-ptabs__btn is-active" data-hsw-tab="specs">
+                                        <button type="button" class="hsw-ptabs__btn<?php echo 'specs' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="specs">
                                                 <?php echo HSW_Helpers::icon( 'tune' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                 <span><?php echo esc_html( $lbl_specs ); ?></span>
                                         </button>
                                 <?php endif; ?>
                                 <?php if ( $show_review ) : ?>
-                                        <button type="button" class="hsw-ptabs__btn" data-hsw-tab="review">
+                                        <button type="button" class="hsw-ptabs__btn<?php echo 'review' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="review">
                                                 <?php echo HSW_Helpers::icon( 'description' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                 <span><?php echo esc_html( $lbl_review ); ?></span>
                                         </button>
                                 <?php endif; ?>
-                                <?php if ( $show_warranty ) : ?>
-                                        <button type="button" class="hsw-ptabs__btn" data-hsw-tab="warranty">
-                                                <?php echo HSW_Helpers::icon( 'verified_user' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                <span><?php echo esc_html( $lbl_warranty ); ?></span>
-                                        </button>
-                                <?php endif; ?>
                                 <?php if ( $show_comments ) : ?>
-                                        <button type="button" class="hsw-ptabs__btn" data-hsw-tab="comments">
+                                        <button type="button" class="hsw-ptabs__btn<?php echo 'comments' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="comments">
                                                 <?php echo HSW_Helpers::icon( 'rate_review' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                 <span><?php echo esc_html( $lbl_comments ); ?></span>
                                         </button>
@@ -327,8 +334,27 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                         </button>
                         </div>
 
+                        <?php if ( $show_warranty ) : ?>
+                                <div class="hsw-ptabs__panel<?php echo 'warranty' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="warranty">
+                                        <h2 class="hsw-ptabs__h2"><?php echo esc_html( $warranty_title ); ?></h2>
+                                        <?php
+                                        $w_lines = preg_split( '/\r\n|\r|\n/', trim( (string) $warranty_text ) );
+                                        $w_lines = array_filter( array_map( 'trim', (array) $w_lines ) );
+                                        ?>
+                                        <?php if ( empty( $w_lines ) ) : ?>
+                                                <p><?php esc_html_e( 'اطلاعاتی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
+                                        <?php else : ?>
+                                                <ul class="hsw-ptabs__warranty">
+                                                        <?php foreach ( $w_lines as $line ) : ?>
+                                                                <li><?php echo HSW_Helpers::icon( 'check_circle' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php echo esc_html( $line ); ?></span></li>
+                                                        <?php endforeach; ?>
+                                                </ul>
+                                        <?php endif; ?>
+                                </div>
+                        <?php endif; ?>
+
                         <?php if ( $show_specs ) : ?>
-                                <div class="hsw-ptabs__panel is-active" data-hsw-panel="specs">
+                                <div class="hsw-ptabs__panel<?php echo 'specs' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="specs">
                                         <h2 class="hsw-ptabs__h2"><?php echo esc_html( $specs_title ); ?></h2>
                                         <?php if ( empty( $specs ) ) : ?>
                                                 <p><?php esc_html_e( 'مشخصاتی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
@@ -351,7 +377,7 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                         <?php endif; ?>
 
                         <?php if ( $show_review ) : ?>
-                                <div class="hsw-ptabs__panel" data-hsw-panel="review">
+                                <div class="hsw-ptabs__panel<?php echo 'review' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="review">
                                         <div class="hsw-ptabs__review">
                                                 <?php if ( $demo ) : ?>
                                                         <p><?php echo esc_html( 'پرچمدار جدید سامسونگ نقطه عطف یکپارچه‌سازی سخت‌افزار ممتاز با الگوریتم‌های هوش مصنوعی اختصاصی است. بدنه تیتانیومی مستحکم علاوه بر جلوه مدرن و فوق‌العاده مینیمال، مقاومت دستگاه را در برابر صدمات روزمره تضمین می‌کند.' ); ?></p>
@@ -368,31 +394,12 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                 </div>
                         <?php endif; ?>
 
-                        <?php if ( $show_warranty ) : ?>
-                                <div class="hsw-ptabs__panel" data-hsw-panel="warranty">
-                                        <h2 class="hsw-ptabs__h2"><?php echo esc_html( $warranty_title ); ?></h2>
-                                        <?php
-                                        $w_lines = preg_split( '/\r\n|\r|\n/', trim( (string) $warranty_text ) );
-                                        $w_lines = array_filter( array_map( 'trim', (array) $w_lines ) );
-                                        ?>
-                                        <?php if ( empty( $w_lines ) ) : ?>
-                                                <p><?php esc_html_e( 'اطلاعاتی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
-                                        <?php else : ?>
-                                                <ul class="hsw-ptabs__warranty">
-                                                        <?php foreach ( $w_lines as $line ) : ?>
-                                                                <li><?php echo HSW_Helpers::icon( 'check_circle' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php echo esc_html( $line ); ?></span></li>
-                                                        <?php endforeach; ?>
-                                                </ul>
-                                        <?php endif; ?>
-                                </div>
-                        <?php endif; ?>
-
                         <?php if ( $show_comments ) : ?>
                                 <?php
                                 $review_form_id = $product ? 'hsw-review-form-' . (int) $product->get_id() : '';
                                 $can_review     = ! $demo && $product && $this->review_form_allowed( $product );
                                 ?>
-                                <div class="hsw-ptabs__panel" data-hsw-panel="comments" id="reviews">
+                                <div class="hsw-ptabs__panel<?php echo 'comments' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="comments" id="reviews">
                                         <div class="hsw-ptabs__rvhead">
                                                 <div>
                                                         <h2 class="hsw-ptabs__h2"><?php esc_html_e( 'دیدگاه‌های تاییدشده خریداران', 'hamishop-elementor-widgets' ); ?></h2>

@@ -88,7 +88,7 @@ HSW_Palette → html:root { --hsw-primary … --hsw-cta* --hsw-pal-* --hsw-font 
 |---|---|---|:--:|:--:|:--:|:--:|---|
 | `hsw-product-accordions` | آکاردئون‌های محصول (HamiShop) | class-hsw-widget-product-accordions.php | ✔ | 2 | 0 | 13 | ارثی |
 | `hsw-product-breadcrumb` | همی‌راه محصول (HamiShop) | class-hsw-widget-product-breadcrumb.php | — | 2 | 1 | 6 | ارثی |
-| `hsw-product-features` | ویژگی‌های شاخص محصول (HamiShop) | class-hsw-widget-product-features.php | ✔ | 2 | 0 | 9 | ارثی |
+| `hsw-product-features` | ویژگی‌های شاخص محصول (HamiShop) | class-hsw-widget-product-features.php | ✔ | 2 | 0 | 11 | ارثی |
 | `hsw-product-gallery` | گالری محصول (HamiShop) | class-hsw-widget-product-gallery.php | — | 2 | 1 | 18 | ارثی |
 | `hsw-product-page` | صفحه کامل محصول — حامی (ویجت جامع) | class-hsw-widget-product-page.php | — | 2 | 2 | 27 | hsw-fonts, hsw-product, hsw-composite |
 | `hsw-product-purchase` | جعبه خرید و قیمت (HamiShop) | class-hsw-widget-product-purchase.php | ✔ | 2 | 1 | 14 | ارثی |

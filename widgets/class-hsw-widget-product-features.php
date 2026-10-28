@@ -4,8 +4,8 @@
  * Desktop: check-marked list inside a bordered box. Mobile: 2×2 bento grid
  * (icon box + label + value).
  *
- * Sources: repeater items by default (the design's Samsung demo texts), or the
- * first 4 attribute-spec rows as «k: v» when the auto switchers are on.
+ * Sources: a selectable mix of WooCommerce attributes and the short-description
+ * table/lines, with a repeater fallback. The row limit defaults to all rows.
  * Demo mode always renders the repeater defaults.
  *
  * @package HamiShop_Elementor_Widgets
@@ -103,12 +103,43 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                 );
 
                 $this->add_control(
+                        'source',
+                        array(
+                                'label'       => __( 'منبع ویژگی‌ها', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'auto',
+                                'options'     => array(
+                                        'auto'              => __( 'خودکار — مشخصات محصول + توضیح کوتاه', 'hamishop-elementor-widgets' ),
+                                        'attributes'        => __( 'فقط ویژگی‌های ووکامرس (Attributes)', 'hamishop-elementor-widgets' ),
+                                        'short_description' => __( 'فقط جدول/متن توضیح کوتاه', 'hamishop-elementor-widgets' ),
+                                        'manual'            => __( 'فقط فهرست دستی', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'در حالت خودکار، ابتدا ویژگی‌های ووکامرس و سپس جدول یا خطوط توضیح کوتاه خوانده می‌شوند؛ ردیف‌های تکراری حذف می‌شوند. در حالت دستی فقط فهرست‌های زیر استفاده می‌شوند.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'rows_limit',
+                        array(
+                                'label'       => __( 'حداکثر تعداد ردیف', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::NUMBER,
+                                'default'     => 0,
+                                'min'         => 0,
+                                'max'         => 50,
+                                'step'        => 1,
+                                'description' => __( '۰ یعنی همهٔ ردیف‌ها نمایش داده شوند. برای فهرست‌های طولانی می‌توانید مثلاً ۱۲ بگذارید.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'source!' => 'manual' ),
+                        )
+                );
+
+                $this->add_control(
                         'desk_auto',
                         array(
-                                'label'       => __( 'دسکتاپ: از مشخصات محصول', 'hamishop-elementor-widgets' ),
-                                'description' => __( 'روشن (پیش‌فرض): تا ۶ مشخصه‌ی محصول به شکل «نام: مقدار»؛ مشخصات محصول و فیلدهای توضیح کوتاه با هم ترکیب می‌شوند. اگر محصول مشخصه نداشت، از آیتم‌های فهرست زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'دسکتاپ: استفاده خودکار از داده محصول', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'روشن (پیش‌فرض): ردیف‌ها از منبع انتخاب‌شده خوانده می‌شوند. اگر خاموش باشد یا داده‌ای پیدا نشود، از فهرست دستی زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SWITCHER,
                                 'default'     => 'yes',
+                                'condition'   => array( 'source!' => 'manual' ),
                         )
                 );
 
@@ -136,10 +167,11 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                 $this->add_control(
                         'mob_auto',
                         array(
-                                'label'       => __( 'موبایل: از مشخصات محصول', 'hamishop-elementor-widgets' ),
-                                'description' => __( 'روشن (پیش‌فرض): تا ۶ مشخصه‌ی محصول با آیکون tune — مشخصات و فیلدهای توضیح کوتاه با هم ترکیب می‌شوند. اگر محصول مشخصه نداشت، از گرید زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'label'       => __( 'موبایل: استفاده خودکار از داده محصول', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'روشن (پیش‌فرض): ردیف‌ها از منبع انتخاب‌شده با آیکون tune خوانده می‌شوند. اگر خاموش باشد یا داده‌ای پیدا نشود، از گرید دستی زیر استفاده می‌شود.', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SWITCHER,
                                 'default'     => 'yes',
+                                'condition'   => array( 'source!' => 'manual' ),
                         )
                 );
 
@@ -264,12 +296,20 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                 list( $product, $demo ) = $this->product_or_demo();
                 $s = $this->effective_settings();
 
-                /* --- Desktop: demo defaults | auto specs/bullets | repeater. --- */
+                $source = isset( $s['source'] ) ? (string) $s['source'] : 'auto';
+                if ( ! in_array( $source, array( 'auto', 'attributes', 'short_description', 'manual' ), true ) ) {
+                        $source = 'auto';
+                }
+                $limit     = isset( $s['rows_limit'] ) ? max( 0, (int) $s['rows_limit'] ) : 0;
+                $desk_auto = 'yes' === ( $s['desk_auto'] ?? 'yes' );
+                $mob_auto  = 'yes' === ( $s['mob_auto'] ?? 'yes' );
+
+                /* --- Desktop: demo defaults | selected source | repeater. --- */
                 $desk = array();
                 if ( $demo ) {
                         $desk = $this->default_desk_items();
-                } elseif ( 'yes' === ( $s['desk_auto'] ?? '' ) ) {
-                        foreach ( $this->feature_rows( $product ) as $row ) {
+                } elseif ( 'manual' !== $source && $desk_auto ) {
+                        foreach ( $this->feature_rows( $product, $limit, $source ) as $row ) {
                                 $desk[] = array( 'text' => '' !== $row['k'] ? trim( $row['k'] . ': ' . $row['v'] ) : $row['v'] );
                         }
                 }
@@ -284,12 +324,12 @@ class HSW_Widget_Product_Features extends HSW_Product_Base {
                         }
                 }
 
-                /* --- Mobile: demo defaults | auto specs/bullets (tune icon) | repeater. --- */
+                /* --- Mobile: demo defaults | selected source (tune icon) | repeater. --- */
                 $mob = array();
                 if ( $demo ) {
                         $mob = $this->default_mob_items();
-                } elseif ( 'yes' === ( $s['mob_auto'] ?? '' ) ) {
-                        foreach ( $this->feature_rows( $product ) as $row ) {
+                } elseif ( 'manual' !== $source && $mob_auto ) {
+                        foreach ( $this->feature_rows( $product, $limit, $source ) as $row ) {
                                 $mob[] = array( 'icon' => 'tune', 'label' => $row['k'], 'value' => $row['v'] );
                         }
                 }

@@ -256,13 +256,15 @@
   </div>
 </div>
 ```
-- منبع دسکتاپ: SWITCHER `desk_auto` (default no). خاموش → Repeater `desk_items` (فیلد `text`؛ ۴ آیتم پیش‌فرض متن‌های demo features_d). روشن → از attribute مشخص‌شده؟ نه — ساده: روشن = ۴ مقدار اول `specs_rows($product)` به شکل «k: v».
-- منبع موبایل: SWITCHER `mob_auto` (default no). خاموش → Repeater `mob_items` (فیلدها `icon` SELECT، `label`، `value`؛ ۴ آیتم پیش‌فرض demo features_m). روشن → ۴ اول specs (icon ثابت tune، label=k، value=v).
+- منبع: SELECT `source` با حالت‌های `auto` (ویژگی‌های ووکامرس + توضیح کوتاه)، `attributes` (فقط Attributes)، `short_description` (فقط جدول/متن توضیح کوتاه) و `manual` (فقط Repeater). حالت پیش‌فرض `auto`.
+- جدول HTML توضیح کوتاه با `short_description_table_rows()` ردیف‌به‌ردیف پارس می‌شود؛ سرسطر (`<th>` یا ردیف «ویژگی | مشخصات محصول») حذف می‌شود. اگر جدولی نبود، `<li>`ها یا خطوط متن به‌عنوان fallback خوانده می‌شوند.
+- محدودیت ردیف: NUMBER `rows_limit` (default `0` = همهٔ ردیف‌ها؛ حداکثر ۵۰). `feature_rows($product, $limit, $source)` مقدار ۰ را نامحدود تفسیر می‌کند.
+- سوییچ‌های `desk_auto`/`mob_auto` (default yes) در حالت منبع غیردستی تعیین می‌کنند هر ویوپورت از دادهٔ خودکار استفاده کند یا از Repeater جایگزین. `manual` همیشه Repeater را انتخاب می‌کند.
 - عناوین: `desk_title` (default «ویژگی‌های شاخص کالا:») و `mob_title` (default «ویژگی‌های کلیدی»).
 - demo: اگر demo → همان repeater پیش‌فرض‌ها کفایت می‌کند (پس وقتی demo، repeater خامش را رندر کن).
 
 ### کنترل‌ها
-- CONTENT: `ctrl_visibility`؛ `desk_title`,`mob_title` (TEXT)؛ `desk_auto`/`mob_auto` (SWITCHER)؛ `desk_items` (REPEATER text)؛ `mob_items` (REPEATER icon/label/value).
+- CONTENT: `ctrl_visibility`؛ `desk_title`,`mob_title` (TEXT)؛ `source` (SELECT)؛ `rows_limit` (NUMBER)؛ `desk_auto`/`mob_auto` (SWITCHER)؛ `desk_items` (REPEATER text)؛ `mob_items` (REPEATER icon/label/value).
 - STYLE: `ctrl_box('ft','{{WRAPPER}} .hsw-pfeat__box')`؛ `ctrl_text('ft_t','{{WRAPPER}} .hsw-pfeat__title')`؛ `ctrl_text('ft_i','{{WRAPPER}} .hsw-pfeat__list')`؛ `ctrl_icon('ft_ic','{{WRAPPER}} .hsw-pfeat__ic')`؛ موبایل: `ctrl_box('ftm','{{WRAPPER}} .hsw-pfeat__cell')`؛ رنگ قاب آیکون: `{{WRAPPER}} .hsw-pfeat__mic` → `--hsw-ft-mic-bg`,`--hsw-ft-mic`؛ `ctrl_text('ftm_l','{{WRAPPER}} .hsw-pfeat__mlabel')`؛ `ctrl_text('ftm_v','{{WRAPPER}} .hsw-pfeat__mval')`.
 
 ---
