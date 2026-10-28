@@ -265,32 +265,6 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	border-bottom: 1px solid var(--hsw-hd-border);
 }
 
-/*
- * Header shine. A dedicated, clipped layer keeps the moving gradient inside
- * the main row without `overflow: hidden` on the row itself, which would clip
- * the search suggestions and dropdown panels that escape the header.
- */
-.hsw-hd__shine {
-	position: absolute;
-	inset: 0;
-	z-index: 0;
-	overflow: hidden;
-	pointer-events: none;
-}
-
-.hsw-hd--header-shine .hsw-hd__shine::before {
-	content: '';
-	position: absolute;
-	inset: -45% -25%;
-	background: linear-gradient(105deg,
-		transparent 28%,
-		var(--hsw-hd-header-shine-c, rgba(29, 78, 216, .18)) 46%,
-		transparent 64%);
-	transform: translateX(-125%) rotate(6deg);
-	animation: hsw-hd-header-shine var(--hsw-hd-header-shine-dur, 7s) ease-in-out infinite;
-	will-change: transform, opacity;
-}
-
 .hsw-hd__maininner {
 	position: relative;
 	z-index: 1;
@@ -301,23 +275,6 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	max-width: var(--hsw-hd-width);
 	margin: 0 auto;
 	padding: 13px clamp(16px, 3vw, 28px);
-}
-
-@keyframes hsw-hd-header-shine {
-	0%, 12% {
-		opacity: 0;
-		transform: translateX(-125%) rotate(6deg);
-	}
-	22% {
-		opacity: 1;
-	}
-	60% {
-		opacity: 1;
-	}
-	82%, 100% {
-		opacity: 0;
-		transform: translateX(125%) rotate(6deg);
-	}
 }
 
 .hsw-hd__burger {
@@ -342,7 +299,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	align-items: center;
 	min-width: 0;
 	max-width: 290px;
-	flex-shrink: 0;
+	flex-shrink: 1;
 	margin: 0;
 	padding: 0;
 	font: inherit;
@@ -355,7 +312,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	gap: 10px;
 	min-width: 0;
 	max-width: 290px;
-	flex-shrink: 0;
+	flex-shrink: 1;
 }
 
 .hsw-hd__logomark {
@@ -415,14 +372,37 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 }
 
 .hsw-hd__logomark--image {
+	--hsw-hd-logo-maxh: var(--hsw-hd-logow);
+	width: auto;
+	height: auto;
+	max-width: min(calc(var(--hsw-hd-logow) * 6), 38vw, 100%);
+	max-height: var(--hsw-hd-logo-maxh);
+	flex: 0 1 auto;
+	min-width: 0;
 	background: var(--hsw-hd-search);
 	box-shadow: none;
 }
 
+.hsw-hd__logomark--ratio {
+	width: min(calc(var(--hsw-hd-logo-maxh) * var(--hsw-hd-logo-ar)), var(--hsw-hd-logo-w), 38vw);
+	height: auto;
+	aspect-ratio: var(--hsw-hd-logo-ar);
+}
+
 .hsw-hd__logoimg {
+	display: block;
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: var(--hsw-hd-logo-maxh, var(--hsw-hd-logow));
+	object-fit: contain;
+}
+
+.hsw-hd__logomark--ratio .hsw-hd__logoimg {
 	width: 100%;
 	height: 100%;
-	object-fit: contain;
+	max-width: 100%;
+	max-height: 100%;
 }
 
 .hsw-hd__brandtext {
@@ -1715,8 +1695,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.hsw-hd__logomark--shine::after,
-	.hsw-hd--header-shine .hsw-hd__shine::before {
+	.hsw-hd__logomark--shine::after {
 		display: none;
 		animation: none !important;
 	}
@@ -1784,10 +1763,14 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	max-width: 230px;
 }
 
-.hsw-hd__pill .hsw-hd__logomark {
+.hsw-hd__pill .hsw-hd__logomark:not(.hsw-hd__logomark--image) {
 	width: calc(var(--hsw-hd-logow) * .86);
 	height: calc(var(--hsw-hd-logow) * .86);
 	border-radius: 50%;
+}
+
+.hsw-hd__pill .hsw-hd__logomark--image {
+	--hsw-hd-logo-maxh: calc(var(--hsw-hd-logow) * .86);
 }
 
 .hsw-hd__pill .hsw-hd__brandname {
@@ -2523,9 +2506,13 @@ html { overflow-x: clip; }
 		font-size: 14px;
 	}
 
-	.hsw-hd__logomark {
+	.hsw-hd__logomark:not(.hsw-hd__logomark--image) {
 		width: 38px;
 		height: 38px;
+	}
+
+	.hsw-hd__logomark--image {
+		--hsw-hd-logo-maxh: 38px;
 	}
 
 	.hsw-hd__pill {
@@ -2538,9 +2525,13 @@ html { overflow-x: clip; }
 		font-size: 13px;
 	}
 
-	.hsw-hd__pill .hsw-hd__logomark {
+	.hsw-hd__pill .hsw-hd__logomark:not(.hsw-hd__logomark--image) {
 		width: 34px;
 		height: 34px;
+	}
+
+	.hsw-hd__pill .hsw-hd__logomark--image {
+		--hsw-hd-logo-maxh: 34px;
 	}
 
 	.hsw-hd__minactions {

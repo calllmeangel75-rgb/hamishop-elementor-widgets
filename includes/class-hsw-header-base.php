@@ -211,27 +211,36 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		 * to get_bloginfo( 'name' ), so an empty value means the user cleared
 		 * it on purpose and the name must really disappear (logo-only brand).
 		 */
-		$aria_name = '' !== $name ? $name : get_bloginfo( 'name' );
-		$logo_id   = isset( $s['logo']['id'] ) ? absint( $s['logo']['id'] ) : 0;
-		$logo      = '';
+		$aria_name  = '' !== $name ? $name : get_bloginfo( 'name' );
+		$logo_id    = isset( $s['logo']['id'] ) ? absint( $s['logo']['id'] ) : 0;
+		$logo       = '';
+		$logo_width = 0;
+		$logo_ratio = 0;
 
 		if ( ! $logo_id ) {
 			$logo_id = (int) get_theme_mod( 'custom_logo' );
 		}
 		if ( $logo_id ) {
+			$logo_meta = wp_get_attachment_metadata( $logo_id );
+			if ( ! empty( $logo_meta['width'] ) && ! empty( $logo_meta['height'] ) ) {
+				$logo_width = (int) $logo_meta['width'];
+				$logo_ratio = round( $logo_width / (int) $logo_meta['height'], 4 );
+			}
+
 			/*
-			 * A 67px logo does not need the 300×300 original (25 KiB on the
-			 * client's shop). Ask for a 160px rendition and declare the real
-			 * display size so the browser stops downloading the full file.
+			 * Keep the logo's natural aspect ratio. The height control caps
+			 * the rendered height, while the responsive width cap lets wide
+			 * logos use the space they need without forcing a square box.
+			 * Declare that width so the browser can pick a suitable file.
 			 */
 			$logo = wp_get_attachment_image(
 				$logo_id,
-				array( 160, 160 ),
+				array( 320, 320 ),
 				false,
 				array(
 					'class'         => 'hsw-hd__logoimg',
 					'alt'           => $aria_name,
-					'sizes'         => '(max-width: 767px) 96px, 120px',
+					'sizes'         => '(max-width: 767px) 38vw, 264px',
 					'fetchpriority' => 'high',
 					'decoding'      => 'async',
 				)
@@ -241,12 +250,20 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			$logo = '<img class="hsw-hd__logoimg" src="' . esc_url( $s['logo']['url'] ) . '" alt="' . esc_attr( $aria_name ) . '" loading="lazy" decoding="async">';
 		}
 
-		$shine       = isset( $s['logo_shine'] ) && 'yes' === $s['logo_shine'];
+		$shine        = isset( $s['logo_shine'] ) && 'yes' === $s['logo_shine'];
 		$mark_classes = 'hsw-hd__logomark' . ( $shine ? ' hsw-hd__logomark--shine' : '' );
+		$mark_style   = '';
 
-		$mark = $logo
-			? '<span class="' . esc_attr( $mark_classes . ' hsw-hd__logomark--image' ) . '">' . $logo . '</span>'
-			: '<span class="' . esc_attr( $mark_classes ) . '">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
+		if ( $logo ) {
+			$mark_classes .= ' hsw-hd__logomark--image';
+			if ( $logo_ratio > 0 ) {
+				$mark_classes .= ' hsw-hd__logomark--ratio';
+				$mark_style    = ' style="--hsw-hd-logo-ar:' . esc_attr( (string) $logo_ratio ) . ';--hsw-hd-logo-w:' . esc_attr( $logo_width . 'px' ) . '"';
+			}
+			$mark = '<span class="' . esc_attr( $mark_classes ) . '"' . $mark_style . '>' . $logo . '</span>';
+		} else {
+			$mark = '<span class="' . esc_attr( $mark_classes ) . '">' . HSW_Helpers::icon( 'storefront' ) . '</span>';
+		}
 
 		$wrap = ( $as_heading && is_front_page() ) ? 'h1' : 'span';
 		$out  = '<' . $wrap . ' class="hsw-hd__brandwrap"><a class="hsw-hd__brand" href="' . esc_url( home_url( '/' ) ) . '" aria-label="' . esc_attr( $aria_name ) . '">';
@@ -697,7 +714,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	/**
 	 * Brand + logo controls.
 	 */
-	protected function content_brand( $variant = 'store' ) {
+	protected function content_brand() {
 		$this->start_controls_section(
 			'sec_hd_brand',
 			array(
@@ -737,20 +754,21 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$this->add_responsive_control(
 			'logo_width',
 			array(
-				'label'      => __( 'عرض لوگو', 'hamishop-elementor-widgets' ),
-				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array(
+				'label'       => __( 'حداکثر ارتفاع لوگو', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array(
 					'px' => array(
 						'min' => 24,
 						'max' => 180,
 					),
 				),
-				'default'    => array(
+				'default'     => array(
 					'size' => 44,
 					'unit' => 'px',
 				),
-				'selectors'  => array(
+				'description' => __( 'لوگو با نسبت تصویر خودش نمایش داده می‌شود؛ این مقدار فقط ارتفاع را محدود می‌کند تا لوگوهای افقی و عمودی هر وب‌سایتی بدون فشرده شدن جا شوند.', 'hamishop-elementor-widgets' ),
+				'selectors'   => array(
 					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-logow: {{SIZE}}{{UNIT}};',
 				),
 			)
@@ -766,19 +784,6 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 				'description' => __( 'یک درخشش گرادیانتی دوره‌ای روی نشان/تصویر لوگو حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است.', 'hamishop-elementor-widgets' ),
 			)
 		);
-
-		if ( 'store' === $variant ) {
-			$this->add_control(
-				'header_shine',
-				array(
-					'label'       => __( 'شاین گرادیانت هدر', 'hamishop-elementor-widgets' ),
-					'type'        => Controls_Manager::SWITCHER,
-					'default'     => 'yes',
-					'separator'   => 'before',
-					'description' => __( 'یک درخشش گرادیانتی ملایم روی نوار اصلی هدر حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است.', 'hamishop-elementor-widgets' ),
-				)
-			);
-		}
 
 		$this->end_controls_section();
 	}
@@ -1295,55 +1300,6 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 				'selector' => '{{WRAPPER}} .hsw-hd__brandname',
 			)
 		);
-
-		if ( 'store' === $variant ) {
-			$this->add_control(
-				'header_shine_heading',
-				array(
-					'label'     => __( 'شاین گرادیانت هدر', 'hamishop-elementor-widgets' ),
-					'type'      => Controls_Manager::HEADING,
-					'separator' => 'before',
-					'condition' => array( 'header_shine' => 'yes' ),
-				)
-			);
-
-			$this->add_control(
-				'header_shine_color',
-				array(
-					'label'     => __( 'رنگ شاین هدر', 'hamishop-elementor-widgets' ),
-					'type'      => Controls_Manager::COLOR,
-					'default'   => 'rgba(29,78,216,0.18)',
-					'condition' => array( 'header_shine' => 'yes' ),
-					'selectors' => array(
-						'{{WRAPPER}} .hsw-hd' => '--hsw-hd-header-shine-c: {{VALUE}};',
-					),
-				)
-			);
-
-			$this->add_control(
-				'header_shine_duration',
-				array(
-					'label'      => __( 'مدت یک دور شاین هدر (ثانیه)', 'hamishop-elementor-widgets' ),
-					'type'       => Controls_Manager::SLIDER,
-					'size_units' => array( 's' ),
-					'range'      => array(
-						's' => array(
-							'min'  => 3,
-							'max'  => 15,
-							'step' => 0.5,
-						),
-					),
-					'default'    => array(
-						'size' => 7,
-						'unit' => 's',
-					),
-					'condition'  => array( 'header_shine' => 'yes' ),
-					'selectors'  => array(
-						'{{WRAPPER}} .hsw-hd' => '--hsw-hd-header-shine-dur: {{SIZE}}{{UNIT}};',
-					),
-				)
-			);
-		}
 
 		$this->add_control(
 			'logo_shine_heading',
@@ -2136,10 +2092,6 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		}
 		if ( $autohide ) {
 			$classes .= ' hsw-hd--autohide';
-		}
-		$header_shine = 'store' === $variant && ( ! isset( $s['header_shine'] ) || 'yes' === $s['header_shine'] );
-		if ( $header_shine ) {
-			$classes .= ' hsw-hd--header-shine';
 		}
 		$vis = isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto';
 		$classes .= ' hsw-vis-' . $vis . $this->hsw_font_class();

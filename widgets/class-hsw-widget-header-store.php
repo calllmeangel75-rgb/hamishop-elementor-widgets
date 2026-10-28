@@ -32,7 +32,7 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 	}
 
 	protected function register_controls() {
-		$this->content_brand( 'store' );
+		$this->content_brand();
 		$this->content_nav();
 		$this->content_search();
 		$this->content_actions();
@@ -316,7 +316,7 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		echo $this->open_root( 'store', $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 		echo $this->topbar_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 
-		echo '<div class="hsw-hd__main"><span class="hsw-hd__shine" aria-hidden="true"></span><div class="hsw-hd__maininner">';
+		echo '<div class="hsw-hd__main"><div class="hsw-hd__maininner">';
 
 		echo '<button class="hsw-hd__burger" type="button" data-hsw-hd-drawer-open aria-controls="' . esc_attr( $drawer_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن منو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'menu' ) . '</button>';
 

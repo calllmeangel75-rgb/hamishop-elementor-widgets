@@ -33,7 +33,7 @@ class HSW_Widget_Header_Minimal extends HSW_Header_Base {
 	}
 
 	protected function register_controls() {
-		$this->content_brand( 'minimal' );
+		$this->content_brand();
 		$this->content_nav();
 		$this->content_search();
 		$this->content_actions();

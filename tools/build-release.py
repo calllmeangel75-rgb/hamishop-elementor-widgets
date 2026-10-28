@@ -3,7 +3,7 @@
 
 Usage:
     python tools/build-release.py            # reads Version from the plugin header
-    python tools/build-release.py 1.11.155   # explicit version
+    python tools/build-release.py 1.11.156   # explicit version
 
 The archive contains one top-level folder and never includes tests, tools,
 backups, VCS data or temporary files. The output is written next to the repo:
@@ -32,7 +32,7 @@ TOP_LEVEL_FILES = (
     "WIDGETS-REFERENCE.md",
     "ARCHITECTURE-MAP.md",
     "STAGING-CHECKLIST.md",
-    "RELEASE-NOTES-1.11.155.md",
+    "RELEASE-NOTES-1.11.156.md",
 )
 TOP_LEVEL_DIRS = ("assets", "includes", "widgets", "templates", "languages")
 EXCLUDED_NAMES = {".DS_Store", "Thumbs.db", "__pycache__"}
