@@ -289,8 +289,4 @@ class HSW_Telegram_Poller {
 			delete_option( self::READY_KEY . '_hash' );
 		}
 	}
-
-	public static function deactivate() {
-		wp_clear_scheduled_hook( self::CRON_HOOK );
-	}
 }

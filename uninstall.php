@@ -23,20 +23,47 @@ function hsw_uninstall_site() {
 	/* ------------------------------------------------------------------
 	 * Options
 	 * --------------------------------------------------------------- */
+	/*
+	 * Every option the plugin reads, including the ones added after this file
+	 * was first written (invoice, telegram polling, 404 page, story flags) and
+	 * the legacy `hsw_bale_contacts` name that older installs may still carry.
+	 */
 	$options = array(
 		'hsw_account_settings',
 		'hsw_account_rewrite_hash',
-		'hsw_throttle_db',
+		'hsw_add_feedback',
 		'hsw_asset_version',
 		'hsw_bale_contacts',
 		'hsw_brand',
+		'hsw_complete_page_id',
+		'hsw_custom_404_enabled',
+		'hsw_db_version',
 		'hsw_enabled_widgets',
 		'hsw_express_slug',
+		'hsw_free_shipping_min',
+		'hsw_free_shipping_on',
 		'hsw_header_widgets_migrated',
+		'hsw_htaccess_backup',
+		'hsw_invoice_enabled',
+		'hsw_invoice_mono',
+		'hsw_jalali_on',
 		'hsw_last_error',
+		'hsw_loop_version',
+		'hsw_oos_last',
 		'hsw_palette',
 		'hsw_post_widget_migrated',
 		'hsw_security',
+		'hsw_telegram_contacts',
+		'hsw_tg_offset',
+		'hsw_tg_poll_ready',
+		'hsw_tg_poll_ready_hash',
+		'hsw_throttle_db',
+		'hsw_wallet_db',
+		'hsw_404_cta',
+		'hsw_404_home',
+		'hsw_404_search_ph',
+		'hsw_404_text',
+		'hsw_404_title',
 	);
 	foreach ( $options as $option ) {
 		delete_option( $option );
@@ -79,6 +106,10 @@ function hsw_uninstall_site() {
 
 	/* ------------------------------------------------------------------
 	 * The throttle table (login counters).
+	 *
+	 * The wallet ledger (`{prefix}hsw_wallet_ledger`) is deliberately kept:
+	 * it is a financial record of customer credit, and deleting a plugin
+	 * should not erase money that was already paid in.
 	 * --------------------------------------------------------------- */
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}hsw_throttle" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 
@@ -98,7 +129,7 @@ function hsw_uninstall_site() {
 	/* ------------------------------------------------------------------
 	 * Scheduled events (if any were registered by an older version).
 	 * --------------------------------------------------------------- */
-	$crons = array( 'hsw_daily_cleanup', 'hsw_ticket_cleanup' );
+	$crons = array( 'hsw_daily_cleanup', 'hsw_ticket_cleanup', 'hsw_tg_poll' );
 	foreach ( $crons as $cron ) {
 		wp_clear_scheduled_hook( $cron );
 	}

@@ -60,19 +60,6 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
         }
 
         /**
-         * Currently chosen gateway id (or first available).
-         */
-        protected function chosen_gateway_id() {
-                $gateways = $this->gateways();
-                foreach ( $gateways as $gw ) {
-                        if ( ! empty( $gw['chosen'] ) ) {
-                                return (string) $gw['id'];
-                        }
-                }
-                return ( $gateways ? (string) $gateways[0]['id'] : '' );
-        }
-
-        /**
          * Pick an icon for a gateway by its id/title keywords.
          */
         protected function icon_for_gateway( $id, $title = '' ) {
@@ -112,17 +99,6 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
                         );
                 }
                 return $out;
-        }
-
-        /**
-         * Total deducted by coupons (live cart).
-         */
-        protected function coupons_total() {
-                $sum = 0;
-                foreach ( $this->applied_coupons() as $c ) {
-                        $sum += (float) $c['amount'];
-                }
-                return $sum;
         }
 
         /**
@@ -362,17 +338,6 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
         }
 
         /**
-         * Demo wallet balances (desktop methods row / mobile summary row).
-         */
-        protected function demo_wallet_balance() {
-                return 250000;
-        }
-
-        protected function demo_wallet_balance_m() {
-                return 350000;
-        }
-
-        /**
          * Demo invoice totals — exactly the DESKTOP mock:
          * ۶۷,۳۴۰,۰۰۰ − ۲,۹۰۰,۰۰۰ − ۵۰,۰۰۰ (کوپن WELCOME) + ارسال رایگان = ۶۴,۳۹۰,۰۰۰.
          */
@@ -406,17 +371,6 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
                         'wallet'   => 350000,
                         'total'    => 9700000,
                 );
-        }
-
-        /**
-         * Demo shipping-free pill captions (the two mocks differ).
-         */
-        protected function demo_free_note() {
-                return 'رایگان (خرید بالای ۵۰۰ هزار)';
-        }
-
-        protected function demo_free_note_m() {
-                return 'رایگان (خرید بالای ۵۰۰ تومان)';
         }
 
         /**

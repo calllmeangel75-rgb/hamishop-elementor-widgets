@@ -2258,26 +2258,6 @@ final class HSW_Account {
 	}
 
 	/**
-	 * Status tone for the invoice pill (matches the order cards).
-	 *
-	 * @param string $status Order status without the `wc-` prefix.
-	 * @return string
-	 */
-	private function order_tone( $status ) {
-		$map = array(
-			'completed'  => 'success',
-			'processing' => 'info',
-			'on-hold'    => 'warning',
-			'pending'    => 'warning',
-			'cancelled'  => 'muted',
-			'refunded'   => 'muted',
-			'failed'     => 'danger',
-		);
-
-		return isset( $map[ $status ] ) ? $map[ $status ] : 'info';
-	}
-
-	/**
 	 * Address list page. The native billing/shipping forms are still rendered
 	 * by WooCommerce when the customer opens an address editor.
 	 */
