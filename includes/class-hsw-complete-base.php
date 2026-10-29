@@ -163,7 +163,7 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
 
         return array(
             'number'   => (string) $order->get_order_number(),
-            'date'     => function_exists( 'wc_format_datetime' ) ? (string) wc_format_datetime( $order->get_date_created() ) : '',
+            'date'     => $this->order_date( $order ),
             'status'   => array(
                 'key'   => (string) $order->get_status(),
                 'label' => function_exists( 'wc_get_order_status_name' ) ? (string) wc_get_order_status_name( $order->get_status() ) : (string) $order->get_status(),
@@ -270,6 +270,24 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
                 'pay_url'  => '',
             ),
         );
+    }
+
+    /**
+     * Order creation date in the store's own calendar (Jalali when available).
+     *
+     * `wc_format_datetime()` always prints the Gregorian calendar, which made
+     * the thank-you page disagree with every other date on a Persian store.
+     *
+     * @param WC_Order $order Order.
+     * @return string
+     */
+    protected function order_date( $order ) {
+        $created = $order->get_date_created();
+        if ( ! $created instanceof WC_DateTime ) {
+            return function_exists( 'wc_format_datetime' ) ? (string) wc_format_datetime( $order->get_date_created() ) : '';
+        }
+
+        return HSW_Helpers::format_date( $created->getTimestamp(), 'j F Y، H:i' );
     }
 
     /**

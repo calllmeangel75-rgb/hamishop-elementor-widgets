@@ -1671,7 +1671,7 @@ final class HSW_Account {
 		}
 
 		$html .= '<div class="hsw-ac__order-summary">';
-		$html .= '<div class="hsw-ac__order-total"><span>' . esc_html__( 'مبلغ کل پرداختی', 'hamishop-elementor-widgets' ) . '</span><strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong></div>';
+		$html .= '<div class="hsw-ac__order-total"><span>' . esc_html__( 'مبلغ کل پرداختی', 'hamishop-elementor-widgets' ) . '</span><strong>' . wp_kses_post( $this->localize_price_html( $order->get_formatted_order_total() ) ) . '</strong></div>';
 		$html .= '<div class="hsw-ac__order-items"><span>' . esc_html( sprintf( 'اقلام سفارش (%s کالا)', HSW_Helpers::fa_num( $count ) ) ) . '</span><div class="hsw-ac__order-thumbs">';
 		$shown = 0;
 		foreach ( $items as $item ) {
@@ -2015,7 +2015,7 @@ final class HSW_Account {
 		if ( count( $items ) > 3 ) {
 			$html .= '<span class="hsw-ac__order-thumb-more">+' . esc_html( HSW_Helpers::fa_num( count( $items ) - 3 ) ) . '</span>';
 		}
-		$html .= '</div><div class="hsw-ac__order-summary-line"><span>' . esc_html( sprintf( '%s کالا', HSW_Helpers::fa_num( $count ) ) ) . '</span><strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong></div></div>';
+		$html .= '</div><div class="hsw-ac__order-summary-line"><span>' . esc_html( sprintf( '%s کالا', HSW_Helpers::fa_num( $count ) ) ) . '</span><strong>' . wp_kses_post( $this->localize_price_html( $order->get_formatted_order_total() ) ) . '</strong></div></div>';
 
 		if ( ! empty( $actions ) ) {
 			$html .= '<footer class="hsw-ac__order-actions">';
@@ -2164,8 +2164,8 @@ final class HSW_Account {
 			}
 			$html .= '</td>';
 			$html .= '<td class="hsw-inv__c-qty">' . esc_html( HSW_Helpers::fa_num( $qty ) ) . '</td>';
-			$html .= '<td class="hsw-inv__c-price">' . wp_kses_post( wc_price( $unit, array( 'currency' => $currency ) ) ) . '</td>';
-			$html .= '<td class="hsw-inv__c-total">' . wp_kses_post( wc_price( $line, array( 'currency' => $currency ) ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-price">' . wp_kses_post( $this->localize_price_html( wc_price( $unit, array( 'currency' => $currency ) ) ) ) . '</td>';
+			$html .= '<td class="hsw-inv__c-total">' . wp_kses_post( $this->localize_price_html( wc_price( $line, array( 'currency' => $currency ) ) ) ) . '</td>';
 			$html .= '</tr>';
 		}
 		$html .= '</tbody></table>';
@@ -2199,18 +2199,18 @@ final class HSW_Account {
 		foreach ( $rows as $row ) {
 			$value  = (float) $row[1];
 			$amount = $value < 0
-				? '− ' . wc_price( abs( $value ), array( 'currency' => $currency ) )
-				: ( 0.0 === $value ? esc_html__( 'رایگان', 'hamishop-elementor-widgets' ) : wc_price( $value, array( 'currency' => $currency ) ) );
+				? '− ' . $this->localize_price_html( wc_price( abs( $value ), array( 'currency' => $currency ) ) )
+				: ( 0.0 === $value ? esc_html__( 'رایگان', 'hamishop-elementor-widgets' ) : $this->localize_price_html( wc_price( $value, array( 'currency' => $currency ) ) ) );
 			$html  .= '<tr><th>' . esc_html( $row[0] ) . '</th><td>' . wp_kses_post( $amount ) . '</td></tr>';
 		}
-		$html .= '<tr class="hsw-inv__grand"><th>' . esc_html__( 'مبلغ پرداخت‌شده', 'hamishop-elementor-widgets' ) . '</th><td>' . wp_kses_post( $order->get_formatted_order_total() ) . '</td></tr>';
+		$html .= '<tr class="hsw-inv__grand"><th>' . esc_html__( 'مبلغ پرداخت‌شده', 'hamishop-elementor-widgets' ) . '</th><td>' . wp_kses_post( $this->localize_price_html( $order->get_formatted_order_total() ) ) . '</td></tr>';
 		$html .= '</tbody></table>';
 
 		$words = HSW_Helpers::number_words( (float) $order->get_total() );
 
 		$html .= '<div class="hsw-inv__paidbox">';
 		$html .= '<span>' . esc_html__( 'مبلغ پرداخت‌شده توسط خریدار:', 'hamishop-elementor-widgets' ) . '</span>';
-		$html .= '<strong>' . wp_kses_post( $order->get_formatted_order_total() ) . '</strong>';
+		$html .= '<strong>' . wp_kses_post( $this->localize_price_html( $order->get_formatted_order_total() ) ) . '</strong>';
 		$html .= '<p class="hsw-inv__words">' . esc_html( $words . ' ' . ( function_exists( 'get_woocommerce_currency' ) && 'IRT' === get_woocommerce_currency() ? __( 'تومان', 'hamishop-elementor-widgets' ) : get_woocommerce_currency() ) ) . '</p>';
 		$html .= '</div>';
 
@@ -2595,7 +2595,8 @@ final class HSW_Account {
 	}
 
 	private function localize_price_html( $html ) {
-		return HSW_Helpers::fa_num( html_entity_decode( (string) $html, ENT_QUOTES, 'UTF-8' ) );
+		/* Text-node only: keeps `?add-to-cart=` and data attributes intact. */
+		return HSW_Helpers::price_html_fa( $html );
 	}
 
 	private function price_html( $amount ) {
@@ -2603,14 +2604,9 @@ final class HSW_Account {
 	}
 
 	public function format_date( $timestamp, $format = 'j F Y، H:i' ) {
-		if ( ! $timestamp ) {
-			return '';
-		}
-		if ( function_exists( 'parsidate' ) ) {
-			$offset = wp_timezone()->getOffset( new DateTime( '@' . (int) $timestamp ) );
-			return parsidate( $format, (int) $timestamp + (int) $offset, true );
-		}
-		return wp_date( $format, $timestamp );
+		/* One formatter for the whole plugin: wp-parsidate → HamiShop Jalali →
+		   site locale (see HSW_Helpers::format_date). */
+		return HSW_Helpers::format_date( $timestamp, $format );
 	}
 
 	private function format_notification_time( $timestamp ) {

@@ -73,6 +73,51 @@ class HSW_Helpers {
         }
 
         /**
+         * Localized date: Jalali when the store already runs a Persian calendar
+         * plugin, Gregorian (site locale) otherwise.
+         *
+         * `wc_format_datetime()` prints the Gregorian calendar with translated
+         * month names, so the thank-you page said «اکتبر 29, 2026» while every
+         * other date on the site (account orders, tickets) was Jalali. The three
+         * branches keep the plugin dependency-free:
+         *  1. wp-parsidate active → its `parsidate()` converter,
+         *  2. HamiShop's own (opt-in) Jalali toggle,
+         *  3. plain WordPress date in the site locale.
+         *
+         * @param int    $timestamp Unix timestamp.
+         * @param string $format    Date format tokens.
+         * @return string
+         */
+        public static function format_date( $timestamp, $format = 'j F Y' ) {
+                $timestamp = (int) $timestamp;
+                if ( $timestamp <= 0 ) {
+                        return '';
+                }
+
+                static $offset = null;
+                if ( null === $offset ) {
+                        $offset = 0;
+                        if ( function_exists( 'wp_timezone' ) ) {
+                                try {
+                                        $offset = (int) wp_timezone()->getOffset( new DateTime( '@' . $timestamp ) );
+                                } catch ( Exception $e ) {
+                                        $offset = 0;
+                                }
+                        }
+                }
+
+                if ( function_exists( 'parsidate' ) ) {
+                        return self::fa_num( (string) parsidate( $format, $timestamp + $offset, true ) );
+                }
+
+                if ( class_exists( 'HSW_Jalali' ) && HSW_Jalali::is_on() ) {
+                        return self::fa_num( (string) HSW_Jalali::format( $timestamp + $offset, $format ) );
+                }
+
+                return self::fa_num( (string) wp_date( $format, $timestamp ) );
+        }
+
+        /**
          * How much the customer is saving on the current cart.
          *
          * Two sources, added together:

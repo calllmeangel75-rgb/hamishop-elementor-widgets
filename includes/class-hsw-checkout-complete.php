@@ -251,6 +251,19 @@ class HSW_Checkout_Complete {
 
 			$result   = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 			$redirect = ! empty( $result['redirect'] ) ? (string) $result['redirect'] : $order->get_checkout_order_received_url();
+
+			/*
+			 * Most gateways empty the cart inside process_payment(), but not all
+			 * of them (and an offline gateway that forgets would let a refresh
+			 * place a second order for the same items). Clearing it here makes
+			 * the "one cart, one order" rule independent of the gateway.
+			 */
+			if ( WC()->cart && ! WC()->cart->is_empty() ) {
+				WC()->cart->empty_cart();
+			}
+			if ( WC()->session ) {
+				WC()->session->set( 'order_awaiting_payment', null );
+			}
 		} else {
 			$order->payment_complete();
 			wc_empty_cart();
