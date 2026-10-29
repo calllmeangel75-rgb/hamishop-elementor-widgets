@@ -2241,7 +2241,16 @@ final class HSW_Account {
 		$html .= '</footer>';
 
 		$html .= '<div class="hsw-inv__actions no-print">';
-		$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
+		/*
+		 * «چاپ» opens the standalone sheet rather than printing this card: the
+		 * sheet is a one-page A4 document with the postal block, and printing it
+		 * never drags the account shell into the paper.
+		 */
+		if ( class_exists( 'HSW_Invoice' ) && HSW_Invoice::enabled() ) {
+			$html .= '<a class="hsw-inv__print" data-hsw-print-link target="_blank" rel="noopener" href="' . esc_url( HSW_Invoice::url( $order->get_id() ) ) . '">' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور / برچسب پستی', 'hamishop-elementor-widgets' ) . '</a>';
+		} else {
+			$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
+		}
 		$html .= '<a class="hsw-ac__btn hsw-ac__btn--ghost" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a>';
 		$html .= '</div>';
 

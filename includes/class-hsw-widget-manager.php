@@ -716,6 +716,29 @@ final class HSW_Widget_Manager {
 			)
 		);
 
+		/* Printable invoice: on by default, and the monochrome switch beside it. */
+		register_setting(
+			'hsw_widgets_group',
+			HSW_Invoice::ENABLED,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_yes_no' ),
+				'default'           => 'yes',
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_setting(
+			'hsw_widgets_group',
+			HSW_Invoice::MONO,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_yes_no' ),
+				'default'           => 'no',
+				'show_in_rest'      => false,
+			)
+		);
+
 		register_setting(
 			'hsw_widgets_group',
 			HSW_Free_Shipping::ENABLED,
@@ -1084,6 +1107,52 @@ final class HSW_Widget_Manager {
 									</span>
 								</label>
 							</div>
+						</section>
+
+						<section class="hsw-wm-group" id="hsw-group-invoice" style="--hsw-wm-accent:#0f766e">
+							<header class="hsw-wm-grouphead">
+								<span class="hsw-wm-groupicon dashicons dashicons-media-document" aria-hidden="true"></span>
+								<div class="hsw-wm-grouptitle">
+									<h2><?php esc_html_e( 'فاکتور چاپی و برچسب پستی', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'فاکتور تک‌برگی A4 با لوگو، مشخصات فرستنده/گیرنده به سبک فرم ادارهٔ پست و مبلغ به حروف. همان لحظه در مرورگر ساخته می‌شود؛ فایلی روی هاست ذخیره نمی‌شود و از پنجرهٔ چاپ به‌صورت PDF ذخیره می‌شود.', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
+							</header>
+
+							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-invoice-on">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'فعال‌سازی فاکتور چاپی', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'دکمهٔ چاپ در صفحهٔ ویرایش سفارش (پیشخوان) و در «سفارش‌های من» (پنل مشتری) نمایش داده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="hidden" name="<?php echo esc_attr( HSW_Invoice::ENABLED ); ?>" value="no" />
+										<input type="checkbox" id="hsw-invoice-on" name="<?php echo esc_attr( HSW_Invoice::ENABLED ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Invoice::ENABLED, 'yes' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
+									</span>
+								</label>
+
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-invoice-mono">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'سیاه و سفید خالص', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'پیش‌فرض: یک خط و سرستون‌ها از رنگ اصلی پالت رنگ می‌گیرند و بقیه سیاه‌وسفید است. با روشن‌کردن این گزینه همه‌چیز خالص سیاه‌وسفید چاپ می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="hidden" name="<?php echo esc_attr( HSW_Invoice::MONO ); ?>" value="no" />
+										<input type="checkbox" id="hsw-invoice-mono" name="<?php echo esc_attr( HSW_Invoice::MONO ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Invoice::MONO, 'no' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
+									</span>
+								</label>
+							</div>
+
+							<p class="hsw-wm-note hsw-wm-note--info">
+								<?php
+								printf(
+									/* translators: %s: link to the branding page. */
+									esc_html__( 'لوگو، نشانی، تلفن و کد پستی فروشگاه از %s خوانده می‌شود.', 'hamishop-elementor-widgets' ),
+									'<a href="' . esc_url( admin_url( 'admin.php?page=hamishop-brand' ) ) . '">' . esc_html__( 'HamiShop ← برند و لوگو', 'hamishop-elementor-widgets' ) . '</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above.
+								);
+								?>
+							</p>
 						</section>
 
 						<section class="hsw-wm-group" id="hsw-group-shipping" style="--hsw-wm-accent:#16a34a">

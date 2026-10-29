@@ -90,6 +90,7 @@ class HSW_Branding {
 			 */
 			'store_address' => self::default_store_address(),
 			'store_phone'   => '',
+			'store_postal'  => (string) get_option( 'woocommerce_store_postcode', '' ),
 			'store_email'   => (string) get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
 			'stamp_url'     => '',
 			/* White-label switches — off by default. */
@@ -355,6 +356,7 @@ class HSW_Branding {
 				'from_name'  => sanitize_text_field( $in['from_name'] ?? '' ),
 				'store_address' => sanitize_textarea_field( $in['store_address'] ?? '' ),
 				'store_phone'   => sanitize_text_field( $in['store_phone'] ?? '' ),
+				'store_postal'  => preg_replace( '/\D/', '', (string) ( $in['store_postal'] ?? '' ) ),
 				'store_email'   => sanitize_email( $in['store_email'] ?? '' ),
 				'stamp_url'     => esc_url_raw( $in['stamp_url'] ?? '' ),
 				'rebrand'        => ( 'yes' === ( $in['rebrand'] ?? '' ) ) ? 'yes' : 'no',
@@ -537,6 +539,17 @@ class HSW_Branding {
 									<div class="hsw-pal__field">
 										<input class="hsw-pal__input" type="text" id="hsw-brand-store-phone" name="hsw_brand[store_phone]"
 											value="<?php echo esc_attr( $b['store_phone'] ); ?>" dir="ltr" placeholder="021-00000000" />
+									</div>
+								</div>
+
+								<div class="hsw-pal__row">
+									<div class="hsw-pal__label">
+										<strong><?php esc_html_e( 'کد پستی فروشگاه', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'در «فرستنده»ی برچسب پستی فاکتور چاپ می‌شود. پیش‌فرض از کد پستی فروشگاه ووکامرس خوانده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
+									</div>
+									<div class="hsw-pal__field">
+										<input class="hsw-pal__input" type="text" id="hsw-brand-store-postal" name="hsw_brand[store_postal]"
+											value="<?php echo esc_attr( $b['store_postal'] ); ?>" dir="ltr" inputmode="numeric" maxlength="10" placeholder="1234567890" />
 									</div>
 								</div>
 
