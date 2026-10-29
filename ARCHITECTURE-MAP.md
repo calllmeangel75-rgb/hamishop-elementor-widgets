@@ -31,9 +31,9 @@ hamishop-elementor-widgets.php
 | hsw-blog | HSW_Blog_Base | assets/css/hsw-blog.css | 12.3 KB |
 | hsw-post | HSW_Post_Base | assets/css/hsw-post.css | 20.6 KB |
 | hsw-account | HSW_Account | assets/css/hsw-account.css | 100.7 KB |
-| hsw-loop | HSW_Widget_Base(override) | assets/css/hsw-loop.css | 19.4 KB |
+| hsw-loop | HSW_Widget_Base(override) | assets/css/hsw-loop.css | 21.1 KB |
 | hsw-loop-box | ارثی: hsw-loop | assets/css/hsw-loop-box.css | 0.2 KB |
-| hsw-loop-deal | ارثی: hsw-loop | assets/css/hsw-loop-deal.css | 1.1 KB |
+| hsw-loop-deal | ارثی: hsw-loop | assets/css/hsw-loop-deal.css | 1.4 KB |
 | hsw-footer | HSW_Widget_Footer_Sticky | assets/css/hsw-footer.css | 1.4 KB |
 
 ## ۳) وضعیت استاندارد المنتور (Repeater + کنترل ریسپانسیو)

@@ -537,7 +537,9 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'hsw_card',
                         array(
                                 'priority' => $priority,
-                                'sizes'    => '(max-width: 767px) 45vw, 288px',
+                                /* One preload per page, for the first visible card. */
+                                'preload'  => $priority && ! empty( $args['first_priority'] ),
+                                'sizes'    => self::sizes_attr( $args ),
                         )
                 );
 
@@ -545,6 +547,63 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         '<a class="hsw-loop__media-link" href="' . esc_url( $product->get_permalink() ) . '" tabindex="-1" aria-hidden="true">' . $image . '</a>' .
                         $badge . $rank . $overlay .
                         '</div>';
+        }
+
+        /**
+         * `sizes` attribute that matches how many cards the rail shows.
+         *
+         * A fixed `45vw / 288px` pair made mobile download a desktop-sized
+         * candidate (and vice versa) whenever the widget's «cards per view»
+         * differed from the assumption. The numbers come from the same settings
+         * that write `--hsw-loop-cards`, so the browser picks a candidate of the
+         * right width at every breakpoint.
+         *
+         * @param array $args Renderer args.
+         * @return string
+         */
+        protected static function sizes_attr( $args ) {
+                $cards = static function ( $value, $fallback ) {
+                        $value = (float) $value;
+                        return $value > 0 ? min( 8, max( 1, $value ) ) : (float) $fallback;
+                };
+
+                $desktop = $cards( $args['cards'] ?? 0, 0 );
+                $tablet  = $cards( $args['cards_tablet'] ?? 0, 0 );
+                $mobile  = $cards( $args['cards_mobile'] ?? 0, 0 );
+
+                /* 0 means "fixed card width" — fall back to the default order. */
+                if ( $desktop <= 0 ) {
+                        $desktop = 4;
+                }
+
+                $parts = array();
+
+                if ( $mobile > 0 ) {
+                        /* Full-bleed rail: the list is the viewport minus the
+                           shell padding, so 100vw is the honest width here. */
+                        $parts[] = sprintf( '(max-width: 767px) calc(100vw / %s)', self::trim_float( $mobile ) );
+                } else {
+                        $parts[] = '(max-width: 767px) 45vw';
+                }
+
+                if ( $tablet > 0 ) {
+                        $parts[] = sprintf( '(min-width: 768px) and (max-width: 1024px) calc(100vw / %s)', self::trim_float( $tablet ) );
+                }
+
+                $parts[] = sprintf( 'calc(100vw / %s)', self::trim_float( $desktop ) );
+
+                return implode( ', ', $parts );
+        }
+
+        /**
+         * Float without a trailing `.0` for CSS `calc()`.
+         *
+         * @param float $value Number.
+         * @return string
+         */
+        private static function trim_float( $value ) {
+                $value = (float) $value;
+                return (string) ( floor( $value ) === $value ? (int) $value : $value );
         }
 
         /**
@@ -721,7 +780,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 if ( ! $oos && ! empty( $args['show_stock'] ) ) {
                         $stock = HSW_Helpers::stock_progress(
                                 $product,
-                                (string) ( $args['stock_mode'] ?? 'sold' ),
+                                (string) ( $args['stock_mode'] ?? 'low' ),
                                 (int) ( $args['stock_low'] ?? 3 )
                         );
                         if ( $stock ) {
@@ -760,8 +819,13 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'show_stock'        => 'yes',
                         'show_rank'         => 'yes',
                         'show_badge'        => 'yes',
-                        'stock_mode'        => 'sold',
+                        'stock_mode'        => 'low',
                         'stock_low'         => 3,
+			'cards'             => 4,
+			'cards_tablet'      => 3,
+			'cards_mobile'      => 2.2,
+			'timer_end_action'  => 'hide_timer',
+			'timer_end_text'    => __( 'این پیشنهاد به پایان رسید', 'hamishop-elementor-widgets' ),
                         'btn_variant'       => 'text',
                         'price_label'       => '',
                         'currency'          => __( 'تومان', 'hamishop-elementor-widgets' ),
@@ -805,6 +869,25 @@ abstract class HSW_Widget_Base extends Widget_Base {
         }
 
         /**
+         * `data-hsw-theme` for the widget root.
+         *
+         * The dark palette is the same token set with darker values, so it is
+         * opt-in per widget (`dark`) or follows the visitor's system
+         * preference (`auto`); the default stays light and leaves the store's
+         * look untouched.
+         *
+         * @param array $s Settings.
+         * @return string
+         */
+        protected function theme_attr( $s ) {
+                $mode = (string) ( $s['loop_color_mode'] ?? 'light' );
+                if ( ! in_array( $mode, array( 'light', 'dark', 'auto' ), true ) ) {
+                        $mode = 'light';
+                }
+                return ' data-hsw-theme="' . esc_attr( $mode ) . '"';
+        }
+
+        /**
          * Rail ID shared by tabs and the rail (aria-controls).
          *
          * @return string
@@ -822,14 +905,36 @@ abstract class HSW_Widget_Base extends Widget_Base {
          * `role="timer"` + `aria-live="off"` pair announces the control once
          * without reading every second.
          *
+         * When the end has already passed the behavior follows the widget
+         * setting: hide the timer, hide the whole block (JS), or render the
+         * editable «ended» note in the timer's place — never an empty 00:00:00.
+         *
          * @param int    $end   Unix timestamp.
          * @param string $label Label before the digits.
+         * @param array  $args  timer_end_action + timer_end_text.
          * @return string
          */
-        protected function timer_html( $end, $label = '' ) {
-                $end = (int) $end;
+        protected function timer_html( $end, $label = '', $args = array() ) {
+                $end    = (int) $end;
+                $action = (string) ( $args['timer_end_action'] ?? 'hide_timer' );
+                $text   = trim( (string) ( $args['timer_end_text'] ?? '' ) );
+
+                if ( ! in_array( $action, array( 'hide_timer', 'hide_block', 'ended_note' ), true ) ) {
+                        $action = 'hide_timer';
+                }
+
+                $ended = static function () use ( $text ) {
+                        if ( '' === $text ) {
+                                return '';
+                        }
+                        return '<div class="hsw-loop__timer hsw-loop__timer--ended" role="status">' .
+                                HSW_Helpers::icon( 'timer' ) .
+                                '<span class="hsw-loop__timer-label">' . esc_html( $text ) . '</span>' .
+                                '</div>';
+                };
+
                 if ( $end <= time() ) {
-                        return '';
+                        return 'ended_note' === $action ? $ended() : '';
                 }
 
                 $diff = max( 0, $end - time() );
@@ -843,7 +948,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
 
                 $label = '' !== (string) $label ? '<span class="hsw-loop__timer-label">' . esc_html( $label ) . '</span>' : '';
 
-                return '<div class="hsw-loop__timer" role="timer" aria-live="off" aria-label="' . esc_attr__( 'زمان باقی‌مانده', 'hamishop-elementor-widgets' ) . '" data-hsw-end="' . esc_attr( $end ) . '">' .
+                return '<div class="hsw-loop__timer" role="timer" aria-live="off" aria-label="' . esc_attr__( 'زمان باقی‌مانده', 'hamishop-elementor-widgets' ) . '" data-hsw-end="' . esc_attr( $end ) . '" data-hsw-end-action="' . esc_attr( $action ) . '" data-hsw-end-text="' . esc_attr( $text ) . '">' .
                         HSW_Helpers::icon( 'timer' ) .
                         $label .
                         '<span class="hsw-loop__timer-part" data-hsw-t="h">' . esc_html( HSW_Helpers::fa_num( $pad( $h ) ) ) . '</span>' .
@@ -896,7 +1001,14 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         $side .= $extra;
                 }
 
-                $side .= $this->timer_html( (int) $end, (string) ( $s['cd_label'] ?? '' ) );
+                $side .= $this->timer_html(
+                        (int) $end,
+                        (string) ( $s['cd_label'] ?? '' ),
+                        array(
+                                'timer_end_action' => (string) ( $s['cd_end_action'] ?? 'hide_timer' ),
+                                'timer_end_text'   => (string) ( $s['cd_end_text'] ?? '' ),
+                        )
+                );
                 $side .= $this->header_link_html( $s );
                 $side .= $this->arrows_html();
 
@@ -1350,6 +1462,33 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
 
+                $this->add_control(
+                        'cd_end_action',
+                        array(
+                                'label'     => __( 'رفتار پس از پایان زمان', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::SELECT,
+                                'default'   => 'hide_timer',
+                                'options'   => array(
+                                        'hide_timer'  => __( 'فقط تایمر پنهان شود', 'hamishop-elementor-widgets' ),
+                                        'hide_block'  => __( 'کل ویجت پنهان شود', 'hamishop-elementor-widgets' ),
+                                        'ended_note'  => __( 'متن «پایان یافته» جای تایمر', 'hamishop-elementor-widgets' ),
+                                ),
+                                'condition' => array( 'show_cd' => 'yes' ),
+                                'description' => __( 'هیچ‌وقت 00:00:00 مرده نمایش داده نمی‌شود؛ در حالت «کل ویجت پنهان شود» ارتفاع صفحه تغییر نمی‌کند.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'cd_end_text',
+                        array(
+                                'label'       => __( 'متن پایان تایمر', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => __( 'این پیشنهاد به پایان رسید', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'show_cd' => 'yes', 'cd_end_action' => 'ended_note' ),
+                                'label_block' => true,
+                        )
+                );
+
                 $this->end_controls_section();
         }
 
@@ -1509,12 +1648,13 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         array(
                                 'label'       => __( 'حالت نوار موجودی', 'hamishop-elementor-widgets' ),
                                 'type'        => Controls_Manager::SELECT,
-                                'default'     => 'sold',
+                                'default'     => 'low',
                                 'options'     => array(
-                                        'sold' => __( 'درصد فروش‌رفته', 'hamishop-elementor-widgets' ),
                                         'low'  => __( 'درصد باقی‌مانده تا آستانه', 'hamishop-elementor-widgets' ),
+                                        'sold' => __( 'درصد فروش‌رفته (از موجودی ثبت‌شده)', 'hamishop-elementor-widgets' ),
                                 ),
                                 'condition'   => array( 'show_stock' => 'yes' ),
+                                'description' => __( 'حالت «فروش‌رفته» از موجودی اولیهٔ ثبت‌شده حساب می‌کند (نه فروش کل محصول)؛ تا زمانی که برای محصول موجودی اولیه ثبت نشده باشد، نوار ساخته نمی‌شود.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -1570,6 +1710,39 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                         'green' => __( 'سبز', 'hamishop-elementor-widgets' ),
                                 ),
                                 'description' => __( 'رنگ‌های سراسری از صفحه «تنظیمات حامی → پالت رنگ» خوانده می‌شوند؛ این پالت فقط برای همین ویجت است.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'loop_color_mode',
+                        array(
+                                'label'       => __( 'حالت روشن/تاریک', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'light',
+                                'options'     => array(
+                                        'light' => __( 'روشن', 'hamishop-elementor-widgets' ),
+                                        'dark'  => __( 'تاریک', 'hamishop-elementor-widgets' ),
+                                        'auto'  => __( 'خودکار بر اساس تنظیم سیستم کاربر', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'همهٔ رنگ‌ها از همان توکن‌ها می‌آیند؛ حالت تاریک نسخهٔ تیرهٔ همین توکن‌هاست و ظاهر پیش‌فرض سایت را تغییر نمی‌دهد.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                /*
+                 * White text on a light gradient stop measured 3.43:1 (fails AA
+                 * for normal text). The scrim is the store's own dial: 20% is
+                 * enough for a typical blue start, more for a lighter palette.
+                 */
+                $this->add_responsive_control(
+                        'deal_scrim',
+                        array(
+                                'label'      => __( 'تیرگی پردهٔ گرادیان (پیشنهاد شگفت‌انگیز)', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( '%' ),
+                                'range'      => array( '%' => array( 'min' => 0, 'max' => 50, 'step' => 1 ) ),
+                                'default'    => array( 'size' => 20, 'unit' => '%' ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-loop' => '--hsw-loop-deal-scrim: rgb(0 0 0 / {{SIZE}}%);' ),
+                                'description' => __( 'حداقل ۱۵٪ برای متن سفید روی روشن‌ترین نقطهٔ گرادیان لازم است تا کنتراست AA شود.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -2822,8 +2995,13 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'show_stock'        => $s['show_stock'] ?? 'yes',
                                 'show_rank'         => $s['show_rank'] ?? 'yes',
                                 'show_badge'        => $s['show_badge'] ?? 'yes',
-                                'stock_mode'        => $s['stock_mode'] ?? 'sold',
+                                'stock_mode'        => $s['stock_mode'] ?? 'low',
                                 'stock_low'         => (int) ( $s['stock_low'] ?? 3 ),
+				'cards'             => (float) ( $s['cards']['size'] ?? 4 ),
+				'cards_tablet'      => (float) ( $s['cards_tablet']['size'] ?? 3 ),
+				'cards_mobile'      => (float) ( $s['cards_mobile']['size'] ?? 2.2 ),
+				'timer_end_action'  => (string) ( $s['cd_end_action'] ?? 'hide_timer' ),
+				'timer_end_text'    => (string) ( $s['cd_end_text'] ?? __( 'این پیشنهاد به پایان رسید', 'hamishop-elementor-widgets' ) ),
                                 'btn_variant'       => $s['btn_variant'] ?? 'text',
                                 'price_label'       => $s['price_label'] ?? '',
                                 'currency'          => $s['currency'] ?? __( 'تومان', 'hamishop-elementor-widgets' ),

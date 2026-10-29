@@ -41,12 +41,50 @@
 		timers = [].slice.call(doc.querySelectorAll('.hsw-loop__timer[data-hsw-end]'));
 	}
 
+	/*
+	 * The timer never dies on 00:00:00: the widget chooses what happens when the
+	 * deadline passes — hide the timer, hide the whole block, or swap in the
+	 * editable «ended» note. `data-hsw-done` makes this run once per timer.
+	 */
+	function finishTimer(el) {
+		if (el.getAttribute('data-hsw-done')) {
+			return;
+		}
+		el.setAttribute('data-hsw-done', '1');
+
+		var action = el.getAttribute('data-hsw-end-action') || 'hide_timer';
+
+		if ('hide_block' === action) {
+			var root = el.closest('.hsw-loop');
+			if (root) {
+				root.classList.add('is-ended-hidden');
+				root.setAttribute('hidden', 'hidden');
+			}
+			return;
+		}
+
+		if ('ended_note' === action) {
+			var text = el.getAttribute('data-hsw-end-text') || '';
+			el.classList.add('hsw-loop__timer--ended');
+			el.removeAttribute('role');
+			el.setAttribute('role', 'status');
+			el.innerHTML = (window.hswIcon ? window.hswIcon('timer') : '') + '<span class="hsw-loop__timer-label"></span>';
+			var label = el.querySelector('.hsw-loop__timer-label');
+			if (label) {
+				label.textContent = text;
+			}
+			return;
+		}
+
+		el.hidden = true;
+	}
+
 	function tick() {
 		var now = Date.now();
 		var alive = 0;
 
 		each(timers, function (el) {
-			if (el.hidden || !el.isConnected) {
+			if (el.hidden || !el.isConnected || el.getAttribute('data-hsw-done')) {
 				return;
 			}
 
@@ -54,7 +92,7 @@
 			var left = Math.floor((end - now) / 1000);
 
 			if (left <= 0) {
-				el.hidden = true;
+				finishTimer(el);
 				return;
 			}
 
@@ -273,7 +311,18 @@
 					throw new Error('cart error');
 				}
 
+				/*
+				 * WooCommerce's own contract: themes and plugins listen for
+				 * `added_to_cart` to update the mini-cart, the counter and
+				 * analytics. Triggering only `wc_fragment_refresh` left them
+				 * stale after an add from a loop card.
+				 */
 				if (window.jQuery) {
+					window.jQuery(doc.body).trigger('added_to_cart', [
+						response.fragments || {},
+						response.cart_hash || '',
+						window.jQuery(button)
+					]);
 					window.jQuery(doc.body).trigger('wc_fragment_refresh');
 				}
 

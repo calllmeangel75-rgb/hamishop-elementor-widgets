@@ -13,6 +13,9 @@ class HSW_Helpers {
         /** Persian digits map. */
         private static $fa_digits = array( '0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹' );
 
+        /** Only the first loop image of a request is preloaded. */
+        private static $image_preloaded = false;
+
         /** Whether the standard product notice output was moved into the composite. */
         private static $product_notices_deferred = false;
 
@@ -833,18 +836,25 @@ JS;
         }
 
         /**
-         * Sold-percent + remaining stock text for the progress bar.
+         * Stock bar data for one product, or null when there is nothing honest
+         * to show.
          *
-         * Only products that actually manage stock get a bar. `sold` mode shows
-         * the sold share, `low` mode shows how much of the low-stock window is
-         * still available.
+         * Only products that actually manage stock get a bar. Two modes:
+         *  - `low`  → «only N left», built from the current quantity and the
+         *             threshold; always safe.
+         *  - `sold` → share sold since a recorded baseline. `total_sales` is
+         *             NOT a substitute for "sold out of the initial quantity":
+         *             it counts the product's whole lifetime (often years
+         *             before this plugin), so a percentage built from it is
+         *             fiction. The mode therefore needs the
+         *             `_hsw_initial_stock` baseline and stays off without it.
          *
          * @param WC_Product $product   Product.
          * @param string     $mode      sold|low.
          * @param int        $threshold Low-stock threshold.
          * @return array|null
          */
-        public static function stock_progress( $product, $mode = 'sold', $threshold = 3 ) {
+        public static function stock_progress( $product, $mode = 'low', $threshold = 3 ) {
                 if ( ! $product instanceof WC_Product || ! $product->get_manage_stock() ) {
                         return null;
                 }
@@ -853,16 +863,21 @@ JS;
                 if ( null === $stock || (int) $stock <= 0 ) {
                         return null;
                 }
+
                 $stock     = max( 0, (int) $stock );
                 $threshold = max( 1, absint( $threshold ) );
-                $sales     = (int) $product->get_total_sales();
 
-                if ( 'low' === $mode ) {
+                if ( 'sold' === $mode ) {
+                        $initial = self::initial_stock( $product );
+                        if ( $initial <= $stock ) {
+                                /* No baseline (or nothing sold since it was
+                                   recorded): a bar would be a guess. */
+                                return null;
+                        }
+                        $percent = (int) min( 99, max( 1, round( ( ( $initial - $stock ) / $initial ) * 100 ) ) );
+                } else {
                         $total   = max( 1, $stock + $threshold );
                         $percent = (int) min( 95, max( 5, round( ( $stock / $total ) * 100 ) ) );
-                } else {
-                        $total   = max( 1, $sales + $stock );
-                        $percent = (int) min( 95, max( 5, round( ( $sales / $total ) * 100 ) ) );
                 }
 
                 if ( $stock <= $threshold ) {
@@ -874,12 +889,12 @@ JS;
                         $critical = false;
                 }
 
-                if ( 'low' === $mode ) {
-                        /* translators: %s: number */
-                        $sold = sprintf( __( 'باقی‌مانده: %s عدد', 'hamishop-elementor-widgets' ), self::fa_num( $stock ) );
-                } else {
+                if ( 'sold' === $mode ) {
                         /* translators: %s: percent */
                         $sold = sprintf( __( 'فروش رفته: %s٪', 'hamishop-elementor-widgets' ), self::fa_num( $percent ) );
+                } else {
+                        /* translators: %s: number */
+                        $sold = sprintf( __( 'باقی‌مانده: %s عدد', 'hamishop-elementor-widgets' ), self::fa_num( $stock ) );
                 }
 
                 return array(
@@ -888,6 +903,54 @@ JS;
                         'left'     => $left,
                         'critical' => $critical,
                 );
+        }
+
+        /**
+         * Recorded stock baseline for the "sold" bar, or 0 when unknown.
+         *
+         * @param WC_Product $product Product.
+         * @return int
+         */
+        public static function initial_stock( $product ) {
+                if ( ! $product instanceof WC_Product ) {
+                        return 0;
+                }
+
+                $value = $product->get_meta( '_hsw_initial_stock', true );
+                return is_numeric( $value ) ? max( 0, (int) $value ) : 0;
+        }
+
+        /**
+         * Write the baseline the first time a managed product is seen.
+         *
+         * The current quantity is a real, observed number — not an estimate of
+         * lifetime sales — so "sold" means "sold since this moment". The value
+         * only ever grows: a restock raises it, a sale never rewrites it.
+         *
+         * @param WC_Product|int $product Product or product id.
+         * @return void
+         */
+        public static function remember_initial_stock( $product ) {
+                if ( ! $product instanceof WC_Product ) {
+                        $product = wc_get_product( $product );
+                }
+                if ( ! $product instanceof WC_Product || ! $product->get_manage_stock() ) {
+                        return;
+                }
+
+                $stock = $product->get_stock_quantity();
+                if ( null === $stock || (int) $stock <= 0 ) {
+                        return;
+                }
+
+                $stock     = (int) $stock;
+                $recorded  = self::initial_stock( $product );
+                if ( $stock <= $recorded ) {
+                        return;
+                }
+
+                $product->update_meta_data( '_hsw_initial_stock', $stock );
+                $product->save_meta_data();
         }
 
         /**
@@ -903,6 +966,7 @@ JS;
                         $args,
                         array(
                                 'priority' => false,
+                                'preload'  => false,
                                 'sizes'    => '(max-width: 767px) 45vw, 288px',
                                 'class'    => 'hsw-loop__img',
                         )
@@ -923,6 +987,12 @@ JS;
                         $size = 'woocommerce_thumbnail';
                 }
 
+                $preload = '';
+                if ( ! empty( $args['preload'] ) && ! self::$image_preloaded ) {
+                        $preload              = self::preload_tag( $image_id, $size, (string) $args['sizes'] );
+                        self::$image_preloaded = true;
+                }
+
                 $alt = trim( wp_strip_all_tags( $product->get_name() ) );
                 $attr = array(
                         'class'    => $args['class'],
@@ -940,11 +1010,11 @@ JS;
 
                 $html = wp_get_attachment_image( $image_id, $size, false, $attr );
                 if ( $html ) {
-                        return $html;
+                        return $preload . $html;
                 }
 
                 $src = wp_get_attachment_image_url( $image_id, $size );
-                return sprintf(
+                return $preload . sprintf(
                         '<img class="%s" src="%s" alt="%s" loading="%s" decoding="async" sizes="%s">',
                         esc_attr( $args['class'] ),
                         esc_url( $src ),
@@ -952,6 +1022,42 @@ JS;
                         ! empty( $args['priority'] ) ? 'eager' : 'lazy',
                         esc_attr( $args['sizes'] )
                 );
+        }
+
+        /**
+         * `<link rel="preload">` for the one above-the-fold card image.
+         *
+         * HTML5 only allows `<link>` in the head and Elementor renders widgets
+         * after `wp_head` has been printed, so a head-level preload would need a
+         * second product query before the page content exists. Emitting the tag
+         * immediately before the `<img>` still starts the request earlier than
+         * the image element itself, and the static flag keeps it to exactly one
+         * per request even when several loop widgets enable the option.
+         *
+         * @param int    $image_id Attachment id.
+         * @param string $size     Image size.
+         * @param string $sizes    The same `sizes` attribute the <img> uses.
+         * @return string
+         */
+        private static function preload_tag( $image_id, $size, $sizes ) {
+                $src = wp_get_attachment_image_url( $image_id, $size );
+                if ( ! $src ) {
+                        return '';
+                }
+
+                $tag = '<link rel="preload" as="image" href="' . esc_url( $src ) . '"';
+
+                if ( function_exists( 'wp_get_attachment_image_srcset' ) ) {
+                        $srcset = wp_get_attachment_image_srcset( $image_id, $size );
+                        if ( $srcset ) {
+                                $tag .= ' imagesrcset="' . esc_attr( $srcset ) . '"';
+                        }
+                }
+                if ( '' !== $sizes ) {
+                        $tag .= ' imagesizes="' . esc_attr( $sizes ) . '"';
+                }
+
+                return $tag . '>';
         }
 
         /**

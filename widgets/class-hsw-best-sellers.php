@@ -94,7 +94,7 @@ class HSW_Widget_Best_Sellers extends HSW_Widget_Base {
 		$fit   = $cards > 0 ? 'cards' : 'fixed';
 		$title = trim( (string) ( $s['hdr_title'] ?? '' ) );
 		?>
-		<section class="hsw-loop hsw-loop--box hsw-loop--best hsw-loop--hsw-best-sellers<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>" data-hsw-fit="<?php echo esc_attr( $fit ); ?>">
+		<section class="hsw-loop hsw-loop--box hsw-loop--best hsw-loop--hsw-best-sellers<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>" data-hsw-fit="<?php echo esc_attr( $fit ); ?>"<?php echo $this->theme_attr( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>>
 			<?php
 			if ( 'yes' === ( $s['show_header'] ?? 'yes' ) ) {
 				echo $this->header_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.

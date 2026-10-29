@@ -187,6 +187,7 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
 		<section class="hsw-loop hsw-loop--box hsw-loop--pop hsw-loop--hsw-popular<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>"
 			data-hsw-fit="<?php echo esc_attr( $fit ); ?>"
 			data-hsw-count="<?php echo esc_attr( $count ); ?>"
+			<?php echo $this->theme_attr( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>
 			<?php if ( $tabbed ) : ?>data-hsw-tabs="1"<?php endif; ?>>
 			<?php
 			if ( 'yes' === ( $s['show_header'] ?? 'yes' ) ) {

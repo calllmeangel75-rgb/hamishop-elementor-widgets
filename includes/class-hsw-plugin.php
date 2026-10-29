@@ -84,6 +84,54 @@ final class HSW_Plugin {
 
                 /* Loop cards use one dedicated, cropped size instead of `full`. */
                 add_action( 'after_setup_theme', array( __CLASS__, 'register_image_sizes' ), 20 );
+
+                /* Versioned, one-time data work (see migrate()). */
+                add_action( 'init', array( __CLASS__, 'migrate' ), 5 );
+
+                /*
+                 * The "sold" stock bar needs a baseline; record it the first
+                 * time a managed product's stock is seen (and raise it on a
+                 * restock). A sale never rewrites it.
+                 */
+                add_action( 'woocommerce_product_set_stock', array( 'HSW_Helpers', 'remember_initial_stock' ), 20 );
+                add_action( 'woocommerce_variation_set_stock', array( 'HSW_Helpers', 'remember_initial_stock' ), 20 );
+                add_action( 'woocommerce_update_product', array( 'HSW_Helpers', 'remember_initial_stock' ), 20 );
+        }
+
+        /**
+         * One-time data migrations, versioned so they never run on every load.
+         *
+         * v1 — seed `_hsw_initial_stock` for managed products that predate the
+         *      "sold" stock bar, so the bar has an honest baseline instead of a
+         *      percentage invented from `total_sales`; and drop the loop query
+         *      transients once, because their shape changed with the baseline.
+         */
+        public static function migrate() {
+                $target  = '1';
+                $current = (string) get_option( 'hsw_db_version', '0' );
+
+                if ( version_compare( $current, $target, '>=' ) ) {
+                        return;
+                }
+
+                global $wpdb;
+
+                $ids = $wpdb->get_col(
+                        "SELECT p.ID FROM {$wpdb->posts} p
+                         INNER JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = '_manage_stock' AND s.meta_value = 'yes'
+                         LEFT JOIN {$wpdb->postmeta} i ON i.post_id = p.ID AND i.meta_key = '_hsw_initial_stock'
+                         WHERE p.post_type IN ('product','product_variation') AND p.post_status = 'publish' AND i.meta_id IS NULL
+                         LIMIT 2000"
+                );
+
+                foreach ( (array) $ids as $id ) {
+                        HSW_Helpers::remember_initial_stock( (int) $id );
+                }
+
+                /* Loop ID lists and HTML fragments are rebuilt on next render. */
+                $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_hsw_lp_%' OR option_name LIKE '_transient_timeout_hsw_lp_%' OR option_name LIKE '_transient_hsw_loop_%' OR option_name LIKE '_transient_timeout_hsw_loop_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+                update_option( 'hsw_db_version', $target, false );
         }
 
         /**

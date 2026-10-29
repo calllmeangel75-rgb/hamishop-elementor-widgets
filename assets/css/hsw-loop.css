@@ -28,6 +28,15 @@
 	--hsw-loop-deal-from: var(--hsw-loop-primary);
 	--hsw-loop-deal-via: var(--hsw-primary-dark, var(--hsw-loop-primary));
 	--hsw-loop-deal-to: var(--hsw-loop-accent);
+/* Text/icons placed on an accent, badge or gradient background. */
+--hsw-loop-on-accent: var(--hsw-pal-on-accent, #fff);
+
+/*
+ * Deal gradient scrim. White text on the lightest stop of a typical store
+ * palette (#4d85ff) measures 3.43:1 without it and 5.07:1 at 20%, i.e. AA
+ * for normal text; the Elementor control can raise it further.
+ */
+--hsw-loop-deal-scrim: rgb(0 0 0 / 20%);
 
 	--hsw-loop-gap: 12px;
 	--hsw-loop-cards: 4;
@@ -43,7 +52,7 @@
 	--hsw-loop-title-c: var(--hsw-loop-fg);
 	--hsw-loop-title-hover: var(--hsw-loop-accent);
 	--hsw-loop-cat-c: var(--hsw-loop-muted);
-	--hsw-loop-rating-c: #f59e0b;
+	--hsw-loop-rating-c: var(--hsw-pal-star, #f59e0b);
 	--hsw-loop-price-c: var(--hsw-loop-accent);
 	--hsw-loop-old-c: var(--hsw-loop-muted);
 	--hsw-loop-currency-c: var(--hsw-loop-muted);
@@ -54,7 +63,7 @@
 	--hsw-loop-media-fit: cover;
 
 	--hsw-loop-hdr-icon-bg: var(--hsw-loop-accent);
-	--hsw-loop-hdr-icon-c: #fff;
+	--hsw-loop-hdr-icon-c: var(--hsw-loop-on-accent);
 	--hsw-loop-hdr-icon-size: 1.25rem;
 	--hsw-loop-hdr-icon-box: 2.5rem;
 	--hsw-loop-hdr-title-c: var(--hsw-loop-fg);
@@ -75,11 +84,11 @@
 	--hsw-loop-arrow-bg: var(--hsw-loop-bg);
 	--hsw-loop-arrow-bg-h: var(--hsw-loop-accent);
 	--hsw-loop-arrow-c: var(--hsw-loop-fg);
-	--hsw-loop-arrow-c-h: #fff;
+	--hsw-loop-arrow-c-h: var(--hsw-loop-on-accent);
 	--hsw-loop-arrow-border: var(--hsw-loop-border);
 	--hsw-loop-arrow-radius: 10px;
 	--hsw-loop-arrow-size: 36px;
-	--hsw-loop-scrollbar: #cbd5e1;
+	--hsw-loop-scrollbar: var(--hsw-pal-border-strong, #cbd5e1);
 
 	--hsw-loop-stock-track: var(--hsw-pal-surface-alt, #f3f4f6);
 	--hsw-loop-stock-fill: var(--hsw-pal-success, #16a34a);
@@ -90,24 +99,24 @@
 
 	--hsw-loop-btn-bg: var(--hsw-loop-accent);
 	--hsw-loop-btn-bg-h: var(--hsw-loop-primary);
-	--hsw-loop-btn-c: #fff;
-	--hsw-loop-btn-c-h: #fff;
+	--hsw-loop-btn-c: var(--hsw-loop-on-accent);
+	--hsw-loop-btn-c-h: var(--hsw-loop-on-accent);
 	--hsw-loop-btn-radius: 10px;
 
 	--hsw-loop-sale-bg: var(--hsw-loop-accent);
-	--hsw-loop-sale-c: #fff;
+	--hsw-loop-sale-c: var(--hsw-loop-on-accent);
 	--hsw-loop-feat-bg: var(--hsw-loop-primary);
-	--hsw-loop-feat-c: #fff;
+	--hsw-loop-feat-c: var(--hsw-loop-on-accent);
 	--hsw-loop-ship-bg: var(--hsw-pal-success, #16a34a);
-	--hsw-loop-ship-c: #fff;
-	--hsw-loop-oos-bg: #374151;
-	--hsw-loop-oos-c: #fff;
+	--hsw-loop-ship-c: var(--hsw-loop-on-accent);
+	--hsw-loop-oos-bg: var(--hsw-pal-ink-soft, #374151);
+	--hsw-loop-oos-c: var(--hsw-loop-on-accent);
 	--hsw-loop-badge-radius: 999px;
 	--hsw-loop-badge-fs: 0.6875rem;
-	--hsw-loop-rank-1-bg: #f59e0b;
-	--hsw-loop-rank-1-c: #fff;
-	--hsw-loop-rank-23-bg: #cbd5e1;
-	--hsw-loop-rank-23-c: #1f2937;
+	--hsw-loop-rank-1-bg: var(--hsw-pal-warning, #f59e0b);
+	--hsw-loop-rank-1-c: var(--hsw-loop-on-accent);
+	--hsw-loop-rank-23-bg: var(--hsw-pal-border-strong, #cbd5e1);
+	--hsw-loop-rank-23-c: var(--hsw-pal-ink, #1f2937);
 	--hsw-loop-rank-n-bg: var(--hsw-pal-surface-alt, #f3f4f6);
 	--hsw-loop-rank-n-c: var(--hsw-loop-muted);
 
@@ -122,12 +131,12 @@
 
 	--hsw-loop-lead-bg: var(--hsw-loop-primary);
 	--hsw-loop-lead-border: transparent;
-	--hsw-loop-lead-c: #fff;
+	--hsw-loop-lead-c: var(--hsw-loop-on-accent);
 	--hsw-loop-lead-sub-c: rgb(255 255 255 / 78%);
-	--hsw-loop-lead-btn-bg: #fff;
+	--hsw-loop-lead-btn-bg: var(--hsw-pal-on-accent, #fff);
 	--hsw-loop-lead-btn-c: var(--hsw-loop-primary);
 	--hsw-loop-lead-btn-bg-h: var(--hsw-loop-accent);
-	--hsw-loop-lead-btn-c-h: #fff;
+	--hsw-loop-lead-btn-c-h: var(--hsw-loop-on-accent);
 	--hsw-loop-lead-w: 208px;
 	--hsw-loop-lead-radius: 14px;
 
@@ -136,6 +145,66 @@
 	--hsw-loop-skel-radius: 14px;
 	--hsw-loop-skel-speed: 1.4s;
 	--hsw-loop-skel-h: 360px;
+}
+
+/*
+ * Dark palette — the same token names with darker values, so nothing else in
+ * the stylesheet needs to know about it. Opt-in per widget (`dark`) or tied to
+ * the visitor's system preference (`auto`); the default stays light, so the
+ * store's look never changes on its own.
+ */
+.hsw-loop[data-hsw-theme="dark"] {
+--hsw-loop-bg: #14161c;
+--hsw-loop-fg: #e8eaee;
+--hsw-loop-muted: #9aa3b2;
+--hsw-loop-border: #2a2f3a;
+--hsw-loop-card-bg: #191c23;
+--hsw-loop-shell-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+--hsw-loop-timer-bg: #232833;
+--hsw-loop-timer-part-bg: #2a2f3a;
+--hsw-loop-arrow-bg: #232833;
+--hsw-loop-tabs-bg: #1d222b;
+--hsw-loop-tab-active-bg: #2a2f3a;
+--hsw-loop-stock-track: #2a2f3a;
+--hsw-loop-skel-bg: #1d222b;
+--hsw-loop-skel-shine: rgb(255 255 255 / 12%);
+--hsw-loop-rank-n-bg: #232833;
+--hsw-loop-hdr-badge-bg: rgb(255 255 255 / 10%);
+--hsw-loop-oos-bg: #4b5563;
+}
+
+@media (prefers-color-scheme: dark) {
+.hsw-loop[data-hsw-theme="auto"] {
+--hsw-loop-bg: #14161c;
+--hsw-loop-fg: #e8eaee;
+--hsw-loop-muted: #9aa3b2;
+--hsw-loop-border: #2a2f3a;
+--hsw-loop-card-bg: #191c23;
+--hsw-loop-shell-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+--hsw-loop-timer-bg: #232833;
+--hsw-loop-timer-part-bg: #2a2f3a;
+--hsw-loop-arrow-bg: #232833;
+--hsw-loop-tabs-bg: #1d222b;
+--hsw-loop-tab-active-bg: #2a2f3a;
+--hsw-loop-stock-track: #2a2f3a;
+--hsw-loop-skel-bg: #1d222b;
+--hsw-loop-skel-shine: rgb(255 255 255 / 12%);
+--hsw-loop-rank-n-bg: #232833;
+--hsw-loop-hdr-badge-bg: rgb(255 255 255 / 10%);
+--hsw-loop-oos-bg: #4b5563;
+}
+}
+
+/* End of the countdown: the timer keeps its pill with the «ended» line, and a
+   hidden block really leaves the flow (`display` is set on `.hsw-loop`). */
+.hsw-loop__timer--ended .hsw-loop__timer-label {
+color: inherit;
+font-weight: 700;
+}
+
+.hsw-loop[hidden],
+.hsw-loop.is-ended-hidden {
+display: none;
 }
 
 /* Three dashboard presets. They only remap the global palette tokens, so a

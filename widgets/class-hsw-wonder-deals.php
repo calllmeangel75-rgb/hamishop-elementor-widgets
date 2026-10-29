@@ -158,12 +158,19 @@ class HSW_Widget_Wonder_Deals extends HSW_Widget_Base {
 		$more   = 'yes' === ( $s['show_more_card'] ?? 'no' );
 		$last   = count( $chunks ) - 1;
 		?>
-		<section class="hsw-loop hsw-loop--deal hsw-loop--hsw-wonder-deals<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>" data-hsw-fit="<?php echo esc_attr( $fit ); ?>">
+		<section class="hsw-loop hsw-loop--deal hsw-loop--hsw-wonder-deals<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>" data-hsw-fit="<?php echo esc_attr( $fit ); ?>"<?php echo $this->theme_attr( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside. ?>>
 			<?php
 			if ( 'yes' === ( $s['show_header'] ?? 'yes' ) ) {
 				echo $this->header_html( $s, $cd_end ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 			} elseif ( $cd_end > time() ) {
-				echo '<div class="hsw-loop__bar">' . $this->timer_html( $cd_end, (string) ( $s['cd_label'] ?? '' ) ) . $this->arrows_html() . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo '<div class="hsw-loop__bar">' . $this->timer_html(
+					$cd_end,
+					(string) ( $s['cd_label'] ?? '' ),
+					array(
+						'timer_end_action' => (string) ( $s['cd_end_action'] ?? 'hide_timer' ),
+						'timer_end_text'   => (string) ( $s['cd_end_text'] ?? '' ),
+					)
+				) . $this->arrows_html() . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			} else {
 				echo '<div class="hsw-loop__bar">' . $this->arrows_html() . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}

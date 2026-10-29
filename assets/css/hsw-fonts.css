@@ -12,7 +12,15 @@
         src: url('../fonts/vazirmatn.woff2') format('woff2-variations');
         font-weight: 100 900;
         font-style: normal;
-        font-display: swap;
+        /*
+         * `optional`, not `swap`: with a swapped webfont the first render used
+         * Tahoma and the header/rail re-flowed when the font arrived, measured at
+         * CLS 0.18 on a 390px viewport. `optional` never swaps after the block
+         * period — the file is local and cached after the first visit, so the
+         * brand font is still used; a slow first load simply keeps the fallback
+         * for that page view instead of shifting the layout.
+         */
+        font-display: optional;
         /*
          * Full basic Latin + Latin-1 as well as the Arabic blocks: the old range
          * skipped A-Z, a-z, ':' and ';', so every Latin fragment inside a widget
