@@ -53,6 +53,17 @@ def add_file(archive, path, arcname):
     archive.write(path, arcname, compress_type=zipfile.ZIP_DEFLATED)
 
 
+def release_files(version):
+    """Top-level files for this release, with the matching release note.
+
+    The note name used to be hard-coded to one old version, so a ZIP built for
+    a newer version shipped yesterday's notes (or none at all).
+    """
+    notes = "RELEASE-NOTES-%s.md" % version
+    files = tuple(f for f in TOP_LEVEL_FILES if not f.startswith("RELEASE-NOTES-"))
+    return files + (notes,)
+
+
 def main():
     version = sys.argv[1] if len(sys.argv) > 1 else version_from_header()
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
@@ -63,7 +74,7 @@ def main():
     written = 0
 
     with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for name in TOP_LEVEL_FILES:
+        for name in release_files(version):
             path = os.path.join(ROOT, name)
             if name.startswith("RELEASE-NOTES-") and not os.path.isfile(path):
                 continue
