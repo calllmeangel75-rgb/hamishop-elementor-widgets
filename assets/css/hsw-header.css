@@ -335,6 +335,10 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
  * Optional logo shine. The sweep lives on a pseudo-element so it works for
  * both the bundled storefront icon and an uploaded image logo, without an
  * extra DOM node or a second request.
+ *
+ * Two tones instead of one flat band: the palette accent tints the trailing
+ * half, so the sweep reads as a gradient (the store's own "shiny logo" look)
+ * and follows the dashboard palette instead of always being plain white.
  */
 .hsw-hd__logomark--shine::after {
 	content: '';
@@ -342,9 +346,10 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	inset: -35% -55%;
 	z-index: 2;
 	background: linear-gradient(115deg,
-		transparent 30%,
-		var(--hsw-hd-shine-c, rgba(255, 255, 255, .82)) 48%,
-		transparent 66%);
+		transparent 28%,
+		var(--hsw-hd-shine-c, rgba(255, 255, 255, .82)) 46%,
+		color-mix(in srgb, var(--hsw-accent, #fc593a) 42%, #fff) 54%,
+		transparent 70%);
 	pointer-events: none;
 	transform: translateX(-170%) rotate(8deg);
 	animation: hsw-hd-logo-shine var(--hsw-hd-shine-dur, 5s) ease-in-out infinite;
@@ -419,6 +424,35 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	line-height: 1.3;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+/*
+ * «لوگوی شاینی» for text brands: primary → accent → primary, painted into the
+ * glyphs. Kept behind a switch because a gradient wordmark is a brand decision,
+ * and `color: transparent` would otherwise hide the name on engines without
+ * background-clip: text (hence the @supports guard).
+ *
+ * One prefixed condition instead of `x or y`: the minifier drops the space
+ * after `or`, which turns it into a function call and makes the whole block
+ * invalid — silently losing the gradient on the production (minified) build.
+ */
+@supports (-webkit-background-clip: text) {
+	.hsw-hd__brandname--gradient {
+		background: linear-gradient(100deg,
+			var(--hsw-hd-primary) 0%,
+			var(--hsw-accent, #fc593a) 46%,
+			var(--hsw-hd-primary) 100%);
+		background-size: 180% 100%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		animation: hsw-hd-brand-gradient 9s ease-in-out infinite;
+	}
+
+	@keyframes hsw-hd-brand-gradient {
+		0%, 100% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+	}
 }
 
 .hsw-hd__brandtag {
@@ -2595,6 +2629,92 @@ html { overflow-x: clip; }
 
 	.hsw-hd__minactions .hsw-hd__account {
 		display: none;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Phone rhythm: one gap size for every item, both headers
+ *
+ * The row used to be spaced by three different numbers at once — 8px between
+ * the brand and the burger, the widget's own 40px between the action icons,
+ * and a zero-width search wrapper that swallowed the free space — so one side
+ * looked packed and the other airy, and the two headers drifted apart.
+ *
+ * Below 900px every child becomes a direct flex item of the row (`display:
+ * contents` on the action clusters), so `space-evenly` gives a single gap
+ * value between all of them and at both edges. The clusters' own `gap` stops
+ * mattering, which also makes the layout immune to a per-widget gap value.
+ * ---------------------------------------------------------------------- */
+@media (max-width: 900px) {
+	/*
+	 * `!important` here is deliberate: Elementor prints a per-element rule
+	 * (`@media (max-width: 767px) .elementor-… .hsw-hd__maininner {
+	 * justify-content: center }`) from the widget's align control, and any
+	 * selector we could write loses to it on specificity. On phones the row is
+	 * distributed evenly instead, which is why the control says so in its
+	 * description. Everything else below still comes from plain rules.
+	 */
+	body .hsw-hd .hsw-hd__maininner,
+	body .hsw-hd .hsw-hd__pill {
+		display: flex;
+		align-items: center;
+		justify-content: space-evenly !important;
+		gap: 6px;
+		padding-inline: 6px;
+	}
+
+	.hsw-hd__maininner > .hsw-hd__actions,
+	.hsw-hd__pill > .hsw-hd__minactions {
+		display: contents;
+	}
+
+	/* Zero-width wrappers no longer need to absorb space. */
+	.hsw-hd__maininner > .hsw-hd__searchwrap,
+	.hsw-hd__maininner > .hsw-hd__spacer,
+	.hsw-hd__minwrap .hsw-hd__minnav {
+		display: none;
+	}
+
+	/*
+	 * Equal 40px targets. The old 8px/16px inner padding pushed the glyphs a
+	 * couple of pixels off the centre of their circles.
+	 */
+	.hsw-hd__maininner > .hsw-hd__burger,
+	.hsw-hd__pill > .hsw-hd__burger,
+	.hsw-hd__maininner > .hsw-hd__iconbtn,
+	.hsw-hd__maininner > .hsw-hd__account,
+	.hsw-hd__maininner > .hsw-hd__cart,
+	.hsw-hd__pill .hsw-hd__iconbtn,
+	.hsw-hd__pill .hsw-hd__action--minimal {
+		padding: 0;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+	}
+
+	/* The brand is one item among the rest, so it must not claim the slack. */
+	.hsw-hd__maininner > .hsw-hd__brandwrap,
+	.hsw-hd__pill > .hsw-hd__brandwrap {
+		flex: 0 1 auto;
+		max-width: min(58vw, 220px);
+	}
+}
+
+@media (max-width: 420px) {
+	.hsw-hd__maininner,
+	.hsw-hd__pill {
+		gap: 4px;
+	}
+
+	.hsw-hd__maininner > .hsw-hd__burger,
+	.hsw-hd__pill > .hsw-hd__burger,
+	.hsw-hd__maininner > .hsw-hd__iconbtn,
+	.hsw-hd__maininner > .hsw-hd__account,
+	.hsw-hd__maininner > .hsw-hd__cart,
+	.hsw-hd__pill .hsw-hd__iconbtn,
+	.hsw-hd__pill .hsw-hd__action--minimal {
+		width: 36px;
+		height: 36px;
 	}
 }
 

@@ -229,6 +229,7 @@ final class HSW_Account {
 				'telegram_token'    => '',
 				'telegram_bot'      => '',
 				'telegram_secret'   => '',
+				'telegram_polling'  => 'no',
 				'whatsapp_provider' => 'cloud',
 				'whatsapp_token'    => '',
 				'whatsapp_phone_id' => '',
@@ -479,6 +480,7 @@ final class HSW_Account {
 			if ( '' === $out['auth']['telegram_secret'] ) {
 				$out['auth']['telegram_secret'] = wp_generate_password( 40, false, false );
 			}
+			$out['auth']['telegram_polling']    = $this->yes_no( $a['telegram_polling'] ?? $out['auth']['telegram_polling'] );
 			$out['auth']['whatsapp_provider'] = in_array( ( $a['whatsapp_provider'] ?? '' ), array( 'cloud', 'bridge' ), true ) ? $a['whatsapp_provider'] : 'cloud';
 			$out['auth']['whatsapp_token']    = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_token'] ?? '' ) ) );
 			$out['auth']['whatsapp_phone_id'] = sanitize_text_field( wp_unslash( (string) ( $a['whatsapp_phone_id'] ?? '' ) ) );

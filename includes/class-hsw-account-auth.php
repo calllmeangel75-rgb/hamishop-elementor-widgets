@@ -1327,6 +1327,19 @@ final class HSW_Account_Auth {
 			return;
 		}
 
+		/*
+		 * Polling owns the updates when it is on. Telegram keeps retrying a
+		 * webhook it cannot reach, so both paths could otherwise process the
+		 * same message twice (two "connected" replies, two chat bindings).
+		 */
+		if ( 'yes' === $this->s( 'telegram_polling', 'no' ) ) {
+			status_header( 200 );
+			nocache_headers();
+			header( 'Content-Type: application/json; charset=utf-8' );
+			echo wp_json_encode( array( 'ok' => true, 'mode' => 'polling' ) );
+			exit;
+		}
+
 		$secret = (string) $this->s( 'telegram_secret' );
 		$given  = isset( $_GET['secret'] ) ? (string) wp_unslash( $_GET['secret'] ) : '';
 		$header = isset( $_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ) ? (string) wp_unslash( $_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ) : '';
@@ -1347,6 +1360,31 @@ final class HSW_Account_Auth {
 			nocache_headers();
 			echo 'invalid';
 			exit;
+		}
+
+		$this->handle_telegram_update( $data );
+
+		status_header( 200 );
+		nocache_headers();
+		header( 'Content-Type: application/json; charset=utf-8' );
+		echo wp_json_encode( array( 'ok' => true ) );
+		exit;
+	}
+
+	/**
+	 * Apply one Telegram update.
+	 *
+	 * Both transports feed this method — the webhook above and the long-polling
+	 * worker (`HSW_Telegram_Poller`), which exists for hosts where Telegram
+	 * cannot reach the site. Keeping the rules in one place is what stops the
+	 * two paths from answering differently, and the contact-ownership check
+	 * below must never be re-implemented elsewhere.
+	 *
+	 * @param array $data Decoded update.
+	 */
+	public function handle_telegram_update( $data ) {
+		if ( ! is_array( $data ) ) {
+			return;
 		}
 
 		$message    = isset( $data['message'] ) && is_array( $data['message'] ) ? $data['message'] : array();
@@ -1428,12 +1466,6 @@ final class HSW_Account_Auth {
 				$keyboard
 			);
 		}
-
-		status_header( 200 );
-		nocache_headers();
-		header( 'Content-Type: application/json; charset=utf-8' );
-		echo wp_json_encode( array( 'ok' => true ) );
-		exit;
 	}
 
 	/* ---------------------------------------------------------------------

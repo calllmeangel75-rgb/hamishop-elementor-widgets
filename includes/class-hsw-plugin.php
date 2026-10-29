@@ -47,6 +47,7 @@ final class HSW_Plugin {
                 new HSW_Rebrand();
                 new HSW_Request_Blocker();
                 new HSW_Login();
+                new HSW_Telegram_Poller();
                 HSW_Coupon_Messages::instance();
 
                 /* One SVG sprite per page, containing only the icons it rendered. */
@@ -313,6 +314,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-rebrand.php';
                 require_once HSW_DIR . 'includes/class-hsw-request-blocker.php';
                 require_once HSW_DIR . 'includes/class-hsw-login.php';
+                require_once HSW_DIR . 'includes/class-hsw-telegram-poller.php';
                 require_once HSW_DIR . 'includes/class-hsw-coupon-messages.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';

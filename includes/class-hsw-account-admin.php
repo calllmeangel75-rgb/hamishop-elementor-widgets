@@ -577,6 +577,8 @@ final class HSW_Account_Admin {
 	private function tab_auth( $s ) {
 		$secret  = $this->val( $s, 'auth', 'telegram_secret' );
 		$webhook = $secret ? add_query_arg( array( 'hsw_telegram_webhook' => 1, 'secret' => $secret ), home_url( '/' ) ) : '';
+		$poll    = $secret ? add_query_arg( array( 'hsw_tg_poll' => 1, 'secret' => $secret ), home_url( '/' ) ) : '';
+		$polling = 'yes' === $this->val( $s, 'auth', 'telegram_polling' );
 		$bot     = $this->val( $s, 'auth', 'telegram_bot' );
 		$sms     = ( HSW_Account::instance()->auth && HSW_Account::instance()->auth->third_party_sms_active() );
 		$channels = array( 'email' => 'ایمیل', 'telegram' => 'تلگرام', 'whatsapp' => 'واتساپ' );
@@ -627,6 +629,22 @@ final class HSW_Account_Admin {
 			<?php else : ?>
 				<p class="hsw-notice">پس از ذخیرهٔ تنظیمات، کلید امنیتی و آدرس وبهوک ساخته می‌شود.</p>
 			<?php endif; ?>
+
+			<hr style="margin:16px 0">
+			<?php $this->switch_field( $s, 'auth', 'telegram_polling', 'دریافت پیام‌ها با Polling (هاست‌هایی که وبهوک کار نمی‌کند)', 'اگر getWebhookInfo خطای Connection timed out می‌دهد ولی getUpdates از همین هاست جواب می‌دهد، این گزینه را روشن کنید. وبهوک خودکار کنار گذاشته می‌شود تا پیام‌ها دوبار پردازش نشوند.' ); ?>
+			<?php if ( $poll ) : ?>
+				<p><strong>آدرس ورکر Polling:</strong> <?php echo $polling ? '<span class="hsw-admin-badge is-success">فعال</span>' : '<span class="hsw-admin-badge">غیرفعال</span>'; ?></p>
+				<code class="hsw-code"><?php echo esc_html( $poll ); ?></code>
+				<p class="description">
+					این آدرس در هر بار فراخوانی یک <code>getUpdates</code> کوتاه می‌زند (حداکثر ۱۰ پیام، timeout صفر) و <code>offset</code> را ذخیره می‌کند؛ پیام تکراری پردازش نمی‌شود.
+					از داخل وردپرس هر دقیقه با WP-Cron هم اجرا می‌شود، اما چون WP-Cron به بازدید وابسته است، برای پایداری یک Cron Job در هاست (DirectAdmin → Cron Jobs) با فاصلهٔ یک دقیقه روی همین آدرس بگذارید:
+					<code dir="ltr" style="display:block;margin:6px 0">php -q <?php echo esc_html( ABSPATH . 'wp-cron.php' ); ?></code>
+					یا <code dir="ltr">curl -s "<?php echo esc_html( $poll ); ?>" &gt;/dev/null</code>
+				</p>
+			<?php else : ?>
+				<p class="hsw-notice">پس از ذخیرهٔ تنظیمات، آدرس ورکر Polling ساخته می‌شود.</p>
+			<?php endif; ?>
+
 			<?php if ( $bot ) : ?>
 				<p class="description">لینک ربات: <code>https://t.me/<?php echo esc_html( $bot ); ?></code></p>
 			<?php endif; ?>

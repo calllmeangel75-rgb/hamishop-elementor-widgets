@@ -270,7 +270,8 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= $mark;
 		$out .= '<span class="hsw-hd__brandtext">';
 		if ( '' !== $name ) {
-			$out .= '<span class="hsw-hd__brandname">' . esc_html( $name ) . '</span>';
+			$name_class = 'hsw-hd__brandname' . ( ! empty( $s['brand_gradient'] ) && 'yes' === $s['brand_gradient'] ? ' hsw-hd__brandname--gradient' : '' );
+			$out       .= '<span class="' . esc_attr( $name_class ) . '">' . esc_html( $name ) . '</span>';
 		}
 		if ( '' !== $tagline ) {
 			$out .= '<span class="hsw-hd__brandtag">' . esc_html( $tagline ) . '</span>';
@@ -779,12 +780,22 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
+			'brand_gradient',
+			array(
+				'label'       => __( 'گرادیانت روی نام برند', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'no',
+				'separator'   => 'before',
+				'description' => __( 'نام برند با گرادیانت رنگ اصلی و رنگ تأکید پالت نوشته می‌شود (مثل «لوگوی شاینی»). روی لوگوی تصویری اثری ندارد؛ برای آن‌ها «افکت شاین» بالا را استفاده کنید.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
 			'logo_shine',
 			array(
 				'label'       => __( 'افکت شاین گرادیانت روی لوگو', 'hamishop-elementor-widgets' ),
 				'type'        => Controls_Manager::SWITCHER,
 				'default'     => 'yes',
-				'separator'   => 'before',
 				'description' => __( 'یک درخشش گرادیانتی دوره‌ای روی نشان/تصویر لوگو حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است.', 'hamishop-elementor-widgets' ),
 			)
 		);
