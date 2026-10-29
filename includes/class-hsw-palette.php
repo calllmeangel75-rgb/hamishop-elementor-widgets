@@ -227,10 +227,23 @@ class HSW_Palette {
 	 *    a distinct name because `--hsw-surface` already means "page
 	 *    background" inside the product family and must not be redefined.
 	 *
+	 * The loop family also reads `--hsw-pal-star`, `-border-strong`, `-ink`,
+	 * `-ink-soft` and `-on-accent`. They are derived here (not left to the
+	 * stylesheet fallbacks) so changing a palette colour really changes every
+	 * loop surface instead of silently doing nothing.
+	 *
 	 * @return string
 	 */
 	public function css() {
 		$p = self::get();
+
+		/* Readable text on a filled colour, whatever the owner picked. */
+		$on_primary = self::contrast_text( $p['primary'] );
+		$on_accent  = self::contrast_text( $p['accent'] );
+		$on_cta     = self::contrast_text( $p['cta'] );
+		$on_danger  = self::contrast_text( $p['danger'] );
+		$on_success = self::contrast_text( $p['success'] );
+		$on_warning = self::contrast_text( $p['warning'] );
 
 		$vars = array(
 			'--hsw-primary'            => $p['primary'],
@@ -239,14 +252,14 @@ class HSW_Palette {
 			'--hsw-secondary-container' => $p['accent'],
 			'--hsw-accent'             => $p['accent'],
 			'--hsw-hover'              => $p['hover'],
-			'--hsw-on-primary'         => '#ffffff',
+			'--hsw-on-primary'         => $on_primary,
 			'--hsw-on-surface'         => $p['text'],
 
 			/* Purchase-step CTAs: one colour for cart → checkout → pay. */
 			'--hsw-cta'                => $p['cta'],
 			'--hsw-cta-hover'          => $p['cta_hover'],
 			'--hsw-cta-active'         => $p['cta_active'],
-			'--hsw-on-cta'             => ( $p['cta_text'] ?? '#ffffff' ),
+			'--hsw-on-cta'             => ( $p['cta_text'] ?? $on_cta ),
 
 			'--hsw-pal-surface'        => $p['surface'],
 			'--hsw-pal-surface-alt'    => $p['surface_alt'],
@@ -255,6 +268,21 @@ class HSW_Palette {
 			'--hsw-pal-success'        => $p['success'],
 			'--hsw-pal-warning'        => $p['warning'],
 			'--hsw-pal-danger'         => $p['danger'],
+
+			/*
+			 * Loop-family tokens that used to fall back to the stylesheet's own
+			 * literals. Derived from the palette so one screen owns them:
+			 * stars, a stronger border, an ink pair for dark badges, and the
+			 * text colour that sits on accent fills.
+			 */
+			'--hsw-pal-star'           => 'color-mix(in srgb, ' . $p['warning'] . ', #f59e0b 55%)',
+			'--hsw-pal-border-strong'  => 'color-mix(in srgb, ' . $p['border'] . ', ' . $p['text'] . ' 28%)',
+			'--hsw-pal-ink'            => $p['text'],
+			'--hsw-pal-ink-soft'       => 'color-mix(in srgb, ' . $p['text'] . ', ' . $p['surface'] . ' 26%)',
+			'--hsw-pal-on-accent'      => $on_accent,
+			'--hsw-pal-on-success'     => $on_success,
+			'--hsw-pal-on-warning'     => $on_warning,
+			'--hsw-pal-on-danger'      => $on_danger,
 
 			/* Functional header buttons (cart / account / burger). */
 			'--hsw-hd-act-icon'        => $p['header_icon_color'],
@@ -286,6 +314,41 @@ class HSW_Palette {
 		}
 
 		return 'html:root{' . $decls . '}';
+	}
+
+	/**
+	 * Text colour that stays readable on a filled colour.
+	 *
+	 * Conservative on purpose: the store's design assumes white text on accent
+	 * fills, so white is kept unless it fails even the large-text AA ratio
+	 * (3:1). Only genuinely light fills — a yellow accent, a white "surface"
+	 * mistake — switch to dark ink. Nothing changes for the default palette.
+	 *
+	 * @param string $hex Background colour.
+	 * @return string `#ffffff` or `#111827`.
+	 */
+	public static function contrast_text( $hex ) {
+		$hex = ltrim( (string) $hex, '#' );
+		if ( 3 === strlen( $hex ) ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+		if ( 6 !== strlen( $hex ) || ! ctype_xdigit( $hex ) ) {
+			return '#ffffff';
+		}
+
+		$channel = static function ( $pair ) use ( $hex ) {
+			$value = hexdec( $pair ) / 255;
+			return $value <= 0.03928 ? $value / 12.92 : pow( ( $value + 0.055 ) / 1.055, 2.4 );
+		};
+
+		$luminance = 0.2126 * $channel( substr( $hex, 0, 2 ) )
+			+ 0.7152 * $channel( substr( $hex, 2, 2 ) )
+			+ 0.0722 * $channel( substr( $hex, 4, 2 ) );
+
+		/* WCAG contrast = (L1 + 0.05) / (L2 + 0.05). */
+		$with_white = 1.05 / ( $luminance + 0.05 );
+
+		return $with_white >= 3.0 ? '#ffffff' : '#111827';
 	}
 
 	/**
