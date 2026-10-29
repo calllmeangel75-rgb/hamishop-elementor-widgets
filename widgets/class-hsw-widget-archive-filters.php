@@ -976,10 +976,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 $html .= '<span class="hsw-af__catspacer" aria-hidden="true"></span>';
                         }
 
-                        $link = get_term_link( $term );
-                        if ( is_wp_error( $link ) ) {
-                                $link = '#';
-                        }
+                        $link = $this->cat_link( $term );
                         $link_class = 'hsw-af__catlink';
                         if ( $is_current ) {
                                 $link_class .= ' is-active';
@@ -1009,6 +1006,33 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 }
 
                 return $html;
+        }
+
+        /**
+         * Category archive URL that keeps the other active filters.
+         *
+         * The tree rows are navigation, not form inputs. A link straight from
+         * `get_term_link()` dropped `instock`, the attribute chips and the price
+         * range, so «filter, then pick a category» silently reset everything —
+         * the opposite of what a filter sidebar is for. The `product_cat` keys
+         * are cleared because the target path already fixes the category.
+         *
+         * @param WP_Term $term Term.
+         * @return string
+         */
+        protected function cat_link( $term ) {
+                $link = get_term_link( $term );
+                if ( is_wp_error( $link ) ) {
+                        return '#';
+                }
+
+                return $this->filter_url(
+                        array(
+                                'product_cat'        => null,
+                                'filter_product_cat' => null,
+                        ),
+                        $link
+                );
         }
 
         /**

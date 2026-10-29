@@ -687,7 +687,7 @@ msgstr ""
 msgid "ارسال فوری"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1240
+#: widgets/class-hsw-widget-archive-filters.php:1264
 msgid "ارسال فوری (تحویل امروز)"
 msgstr ""
 
@@ -768,7 +768,7 @@ msgstr ""
 msgid "از ۵"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1192
+#: widgets/class-hsw-widget-archive-filters.php:1216
 msgid "از:"
 msgstr ""
 
@@ -1083,8 +1083,8 @@ msgstr ""
 msgid "اعلان‌های ووکامرس داخل همین ویجت چاپ می‌شوند. پیام شناور سراسری افزودن به سبد از استایل مشترک HamiShop استفاده می‌کند و از این بخش جدا است."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1387
 #: widgets/class-hsw-widget-archive-filters.php:1411
+#: widgets/class-hsw-widget-archive-filters.php:1435
 msgid "اعمال فیلترها"
 msgstr ""
 
@@ -1794,8 +1794,8 @@ msgid "باز باشد"
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-filters.php:974
-#: widgets/class-hsw-widget-archive-filters.php:1042
-#: widgets/class-hsw-widget-archive-filters.php:1051
+#: widgets/class-hsw-widget-archive-filters.php:1066
+#: widgets/class-hsw-widget-archive-filters.php:1075
 msgid "باز و بستن زیرشاخه‌ها"
 msgstr ""
 
@@ -2570,7 +2570,7 @@ msgstr ""
 #: includes/class-hsw-assets.php:631
 #: includes/class-hsw-assets.php:651
 #: includes/class-hsw-assets.php:679
-#: widgets/class-hsw-widget-archive-filters.php:1401
+#: widgets/class-hsw-widget-archive-filters.php:1425
 #: widgets/class-hsw-widget-archive-guide.php:188
 #: widgets/class-hsw-widget-archive-header.php:213
 #: widgets/class-hsw-widget-archive-toolbar.php:189
@@ -2764,7 +2764,7 @@ msgstr ""
 msgid "تا ۷ روز پس از تحویل، در صورت سالم بودن بسته‌بندی و کالا، امکان مرجوعی یا تعویض وجود دارد؛ کافی است از بخش سفارش‌های حساب کاربری درخواست خود را ثبت کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1194
+#: widgets/class-hsw-widget-archive-filters.php:1218
 msgid "تا:"
 msgstr ""
 
@@ -3903,7 +3903,7 @@ msgstr ""
 msgid "جستجو و تب‌های دسته"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1090
+#: widgets/class-hsw-widget-archive-filters.php:1114
 msgid "جستجو..."
 msgstr ""
 
@@ -3924,12 +3924,12 @@ msgid "جستجوی داخل فهرست"
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-filters.php:867
-#: widgets/class-hsw-widget-archive-filters.php:1034
+#: widgets/class-hsw-widget-archive-filters.php:1058
 msgid "جستجوی دسته..."
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-filters.php:867
-#: widgets/class-hsw-widget-archive-filters.php:1034
+#: widgets/class-hsw-widget-archive-filters.php:1058
 msgid "جستجوی دسته‌بندی"
 msgstr ""
 
@@ -4228,7 +4228,7 @@ msgstr ""
 msgid "حد مجاز گفتگوهای باز تکمیل است. یکی را ببندید و دوباره تلاش کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1188
+#: widgets/class-hsw-widget-archive-filters.php:1212
 msgid "حداقل قیمت"
 msgstr ""
 
@@ -4289,7 +4289,7 @@ msgstr ""
 msgid "حداکثر عمق زیرشاخه‌ها"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1189
+#: widgets/class-hsw-widget-archive-filters.php:1213
 msgid "حداکثر قیمت"
 msgstr ""
 
@@ -4336,8 +4336,8 @@ msgstr ""
 msgid "حذف ناموجودها"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1380
-#: widgets/class-hsw-widget-archive-filters.php:1409
+#: widgets/class-hsw-widget-archive-filters.php:1404
+#: widgets/class-hsw-widget-archive-filters.php:1433
 msgid "حذف همه"
 msgstr ""
 
@@ -8426,7 +8426,7 @@ msgid "فقط تایمر پنهان شود"
 msgstr ""
 
 #: includes/class-hsw-archive-base.php:320
-#: widgets/class-hsw-widget-archive-filters.php:1243
+#: widgets/class-hsw-widget-archive-filters.php:1267
 msgid "فقط تخفیف‌دارها"
 msgstr ""
 
@@ -8501,7 +8501,7 @@ msgid "فقط ویژگی‌های ووکامرس (Attributes)"
 msgstr ""
 
 #: includes/class-hsw-archive-base.php:295
-#: widgets/class-hsw-widget-archive-filters.php:1237
+#: widgets/class-hsw-widget-archive-filters.php:1261
 msgid "فقط کالاهای موجود"
 msgstr ""
 
@@ -8582,7 +8582,7 @@ msgstr ""
 msgid "فیلتر سریع"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-filters.php:1399
+#: widgets/class-hsw-widget-archive-filters.php:1423
 msgid "فیلتر فعال"
 msgstr ""
 
@@ -8604,8 +8604,8 @@ msgstr ""
 
 #: includes/class-hsw-widget-manager.php:383
 #: widgets/class-hsw-widget-archive-filters.php:61
-#: widgets/class-hsw-widget-archive-filters.php:1304
-#: widgets/class-hsw-widget-archive-filters.php:1397
+#: widgets/class-hsw-widget-archive-filters.php:1328
+#: widgets/class-hsw-widget-archive-filters.php:1421
 msgid "فیلترهای پیشرفته"
 msgstr ""
 
