@@ -969,6 +969,8 @@
 @media (max-width: 767.98px) {
         .hsw-ptabs__nav { padding-inline: 12px; }
         .hsw-ptabs__more { width: 46px; }
+        /* The mobile «more tabs» chevron sits 10px higher on request. */
+        .hsw-ptabs__more svg { transform: translateY(-10px); }
 }
 .hsw-ptabs__btn {
         display: flex;

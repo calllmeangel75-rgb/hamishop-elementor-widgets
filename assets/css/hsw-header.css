@@ -2670,6 +2670,15 @@ html { overflow-x: clip; }
  * and the edge cannot jump while opening or closing.
  * ====================================================================== */
 
+/*
+ * The drawer lives inside the fixed header, so its own z-index is trapped in
+ * the header stacking context. While it is open, lift that context above the
+ * mobile sticky purchase bar (9995) so the checkout button is never covered.
+ */
+.hsw-hd.is-cart-open {
+	z-index: 10021;
+}
+
 .hsw-hd__cartdrawer {
 	position: fixed;
 	inset: 0;
@@ -2807,7 +2816,8 @@ html { overflow-x: clip; }
 	border: 1px solid var(--hsw-hd-border, #e7e8eb);
 	border-radius: 10px;
 	background: #fff;
-	color: var(--hsw-on-surface-variant, #5b6069);
+	/* Header-owned token: do not inherit the product-page surface variable. */
+	color: var(--hsw-hd-text, #0f172a);
 	cursor: pointer;
 	transition: background-color .15s, color .15s, border-color .15s;
 }

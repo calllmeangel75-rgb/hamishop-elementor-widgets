@@ -163,9 +163,10 @@ class HSW_Cart_Drawer {
 			}
 			$html .= '<div class="hsw-hd__cartrow">';
 			$html .= '<div class="hsw-hd__cartqty" role="group" aria-label="' . esc_attr__( 'تعداد', 'hamishop-elementor-widgets' ) . '">';
-			$html .= self::qty_button( -1, $product_id, $variation_id, $qty <= 1, $args['decrease_text'] );
-			$html .= '<span class="hsw-hd__cartqtyval" data-hsw-cart-qtyval>' . esc_html( HSW_Helpers::fa_num( $qty ) ) . '</span>';
+			/* RTL: the increase button sits on the right, decrease on the left. */
 			$html .= self::qty_button( 1, $product_id, $variation_id, false, $args['increase_text'] );
+			$html .= '<span class="hsw-hd__cartqtyval" data-hsw-cart-qtyval>' . esc_html( HSW_Helpers::fa_num( $qty ) ) . '</span>';
+			$html .= self::qty_button( -1, $product_id, $variation_id, $qty <= 1, $args['decrease_text'] );
 			$html .= '</div>';
 			$html .= '<span class="hsw-hd__cartlineprice">' . wp_kses_post( $cart->get_product_subtotal( $product, $qty ) ) . '</span>';
 			$html .= '<button type="button" class="hsw-hd__cartremove" data-hsw-cart-remove data-product-id="' . esc_attr( $product_id ) . '" data-variation-id="' . esc_attr( $variation_id ) . '" aria-label="' . esc_attr( $args['remove_text'] . ' ' . $product->get_name() ) . '">' . HSW_Helpers::icon( 'delete' ) . '</button>';

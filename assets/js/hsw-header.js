@@ -991,6 +991,27 @@
 			var cartClosers = all(cartDrawer, '[data-hsw-cart-close]');
 			var cartLastFocus = null;
 			var cartBusy = false;
+			var cartLayerTimer = 0;
+
+			/*
+			 * The z-index lives on the header, not the drawer (its parent is a
+			 * stacking context). Keep it raised through the closing slide so
+			 * the sticky purchase bar cannot flash above the panel.
+			 */
+			function setCartLayer(open) {
+				if (cartLayerTimer) {
+					window.clearTimeout(cartLayerTimer);
+					cartLayerTimer = 0;
+				}
+				if (open) {
+					root.classList.add('is-cart-open');
+					return;
+				}
+				cartLayerTimer = window.setTimeout(function () {
+					root.classList.remove('is-cart-open');
+					cartLayerTimer = 0;
+				}, 500);
+			}
 
 			function focusCartElement(element) {
 				if (!element || typeof element.focus !== 'function') {
@@ -1024,6 +1045,7 @@
 				}
 				cartLastFocus = document.activeElement;
 				cartDrawer.classList.add('is-open');
+				setCartLayer(true);
 				cartDrawer.setAttribute('aria-hidden', 'false');
 				setCartExpanded(true);
 				syncScrollLock();
@@ -1040,6 +1062,7 @@
 
 			function closeCart(restoreFocus) {
 				cartDrawer.classList.remove('is-open');
+				setCartLayer(false);
 				cartDrawer.setAttribute('aria-hidden', 'true');
 				setCartExpanded(false);
 				syncScrollLock();

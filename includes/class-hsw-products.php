@@ -10,6 +10,85 @@ defined( 'ABSPATH' ) || exit;
 class HSW_Products {
 
         /**
+         * Same-category product IDs, walking up to the parent category when the
+         * current category has no other products.
+         *
+         * The walk only moves up when the current level is empty. Products from
+         * the first non-empty level are returned as-is, so a category with two
+         * products still shows two cards (the current product is excluded).
+         *
+         * @param int $product_id Current product ID.
+         * @param int $limit      Max IDs to return (0/negative is treated as 1).
+         * @return int[]
+         */
+        public static function related_category_ids( $product_id, $limit = 8 ) {
+                $product_id = absint( $product_id );
+                $limit      = max( 1, absint( $limit ) );
+
+                if ( ! $product_id ) {
+                        return array();
+                }
+
+                $terms = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'ids' ) );
+                if ( is_wp_error( $terms ) || empty( $terms ) ) {
+                        return array();
+                }
+
+                $level = array_values( array_unique( array_map( 'absint', (array) $terms ) ) );
+                $seen  = array();
+
+                while ( ! empty( $level ) ) {
+                        $level = array_values( array_diff( $level, $seen ) );
+                        if ( empty( $level ) ) {
+                                break;
+                        }
+                        $seen = array_merge( $seen, $level );
+
+                        $ids = get_posts(
+                                array(
+                                        'post_type'           => 'product',
+                                        'post_status'         => 'publish',
+                                        'posts_per_page'      => $limit,
+                                        'post__not_in'        => array( $product_id ),
+                                        'fields'              => 'ids',
+                                        'no_found_rows'       => true,
+                                        'ignore_sticky_posts' => true,
+                                        'orderby'             => 'date',
+                                        'order'               => 'DESC',
+                                        'tax_query'           => array(
+                                                array(
+                                                        'taxonomy'         => 'product_cat',
+                                                        'field'            => 'term_id',
+                                                        'terms'            => $level,
+                                                        'include_children' => true,
+                                                ),
+                                        ),
+                                )
+                        );
+
+                        if ( ! empty( $ids ) ) {
+                                return array_values( array_map( 'intval', $ids ) );
+                        }
+
+                        /*
+                         * Nothing left at this level: move exactly one level up.
+                         * Multiple direct categories can share a parent, so the
+                         * unique parent list is queried once.
+                         */
+                        $parents = array();
+                        foreach ( $level as $term_id ) {
+                                $parent = (int) get_term_field( 'parent', $term_id, 'product_cat' );
+                                if ( $parent > 0 ) {
+                                        $parents[] = $parent;
+                                }
+                        }
+                        $level = array_values( array_unique( $parents ) );
+                }
+
+                return array();
+        }
+
+        /**
          * Query products by source key.
          *
          * @param array $args {source, count, ids, term_id, exclude_oos}

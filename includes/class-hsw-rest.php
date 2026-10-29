@@ -354,26 +354,8 @@ class HSW_Rest {
 
                 $ids = wc_get_related_products( $id, $limit, array( $id ) );
                 if ( empty( $ids ) ) {
-                        /* Fall back to the same category so the sheet is never empty. */
-                        $terms = wp_get_post_terms( $id, 'product_cat', array( 'fields' => 'ids' ) );
-                        if ( $terms && ! is_wp_error( $terms ) ) {
-                                $ids = get_posts(
-                                        array(
-                                                'post_type'      => 'product',
-                                                'posts_per_page' => $limit,
-                                                'post__not_in'   => array( $id ),
-                                                'fields'         => 'ids',
-                                                'no_found_rows'  => true,
-                                                'tax_query'      => array(
-                                                        array(
-                                                                'taxonomy' => 'product_cat',
-                                                                'field'    => 'term_id',
-                                                                'terms'    => $terms,
-                                                        ),
-                                                ),
-                                        )
-                                );
-                        }
+                        /* Fall back to the same category tree (parent included). */
+                        $ids = HSW_Products::related_category_ids( $id, $limit );
                 }
 
                 foreach ( (array) $ids as $pid ) {

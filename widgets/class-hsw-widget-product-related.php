@@ -3,8 +3,11 @@
  * Widget: محصولات مرتبط — a horizontal product carousel.
  *
  * 4 cards on desktop, 2.5 on tablet, 1.5 on mobile, with a soft edge fade and
- * two arrow buttons (RTL-aware). The source can be WooCommerce's own related
- * products, the same category, upsells or the best sellers.
+ * two arrow buttons (RTL-aware). The default source is the product's own
+ * category tree: direct categories first, then the parent (and further
+ * ancestors) when the current level has no other products. WooCommerce's own
+ * related products, upsells and best sellers remain available as explicit
+ * sources.
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -88,10 +91,10 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 			array(
 				'label'   => __( 'منبع محصولات', 'hamishop-elementor-widgets' ),
 				'type'    => Controls_Manager::SELECT,
-				'default' => 'related',
+				'default' => 'category',
 				'options' => array(
+					'category'     => __( 'محصولات هم‌دسته (با بازگشت به دسته والد)', 'hamishop-elementor-widgets' ),
 					'related'      => __( 'محصولات مرتبط ووکامرس', 'hamishop-elementor-widgets' ),
-					'category'     => __( 'محصولات هم‌دسته', 'hamishop-elementor-widgets' ),
 					'upsells'      => __( 'محصولات تشویقی (Upsells)', 'hamishop-elementor-widgets' ),
 					'best_selling' => __( 'پرفروش‌ترین‌ها', 'hamishop-elementor-widgets' ),
 				),
@@ -101,11 +104,12 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 		$this->add_control(
 			'count',
 			array(
-				'label'   => __( 'تعداد محصولات', 'hamishop-elementor-widgets' ),
-				'type'    => Controls_Manager::NUMBER,
-				'min'     => 2,
-				'max'     => 20,
-				'default' => 8,
+				'label'       => __( 'تعداد محصولات', 'hamishop-elementor-widgets' ),
+				'description' => __( 'اگر محصولات موجود کمتر از این تعداد باشند، همان تعداد نمایش داده می‌شود؛ حداقل تعداد اجباری نیست.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::NUMBER,
+				'min'         => 1,
+				'max'         => 20,
+				'default'     => 8,
 			)
 		);
 
@@ -135,41 +139,39 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 		}
 
 		$settings = $this->effective_settings();
-		$source   = isset( $settings['source'] ) ? (string) $settings['source'] : 'related';
-		$ids    = array();
+		$source   = isset( $settings['source'] ) ? (string) $settings['source'] : 'category';
+		$ids      = array();
 
 		if ( 'upsells' === $source ) {
 			$ids = $product->get_upsell_ids();
-		} elseif ( 'category' === $source ) {
-			$terms = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) );
-			$ids   = $terms ? get_posts(
-				array(
-					'post_type'      => 'product',
-					'posts_per_page' => $limit,
-					'post__not_in'   => array( $product->get_id() ),
-					'fields'         => 'ids',
-					'no_found_rows'  => true,
-					'tax_query'      => array(
-						array(
-							'taxonomy' => 'product_cat',
-							'field'    => 'term_id',
-							'terms'    => $terms,
-						),
-					),
-				)
-			) : array();
 		} elseif ( 'best_selling' === $source ) {
 			$ids = wc_get_products(
 				array(
 					'limit'    => $limit,
 					'status'   => 'publish',
+					'exclude'  => array( $product->get_id() ),
 					'orderby'  => 'meta_value_num',
 					'meta_key' => 'total_sales', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'return'   => 'ids',
 				)
 			);
-		} else {
+		} elseif ( 'related' === $source ) {
+			/*
+			 * Native WooCommerce related products are kept as an explicit
+			 * option. When WooCommerce has no match, the same-category walk
+			 * (including the parent fallback) keeps the carousel useful.
+			 */
 			$ids = wc_get_related_products( $product->get_id(), $limit, array( $product->get_id() ) );
+			if ( empty( $ids ) ) {
+				$ids = HSW_Products::related_category_ids( $product->get_id(), $limit );
+			}
+		} else {
+			/*
+			 * Default: direct categories first, then one level up while the
+			 * current level has no products. All available products at the
+			 * first non-empty level are shown; no minimum count is required.
+			 */
+			$ids = HSW_Products::related_category_ids( $product->get_id(), $limit );
 		}
 
 		$ids = array_slice( array_filter( array_map( 'intval', (array) $ids ) ), 0, $limit );
@@ -202,7 +204,7 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 			return;
 		}
 
-		$limit    = max( 2, min( 20, isset( $s['count'] ) ? (int) $s['count'] : 8 ) );
+		$limit    = max( 1, min( 20, isset( $s['count'] ) ? (int) $s['count'] : 8 ) );
 		$products = $this->products( $limit );
 
 		if ( empty( $products ) ) {

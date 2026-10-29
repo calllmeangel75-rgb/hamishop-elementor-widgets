@@ -1,8 +1,8 @@
 <?php
 /**
  * Widget: تب‌های محصول — faithful conversion of the supplied design.
- * Desktop-only tab strip with three panels: specs table, editorial review
- * and buyer reviews (initials avatar, verified tag, filled star rating).
+ * Responsive tab strip with four panels: editorial review, warranty, specs
+ * table and buyer reviews (initials avatar, verified tag, filled star rating).
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -250,7 +250,7 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
         }
 
         /**
-         * Render the tabs widget (nav buttons + three panels).
+         * Render the tabs widget (nav buttons + four panels).
          */
         protected function render() {
                 list( $product, $demo ) = $this->product_or_demo();
@@ -287,11 +287,11 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 $show_comments = ( 'yes' === ( $s['tab_comments'] ?? 'yes' ) );
 
                 /*
-                 * Visual order: گارانتی → مشخصات (WooCommerce attributes) →
-                 * بررسی تخصصی → دیدگاه‌ها. The first visible tab is active so
+                 * Visual order: بررسی تخصصی → گارانتی → مشخصات (WooCommerce
+                 * attributes) → دیدگاه‌ها. The first visible tab is active so
                  * the strip and its panel always agree.
                  */
-                $first_tab = $show_warranty ? 'warranty' : ( $show_specs ? 'specs' : ( $show_review ? 'review' : 'comments' ) );
+                $first_tab = $show_review ? 'review' : ( $show_warranty ? 'warranty' : ( $show_specs ? 'specs' : 'comments' ) );
                 ?>
                 <?php
                 /*
@@ -304,6 +304,12 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 <section class="<?php echo esc_attr( $this->root_class( 'ptabs' ) ); ?>" data-hsw-ptabs>
                         <div class="hsw-ptabs__navwrap">
                         <div class="hsw-ptabs__nav" data-hsw-tabs-scroll>
+                                <?php if ( $show_review ) : ?>
+                                        <button type="button" class="hsw-ptabs__btn<?php echo 'review' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="review">
+                                                <?php echo HSW_Helpers::icon( 'description' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                <span><?php echo esc_html( $lbl_review ); ?></span>
+                                        </button>
+                                <?php endif; ?>
                                 <?php if ( $show_warranty ) : ?>
                                         <button type="button" class="hsw-ptabs__btn<?php echo 'warranty' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="warranty">
                                                 <?php echo HSW_Helpers::icon( 'verified_user' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
@@ -314,12 +320,6 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                         <button type="button" class="hsw-ptabs__btn<?php echo 'specs' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="specs">
                                                 <?php echo HSW_Helpers::icon( 'tune' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                 <span><?php echo esc_html( $lbl_specs ); ?></span>
-                                        </button>
-                                <?php endif; ?>
-                                <?php if ( $show_review ) : ?>
-                                        <button type="button" class="hsw-ptabs__btn<?php echo 'review' === $first_tab ? ' is-active' : ''; ?>" data-hsw-tab="review">
-                                                <?php echo HSW_Helpers::icon( 'description' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                <span><?php echo esc_html( $lbl_review ); ?></span>
                                         </button>
                                 <?php endif; ?>
                                 <?php if ( $show_comments ) : ?>
