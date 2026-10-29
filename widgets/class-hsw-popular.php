@@ -1,33 +1,30 @@
 <?php
 /**
  * Widget: محبوب‌ترین‌ها / منتخب هوشمند (Most Popular) — Section 3 of the supplied design.
- * White box shell, icon header + interactive filter tabs (محبوب‌ترین‌ها /
- * جدیدترین‌ها / بیشترین تخفیف) switching server-rendered fragments,
- * horizontal carousel with featured/shipping/sale badges + OOS state.
+ *
+ * The first tab is rendered on the server. The remaining tabs are fetched from
+ * the cached /hsw/v1/loop endpoint only after the visitor interacts with them;
+ * there is no idle prefetch and no request on first paint.
  *
  * @package HamiShop_Elementor_Widgets
  */
 
 defined( 'ABSPATH' ) || exit;
 
-use Elementor\Controls_Manager;
-use Elementor\Group_Control_Typography;
-use Elementor\Repeater;
-
 class HSW_Widget_Popular extends HSW_Widget_Base {
 
-        public function get_name() {
-                return 'hsw-popular';
-        }
+	public function get_name() {
+		return 'hsw-popular';
+	}
 
-        	/**
+	/**
 	 * Loop bundle (CSS + JS) — declared here because the base no longer defaults
 	 * to hsw-loop for every widget.
 	 *
 	 * @return array
 	 */
 	public function get_style_depends() {
-		return array( 'hsw-fonts', 'hsw-loop' );
+		return array( 'hsw-fonts', 'hsw-loop-box' );
 	}
 
 	/**
@@ -37,244 +34,178 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
 		return array( 'hsw-loop' );
 	}
 
-public function get_title() {
-                return __( 'محبوب‌ترین‌ها / منتخب (HamiShop)', 'hamishop-elementor-widgets' );
-        }
+	public function get_title() {
+		return __( 'محبوب‌ترین‌ها / منتخب (HamiShop)', 'hamishop-elementor-widgets' );
+	}
 
-        public function get_icon() {
-                return 'eicon-tabs';
-        }
+	public function get_icon() {
+		return 'eicon-tabs';
+	}
 
-        public function get_keywords() {
-                return array( 'محبوب', 'منتخب', 'تب', 'جدیدترین', 'popular', 'tab', 'hamishop' );
-        }
+	public function get_keywords() {
+		return array( 'محبوب', 'منتخب', 'تب', 'جدیدترین', 'popular', 'tab', 'hamishop' );
+	}
 
-        protected function register_controls() {
-                /* ------------------------- CONTENT ------------------------- */
-                $this->controls_source( 'rating' );
-                $this->controls_header(
-                        array(
-                                'icon'   => 'auto_awesome',
-                                'title'  => __( 'منتخب هوشمند کالاها', 'hamishop-elementor-widgets' ),
-                                'badge'  => '',
-                                'sub'    => __( 'بر اساس علایق و تازه‌ترین ورودی‌های انبار', 'hamishop-elementor-widgets' ),
-                                'link_d' => '',
-                                'link_m' => '',
-                        )
-                );
+	protected function register_controls() {
+		/* ------------------------- CONTENT ------------------------- */
+		$this->controls_source( 'rating' );
+		$this->controls_header(
+			array(
+				'icon'   => 'auto_awesome',
+				'title'  => __( 'منتخب هوشمند کالاها', 'hamishop-elementor-widgets' ),
+				'badge'  => '',
+				'sub'    => __( 'بر اساس علایق و تازه‌ترین ورودی‌های انبار', 'hamishop-elementor-widgets' ),
+				'link_d' => '',
+				'link_m' => '',
+			)
+		);
+		$this->controls_tabs();
+		$this->controls_card_content(
+			array(
+				'show_rank'   => false,
+				'show_stock'  => false,
+				'price_label' => false,
+				'txt_buy'     => false,
+				'btn_variant' => 'icon',
+			)
+		);
 
-                /* Tabs */
-                $this->start_controls_section(
-                        'sec_tabs',
-                        array( 'label' => __( 'تب‌های فیلتر', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_CONTENT )
-                );
+		/* ------------------------- STYLE ------------------------- */
+		$this->controls_theme();
+		$this->controls_shell( 'box' );
+		$this->controls_header_style();
+		$this->controls_tabs_style();
+		$this->controls_card_style();
+		$this->controls_badge_style();
+		$this->controls_stock_style();
+		$this->controls_price_style();
+		$this->controls_button_style();
+		$this->controls_skeleton_style();
+	}
 
-                $this->add_control(
-                        'show_tabs',
-                        array(
-                                'label'   => __( 'نمایش تب‌ها', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::SWITCHER,
-                                'default' => 'yes',
-                        )
-                );
+	/**
+	 * Post that owns this widget.
+	 *
+	 * Inside an Elementor page the current document is the page being
+	 * rendered, which is what `_elementor_data` is keyed by. Falls back to
+	 * the queried post for non-Elementor contexts.
+	 *
+	 * @return int
+	 */
+	protected function current_document_id() {
+		if ( class_exists( '\Elementor\Plugin' ) ) {
+			$documents = \Elementor\Plugin::$instance->documents;
+			if ( $documents ) {
+				$current = $documents->get_current();
+				if ( $current ) {
+					return (int) $current->get_main_id();
+				}
+			}
+		}
 
-                $repeater = new Repeater();
-                $repeater->add_control(
-                        'tab_label',
-                        array(
-                                'label'   => __( 'عنوان تب', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'محبوب‌ترین‌ها', 'hamishop-elementor-widgets' ),
-                        )
-                );
-                $repeater->add_control(
-                        'tab_source',
-                        array(
-                                'label'   => __( 'منبع', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::SELECT,
-                                'default' => 'rating',
-                                'options' => array(
-                                        'rating'   => __( 'محبوب‌ترین (امتیاز)', 'hamishop-elementor-widgets' ),
-                                        'newest'   => __( 'جدیدترین', 'hamishop-elementor-widgets' ),
-                                        'discount' => __( 'بیشترین تخفیف', 'hamishop-elementor-widgets' ),
-                                        'sale'     => __( 'تخفیف‌دارها', 'hamishop-elementor-widgets' ),
-                                        'best_selling' => __( 'پرفروش‌ترین', 'hamishop-elementor-widgets' ),
-                                        'featured' => __( 'منتخب (Featured)', 'hamishop-elementor-widgets' ),
-                                ),
-                        )
-                );
+		return (int) get_the_ID();
+	}
 
-                $default_tabs = array(
-                        array( 'tab_label' => __( 'محبوب‌ترین‌ها', 'hamishop-elementor-widgets' ), 'tab_source' => 'rating' ),
-                        array( 'tab_label' => __( 'جدیدترین‌ها', 'hamishop-elementor-widgets' ), 'tab_source' => 'newest' ),
-                        array( 'tab_label' => __( 'بیشترین تخفیف', 'hamishop-elementor-widgets' ), 'tab_source' => 'discount' ),
-                );
+	/**
+	 * Valid repeater rows, mirroring the allow-list used by tabs_html().
+	 *
+	 * @param array $tabs Repeater rows.
+	 * @return array
+	 */
+	private function valid_tabs( $tabs ) {
+		$out     = array();
+		$sources = self::loop_sources();
 
-                $this->add_control(
-                        'tabs',
-                        array(
-                                'label'       => __( 'تب‌ها', 'hamishop-elementor-widgets' ),
-                                'type'        => Controls_Manager::REPEATER,
-                                'fields'      => $repeater->get_controls(),
-                                'default'     => $default_tabs,
-                                'title_field' => '{{{ tab_label }}}',
-                                'condition'   => array( 'show_tabs' => 'yes' ),
-                        )
-                );
+		foreach ( (array) $tabs as $tab ) {
+			if ( ! is_array( $tab ) ) {
+				continue;
+			}
+			$source = (string) ( $tab['tab_source'] ?? 'rating' );
+			$label  = trim( (string) ( $tab['tab_label'] ?? '' ) );
+			if ( ! in_array( $source, $sources, true ) || '' === $label ) {
+				continue;
+			}
+			$out[] = $tab;
+		}
 
-                $this->add_control(
-                        'hdr_note',
-                        array(
-                                'label'       => __( 'یادداشت کنار عنوان (موبایل)', 'hamishop-elementor-widgets' ),
-                                'type'        => Controls_Manager::TEXT,
-                                'default'     => __( 'بر اساس امتیاز کاربران', 'hamishop-elementor-widgets' ),
-                                'description' => __( 'در موبایل کنار عنوان نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
-                        )
-                );
+		return $out;
+	}
 
-                $this->end_controls_section();
+	protected function render() {
+		$s        = $this->effective_settings();
+		$show_tabs = 'yes' === ( $s['show_tabs'] ?? 'yes' );
+		$tabs      = $this->valid_tabs( is_array( $s['tabs'] ?? null ) ? $s['tabs'] : array() );
+		$tabbed    = $show_tabs && count( $tabs ) > 0;
 
-                $this->controls_card_content(
-                        array(
-                                'show_rank'   => false,
-                                'show_stock'  => false,
-                                'price_label' => false,
-                                'txt_buy'     => false,
-                        )
-                );
+		$count   = max( 1, min( 24, (int) ( $s['count']['size'] ?? 8 ) ) );
+		$term_id = (int) ( $s['source_term'] ?? 0 );
+		$source  = $tabbed ? (string) $tabs[0]['tab_source'] : (string) ( $s['source'] ?? 'rating' );
+		if ( ! in_array( $source, self::loop_sources(), true ) ) {
+			$source = 'rating';
+		}
 
-                /* ------------------------- STYLE ------------------------- */
-                $this->controls_shell( 'box' );
-                $this->controls_header_style();
-                $this->controls_card_style();
-                $this->controls_badge_style();
-                $this->controls_price_style();
+		$products = $this->resolve_products(
+			array(
+				'source'  => $source,
+				'count'   => $count,
+				'term_id' => $term_id,
+			)
+		);
+		$args = $this->renderer_args();
 
-                /* Tabs style */
-                $this->start_controls_section(
-                        'sec_style_tabs',
-                        array( 'label' => __( 'استایل تب‌ها', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
-                );
-                $this->add_control( 'tabs_bg', array( 'label' => __( 'پس‌زمینه کانتینر', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tabs' => '--hsw-tabs-bg: {{VALUE}};' ) ) );
-                $this->add_control( 'tabs_border', array( 'label' => __( 'حاشیه کانتینر', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tabs' => '--hsw-tabs-border: {{VALUE}};' ) ) );
-                $this->add_control( 'tab_active_bg', array( 'label' => __( 'پس‌زمینه تب فعال', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tab.is-active' => '--hsw-tab-active-bg: {{VALUE}};' ) ) );
-                $this->add_control( 'tab_active_c', array( 'label' => __( 'رنگ تب فعال', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tab.is-active' => '--hsw-tab-active-c: {{VALUE}};' ) ) );
-                $this->add_control( 'tab_c', array( 'label' => __( 'رنگ تب غیرفعال', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-tab' => '--hsw-tab-c: {{VALUE}};' ) ) );
-                $this->add_group_control(
-                        Group_Control_Typography::get_type(),
-                        array(
-                                'name'     => 'tab_typo',
-                                'label'    => __( 'تایپوگرافی تب‌ها', 'hamishop-elementor-widgets' ),
-                                'selector' => '{{WRAPPER}} .hsw-tab',
-                        )
-                );
-                $this->end_controls_section();
-        }
+		$cards = (float) ( $s['cards']['size'] ?? 4 );
+		$fit   = $cards > 0 ? 'cards' : 'fixed';
+		$title = trim( (string) ( $s['hdr_title'] ?? '' ) );
 
-        /**
-         * Post that owns this widget.
-         *
-         * Inside an Elementor page the current document is the page being
-         * rendered, which is what `_elementor_data` is keyed by. Falls back to
-         * the queried post for non-Elementor contexts.
-         *
-         * @return int
-         */
-        protected function current_document_id() {
-                if ( class_exists( '\\Elementor\\Plugin' ) ) {
-                        $documents = \Elementor\Plugin::$instance->documents;
-                        if ( $documents ) {
-                                $current = $documents->get_current();
-                                if ( $current ) {
-                                        return (int) $current->get_main_id();
-                                }
-                        }
-                }
+		$post_id   = $this->current_document_id();
+		$widget_id = (string) $this->get_id();
+		$sig       = HSW_Rest::loop_signature( $post_id, $widget_id );
+		$endpoint  = rest_url( 'hsw/v1/loop' );
+		$rail      = $this->rail_id();
 
-                return (int) get_the_ID();
-        }
+		$tabs_markup = '';
+		if ( $tabbed ) {
+			$tabs_markup = $this->tabs_html(
+				$tabs,
+				array(
+					'endpoint'  => $endpoint,
+					'post_id'   => $post_id,
+					'widget_id' => $widget_id,
+					'sig'       => $sig,
+					'per_page'  => $count,
+					'term_id'   => $term_id,
+				)
+			);
+		}
 
-        protected function render() {
-                $s        = $this->effective_settings();
-                $products = $this->resolve_products();
-                $args     = $this->renderer_args();
+		$note = '';
+		if ( '' !== trim( (string) ( $s['hdr_note'] ?? '' ) ) ) {
+			$note = '<span class="hsw-loop__note">' . HSW_Helpers::icon( 'favorite' ) .
+				'<span>' . esc_html( (string) $s['hdr_note'] ) . '</span></span>';
+		}
+		?>
+		<section class="hsw-loop hsw-loop--box hsw-loop--pop hsw-loop--hsw-popular<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>"
+			data-hsw-fit="<?php echo esc_attr( $fit ); ?>"
+			data-hsw-count="<?php echo esc_attr( $count ); ?>"
+			<?php if ( $tabbed ) : ?>data-hsw-tabs="1"<?php endif; ?>>
+			<?php
+			if ( 'yes' === ( $s['show_header'] ?? 'yes' ) ) {
+				echo $this->header_html( $s, 0, $note . $tabs_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+			} elseif ( $tabbed ) {
+				echo '<div class="hsw-loop__bar">' . $tabs_markup . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+			}
 
-                $show_header = 'yes' === ( $s['show_header'] ?? 'yes' );
-                $show_tabs   = 'yes' === ( $s['show_tabs'] ?? 'yes' );
-                $tabs        = is_array( $s['tabs'] ?? null ) ? $s['tabs'] : array();
+			if ( empty( $products ) ) {
+				echo '<div class="hsw-loop__empty">' . esc_html__( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ) . '</div>';
+			}
 
-                /*
-                 * Endpoint + signature for tab fragments.
-                 *
-                 * The signature is bound to this post and this widget, and the
-                 * IDs travel with every request so the server can re-read the
-                 * widget's own settings and render the fragment exactly like the
-                 * first page load. Without them the tab switch fell back to
-                 * default texts and badges.
-                 */
-                $post_id   = $this->current_document_id();
-                $widget_id = (string) $this->get_id();
-                $sig       = HSW_Rest::loop_signature( $post_id, $widget_id );
-                $endpoint  = esc_url( rest_url( 'hsw/v1/loop' ) );
-                $count     = max( 1, (int) ( $s['count']['size'] ?? 8 ) );
-                $term_id   = isset( $s['source_term'] ) ? (int) $s['source_term'] : 0;
-                ?>
-                <section class="hsw-loop hsw-loop--box hsw-loop--pop hsw-loop--hsw-popular<?php echo esc_attr( $this->hsw_font_class() ); ?>"
-                        <?php if ( $show_tabs && ! empty( $tabs ) ) : ?>
-                        data-hsw-endpoint="<?php echo esc_url( add_query_arg( 'sig', $sig, $endpoint ) ); ?>"
-                        <?php endif; ?>
-                >
-
-                        <?php if ( $show_header ) : ?>
-                        <header class="hsw-hdr">
-                                <div class="hsw-hdr__main">
-                                        <div class="hsw-hdr__brand">
-                                                <span class="hsw-hdr__bar" aria-hidden="true"></span>
-                                                <span class="hsw-hdr__icon hsw-d"><?php echo HSW_Helpers::icon( $s['hdr_icon'] ?? 'auto_awesome' ); // phpcs:ignore ?></span>
-                                                <div class="hsw-hdr__titles">
-                                                        <div class="hsw-hdr__row">
-                                                                <h2 class="hsw-hdr__title"><?php echo esc_html( $s['hdr_title'] ?? '' ); ?></h2>
-                                                        </div>
-                                                        <?php if ( ! empty( $s['hdr_sub'] ) ) : ?>
-                                                                <p class="hsw-hdr__sub"><?php echo esc_html( $s['hdr_sub'] ); ?></p>
-                                                        <?php endif; ?>
-                                                </div>
-                                        </div>
-
-                                        <div class="hsw-hdr__side">
-                                                <?php if ( ! empty( $s['hdr_note'] ) ) : ?>
-                                                        <span class="hsw-hdr__note hsw-m"><?php echo HSW_Helpers::icon( 'favorite' ); // phpcs:ignore ?><span><?php echo esc_html( $s['hdr_note'] ); ?></span></span>
-                                                <?php endif; ?>
-
-                                                <?php if ( $show_tabs && ! empty( $tabs ) ) : ?>
-                                                        <div class="hsw-tabs hsw-d" role="tablist">
-                                                                <?php $first = true; ?>
-                                                                <?php foreach ( $tabs as $tab ) : ?>
-                                                                        <button type="button" role="tab" aria-selected="<?php echo $first ? 'true' : 'false'; ?>"
-                                                                                class="hsw-tab<?php echo $first ? ' is-active' : ''; ?>"
-                                                                                data-hsw-query="<?php echo esc_attr( http_build_query( array( 'type' => 'popular', 'source' => $tab['tab_source'], 'per_page' => $count, 'term_id' => $term_id, 'post_id' => $post_id, 'widget_id' => $widget_id, 'sig' => $sig ) ) ); ?>">
-                                                                                <?php echo esc_html( $tab['tab_label'] ); ?>
-                                                                        </button>
-                                                                        <?php $first = false; ?>
-                                                                <?php endforeach; ?>
-                                                        </div>
-                                                <?php endif; ?>
-                                        </div>
-                                </div>
-                        </header>
-                        <?php endif; ?>
-
-                        <div class="hsw-track">
-                                <?php
-                                $cards = self::cards_html( 'popular', $products, $args );
-                                if ( '' === $cards ) {
-                                        echo '<div class="hsw-empty">' . esc_html__( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ) . '</div>';
-                                } else {
-                                        echo $cards; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
-                                }
-                                ?>
-                        </div>
-                </section>
-                <?php
-        }
+			echo '<div class="hsw-loop__row"><div class="hsw-loop__rail" id="' . esc_attr( $rail ) . '" data-hsw-rail data-hsw-src="' . esc_attr( $source ) . '" role="group" aria-label="' . esc_attr( '' !== $title ? $title : __( 'محبوب‌ترین محصولات', 'hamishop-elementor-widgets' ) ) . '" aria-busy="false" tabindex="0">';
+			if ( ! empty( $products ) ) {
+				echo self::cards_html( 'popular', $products, $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+			}
+			echo '</div></div>';
+			?>
+		</section>
+		<?php
+	}
 }

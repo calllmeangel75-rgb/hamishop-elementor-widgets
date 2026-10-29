@@ -447,6 +447,24 @@ class HSW_Assets {
                         HSW_VERSION
                 );
 
+                /*
+                 * Variant sheets are deliberately tiny: shared cards/rails live in
+                 * `hsw-loop`, and a page only downloads the shell it renders.
+                 */
+                wp_register_style(
+                        'hsw-loop-deal',
+                        $this->asset( 'assets/css/hsw-loop-deal.css' ),
+                        array( 'hsw-loop' ),
+                        HSW_VERSION
+                );
+
+                wp_register_style(
+                        'hsw-loop-box',
+                        $this->asset( 'assets/css/hsw-loop-box.css' ),
+                        array( 'hsw-loop' ),
+                        HSW_VERSION
+                );
+
                 wp_register_script(
                         'hsw-loop',
                         $this->asset( 'assets/js/hsw-loop.js' ),
@@ -454,6 +472,7 @@ class HSW_Assets {
                         HSW_VERSION,
                         true
                 );
+                wp_script_add_data( 'hsw-loop', 'strategy', 'defer' );
 
                 wp_register_style(
                         'hsw-product',
@@ -603,9 +622,15 @@ class HSW_Assets {
                  * attaches to the handle and prints when the widget enqueues it.
                  */
                 $hsw_data = array(
-                        'wcAjax'    => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
-                        'addedText' => __( 'به سبد خرید اضافه شد ✓', 'hamishop-elementor-widgets' ),
-                        'errorText' => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
+                        'wcAjax'        => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
+                        'addedText'     => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
+                        'errorText'     => __( 'افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ),
+                        'cartUrl'       => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ),
+                        'viewCart'      => __( 'مشاهده سبد خرید', 'hamishop-elementor-widgets' ),
+                        'continueText'  => __( 'ادامه خرید', 'hamishop-elementor-widgets' ),
+                        'closeText'     => __( 'بستن', 'hamishop-elementor-widgets' ),
+                        'modalTitle'    => __( 'به سبد خرید اضافه شد', 'hamishop-elementor-widgets' ),
+                        'feedbackStyle' => self::feedback_settings()['archive_style'],
                 );
                 wp_add_inline_script( 'hsw-loop', 'window.hswData=' . wp_json_encode( $hsw_data ) . ';', 'before' );
 

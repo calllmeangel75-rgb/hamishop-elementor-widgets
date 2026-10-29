@@ -14,6 +14,9 @@ class HSW_Rest {
 
         const NS = 'hsw/v1';
 
+        /** @var array<string,array<string,scalar>> Memoized Elementor settings per post/widget. */
+        private static $settings_cache = array();
+
         public function __construct() {
                 add_action( 'rest_api_init', array( $this, 'routes' ) );
         }
@@ -103,7 +106,7 @@ class HSW_Rest {
                                         'source' => array(
                                                 'type'              => 'string',
                                                 'required'          => true,
-                                                'enum'              => array( 'sale', 'best_selling', 'rating', 'newest', 'discount', 'featured' ),
+                                                'enum'              => array( 'sale', 'best_selling', 'rating', 'popular', 'newest', 'discount', 'featured', 'category' ),
                                                 'sanitize_callback' => 'sanitize_key',
                                                 'validate_callback' => 'rest_validate_request_arg',
                                         ),
@@ -406,22 +409,38 @@ class HSW_Rest {
                         return new WP_Error( 'hsw_bad_term', 'unknown product category', array( 'status' => 400 ) );
                 }
 
-                $version = self::product_version();
-                $key     = 'hsw_loop_' . md5( implode( '|', array( $type, $source, $per_page, $term_id, $post_id, $widget_id, $version ) ) );
-
-                $cached = get_transient( $key );
-                if ( is_array( $cached ) && isset( $cached['html'] ) ) {
-                        self::cache_header( 300 );
-                        return rest_ensure_response( $cached );
+                if ( ! in_array( $source, array( 'sale', 'best_selling', 'rating', 'popular', 'newest', 'discount', 'featured', 'category' ), true ) ) {
+                        return new WP_Error( 'hsw_bad_source', 'unknown product source', array( 'status' => 400 ) );
                 }
 
-                $products = HSW_Plugin::instance()->products->query(
-                        array(
-                                'source'  => $source,
-                                'count'   => $per_page,
-                                'term_id' => $term_id,
-                        )
+                $settings = $this->widget_settings( $post_id, $widget_id );
+
+                /*
+                 * The signature only proves "this widget on this post"; it does
+                 * not stop a caller from asking a deal widget for a best-seller
+                 * fragment. Match the requested type against the stored widget.
+                 */
+                $expected = array(
+                        'deal'    => 'hsw-wonder-deals',
+                        'best'    => 'hsw-best-sellers',
+                        'popular' => 'hsw-popular',
                 );
+                if ( isset( $settings['_widget_type'], $expected[ $type ] ) && $expected[ $type ] !== $settings['_widget_type'] ) {
+                        return new WP_Error( 'hsw_bad_type', 'widget type mismatch', array( 'status' => 400 ) );
+                }
+                unset( $settings['_widget_type'] );
+
+                $is_editor = is_user_logged_in() && current_user_can( 'edit_posts' );
+                $version   = self::product_version();
+                $hash      = md5( (string) wp_json_encode( $settings ) );
+                $key       = 'hsw_loop_' . md5(
+                        implode( '|', array( $type, $source, $per_page, $term_id, $post_id, $widget_id, $version, $hash ) )
+                );
+
+                $cached = $is_editor ? false : get_transient( $key );
+                if ( is_array( $cached ) && isset( $cached['html'] ) ) {
+                        return $this->loop_response( $cached, $version, 300 );
+                }
 
                 // Elementor is guaranteed loaded (boot is dependency-guarded),
                 // but the base class only loads with widget registration —
@@ -430,18 +449,110 @@ class HSW_Rest {
                         require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
                 }
 
-                $settings = $this->widget_settings( $post_id, $widget_id );
-                $html     = HSW_Widget_Base::cards_html( $type, $products, $settings );
+                $args                   = HSW_Widget_Base::settings_to_args( $settings );
+                $args['html_cache']     = false;
+                $args['first_priority'] = false;
+                $args['cache_until']    = 0;
+
+                /*
+                 * Mirror resolve_products(): popular keeps out-of-stock cards
+                 * so the OOS state stays visible, the other loops hide them.
+                 */
+                $exclude = 'yes' === ( $settings['exclude_oos'] ?? 'yes' ) && 'popular' !== $type;
+
+                $days = 0;
+                if ( 'best' === $type ) {
+                        $range = (string) ( $settings['best_range'] ?? '7' );
+                        $days  = 'all' === $range ? 0 : max( 1, (int) $range );
+                }
+
+                $ttl = min( 300, max( 0, (int) ( $settings['cache_ttl'] ?? 300 ) ) );
+
+                $products = HSW_Plugin::instance()->products->query(
+                        array(
+                                'source'      => $source,
+                                'count'       => $per_page,
+                                'term_id'     => $term_id,
+                                'exclude_oos' => $exclude,
+                                'days'        => $days,
+                                'ttl'         => $ttl,
+                        )
+                );
+
+                if ( 'sale' === $source && $ttl > 0 ) {
+                        $until = (int) HSW_Helpers::latest_sale_end( $products );
+                        if ( $until > 0 ) {
+                                $ttl = min( $ttl, max( 1, $until - time() ) );
+                        }
+                }
 
                 $payload = array(
-                        'html'  => $html,
+                        'html'  => HSW_Widget_Base::cards_html( $type, $products, $args ),
                         'found' => count( $products ),
                 );
 
-                set_transient( $key, $payload, 5 * MINUTE_IN_SECONDS );
-                self::cache_header( 300 );
+                if ( $ttl > 0 && ! $is_editor ) {
+                        set_transient( $key, $payload, $ttl );
+                }
 
-                return rest_ensure_response( $payload );
+                return $this->loop_response( $payload, $version, $ttl );
+        }
+
+        /**
+         * JSON + cache headers for a /loop fragment, including a 304 path.
+         *
+         * @param array  $payload Fragment payload (html/found).
+         * @param string $version Catalogue version.
+         * @param int    $ttl     Max age in seconds.
+         * @return WP_REST_Response
+         */
+        private function loop_response( $payload, $version, $ttl ) {
+                $etag = '"' . md5( (string) ( $payload['html'] ?? '' ) . '|' . $version ) . '"';
+                $cc   = 'public, max-age=' . absint( $ttl ) . ', s-maxage=' . absint( $ttl );
+
+                if ( is_user_logged_in() && current_user_can( 'edit_posts' ) ) {
+                        $cc = 'private, no-store, max-age=0';
+                } elseif ( $ttl <= 0 ) {
+                        $cc = 'no-store';
+                }
+
+                $not_modified = current_user_can( 'edit_posts' ) ? false : self::etag_matches( $etag );
+
+                if ( $not_modified ) {
+                        $response = new WP_REST_Response( null, 304 );
+                } else {
+                        $response = new WP_REST_Response( $payload, 200 );
+                }
+
+                $response->header( 'ETag', $etag );
+                $response->header( 'Cache-Control', $cc );
+
+                return $response;
+        }
+
+        /**
+         * Whether the browser's If-None-Match header contains this ETag.
+         *
+         * @param string $etag Quoted ETag.
+         * @return bool
+         */
+        private static function etag_matches( $etag ) {
+                $header = isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) ? wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ) : '';
+                if ( ! is_string( $header ) || '' === $header ) {
+                        return false;
+                }
+
+                foreach ( explode( ',', $header ) as $candidate ) {
+                        $candidate = trim( $candidate );
+                        if ( 0 === strpos( $candidate, 'W/' ) ) {
+                                $candidate = substr( $candidate, 2 );
+                        }
+                        if ( '*' === $candidate || $candidate === $etag ) {
+                                return true;
+                        }
+                }
+
+                return false;
         }
 
         /**
@@ -460,23 +571,32 @@ class HSW_Rest {
                         return array();
                 }
 
+                $memo = (int) $post_id . ':' . (string) $widget_id;
+                if ( isset( self::$settings_cache[ $memo ] ) ) {
+                        return self::$settings_cache[ $memo ];
+                }
+
                 $post = get_post( $post_id );
                 if ( ! $post || 'publish' !== $post->post_status || '' !== (string) $post->post_password ) {
+                        self::$settings_cache[ $memo ] = array();
                         return array();
                 }
 
                 $raw = get_post_meta( $post_id, '_elementor_data', true );
                 if ( ! is_string( $raw ) || '' === $raw ) {
+                        self::$settings_cache[ $memo ] = array();
                         return array();
                 }
 
                 $data = json_decode( $raw, true );
                 if ( ! is_array( $data ) ) {
+                        self::$settings_cache[ $memo ] = array();
                         return array();
                 }
 
                 $element = $this->find_element( $data, (string) $widget_id );
                 if ( ! $element || empty( $element['settings'] ) || ! is_array( $element['settings'] ) ) {
+                        self::$settings_cache[ $memo ] = array();
                         return array();
                 }
 
@@ -486,6 +606,12 @@ class HSW_Rest {
                                 $out[ $name ] = $value;
                         }
                 }
+
+                if ( ! empty( $element['widgetType'] ) ) {
+                        $out['_widget_type'] = (string) $element['widgetType'];
+                }
+
+                self::$settings_cache[ $memo ] = $out;
 
                 return $out;
         }

@@ -1,6 +1,6 @@
 # نقشهٔ فنی HamiShop Elementor Widgets
 
-> تولید شده از خود کد (v1.11.154). هر عدد از فایل واقعی خوانده شده است.
+> تولید شده از خود کد (v1.11.160). هر عدد از فایل واقعی خوانده شده است.
 > برای فهرست کامل ویجت‌ها و مکانیزم‌ها به `WIDGETS-REFERENCE.md` مراجعه کنید.
 
 ## ۱) لایه‌ها
@@ -31,15 +31,17 @@ hamishop-elementor-widgets.php
 | hsw-blog | HSW_Blog_Base | assets/css/hsw-blog.css | 12.3 KB |
 | hsw-post | HSW_Post_Base | assets/css/hsw-post.css | 20.6 KB |
 | hsw-account | HSW_Account | assets/css/hsw-account.css | 100.7 KB |
-| hsw-loop | HSW_Widget_Base(override) | assets/css/hsw-loop.css | 18.5 KB |
+| hsw-loop | HSW_Widget_Base(override) | assets/css/hsw-loop.css | 19.4 KB |
+| hsw-loop-box | ارثی: hsw-loop | assets/css/hsw-loop-box.css | 0.2 KB |
+| hsw-loop-deal | ارثی: hsw-loop | assets/css/hsw-loop-deal.css | 1.1 KB |
 | hsw-footer | HSW_Widget_Footer_Sticky | assets/css/hsw-footer.css | 1.4 KB |
 
 ## ۳) وضعیت استاندارد المنتور (Repeater + کنترل ریسپانسیو)
 
 | ویجت | Repeater | سکشن | کنترل ریسپانسیو | CSS |
 |---|---|---|---|---|
-| `hsw-best-sellers` | — | 0 | 0 | hsw-fonts,hsw-loop |
-| `hsw-popular` | ✔ | 2 | 0 | hsw-fonts,hsw-loop |
+| `hsw-best-sellers` | — | 0 | 0 | hsw-fonts,hsw-loop-box |
+| `hsw-popular` | ✔ | 2 | 0 | hsw-fonts,hsw-loop-box |
 | `hsw-account` | — | 8 | 0 | hsw-fonts,hsw-account |
 | `hsw-archive-breadcrumb` | — | 2 | 0 | ارثی: hsw-archive |
 | `hsw-archive-filters` | ✔ | 2 | 0 | ارثی: hsw-archive |
@@ -99,7 +101,7 @@ hamishop-elementor-widgets.php
 | `hsw-product-title` | — | 2 | 2 | ارثی: hsw-product |
 | `hsw-product-trust` | ✔ | 2 | 0 | ارثی: hsw-product |
 | `hsw-product-variants` | ✔ | 2 | 0 | ارثی: hsw-product |
-| `hsw-wonder-deals` | — | 0 | 0 | hsw-fonts,hsw-loop |
+| `hsw-wonder-deals` | — | 0 | 0 | hsw-fonts,hsw-loop-deal |
 
 **جمع:** 62 ویجت · Repeater دارد: **20** · حداقل ۲ کنترل ریسپانسیو: **9**
 

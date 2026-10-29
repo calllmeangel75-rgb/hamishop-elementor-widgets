@@ -708,8 +708,15 @@ JS;
                 if ( self::is_call_for_price( $product ) ) {
                         return 0;
                 }
-                $regular = (float) $product->get_regular_price();
-                $sale    = (float) $product->get_price();
+
+                if ( $product->is_type( 'variable' ) ) {
+                        $regular = (float) $product->get_variation_regular_price( 'max' );
+                        $sale    = (float) $product->get_variation_price( 'min' );
+                } else {
+                        $regular = (float) $product->get_regular_price();
+                        $sale    = (float) $product->get_price();
+                }
+
                 if ( $regular <= 0 || $sale <= 0 || $sale >= $regular ) {
                         return 0;
                 }
@@ -760,21 +767,38 @@ JS;
 
         /**
          * Sold-percent + remaining stock text for the progress bar.
-         * percent = total_sales / (total_sales + stock) bounded 5..95.
+         *
+         * Only products that actually manage stock get a bar. `sold` mode shows
+         * the sold share, `low` mode shows how much of the low-stock window is
+         * still available.
+         *
+         * @param WC_Product $product   Product.
+         * @param string     $mode      sold|low.
+         * @param int        $threshold Low-stock threshold.
+         * @return array|null
          */
-        public static function stock_progress( $product ) {
-                $stock = $product->get_stock_quantity();
-                if ( null === $stock ) {
+        public static function stock_progress( $product, $mode = 'sold', $threshold = 3 ) {
+                if ( ! $product instanceof WC_Product || ! $product->get_manage_stock() ) {
                         return null;
                 }
-                $sales = (int) $product->get_total_sales();
-                $total = max( 1, $sales + max( 0, (int) $stock ) );
-                $percent = (int) min( 95, max( 5, round( ( $sales / $total ) * 100 ) ) );
 
-                if ( $stock <= 0 ) {
-                        $left     = __( 'اتمام موجودی', 'hamishop-elementor-widgets' );
-                        $critical = true;
-                } elseif ( $stock <= 3 ) {
+                $stock = $product->get_stock_quantity();
+                if ( null === $stock || (int) $stock <= 0 ) {
+                        return null;
+                }
+                $stock     = max( 0, (int) $stock );
+                $threshold = max( 1, absint( $threshold ) );
+                $sales     = (int) $product->get_total_sales();
+
+                if ( 'low' === $mode ) {
+                        $total   = max( 1, $stock + $threshold );
+                        $percent = (int) min( 95, max( 5, round( ( $stock / $total ) * 100 ) ) );
+                } else {
+                        $total   = max( 1, $sales + $stock );
+                        $percent = (int) min( 95, max( 5, round( ( $sales / $total ) * 100 ) ) );
+                }
+
+                if ( $stock <= $threshold ) {
                         /* translators: %s: number */
                         $left     = sprintf( __( 'فقط %s عدد در انبار', 'hamishop-elementor-widgets' ), self::fa_num( $stock ) );
                         $critical = true;
@@ -782,8 +806,14 @@ JS;
                         $left     = __( 'موجود در انبار', 'hamishop-elementor-widgets' );
                         $critical = false;
                 }
-                /* translators: %s: percent */
-                $sold = sprintf( __( 'فروش رفته: %s٪', 'hamishop-elementor-widgets' ), self::fa_num( $percent ) );
+
+                if ( 'low' === $mode ) {
+                        /* translators: %s: number */
+                        $sold = sprintf( __( 'باقی‌مانده: %s عدد', 'hamishop-elementor-widgets' ), self::fa_num( $stock ) );
+                } else {
+                        /* translators: %s: percent */
+                        $sold = sprintf( __( 'فروش رفته: %s٪', 'hamishop-elementor-widgets' ), self::fa_num( $percent ) );
+                }
 
                 return array(
                         'percent'  => $percent,
@@ -795,31 +825,65 @@ JS;
 
         /**
          * Safe image markup with srcset/sizes + lazy loading.
+         *
+         * @param WC_Product $product Product.
+         * @param string     $size    Image size.
+         * @param array      $args    priority (bool), sizes (string), class (string).
+         * @return string
          */
-        public static function image( $product, $size = 'woocommerce_thumbnail' ) {
-                $image_id = $product->get_image_id();
-                if ( ! $image_id ) {
-                        return '<span class="hsw-media__placeholder"></span>';
-                }
-                $html = wp_get_attachment_image(
-                        $image_id,
-                        $size,
-                        false,
+        public static function image( $product, $size = 'hsw_card', $args = array() ) {
+                $args = wp_parse_args(
+                        $args,
                         array(
-                                'class'    => 'hsw-media__img',
-                                'alt'      => trim( wp_strip_all_tags( $product->get_name() ) ),
-                                'loading'  => 'lazy',
-                                'decoding' => 'async',
+                                'priority' => false,
+                                'sizes'    => '(max-width: 767px) 45vw, 288px',
+                                'class'    => 'hsw-loop__img',
                         )
                 );
+
+                $image_id = $product->get_image_id();
+                if ( ! $image_id ) {
+                        return '<span class="hsw-loop__placeholder" aria-hidden="true"></span>';
+                }
+
+                /*
+                 * Attachments uploaded before `hsw_card` existed do not have
+                 * that intermediate size yet; falling back avoids serving a
+                 * multi-megabyte original until thumbnails are regenerated.
+                 */
+                $meta = wp_get_attachment_metadata( $image_id );
+                if ( is_array( $meta ) && ( empty( $meta['sizes']['hsw_card'] ) && 'hsw_card' === $size ) ) {
+                        $size = 'woocommerce_thumbnail';
+                }
+
+                $alt = trim( wp_strip_all_tags( $product->get_name() ) );
+                $attr = array(
+                        'class'    => $args['class'],
+                        'alt'      => $alt,
+                        'sizes'    => $args['sizes'],
+                        'decoding' => 'async',
+                );
+
+                if ( ! empty( $args['priority'] ) ) {
+                        $attr['loading']       = 'eager';
+                        $attr['fetchpriority'] = 'high';
+                } else {
+                        $attr['loading'] = 'lazy';
+                }
+
+                $html = wp_get_attachment_image( $image_id, $size, false, $attr );
                 if ( $html ) {
                         return $html;
                 }
+
                 $src = wp_get_attachment_image_url( $image_id, $size );
                 return sprintf(
-                        '<img class="hsw-media__img" src="%s" alt="%s" loading="lazy" decoding="async">',
+                        '<img class="%s" src="%s" alt="%s" loading="%s" decoding="async" sizes="%s">',
+                        esc_attr( $args['class'] ),
                         esc_url( $src ),
-                        esc_attr( trim( wp_strip_all_tags( $product->get_name() ) ) )
+                        esc_attr( $alt ),
+                        ! empty( $args['priority'] ) ? 'eager' : 'lazy',
+                        esc_attr( $args['sizes'] )
                 );
         }
 
@@ -837,17 +901,32 @@ JS;
         }
 
         /**
-         * Sale-end timestamp for countdown (latest among given products), or 0.
+         * Nearest upcoming sale-end timestamp among the given products, or 0.
+         *
+         * The name is kept for backward compatibility; the value is now the
+         * nearest end (not the latest) so one timer represents the next real
+         * deadline instead of a date that may belong to a single long sale.
+         *
+         * @param WC_Product[] $products Products.
+         * @return int
          */
         public static function latest_sale_end( $products ) {
-                $latest = 0;
+                $nearest = 0;
+                $now     = time();
                 foreach ( $products as $product ) {
                         $end = $product->get_date_on_sale_to();
-                        if ( $end instanceof WC_DateTime ) {
-                                $latest = max( $latest, (int) $end->getTimestamp() );
+                        if ( ! $end instanceof WC_DateTime ) {
+                                continue;
+                        }
+                        $ts = (int) $end->getTimestamp();
+                        if ( $ts <= $now ) {
+                                continue;
+                        }
+                        if ( 0 === $nearest || $ts < $nearest ) {
+                                $nearest = $ts;
                         }
                 }
-                return $latest;
+                return $nearest;
         }
 
         /* =========================================================================

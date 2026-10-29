@@ -11,9 +11,15 @@
 error_reporting( E_ALL );
 define( 'ABSPATH', '/home/z/my-project/' );
 
-require __DIR__ . '/stubs.php';
-
 $base = dirname( __DIR__ ); // plugin root — portable
+
+/* The main plugin file defines these; without them a widget that requires a
+ * trait at load time (product-page) reports a false failure. */
+define( 'HSW_DIR', $base . '/' );
+define( 'HSW_URL', 'http://example.test/wp-content/plugins/hamishop-elementor-widgets/' );
+define( 'HSW_VERSION', 'harness' );
+
+require __DIR__ . '/stubs.php';
 
 /* Order mirrors HSW_Plugin::includes() + register_widgets() exactly. */
 $files = array(

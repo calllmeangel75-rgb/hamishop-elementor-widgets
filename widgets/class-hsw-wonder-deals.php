@@ -1,8 +1,11 @@
 <?php
 /**
  * Widget: پیشنهاد شگفت‌انگیز (Wonder Deals) — Section 1 of the supplied design.
- * Gradient shell, header (icon + badge + subtitle), countdown pill/boxes,
- * lead banner card, horizontal snap carousel with stock-progress deal cards.
+ *
+ * One shared card/rail system with 1–3 rows per instance. The dashboard can
+ * place the widget more than once for longer feeds; every instance still has a
+ * single timer and a single query, so the page never pays for a second query
+ * just to show another row.
  *
  * @package HamiShop_Elementor_Widgets
  */
@@ -11,18 +14,18 @@ defined( 'ABSPATH' ) || exit;
 
 class HSW_Widget_Wonder_Deals extends HSW_Widget_Base {
 
-        public function get_name() {
-                return 'hsw-wonder-deals';
-        }
+	public function get_name() {
+		return 'hsw-wonder-deals';
+	}
 
-        	/**
+	/**
 	 * Loop bundle (CSS + JS) — declared here because the base no longer defaults
 	 * to hsw-loop for every widget.
 	 *
 	 * @return array
 	 */
 	public function get_style_depends() {
-		return array( 'hsw-fonts', 'hsw-loop' );
+		return array( 'hsw-fonts', 'hsw-loop-deal' );
 	}
 
 	/**
@@ -32,155 +35,173 @@ class HSW_Widget_Wonder_Deals extends HSW_Widget_Base {
 		return array( 'hsw-loop' );
 	}
 
-public function get_title() {
-                return __( 'پیشنهاد شگفت‌انگیز (HamiShop)', 'hamishop-elementor-widgets' );
-        }
+	public function get_title() {
+		return __( 'پیشنهاد شگفت‌انگیز (HamiShop)', 'hamishop-elementor-widgets' );
+	}
 
-        public function get_icon() {
-                return 'eicon-fire';
-        }
+	public function get_icon() {
+		return 'eicon-fire';
+	}
 
-        public function get_keywords() {
-                return array( 'شگفت انگیز', 'پیشنهاد ویژه', 'حراج', 'تخفیف', 'wonder', 'deal', 'sale', 'hamishop' );
-        }
+	public function get_keywords() {
+		return array( 'شگفت انگیز', 'پیشنهاد ویژه', 'حراج', 'تخفیف', 'wonder', 'deal', 'sale', 'hamishop' );
+	}
 
-        protected function register_controls() {
-                /* ------------------------- CONTENT ------------------------- */
-                $this->controls_source( 'sale' );
-                $this->controls_header(
-                        array(
-                                'icon'   => 'local_fire_department',
-                                'title'  => __( 'پیشنهاد شگفت‌انگیز روز', 'hamishop-elementor-widgets' ),
-                                'badge'  => __( 'تخفیف تا ۴۵٪', 'hamishop-elementor-widgets' ),
-                                'sub'    => __( 'فرصت طلایی خرید برترین کالاهای دیجیتال با تضمین بهترین قیمت بازار', 'hamishop-elementor-widgets' ),
-                                'link_d' => '',
-                                'link_m' => '',
-                        )
-                );
-                $this->controls_countdown();
-                $this->controls_lead();
-                $this->controls_card_content(
-                        array(
-                                'show_rank'   => false,
-                                'price_label' => false,
-                                'txt_buy'     => '',
-                        )
-                );
+	protected function register_controls() {
+		/* ------------------------- CONTENT ------------------------- */
+		$this->controls_source( 'sale' );
+		$this->controls_deal_rows();
+		$this->controls_header(
+			array(
+				'icon'   => 'local_fire_department',
+				'title'  => __( 'پیشنهاد شگفت‌انگیز روز', 'hamishop-elementor-widgets' ),
+				'badge'  => __( 'تخفیف تا ۴۵٪', 'hamishop-elementor-widgets' ),
+				'sub'    => __( 'فرصت طلایی خرید برترین کالاهای دیجیتال با تضمین بهترین قیمت بازار', 'hamishop-elementor-widgets' ),
+				'link_d' => '',
+				'link_m' => '',
+			)
+		);
+		$this->controls_countdown();
+		$this->controls_lead();
+		$this->controls_card_content(
+			array(
+				'show_rank'   => false,
+				'price_label' => false,
+				'txt_buy'     => '',
+			)
+		);
 
-                /* ------------------------- STYLE ------------------------- */
-                $this->controls_shell( 'deal' );
-                $this->controls_header_style();
-                $this->controls_countdown_style();
-                $this->controls_card_style();
-                $this->controls_badge_style();
-                $this->controls_price_style();
-                $this->controls_lead_style();
-        }
+		/* ------------------------- STYLE ------------------------- */
+		$this->controls_theme();
+		$this->controls_shell( 'deal' );
+		$this->controls_header_style();
+		$this->controls_countdown_style();
+		$this->controls_card_style();
+		$this->controls_badge_style();
+		$this->controls_stock_style();
+		$this->controls_price_style();
+		$this->controls_button_style();
+		$this->controls_lead_style();
+	}
 
-        /**
-         * Countdown end timestamp per settings.
-         */
-        private function cd_end( $products ) {
-                $s = $this->effective_settings();
-                if ( 'yes' !== ( $s['show_cd'] ?? 'yes' ) ) {
-                        return 0;
-                }
-                if ( 'manual' === ( $s['cd_mode'] ?? 'auto' ) ) {
-                        $ts = strtotime( (string) ( $s['cd_manual'] ?? '' ) );
-                        return $ts ? (int) $ts : 0;
-                }
-                return HSW_Helpers::latest_sale_end( $products );
-        }
+	/**
+	 * Countdown end timestamp per settings.
+	 *
+	 * @param WC_Product[] $products Products in this instance.
+	 * @return int
+	 */
+	private function cd_end( $products ) {
+		$s = $this->effective_settings();
+		if ( 'yes' !== ( $s['show_cd'] ?? 'yes' ) ) {
+			return 0;
+		}
+		if ( 'manual' === ( $s['cd_mode'] ?? 'auto' ) ) {
+			$raw = trim( (string) ( $s['cd_manual'] ?? '' ) );
+			if ( '' === $raw ) {
+				return 0;
+			}
+			$date = date_create( $raw, wp_timezone() );
+			return $date ? (int) $date->getTimestamp() : 0;
+		}
+		return HSW_Helpers::latest_sale_end( $products );
+	}
 
-        protected function render() {
-                $s        = $this->effective_settings();
-                $products = $this->resolve_products();
-                $args     = $this->renderer_args();
+	/**
+	 * Lead banner card.
+	 *
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	private function lead_html( $s ) {
+		$url = (string) ( $s['lead_url']['url'] ?? '' );
+		if ( '' === $url ) {
+			$url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+		}
 
-                $show_header = 'yes' === ( $s['show_header'] ?? 'yes' );
-                $show_lead   = 'yes' === ( $s['show_lead'] ?? 'yes' );
-                $cd_end      = $this->cd_end( $products );
+		$title = trim( (string) ( $s['lead_title'] ?? '' ) );
+		$sub   = trim( (string) ( $s['lead_sub'] ?? '' ) );
+		$btn   = trim( (string) ( $s['lead_btn'] ?? '' ) );
 
-                $link_url = $s['hdr_link_url']['url'] ?? '';
-                $lead_url = $s['lead_url']['url'] ?? '';
-                ?>
-                <section class="hsw-loop hsw-loop--deal hsw-loop--hsw-wonder-deals<?php echo esc_attr( $this->hsw_font_class() ); ?>">
-                        <div class="hsw-decor hsw-decor--1" aria-hidden="true"></div>
-                        <div class="hsw-decor hsw-decor--2" aria-hidden="true"></div>
+		return '<div class="hsw-loop__lead">' .
+			'<div class="hsw-loop__lead-body">' .
+				HSW_Helpers::icon( (string) ( $s['lead_icon'] ?? 'local_fire_department' ), 'hsw-loop__lead-ico' ) .
+				( '' !== $title ? '<span class="hsw-loop__lead-title">' . esc_html( $title ) . '</span>' : '' ) .
+				( '' !== $sub ? '<span class="hsw-loop__lead-sub">' . esc_html( $sub ) . '</span>' : '' ) .
+			'</div>' .
+			( '' !== $btn ? '<a class="hsw-loop__lead-btn" href="' . esc_url( $url ) . '">' .
+				'<span>' . esc_html( $btn ) . '</span>' . HSW_Helpers::icon( 'arrow_back' ) . '</a>' : '' ) .
+			'</div>';
+	}
 
-                        <?php if ( $show_header ) : ?>
-                        <header class="hsw-hdr">
-                                <div class="hsw-hdr__main">
-                                        <div class="hsw-hdr__brand">
-                                                <span class="hsw-hdr__bar" aria-hidden="true"></span>
-                                                <span class="hsw-hdr__icon hsw-d"><?php echo HSW_Helpers::icon( $s['hdr_icon'] ?? 'local_fire_department' ); // phpcs:ignore ?></span>
-                                                <div class="hsw-hdr__titles">
-                                                        <div class="hsw-hdr__row">
-                                                                <h2 class="hsw-hdr__title"><?php echo esc_html( $s['hdr_title'] ?? '' ); ?></h2>
-                                                                <?php if ( ! empty( $s['hdr_badge'] ) ) : ?>
-                                                                        <span class="hsw-hdr__badge"><?php echo esc_html( $s['hdr_badge'] ); ?></span>
-                                                                <?php endif; ?>
-                                                        </div>
-                                                        <?php if ( ! empty( $s['hdr_sub'] ) ) : ?>
-                                                                <p class="hsw-hdr__sub"><?php echo esc_html( $s['hdr_sub'] ); ?></p>
-                                                        <?php endif; ?>
-                                                </div>
-                                        </div>
+	protected function render() {
+		$s        = $this->effective_settings();
+		$rows     = max( 1, min( 3, (int) ( $s['deal_rows'] ?? 1 ) ) );
+		$per_row  = max( 1, min( 24, (int) ( $s['count']['size'] ?? 8 ) ) );
+		$show_lead = 'yes' === ( $s['show_lead'] ?? 'yes' );
 
-                                        <div class="hsw-hdr__side">
-                                                <?php if ( $cd_end > 0 ) : ?>
-                                                        <div class="hsw-cd hsw-d" data-hsw-end="<?php echo esc_attr( $cd_end ); ?>" data-hsw-fa="1">
-                                                                <?php echo HSW_Helpers::icon( 'timer', 'hsw-ic--timer' ); // phpcs:ignore ?>
-                                                                <span><?php echo esc_html( $s['cd_label'] ?? '' ); ?></span>
-                                                                <span class="hsw-cd__val">۰۰:۰۰:۰۰</span>
-                                                        </div>
-                                                        <div class="hsw-cd--m hsw-m" data-hsw-end="<?php echo esc_attr( $cd_end ); ?>" data-hsw-fa="1" aria-label="<?php esc_attr_e( 'زمان باقی‌مانده', 'hamishop-elementor-widgets' ); ?>">
-                                                                <span class="hsw-cd__box" data-hsw-cd="h">۰۰</span><span class="hsw-cd__sep">:</span><span class="hsw-cd__box" data-hsw-cd="m">۰۰</span><span class="hsw-cd__sep">:</span><span class="hsw-cd__box" data-hsw-cd="s">۰۰</span>
-                                                        </div>
-                                                <?php endif; ?>
+		$products = $this->resolve_products( array( 'count' => $per_row * $rows ) );
+		$products = array_slice( $products, 0, $per_row * $rows );
+		$cd_end   = $this->cd_end( $products );
 
-                                                <?php if ( ! empty( $s['hdr_link_m'] ) ) : ?>
-                                                        <a class="hsw-hdr__link" href="<?php echo esc_url( $link_url ? $link_url : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '#' ) ); ?>">
-                                                                <span class="hsw-d"><?php echo esc_html( $s['hdr_link_d'] ?? '' ); ?></span>
-                                                                <span class="hsw-m"><?php echo esc_html( $s['hdr_link_m'] ); ?></span>
-                                                                <?php echo HSW_Helpers::icon( 'chevron_left' ); // phpcs:ignore ?>
-                                                        </a>
-                                                <?php endif; ?>
+		$args                  = $this->renderer_args();
+		$args['cache_until']   = $cd_end;
+		$args['first_priority'] = true;
 
-                                                <div class="hsw-arrows hsw-d">
-                                                        <button type="button" class="hsw-arrow" data-hsw-dir="-1" aria-label="<?php esc_attr_e( 'اسلاید قبلی', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'chevron_right' ); // phpcs:ignore ?></button>
-                                                        <button type="button" class="hsw-arrow" data-hsw-dir="1" aria-label="<?php esc_attr_e( 'اسلاید بعدی', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'chevron_left' ); // phpcs:ignore ?></button>
-                                                </div>
-                                        </div>
-                                </div>
-                        </header>
-                        <?php endif; ?>
+		$cards = (float) ( $s['cards']['size'] ?? 4 );
+		$fit   = $cards > 0 ? 'cards' : 'fixed';
+		$rows  = max( 1, min( 3, $rows ) );
+		$chunks = $products ? array_chunk( $products, $per_row ) : array();
+		$chunks = array_slice( $chunks, 0, $rows );
 
-                        <div class="hsw-track">
-                                <?php if ( $show_lead ) : ?>
-                                <div class="hsw-lead">
-                                        <div class="hsw-lead__body">
-                                                <?php echo HSW_Helpers::icon( $s['lead_icon'] ?? 'local_fire_department', 'hsw-lead__ico' ); // phpcs:ignore ?>
-                                                <span class="hsw-lead__title"><?php echo esc_html( $s['lead_title'] ?? '' ); ?></span>
-                                                <span class="hsw-lead__sub"><?php echo esc_html( $s['lead_sub'] ?? '' ); ?></span>
-                                        </div>
-                                        <a class="hsw-lead__btn" href="<?php echo esc_url( $lead_url ? $lead_url : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '#' ) ); ?>">
-                                                <span><?php echo esc_html( $s['lead_btn'] ?? '' ); ?></span>
-                                                <?php echo HSW_Helpers::icon( 'arrow_back' ); // phpcs:ignore ?>
-                                        </a>
-                                </div>
-                                <?php endif; ?>
+		$title  = trim( (string) ( $s['hdr_title'] ?? '' ) );
+		$rail   = $this->rail_id();
+		$more   = 'yes' === ( $s['show_more_card'] ?? 'no' );
+		$last   = count( $chunks ) - 1;
+		?>
+		<section class="hsw-loop hsw-loop--deal hsw-loop--hsw-wonder-deals<?php echo esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ); ?>" data-hsw-fit="<?php echo esc_attr( $fit ); ?>">
+			<?php
+			if ( 'yes' === ( $s['show_header'] ?? 'yes' ) ) {
+				echo $this->header_html( $s, $cd_end ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+			} elseif ( $cd_end > time() ) {
+				echo '<div class="hsw-loop__bar">' . $this->timer_html( $cd_end, (string) ( $s['cd_label'] ?? '' ) ) . $this->arrows_html() . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			} else {
+				echo '<div class="hsw-loop__bar">' . $this->arrows_html() . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			}
+			?>
 
-                                <?php
-                                $cards = self::cards_html( 'deal', $products, $args );
-                                if ( '' === $cards ) {
-                                        echo '<div class="hsw-empty">' . esc_html__( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ) . '</div>';
-                                } else {
-                                        echo $cards; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
-                                }
-                                ?>
-                        </div>
-                </section>
-                <?php
-        }
+			<?php if ( empty( $chunks ) ) : ?>
+				<div class="hsw-loop__empty"><?php esc_html_e( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ); ?></div>
+			<?php else : ?>
+				<div class="hsw-loop__rows">
+					<?php foreach ( $chunks as $ri => $chunk ) : ?>
+						<div class="hsw-loop__row">
+							<div class="hsw-loop__rail"
+								id="<?php echo esc_attr( $rail . ( $rows > 1 ? '-r' . $ri : '' ) ); ?>"
+								data-hsw-rail
+								role="group"
+								aria-label="<?php echo esc_attr( '' !== $title ? $title : __( 'پیشنهاد شگفت‌انگیز', 'hamishop-elementor-widgets' ) ); ?>"
+								tabindex="0">
+								<?php
+								if ( 0 === $ri && $show_lead ) {
+									echo $this->lead_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+								}
+
+								$row_args = $args;
+								if ( $ri > 0 ) {
+									$row_args['first_priority'] = false;
+								}
+								echo self::cards_html( 'deal', $chunk, $row_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+
+								if ( $more && $ri === $last ) {
+									echo $this->more_card_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
+								}
+								?>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			<?php endif; ?>
+		</section>
+		<?php
+	}
 }

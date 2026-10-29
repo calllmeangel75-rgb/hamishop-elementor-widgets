@@ -81,6 +81,16 @@ final class HSW_Plugin {
                  * enable the high-performance order tables on the store.
                  */
                 add_action( 'before_woocommerce_init', array( $this, 'declare_woocommerce_compatibility' ) );
+
+                /* Loop cards use one dedicated, cropped size instead of `full`. */
+                add_action( 'after_setup_theme', array( __CLASS__, 'register_image_sizes' ), 20 );
+        }
+
+        /**
+         * Dedicated card image size for the three loop widgets.
+         */
+        public static function register_image_sizes() {
+                add_image_size( 'hsw_card', 420, 420, true );
         }
 
 
