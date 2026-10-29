@@ -28,6 +28,19 @@
 	var lastFocus = null;
 	var toastTimer = null;
 
+	/*
+	 * The mini-cart fragment is WooCommerce's own markup, printed with Latin
+	 * digits. Every HamiShop component prints Persian digits, so the dialog
+	 * looked wrong next to the rest of the page.
+	 */
+	var FA = '۰۱۲۳۴۵۶۷۸۹';
+
+	function fa(value) {
+		return String(value == null ? '' : value).replace(/[0-9]/g, function (digit) {
+			return FA.charAt(+digit);
+		});
+	}
+
 	function el(tag, cls, attrs) {
 		var node = document.createElement(tag);
 		if (cls) { node.className = cls; }
@@ -255,7 +268,7 @@
 		try {
 			var doc = new DOMParser().parseFromString(html, 'text/html');
 			var total = doc.querySelector('.woocommerce-mini-cart__total .amount, .widget_shopping_cart_content .total .amount');
-			return total ? total.textContent.trim() : '';
+			return total ? fa(total.textContent.trim()) : '';
 		} catch (err) {
 			return '';
 		}
@@ -383,8 +396,8 @@
 			out.push({
 				img: img ? (img.getAttribute('src') || '') : '',
 				title: title,
-				qty: qty,
-				price: price,
+				qty: fa(qty),
+				price: fa(price),
 				url: link ? link.getAttribute('href') : ''
 			});
 		});

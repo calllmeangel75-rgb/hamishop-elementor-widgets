@@ -410,6 +410,15 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			$items = $this->defaults();
 		}
 
+		/*
+		 * A saved row can carry an empty URL or the placeholder `#` (the
+		 * control was cleared, or a template was imported without links).
+		 * Rendering `href="#"` made every tab on the mobile bar dead, so fall
+		 * back to the matching default shortcut; a row beyond the defaults
+		 * keeps the anchor harmless.
+		 */
+		$fallback = $this->defaults();
+
 		$pos   = $s['icon_pos'] ?? 'before';
 		$title = isset( $s['title'] ) ? trim( (string) $s['title'] ) : '';
 
@@ -418,10 +427,13 @@ class HSW_Widget_Footer_Sticky extends HSW_Widget_Base {
 			echo '<span class="hsw-sf__title">' . esc_html( $title ) . '</span>';
 		}
 		echo '<div class="hsw-sf__nav">';
-		foreach ( $items as $item ) {
+		foreach ( array_values( $items ) as $index => $item ) {
 			$url    = is_array( $item['url'] ?? null ) ? ( $item['url']['url'] ?? '' ) : (string) ( $item['url'] ?? '' );
 			$text   = (string) ( $item['text'] ?? '' );
 			$icon   = is_array( $item['icon'] ?? null ) ? ( $item['icon']['value'] ?? '' ) : (string) ( $item['icon'] ?? '' );
+			if ( in_array( trim( $url ), array( '', '#' ), true ) && isset( $fallback[ $index ]['url'] ) ) {
+				$url = $fallback[ $index ]['url'];
+			}
 			if ( 'none' === $icon ) {
 				$icon = '';
 			}

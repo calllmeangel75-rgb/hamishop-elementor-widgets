@@ -236,7 +236,7 @@ class HSW_Widget_Product_Related extends HSW_Product_Base {
 						$pid   = $p->get_id();
 						$link  = get_permalink( $pid );
 						$img   = get_the_post_thumbnail_url( $pid, 'woocommerce_thumbnail' );
-						$price = $p->get_price_html();
+						$price = HSW_Helpers::price_html_fa( $p->get_price_html() );
 						$sale  = $p->is_on_sale();
 						?>
 						<article class="hsw-prel__card">

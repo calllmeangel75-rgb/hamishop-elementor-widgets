@@ -51,6 +51,28 @@ class HSW_Helpers {
         }
 
         /**
+         * Persian digits inside WooCommerce price markup.
+         *
+         * Only text nodes are converted: a blanket `fa_num()` would also rewrite
+         * `?add-to-cart=13107` inside an attribute and break the link. Fonts and
+         * the currency symbol stay untouched because they carry no ASCII digits.
+         *
+         * @param string $html Price markup (`wc_price()`, `get_price_html()`, subtotals).
+         * @return string
+         */
+        public static function price_html_fa( $html ) {
+                $html = html_entity_decode( (string) $html, ENT_QUOTES, 'UTF-8' );
+
+                return preg_replace_callback(
+                        '/(?<=>)[^<]+|^[^<]+/',
+                        static function ( $match ) {
+                                return self::fa_num( $match[0] );
+                        },
+                        $html
+                );
+        }
+
+        /**
          * How much the customer is saving on the current cart.
          *
          * Two sources, added together:

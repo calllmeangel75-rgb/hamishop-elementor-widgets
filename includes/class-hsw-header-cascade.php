@@ -522,7 +522,7 @@ class HSW_Header_Cascade {
 		if ( HSW_Helpers::is_call_for_price( $product ) ) {
 			$meta = HSW_Helpers::cfp_inline_html( $product, false, 'hsw-hd__cascadeprice' );
 		} else {
-			$meta = $product->get_price_html();
+			$meta = HSW_Helpers::price_html_fa( $product->get_price_html() );
 		}
 		if ( '' === trim( (string) $meta ) ) {
 			$meta = '<span class="hsw-hd__cascadeprice">' . esc_html__( 'مشاهده', 'hamishop-elementor-widgets' ) . '</span>';

@@ -2673,10 +2673,13 @@ html { overflow-x: clip; }
 /*
  * The drawer lives inside the fixed header, so its own z-index is trapped in
  * the header stacking context. While it is open, lift that context above the
- * mobile sticky purchase bar (9995) so the checkout button is never covered.
+ * mobile sticky purchase bar (9995) so the checkout button is never covered,
+ * and above third-party floating buttons — a chat FAB at 99998 otherwise
+ * intercepts taps meant for the drawer.
  */
-.hsw-hd.is-cart-open {
-	z-index: 10021;
+.hsw-hd.is-cart-open,
+.hsw-hd.is-drawer-open {
+	z-index: 100050;
 }
 
 .hsw-hd__cartdrawer {

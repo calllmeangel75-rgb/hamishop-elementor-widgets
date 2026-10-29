@@ -294,6 +294,14 @@
 		var drawer = root.querySelector('[data-hsw-hd-drawer]');
 		var drawerOpeners = all(root, '[data-hsw-hd-drawer-open]');
 		var drawerClosers = all(root, '[data-hsw-hd-drawer-close]');
+		/*
+		 * The drawer is a full-bleed overlay inside the header's stacking
+		 * context, so its own z-index cannot beat a third-party floating
+		 * button (a chat FAB at 99998 covered the drawer's cart CTA). The
+		 * header itself has to be lifted while the drawer is open.
+		 */
+		var drawerHost = drawer ? drawer.closest('.hsw-hd') : null;
+		var drawerLayerTimer = 0;
 		var lastFocus = null;
 
 		function closeSearch(except) {
@@ -702,6 +710,14 @@
 			lastFocus = document.activeElement;
 			drawer.classList.add('is-open');
 			drawer.setAttribute('aria-hidden', 'false');
+			if (drawerHost) {
+				/* Cancels a pending un-layer from a fast close/open. */
+				if (drawerLayerTimer) {
+					window.clearTimeout(drawerLayerTimer);
+					drawerLayerTimer = 0;
+				}
+				drawerHost.classList.add('is-drawer-open');
+			}
 			drawerOpeners.forEach(function (button) {
 				setExpanded(button, true);
 			});
@@ -721,6 +737,16 @@
 			}
 			drawer.classList.remove('is-open');
 			drawer.setAttribute('aria-hidden', 'true');
+			if (drawerHost) {
+				/* Stay raised until the slide/fade transition has finished. */
+				if (drawerLayerTimer) {
+					window.clearTimeout(drawerLayerTimer);
+				}
+				drawerLayerTimer = window.setTimeout(function () {
+					drawerHost.classList.remove('is-drawer-open');
+					drawerLayerTimer = 0;
+				}, 500);
+			}
 			drawerOpeners.forEach(function (button) {
 				setExpanded(button, false);
 			});

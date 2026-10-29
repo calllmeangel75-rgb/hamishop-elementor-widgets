@@ -1947,7 +1947,7 @@ msgstr ""
 msgid "باشگاه مشتریان"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:812
+#: includes/class-hsw-helpers.php:834
 msgid "باقی‌مانده: %s عدد"
 msgstr ""
 
@@ -3409,8 +3409,8 @@ msgstr ""
 msgid "تماس با پشتیبانی"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:981
-#: includes/class-hsw-helpers.php:987
+#: includes/class-hsw-helpers.php:1003
+#: includes/class-hsw-helpers.php:1009
 msgid "تماس بگیرید"
 msgstr ""
 
@@ -3611,7 +3611,7 @@ msgid "توضیحی ثبت نشده است."
 msgstr ""
 
 #: includes/class-hsw-account.php:2214
-#: includes/class-hsw-helpers.php:900
+#: includes/class-hsw-helpers.php:922
 #: includes/class-hsw-widget-base.php:767
 #: includes/class-hsw-widget-base.php:2829
 #: widgets/class-hsw-widget-archive-grid.php:87
@@ -4917,7 +4917,7 @@ msgid "دریافت کد تأیید"
 msgstr ""
 
 #: widgets/class-hsw-widget-footer-sticky.php:101
-#: widgets/class-hsw-widget-footer-sticky.php:416
+#: widgets/class-hsw-widget-footer-sticky.php:424
 msgid "دسترسی سریع"
 msgstr ""
 
@@ -6990,7 +6990,7 @@ msgstr ""
 msgid "سود شما از تخفیف‌ها"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:124
+#: includes/class-hsw-helpers.php:146
 msgid "سود شما از خرید"
 msgstr ""
 
@@ -7451,7 +7451,7 @@ msgstr ""
 msgid "صفحه‌های سبد خرید، تسویه حساب، پرداخت و تکمیل سفارش. ویجت جامع هر صفحه فعال است؛ بخش‌های ریز فقط در صورت نیاز نمایش داده می‌شوند."
 msgstr ""
 
-#: includes/class-hsw-helpers.php:143
+#: includes/class-hsw-helpers.php:165
 msgid "صفر"
 msgstr ""
 
@@ -8312,7 +8312,7 @@ msgstr ""
 msgid "فرم ورود و ثبت‌نام"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:815
+#: includes/class-hsw-helpers.php:837
 msgid "فروش رفته: %s٪"
 msgstr ""
 
@@ -8367,7 +8367,7 @@ msgstr ""
 msgid "فقط %s امتیاز قابل تبدیل دارید."
 msgstr ""
 
-#: includes/class-hsw-helpers.php:803
+#: includes/class-hsw-helpers.php:825
 msgid "فقط %s عدد در انبار"
 msgstr ""
 
@@ -10362,7 +10362,7 @@ msgstr ""
 msgid "موجود"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:806
+#: includes/class-hsw-helpers.php:828
 #: widgets/class-hsw-widget-archive-grid.php:48
 #: widgets/class-hsw-widget-archive-grid.php:190
 #: widgets/class-hsw-widget-product-title.php:279

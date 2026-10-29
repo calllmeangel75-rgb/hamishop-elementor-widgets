@@ -441,7 +441,17 @@
                         if (!box) { return; }
                         var cs = window.getComputedStyle(box);
                         var visible = cs.display !== 'none' && cs.visibility !== 'hidden' && box.getClientRects().length > 0;
-                        if (visible) { return; }
+                        if (visible) {
+                                box.removeAttribute('data-hsw-pruned');
+                                return;
+                        }
+                        /*
+                         * Mark the copy, not just its fields: the later passes in
+                         * this file re-enable every checked checkbox, which undid
+                         * this pruning and submitted each name twice (the desktop
+                         * value and the stale sheet value).
+                         */
+                        box.setAttribute('data-hsw-pruned', '1');
                         box.querySelectorAll('input, select, textarea').forEach(function (el) {
                                 if (!el.disabled) {
                                         el.disabled = true;
@@ -449,6 +459,11 @@
                                 }
                         });
                 });
+        }
+
+        /* A pruned copy must stay out of every later pass. */
+        function isPruned(el) {
+                return !!(el.closest && el.closest('[data-hsw-pruned]'));
         }
 
         document.addEventListener('submit', function (e) {
@@ -497,12 +512,14 @@
                 /* Duplicate checkbox names → single CSV field (WooCommerce contract). */
                 var groups = {};
                 form.querySelectorAll('input[type="checkbox"][name^="filter_"]').forEach(function (cb) {
+                        if (isPruned(cb)) { return; }
                         var name = cb.getAttribute('name');
                         if (!groups[name]) { groups[name] = []; }
                         if (cb.checked && -1 === groups[name].indexOf(cb.value)) { groups[name].push(cb.value); }
                 });
                 Object.keys(groups).forEach(function (name) {
                         form.querySelectorAll('input[type="checkbox"][name="' + name.replace(/"/g, '\\"') + '"]').forEach(function (cb) {
+                                if (isPruned(cb)) { return; }
                                 cb.disabled = true;
                         });
                         if (!groups[name].length) { return; }
@@ -514,6 +531,10 @@
                 });
 
                 form.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                        /* Re-enabling a checked box inside the pruned (hidden)
+                           copy submitted the same name twice and let the stale
+                           copy win — the filter then looked broken. */
+                        if (isPruned(cb)) { return; }
                         cb.disabled = !cb.checked;
                 });
                 form.querySelectorAll('input[type="number"], input[type="range"], input[type="hidden"]').forEach(function (inp) {
@@ -685,4 +706,16 @@
                 }
         });
         if ('loading' !== document.readyState) { initWish(); } else { document.addEventListener('DOMContentLoaded', initWish); }
+
+        /*
+         * Clearing every filter submits an empty form, and the browser leaves
+         * the bare "shop/?" in the address bar. It filters nothing, so drop it
+         * and keep the canonical archive URL.
+         */
+        function cleanEmptyQuery() {
+                if ('?' === window.location.search) {
+                        window.history.replaceState(null, '', window.location.pathname);
+                }
+        }
+        cleanEmptyQuery();
 })();

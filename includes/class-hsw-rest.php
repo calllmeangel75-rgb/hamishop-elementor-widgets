@@ -377,8 +377,8 @@ class HSW_Rest {
                                 'id'       => (int) $pid,
                                 'name'     => $product->get_name(),
                                 /* Clean price only: get_price_html() adds «قیمت اصلی … بود» for sales. */
-                                'price'    => wp_strip_all_tags( wc_price( (float) $product->get_price() ) ),
-                                'regular'  => $regular > 0 ? wp_strip_all_tags( wc_price( $regular ) ) : '',
+                                'price'    => HSW_Helpers::fa_num( wp_strip_all_tags( wc_price( (float) $product->get_price() ) ) ),
+                                'regular'  => $regular > 0 ? HSW_Helpers::fa_num( wp_strip_all_tags( wc_price( $regular ) ) ) : '',
                                 'off'      => $off,
                                 'rating'   => (float) $product->get_average_rating(),
                                 'reviews'  => (int) $product->get_review_count(),

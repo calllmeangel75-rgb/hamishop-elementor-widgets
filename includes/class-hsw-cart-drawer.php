@@ -124,7 +124,7 @@ class HSW_Cart_Drawer {
 			return $html . '</div>';
 		}
 
-		$subtotal = $cart->get_cart_subtotal();
+		$subtotal = HSW_Helpers::price_html_fa( $cart->get_cart_subtotal() );
 		$count_tx = str_replace( '{count}', HSW_Helpers::fa_num( $count ), (string) $args['count_text'] );
 
 		$html .= '<div class="hsw-hd__cartsummary">';
@@ -168,7 +168,7 @@ class HSW_Cart_Drawer {
 			$html .= '<span class="hsw-hd__cartqtyval" data-hsw-cart-qtyval>' . esc_html( HSW_Helpers::fa_num( $qty ) ) . '</span>';
 			$html .= self::qty_button( -1, $product_id, $variation_id, $qty <= 1, $args['decrease_text'] );
 			$html .= '</div>';
-			$html .= '<span class="hsw-hd__cartlineprice">' . wp_kses_post( $cart->get_product_subtotal( $product, $qty ) ) . '</span>';
+			$html .= '<span class="hsw-hd__cartlineprice">' . wp_kses_post( HSW_Helpers::price_html_fa( $cart->get_product_subtotal( $product, $qty ) ) ) . '</span>';
 			$html .= '<button type="button" class="hsw-hd__cartremove" data-hsw-cart-remove data-product-id="' . esc_attr( $product_id ) . '" data-variation-id="' . esc_attr( $variation_id ) . '" aria-label="' . esc_attr( $args['remove_text'] . ' ' . $product->get_name() ) . '">' . HSW_Helpers::icon( 'delete' ) . '</button>';
 			$html .= '</div>';
 			$html .= '</div>';
