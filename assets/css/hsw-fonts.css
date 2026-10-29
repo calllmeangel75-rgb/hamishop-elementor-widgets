@@ -123,6 +123,37 @@
 	content: none !important;
 }
 
+/*
+ * WooCommerce focuses the notice it just rendered (screen-reader
+ * announcement), which painted the browser's default orange outline over a
+ * full-width green box. Keep a visible ring — it is a focus indicator — but in
+ * the store palette.
+ */
+.hsw-notices .woocommerce-message:focus,
+.hsw-notices .woocommerce-info:focus,
+.hsw-notices .woocommerce-error:focus,
+.hsw-notices .woocommerce-message:focus-visible,
+.hsw-notices .woocommerce-info:focus-visible,
+.hsw-notices .woocommerce-error:focus-visible {
+	outline: 2px solid var(--hsw-notice-accent, var(--hsw-primary, #2563eb));
+	outline-offset: 2px;
+}
+
+/*
+ * WooCommerce focuses the notice it just rendered (screen-reader
+ * announcement), which painted the browser's default orange outline over a
+ * full-width green box. Keep a visible ring - it is a focus indicator - but in
+ * the store palette.
+ */
+.hsw-notices .woocommerce-message:focus,
+.hsw-notices .woocommerce-info:focus,
+.hsw-notices .woocommerce-error:focus,
+.hsw-notices .woocommerce-message:focus-visible,
+.hsw-notices .woocommerce-info:focus-visible,
+.hsw-notices .woocommerce-error:focus-visible {
+outline: 2px solid var(--hsw-notice-accent, var(--hsw-primary, #2563eb));
+outline-offset: 2px;
+}
 .hsw-notices .button {
 	margin-inline-start: auto;
 	background: var(--hsw-primary, #2563eb);

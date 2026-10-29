@@ -591,12 +591,16 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out  = '<div class="hsw-hd__drawercats">';
 		$out .= '<div class="hsw-hd__drawertitle">' . HSW_Helpers::icon( 'grid_view' ) . '<span>' . esc_html( $title ) . '</span></div>';
 		$out .= '<ul>';
+		$has_cascade = class_exists( 'HSW_Header_Cascade' );
 		foreach ( $cats as $cat ) {
 			$url = get_term_link( $cat );
 			if ( is_wp_error( $url ) ) {
 				continue;
 			}
-			$out .= '<li><a href="' . esc_url( $url ) . '"><span>' . esc_html( $cat->name ) . '</span><span class="hsw-hd__megacount">' . esc_html( HSW_Helpers::fa_num( $cat->count ) ) . '</span></a></li>';
+			/* Descendant-inclusive count: the same number the archive sidebar
+			   prints for this category. */
+			$count = $has_cascade ? \HSW_Header_Cascade::term_total_count( $cat ) : (int) $cat->count;
+			$out .= '<li><a href="' . esc_url( $url ) . '"><span>' . esc_html( $cat->name ) . '</span><span class="hsw-hd__megacount">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></a></li>';
 		}
 		$out .= '</ul></div>';
 

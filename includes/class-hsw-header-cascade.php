@@ -402,6 +402,39 @@ class HSW_Header_Cascade {
 	}
 
 	/**
+	 * Category product count including every descendant, matching what the
+	 * category archive actually lists.
+	 *
+	 * `$term->count` holds only the products assigned to the term itself, so the
+	 * header showed «۵» for a category whose page lists seven products (five
+	 * direct + two in subcategories) while the archive sidebar printed «۷».
+	 *
+	 * @param WP_Term $term Category term.
+	 * @return int
+	 */
+	public static function term_total_count( $term ) {
+		if ( ! $term instanceof WP_Term ) {
+			return 0;
+		}
+
+		$total    = (int) $term->count;
+		$children = get_term_children( (int) $term->term_id, $term->taxonomy );
+
+		if ( is_wp_error( $children ) || empty( $children ) ) {
+			return $total;
+		}
+
+		foreach ( $children as $child_id ) {
+			$child = get_term( (int) $child_id, $term->taxonomy );
+			if ( $child instanceof WP_Term ) {
+				$total += (int) $child->count;
+			}
+		}
+
+		return $total;
+	}
+
+	/**
 	 * Category row. At the last allowed level the row is a real link when the
 	 * product panel is disabled, so the menu ends on the category itself.
 	 *
@@ -433,7 +466,7 @@ class HSW_Header_Cascade {
 		$icon  = $level <= 1 ? '<span class="hsw-hd__cascadeicon">' . HSW_Helpers::icon( 'category' ) . '</span>' : '';
 		$inner = $icon
 			. '<span class="hsw-hd__cascadename">' . esc_html( $term->name ) . '</span>'
-			. '<span class="hsw-hd__cascadecount">' . esc_html( HSW_Helpers::fa_num( $term->count ) ) . '</span>'
+			. '<span class="hsw-hd__cascadecount">' . esc_html( HSW_Helpers::fa_num( self::term_total_count( $term ) ) ) . '</span>'
 			. '<span class="hsw-hd__cascadechev">' . HSW_Helpers::icon( $terminal ? 'arrow_left_alt' : 'chevron_left' ) . '</span>';
 
 		$out = '<li class="hsw-hd__cascadeitem">';
