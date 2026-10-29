@@ -126,6 +126,19 @@ class HSW_Wallet_Topup {
 		$gateway_id = sanitize_key( (string) $gateway_id );
 		$gateways   = self::gateways();
 
+		/*
+		 * "No gateway at all" and "the chosen one is gone" are different
+		 * problems: telling a customer to "pick another gateway" when the shop
+		 * has none is a dead end. COD is blocked on purpose (see gateways()),
+		 * so a site that only enables COD has no online top-up.
+		 */
+		if ( empty( $gateways ) ) {
+			return new WP_Error(
+				'hsw_no_gateway',
+				__( 'در حال حاضر هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' )
+			);
+		}
+
 		if ( '' === $gateway_id ) {
 			$fallback = sanitize_key( (string) $s['gateway'] );
 			if ( isset( $gateways[ $fallback ] ) ) {

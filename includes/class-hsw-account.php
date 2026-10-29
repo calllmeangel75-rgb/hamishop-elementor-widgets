@@ -2680,33 +2680,42 @@ final class HSW_Account {
 			$html .= '</div>';
 		}
 
-		$html .= '<form class="hsw-ac__wallet-form" ' . ( $online ? 'data-hsw-wallet-pay' : 'data-hsw-wallet-topup' ) . '>';
-		$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-amount">' . esc_html__( 'مبلغ (تومان)', 'hamishop-elementor-widgets' ) . '</label>';
-		$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-amount" name="amount" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( number_format( max( (int) $topup['min'], 100000 ) ) ) ) . '" dir="ltr">';
+		/*
+		 * Online mode with no usable gateway has no button to press: COD is
+		 * blocked on purpose, and a form that always fails is worse than a
+		 * clear note. The form is only rendered when the shop can charge.
+		 */
+		$can_charge = ! $online || count( $options ) > 0;
 
-		if ( $online && count( $options ) > 1 ) {
-			$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-gateway">' . esc_html__( 'درگاه پرداخت', 'hamishop-elementor-widgets' ) . '</label>';
-			$html .= '<select class="hsw-ac__wallet-input" id="hsw-wallet-gateway" name="gateway">';
-			foreach ( $options as $gid => $gtitle ) {
-				$html .= '<option value="' . esc_attr( $gid ) . '"' . selected( $gid, (string) $topup['gateway'], false ) . '>' . esc_html( $gtitle ) . '</option>';
+		if ( $can_charge ) {
+			$html .= '<form class="hsw-ac__wallet-form" ' . ( $online ? 'data-hsw-wallet-pay' : 'data-hsw-wallet-topup' ) . '>';
+			$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-amount">' . esc_html__( 'مبلغ (تومان)', 'hamishop-elementor-widgets' ) . '</label>';
+			$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-amount" name="amount" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( number_format( max( (int) $topup['min'], 100000 ) ) ) ) . '" dir="ltr">';
+
+			if ( $online && count( $options ) > 1 ) {
+				$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-gateway">' . esc_html__( 'درگاه پرداخت', 'hamishop-elementor-widgets' ) . '</label>';
+				$html .= '<select class="hsw-ac__wallet-input" id="hsw-wallet-gateway" name="gateway">';
+				foreach ( $options as $gid => $gtitle ) {
+					$html .= '<option value="' . esc_attr( $gid ) . '"' . selected( $gid, (string) $topup['gateway'], false ) . '>' . esc_html( $gtitle ) . '</option>';
+				}
+				$html .= '</select>';
 			}
-			$html .= '</select>';
-		}
 
-		if ( ! $online ) {
-			$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-note">' . esc_html__( 'شماره پیگیری / توضیح', 'hamishop-elementor-widgets' ) . '</label>';
-			$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-note" name="note" type="text">';
-		}
+			if ( ! $online ) {
+				$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-note">' . esc_html__( 'شماره پیگیری / توضیح', 'hamishop-elementor-widgets' ) . '</label>';
+				$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-note" name="note" type="text">';
+			}
 
-		$html .= '<p class="hsw-ac__wallet-msg" data-hsw-wallet-msg role="alert" hidden></p>';
-		$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">'
-			. $this->icon( 'wallet' )
-			. ( $online ? esc_html__( 'پرداخت و شارژ', 'hamishop-elementor-widgets' ) : esc_html__( 'ثبت فیش و درخواست شارژ', 'hamishop-elementor-widgets' ) )
-			. '</button>';
-		$html .= '</form>';
+			$html .= '<p class="hsw-ac__wallet-msg" data-hsw-wallet-msg role="alert" hidden></p>';
+			$html .= '<button type="submit" class="hsw-ac__btn hsw-ac__btn--primary">'
+				. $this->icon( 'wallet' )
+				. ( $online ? esc_html__( 'پرداخت و شارژ', 'hamishop-elementor-widgets' ) : esc_html__( 'ثبت فیش و درخواست شارژ', 'hamishop-elementor-widgets' ) )
+				. '</button>';
+			$html .= '</form>';
+		}
 
 		if ( $online && 0 === count( $options ) ) {
-			$html .= '<p class="hsw-ac__wallet-empty">' . esc_html__( 'هیچ درگاه پرداختی روی سایت فعال نیست؛ با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) . '</p>';
+			$html .= '<p class="hsw-ac__wallet-empty">' . esc_html__( 'هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) . '</p>';
 		}
 
 		$html .= '</section>';
