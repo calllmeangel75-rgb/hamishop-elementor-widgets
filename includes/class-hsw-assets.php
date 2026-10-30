@@ -683,6 +683,19 @@ class HSW_Assets {
                         ) ) . ';',
                         'before'
                 );;
+
+                /*
+                 * Defer every front-end script. None of them writes to the
+                 * document; each module wires itself up on its own
+                 * DOMContentLoaded handler, so deferring keeps the execution
+                 * order intact while the browser stops blocking first paint on
+                 * them. WP 6.3+ native; older installs ignore the strategy.
+                 */
+                foreach ( array( 'hsw-header', 'hsw-loop', 'hsw-product', 'hsw-archive', 'hsw-cart', 'hsw-checkout', 'hsw-feedback', 'hsw-post', 'hsw-account' ) as $hsw_script ) {
+                        if ( wp_script_is( $hsw_script, 'registered' ) ) {
+                                wp_script_add_data( $hsw_script, 'strategy', 'defer' );
+                        }
+                }
         }
 
         /**
