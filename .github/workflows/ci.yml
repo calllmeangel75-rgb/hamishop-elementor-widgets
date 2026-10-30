@@ -136,6 +136,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Read plugin version
+        id: ver
+        shell: bash
+        run: |
+          version=$(grep -m1 '^ \* Version:' hamishop-elementor-widgets.php | sed 's/.*Version:[[:space:]]*//')
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "packaged version: ${version}"
+
       - name: Build ZIP
         # build-release.py writes one level above the plugin folder (../<slug>-<ver>.zip),
         # which is outside the workspace runner, so bring it back in for the upload.
@@ -145,7 +153,9 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: hamishop-elementor-widgets-${{ github.ref_name }}
+          # Version, not ref name: a manual run would otherwise produce an artifact
+          # called "…-main".
+          name: hamishop-elementor-widgets-${{ steps.ver.outputs.version }}
           path: hamishop-elementor-widgets-*.zip
           if-no-files-found: error
           retention-days: 90
