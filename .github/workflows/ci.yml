@@ -123,8 +123,10 @@ jobs:
   package:
     # Tagging v* produces the distributable ZIP as a workflow artifact, using the
     # same script as a local release, so the artefact is never hand-assembled.
+    # A manual run also packages, which is how the tag path itself gets tested
+    # without cutting a release just to see whether it works.
     name: release package
-    if: startsWith( github.ref, 'refs/tags/v' )
+    if: startsWith( github.ref, 'refs/tags/v' ) || github.event_name == 'workflow_dispatch'
     needs: [ lint, harness, checks, generated ]
     runs-on: ubuntu-latest
     steps:
