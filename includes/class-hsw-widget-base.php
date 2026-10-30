@@ -2918,6 +2918,27 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'chevron_right'         => 'راست',
                         'arrow_back'            => 'بازگشت',
                         'arrow_forward'         => 'جلو',
+                        /* header / navigation — added for the header icon pickers */
+                        'menu'                  => 'منوی همبرگری',
+                        'search'                => 'جستجو',
+                        'person'                => 'کاربر',
+                        'home'                  => 'خانه',
+                        'storefront'            => 'فروشگاه',
+                        'grid_view'             => 'شبکهٔ دسته‌ها',
+                        'category'              => 'دسته‌بندی',
+                        'support_agent'         => 'پشتیبانی',
+                        'call'                  => 'تماس',
+                        'logout'                => 'خروج',
+                        'check_circle'          => 'تیک',
+                        'close'                 => 'بستن',
+                        'verified'              => 'تأییدشده',
+                        'shield'                => 'سپر',
+                        'account_balance_wallet' => 'کیف پول',
+                        'credit_card'           => 'کارت بانکی',
+                        'receipt_long'          => 'فاکتور',
+                        'percent'               => 'تخفیف',
+                        'sell'                  => 'برچسب قیمت',
+                        'arrow_left_alt'        => 'فلش (CTA)',
                 );
         }
 

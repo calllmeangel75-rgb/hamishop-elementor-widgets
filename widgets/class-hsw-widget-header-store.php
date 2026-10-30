@@ -318,7 +318,7 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 
 		echo '<div class="hsw-hd__main"><div class="hsw-hd__maininner">';
 
-		echo '<button class="hsw-hd__burger" type="button" data-hsw-hd-drawer-open aria-controls="' . esc_attr( $drawer_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن منو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'menu' ) . '</button>';
+		echo '<button class="hsw-hd__burger" type="button" data-hsw-hd-drawer-open aria-controls="' . esc_attr( $drawer_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن منو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( $this->icon_of( $s, 'menu_icon', 'menu' ) ) . '</button>';
 
 		echo $this->brand_html( $s, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in helper.
 
@@ -328,7 +328,7 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 
 		echo '<div class="hsw-hd__actions">';
 		if ( $show_search ) {
-			echo '<button class="hsw-hd__iconbtn hsw-hd__mobilesearch" type="button" data-hsw-hd-search-toggle aria-controls="' . esc_attr( $search_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن جستجو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'search' ) . '</button>';
+			echo '<button class="hsw-hd__iconbtn hsw-hd__mobilesearch" type="button" data-hsw-hd-search-toggle aria-controls="' . esc_attr( $search_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن جستجو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( $this->icon_of( $s, 'search_icon', 'search' ) ) . '</button>';
 		}
 		if ( $show_account ) {
 			echo $this->account_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped

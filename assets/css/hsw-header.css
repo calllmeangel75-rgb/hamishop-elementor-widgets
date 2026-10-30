@@ -281,11 +281,11 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	display: none;
 	align-items: center;
 	justify-content: center;
-	width: 42px;
-	height: 42px;
+	width: var(--hsw-hd-act-size, 42px);
+	height: var(--hsw-hd-act-size, 42px);
 	flex-shrink: 0;
 	border: 1px solid var(--hsw-hd-border);
-	border-radius: calc(var(--hsw-hd-radius) * .7);
+	border-radius: var(--hsw-hd-act-radius, calc(var(--hsw-hd-radius) * .7));
 	background: var(--hsw-hd-act-bg, var(--hsw-hd-icon-bg, var(--hsw-hd-search)));
 	color: var(--hsw-hd-act-icon, var(--hsw-hd-icon, var(--hsw-hd-text)));
 }
@@ -627,11 +627,11 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 40px;
-	height: 40px;
+	width: var(--hsw-hd-act-size, 40px);
+	height: var(--hsw-hd-act-size, 40px);
 	flex-shrink: 0;
 	border: 1px solid var(--hsw-hd-border);
-	border-radius: 50%;
+	border-radius: var(--hsw-hd-act-radius, 50%);
 	background: var(--hsw-hd-act-bg, var(--hsw-hd-icon-bg, var(--hsw-hd-bg)));
 	color: var(--hsw-hd-act-icon, var(--hsw-hd-icon, var(--hsw-hd-text, #0f172a)));
 	transition: color .15s, border-color .15s, background-color .15s;
@@ -1778,12 +1778,12 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 .hsw-hd__pill {
 	display: flex;
 	align-items: center;
-	gap: 14px;
-	min-height: 58px;
-	padding: 8px 13px;
-	border: 1px solid color-mix(in srgb, var(--hsw-hd-border) 80%, transparent);
+	gap: var(--hsw-hd-pill-gap, 14px);
+	min-height: var(--hsw-hd-pill-h, 58px);
+	padding: var(--hsw-hd-pill-py, 8px) var(--hsw-hd-pill-px, 13px);
+	border: var(--hsw-hd-pill-bw, 1px) solid var(--hsw-hd-pill-border, color-mix(in srgb, var(--hsw-hd-border) 80%, transparent));
 	border-radius: 999px;
-	background: var(--hsw-hd-bg);
+	background: var(--hsw-hd-pill-bg, var(--hsw-hd-bg));
 	box-shadow: 0 14px 40px rgba(15, 23, 42, .10), inset 0 1px 0 rgba(255, 255, 255, .72);
 	backdrop-filter: blur(var(--hsw-hd-blur));
 	-webkit-backdrop-filter: blur(var(--hsw-hd-blur));
@@ -1811,8 +1811,17 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	font-size: 15px;
 }
 
+/*
+ * The tagline used to be hidden here, which made the «شعار / زیرنویس برند»
+ * content control look broken on the minimal header: the field saved, the
+ * markup printed, and the stylesheet threw it away. It now shows under the
+ * name (second line, small) and has its own colour/typography controls.
+ */
 .hsw-hd__pill .hsw-hd__brandtag {
-	display: none;
+	display: block;
+	max-width: 100%;
+	font-size: 9.5px;
+	line-height: 1.35;
 }
 
 .hsw-hd__minnav {
@@ -1841,26 +1850,18 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	flex-shrink: 0;
 }
 
-.hsw-hd__minactions .hsw-hd__iconbtn {
-	width: 36px;
-	height: 36px;
-	border-color: transparent;
-	background: transparent;
-}
-
-.hsw-hd__minactions .hsw-hd__iconbtn:hover {
-	background: var(--hsw-hd-search);
-}
-
+.hsw-hd__minactions .hsw-hd__iconbtn,
 .hsw-hd__action--minimal {
-	width: 36px;
-	height: 36px;
+	width: var(--hsw-hd-act-size, 36px);
+	height: var(--hsw-hd-act-size, 36px);
 	padding: 0;
 	justify-content: center;
 	border-color: transparent;
+	border-radius: var(--hsw-hd-act-radius, 50%);
 	background: transparent;
 }
 
+.hsw-hd__minactions .hsw-hd__iconbtn:hover,
 .hsw-hd__action--minimal:hover {
 	background: var(--hsw-hd-search);
 }
@@ -2504,10 +2505,10 @@ html { overflow-x: clip; }
 	.hsw-hd__account,
 	.hsw-hd__cart {
 		padding: 0;
-		width: 40px;
-		height: 40px;
+		width: var(--hsw-hd-act-size, 40px);
+		height: var(--hsw-hd-act-size, 40px);
 		justify-content: center;
-		border-radius: 50%;
+		border-radius: var(--hsw-hd-act-radius, 50%);
 		/* The palette background must survive the mobile layout. */
 		background: var(--hsw-hd-act-bg, var(--hsw-hd-icon-bg, var(--hsw-hd-search)));
 	}
@@ -2556,9 +2557,9 @@ html { overflow-x: clip; }
 	}
 
 	.hsw-hd__pill {
-		min-height: 52px;
-		gap: 8px;
-		padding: 6px 9px;
+		min-height: var(--hsw-hd-pill-h, 52px);
+		gap: var(--hsw-hd-pill-gap, 8px);
+		padding: var(--hsw-hd-pill-py, 6px) var(--hsw-hd-pill-px, 9px);
 	}
 
 	.hsw-hd__pill .hsw-hd__brandname {
@@ -2613,14 +2614,14 @@ html { overflow-x: clip; }
 
 	.hsw-hd__burger,
 	.hsw-hd__iconbtn {
-		width: 36px;
-		height: 36px;
+		width: var(--hsw-hd-act-size, 36px);
+		height: var(--hsw-hd-act-size, 36px);
 	}
 
 	.hsw-hd__account,
 	.hsw-hd__cart {
-		width: 36px;
-		height: 36px;
+		width: var(--hsw-hd-act-size, 36px);
+		height: var(--hsw-hd-act-size, 36px);
 	}
 
 	.hsw-hd__brandname {
@@ -2663,6 +2664,16 @@ html { overflow-x: clip; }
 		padding-inline: 6px;
 	}
 
+	/*
+	 * The pill keeps its own controls on phones too: the evenly-spaced row is
+	 * the default, but a gap/padding set in the widget must still win (the
+	 * «پیل شیشهای» controls write --hsw-hd-pill-*).
+	 */
+	body .hsw-hd .hsw-hd__pill {
+		gap: var(--hsw-hd-pill-gap, 6px);
+		padding-inline: var(--hsw-hd-pill-px, 6px);
+	}
+
 	.hsw-hd__maininner > .hsw-hd__actions,
 	.hsw-hd__pill > .hsw-hd__minactions {
 		display: contents;
@@ -2688,8 +2699,8 @@ html { overflow-x: clip; }
 	.hsw-hd__pill .hsw-hd__action--minimal {
 		padding: 0;
 		justify-content: center;
-		width: 40px;
-		height: 40px;
+		width: var(--hsw-hd-act-size, 40px);
+		height: var(--hsw-hd-act-size, 40px);
 	}
 
 	/* The brand is one item among the rest, so it must not claim the slack. */
@@ -2713,8 +2724,8 @@ html { overflow-x: clip; }
 	.hsw-hd__maininner > .hsw-hd__cart,
 	.hsw-hd__pill .hsw-hd__iconbtn,
 	.hsw-hd__pill .hsw-hd__action--minimal {
-		width: 36px;
-		height: 36px;
+		width: var(--hsw-hd-act-size, 36px);
+		height: var(--hsw-hd-act-size, 36px);
 	}
 }
 

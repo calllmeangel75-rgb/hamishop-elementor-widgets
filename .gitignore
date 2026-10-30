@@ -6,3 +6,8 @@ tools/_ms.css
 tests/_shots/
 tools/_vazirmatn-src.woff2
 tests/_lh-*.json
+
+# probe artefacts (screenshots / harness logs)
+tests/_shot-*.png
+tests/_h.txt
+

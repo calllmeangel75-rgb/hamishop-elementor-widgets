@@ -326,6 +326,31 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	}
 
 	/**
+	 * Saved icon name, or the default when the value is empty or unknown.
+	 *
+	 * Guards against an icon that was removed from the sprite later: the header
+	 * falls back instead of printing a dot. The list itself comes from
+	 * `HSW_Widget_Base::icon_options()` (a curated, labelled subset of the
+	 * sprite) — one shared list means the loop widgets and the header can never
+	 * offer different icons.
+	 *
+	 * @param array  $s       Settings.
+	 * @param string $key     Control key.
+	 * @param string $default Fallback icon name.
+	 * @return string
+	 */
+	protected function icon_of( $s, $key, $default ) {
+		$name = isset( $s[ $key ] ) ? trim( (string) $s[ $key ] ) : '';
+		if ( '' === $name ) {
+			return $default;
+		}
+		if ( class_exists( 'HSW_Icon_Set' ) && ! HSW_Icon_Set::has( $name ) ) {
+			return $default;
+		}
+		return $name;
+	}
+
+	/**
 	 * Account action.
 	 *
 	 * @param array $s       Settings.
@@ -339,7 +364,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$aria = '' !== $label ? $label : __( 'حساب کاربری', 'hamishop-elementor-widgets' );
 
 		$out  = '<a class="hsw-hd__action hsw-hd__account' . ( $minimal ? ' hsw-hd__action--minimal' : '' ) . '" href="' . esc_url( $this->account_url() ) . '" aria-label="' . esc_attr( $aria ) . '">';
-		$out .= '<span class="hsw-hd__actionicon">' . HSW_Helpers::icon( 'person' ) . '</span>';
+		$out .= '<span class="hsw-hd__actionicon">' . HSW_Helpers::icon( $this->icon_of( $s, 'account_icon', 'person' ) ) . '</span>';
 		if ( $minimal ) {
 			if ( '' !== $label ) {
 				$out .= '<span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span>';
@@ -375,7 +400,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		 * to decide whether a cached badge has to be cleared for a visitor with
 		 * no cart; without the attribute the reset never fired.
 		 */
-		$out .= '<span class="hsw-hd__carticon">' . HSW_Helpers::icon( 'shopping_cart' ) . '<span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></span>';
+		$out .= '<span class="hsw-hd__carticon">' . HSW_Helpers::icon( $this->icon_of( $s, 'cart_icon', 'shopping_cart' ) ) . '<span class="hsw-hd__badge" data-hsw-cart-count data-count="' . esc_attr( (int) $count ) . '">' . esc_html( HSW_Helpers::fa_num( $count ) ) . '</span></span>';
 		if ( ! $minimal && '' !== $label ) {
 			$out .= '<span class="hsw-hd__actionmeta"><span class="hsw-hd__actionlabel">' . esc_html( $label ) . '</span><span class="hsw-hd__actionsub hsw-hd__carttotal" data-hsw-cart-total>' . wp_kses_post( $total ) . '</span></span>';
 		}
@@ -633,7 +658,7 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$out .= '<div class="hsw-hd__drawerbody">';
 		if ( $show_acct ) {
 			$out .= '<div class="hsw-hd__profile">';
-			$out .= '<span class="hsw-hd__profileicon">' . HSW_Helpers::icon( 'person' ) . '</span>';
+			$out .= '<span class="hsw-hd__profileicon">' . HSW_Helpers::icon( $this->icon_of( $s, 'account_icon', 'person' ) ) . '</span>';
 			$out .= '<span class="hsw-hd__profiletext"><strong>' . esc_html( $this->current_user_name() ) . '</strong><span>' . esc_html__( 'مدیریت حساب و سفارش‌ها', 'hamishop-elementor-widgets' ) . '</span></span>';
 			$out .= '</div>';
 		}
@@ -1113,6 +1138,65 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		/*
+		 * Icon pickers. Everything below used to be hard-coded in the template
+		 * (`person`, `shopping_cart`, `menu`, `search`), which is why «آیکن
+		 * نمیشه گذاشت». Options come from the bundled sprite, so whatever the
+		 * editor picks is guaranteed to draw.
+		 */
+		$this->add_control(
+			'icons_heading',
+			array(
+				'label'     => __( 'آیکن دکمه‌ها', 'hamishop-elementor-widgets' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'menu_icon',
+			array(
+				'label'       => __( 'آیکن منوی همبرگری', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'options'     => self::icon_options(),
+				'default'     => 'menu',
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
+			'search_icon',
+			array(
+				'label'       => __( 'آیکن دکمهٔ جستجو', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'options'     => self::icon_options(),
+				'default'     => 'search',
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
+			'account_icon',
+			array(
+				'label'       => __( 'آیکن حساب کاربری', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'options'     => self::icon_options(),
+				'default'     => 'person',
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
+			'cart_icon',
+			array(
+				'label'       => __( 'آیکن سبد خرید', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'options'     => self::icon_options(),
+				'default'     => 'shopping_cart',
+				'label_block' => true,
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -1316,6 +1400,23 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		/*
+		 * The tagline («شعار / زیرنویس برند») existed as a content control from
+		 * the start but the pill stylesheet hid it (`display: none`), so filling
+		 * it in changed nothing on the minimal header. It is visible now and has
+		 * its own colour + typography.
+		 */
+		$this->a_color( 'brandtag_color', __( 'رنگ شعار / زیرنویس', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-hd__brandtag' );
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'brandtag_typography',
+				'label'    => __( 'تایپوگرافی شعار / زیرنویس', 'hamishop-elementor-widgets' ),
+				'selector' => '{{WRAPPER}} .hsw-hd__brandtag',
+			)
+		);
+
 		$this->add_control(
 			'logo_shine_heading',
 			array(
@@ -1372,6 +1473,59 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		$this->a_color( 'nav_link_color', __( 'رنگ لینک‌های منو', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-hd__menu > li > a' );
+
+		$this->a_color(
+			'nav_link_hover',
+			__( 'رنگ لینک منو در هاور', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-hd__menu > li > a:hover, {{WRAPPER}} .hsw-hd__menu > li > a:focus-visible'
+		);
+
+		/*
+		 * Size and radius of the round buttons (menu / account / cart). They were
+		 * fixed at 42px in the stylesheet, so a taller pill or a smaller header
+		 * could not be matched without editing CSS.
+		 */
+		$this->add_responsive_control(
+			'action_size',
+			array(
+				'label'      => __( 'اندازهٔ دکمه‌های آیکنی', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 28,
+						'max' => 56,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-act-size: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'action_radius',
+			array(
+				'label'      => __( 'گردی دکمه‌های آیکنی', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( '%', 'px' ),
+				'range'      => array(
+					'%'  => array(
+						'min' => 0,
+						'max' => 50,
+					),
+					'px' => array(
+						'min' => 0,
+						'max' => 28,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-act-radius: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
 		$this->a_button(
 			'cat',
 			__( 'دکمهٔ دسته‌بندی محصولات', 'hamishop-elementor-widgets' ),
@@ -1384,6 +1538,19 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			__( 'دکمهٔ جستجو', 'hamishop-elementor-widgets' ),
 			'{{WRAPPER}} .hsw-hd__searchbtn',
 			array( 'size' => 11.5, 'radius' => 10 )
+		);
+
+		/*
+		 * The CTA («مشاهده فروشگاه») only exists in the pill header, but the
+		 * selector is harmless on the store header and keeps one place for every
+		 * shared button. Without this the CTA was unstyleable: its colour came
+		 * straight from the primary colour with no override.
+		 */
+		$this->a_button(
+			'cta',
+			__( 'دکمهٔ اقدام (CTA)', 'hamishop-elementor-widgets' ),
+			'{{WRAPPER}} .hsw-hd__cta',
+			array( 'size' => 11, 'radius' => 999 )
 		);
 		$this->end_controls_section();
 	}

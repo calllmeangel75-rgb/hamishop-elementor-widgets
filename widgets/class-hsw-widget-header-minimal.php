@@ -75,6 +75,18 @@ class HSW_Widget_Header_Minimal extends HSW_Header_Base {
 			)
 		);
 
+		$this->add_control(
+			'cta_icon',
+			array(
+				'label'       => __( 'آیکن دکمهٔ اقدام', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'options'     => self::icon_options(),
+				'default'     => 'arrow_left_alt',
+				'label_block' => true,
+				'condition'   => array( 'show_cta' => 'yes' ),
+			)
+		);
+
 		$this->end_controls_section();
 
 		$this->content_style( 'minimal' );
@@ -93,6 +105,110 @@ class HSW_Widget_Header_Minimal extends HSW_Header_Base {
 				'name'     => 'pill_shadow',
 				'label'    => __( 'سایه پیل', 'hamishop-elementor-widgets' ),
 				'selector' => '{{WRAPPER}} .hsw-hd__pill',
+			)
+		);
+
+		$this->add_control(
+			'pill_bg',
+			array(
+				'label'       => __( 'پس‌زمینهٔ پیل', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'description' => __( 'خالی = همان «پس‌زمینه هدر» در بخش «استایل هدر».', 'hamishop-elementor-widgets' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-pill-bg: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->a_color( 'pill_border', __( 'رنگ حاشیهٔ پیل', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-hd', '--hsw-hd-pill-border: {{VALUE}};' );
+
+		$this->add_control(
+			'pill_border_width',
+			array(
+				'label'      => __( 'ضخامت حاشیهٔ پیل', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 4,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-pill-bw: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'pill_gap',
+			array(
+				'label'      => __( 'فاصلهٔ آیتم‌های پیل', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 4,
+						'max' => 40,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-pill-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'pill_height',
+			array(
+				'label'      => __( 'کمینهٔ ارتفاع پیل', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 44,
+						'max' => 96,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-pill-h: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'pill_padding_v',
+			array(
+				'label'      => __( 'پدینگ عمودی پیل', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 26,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-pill-py: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'pill_padding_h',
+			array(
+				'label'      => __( 'پدینگ افقی پیل', 'hamishop-elementor-widgets' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 40,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-pill-px: {{SIZE}}{{UNIT}};',
+				),
 			)
 		);
 
@@ -137,7 +253,7 @@ class HSW_Widget_Header_Minimal extends HSW_Header_Base {
 		echo '<div class="hsw-hd__minwrap">';
 		echo '<div class="hsw-hd__pill">';
 
-		echo '<button class="hsw-hd__burger" type="button" data-hsw-hd-drawer-open aria-controls="' . esc_attr( $drawer_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن منو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'menu' ) . '</button>';
+		echo '<button class="hsw-hd__burger" type="button" data-hsw-hd-drawer-open aria-controls="' . esc_attr( $drawer_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن منو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( $this->icon_of( $s, 'menu_icon', 'menu' ) ) . '</button>';
 
 		echo $this->brand_html( $s, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
@@ -147,7 +263,7 @@ class HSW_Widget_Header_Minimal extends HSW_Header_Base {
 
 		echo '<div class="hsw-hd__minactions">';
 		if ( $show_search ) {
-			echo '<button class="hsw-hd__iconbtn" type="button" data-hsw-hd-search-toggle aria-controls="' . esc_attr( $search_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن جستجو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'search' ) . '</button>';
+			echo '<button class="hsw-hd__iconbtn" type="button" data-hsw-hd-search-toggle aria-controls="' . esc_attr( $search_id ) . '" aria-expanded="false" aria-label="' . esc_attr__( 'باز کردن جستجو', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( $this->icon_of( $s, 'search_icon', 'search' ) ) . '</button>';
 		}
 		if ( $show_account ) {
 			echo $this->account_html( $s, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -187,6 +303,6 @@ class HSW_Widget_Header_Minimal extends HSW_Header_Base {
 		$url  = is_array( $url ) ? ( $url['url'] ?? '' ) : $url;
 		$url  = $url ? $url : $this->shop_url();
 
-		return '<a class="hsw-hd__cta" href="' . esc_url( $url ) . '"><span>' . esc_html( $text ) . '</span>' . HSW_Helpers::icon( 'arrow_left_alt' ) . '</a>';
+		return '<a class="hsw-hd__cta" href="' . esc_url( $url ) . '"><span>' . esc_html( $text ) . '</span>' . HSW_Helpers::icon( $this->icon_of( $s, 'cta_icon', 'arrow_left_alt' ) ) . '</a>';
 	}
 }
