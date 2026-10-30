@@ -1090,7 +1090,7 @@ $this->a_button( 'prod', __( 'دکمهٔ خرید', 'hamishop-elementor-widgets'
 ## مینیفای دارایی‌ها — v1.11.13
 
 - `tools/build-assets.py` هر `assets/css/*.css` و `assets/js/*.js` را به `.min.*` تبدیل می‌کند
-  (`csscompressor` + `rjsmin`). خروجی: CSS ۴۲۷→۳۱۴KB، JS ۱۲۳→۷۶KB.
+  (`csscompressor` + `rjsmin`). خروجی: CSS ۶۳۲→۴۶۸KB، JS ۲۴۸→۱۵۶KB.
 - `HSW_Assets::asset( $rel )` مسیر را می‌دهد: اگر `SCRIPT_DEBUG` خاموش و فایل `.min` موجود باشد،
   نسخهٔ مینیفای‌شده؛ وگرنه فایل خوانا. هر ۲۰ ثبت دارایی از همین هلپر رد می‌شوند — **مسیر جدید را
   مستقیم با `HSW_URL` نسازید**.

@@ -26,6 +26,9 @@ class HSW_Throttle {
 
 	const DB_VERSION = '1';
 
+	/** Daily cleanup hook for expired buckets. */
+	const PRUNE_HOOK = 'hsw_throttle_prune';
+
 	/** @var HSW_Throttle|null */
 	private static $instance = null;
 
@@ -38,6 +41,38 @@ class HSW_Throttle {
 
 	private function __construct() {
 		add_action( 'init', array( $this, 'maybe_install' ), 5 );
+		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune' ) );
+		add_action( 'init', array( $this, 'maybe_schedule' ), 22 );
+	}
+
+	/**
+	 * One daily event. The table is keyed by bucket, so it does not grow per
+	 * request — but every distinct IP or phone leaves a row behind forever,
+	 * which on a busy shop is a slow leak. Rows older than a day are useless:
+	 * every window in this class is measured in minutes or hours.
+	 */
+	public function maybe_schedule() {
+		if ( wp_next_scheduled( self::PRUNE_HOOK ) ) {
+			return;
+		}
+		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::PRUNE_HOOK );
+	}
+
+	/**
+	 * Delete buckets that expired more than a day ago.
+	 *
+	 * @return int Rows removed.
+	 */
+	public static function prune() {
+		global $wpdb;
+
+		$table = self::table();
+		$cut   = time() - DAY_IN_SECONDS;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+		$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE expires < %d", $cut ) );
+
+		return (int) $deleted;
 	}
 
 	/**

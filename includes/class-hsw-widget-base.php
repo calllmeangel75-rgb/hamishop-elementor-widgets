@@ -948,7 +948,12 @@ abstract class HSW_Widget_Base extends Widget_Base {
 
                 $label = '' !== (string) $label ? '<span class="hsw-loop__timer-label">' . esc_html( $label ) . '</span>' : '';
 
-                return '<div class="hsw-loop__timer" role="timer" aria-live="off" aria-label="' . esc_attr__( 'زمان باقی‌مانده', 'hamishop-elementor-widgets' ) . '" data-hsw-end="' . esc_attr( $end ) . '" data-hsw-end-action="' . esc_attr( $action ) . '" data-hsw-end-text="' . esc_attr( $text ) . '">' .
+                /*
+                 * `data-hsw-now` carries the server's own clock. The countdown is a UNIX
+                 * deadline, and a visitor whose device clock is off would see the wrong
+                 * remaining time; the script anchors itself to this value instead.
+                 */
+                return '<div class="hsw-loop__timer" role="timer" aria-live="off" aria-label="' . esc_attr__( 'زمان باقی‌مانده', 'hamishop-elementor-widgets' ) . '" data-hsw-end="' . esc_attr( $end ) . '" data-hsw-now="' . esc_attr( (string) time() ) . '" data-hsw-end-action="' . esc_attr( $action ) . '" data-hsw-end-text="' . esc_attr( $text ) . '">' .
                         HSW_Helpers::icon( 'timer' ) .
                         $label .
                         '<span class="hsw-loop__timer-part" data-hsw-t="h">' . esc_html( HSW_Helpers::fa_num( $pad( $h ) ) ) . '</span>' .

@@ -185,6 +185,8 @@ class HSW_Wallet_Topup {
 	 * @param int $order_id Order id.
 	 */
 	public function settle( $order_id ) {
+		global $wpdb;
+
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
 			return;
@@ -195,36 +197,72 @@ class HSW_Wallet_Topup {
 			return;
 		}
 
-		/* payment_complete() can fire more than once (status changes, retries). */
-		if ( $order->get_meta( self::META_DONE ) ) {
-			return;
-		}
-
-		$amount = (float) $order->get_total();
-		if ( $amount <= 0 ) {
-			return;
-		}
-
-		HSW_Wallet::credit(
-			$user_id,
-			$amount,
-			'topup',
-			sprintf(
-				/* translators: %s: order number. */
-				__( 'شارژ کیف پول — سفارش #%s', 'hamishop-elementor-widgets' ),
-				$order->get_order_number()
-			),
-			0,
-			(string) $order_id
+		/*
+		 * `payment_complete()` and the two status hooks can fire for the same
+		 * order in one request — or two requests can overlap on a retry. The
+		 * old check-then-set (`get_meta` … credit … `update_meta`) let both
+		 * pass the check and credit the wallet twice.
+		 *
+		 * A MySQL named lock serialises the whole block; the flag is re-read
+		 * *inside* the lock, so the second caller sees `done` and leaves.
+		 * GET_LOCK is available on MySQL and MariaDB (shared hosting too) and
+		 * is what WooCommerce itself uses for order-level work.
+		 */
+		$lock = $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', 'hsw_topup_' . (int) $order_id )
 		);
+		if ( '1' !== (string) $lock ) {
+			/* Another request holds it; it will do the credit. */
+			return;
+		}
 
-		$order->update_meta_data( self::META_DONE, current_time( 'mysql' ) );
-		$order->add_order_note( sprintf(
-			/* translators: %s: formatted amount. */
-			__( 'کیف پول مشتری به مبلغ %s شارژ شد.', 'hamishop-elementor-widgets' ),
-			wp_strip_all_tags( wc_price( $amount ) )
-		) );
-		$order->save();
+		try {
+			/* Re-read after the lock: a request that ran first may have settled it. */
+			$fresh = wc_get_order( $order_id );
+			if ( ! $fresh || $fresh->get_meta( self::META_DONE ) ) {
+				return;
+			}
+
+			$amount = (float) $fresh->get_total();
+			if ( $amount <= 0 ) {
+				return;
+			}
+
+			$credited = HSW_Wallet::credit(
+				$user_id,
+				$amount,
+				'topup',
+				sprintf(
+					/* translators: %s: order number. */
+					__( 'شارژ کیف پول — سفارش #%s', 'hamishop-elementor-widgets' ),
+					$fresh->get_order_number()
+				),
+				0,
+				'topup:' . $order_id
+			);
+
+			/*
+			 * A ledger failure now comes back as an error instead of a silent
+			 * zero, so the flag is only set when the money really moved.
+			 */
+			if ( is_wp_error( $credited ) ) {
+				return;
+			}
+
+			$fresh->update_meta_data( self::META_DONE, current_time( 'mysql' ) );
+			$fresh->add_order_note(
+				sprintf(
+					/* translators: %s: formatted amount. */
+					__( 'کیف پول مشتری به مبلغ %s شارژ شد.', 'hamishop-elementor-widgets' ),
+					wp_strip_all_tags( wc_price( $amount ) )
+				)
+			);
+			$fresh->save();
+		} finally {
+			$wpdb->query( // phpcs:ignore WordPress.DB
+				$wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', 'hsw_topup_' . (int) $order_id )
+			);
+		}
 	}
 }
 

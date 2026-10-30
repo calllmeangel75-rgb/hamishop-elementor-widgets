@@ -79,8 +79,30 @@
 		el.hidden = true;
 	}
 
+	/*
+	 * Server-anchored clock.
+	 *
+	 * `data-hsw-end` is a UNIX timestamp from the server, but `Date.now()`
+	 * belongs to the visitor's device — a laptop five minutes behind showed a
+	 * countdown five minutes too long, and a device with a broken clock could
+	 * show the deal as already finished. The markup carries the server's own
+	 * `time()` in `data-hsw-now`; from that we keep one offset and only measure
+	 * elapsed local time, so the countdown follows the server, not the device.
+	 */
+	var serverSkew = null;
+	var localStart = Date.now();
+
+	function nowMs() {
+		if (null === serverSkew) {
+			var el = timers[0] || doc.querySelector('[data-hsw-now]');
+			var serverNow = el ? parseInt(el.getAttribute('data-hsw-now'), 10) : 0;
+			serverSkew = serverNow > 0 ? (serverNow * 1000) - localStart : 0;
+		}
+		return Date.now() + serverSkew;
+	}
+
 	function tick() {
-		var now = Date.now();
+		var now = nowMs();
 		var alive = 0;
 
 		each(timers, function (el) {

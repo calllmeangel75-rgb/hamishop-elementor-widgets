@@ -129,7 +129,7 @@ function hsw_uninstall_site() {
 	/* ------------------------------------------------------------------
 	 * Scheduled events (if any were registered by an older version).
 	 * --------------------------------------------------------------- */
-	$crons = array( 'hsw_daily_cleanup', 'hsw_ticket_cleanup', 'hsw_tg_poll' );
+	$crons = array( 'hsw_daily_cleanup', 'hsw_ticket_cleanup', 'hsw_tg_poll', 'hsw_throttle_prune' );
 	foreach ( $crons as $cron ) {
 		wp_clear_scheduled_hook( $cron );
 	}

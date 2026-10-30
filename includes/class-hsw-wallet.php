@@ -317,11 +317,15 @@ class HSW_Wallet {
 			return self::balance( $user_id );
 		}
 
-		if ( self::balance( $user_id ) < $amount ) {
-			return new WP_Error( 'hsw_wallet_short', __( 'موجودی کیف پول کافی نیست.', 'hamishop-elementor-widgets' ) );
-		}
-
-		return self::apply( absint( $user_id ), -$amount, $kind, $note, $actor_id, $ref );
+		/*
+		 * No read-then-write here on purpose. The old code compared
+		 * `balance()` with the amount and then subtracted unconditionally, so
+		 * two simultaneous checkouts could both pass the check and drive the
+		 * balance negative. The guard now travels into the UPDATE itself
+		 * (`WHERE balance >= amount`), which is the only place a race can be
+		 * decided.
+		 */
+		return self::apply( absint( $user_id ), -$amount, $kind, $note, $actor_id, $ref, $amount );
 	}
 
 	/**
@@ -344,28 +348,36 @@ class HSW_Wallet {
 	 *
 	 * @param int   $user_id User.
 	 * @param float $delta   Signed amount.
-	 * @return float New balance.
+	 * @param float|null $min When set, the row is only written if the current
+	 *                        balance is at least this much (atomic debit guard).
+	 * @return float|false New balance, or false when the guard rejected the write.
 	 */
-	private static function apply_balance( $user_id, $delta ) {
+	private static function apply_balance( $user_id, $delta, $min = null ) {
 		global $wpdb;
 
 		/*
 		 * Atomic: the arithmetic happens on the stored value, so two requests
 		 * running at the same time cannot both read the old balance.
 		 */
-		$updated = $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare(
-				"UPDATE {$wpdb->usermeta}
+		$sql  = "UPDATE {$wpdb->usermeta}
 				 SET meta_value = CAST(meta_value AS DECIMAL(18,2)) + %f
-				 WHERE user_id = %d AND meta_key = %s",
-				$delta,
-				$user_id,
-				self::BALANCE_META
-			)
-		);
+				 WHERE user_id = %d AND meta_key = %s";
+		$args = array( $delta, $user_id, self::BALANCE_META );
 
-		/* First ever transaction: the meta row does not exist yet. */
+		if ( null !== $min ) {
+			/* The guard lives in the WHERE clause: no window between check and write. */
+			$sql   .= ' AND CAST(meta_value AS DECIMAL(18,2)) >= %f';
+			$args[] = (float) $min;
+		}
+
+		$updated = $wpdb->query( $wpdb->prepare( $sql, $args ) ); // phpcs:ignore WordPress.DB
+
 		if ( ! $updated ) {
+			if ( null !== $min ) {
+				/* Either the guard rejected it or the row does not exist yet. */
+				return false;
+			}
+			/* First ever transaction: the meta row does not exist yet. */
 			add_user_meta( $user_id, self::BALANCE_META, $delta, true );
 		}
 
@@ -386,16 +398,20 @@ class HSW_Wallet {
 	 * @param string $ref     Reference.
 	 * @return float
 	 */
-	private static function apply( $user_id, $delta, $kind, $note, $actor_id, $ref ) {
+	private static function apply( $user_id, $delta, $kind, $note, $actor_id, $ref, $min = null ) {
 		global $wpdb;
 
 		if ( ! $user_id ) {
 			return 0.0;
 		}
 
-		$balance = self::apply_balance( $user_id, $delta );
+		$balance = self::apply_balance( $user_id, $delta, $min );
 
-		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( false === $balance ) {
+			return new WP_Error( 'hsw_wallet_short', __( 'موجودی کیف پول کافی نیست.', 'hamishop-elementor-widgets' ) );
+		}
+
+		$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			self::table(),
 			array(
 				'user_id'       => $user_id,
@@ -410,6 +426,16 @@ class HSW_Wallet {
 			),
 			array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
 		);
+
+		/*
+		 * The balance and the statement must never disagree. If the ledger row
+		 * cannot be written, the balance change is reversed so the wallet holds
+		 * exactly what the statement shows.
+		 */
+		if ( ! $inserted ) {
+			self::apply_balance( $user_id, -$delta );
+			return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
+		}
 
 		do_action( 'hsw_wallet_changed', $user_id, $delta, $balance, $kind );
 
