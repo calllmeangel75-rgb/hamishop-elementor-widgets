@@ -73,7 +73,7 @@ msgstr ""
 msgid "CTA مراحل خرید (کلیک)"
 msgstr ""
 
-#: includes/class-hsw-assets.php:722
+#: includes/class-hsw-assets.php:735
 msgid "HamiShop (لوکال)"
 msgstr ""
 
