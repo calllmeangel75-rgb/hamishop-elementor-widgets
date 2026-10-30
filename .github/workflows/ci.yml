@@ -12,6 +12,9 @@ name: CI
 on:
   push:
     branches: [ main ]
+    # Without this line a tag push never starts the workflow at all, so the
+    # `package` job below (which is gated on refs/tags/v*) could never run.
+    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
