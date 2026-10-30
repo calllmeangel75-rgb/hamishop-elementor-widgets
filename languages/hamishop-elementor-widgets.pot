@@ -305,7 +305,7 @@ msgstr ""
 msgid "آدرس و نامی که وردپرس با آن ایمیل می‌فرستد. به‌صورت پیش‌فرض %s است که بسیاری از سرورها آن را اسپم می‌کنند؛ اینجا آدرس واقعی فروشگاه را بگذارید. این تنظیم روی همهٔ ایمیل‌های سایت اثر دارد (سفارش، بازیابی رمز، کد تأیید ایمیل)."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:940
+#: includes/class-hsw-wallet.php:1795
 msgid "آدرس وب‌هوک پیامک را در «حساب کاربری ← کیف پول» تنظیم کنید. بدون آدرس، پیامکی ارسال نمی‌شود و بقیهٔ کار انجام می‌شود."
 msgstr ""
 
@@ -547,10 +547,10 @@ msgid "ابتدا ربات تلگرام را باز کنید و شماره خو�
 msgstr ""
 
 #: includes/class-hsw-account-support.php:1043
-#: includes/class-hsw-account.php:3004
+#: includes/class-hsw-account.php:3005
 #: includes/class-hsw-email-verify.php:199
 #: includes/class-hsw-email-verify.php:266
-#: includes/class-hsw-wallet.php:465
+#: includes/class-hsw-wallet.php:1193
 msgid "ابتدا وارد حساب خود شوید."
 msgstr ""
 
@@ -723,7 +723,7 @@ msgstr ""
 msgid "ارسال فوری اکسپرس در تهران (تحویل حداکثر ۳ ساعته)"
 msgstr ""
 
-#: includes/class-hsw-account.php:3315
+#: includes/class-hsw-account.php:3316
 msgid "ارسال لینک بازیابی"
 msgstr ""
 
@@ -740,7 +740,7 @@ msgstr ""
 msgid "ارسال پیام واتساپ ناموفق بود."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:939
+#: includes/class-hsw-wallet.php:1794
 msgid "ارسال پیامک اطلاع‌رسانی به هر مشتری"
 msgstr ""
 
@@ -752,7 +752,7 @@ msgstr ""
 msgid "ارسال کد تأیید"
 msgstr ""
 
-#: includes/class-hsw-account.php:3199
+#: includes/class-hsw-account.php:3200
 msgid "ارسال کد دوعاملی ناموفق بود. لطفاً دوباره وارد شوید یا با پشتیبانی تماس بگیرید."
 msgstr ""
 
@@ -1170,7 +1170,7 @@ msgstr ""
 msgid "افزوده شد"
 msgstr ""
 
-#: includes/class-hsw-account.php:3138
+#: includes/class-hsw-account.php:3139
 msgid "افزونه ورود پیامکی فعال است؛ فرم ورود و ثبت‌نام این پنل نمایش داده نمی‌شود و ورود به‌صورت کامل توسط افزونه پیامکی مدیریت می‌شود."
 msgstr ""
 
@@ -1186,7 +1186,7 @@ msgstr ""
 msgid "افکت شاین گرادیانت روی لوگو"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:860
+#: includes/class-hsw-wallet.php:1715
 msgid "اقدام"
 msgstr ""
 
@@ -1369,6 +1369,10 @@ msgstr ""
 
 #: includes/trait-hsw-product-page-style-parts-2.php:156
 msgid "انتخاب‌گر متغیرها"
+msgstr ""
+
+#: includes/class-hsw-wallet.php:467
+msgid "انتقال موجودی از متای قدیمی کیف پول"
 msgstr ""
 
 #: includes/class-hsw-assets.php:584
@@ -1586,7 +1590,7 @@ msgstr ""
 #: includes/class-hsw-account-auth.php:1508
 #: includes/class-hsw-account.php:2125
 #: includes/class-hsw-account.php:2137
-#: includes/class-hsw-account.php:3370
+#: includes/class-hsw-account.php:3371
 #: includes/class-hsw-product-base.php:1304
 msgid "ایمیل"
 msgstr ""
@@ -1634,7 +1638,7 @@ msgstr ""
 msgid "ایمیل وارد‌شده معتبر نیست."
 msgstr ""
 
-#: includes/class-hsw-account.php:3205
+#: includes/class-hsw-account.php:3206
 msgid "ایمیل یا نام کاربری خود را وارد کنید تا لینک تنظیم رمز عبور برایتان ارسال شود."
 msgstr ""
 
@@ -1658,6 +1662,10 @@ msgstr ""
 msgid "این بخش رنگ و فونت همهٔ اجزای صفحهٔ محصول را یک‌جا کنترل می‌کند. بخش‌های تفصیلی پایین‌تر (گالری، عنوان، قیمت، موجودی، توضیحات، ویژگی‌ها، متغیرها، خرید، پیام‌ها، تب‌ها و محصولات مرتبط) تنظیمات دقیق‌تر و حالت‌های هاور/فوکوس/انتخاب/ناموجود را دارند و در صورت پر شدن، بر این بخش اولویت می‌گیرند."
 msgstr ""
 
+#: includes/class-hsw-wallet.php:1162
+msgid "این تراکنش قبلاً ثبت شده است."
+msgstr ""
+
 #: widgets/class-hsw-widget-blog-page.php:297
 msgid "این تنظیمات روی همهٔ کارت‌های فهرست اعمال می‌شود؛ مطلب شاخص کنترل‌های جدا دارد."
 msgstr ""
@@ -1670,7 +1678,8 @@ msgstr ""
 msgid "این حساب قبلاً ثبت‌نام کرده است. از تب ورود استفاده کنید."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:526
+#: includes/class-hsw-wallet.php:1286
+#: includes/class-hsw-wallet.php:1307
 msgid "این درخواست دیگر در انتظار نیست."
 msgstr ""
 
@@ -1952,7 +1961,7 @@ msgstr ""
 msgid "بازگشت به صفحهٔ اصلی"
 msgstr ""
 
-#: includes/class-hsw-account.php:3202
+#: includes/class-hsw-account.php:3203
 #: widgets/class-hsw-widget-cart-items.php:202
 #: widgets/class-hsw-widget-cart-items.php:584
 msgid "بازگشت به فروشگاه"
@@ -1967,7 +1976,7 @@ msgid "بازگشت به مجله"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:1594
-#: includes/class-hsw-account.php:3215
+#: includes/class-hsw-account.php:3216
 msgid "بازگشت به ورود"
 msgstr ""
 
@@ -1981,11 +1990,15 @@ msgstr ""
 msgid "بازگشت وجه"
 msgstr ""
 
-#: includes/class-hsw-account.php:3205
+#: includes/class-hsw-wallet-pay.php:108
+msgid "بازگشت وجه سفارش #%s به کیف پول"
+msgstr ""
+
+#: includes/class-hsw-account.php:3206
 msgid "بازیابی حساب"
 msgstr ""
 
-#: includes/class-hsw-account.php:3205
+#: includes/class-hsw-account.php:3206
 msgid "بازیابی رمز عبور"
 msgstr ""
 
@@ -2820,7 +2833,7 @@ msgid "تا:"
 msgstr ""
 
 #: includes/class-hsw-account.php:2752
-#: includes/class-hsw-wallet.php:859
+#: includes/class-hsw-wallet.php:1714
 msgid "تاریخ"
 msgstr ""
 
@@ -3011,7 +3024,7 @@ msgstr ""
 msgid "تایپوگرافی چیپ"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:879
+#: includes/class-hsw-wallet.php:1734
 msgid "تایید و شارژ"
 msgstr ""
 
@@ -3045,7 +3058,7 @@ msgstr ""
 msgid "تب گارانتی و خدمات"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:610
+#: includes/class-hsw-wallet.php:1454
 msgid "تبدیل %s امتیاز باشگاه به کیف پول"
 msgstr ""
 
@@ -3094,7 +3107,7 @@ msgstr ""
 msgid "تب‌های محصول (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-account.php:3287
+#: includes/class-hsw-account.php:3288
 msgid "تجربه خرید بهتر"
 msgstr ""
 
@@ -3243,6 +3256,10 @@ msgstr ""
 msgid "ترتیب محصولات"
 msgstr ""
 
+#: includes/class-hsw-wallet.php:677
+msgid "ترمیم خودکار دفتر کیف پول (اختلاف با موجودی)"
+msgstr ""
+
 #: widgets/class-hsw-widget-archive-header.php:86
 msgid "ترم‌های یک صفت (برند و...)"
 msgstr ""
@@ -3294,7 +3311,7 @@ msgstr ""
 msgid "تعداد امتیاز"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:583
+#: includes/class-hsw-wallet.php:1391
 msgid "تعداد امتیاز را وارد کنید."
 msgstr ""
 
@@ -3500,8 +3517,7 @@ msgstr ""
 msgid "تمامی قیمت‌ها شامل مالیات بر ارزش افزوده قانونی است."
 msgstr ""
 
-#: includes/class-hsw-account-admin.php:824
-#: includes/class-hsw-account-admin.php:832
+#: includes/class-hsw-account-admin.php:825
 msgid "تنظیم دستی موجودی توسط مدیر"
 msgstr ""
 
@@ -3640,7 +3656,7 @@ msgstr ""
 msgid "توضیح (موبایل)"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:933
+#: includes/class-hsw-wallet.php:1788
 msgid "توضیح تراکنش"
 msgstr ""
 
@@ -3652,7 +3668,7 @@ msgstr ""
 msgid "توضیح صفحه"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:858
+#: includes/class-hsw-wallet.php:1713
 msgid "توضیح مشتری"
 msgstr ""
 
@@ -3668,7 +3684,7 @@ msgstr ""
 msgid "توضیحات برگهٔ فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:269
+#: includes/class-hsw-plugin.php:270
 msgid "توضیحات محصول"
 msgstr ""
 
@@ -3704,7 +3720,7 @@ msgstr ""
 msgid "تومان تخفیف"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:929
+#: includes/class-hsw-wallet.php:1784
 msgid "تومان. به هر مشتری انتخاب‌شده این مبلغ اضافه می‌شود."
 msgstr ""
 
@@ -3788,7 +3804,7 @@ msgstr ""
 msgid "ثبت آدرس و ادامه"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:437
+#: includes/class-hsw-wallet.php:1165
 msgid "ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد."
 msgstr ""
 
@@ -3850,12 +3866,12 @@ msgstr ""
 msgid "ثبت و بررسی"
 msgstr ""
 
-#: includes/class-hsw-account.php:3229
-#: includes/class-hsw-account.php:3381
+#: includes/class-hsw-account.php:3230
+#: includes/class-hsw-account.php:3382
 msgid "ثبت‌نام"
 msgstr ""
 
-#: includes/class-hsw-account.php:3256
+#: includes/class-hsw-account.php:3257
 msgid "ثبت‌نام با رمز عبور ثابت"
 msgstr ""
 
@@ -3864,12 +3880,12 @@ msgstr ""
 msgid "ثبت‌نام با کد یکبارمصرف غیرفعال است."
 msgstr ""
 
-#: includes/class-hsw-account.php:3267
+#: includes/class-hsw-account.php:3268
 msgid "ثبت‌نام در این فروشگاه غیرفعال است."
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:1495
-#: includes/class-hsw-account.php:3258
+#: includes/class-hsw-account.php:3259
 msgid "ثبت‌نام سریع با کد یکبارمصرف"
 msgstr ""
 
@@ -4271,31 +4287,31 @@ msgstr ""
 msgid "حالت‌های ویژه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:359
+#: includes/class-hsw-plugin.php:360
 msgid "حامی — هدر و ناوبری"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:363
+#: includes/class-hsw-plugin.php:364
 msgid "حامی — ویجت‌های آرشیو محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:362
+#: includes/class-hsw-plugin.php:363
 msgid "حامی — ویجت‌های سبد خرید و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:360
+#: includes/class-hsw-plugin.php:361
 msgid "حامی — ویجت‌های صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:361
+#: includes/class-hsw-plugin.php:362
 msgid "حامی — ویجت‌های لوپ محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:365
+#: includes/class-hsw-plugin.php:366
 msgid "حامی — ویجت‌های مجله و وبلاگ"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:364
+#: includes/class-hsw-plugin.php:365
 msgid "حامی — پنل حساب کاربری"
 msgstr ""
 
@@ -4311,8 +4327,8 @@ msgstr ""
 msgid "حداقل قیمت برای نشان «ارسال رایگان»"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:117
-#: includes/class-hsw-wallet.php:475
+#: includes/class-hsw-wallet-pay.php:242
+#: includes/class-hsw-wallet.php:1203
 msgid "حداقل مبلغ شارژ %s تومان است."
 msgstr ""
 
@@ -4390,7 +4406,7 @@ msgstr ""
 msgid "حذف از سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-account.php:3064
+#: includes/class-hsw-account.php:3065
 msgid "حذف از علاقه‌مندی‌ها"
 msgstr ""
 
@@ -4445,7 +4461,7 @@ msgstr ""
 msgid "حساب من"
 msgstr ""
 
-#: includes/class-hsw-account.php:3222
+#: includes/class-hsw-account.php:3223
 #: includes/class-hsw-header-base.php:364
 #: includes/class-hsw-header-base.php:548
 #: includes/class-hsw-header-base.php:1096
@@ -4480,7 +4496,7 @@ msgid "حسابی با این شناسه پیدا نشد."
 msgstr ""
 
 #: includes/class-hsw-header-base.php:392
-#: includes/class-hsw-plugin.php:249
+#: includes/class-hsw-plugin.php:250
 msgid "خالی"
 msgstr ""
 
@@ -4859,7 +4875,7 @@ msgstr ""
 msgid "در انتظار پرداخت"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:176
+#: includes/class-hsw-wallet-pay.php:301
 msgid "در انتظار پرداخت شارژ کیف پول"
 msgstr ""
 
@@ -4888,7 +4904,7 @@ msgstr ""
 msgid "در حال تکمیل"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:138
+#: includes/class-hsw-wallet-pay.php:263
 msgid "در حال حاضر هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید."
 msgstr ""
 
@@ -4941,7 +4957,7 @@ msgstr ""
 msgid "درخواست خارجی توسط «قفل درخواست‌های خارجی» مسدود شد: %s"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:835
+#: includes/class-hsw-wallet.php:1690
 msgid "درخواست رد شد."
 msgstr ""
 
@@ -4963,7 +4979,7 @@ msgstr ""
 msgid "درخواست ورود منقضی شده است. دوباره وارد شوید."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:852
+#: includes/class-hsw-wallet.php:1707
 msgid "درخواستی در انتظار نیست."
 msgstr ""
 
@@ -4975,7 +4991,7 @@ msgstr ""
 msgid "درخواست‌های سمت سرور به سرورهای آپدیت، لایسنس، آمار و CDN مسدود می‌شوند تا هنگام قطعی اینترنت، سایت و پیشخوان پشت تایم‌اوت نمانند. تا وقتی تیک نخورده، هیچ هوکی ثبت نمی‌شود (سربار صفر)."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:850
+#: includes/class-hsw-wallet.php:1705
 msgid "درخواست‌های شارژ در انتظار"
 msgstr ""
 
@@ -5017,7 +5033,7 @@ msgstr ""
 msgid "درگاه پرداخت امن شاپرک"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:154
+#: includes/class-hsw-wallet-pay.php:279
 msgid "درگاه پرداخت انتخاب‌شده در دسترس نیست. لطفاً درگاه دیگری انتخاب کنید."
 msgstr ""
 
@@ -5055,7 +5071,7 @@ msgstr ""
 msgid "دسترسی لازم برای این کار را ندارید."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:775
+#: includes/class-hsw-wallet.php:1630
 msgid "دسترسی ندارید."
 msgstr ""
 
@@ -5529,7 +5545,7 @@ msgstr ""
 msgid "دیدگاه‌ها و فرم ثبت نظر"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:271
+#: includes/class-hsw-plugin.php:272
 msgid "دیدگاه‌ها و نظرات"
 msgstr ""
 
@@ -5654,7 +5670,7 @@ msgstr ""
 msgid "رتبه %s"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:880
+#: includes/class-hsw-wallet.php:1735
 msgid "رد"
 msgstr ""
 
@@ -5784,12 +5800,12 @@ msgstr ""
 msgid "رفتن به فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-account.php:3335
-#: includes/class-hsw-account.php:3375
+#: includes/class-hsw-account.php:3336
+#: includes/class-hsw-account.php:3376
 msgid "رمز عبور"
 msgstr ""
 
-#: includes/class-hsw-account.php:3344
+#: includes/class-hsw-account.php:3345
 msgid "رمز عبور را فراموش کرده‌اید؟"
 msgstr ""
 
@@ -6828,7 +6844,7 @@ msgstr ""
 msgid "زیر‌دسته‌های دسته فعلی"
 msgstr ""
 
-#: includes/class-hsw-account.php:3381
+#: includes/class-hsw-account.php:3382
 msgid "ساخت حساب کاربری"
 msgstr ""
 
@@ -7182,7 +7198,7 @@ msgstr ""
 msgid "شارژ آنلاین در دسترس نیست."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:833
+#: includes/class-hsw-wallet.php:1688
 msgid "شارژ تایید و به کیف پول مشتری اضافه شد."
 msgstr ""
 
@@ -7190,21 +7206,21 @@ msgstr ""
 msgid "شارژ توسط پشتیبانی"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:946
+#: includes/class-hsw-wallet.php:1801
 msgid "شارژ مشتریان انتخاب‌شده"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:934
+#: includes/class-hsw-wallet.php:1789
 msgid "شارژ هدیه"
 msgstr ""
 
 #: includes/class-hsw-account.php:2652
 #: includes/class-hsw-account.php:2784
-#: includes/class-hsw-wallet-pay.php:164
+#: includes/class-hsw-wallet-pay.php:289
 msgid "شارژ کیف پول"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:237
+#: includes/class-hsw-wallet-pay.php:356
 msgid "شارژ کیف پول — سفارش #%s"
 msgstr ""
 
@@ -8565,7 +8581,8 @@ msgstr ""
 msgid "فعلاً ناموجود"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:592
+#: includes/class-hsw-wallet.php:1400
+#: includes/class-hsw-wallet.php:1440
 msgid "فقط %s امتیاز قابل تبدیل دارید."
 msgstr ""
 
@@ -8669,7 +8686,7 @@ msgstr ""
 msgid "فهرست آیتم‌ها"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:891
+#: includes/class-hsw-wallet.php:1746
 msgid "فهرست بر اساس مجموع خرید (یک کوئری تجمیعی، نه یک کوئری برای هر مشتری). تیک بزنید، مبلغ را وارد کنید و در صورت نیاز پیامک بفرستید."
 msgstr ""
 
@@ -9179,16 +9196,24 @@ msgstr ""
 msgid "مبلغ"
 msgstr ""
 
+#: includes/class-hsw-wallet-pay.php:123
+msgid "مبلغ %s به کیف پول مشتری بازگشت."
+msgstr ""
+
 #: includes/class-hsw-account.php:2683
-#: includes/class-hsw-wallet.php:857
+#: includes/class-hsw-wallet.php:1712
 msgid "مبلغ (تومان)"
+msgstr ""
+
+#: includes/class-hsw-wallet.php:1325
+msgid "مبلغ این درخواست قابل اعمال نیست."
 msgstr ""
 
 #: includes/class-hsw-account.php:2655
 msgid "مبلغ را وارد کنید و از طریق درگاه پرداخت کنید؛ موجودی پس از تأیید پرداخت اضافه می‌شود."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:468
+#: includes/class-hsw-wallet.php:1196
 msgid "مبلغ را وارد کنید."
 msgstr ""
 
@@ -9196,7 +9221,7 @@ msgstr ""
 msgid "مبلغ را واریز کنید، شمارهٔ پیگیری را ثبت کنید تا پس از تایید پشتیبانی موجودی اضافه شود."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:925
+#: includes/class-hsw-wallet.php:1780
 msgid "مبلغ شارژ هر نفر"
 msgstr ""
 
@@ -9241,6 +9266,10 @@ msgstr ""
 msgid "مبلغ نهایی پرداخت"
 msgstr ""
 
+#: includes/class-hsw-wallet.php:1120
+msgid "مبلغ وارد‌شده خارج از محدودهٔ مجاز است."
+msgstr ""
+
 #: includes/class-hsw-account.php:2208
 msgid "مبلغ پرداخت‌شده"
 msgstr ""
@@ -9271,7 +9300,7 @@ msgstr ""
 msgid "مبلغ کل پرداختی:"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:837
+#: includes/class-hsw-wallet.php:1692
 msgid "مبلغ یا مشتری انتخاب نشده است."
 msgstr ""
 
@@ -9902,7 +9931,7 @@ msgstr ""
 msgid "مثل «مرحله اول» یا «در حال تکمیل»."
 msgstr ""
 
-#: includes/class-hsw-account.php:3309
+#: includes/class-hsw-account.php:3310
 msgid "مثلاً 0912... یا name@example.com"
 msgstr ""
 
@@ -9936,7 +9965,7 @@ msgid "مجله: صفحه کامل نوشته (HamiShop)"
 msgstr ""
 
 #: includes/class-hsw-account.php:2637
-#: includes/class-hsw-wallet.php:906
+#: includes/class-hsw-wallet.php:1761
 msgid "مجموع خرید"
 msgstr ""
 
@@ -10098,7 +10127,7 @@ msgstr ""
 msgid "مدیریت حساب و سفارش‌ها"
 msgstr ""
 
-#: includes/class-hsw-account.php:3343
+#: includes/class-hsw-account.php:3344
 msgid "مرا به خاطر بسپار"
 msgstr ""
 
@@ -10315,7 +10344,7 @@ msgstr ""
 msgid "مشاهده فهرست کامل"
 msgstr ""
 
-#: includes/class-hsw-account.php:3063
+#: includes/class-hsw-account.php:3064
 #: widgets/class-hsw-widget-archive-grid.php:408
 #: widgets/class-hsw-widget-archive-grid.php:411
 #: widgets/class-hsw-widget-product-related.php:255
@@ -10350,8 +10379,8 @@ msgstr ""
 msgid "مشاهدهٔ سفارش در حساب من"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:856
-#: includes/class-hsw-wallet.php:905
+#: includes/class-hsw-wallet.php:1711
+#: includes/class-hsw-wallet.php:1760
 msgid "مشتری"
 msgstr ""
 
@@ -10359,7 +10388,7 @@ msgstr ""
 msgid "مشتری یافت نشد."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:889
+#: includes/class-hsw-wallet.php:1744
 msgid "مشتریان طلایی — شارژ گروهی"
 msgstr ""
 
@@ -10377,7 +10406,7 @@ msgstr ""
 msgid "مشخصات تحویل سفارش (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:270
+#: includes/class-hsw-plugin.php:271
 #: widgets/class-hsw-widget-product-tabs.php:70
 #: widgets/class-hsw-widget-product-tabs.php:275
 msgid "مشخصات فنی"
@@ -10571,7 +10600,7 @@ msgstr ""
 msgid "مهر و امضای فروشنده"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:908
+#: includes/class-hsw-wallet.php:1763
 #: widgets/class-hsw-widget-cart-summary.php:333
 #: widgets/class-hsw-widget-checkout-summary.php:280
 #: widgets/class-hsw-widget-pay-recall.php:124
@@ -10608,7 +10637,7 @@ msgstr ""
 msgid "موجودی"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:907
+#: includes/class-hsw-wallet.php:1762
 msgid "موجودی فعلی"
 msgstr ""
 
@@ -10624,15 +10653,15 @@ msgstr ""
 msgid "موجودی کیف پول از فاکتور نهایی به صورت خودکار کسر می‌گردد."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:364
+#: includes/class-hsw-wallet-pay.php:543
 msgid "موجودی کیف پول برای این سفارش کافی نیست."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:346
+#: includes/class-hsw-wallet-pay.php:513
 msgid "موجودی کیف پول شما %1$s است. پس از پرداخت، %2$s باقی می‌ماند."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:411
+#: includes/class-hsw-wallet.php:1126
 msgid "موجودی کیف پول کافی نیست."
 msgstr ""
 
@@ -10701,7 +10730,7 @@ msgstr ""
 msgid "میانبرهای پرکاربرد"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:748
+#: includes/class-hsw-wallet.php:1603
 msgid "میزان %s تومان کیف پول شما شارژ شد."
 msgstr ""
 
@@ -10809,12 +10838,12 @@ msgstr ""
 msgid "نام و نام خانوادگی"
 msgstr ""
 
-#: includes/class-hsw-account.php:3365
+#: includes/class-hsw-account.php:3366
 msgid "نام کاربری"
 msgstr ""
 
-#: includes/class-hsw-account.php:3307
-#: includes/class-hsw-account.php:3329
+#: includes/class-hsw-account.php:3308
+#: includes/class-hsw-account.php:3330
 msgid "نام کاربری یا ایمیل"
 msgstr ""
 
@@ -11124,8 +11153,8 @@ msgstr ""
 msgid "نمایش دکمهٔ کاتالوگ"
 msgstr ""
 
-#: includes/class-hsw-account.php:3338
-#: includes/class-hsw-account.php:3376
+#: includes/class-hsw-account.php:3339
+#: includes/class-hsw-account.php:3377
 #: includes/class-hsw-assets.php:567
 msgid "نمایش رمز عبور"
 msgstr ""
@@ -11639,7 +11668,7 @@ msgstr ""
 msgid "هنوز تراکنشی ثبت نشده است."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:895
+#: includes/class-hsw-wallet.php:1750
 msgid "هنوز داده‌ای برای رتبه‌بندی نیست (جدول آمار ووکامرس خالی است)."
 msgstr ""
 
@@ -11732,8 +11761,8 @@ msgstr ""
 msgid "وبلاگ: پربازدیدترین‌ها (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-account.php:3228
-#: includes/class-hsw-account.php:3348
+#: includes/class-hsw-account.php:3229
+#: includes/class-hsw-account.php:3349
 msgid "ورود"
 msgstr ""
 
@@ -11748,7 +11777,7 @@ msgstr ""
 msgid "ورود / مشاهدهٔ سفارش‌ها"
 msgstr ""
 
-#: includes/class-hsw-account.php:3245
+#: includes/class-hsw-account.php:3246
 msgid "ورود با رمز عبور ثابت"
 msgstr ""
 
@@ -11770,7 +11799,7 @@ msgstr ""
 msgid "ورود با کد یکبارمصرف فعال نیست."
 msgstr ""
 
-#: includes/class-hsw-account.php:3348
+#: includes/class-hsw-account.php:3349
 #: includes/class-hsw-invoice.php:146
 msgid "ورود به حساب"
 msgstr ""
@@ -11808,15 +11837,15 @@ msgstr ""
 msgid "ورود سریع"
 msgstr ""
 
-#: includes/class-hsw-account.php:3247
+#: includes/class-hsw-account.php:3248
 msgid "ورود سریع با کد یکبارمصرف"
 msgstr ""
 
-#: includes/class-hsw-account.php:3171
+#: includes/class-hsw-account.php:3172
 msgid "ورود و ثبت‌نام از طریق افزونه ورود پیامکی انجام می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account.php:3227
+#: includes/class-hsw-account.php:3228
 msgid "ورود یا ثبت‌نام"
 msgstr ""
 
@@ -11891,7 +11920,7 @@ msgstr ""
 msgid "ووکامرس شماره پیش‌فاکتور ندارد؛ متن دلخواه وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:123
+#: includes/class-hsw-wallet-pay.php:248
 msgid "ووکامرس فعال نیست."
 msgstr ""
 
@@ -12123,11 +12152,11 @@ msgid "پرداخت"
 msgstr ""
 
 #: includes/class-hsw-account.php:2787
-#: includes/class-hsw-wallet-pay.php:292
+#: includes/class-hsw-wallet-pay.php:438
 msgid "پرداخت از کیف پول"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:389
+#: includes/class-hsw-wallet-pay.php:578
 msgid "پرداخت از کیف پول: %s"
 msgstr ""
 
@@ -12153,7 +12182,7 @@ msgstr ""
 msgid "پرداخت سفارش"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:374
+#: includes/class-hsw-wallet-pay.php:553
 msgid "پرداخت سفارش #%s"
 msgstr ""
 
@@ -12204,7 +12233,7 @@ msgstr ""
 msgid "پرداخت و شارژ"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:288
+#: includes/class-hsw-wallet-pay.php:434
 msgid "پرداخت کامل سفارش از موجودی کیف پول. فقط وقتی نمایش داده می‌شود که موجودی مشتری کافی باشد."
 msgstr ""
 
@@ -12749,7 +12778,7 @@ msgstr ""
 msgid "پشتیبانی و SSL"
 msgstr ""
 
-#: includes/class-hsw-account.php:3295
+#: includes/class-hsw-account.php:3296
 msgid "پشتیبانی واقعی، پاسخگویی سریع"
 msgstr ""
 
@@ -12833,7 +12862,7 @@ msgstr ""
 
 #: includes/class-hsw-account-auth.php:130
 #: includes/class-hsw-account-auth.php:146
-#: includes/class-hsw-wallet.php:937
+#: includes/class-hsw-wallet.php:1792
 msgid "پیامک"
 msgstr ""
 
@@ -12981,7 +13010,7 @@ msgstr ""
 msgid "پیش‌نمایش زنده"
 msgstr ""
 
-#: includes/class-hsw-account.php:3195
+#: includes/class-hsw-account.php:3196
 msgid "پیش‌نمایش فرم ورود؛ در سایت واقعی، کاربران واردشده پنل حساب را می‌بینند."
 msgstr ""
 
@@ -13612,9 +13641,9 @@ msgstr ""
 msgid "کنترل ویجت‌ها"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:762
-#: includes/class-hsw-wallet.php:763
-#: includes/class-hsw-wallet.php:830
+#: includes/class-hsw-wallet.php:1617
+#: includes/class-hsw-wallet.php:1618
+#: includes/class-hsw-wallet.php:1685
 #: widgets/class-hsw-widget-account.php:69
 #: widgets/class-hsw-widget-account.php:110
 #: widgets/class-hsw-widget-footer-sticky.php:127
@@ -13622,15 +13651,15 @@ msgstr ""
 msgid "کیف پول"
 msgstr ""
 
-#: includes/class-hsw-wallet.php:843
+#: includes/class-hsw-wallet.php:1698
 msgid "کیف پول %s مشتری شارژ شد."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:287
+#: includes/class-hsw-wallet-pay.php:433
 msgid "کیف پول HamiShop"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:256
+#: includes/class-hsw-wallet-pay.php:376
 msgid "کیف پول مشتری به مبلغ %s شارژ شد."
 msgstr ""
 
@@ -14022,7 +14051,8 @@ msgstr ""
 msgid "یک درخشش گرادیانتی دوره‌ای روی نشان/تصویر لوگو حرکت می‌کند. رنگ و سرعت آن در تب استایل، بخش «استایل هدر» قابل تنظیم است."
 msgstr ""
 
-#: includes/class-hsw-wallet.php:489
+#: includes/class-hsw-wallet.php:1217
+#: includes/class-hsw-wallet.php:1238
 msgid "یک درخواست شارژ باز دارید؛ تا بررسی آن صبر کنید."
 msgstr ""
 
