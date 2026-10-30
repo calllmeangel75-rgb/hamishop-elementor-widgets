@@ -1,0 +1,145 @@
+name: CI
+
+# Four gates, no services, no database:
+#   lint      — every PHP file compiles on 7.4 … 8.3 (the range we claim)
+#   harness   — every plugin file loads in WordPress order (compile-level fatals)
+#   checks    — version/text-domain/debug/asset/catalog consistency
+#   generated — .min and .pot are up to date with their sources
+#
+# The browser probes in tests/*.js need a live WordPress + WooCommerce site and
+# are therefore NOT part of this workflow; they are run locally against XAMPP.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.4', '8.0', '8.1', '8.2', '8.3' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+
+      - name: php -l on every file
+        shell: bash
+        run: |
+          fail=0
+          while IFS= read -r -d '' file; do
+            if ! out=$(php -l "$file" 2>&1); then
+              echo "::error file=${file}::${out}"
+              echo "$out"
+              fail=1
+            fi
+          done < <(find . -name '*.php' -not -path './.git/*' -print0)
+          exit $fail
+
+  harness:
+    name: harness (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest supported version and the newest stable one: the harness is
+        # about declarations (extends/implements/visibility), not runtime.
+        php: [ '7.4', '8.2' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+
+      - name: Load every plugin file
+        run: php tests/harness.php
+
+  checks:
+    name: structural checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: none
+
+      - name: Version, text domain, debug leftovers, assets, catalog, docs
+        run: php tools/ci-checks.php
+
+  generated:
+    name: generated files in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install asset minifier
+        run: pip install --quiet csscompressor rjsmin
+
+      - name: Rebuild .min assets and the POT
+        run: |
+          python tools/build-assets.py
+          python tools/build-pot.py
+
+      - name: Nothing may change
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain -- assets languages)" ]; then
+            echo "::error title=Generated files are stale::Run 'python tools/build-assets.py' and 'python tools/build-pot.py', then commit the result."
+            git status --porcelain -- assets languages
+            git --no-pager diff --stat -- assets languages
+            exit 1
+          fi
+          echo "assets and languages are in sync with their sources."
+
+  package:
+    # Tagging v* produces the distributable ZIP as a workflow artifact, using the
+    # same script as a local release, so the artefact is never hand-assembled.
+    name: release package
+    if: startsWith( github.ref, 'refs/tags/v' )
+    needs: [ lint, harness, checks, generated ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build ZIP
+        run: python tools/build-release.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hamishop-elementor-widgets-${{ github.ref_name }}
+          path: hamishop-elementor-widgets-*.zip
+          if-no-files-found: error
+          retention-days: 90
