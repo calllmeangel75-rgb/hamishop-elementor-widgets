@@ -135,7 +135,11 @@ jobs:
           python-version: '3.12'
 
       - name: Build ZIP
-        run: python tools/build-release.py
+        # build-release.py writes one level above the plugin folder (../<slug>-<ver>.zip),
+        # which is outside the workspace runner, so bring it back in for the upload.
+        run: |
+          python tools/build-release.py
+          cp ../hamishop-elementor-widgets-*.zip .
 
       - uses: actions/upload-artifact@v4
         with:
