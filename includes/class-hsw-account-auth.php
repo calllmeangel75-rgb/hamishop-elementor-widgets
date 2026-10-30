@@ -394,17 +394,46 @@ final class HSW_Account_Auth {
 			delete_transient( $key );
 			return new WP_Error( 'hsw_otp_expired', __( 'کد وارد شده منقضی شده است. لطفاً کد جدید بگیرید.', 'hamishop-elementor-widgets' ) );
 		}
+
+		/*
+		 * Attempt counting lives in the atomic throttle table, not in the
+		 * transient. The old read-modify-write on the transient let a burst of
+		 * parallel requests all read "0 attempts" and all get a guess (six
+		 * parallel wrong codes against max_attempts=5 all processed —
+		 * reproduced). The table upsert is a single atomic statement.
+		 */
 		$max = max( 1, min( 20, absint( $this->s( 'otp_max_attempts', 5 ) ) ) );
-		if ( (int) $data['attempts'] >= $max ) {
+		$att = HSW_Throttle::hit(
+			'otp_attempt:' . md5( $key ),
+			$max,
+			max( 60, (int) $data['expires'] - time() )
+		);
+		if ( ! $att['allowed'] ) {
 			delete_transient( $key );
 			return new WP_Error( 'hsw_otp_attempts', __( 'تعداد تلاش‌ها بیش از حد مجاز است. کد جدید بگیرید.', 'hamishop-elementor-widgets' ) );
 		}
+
 		if ( ! wp_check_password( (string) $code, $data['hash'] ) ) {
-			$data['attempts'] = (int) $data['attempts'] + 1;
-			$remaining        = max( 1, $data['expires'] - time() );
-			set_transient( $key, $data, $remaining );
 			return new WP_Error( 'hsw_otp_invalid', __( 'کد وارد شده صحیح نیست.', 'hamishop-elementor-widgets' ) );
 		}
+
+		/*
+		 * Single-use claim: an atomic one-row upsert in the throttle table is
+		 * the lock — not the transient delete. Two parallel verifications of
+		 * the same code both read the transient and both pass the hash check
+		 * (reproduced 4/4); only the first claim upsert wins, the loser is
+		 * rejected. This stays correct on object-cache backends too, where
+		 * `delete_transient()` can report success without a real delete.
+		 */
+		$claim = HSW_Throttle::hit(
+			'otp_claim:' . md5( $key ),
+			1,
+			max( 60, (int) $data['expires'] - time() )
+		);
+		if ( ! $claim['allowed'] ) {
+			return new WP_Error( 'hsw_otp_expired', __( 'کد وارد شده منقضی شده است. لطفاً کد جدید بگیرید.', 'hamishop-elementor-widgets' ) );
+		}
+
 		delete_transient( $key );
 		return $data;
 	}
@@ -1123,7 +1152,13 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'درخواست ورود منقضی شده است. دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		$max = max( 1, min( 20, absint( $this->s( 'otp_max_attempts', 5 ) ) ) );
-		if ( (int) $data['attempts'] >= $max ) {
+		/* Atomic attempt counter (same reasoning as check_code()). */
+		$att = HSW_Throttle::hit(
+			'2fa_attempt:' . md5( (string) $token ),
+			$max,
+			max( 60, (int) $data['expires'] - time() )
+		);
+		if ( ! $att['allowed'] ) {
 			delete_transient( 'hsw_2fa_' . $token );
 			wp_send_json_error( array( 'message' => __( 'تعداد تلاش‌ها بیش از حد مجاز است. دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 429 );
 		}
@@ -1142,10 +1177,17 @@ final class HSW_Account_Auth {
 			);
 		}
 		if ( ! wp_check_password( (string) $code, $data['hash'] ) ) {
-			$data['attempts'] = (int) $data['attempts'] + 1;
-			set_transient( 'hsw_2fa_' . $token, $data, max( 1, $data['expires'] - time() ) );
 			$this->note_failed_verify( (string) $data['phone'] );
 			wp_send_json_error( array( 'message' => __( 'کد وارد شده صحیح نیست.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+		/* Atomic single-use claim (same reasoning as check_code()). */
+		$claim = HSW_Throttle::hit(
+			'2fa_claim:' . md5( (string) $token ),
+			1,
+			max( 60, (int) $data['expires'] - time() )
+		);
+		if ( ! $claim['allowed'] ) {
+			wp_send_json_error( array( 'message' => __( 'درخواست ورود منقضی شده است. دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		$user = get_user_by( 'id', (int) $data['user_id'] );
 		if ( ! $user ) {

@@ -234,14 +234,23 @@ class HSW_Throttle {
 	/**
 	 * Is this address a CDN / reverse-proxy we accept headers from?
 	 *
-	 * Defaults to Cloudflare's published IPv4 ranges (stable, published at
-	 * cloudflare.com/ips-v4). Extend with the `hsw_trusted_proxies` filter.
+	 * Defaults to Cloudflare's published IPv4 AND IPv6 ranges (stable, published
+	 * at cloudflare.com/ips). Extend with the `hsw_trusted_proxies` filter —
+	 * for example ArvanCloud's ranges on an Iranian shop behind their CDN:
+	 *
+	 *     add_filter( 'hsw_trusted_proxies', function ( $r ) {
+	 *         return array_merge( $r, array( 'x.x.x.x/y' ) );
+	 *     } );
+	 *
+	 * Both address families are matched on their own bytes; an IPv4 rule can
+	 * never match an IPv6 address and vice versa.
 	 *
 	 * @param string $ip Address.
 	 * @return bool
 	 */
 	private static function is_trusted_proxy( $ip ) {
-		if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+		$ip_bin = @inet_pton( (string) $ip );
+		if ( false === $ip_bin || null === $ip_bin ) {
 			return false;
 		}
 
@@ -263,23 +272,44 @@ class HSW_Throttle {
 				'104.24.0.0/14',
 				'172.64.0.0/13',
 				'131.0.72.0/22',
+				/* Cloudflare IPv6 edges — without these, every visitor behind one
+				 * IPv6 edge shared a single throttle bucket. */
+				'2400:cb00::/32',
+				'2606:4700::/32',
+				'2803:f800::/32',
+				'2405:b500::/32',
+				'2405:8100::/32',
+				'2a06:98c0::/29',
+				'2c0f:f248::/32',
 			)
 		);
-
-		$ip_long = ip2long( $ip );
 
 		foreach ( $ranges as $cidr ) {
 			$parts = explode( '/', (string) $cidr );
 			if ( 2 !== count( $parts ) ) {
 				continue;
 			}
-			$net   = ip2long( $parts[0] );
-			$bits  = (int) $parts[1];
-			if ( false === $net || $bits < 0 || $bits > 32 ) {
+			$net = @inet_pton( trim( (string) $parts[0] ) );
+			$bits = (int) $parts[1];
+			if ( false === $net || null === $net ) {
 				continue;
 			}
-			$mask = -1 << ( 32 - $bits );
-			if ( ( $ip_long & $mask ) === ( $net & $mask ) ) {
+			$max_bits = strlen( $net ) * 8;
+			if ( $bits < 0 || $bits > $max_bits || strlen( $net ) !== strlen( $ip_bin ) ) {
+				continue;
+			}
+
+			/* Compare the first $bits of both byte strings. */
+			$whole = (int) floor( $bits / 8 );
+			if ( $whole > 0 && substr( $ip_bin, 0, $whole ) !== substr( $net, 0, $whole ) ) {
+				continue;
+			}
+			$rest = $bits % 8;
+			if ( 0 === $rest ) {
+				return true;
+			}
+			$mask = 0xff << ( 8 - $rest );
+			if ( 0 === ( ( ord( $ip_bin[ $whole ] ) ^ ord( $net[ $whole ] ) ) & $mask ) ) {
 				return true;
 			}
 		}

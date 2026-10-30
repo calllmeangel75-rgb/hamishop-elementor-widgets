@@ -75,7 +75,16 @@ class HSW_Wallet_Refunds {
 
 		$paid = round( (float) $order->get_meta( self::META_PAID ), 2 );
 		if ( $paid <= 0 ) {
-			return 0.0;
+			/*
+			 * process_payment() debits first and marks the order second; a
+			 * death between the two left the order unmarked and a later cancel
+			 * silently kept the customer's money. The ledger is the truth:
+			 * the unique `spend:<order>` row is what was actually taken.
+			 */
+			$paid = self::ledger_spend_total( $order_id );
+			if ( $paid <= 0 ) {
+				return 0.0;
+			}
 		}
 
 		$user_id = (int) $order->get_customer_id();
@@ -142,6 +151,23 @@ class HSW_Wallet_Refunds {
 			$wpdb->prepare(
 				'SELECT COALESCE(SUM(amount),0) FROM ' . HSW_Wallet::table() . " WHERE kind = 'refund' AND status = 'done' AND ref LIKE %s",
 				'refund:' . (int) $order_id . ':%'
+			)
+		);
+	}
+
+	/**
+	 * What the wallet actually took for this order, straight from the ledger.
+	 *
+	 * @param int $order_id Order.
+	 * @return float Absolute spend amount, 0 when the order was never charged.
+	 */
+	public static function ledger_spend_total( $order_id ) {
+		global $wpdb;
+
+		return (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				'SELECT COALESCE(SUM(ABS(amount)),0) FROM ' . HSW_Wallet::table() . " WHERE kind = 'spend' AND status = 'done' AND ref = %s",
+				'spend:' . (int) $order_id
 			)
 		);
 	}

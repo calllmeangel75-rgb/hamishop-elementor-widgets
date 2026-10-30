@@ -237,7 +237,7 @@ class HSW_Wallet {
 				note text NULL,
 				ref varchar(64) NULL DEFAULT NULL,
 				actor_id bigint unsigned NOT NULL DEFAULT 0,
-				created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				created_at datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY user_time (user_id, created_at),
 				KEY status (status),
@@ -250,7 +250,7 @@ class HSW_Wallet {
 				user_id bigint unsigned NOT NULL,
 				balance decimal(18,2) NOT NULL DEFAULT 0,
 				points_used decimal(12,0) NOT NULL DEFAULT 0,
-				updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				updated_at datetime NOT NULL,
 				PRIMARY KEY  (user_id)
 			) {$collate};"
 		);
@@ -271,11 +271,27 @@ class HSW_Wallet {
 				meta_id bigint unsigned NOT NULL,
 				user_id bigint unsigned NOT NULL DEFAULT 0,
 				meta_value longtext NULL,
-				taken_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				taken_at datetime NOT NULL,
 				PRIMARY KEY  (meta_id),
 				KEY user_id (user_id)
 			) {$collate};"
 		);
+
+		/*
+		 * Only stamp the schema version when all three tables really exist.
+		 * `dbDelta()` swallows server errors (zero-date defaults were rejected
+		 * by NO_ZERO_DATE servers with "Invalid default value"), and a stamped
+		 * version meant a broken install never retried. Without the stamp the
+		 * next request tries again.
+		 */
+		$installed = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table
+			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $balances ) ) === $balances
+			&& $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', self::backup_table() ) ) === self::backup_table();
+
+		if ( ! $installed ) {
+			error_log( 'HamiShop wallet: table creation failed; will retry on the next request.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			return;
+		}
 
 		self::migrate();
 		self::register_cli();
@@ -660,11 +676,34 @@ class HSW_Wallet {
 			}
 
 			/*
-			 * Ledger-only: the money already moved (or never moved), so the
-			 * repair writes the missing statement line and leaves the balance
-			 * alone. A first version called `apply()`, which moved the balance
-			 * *and* wrote the line — on a negative gap that took money from the
-			 * customer. Never again.
+			 * A POSITIVE gap means the balance moved without a statement line —
+			 * the money is real, the repair writes the missing entry.
+			 *
+			 * A NEGATIVE gap means the statement shows money the balance never
+			 * received — a lost credit (for example a top-up marked done by
+			 * `decide()` right before the process died). Writing a repair row
+			 * there would silently "reconcile" the customer's lost money away.
+			 * Those are reported and left for a human: report first, confirm
+			 * by hand, then fix with set_balance() if appropriate.
+			 */
+			if ( $amount < 0 ) {
+				$out[] = array(
+					'user_id'  => $gap['user_id'],
+					'gap'      => $amount,
+					'repaired' => false,
+				);
+				continue;
+			}
+
+			/*
+			 * Ledger-only: the money already moved, so the repair writes the
+			 * missing statement line and leaves the balance alone. A first
+			 * version called `apply()`, which moved the balance *and* wrote
+			 * the line — on a negative gap that took money from the customer.
+			 * Never again. The reference carries the time so a gap of the
+			 * same size recurring later cannot collide with the earlier
+			 * repair's unique ref (which used to leave the gap unfixable
+			 * forever).
 			 */
 			$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				self::table(),
@@ -675,7 +714,7 @@ class HSW_Wallet {
 					'kind'          => 'repair',
 					'status'        => 'done',
 					'note'          => __( 'ترمیم خودکار دفتر کیف پول (اختلاف با موجودی)', 'hamishop-elementor-widgets' ),
-					'ref'           => 'repair:' . $gap['user_id'] . ':' . number_format( $amount, 2, '.', '' ),
+					'ref'           => 'repair:' . $gap['user_id'] . ':' . number_format( $amount, 2, '.', '' ) . ':' . current_time( 'YmdHis' ),
 					'actor_id'      => 0,
 					'created_at'    => current_time( 'mysql' ),
 				),
@@ -941,6 +980,16 @@ class HSW_Wallet {
 		$user_id = absint( $user_id );
 		$target  = max( 0, round( (float) $target, 2 ) );
 		$table   = self::balance_table();
+
+		/*
+		 * Same ceiling apply() enforces for credit/debit (wallet.php:1119).
+		 * Without it an admin typo like 1e18 sailed through: the DECIMAL(18,2)
+		 * column silently clamped the stored value, the returned value stayed
+		 * 1e18 and the ledger row recorded a third number.
+		 */
+		if ( $target >= 1.0e16 ) {
+			return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ وارد‌شده خارج از محدودهٔ مجاز است.', 'hamishop-elementor-widgets' ) );
+		}
 
 		/* Portable upsert: UPDATE, then INSERT IGNORE, then UPDATE again. */
 		$ok = $wpdb->query( // phpcs:ignore WordPress.DB

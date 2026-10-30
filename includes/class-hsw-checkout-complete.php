@@ -201,7 +201,7 @@ class HSW_Checkout_Complete {
 		}
 
 		try {
-			$order_id = WC()->checkout()->create_order( $data );
+			$order_id = $this->create_order_locked( $data );
 		} catch ( Throwable $e ) {
 			return new WP_Error( 'hsw_order_failed', wp_strip_all_tags( $e->getMessage() ), array( 'status' => 500 ) );
 		}
@@ -288,6 +288,36 @@ class HSW_Checkout_Complete {
 	/* =========================================================================
 	 *  INTERNALS
 	 * ====================================================================== */
+
+	/**
+	 * Place the order behind an atomic one-shot lock.
+	 *
+	 * A double click (or a retrying client) used to reach `create_order()`
+	 * twice before the cart was emptied: two pending orders for one cart.
+	 * The throttle table's upsert is a single atomic statement, so of two
+	 * parallel requests exactly one gets through and the rest are answered
+	 * with a "your order is being placed" error. The lock lives 20 seconds —
+	 * long enough to cover `create_order()` plus the gateway hand-off, short
+	 * enough that a real failure can be retried moments later.
+	 *
+	 * @param array $data Checkout data for WC_Checkout::create_order().
+	 * @return int|WP_Error Order id.
+	 */
+	protected function create_order_locked( $data ) {
+		$sid = ( WC()->session ) ? (string) WC()->session->get_customer_id() : '';
+		$key = 'hsw-ck-place-' . md5( HSW_Throttle::ip() . '|' . $sid );
+
+		$lock = HSW_Throttle::hit( $key, 1, 20 );
+		if ( ! $lock['allowed'] ) {
+			return new WP_Error(
+				'hsw_order_busy',
+				__( 'سفارش شما در حال ثبت است؛ چند ثانیه صبر کنید و صفحه را دوباره بارگذاری نکنید.', 'hamishop-elementor-widgets' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		return WC()->checkout()->create_order( $data );
+	}
 
 	/**
 	 * Write the order address back to the customer.

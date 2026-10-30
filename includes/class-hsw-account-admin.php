@@ -771,7 +771,15 @@ final class HSW_Account_Admin {
 	 * ------------------------------------------------------------------ */
 
 	public function user_fields( $user ) {
-		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
+		/*
+		 * `edit_user` alone is not enough: WordPress maps editing YOUR OWN
+		 * profile to no capability at all (wp-includes/capabilities.php,
+		 * map_meta_cap "Allow user to edit itself"), so every subscriber passed
+		 * this check on wp-admin/profile.php and could hand themselves wallet
+		 * money. Balances are shop money: manage_woocommerce is required, on
+		 * top of being able to edit that specific account.
+		 */
+		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'edit_user', $user->ID ) ) {
 			return;
 		}
 		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user->ID ) : 0.0;
@@ -798,7 +806,9 @@ final class HSW_Account_Admin {
 	}
 
 	public function save_user_fields( $user_id ) {
-		if ( ! current_user_can( 'edit_user', $user_id ) ) {
+		/* Same rule as the form above: shop money needs manage_woocommerce,
+		 * and self-editing alone must never reach set_balance(). */
+		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'edit_user', $user_id ) ) {
 			return;
 		}
 		if ( ! isset( $_POST['hsw_account_user_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hsw_account_user_nonce'] ) ), 'hsw_account_user_' . $user_id ) ) {
