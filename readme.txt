@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.171
+Stable tag: 1.11.172
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.172 =
+* **انتشار دستی ۱.۱۱.۱۷۲ — CI روی GitHub، هارنس کامل‌تر و بررسی‌های ساختاری.**
+  - **`.github/workflows/ci.yml`:** چهار gate روی هر push/PR (و روی تگ `v*` ساخت artifact از ZIP): لینت روی **PHP 7.4/8.0/8.1/8.2/8.3**، هارنس روی ۷٫۴ و ۸٫۲، بررسی‌های ساختاری، و تازه‌بودن `.min`/POT.
+  - **هارنس از ۷۵ فایل به ۱۱۷/۱۱۷ فایل رسید:** قبلاً ۴۲ فایل (فاکتور، ورکر تلگرام، هدرها، پنل حساب، امنیت، کیف پول و…) هرگز در هارنس لود نمی‌شدند و «ALL CLEAN» نیمی از افزونه را تست نمی‌کرد. حالا pass دوم با ترتیب وابستگی (trait → base → بقیه) همه را لود می‌کند و اگر فایلی جا بیفتد، خودش `COVERAGE GAP` می‌دهد.
+  - **`tools/ci-checks.php` (جدید، بدون وابستگی):** ۱۶ بررسی — هم‌خوانی نسخه در سه فایل + وجود release note + چنج‌لاگ، دامنهٔ ترجمهٔ غلط، `var_dump`/`print_r`/`console.log` جامانده، وجود `.min` برای هر CSS/JS، ثبت هر ویجت در کاتالوگ و require شدنش، نبود `node_modules`/فایل‌های موقت، و وجود مستندات.
+  - README: نشان CI + بخش «تست خودکار» با جدول چهار مرحله و دستورهای محلی.
 
 = 1.11.171 =
 * **انتشار دستی ۱.۱۱.۱۷۱ — مستندسازی کامل، پاک‌سازی کد مرده و تکمیل uninstall.**

@@ -319,18 +319,32 @@ cron (هر دقیقه) یا GET /?hsw_tg_poll=1&secret=…
 # لینت کل افزونه
 for f in $(find . -name '*.php'); do php -l "$f"; done
 
-# هارنس PHP (بوت همهٔ کلاس‌ها با stub وردپرس)
-php tests/harness.php          # → HARNESS RESULT: ALL CLEAN
+# هارنس PHP: همهٔ فایل‌ها به‌ترتیب وردپرس لود می‌شوند (یک gate برای fatalهای سطح declaration)
+php tests/harness.php          # → files loaded: 117/117 · ALL CLEAN
 
-# بازسازی POT
+# بررسی‌های ساختاری (نسخه، دامنهٔ ترجمه، دیباگ، دارایی‌ها، کاتالوگ، مستندات)
+php tools/ci-checks.php        # → 16 checks, all passed
+
+# بازسازی POT و نسخهٔ .min
 python tools/build-pot.py
-
-# ساخت نسخهٔ .min
-python tools/build-assets.py
+python tools/build-assets.py   # نیازمند: pip install csscompressor rjsmin
 
 # بستهٔ انتشار
 python tools/build-release.py  # → hamishop-elementor-widgets-<ver>.zip
 ```
+
+### CI (GitHub Actions) — `.github/workflows/ci.yml`
+
+روی هر push به `main` و هر PR اجرا می‌شود؛ روی تگ `v*` بستهٔ ZIP را هم به‌عنوان artifact می‌سازد. چهار gate:
+
+| Job | چه می‌کند | چرا |
+|---|---|---|
+| `lint` | `php -l` روی همهٔ فایل‌ها، روی **PHP 7.4، 8.0، 8.1، 8.2، 8.3** | ما «PHP ≥ 7.4» ادعا می‌کنیم؛ یک `str_contains` یا `match` در ۷٫۴ می‌شکند |
+| `harness` | `php tests/harness.php` روی ۷٫۴ و ۸٫۲ | fatal‌های سطح declaration (extends/implements/visibility) که lint نمی‌بیند |
+| `checks` | `php tools/ci-checks.php` | نسخه‌ها هم‌خوان باشند، دامنهٔ ترجمه غلط نباشد، `var_dump` نماند، هر ویجت در کاتالوگ باشد |
+| `generated` | `build-assets.py` + `build-pot.py` و `git status` باید خالی بماند | `.min` و POT کهنه نباید merge شوند |
+
+> پروب‌های Playwright در CI اجرا **نمی‌شوند**؛ آن‌ها به یک وردپرس زنده با ووکامرس نیاز دارند و محلی روی XAMPP اجرا می‌شوند.
 
 **پروب‌های Playwright** (نیازمند `npm i playwright` و XAMPP روشن): هر پروب یک قابلیت را با عدد اثبات می‌کند.
 
@@ -364,13 +378,12 @@ python tools/build-release.py  # → hamishop-elementor-widgets-<ver>.zip
 
 ## ۱۶) محدودیت‌ها و کارهای باز (صادقانه)
 
-1. **بدون CI** — لینت/هارنس/پروب‌ها دستی اجرا می‌شوند؛ پیشنهاد: GitHub Actions با PHP 7.4/8.2 + هارنس.
-2. **بدون تست واحد PHP** — پوشش فعلی از نوع «یکپارچه با مرورگر» است؛ برای helperهای خالص (Jalali، price، stock) تست واحد ارزش دارد.
-3. **PDF سمت سرور نیست** — عمدی است (بدون کتابخانهٔ ۵ مگابایتی). اگر روزی «ارسال PDF در ایمیل» لازم شد، باید mPDF سبک‌شده یا سرویس بیرونی تصمیم‌گیری شود.
-4. **آیکن‌ها زیرمجموعه‌اند** — آیکن خارج از مجموعه با نقطه جایگزین می‌شود و `error_log` می‌دهد؛ افزودن آیکن = ویرایش `tools/_icons.txt` + `build-sprite.py`.
-5. **آرشیو تک‌دسته‌ای** — لینک دسته یک ناوبری است، پس در تگ‌های «×» نمی‌آید (بازگشت با «حذف همه»).
-6. **کیف پول بدون درگاه فعال** — اگر تنها COD فعال باشد، شارژ عمداً بسته است.
-7. **فونت پیش‌فرض** — فونت همراه افزونه است؛ اگر قالب فونت دیگری بدهد، `hsw-fonts` همچنان لود می‌شود (۱۵ KB) — قابل بهینه‌سازی با یک سوییچ «فونت قالب».
+1. **بدون تست واحد PHP** — پوشش فعلی «compile + یکپارچه با مرورگر» است؛ CI از v1.11.172 هست، اما برای helperهای خالص (Jalali، price، stock) تست واحد ارزش دارد.
+2. **PDF سمت سرور نیست** — عمدی است (بدون کتابخانهٔ ۵ مگابایتی). اگر روزی «ارسال PDF در ایمیل» لازم شد، باید mPDF سبک‌شده یا سرویس بیرونی تصمیم‌گیری شود.
+3. **آیکن‌ها زیرمجموعه‌اند** — آیکن خارج از مجموعه با نقطه جایگزین می‌شود و `error_log` می‌دهد؛ افزودن آیکن = ویرایش `tools/_icons.txt` + `build-sprite.py`.
+4. **آرشیو تک‌دسته‌ای** — لینک دسته یک ناوبری است، پس در تگ‌های «×» نمی‌آید (بازگشت با «حذف همه»).
+5. **کیف پول بدون درگاه فعال** — اگر تنها COD فعال باشد، شارژ عمداً بسته است.
+6. **فونت پیش‌فرض** — فونت همراه افزونه است؛ اگر قالب فونت دیگری بدهد، `hsw-fonts` همچنان لود می‌شود (۱۵ KB) — قابل بهینه‌سازی با یک سوییچ «فونت قالب».
 
 ---
 
@@ -381,7 +394,8 @@ python tools/build-release.py  # → hamishop-elementor-widgets-<ver>.zip
 [ ] RELEASE-NOTES-<ver>.md نوشته شد
 [ ] CHANGELOG در readme.txt
 [ ] php -l روی همهٔ فایل‌ها: 0 failure
-[ ] php tests/harness.php → ALL CLEAN
+[ ] php tests/harness.php → files loaded: N/N · ALL CLEAN
+[ ] php tools/ci-checks.php → 16 checks, all passed
 [ ] python tools/build-assets.py (min تازه)
 [ ] python tools/build-pot.py
 [ ] پروب‌های مرتبط روی سایت تست: RESULT: clean

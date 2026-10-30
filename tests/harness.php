@@ -21,6 +21,29 @@ define( 'HSW_VERSION', 'harness' );
 
 require __DIR__ . '/stubs.php';
 
+/*
+ * A handful of WordPress functions are called at *file scope* by modules that
+ * must decide early (the wallet gateway asks `did_action('woocommerce_loaded')`
+ * so it can register before WooCommerce boots). Only the existence matters
+ * here — the harness checks that the file compiles and loads, not that the
+ * hook fires.
+ */
+if ( ! function_exists( 'did_action' ) ) {
+	function did_action( $hook ) {
+		return 0;
+	}
+}
+if ( ! function_exists( 'add_action' ) ) {
+	function add_action( ...$args ) {
+		return true;
+	}
+}
+if ( ! function_exists( 'add_filter' ) ) {
+	function add_filter( ...$args ) {
+		return true;
+	}
+}
+
 /* Order mirrors HSW_Plugin::includes() + register_widgets() exactly. */
 $files = array(
 	/* ---- plugins_loaded: pure WP/WC classes ---- */
@@ -104,6 +127,7 @@ $files = array(
 );
 
 $failed = 0;
+$loaded = array();
 foreach ( $files as $rel ) {
 	$path = $base . '/' . $rel;
 	if ( ! file_exists( $path ) ) {
@@ -112,12 +136,82 @@ foreach ( $files as $rel ) {
 		continue;
 	}
 	try {
-		require $path;
+		require_once $path;
+		$loaded[] = $rel;
 		echo "OK: $rel\n";
 	} catch ( \Throwable $e ) {
+		$loaded[] = $rel;
 		echo "CATCHABLE FAIL: $rel — " . get_class( $e ) . ': ' . $e->getMessage() . ' @ ' . basename( $e->getFile() ) . ':' . $e->getLine() . "\n";
 		$failed++;
 	}
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * Pass 2 — everything the hand-written list forgot.
+ *
+ * The list above carries the order that matters (Elementor bases before the
+ * widgets that extend them). It used to be the whole story, which meant a new
+ * file could ship without ever being compile-checked here: at the time this
+ * pass was added, 42 of 106 files were silently skipped. The remainder is now
+ * loaded dependency-first (traits → bases → rest) so a missing base or a
+ * broken trait surfaces in CI instead of on a customer's site.
+ * ---------------------------------------------------------------------------
+ */
+$all_php = array_merge(
+	glob( $base . '/includes/*.php' ) ?: array(),
+	glob( $base . '/widgets/*.php' ) ?: array()
+);
+
+$remaining = array();
+foreach ( $all_php as $abs ) {
+	$rel = str_replace( $base . '/', '', $abs );
+	if ( in_array( $rel, $loaded, true ) ) {
+		continue;
+	}
+	$remaining[] = $rel;
+}
+
+usort(
+	$remaining,
+	function ( $a, $b ) {
+		$rank = function ( $rel ) {
+			if ( false !== strpos( $rel, '/trait-' ) ) {
+				return 0; // traits first: classes may `use` them at declaration.
+			}
+			if ( preg_match( '/-base\.php$/', $rel ) ) {
+				return 1;
+			}
+			return 2;
+		};
+		$ra = $rank( $a );
+		$rb = $rank( $b );
+		return $ra === $rb ? strcmp( $a, $b ) : $ra - $rb;
+	}
+);
+
+if ( $remaining ) {
+	echo "\n-- pass 2: " . count( $remaining ) . " file(s) not in the explicit list --\n";
+}
+
+foreach ( $remaining as $rel ) {
+	try {
+		require_once $base . '/' . $rel;
+		$loaded[] = $rel;
+		echo "AUTO: $rel\n";
+	} catch ( \Throwable $e ) {
+		$loaded[] = $rel;
+		echo "CATCHABLE FAIL: $rel — " . get_class( $e ) . ': ' . $e->getMessage() . ' @ ' . basename( $e->getFile() ) . ':' . $e->getLine() . "\n";
+		$failed++;
+	}
+}
+
+$covered = count( $loaded );
+$expected = count( $all_php );
+echo "\n=== files loaded: {$covered}/{$expected} ===\n";
+if ( $covered < $expected ) {
+	echo "COVERAGE GAP: " . ( $expected - $covered ) . " file(s) on disk were never loaded\n";
+	$failed++;
 }
 
 /* Final reflection audit: every HSW class must resolve its parents. */
