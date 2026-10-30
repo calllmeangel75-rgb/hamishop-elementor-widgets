@@ -59,6 +59,8 @@ function hsw_uninstall_site() {
 		'hsw_tg_poll_ready_hash',
 		'hsw_throttle_db',
 		'hsw_wallet_db',
+		'hsw_wallet_migration',
+		'hsw_points_migrated',
 		'hsw_404_cta',
 		'hsw_404_home',
 		'hsw_404_search_ph',
@@ -107,9 +109,10 @@ function hsw_uninstall_site() {
 	/* ------------------------------------------------------------------
 	 * The throttle table (login counters).
 	 *
-	 * The wallet ledger (`{prefix}hsw_wallet_ledger`) is deliberately kept:
-	 * it is a financial record of customer credit, and deleting a plugin
-	 * should not erase money that was already paid in.
+	 * The wallet ledger (`{prefix}hsw_wallet_ledger`) and the balance table
+	 * (`{prefix}hsw_wallet`) are deliberately kept: they are a financial
+	 * record of customer credit, and deleting a plugin should not erase money
+	 * that was already paid in.
 	 * --------------------------------------------------------------- */
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}hsw_throttle" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 

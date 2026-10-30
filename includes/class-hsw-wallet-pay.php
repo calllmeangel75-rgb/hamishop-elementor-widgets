@@ -23,6 +23,131 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Return wallet money when a wallet-paid order is cancelled or refunded.
+ *
+ * There was no such path at all: paying an order from the wallet debited the
+ * customer and cancelling it kept the money. Every refund here carries a
+ * unique ledger reference, so the same refund can be requested any number of
+ * times (cancel + full refund + a retried webhook) and only the first one
+ * moves money.
+ */
+class HSW_Wallet_Refunds {
+
+	/** Order meta: how much of this order was actually paid from the wallet. */
+	const META_PAID = '_hsw_wallet_paid';
+
+	public function __construct() {
+		add_action( 'woocommerce_order_status_cancelled', array( $this, 'refund_order' ) );
+		add_action( 'woocommerce_order_status_refunded', array( $this, 'refund_order' ) );
+		add_action( 'woocommerce_order_refunded', array( $this, 'refund_order' ), 10, 2 );
+	}
+
+	/**
+	 * Record the amount a wallet payment took, so a later refund knows how much
+	 * to give back without trusting the order total (which can be edited).
+	 *
+	 * @param int   $order_id Order.
+	 * @param float $amount   Amount paid from the wallet.
+	 */
+	public static function mark_paid( $order_id, $amount ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
+
+		$paid = round( (float) $order->get_meta( self::META_PAID ), 2 );
+		$order->update_meta_data( self::META_PAID, round( $paid + (float) $amount, 2 ) );
+		$order->save();
+	}
+
+	/**
+	 * Refund the wallet part of an order.
+	 *
+	 * @param int $order_id  Order.
+	 * @param int $refund_id WooCommerce refund id (0 = cancel / full refund).
+	 * @return float|WP_Error Amount credited.
+	 */
+	public function refund_order( $order_id, $refund_id = 0 ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order || 'hsw_wallet' !== $order->get_payment_method() ) {
+			return 0.0;
+		}
+
+		$paid = round( (float) $order->get_meta( self::META_PAID ), 2 );
+		if ( $paid <= 0 ) {
+			return 0.0;
+		}
+
+		$user_id = (int) $order->get_customer_id();
+		if ( ! $user_id ) {
+			return 0.0;
+		}
+
+		if ( $refund_id ) {
+			$refund = wc_get_order( $refund_id );
+			$amount = $refund ? round( abs( (float) $refund->get_amount() ), 2 ) : 0.0;
+			$ref    = 'refund:' . (int) $order_id . ':' . (int) $refund_id;
+
+			/* A partial refund cannot hand back more than the order took. */
+			$amount = min( $amount, max( 0, $paid - self::refunded_total( $order_id ) ) );
+		} else {
+			$amount = round( $paid - self::refunded_total( $order_id ), 2 );
+			$ref    = 'refund:' . (int) $order_id . ':full';
+		}
+
+		if ( $amount <= 0 ) {
+			return 0.0;
+		}
+
+		$credited = HSW_Wallet::credit(
+			$user_id,
+			$amount,
+			'refund',
+			sprintf(
+				/* translators: %s: order number. */
+				__( 'بازگشت وجه سفارش #%s به کیف پول', 'hamishop-elementor-widgets' ),
+				$order->get_order_number()
+			),
+			0,
+			$ref
+		);
+
+		if ( is_wp_error( $credited ) ) {
+			/* Duplicate reference = this refund already happened. */
+			return 'hsw_wallet_duplicate' === $credited->get_error_code() ? 0.0 : $credited;
+		}
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: formatted amount. */
+				__( 'مبلغ %s به کیف پول مشتری بازگشت.', 'hamishop-elementor-widgets' ),
+				wp_strip_all_tags( wc_price( $amount ) )
+			)
+		);
+		$order->save();
+
+		return $amount;
+	}
+
+	/**
+	 * How much has already been refunded to the wallet for this order.
+	 *
+	 * @param int $order_id Order.
+	 * @return float
+	 */
+	public static function refunded_total( $order_id ) {
+		global $wpdb;
+
+		return (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				'SELECT COALESCE(SUM(amount),0) FROM ' . HSW_Wallet::table() . " WHERE kind = 'refund' AND status = 'done' AND ref LIKE %s",
+				'refund:' . (int) $order_id . ':%'
+			)
+		);
+	}
+}
+
+/**
  * Create and settle wallet top-up orders.
  */
 class HSW_Wallet_Topup {
@@ -182,11 +307,23 @@ class HSW_Wallet_Topup {
 	/**
 	 * Credit the wallet when the top-up order is paid.
 	 *
+	 * Idempotent by database constraint, not by a flag: the ledger has a unique
+	 * index on `ref`, and this method always uses `topup:<order id>` as the ref.
+	 * A second call — from the same hook firing twice, from
+	 * `order_status_processing` after `payment_complete`, or from two requests
+	 * racing — inserts a duplicate ref, the unique index rejects it, the balance
+	 * write is rolled back and the caller sees `hsw_wallet_duplicate`, which is
+	 * treated as success.
+	 *
+	 * The `_hsw_wallet_topup_credited` meta is still written, but only as an
+	 * audit trail. It is **not** the guard: WooCommerce serves order meta from
+	 * its object cache, and a request that loaded the order before the first
+	 * credit would read a stale, empty flag (this is exactly how five parallel
+	 * `payment_complete` calls each credited 25000 before the ref index existed).
+	 *
 	 * @param int $order_id Order id.
 	 */
 	public function settle( $order_id ) {
-		global $wpdb;
-
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
 			return;
@@ -197,72 +334,81 @@ class HSW_Wallet_Topup {
 			return;
 		}
 
-		/*
-		 * `payment_complete()` and the two status hooks can fire for the same
-		 * order in one request — or two requests can overlap on a retry. The
-		 * old check-then-set (`get_meta` … credit … `update_meta`) let both
-		 * pass the check and credit the wallet twice.
-		 *
-		 * A MySQL named lock serialises the whole block; the flag is re-read
-		 * *inside* the lock, so the second caller sees `done` and leaves.
-		 * GET_LOCK is available on MySQL and MariaDB (shared hosting too) and
-		 * is what WooCommerce itself uses for order-level work.
-		 */
-		$lock = $wpdb->get_var( // phpcs:ignore WordPress.DB
-			$wpdb->prepare( 'SELECT GET_LOCK(%s, 5)', 'hsw_topup_' . (int) $order_id )
-		);
-		if ( '1' !== (string) $lock ) {
-			/* Another request holds it; it will do the credit. */
+		$amount = (float) $order->get_total();
+		if ( $amount <= 0 ) {
 			return;
 		}
 
-		try {
-			/* Re-read after the lock: a request that ran first may have settled it. */
-			$fresh = wc_get_order( $order_id );
-			if ( ! $fresh || $fresh->get_meta( self::META_DONE ) ) {
-				return;
-			}
+		$ref = 'topup:' . (int) $order_id;
 
-			$amount = (float) $fresh->get_total();
-			if ( $amount <= 0 ) {
-				return;
-			}
-
-			$credited = HSW_Wallet::credit(
-				$user_id,
-				$amount,
-				'topup',
-				sprintf(
-					/* translators: %s: order number. */
-					__( 'شارژ کیف پول — سفارش #%s', 'hamishop-elementor-widgets' ),
-					$fresh->get_order_number()
-				),
-				0,
-				'topup:' . $order_id
-			);
-
-			/*
-			 * A ledger failure now comes back as an error instead of a silent
-			 * zero, so the flag is only set when the money really moved.
-			 */
-			if ( is_wp_error( $credited ) ) {
-				return;
-			}
-
-			$fresh->update_meta_data( self::META_DONE, current_time( 'mysql' ) );
-			$fresh->add_order_note(
-				sprintf(
-					/* translators: %s: formatted amount. */
-					__( 'کیف پول مشتری به مبلغ %s شارژ شد.', 'hamishop-elementor-widgets' ),
-					wp_strip_all_tags( wc_price( $amount ) )
-				)
-			);
-			$fresh->save();
-		} finally {
-			$wpdb->query( // phpcs:ignore WordPress.DB
-				$wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', 'hsw_topup_' . (int) $order_id )
-			);
+		/* Fast path: already in the statement (indexed, cache-free read). */
+		if ( self::ledger_has_ref( $ref ) ) {
+			self::mark_done( $order_id );
+			return;
 		}
+
+		$credited = HSW_Wallet::credit(
+			$user_id,
+			$amount,
+			'topup',
+			sprintf(
+				/* translators: %s: order number. */
+				__( 'شارژ کیف پول — سفارش #%s', 'hamishop-elementor-widgets' ),
+				$order->get_order_number()
+			),
+			0,
+			$ref
+		);
+
+		if ( is_wp_error( $credited ) ) {
+			if ( 'hsw_wallet_duplicate' === $credited->get_error_code() ) {
+				/* Another request won the race: the money is in, mark and stop. */
+				self::mark_done( $order_id );
+			}
+			return;
+		}
+
+		self::mark_done( $order_id );
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: formatted amount. */
+				__( 'کیف پول مشتری به مبلغ %s شارژ شد.', 'hamishop-elementor-widgets' ),
+				wp_strip_all_tags( wc_price( $amount ) )
+			)
+		);
+		$order->save();
+	}
+
+	/**
+	 * Is this reference already in the ledger?
+	 *
+	 * @param string $ref Reference.
+	 * @return bool
+	 */
+	private static function ledger_has_ref( $ref ) {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				'SELECT id FROM ' . HSW_Wallet::table() . ' WHERE ref = %s LIMIT 1',
+				$ref
+			)
+		);
+	}
+
+	/**
+	 * Audit flag on the order (best effort; never the guard).
+	 *
+	 * @param int $order_id Order.
+	 */
+	private static function mark_done( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order || $order->get_meta( self::META_DONE ) ) {
+			return;
+		}
+		$order->update_meta_data( self::META_DONE, current_time( 'mysql' ) );
+		$order->save();
 	}
 }
 
@@ -302,6 +448,27 @@ function hsw_register_wallet_gateway() {
 			 */
 			protected function balance() {
 				return is_user_logged_in() ? HSW_Wallet::balance( get_current_user_id() ) : 0.0;
+			}
+
+			/**
+			 * Has this order already been charged to the wallet?
+			 *
+			 * Covers both reference formats: `spend:<id>` (current) and the bare
+			 * `<id>` written by earlier versions.
+			 *
+			 * @param int $order_id Order.
+			 * @return bool
+			 */
+			protected static function order_already_paid( $order_id ) {
+				global $wpdb;
+
+				return (bool) $wpdb->get_var( // phpcs:ignore WordPress.DB
+					$wpdb->prepare(
+						'SELECT id FROM ' . HSW_Wallet::table() . " WHERE kind = 'spend' AND status = 'done' AND ref IN (%s, %s) LIMIT 1",
+						'spend:' . (int) $order_id,
+						(string) (int) $order_id
+					)
+				);
 			}
 
 			/**
@@ -360,6 +527,18 @@ function hsw_register_wallet_gateway() {
 				$total   = (float) $order->get_total();
 				$balance = HSW_Wallet::balance( $user_id );
 
+				/*
+				 * A double click (or a browser retry) used to debit twice. The
+				 * ledger reference `spend:<order>` is unique, and older rows
+				 * used the bare order id, so both are checked before charging.
+				 */
+				if ( self::order_already_paid( $order_id ) ) {
+					return array(
+						'result'   => 'success',
+						'redirect' => $this->get_return_url( $order ),
+					);
+				}
+
 				if ( $total <= 0 || $balance + 0.001 < $total ) {
 					wc_add_notice( __( 'موجودی کیف پول برای این سفارش کافی نیست.', 'hamishop-elementor-widgets' ), 'error' );
 					return array( 'result' => 'failure' );
@@ -375,14 +554,24 @@ function hsw_register_wallet_gateway() {
 						$order->get_order_number()
 					),
 					0,
-					(string) $order_id
+					'spend:' . $order_id
 				);
 
 				/* debit() refuses to go negative and hands back a WP_Error. */
 				if ( is_wp_error( $debit ) ) {
+					if ( 'hsw_wallet_duplicate' === $debit->get_error_code() ) {
+						/* The other request already charged this order. */
+						return array(
+							'result'   => 'success',
+							'redirect' => $this->get_return_url( $order ),
+						);
+					}
+
 					wc_add_notice( $debit->get_error_message(), 'error' );
 					return array( 'result' => 'failure' );
 				}
+
+				HSW_Wallet_Refunds::mark_paid( $order_id, $total );
 
 				$order->add_order_note( sprintf(
 					/* translators: %s: formatted amount. */

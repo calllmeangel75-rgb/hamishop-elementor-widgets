@@ -78,6 +78,61 @@ jobs:
       - name: Load every plugin file
         run: php tests/harness.php
 
+  unit:
+    name: unit tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.4', '8.2', '8.3' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+
+      # Pure logic only (Jalali calendar, amount in words): no WordPress and no
+      # database, so it runs on every version the plugin supports.
+      - name: Jalali + number_words
+        run: php tests/unit/run.php
+
+  mysql8:
+    name: SQL compatibility (MySQL 8)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: hsw_qa
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: none
+
+      - name: Wallet statements on MySQL 8
+        run: |
+          HSW_QA_DSN="mysql:host=127.0.0.1;port=3306;dbname=hsw_qa" \
+          HSW_QA_USER=root \
+          HSW_QA_PASS=root \
+          php tests/qa/sql-compat.php
+
   checks:
     name: structural checks
     runs-on: ubuntu-latest

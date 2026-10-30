@@ -199,7 +199,9 @@ CSS ویجت‌ها همیشه با `var(--x, fallback)` نوشته می‌شو�
 | جدول | کاربرد |
 |---|---|
 | `{prefix}hsw_throttle` | شمارنده‌های نرخ (OTP، ورود) — نوشتن اتمیک |
-| `{prefix}hsw_wallet_ledger` | دفتر تراکنش‌های کیف پول (هنگام حذف افزونه **عمداً** پاک نمی‌شود) |
+| `{prefix}hsw_wallet` | موجودی هر کاربر، `PRIMARY KEY (user_id)` + `points_used`. منبع حقیقت؛ متای `_hsw_wallet_balance` فقط snapshot پیش از مهاجرت است. |
+| `{prefix}hsw_wallet_meta_backup` | کپی خام هر ردیف `_hsw_wallet_balance` پیش از مهاجرت (برای rollback/بازبینی) |
+| `{prefix}hsw_wallet_ledger` | دفتر تراکنش‌های کیف پول، با `UNIQUE KEY (ref)` برای idempotency (هنگام حذف افزونه **عمداً** پاک نمی‌شود) |
 
 **پست‌تایپ:** `hsw_ticket` (تیکت پشتیبانی، خصوصی، بدون آرشیو عمومی) + کامنت‌های `hsw_ticket_reply`.
 **متا:** `_hsw_ticket_status`, `_hsw_ticket_priority`, `_hsw_ticket_department`, `_hsw_ticket_unread_*`, `_hsw_telegram_chat_id`, `_hsw_phone`, `_hsw_2fa_*`, `_hsw_email_verified`, `_hsw_initial_stock`.

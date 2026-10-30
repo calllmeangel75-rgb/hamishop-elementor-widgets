@@ -30,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
 
 class HSW_Wallet {
 
-	const DB_VERSION   = '1';
+	const DB_VERSION   = '5';
 	const BALANCE_META = '_hsw_wallet_balance';
 	const POINTS_META  = '_hsw_points_used';
 
@@ -178,6 +178,24 @@ class HSW_Wallet {
 		return $wpdb->prefix . 'hsw_wallet_ledger';
 	}
 
+	/**
+	 * Balance table: one row per user, `user_id` is the primary key.
+	 *
+	 * The balance used to live in `usermeta`. That table has **no unique index**
+	 * on `(user_id, meta_key)`, and `add_user_meta( …, true )` only *checks*
+	 * before inserting — so N parallel first-time credits created N rows of the
+	 * same key. `get_user_meta()` returns the first one, which meant the customer
+	 * saw 100 while the statement said 1000 (reproduced with 10 processes).
+	 * A primary key makes the write atomic and the read unambiguous.
+	 *
+	 * @return string
+	 */
+	public static function balance_table() {
+		global $wpdb;
+
+		return $wpdb->prefix . 'hsw_wallet';
+	}
+
 	public function maybe_install() {
 		if ( self::DB_VERSION === get_option( 'hsw_wallet_db' ) ) {
 			return;
@@ -185,9 +203,29 @@ class HSW_Wallet {
 
 		global $wpdb;
 		$table   = self::table();
+		$balances = self::balance_table();
 		$collate = $wpdb->get_charset_collate();
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		/*
+		 * `ref` used to be `NOT NULL DEFAULT ''` with no unique index, so the
+		 * same top-up could be written twice. Before dbDelta adds the unique
+		 * key, the column has to be nullable (many rows share ''), the empty
+		 * values must become NULL (MySQL allows any number of NULLs in a unique
+		 * index) and the existing duplicates must be moved out of the way. The
+		 * extra rows are kept — they are part of the money history — but get a
+		 * suffixed reference so exactly one row per real reference is claimable.
+		 */
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
+			$wpdb->query( "ALTER TABLE {$table} MODIFY ref varchar(64) NULL DEFAULT NULL" ); // phpcs:ignore WordPress.DB
+			$wpdb->query( "UPDATE {$table} SET ref = NULL WHERE ref = ''" ); // phpcs:ignore WordPress.DB
+			$wpdb->query( // phpcs:ignore WordPress.DB
+				"UPDATE {$table} SET ref = CONCAT(LEFT(ref, 50), '#dup', id)
+				 WHERE ref IS NOT NULL
+				   AND id NOT IN ( SELECT keep_id FROM ( SELECT MIN(id) keep_id FROM {$table} WHERE ref IS NOT NULL GROUP BY ref ) k )"
+			);
+		}
+
 		dbDelta(
 			"CREATE TABLE {$table} (
 				id bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -197,24 +235,531 @@ class HSW_Wallet {
 				kind varchar(32) NOT NULL DEFAULT 'credit',
 				status varchar(16) NOT NULL DEFAULT 'done',
 				note text NULL,
-				ref varchar(64) NOT NULL DEFAULT '',
+				ref varchar(64) NULL DEFAULT NULL,
 				actor_id bigint unsigned NOT NULL DEFAULT 0,
 				created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 				PRIMARY KEY  (id),
 				KEY user_time (user_id, created_at),
-				KEY status (status)
+				KEY status (status),
+				UNIQUE KEY uniq_ref (ref)
 			) {$collate};"
 		);
 
+		dbDelta(
+			"CREATE TABLE {$balances} (
+				user_id bigint unsigned NOT NULL,
+				balance decimal(18,2) NOT NULL DEFAULT 0,
+				points_used decimal(12,0) NOT NULL DEFAULT 0,
+				updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				PRIMARY KEY  (user_id)
+			) {$collate};"
+		);
+
+		/* One-time copy of the old points counter into the atomic column. */
+		if ( 'yes' !== get_option( 'hsw_points_migrated' ) ) {
+			$wpdb->query( // phpcs:ignore WordPress.DB
+				"UPDATE {$balances} b
+				 JOIN {$wpdb->usermeta} u ON u.user_id = b.user_id AND u.meta_key = '" . esc_sql( self::POINTS_META ) . "'
+				 SET b.points_used = CAST(u.meta_value AS DECIMAL(12,0))
+				 WHERE b.points_used = 0"
+			);
+			update_option( 'hsw_points_migrated', 'yes', false );
+		}
+
+		dbDelta(
+			"CREATE TABLE " . self::backup_table() . " (
+				meta_id bigint unsigned NOT NULL,
+				user_id bigint unsigned NOT NULL DEFAULT 0,
+				meta_value longtext NULL,
+				taken_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+				PRIMARY KEY  (meta_id),
+				KEY user_id (user_id)
+			) {$collate};"
+		);
+
+		self::migrate();
+		self::register_cli();
+
 		update_option( 'hsw_wallet_db', self::DB_VERSION, false );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Migration from the legacy `_hsw_wallet_balance` meta
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Batch size when walking the user table. 200 users per step keeps the
+	 * query fast on shared hosting (no `JOIN` on a million rows, no long
+	 * `INSERT … SELECT`) and lets a timeout resume where it stopped.
+	 */
+	const MIGRATION_BATCH = 200;
+
+	/** Option that holds the migration report. */
+	const MIGRATION_REPORT = 'hsw_wallet_migration';
+
+	/**
+	 * Copy the legacy meta into the balance table.
+	 *
+	 * Rules, in order of importance:
+	 *  - the legacy meta is **never modified or deleted**, so a rollback is
+	 *    just dropping the rows of `{prefix}hsw_wallet` (kept for one release);
+	 *  - every raw meta row is also copied to `{prefix}hsw_wallet_meta_backup`
+	 *    so the exact pre-migration state survives even if something else
+	 *    touches `usermeta`;
+	 *  - a user that already has a row in the balance table is skipped, which
+	 *    makes the migration idempotent: a second run cannot change a balance;
+	 *  - when one user has several meta rows, the values are **summed** (the
+	 *    statement shows each of them) and the user is listed in the report;
+	 *  - a value that cannot be parsed contributes 0 and is reported, it is
+	 *    never silently treated as a valid zero.
+	 *
+	 * @param int  $batch Rows per step.
+	 * @param bool $force Ignore the "already done" flag.
+	 * @return array{users:int,inserted:int,total_before:float,total_after:float,anomalies:int,done:bool}
+	 */
+	public static function migrate( $batch = self::MIGRATION_BATCH, $force = false ) {
+		global $wpdb;
+
+		$batch   = max( 1, min( 1000, (int) $batch ) );
+		$report  = get_option( self::MIGRATION_REPORT, array() );
+		$report  = is_array( $report ) ? $report : array();
+		$started = ! empty( $report['done'] );
+
+		if ( $started && ! $force ) {
+			return array(
+				'users'        => (int) ( $report['users'] ?? 0 ),
+				'inserted'     => (int) ( $report['inserted'] ?? 0 ),
+				'total_before' => (float) ( $report['total_before'] ?? 0 ),
+				'total_after'  => (float) ( $report['total_after'] ?? 0 ),
+				'anomalies'    => (int) ( $report['anomalies'] ?? 0 ),
+				'done'         => true,
+			);
+		}
+
+		if ( $force ) {
+			/* A forced re-run starts from the beginning but still skips users
+			 * that already have a balance row, so nothing is added twice. */
+			$report  = array( 'last_user' => 0, 'anomaly_list' => array() );
+			$started = false;
+		}
+
+		$table  = self::balance_table();
+		$backup = self::backup_table();
+		$state  = $started ? (int) ( $report['last_user'] ?? 0 ) : 0;
+		$stats  = array(
+			'users'        => (int) ( $report['users'] ?? 0 ),
+			'inserted'     => (int) ( $report['inserted'] ?? 0 ),
+			'total_before' => (float) ( $report['total_before'] ?? 0 ),
+			'total_after'  => (float) ( $report['total_after'] ?? 0 ),
+			'anomalies'    => (int) ( $report['anomalies'] ?? 0 ),
+			'done'         => true,
+			'last_user'    => $state,
+			'anomaly_list' => (array) ( $report['anomaly_list'] ?? array() ),
+			'ran_at'       => current_time( 'mysql' ),
+		);
+
+		do {
+			$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB
+				$wpdb->prepare(
+					"SELECT user_id FROM {$wpdb->usermeta}
+					 WHERE meta_key = %s AND user_id > %d
+					 GROUP BY user_id ORDER BY user_id ASC LIMIT %d",
+					self::BALANCE_META,
+					$state,
+					$batch
+				)
+			);
+
+			if ( ! $ids ) {
+				break;
+			}
+
+			$in  = implode( ',', array_map( 'absint', $ids ) );
+			$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB
+				"SELECT umeta_id AS meta_id, user_id, meta_value FROM {$wpdb->usermeta}
+				 WHERE meta_key = '" . esc_sql( self::BALANCE_META ) . "' AND user_id IN ({$in})
+				 ORDER BY user_id ASC, umeta_id ASC"
+			);
+
+			$by_user = array();
+			foreach ( $rows as $row ) {
+				$by_user[ (int) $row->user_id ][] = $row;
+
+				/* Verbatim backup, once per meta row. */
+				$wpdb->query( // phpcs:ignore WordPress.DB
+					$wpdb->prepare(
+						"INSERT IGNORE INTO {$backup} (meta_id, user_id, meta_value, taken_at) VALUES (%d, %d, %s, %s)",
+						(int) $row->meta_id,
+						(int) $row->user_id,
+						(string) $row->meta_value,
+						current_time( 'mysql' )
+					)
+				);
+			}
+
+			foreach ( $by_user as $uid => $list ) {
+				$values  = array();
+				$sum     = 0.0;
+				$flags   = array();
+
+				foreach ( $list as $row ) {
+					$raw      = (string) $row->meta_value;
+					$values[] = $raw;
+					$parsed   = self::parse_legacy_amount( $raw );
+
+					if ( null === $parsed ) {
+						$flags[] = 'non-numeric';
+						continue;
+					}
+					if ( '' === trim( $raw ) ) {
+						$flags[] = 'empty';
+					}
+					if ( preg_match( '/[۰-۹٠-٩]/u', $raw ) ) {
+						$flags[] = 'persian-digits';
+					}
+					if ( false !== strpos( $raw, '.' ) ) {
+						$flags[] = 'decimal';
+					}
+					$sum += $parsed;
+				}
+
+				if ( count( $list ) > 1 ) {
+					$flags[] = 'duplicate-rows';
+				}
+				if ( count( array_unique( $values ) ) > 1 ) {
+					/* Different values for the same user: this is exactly the
+					 * state the old race left behind, and it must be visible. */
+					$flags[] = 'duplicate-differing';
+				}
+
+				$sum = round( $sum, 2 );
+				$stats['total_before'] += $sum;
+				$stats['users']++;
+
+				$inserted = $wpdb->query( // phpcs:ignore WordPress.DB
+					$wpdb->prepare(
+						"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
+						$uid,
+						$sum,
+						current_time( 'mysql' )
+					)
+				);
+
+				if ( $inserted ) {
+					$stats['inserted']++;
+					$stats['total_after'] += $sum;
+
+					/*
+					 * Opening statement line. Without it every migrated user
+					 * would look like a gap (`balance` set, ledger empty) and the
+					 * gap report would flood. `migrate:<user>` is unique, so a
+					 * re-run cannot add a second opening line.
+					 */
+					if ( abs( $sum ) >= 0.01 ) {
+						$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+							self::table(),
+							array(
+								'user_id'       => $uid,
+								'amount'        => $sum,
+								'balance_after' => $sum,
+								'kind'          => 'migrate',
+								'status'        => 'done',
+								'note'          => __( 'انتقال موجودی از متای قدیمی کیف پول', 'hamishop-elementor-widgets' ),
+								'ref'           => 'migrate:' . $uid,
+								'actor_id'      => 0,
+								'created_at'    => current_time( 'mysql' ),
+							),
+							array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
+						);
+					}
+				} else {
+					/* The row already existed (re-run, or a balance was written
+					 * after the migration started): trust the table. */
+					$current = $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d", $uid ) ); // phpcs:ignore WordPress.DB
+					$stats['total_after'] += (float) $current;
+				}
+
+				if ( $flags ) {
+					$stats['anomalies']++;
+					if ( count( $stats['anomaly_list'] ) < 500 ) {
+						$stats['anomaly_list'][] = array(
+							'user_id' => $uid,
+							'flags'   => array_values( array_unique( $flags ) ),
+							'values'  => $values,
+							'used'    => $sum,
+						);
+					}
+				}
+			}
+
+			$state = (int) end( $ids );
+			$stats['last_user'] = $state;
+
+			/* Persist after every batch: a timeout or a killed request can
+			 * resume instead of starting over. */
+			update_option( self::MIGRATION_REPORT, $stats, false );
+		} while ( count( $ids ) === $batch );
+
+		$stats['done'] = true;
+		update_option( self::MIGRATION_REPORT, $stats, false );
+
+		if ( $stats['anomalies'] > 0 ) {
+			error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+				sprintf(
+					'HamiShop wallet migration: %d users carry unusual legacy values (duplicates / empty / non-numeric / persian digits). See option %s.',
+					$stats['anomalies'],
+					self::MIGRATION_REPORT
+				)
+			);
+		}
+
+		return array(
+			'users'        => $stats['users'],
+			'inserted'     => $stats['inserted'],
+			'total_before' => round( $stats['total_before'], 2 ),
+			'total_after'  => round( $stats['total_after'], 2 ),
+			'anomalies'    => $stats['anomalies'],
+			'done'         => true,
+		);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function migration_done() {
+		$report = get_option( self::MIGRATION_REPORT, array() );
+
+		return is_array( $report ) && ! empty( $report['done'] );
+	}
+
+	/**
+	 * Full migration report (counts + the anomaly list).
+	 *
+	 * @return array
+	 */
+	public static function migration_report() {
+		$report = get_option( self::MIGRATION_REPORT, array() );
+
+		return is_array( $report ) ? $report : array();
+	}
+
+	/**
+	 * Turn a stored meta value into a number.
+	 *
+	 * Persian/Arabic digits and thousands separators are normalised; anything
+	 * else that is not numeric returns null so the caller can report it instead
+	 * of counting it as zero.
+	 *
+	 * @param string $raw Raw value.
+	 * @return float|null
+	 */
+	public static function parse_legacy_amount( $raw ) {
+		$raw = trim( (string) $raw );
+
+		if ( '' === $raw ) {
+			return 0.0;
+		}
+
+		$raw = strtr(
+			$raw,
+			array(
+				'۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+				'۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+				'٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+				'٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+				'،' => '', ',' => '', ' ' => '',
+			)
+		);
+
+		if ( ! is_numeric( $raw ) ) {
+			return null;
+		}
+
+		return (float) $raw;
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function backup_table() {
+		global $wpdb;
+
+		return $wpdb->prefix . 'hsw_wallet_meta_backup';
+	}
+
+	/**
+	 * Compare every wallet balance with its ledger and return the differences.
+	 *
+	 * `balance` is the source of truth for spending; the ledger is the audit
+	 * trail. After a live run this is the check that proves the two agree
+	 * (`wp hsw wallet report`).
+	 *
+	 * @param int $limit Max rows to return.
+	 * @return array<int,array{user_id:int,balance:float,ledger:float,diff:float}>
+	 */
+	public static function balance_gaps( $limit = 200 ) {
+		global $wpdb;
+
+		$balances = self::balance_table();
+		$ledger   = self::table();
+
+		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				"SELECT b.user_id, b.balance, COALESCE(l.total, 0) AS ledger
+				 FROM {$balances} b
+				 LEFT JOIN (
+					SELECT user_id, SUM(amount) AS total FROM {$ledger} WHERE status = 'done' GROUP BY user_id
+				 ) l ON l.user_id = b.user_id
+				 WHERE ABS(b.balance - COALESCE(l.total, 0)) > 0.009
+				 ORDER BY ABS(b.balance - COALESCE(l.total, 0)) DESC
+				 LIMIT %d",
+				max( 1, min( 2000, (int) $limit ) )
+			)
+		);
+
+		$out = array();
+		foreach ( (array) $rows as $row ) {
+			$out[] = array(
+				'user_id' => (int) $row->user_id,
+				'balance' => (float) $row->balance,
+				'ledger'  => (float) $row->ledger,
+				'diff'    => round( (float) $row->balance - (float) $row->ledger, 2 ),
+			);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Close the gaps found by `balance_gaps()`.
+	 *
+	 * The write order is: move the balance, then insert the ledger row. If PHP
+	 * dies between the two (fatal, timeout, OOM, killed request) the customer
+	 * keeps the new balance but the statement has no row for it. Repair writes
+	 * the missing statement line (`kind = repair`) instead of touching the
+	 * money: the movement already happened, and rewriting a balance to match a
+	 * statement would take money away from a customer who may already have
+	 * spent it.
+	 *
+	 * Each repair carries `repair:<user>:<gap>` as its reference, so a second
+	 * run cannot add a second line for the same gap.
+	 *
+	 * @param int $limit Max users to repair per call.
+	 * @return array<int,array{user_id:int,gap:float,repaired:bool}>
+	 */
+	public static function repair_gaps( $limit = 200 ) {
+		global $wpdb;
+
+		$out = array();
+
+		foreach ( self::balance_gaps( $limit ) as $gap ) {
+			$amount = round( (float) $gap['diff'], 2 );
+
+			if ( abs( $amount ) < 0.01 ) {
+				continue;
+			}
+
+			/*
+			 * Ledger-only: the money already moved (or never moved), so the
+			 * repair writes the missing statement line and leaves the balance
+			 * alone. A first version called `apply()`, which moved the balance
+			 * *and* wrote the line — on a negative gap that took money from the
+			 * customer. Never again.
+			 */
+			$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				self::table(),
+				array(
+					'user_id'       => $gap['user_id'],
+					'amount'        => $amount,
+					'balance_after' => $gap['balance'],
+					'kind'          => 'repair',
+					'status'        => 'done',
+					'note'          => __( 'ترمیم خودکار دفتر کیف پول (اختلاف با موجودی)', 'hamishop-elementor-widgets' ),
+					'ref'           => 'repair:' . $gap['user_id'] . ':' . number_format( $amount, 2, '.', '' ),
+					'actor_id'      => 0,
+					'created_at'    => current_time( 'mysql' ),
+				),
+				array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
+			);
+
+			$out[] = array(
+				'user_id'  => $gap['user_id'],
+				'gap'      => $amount,
+				'repaired' => (bool) $inserted,
+			);
+		}
+
+		return $out;
+	}
+
+	/**
+	 * WP-CLI: `wp hsw wallet migrate` and `wp hsw wallet report`.
+	 */
+	public static function register_cli() {
+		if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! class_exists( 'WP_CLI' ) ) {
+			return;
+		}
+
+		WP_CLI::add_command(
+			'hsw wallet migrate',
+			static function ( $args, $assoc ) {
+				$batch = isset( $assoc['batch'] ) ? (int) $assoc['batch'] : self::MIGRATION_BATCH;
+				$force = isset( $assoc['force'] );
+				$out   = self::migrate( $batch, $force );
+
+				WP_CLI::log( sprintf( 'users=%d inserted=%d before=%.2f after=%.2f anomalies=%d', $out['users'], $out['inserted'], $out['total_before'], $out['total_after'], $out['anomalies'] ) );
+
+				$report = self::migration_report();
+				foreach ( (array) ( $report['anomaly_list'] ?? array() ) as $a ) {
+					WP_CLI::log( sprintf( 'user %d: %s used=%.2f raw=%s', $a['user_id'], implode( ',', $a['flags'] ), $a['used'], implode( ' | ', $a['values'] ) ) );
+				}
+
+				WP_CLI::success( 'migration finished' );
+			}
+		);
+
+		WP_CLI::add_command(
+			'hsw wallet report',
+			static function () {
+				$gaps = self::balance_gaps();
+
+				if ( ! $gaps ) {
+					WP_CLI::success( 'balance and ledger agree for every user' );
+					return;
+				}
+
+				foreach ( $gaps as $gap ) {
+					WP_CLI::warning( sprintf( 'user %d balance=%.2f ledger=%.2f diff=%.2f', $gap['user_id'], $gap['balance'], $gap['ledger'], $gap['diff'] ) );
+				}
+
+				WP_CLI::error( sprintf( '%d users differ', count( $gaps ) ), false );
+			}
+		);
+
+		WP_CLI::add_command(
+			'hsw wallet repair',
+			static function ( $args, $assoc ) {
+				$limit = isset( $assoc['limit'] ) ? (int) $assoc['limit'] : 200;
+				$rows  = self::repair_gaps( $limit );
+
+				foreach ( $rows as $row ) {
+					WP_CLI::log( sprintf( 'user %d gap=%.2f %s', $row['user_id'], $row['gap'], $row['repaired'] ? 'repaired' : 'FAILED' ) );
+				}
+
+				WP_CLI::success( sprintf( '%d gaps closed', count( $rows ) ) );
+			}
+		);
 	}
 
 	/* ---------------------------------------------------------------------
 	 * Reading
 	 * ------------------------------------------------------------------ */
 
+	/** @var array<int,float> Per-request balance cache. */
+	private static $balance_cache = array();
+
 	/**
-	 * Current balance. One cached meta read.
+	 * Current balance. One primary-key read (cached per request).
 	 *
 	 * @param int $user_id User.
 	 * @return float
@@ -225,7 +770,56 @@ class HSW_Wallet {
 			return 0.0;
 		}
 
-		return (float) apply_filters( 'hsw_wallet_balance', (float) get_user_meta( $user_id, self::BALANCE_META, true ), $user_id );
+		if ( ! isset( self::$balance_cache[ $user_id ] ) ) {
+			global $wpdb;
+			$table = self::balance_table();
+			$value = $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d", $user_id ) ); // phpcs:ignore WordPress.DB
+
+			if ( null === $value ) {
+				/*
+				 * The table row does not exist. Before the migration finished we
+				 * can still adopt the legacy meta (read-only); afterwards the
+				 * meta is a frozen snapshot and must not resurrect a balance.
+				 */
+				$value = self::migration_done() ? 0.0 : self::adopt_legacy_balance( $user_id );
+			}
+
+			self::$balance_cache[ $user_id ] = (float) $value;
+		}
+
+		return (float) apply_filters( 'hsw_wallet_balance', self::$balance_cache[ $user_id ], $user_id );
+	}
+
+	/**
+	 * Create the table row from the legacy meta when the table has none yet.
+	 *
+	 * @param int $user_id User.
+	 * @return float
+	 */
+	private static function adopt_legacy_balance( $user_id ) {
+		global $wpdb;
+
+		$total = (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				"SELECT COALESCE(SUM(CAST(meta_value AS DECIMAL(18,2))),0) FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s",
+				$user_id,
+				self::BALANCE_META
+			)
+		);
+
+		$table = self::balance_table();
+		$wpdb->query( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
+				$user_id,
+				$total,
+				current_time( 'mysql' )
+			)
+		);
+
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d", $user_id ) ); // phpcs:ignore WordPress.DB
+
+		return null === $value ? $total : (float) $value;
 	}
 
 	/**
@@ -329,16 +923,80 @@ class HSW_Wallet {
 	}
 
 	/**
-	 * Shared write path.
+	 * Set the balance to an exact value (admin edit), atomically.
+	 *
+	 * The admin screen used to read the balance and then send the difference,
+	 * which two managers saving at once could apply twice. One statement here
+	 * replaces the whole read-modify-write cycle.
 	 *
 	 * @param int    $user_id User.
-	 * @param float  $delta   Signed amount.
-	 * @param string $kind    Kind.
-	 * @param string $note    Note.
-	 * @param int    $actor_id Actor.
-	 * @param string $ref     Reference.
+	 * @param float  $target  New balance (>= 0).
+	 * @param string $note    Statement note.
+	 * @param int    $actor_id Admin.
 	 * @return float
 	 */
+	public static function set_balance( $user_id, $target, $note = '', $actor_id = 0 ) {
+		global $wpdb;
+
+		$user_id = absint( $user_id );
+		$target  = max( 0, round( (float) $target, 2 ) );
+		$table   = self::balance_table();
+
+		/* Portable upsert: UPDATE, then INSERT IGNORE, then UPDATE again. */
+		$ok = $wpdb->query( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				"UPDATE {$table} SET balance = %f, updated_at = %s WHERE user_id = %d",
+				$target,
+				current_time( 'mysql' ),
+				$user_id
+			)
+		);
+
+		if ( ! $ok ) {
+			$created = $wpdb->query( // phpcs:ignore WordPress.DB
+				$wpdb->prepare(
+					"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
+					$user_id,
+					$target,
+					current_time( 'mysql' )
+				)
+			);
+
+			if ( ! $created ) {
+				$wpdb->query( // phpcs:ignore WordPress.DB
+					$wpdb->prepare(
+						"UPDATE {$table} SET balance = %f, updated_at = %s WHERE user_id = %d",
+						$target,
+						current_time( 'mysql' ),
+						$user_id
+					)
+				);
+			}
+		}
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			self::table(),
+			array(
+				'user_id'       => $user_id,
+				'amount'        => 0,
+				'balance_after' => $target,
+				'kind'          => 'adjust',
+				'status'        => 'done',
+				'note'          => (string) $note,
+				/* NULL, not '': the unique index allows many NULLs but one ''. */
+				'ref'           => null,
+				'actor_id'      => absint( $actor_id ),
+				'created_at'    => current_time( 'mysql' ),
+			),
+			array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
+		);
+
+		self::$balance_cache[ $user_id ] = $target;
+		wp_cache_delete( $user_id, 'user_meta' );
+		clean_user_cache( $user_id );
+
+		return $target;
+	}
+
 	/**
 	 * Move the balance only — no ledger row.
 	 *
@@ -355,36 +1013,83 @@ class HSW_Wallet {
 	private static function apply_balance( $user_id, $delta, $min = null ) {
 		global $wpdb;
 
-		/*
-		 * Atomic: the arithmetic happens on the stored value, so two requests
-		 * running at the same time cannot both read the old balance.
-		 */
-		$sql  = "UPDATE {$wpdb->usermeta}
-				 SET meta_value = CAST(meta_value AS DECIMAL(18,2)) + %f
-				 WHERE user_id = %d AND meta_key = %s";
-		$args = array( $delta, $user_id, self::BALANCE_META );
+		$table = self::balance_table();
 
-		if ( null !== $min ) {
-			/* The guard lives in the WHERE clause: no window between check and write. */
-			$sql   .= ' AND CAST(meta_value AS DECIMAL(18,2)) >= %f';
-			$args[] = (float) $min;
-		}
+		if ( null === $min ) {
+			/*
+			 * Credit. Two portable statements instead of
+			 * `INSERT … ON DUPLICATE KEY UPDATE … VALUES()`: that syntax is
+			 * deprecated in MySQL 8.0.20 and the replacement (`AS new`) is not
+			 * understood by MariaDB. `UPDATE` first (the common case), then
+			 * `INSERT IGNORE` for the very first credit, then `UPDATE` again if
+			 * another request created the row in between.
+			 */
+			$ok = $wpdb->query( // phpcs:ignore WordPress.DB
+				$wpdb->prepare(
+					"UPDATE {$table} SET balance = balance + %f, updated_at = %s WHERE user_id = %d",
+					$delta,
+					current_time( 'mysql' ),
+					$user_id
+				)
+			);
 
-		$updated = $wpdb->query( $wpdb->prepare( $sql, $args ) ); // phpcs:ignore WordPress.DB
+			if ( ! $ok ) {
+				$created = $wpdb->query( // phpcs:ignore WordPress.DB
+					$wpdb->prepare(
+						"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
+						$user_id,
+						$delta,
+						current_time( 'mysql' )
+					)
+				);
 
-		if ( ! $updated ) {
-			if ( null !== $min ) {
-				/* Either the guard rejected it or the row does not exist yet. */
-				return false;
+				if ( ! $created ) {
+					/* The row appeared between the two statements. */
+					$ok = $wpdb->query( // phpcs:ignore WordPress.DB
+						$wpdb->prepare(
+							"UPDATE {$table} SET balance = balance + %f, updated_at = %s WHERE user_id = %d",
+							$delta,
+							current_time( 'mysql' ),
+							$user_id
+						)
+					);
+				} else {
+					$ok = $created;
+				}
 			}
-			/* First ever transaction: the meta row does not exist yet. */
-			add_user_meta( $user_id, self::BALANCE_META, $delta, true );
+		} else {
+			/* The guard lives in the WHERE clause: no window between check and write. */
+			$ok = $wpdb->query( // phpcs:ignore WordPress.DB
+				$wpdb->prepare(
+					"UPDATE {$table} SET balance = balance - %f, updated_at = %s
+					 WHERE user_id = %d AND balance >= %f",
+					abs( (float) $delta ),
+					current_time( 'mysql' ),
+					$user_id,
+					(float) $min
+				)
+			);
 		}
 
+		if ( ! $ok ) {
+			/* Row missing (debit) or the guard rejected it: not enough money. */
+			return false;
+		}
+
+		$new = (float) $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d", $user_id ) ); // phpcs:ignore WordPress.DB
+
+		/*
+		 * The legacy `_hsw_wallet_balance` meta is deliberately **not** written
+		 * any more: it is the frozen pre-migration snapshot that the rollback
+		 * relies on. A mirror was tried and had to be dropped — under parallel
+		 * writes it ended with several rows and intermediate values, so it was
+		 * never a trustworthy copy of the balance.
+		 */
+		self::$balance_cache[ $user_id ] = $new;
 		wp_cache_delete( $user_id, 'user_meta' );
 		clean_user_cache( $user_id );
 
-		return self::balance( $user_id );
+		return $new;
 	}
 
 	/**
@@ -405,6 +1110,16 @@ class HSW_Wallet {
 			return 0.0;
 		}
 
+		/*
+		 * DECIMAL(18,2) holds up to 10^16 − 0.01. Anything above that used to
+		 * reach MySQL and either raise a range error (debit, reported as "not
+		 * enough money") or be clamped (credit, silently smaller than the
+		 * statement). Reject it before it touches the balance.
+		 */
+		if ( abs( (float) $delta ) >= 1.0e16 ) {
+			return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ وارد‌شده خارج از محدودهٔ مجاز است.', 'hamishop-elementor-widgets' ) );
+		}
+
 		$balance = self::apply_balance( $user_id, $delta, $min );
 
 		if ( false === $balance ) {
@@ -420,7 +1135,8 @@ class HSW_Wallet {
 				'kind'          => substr( sanitize_key( $kind ), 0, 32 ),
 				'status'        => 'done',
 				'note'          => (string) $note,
-				'ref'           => substr( (string) $ref, 0, 64 ),
+				/* NULL, not '': a unique index allows many NULLs but one ''. */
+				'ref'           => '' !== (string) $ref ? substr( (string) $ref, 0, 64 ) : null,
 				'actor_id'      => absint( $actor_id ),
 				'created_at'    => current_time( 'mysql' ),
 			),
@@ -431,9 +1147,21 @@ class HSW_Wallet {
 		 * The balance and the statement must never disagree. If the ledger row
 		 * cannot be written, the balance change is reversed so the wallet holds
 		 * exactly what the statement shows.
+		 *
+		 * A duplicate `ref` is not a failure: the unique index on `ref` is what
+		 * makes a repeated top-up a no-op. The balance is still rolled back and
+		 * the caller gets a distinct error code so it can answer "already done".
 		 */
 		if ( ! $inserted ) {
+			/* Read the error before the rollback query resets `last_error`. */
+			$db_error = (string) $wpdb->last_error;
+
 			self::apply_balance( $user_id, -$delta );
+
+			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
+				return new WP_Error( 'hsw_wallet_duplicate', __( 'این تراکنش قبلاً ثبت شده است.', 'hamishop-elementor-widgets' ) );
+			}
+
 			return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
 		}
 
@@ -478,18 +1206,18 @@ class HSW_Wallet {
 			);
 		}
 
-		/* One open request per customer keeps the admin queue honest. */
-		$open = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare(
-				'SELECT COUNT(*) FROM ' . self::table() . " WHERE user_id = %d AND status = 'pending' AND kind = 'topup'",
-				$user_id
-			)
-		);
-		if ( $open > 0 ) {
+		/*
+		 * One open request per customer, enforced by the unique index on `ref`
+		 * rather than by a `SELECT COUNT()`: the check-then-insert let ten
+		 * simultaneous clicks create ten pending rows. `pending:<user>` can only
+		 * exist once; `decide()` clears it when the request is closed.
+		 */
+		$open = self::open_request_id( $user_id );
+		if ( $open ) {
 			return new WP_Error( 'hsw_wallet_open', __( 'یک درخواست شارژ باز دارید؛ تا بررسی آن صبر کنید.', 'hamishop-elementor-widgets' ) );
 		}
 
-		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			self::table(),
 			array(
 				'user_id'       => $user_id,
@@ -498,14 +1226,46 @@ class HSW_Wallet {
 				'kind'          => 'topup',
 				'status'        => 'pending',
 				'note'          => (string) $note,
-				'ref'           => '',
+				'ref'           => self::open_request_ref( $user_id ),
 				'actor_id'      => 0,
 				'created_at'    => current_time( 'mysql' ),
 			),
 			array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
 		);
 
+		if ( ! $inserted ) {
+			/* Lost the race against another click: the unique index refused it. */
+			return new WP_Error( 'hsw_wallet_open', __( 'یک درخواست شارژ باز دارید؛ تا بررسی آن صبر کنید.', 'hamishop-elementor-widgets' ) );
+		}
+
 		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Reference that marks the single open request of a user.
+	 *
+	 * @param int $user_id User.
+	 * @return string
+	 */
+	private static function open_request_ref( $user_id ) {
+		return 'pending:' . absint( $user_id );
+	}
+
+	/**
+	 * Id of the open request, if any.
+	 *
+	 * @param int $user_id User.
+	 * @return int
+	 */
+	public static function open_request_id( $user_id ) {
+		global $wpdb;
+
+		return (int) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				'SELECT id FROM ' . self::table() . ' WHERE ref = %s LIMIT 1',
+				self::open_request_ref( $user_id )
+			)
+		);
 	}
 
 	/**
@@ -526,25 +1286,53 @@ class HSW_Wallet {
 			return new WP_Error( 'hsw_wallet_state', __( 'این درخواست دیگر در انتظار نیست.', 'hamishop-elementor-widgets' ) );
 		}
 
+		/*
+		 * Claim the row before moving money. The old code checked `pending`,
+		 * credited, and then wrote `done`; two admins (or a double click in two
+		 * tabs) both passed the check and both credited. The WHERE clause makes
+		 * only one of them the winner.
+		 */
+		$claimed = $wpdb->query( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				"UPDATE {$table} SET status = %s, actor_id = %d, note = %s, ref = NULL
+				 WHERE id = %d AND status = 'pending'",
+				$approve ? 'done' : 'rejected',
+				get_current_user_id(),
+				'' !== $note ? $note : (string) $row->note,
+				(int) $row->id
+			)
+		);
+
+		if ( ! $claimed ) {
+			return new WP_Error( 'hsw_wallet_state', __( 'این درخواست دیگر در انتظار نیست.', 'hamishop-elementor-widgets' ) );
+		}
+
 		$balance = (float) $row->balance_after;
 
 		if ( $approve ) {
-			/* The pending row becomes the receipt: move the money, then close it. */
+			/* The pending row becomes the receipt: move the money, then record the total. */
 			$balance = self::apply_balance( (int) $row->user_id, (float) $row->amount );
-		}
 
-		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$table,
-			array(
-				'status'        => $approve ? 'done' : 'rejected',
-				'balance_after' => $balance,
-				'actor_id'      => get_current_user_id(),
-				'note'          => '' !== $note ? $note : (string) $row->note,
-			),
-			array( 'id' => (int) $row->id ),
-			array( '%s', '%f', '%d', '%s' ),
-			array( '%d' )
-		);
+			if ( false === $balance ) {
+				/* Nothing moved: put the request back (with its claim ref) so the admin can retry. */
+				$wpdb->query( // phpcs:ignore WordPress.DB
+					$wpdb->prepare(
+						"UPDATE {$table} SET status = 'pending', ref = %s WHERE id = %d",
+						self::open_request_ref( (int) $row->user_id ),
+						(int) $row->id
+					)
+				);
+				return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ این درخواست قابل اعمال نیست.', 'hamishop-elementor-widgets' ) );
+			}
+
+			$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$table,
+				array( 'balance_after' => $balance ),
+				array( 'id' => (int) $row->id ),
+				array( '%f' ),
+				array( '%d' )
+			);
+		}
 
 		do_action( 'hsw_wallet_request_decided', (int) $row->id, (bool) $approve, (int) $row->user_id );
 
@@ -563,9 +1351,27 @@ class HSW_Wallet {
 	 */
 	public static function points_available( $user_id ) {
 		$earned = HSW_Account::instance()->loyalty_points( $user_id );
-		$used   = (int) get_user_meta( absint( $user_id ), self::POINTS_META, true );
+		$used   = self::points_used( $user_id );
 
 		return max( 0, $earned - $used );
+	}
+
+	/**
+	 * How many points this user already converted.
+	 *
+	 * Kept in the balance table (`points_used`) rather than in usermeta: the
+	 * claim must be a single conditional `UPDATE`, and usermeta has no unique
+	 * key to build one on.
+	 *
+	 * @param int $user_id User.
+	 * @return int
+	 */
+	public static function points_used( $user_id ) {
+		global $wpdb;
+
+		$table = self::balance_table();
+
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT points_used FROM {$table} WHERE user_id = %d", absint( $user_id ) ) ); // phpcs:ignore WordPress.DB
 	}
 
 	/**
@@ -576,6 +1382,8 @@ class HSW_Wallet {
 	 * @return float|WP_Error New balance.
 	 */
 	public static function convert_points( $user_id, $points ) {
+		global $wpdb;
+
 		$user_id = absint( $user_id );
 		$points  = absint( $points );
 
@@ -597,11 +1405,47 @@ class HSW_Wallet {
 
 		$per_point = max( 1, (int) HSW_Account::instance()->setting( 'wallet.point_value', 100 ) );
 		$money     = $points * $per_point;
+		$table     = self::balance_table();
+		$earned    = max( 0, (int) HSW_Account::instance()->loyalty_points( $user_id ) );
 
-		$used = (int) get_user_meta( $user_id, self::POINTS_META, true );
-		update_user_meta( $user_id, self::POINTS_META, $used + $points );
+		/*
+		 * Claim the points with one conditional UPDATE. The previous version
+		 * read `_hsw_points_used`, added the amount and then wrote it back, so
+		 * two requests could spend the same points; the unique ledger ref that
+		 * guarded the payout also refused *legitimate* parallel conversions
+		 * (four parallel 100-point requests with 1000 points available paid out
+		 * three times instead of four).
+		 */
+		$wpdb->query( // phpcs:ignore WordPress.DB
+			$wpdb->prepare( "INSERT IGNORE INTO {$table} (user_id, balance, points_used, updated_at) VALUES (%d, 0, 0, %s)", $user_id, current_time( 'mysql' ) )
+		);
 
-		return self::credit(
+		$claimed = $wpdb->query( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				"UPDATE {$table} SET points_used = points_used + %d, updated_at = %s
+				 WHERE user_id = %d AND points_used + %d <= %d",
+				$points,
+				current_time( 'mysql' ),
+				$user_id,
+				$points,
+				$earned
+			)
+		);
+
+		if ( ! $claimed ) {
+			return new WP_Error(
+				'hsw_points_short',
+				sprintf(
+					/* translators: %s: available points. */
+					__( 'فقط %s امتیاز قابل تبدیل دارید.', 'hamishop-elementor-widgets' ),
+					HSW_Helpers::fa_num( self::points_available( $user_id ) )
+				)
+			);
+		}
+
+		$used_after = self::points_used( $user_id );
+
+		$credited = self::credit(
 			$user_id,
 			$money,
 			'points',
@@ -611,6 +1455,17 @@ class HSW_Wallet {
 				HSW_Helpers::fa_num( $points )
 			)
 		);
+
+		if ( is_wp_error( $credited ) ) {
+			/* Give the points back: no money moved. */
+			$wpdb->query( // phpcs:ignore WordPress.DB
+				$wpdb->prepare( "UPDATE {$table} SET points_used = points_used - %d WHERE user_id = %d", $points, $user_id )
+			);
+
+			return $credited;
+		}
+
+		return $credited;
 	}
 
 	/* ---------------------------------------------------------------------

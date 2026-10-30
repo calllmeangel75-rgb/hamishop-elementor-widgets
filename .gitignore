@@ -10,4 +10,5 @@ tests/_lh-*.json
 # probe artefacts (screenshots / harness logs)
 tests/_shot-*.png
 tests/_h.txt
+tests/qa/out/
 

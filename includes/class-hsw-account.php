@@ -2943,7 +2943,8 @@ final class HSW_Account {
 
 	public function wallet_balance( $user_id = 0 ) {
 		$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
-		$balance = (float) get_user_meta( $user_id, '_hsw_wallet_balance', true );
+		/* The wallet table is the only source; the legacy meta is a frozen snapshot. */
+		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user_id ) : 0.0;
 		return (float) apply_filters( 'hsw_account_wallet_balance', $balance, $user_id );
 	}
 

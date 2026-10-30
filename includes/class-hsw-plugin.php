@@ -41,6 +41,7 @@ final class HSW_Plugin {
                 HSW_Throttle::instance();
                 HSW_Wallet::instance();
                 new HSW_Wallet_Topup();
+                new HSW_Wallet_Refunds();
                 new HSW_Free_Shipping();
                 new HSW_404();
                 new HSW_Pagination();

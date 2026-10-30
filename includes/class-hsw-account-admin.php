@@ -774,7 +774,7 @@ final class HSW_Account_Admin {
 		if ( ! current_user_can( 'edit_user', $user->ID ) ) {
 			return;
 		}
-		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user->ID ) : (float) get_user_meta( $user->ID, '_hsw_wallet_balance', true );
+		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user->ID ) : 0.0;
 		wp_nonce_field( 'hsw_account_user_' . $user->ID, 'hsw_account_user_nonce' );
 		?>
 		<h2>حساب HamiShop</h2>
@@ -809,30 +809,22 @@ final class HSW_Account_Admin {
 			$target  = max( 0, round( (float) $raw, 2 ) );
 
 			if ( ! class_exists( 'HSW_Wallet' ) ) {
-				update_user_meta( $user_id, '_hsw_wallet_balance', $target );
+				/* No wallet class, no balance to set. Writing the legacy meta
+				 * here would corrupt the frozen pre-migration snapshot. */
 				return;
 			}
 
-			$current = HSW_Wallet::balance( $user_id );
-			$delta   = round( $target - $current, 2 );
-
-			if ( $delta > 0 ) {
-				HSW_Wallet::credit(
-					$user_id,
-					$delta,
-					'admin',
-					__( 'تنظیم دستی موجودی توسط مدیر', 'hamishop-elementor-widgets' ),
-					get_current_user_id()
-				);
-			} elseif ( $delta < 0 ) {
-				HSW_Wallet::debit(
-					$user_id,
-					abs( $delta ),
-					'admin',
-					__( 'تنظیم دستی موجودی توسط مدیر', 'hamishop-elementor-widgets' ),
-					get_current_user_id()
-				);
-			}
+			/*
+			 * One atomic write. The previous code read the balance and sent the
+			 * difference through credit()/debit(); two managers saving the same
+			 * form at once could apply both deltas.
+			 */
+			HSW_Wallet::set_balance(
+				$user_id,
+				$target,
+				__( 'تنظیم دستی موجودی توسط مدیر', 'hamishop-elementor-widgets' ),
+				get_current_user_id()
+			);
 		}
 	}
 

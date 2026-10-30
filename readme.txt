@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.174
+Stable tag: 1.11.175
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,16 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.175 =
+* **آماده‌سازی لایو: مهاجرت دسته‌ای موجودی، بازگشت وجه، امتیاز اتمیک و تست‌های موازی.**
+  - **مهاجرت `usermeta` → `{prefix}hsw_wallet`:** دسته‌ای (۲۰۰ کاربر)، idempotent (`INSERT IGNORE`)، متای قدیمی دست‌نخورده + پشتیبان خام در `{prefix}hsw_wallet_meta_backup`. ردیف‌های تکراری **جمع** می‌شوند و با مقادیر خام در گزارش می‌آیند (خالی/غیرعددی/ارقام فارسی/اعشاری جدا برچسب می‌خورند). ابزار: `wp hsw wallet migrate|report|repair`.
+  - **بازگشت وجه:** لغو یا ریفاند سفارشِ پرداخت‌شده با کیف پول، پول را برمی‌گرداند (`refund:<order>:full` و `refund:<order>:<refund_id>`)، idempotent و با سقف مبلغ پرداخت‌شده.
+  - **TOCTOU شارژ:** درخواست pending با `ref = pending:<user>` یکتا می‌شود؛ ده کلیک هم‌زمان = یک درخواست.
+  - **امتیاز:** شمارنده به ستون `points_used` منتقل و با `UPDATE … WHERE points_used + n <= earned` اتمیک claim می‌شود.
+  - **`VALUES()`:** حذف شد؛ الگوی سازگار با MySQL 8.0.20+ و MariaDB.
+  - **آینهٔ متا:** حذف شد؛ متا فقط snapshot پیش از مهاجرت است و هیچ کدی آن را نمی‌خواند.
+  - **تست‌ها:** `tests/qa/migration-5000.php` (۵۰۰۰ کاربر ساختگی، ۲۱ سنجه)، `wallet-paths.php` (۲۵)، `rest-parallel.php` (۸)، `sql-compat.php` (۱۲)، `hpos.php`؛ کار CI تازهٔ `mysql8`.
 
 = 1.11.174 =
 * **انتشار دستی ۱.۱۱.۱۷۴ — نتیجهٔ بازبینی همکار: چهار ریسک واقعی بسته شد + اصلاح اعداد مستندات.**
