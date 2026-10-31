@@ -49,6 +49,31 @@ class HSW_Wallet {
 		add_action( 'admin_menu', array( $this, 'menu' ), 14 );
 		add_action( 'admin_post_hsw_wallet_action', array( $this, 'handle_admin_action' ) );
 		add_action( 'rest_api_init', array( $this, 'routes' ) );
+		add_action( 'admin_notices', array( $this, 'install_failed_notice' ) );
+		/*
+		 * Registering the CLI here, not at the tail of maybe_install(): on an
+		 * installed site that method returns before its tail (schema version
+		 * already current), which meant `wp hsw wallet …` never existed.
+		 */
+		self::register_cli();
+	}
+
+	/**
+	 * Tell the shop owner the wallet tables could not be created.
+	 *
+	 * The schema version is only stamped after `SHOW TABLES` confirms all
+	 * three tables, so a failed install retries on the next `init` — but
+	 * without this notice the admin would only find out when checkout breaks.
+	 */
+	public function install_failed_notice() {
+		if ( '1' !== get_option( 'hsw_wallet_install_failed' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+		printf(
+			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
+			esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
+			esc_html__( 'جدول‌های کیف پول ساخته نشدند (احتمالاً نسخه/حالت MySQL قدیمی است). هر بار تلاش دوباره خودکار انجام می‌شود؛ خطای دقیق در error_log سرور ثبت شده است.', 'hamishop-elementor-widgets' )
+		);
 	}
 
 	/* ---------------------------------------------------------------------
@@ -290,11 +315,12 @@ class HSW_Wallet {
 
 		if ( ! $installed ) {
 			error_log( 'HamiShop wallet: table creation failed; will retry on the next request.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			update_option( 'hsw_wallet_install_failed', '1', false );
 			return;
 		}
 
+		delete_option( 'hsw_wallet_install_failed' );
 		self::migrate();
-		self::register_cli();
 
 		update_option( 'hsw_wallet_db', self::DB_VERSION, false );
 	}
@@ -368,7 +394,10 @@ class HSW_Wallet {
 			'total_before' => (float) ( $report['total_before'] ?? 0 ),
 			'total_after'  => (float) ( $report['total_after'] ?? 0 ),
 			'anomalies'    => (int) ( $report['anomalies'] ?? 0 ),
-			'done'         => true,
+			/* Must be FALSE until the loop finishes: the old true-upfront made
+			 * migration_done() flip mid-run, which stopped resumes and turned
+			 * legacy adoption off for every not-yet-migrated user. */
+			'done'         => false,
 			'last_user'    => $state,
 			'anomaly_list' => (array) ( $report['anomaly_list'] ?? array() ),
 			'ran_at'       => current_time( 'mysql' ),
@@ -448,18 +477,40 @@ class HSW_Wallet {
 					$flags[] = 'duplicate-differing';
 				}
 
-				$sum = round( $sum, 2 );
-				$stats['total_before'] += $sum;
-				$stats['users']++;
+					$sum = round( $sum, 2 );
+					$stats['total_before'] += $sum;
+					$stats['users']++;
 
-				$inserted = $wpdb->query( // phpcs:ignore WordPress.DB
-					$wpdb->prepare(
-						"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
-						$uid,
-						$sum,
-						current_time( 'mysql' )
-					)
-				);
+					if ( $sum >= 1.0e16 ) {
+						/* Garbage legacy values exist in the wild (a live site
+						 * carried 99999999999999999 in its meta). The normal
+						 * INSERT would clamp them to 1e16 on non-strict MySQL
+						 * and hand a customer ten quadrillion tomans. Skip the
+						 * row entirely and flag it for a human decision.
+						 * The continue must NOT skip the anomaly counter, so
+						 * the counters are updated here before jumping. */
+						$flags[]           = 'legacy-above-range';
+						$stats['anomalies']++;
+						if ( count( $stats['anomaly_list'] ) < 500 ) {
+							$stats['anomaly_list'][] = array(
+								'user_id' => $uid,
+								'flags'   => array( 'legacy-above-range' ),
+								'values'  => $values,
+								'used'    => $sum,
+							);
+						}
+						continue;
+					}
+
+					$inserted = $wpdb->query( // phpcs:ignore WordPress.DB
+						$wpdb->prepare(
+							"INSERT IGNORE INTO {$table} (user_id, balance, points_used, updated_at) VALUES (%d, %f, %d, %s)",
+							$uid,
+							$sum,
+							(int) get_user_meta( $uid, self::POINTS_META, true ),
+							current_time( 'mysql' )
+						)
+					);
 
 				if ( $inserted ) {
 					$stats['inserted']++;
@@ -491,8 +542,62 @@ class HSW_Wallet {
 				} else {
 					/* The row already existed (re-run, or a balance was written
 					 * after the migration started): trust the table. */
-					$current = $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d", $uid ) ); // phpcs:ignore WordPress.DB
-					$stats['total_after'] += (float) $current;
+					$current = (float) $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d", $uid ) ); // phpcs:ignore WordPress.DB
+					$stats['total_after'] += $current;
+
+					/*
+					 * A row without its opening line needs a second look. Two
+					 * different worlds produce it while the site is live:
+					 *  a) balance() adopted the legacy sum first (row == legacy):
+					 *     the money is real, only the `migrate:<uid>` line is
+					 *     missing — the gap (balance − done ledger) is exactly
+					 *     that amount, so write the missing line;
+					 *  b) a first wallet write landed between the batch SELECT
+					 *     and this INSERT IGNORE (row == the write only): the
+					 *     legacy money never made it into the balance — the gap
+					 *     is zero while the legacy sum is not, so credit it
+					 *     under the same unique reference.
+					 * The `migrate:<uid>` ref keeps both repairs idempotent: a
+					 * re-run never adds a second one.
+					 */
+					$opening = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB
+						$wpdb->prepare( 'SELECT id FROM ' . self::table() . ' WHERE ref = %s LIMIT 1', 'migrate:' . $uid )
+					);
+					if ( ! $opening && $sum >= 0.01 ) {
+						$ledger_sum = (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+							$wpdb->prepare( "SELECT COALESCE(SUM(amount),0) FROM " . self::table() . " WHERE user_id = %d AND status = 'done'", $uid )
+						);
+						$gap = round( $current - $ledger_sum, 2 );
+						$flags[] = 'premature-row';
+
+						if ( $gap >= 0.01 ) {
+							/* Case a: real money, missing statement line. */
+							$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+								self::table(),
+								array(
+									'user_id'       => $uid,
+									'amount'        => $gap,
+									'balance_after' => $current,
+									'kind'          => 'migrate',
+									'status'        => 'done',
+									'note'          => __( 'افتتاح حساب مهاجرت‌شده (ردیف پیش از مهاجرت ساخته شده بود)', 'hamishop-elementor-widgets' ),
+									'ref'           => 'migrate:' . $uid,
+									'actor_id'      => 0,
+									'created_at'    => current_time( 'mysql' ),
+								),
+								array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
+							);
+						} elseif ( abs( $gap ) < 0.01 ) {
+							/* Case b: legacy money missing from the balance.
+							 * (Garbage ≥1e16 values never reach this point: the
+							 * normal-path guard above already flagged them.) */
+							self::credit( $uid, $sum, 'migrate', __( 'بازیابی موجودی قدیمی (ردیف در میانهٔ مهاجرت ساخته شده بود)', 'hamishop-elementor-widgets' ), 0, 'migrate:' . $uid );
+							$stats['total_after'] += $sum;
+							$flags[] = 'legacy-recovered';
+						}
+						/* A negative gap is a real discrepancy: visible in
+						 * balance_gaps, never auto-written (see repair_gaps). */
+					}
 				}
 
 				if ( $flags ) {
@@ -705,21 +810,55 @@ class HSW_Wallet {
 			 * repair's unique ref (which used to leave the gap unfixable
 			 * forever).
 			 */
+			/*
+			 * H2: lock the user's row, re-verify the gap under the lock (the
+			 * snapshot from balance_gaps may be stale), then write. The
+			 * reference is built from the USER'S last ledger id — the global
+			 * MAX(id) changed with every other user's write, making the same
+			 * user's gap produce a different ref on each attempt.
+			 */
+			self::transaction_begin();
+
+			$locked_balance = $wpdb->get_var( // phpcs:ignore WordPress.DB
+				$wpdb->prepare( 'SELECT balance FROM ' . self::balance_table() . ' WHERE user_id = %d FOR UPDATE', $gap['user_id'] )
+			);
+			$ledger_sum = (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+				$wpdb->prepare( "SELECT COALESCE(SUM(amount),0) FROM " . self::table() . " WHERE user_id = %d AND status = 'done'", $gap['user_id'] )
+			);
+			$gap_now = round( (float) $locked_balance - $ledger_sum, 2 );
+
+			if ( null === $locked_balance || $gap_now < 0.01 || abs( $gap_now - $amount ) >= 0.01 ) {
+				/* The gap changed under us, or is no longer a positive one:
+				 * leave it to the next report instead of writing blind. */
+				self::transaction_rollback();
+				$out[] = array(
+					'user_id'  => $gap['user_id'],
+					'gap'      => $amount,
+					'repaired' => false,
+				);
+				continue;
+			}
+
+			$last_user_row = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB
+				$wpdb->prepare( 'SELECT COALESCE(MAX(id),0) FROM ' . self::table() . ' WHERE user_id = %d', $gap['user_id'] )
+			);
 			$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				self::table(),
 				array(
 					'user_id'       => $gap['user_id'],
 					'amount'        => $amount,
-					'balance_after' => $gap['balance'],
+					'balance_after' => $locked_balance,
 					'kind'          => 'repair',
 					'status'        => 'done',
 					'note'          => __( 'ترمیم خودکار دفتر کیف پول (اختلاف با موجودی)', 'hamishop-elementor-widgets' ),
-					'ref'           => 'repair:' . $gap['user_id'] . ':' . number_format( $amount, 2, '.', '' ) . ':' . current_time( 'YmdHis' ),
+					'ref'           => 'repair:' . $gap['user_id'] . ':' . number_format( $amount, 2, '.', '' ) . ':' . $last_user_row,
 					'actor_id'      => 0,
 					'created_at'    => current_time( 'mysql' ),
 				),
 				array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
 			);
+
+			self::transaction_commit();
 
 			$out[] = array(
 				'user_id'  => $gap['user_id'],
@@ -797,6 +936,62 @@ class HSW_Wallet {
 	/** @var array<int,float> Per-request balance cache. */
 	private static $balance_cache = array();
 
+	/** @var int Nesting depth of open wallet transactions. */
+	private static $tx_depth = 0;
+
+	/** @var array<int,array{0:string,1:array}> do_action() calls deferred until COMMIT. */
+	private static $hook_queue = array();
+
+	/**
+	 * Open a wallet transaction. Nesting-safe: only the outermost frame talks
+	 * to MySQL, inner frames ride along — so apply() can be transaction-aware
+	 * on its own AND stay correct inside decide()/convert_points().
+	 */
+	public static function transaction_begin() {
+		global $wpdb;
+		if ( 0 === self::$tx_depth ) {
+			$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB
+		}
+		self::$tx_depth++;
+	}
+
+	/** Commit only at depth zero; queued hooks (J3) fire after the COMMIT. */
+	public static function transaction_commit() {
+		global $wpdb;
+		self::$tx_depth = max( 0, self::$tx_depth - 1 );
+		if ( 0 === self::$tx_depth ) {
+			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB
+			self::flush_hook_queue();
+		}
+	}
+
+	/** Roll back only at depth zero; queued hooks are dropped with the money. */
+	public static function transaction_rollback() {
+		global $wpdb;
+		self::$tx_depth = max( 0, self::$tx_depth - 1 );
+		if ( 0 === self::$tx_depth ) {
+			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB
+			self::$hook_queue = array();
+		}
+	}
+
+	private static function queue_hook( $hook, ...$args ) {
+		if ( self::$tx_depth > 0 ) {
+			self::$hook_queue[] = array( $hook, $args );
+			return;
+		}
+		do_action( $hook, ...$args );
+	}
+
+	/** Fire the hooks that were queued inside a committed transaction. */
+	public static function flush_hook_queue() {
+		$queue = self::$hook_queue;
+		self::$hook_queue = array();
+		foreach ( $queue as $entry ) {
+			do_action( $entry[0], ...$entry[1] );
+		}
+	}
+
 	/**
 	 * Current balance. One primary-key read (cached per request).
 	 *
@@ -838,20 +1033,43 @@ class HSW_Wallet {
 	private static function adopt_legacy_balance( $user_id ) {
 		global $wpdb;
 
-		$total = (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+		/*
+		 * Parse through the same normalizer the migration uses: the old CAST
+		 * (… AS DECIMAL) read Persian-digit balances as 0 and silently clamped
+		 * a garbage 99999999999999999 into a ten-quadrillion wallet row.
+		 */
+		$rows  = (array) $wpdb->get_results( // phpcs:ignore WordPress.DB
 			$wpdb->prepare(
-				"SELECT COALESCE(SUM(CAST(meta_value AS DECIMAL(18,2))),0) FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s",
+				"SELECT meta_value FROM {$wpdb->usermeta} WHERE user_id = %d AND meta_key = %s",
 				$user_id,
 				self::BALANCE_META
 			)
 		);
+		$total = 0.0;
+		foreach ( $rows as $row ) {
+			$parsed = self::parse_legacy_amount( $row->meta_value );
+			if ( null === $parsed ) {
+				error_log( sprintf( 'HamiShop wallet: user %d has a non-numeric legacy balance, adopting 0 until the migration reports it.', $user_id ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+				continue;
+			}
+			$total += $parsed;
+		}
+		$total = round( $total, 2 );
+
+		if ( $total >= 1.0e16 ) {
+			/* Never build a row out of garbage — the migration's
+			 * legacy-above-range flag is the human decision point. */
+			error_log( sprintf( 'HamiShop wallet: user %d legacy balance %s is out of range; no row created.', $user_id, $total ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			return 0.0;
+		}
 
 		$table = self::balance_table();
 		$wpdb->query( // phpcs:ignore WordPress.DB
 			$wpdb->prepare(
-				"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
+				"INSERT IGNORE INTO {$table} (user_id, balance, points_used, updated_at) VALUES (%d, %f, %d, %s)",
 				$user_id,
 				$total,
+				(int) get_user_meta( $user_id, self::POINTS_META, true ),
 				current_time( 'mysql' )
 			)
 		);
@@ -974,7 +1192,7 @@ class HSW_Wallet {
 	 * @param int    $actor_id Admin.
 	 * @return float
 	 */
-	public static function set_balance( $user_id, $target, $note = '', $actor_id = 0 ) {
+	public static function set_balance( $user_id, $target, $note = '', $actor_id = 0, $orig = null ) {
 		global $wpdb;
 
 		$user_id = absint( $user_id );
@@ -982,51 +1200,76 @@ class HSW_Wallet {
 		$table   = self::balance_table();
 
 		/*
-		 * Same ceiling apply() enforces for credit/debit (wallet.php:1119).
-		 * Without it an admin typo like 1e18 sailed through: the DECIMAL(18,2)
-		 * column silently clamped the stored value, the returned value stayed
-		 * 1e18 and the ledger row recorded a third number.
+		 * Same ceiling apply() enforces for credit/debit. Without it an admin
+		 * typo like 1e18 sailed through: the DECIMAL(18,2) column silently
+		 * clamped the stored value, the returned value stayed 1e18 and the
+		 * ledger row recorded a third number.
 		 */
 		if ( $target >= 1.0e16 ) {
 			return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ وارد‌شده خارج از محدودهٔ مجاز است.', 'hamishop-elementor-widgets' ) );
 		}
 
-		/* Portable upsert: UPDATE, then INSERT IGNORE, then UPDATE again. */
-		$ok = $wpdb->query( // phpcs:ignore WordPress.DB
-			$wpdb->prepare(
-				"UPDATE {$table} SET balance = %f, updated_at = %s WHERE user_id = %d",
-				$target,
-				current_time( 'mysql' ),
-				$user_id
-			)
-		);
+		/*
+		 * Compare-and-set under a row lock (A + H3): the admin form carries the
+		 * balance it was rendered with (`$orig`). If the customer topped up (or
+		 * spent) between opening the form and saving it, the save used to
+		 * overwrite that movement — money vanished. Now the row is locked, the
+		 * original compared, the difference recorded as the adjust amount, and
+		 * a stale save fails loudly instead of quietly winning.
+		 */
+		self::transaction_begin();
 
-		if ( ! $ok ) {
+		$current = $wpdb->get_var( $wpdb->prepare( "SELECT balance FROM {$table} WHERE user_id = %d FOR UPDATE", $user_id ) ); // phpcs:ignore WordPress.DB
+
+		if ( null === $current ) {
+			if ( null !== $orig && round( (float) $orig, 2 ) > 0 ) {
+				self::transaction_rollback();
+				return new WP_Error( 'hsw_wallet_stale', __( 'موجودی از زمان باز شدن فرم تغییر کرده است؛ صفحه را دوباره بارگذاری کنید.', 'hamishop-elementor-widgets' ) );
+			}
 			$created = $wpdb->query( // phpcs:ignore WordPress.DB
 				$wpdb->prepare(
-					"INSERT IGNORE INTO {$table} (user_id, balance, updated_at) VALUES (%d, %f, %s)",
+					"INSERT INTO {$table} (user_id, balance, points_used, updated_at) VALUES (%d, %f, 0, %s)",
 					$user_id,
 					$target,
 					current_time( 'mysql' )
 				)
 			);
-
 			if ( ! $created ) {
-				$wpdb->query( // phpcs:ignore WordPress.DB
-					$wpdb->prepare(
-						"UPDATE {$table} SET balance = %f, updated_at = %s WHERE user_id = %d",
-						$target,
-						current_time( 'mysql' ),
-						$user_id
-					)
-				);
+				self::transaction_rollback();
+				return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت موجودی ناموفق بود.', 'hamishop-elementor-widgets' ) );
 			}
+			$amount = $target;
+		} else {
+			$current = round( (float) $current, 2 );
+			if ( null !== $orig && round( (float) $orig, 2 ) !== $current ) {
+				self::transaction_rollback();
+				return new WP_Error( 'hsw_wallet_stale', __( 'موجودی از زمان باز شدن فرم تغییر کرده است؛ صفحه را دوباره بارگذاری کنید.', 'hamishop-elementor-widgets' ) );
+			}
+			if ( null === $orig && $current === $target ) {
+				/* Nothing to change; no adjust row for a no-op. */
+				self::transaction_commit();
+				return $target;
+			}
+			$updated = $wpdb->query( // phpcs:ignore WordPress.DB
+				$wpdb->prepare(
+					"UPDATE {$table} SET balance = %f, updated_at = %s WHERE user_id = %d",
+					$target,
+					current_time( 'mysql' ),
+					$user_id
+				)
+			);
+			if ( ! $updated ) {
+				self::transaction_rollback();
+				return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت موجودی ناموفق بود.', 'hamishop-elementor-widgets' ) );
+			}
+			$amount = round( $target - $current, 2 );
 		}
-		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+		$recorded = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			self::table(),
 			array(
 				'user_id'       => $user_id,
-				'amount'        => 0,
+				'amount'        => $amount,
 				'balance_after' => $target,
 				'kind'          => 'adjust',
 				'status'        => 'done',
@@ -1038,6 +1281,12 @@ class HSW_Wallet {
 			),
 			array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
 		);
+		if ( ! $recorded ) {
+			self::transaction_rollback();
+			return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت تراکنش تنظیم موجودی ناموفق بود.', 'hamishop-elementor-widgets' ) );
+		}
+
+		self::transaction_commit();
 
 		self::$balance_cache[ $user_id ] = $target;
 		wp_cache_delete( $user_id, 'user_meta' );
@@ -1169,9 +1418,35 @@ class HSW_Wallet {
 			return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ وارد‌شده خارج از محدودهٔ مجاز است.', 'hamishop-elementor-widgets' ) );
 		}
 
+		/*
+		 * A reference longer than the column used to be silently truncated to
+		 * 64 chars — two different long refs could collide on the unique
+		 * index and a legitimate operation was rejected as "duplicate".
+		 * Fail loudly instead of shortening money metadata.
+		 */
+		if ( '' !== (string) $ref && strlen( (string) $ref ) > 64 ) {
+			return new WP_Error( 'hsw_wallet_ref', __( 'شناسهٔ تراکنش بیش از حد مجاز طولانی است.', 'hamishop-elementor-widgets' ) );
+		}
+
+		/*
+		 * Transaction-aware (H1): the balance write and its statement row are
+		 * all-or-nothing even for standalone credit()/debit() calls. Inside an
+		 * outer frame (decide, convert_points, process_payment) the depth
+		 * counter joins the outer transaction instead of committing early.
+		 * A death anywhere before COMMIT rolls the pair back together.
+		 */
+		self::transaction_begin();
+
 		$balance = self::apply_balance( $user_id, $delta, $min );
 
 		if ( false === $balance ) {
+			/* J4: a real DB error (deadlock, …) is not "not enough money". */
+			$db_error = (string) $wpdb->last_error;
+			self::transaction_rollback();
+
+			if ( '' !== $db_error ) {
+				return new WP_Error( 'hsw_wallet_db', __( 'خطای پایگاه‌داده در ثبت تراکنش کیف پول؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
+			}
 			return new WP_Error( 'hsw_wallet_short', __( 'موجودی کیف پول کافی نیست.', 'hamishop-elementor-widgets' ) );
 		}
 
@@ -1185,27 +1460,18 @@ class HSW_Wallet {
 				'status'        => 'done',
 				'note'          => (string) $note,
 				/* NULL, not '': a unique index allows many NULLs but one ''. */
-				'ref'           => '' !== (string) $ref ? substr( (string) $ref, 0, 64 ) : null,
+				'ref'           => '' !== (string) $ref ? (string) $ref : null,
 				'actor_id'      => absint( $actor_id ),
 				'created_at'    => current_time( 'mysql' ),
 			),
 			array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
 		);
 
-		/*
-		 * The balance and the statement must never disagree. If the ledger row
-		 * cannot be written, the balance change is reversed so the wallet holds
-		 * exactly what the statement shows.
-		 *
-		 * A duplicate `ref` is not a failure: the unique index on `ref` is what
-		 * makes a repeated top-up a no-op. The balance is still rolled back and
-		 * the caller gets a distinct error code so it can answer "already done".
-		 */
 		if ( ! $inserted ) {
-			/* Read the error before the rollback query resets `last_error`. */
+			/* Read the error before the rollback resets `last_error`. */
 			$db_error = (string) $wpdb->last_error;
 
-			self::apply_balance( $user_id, -$delta );
+			self::transaction_rollback();
 
 			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
 				return new WP_Error( 'hsw_wallet_duplicate', __( 'این تراکنش قبلاً ثبت شده است.', 'hamishop-elementor-widgets' ) );
@@ -1214,7 +1480,11 @@ class HSW_Wallet {
 			return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
 		}
 
-		do_action( 'hsw_wallet_changed', $user_id, $delta, $balance, $kind );
+		self::transaction_commit();
+
+		/* J3: inside a transaction the hook is queued and fires after COMMIT,
+		 * so an email/SMS listener can never announce a rolled-back movement. */
+		self::queue_hook( 'hsw_wallet_changed', $user_id, $delta, $balance, $kind );
 
 		return $balance;
 	}
@@ -1253,6 +1523,12 @@ class HSW_Wallet {
 					number_format( $min )
 				)
 			);
+		}
+		if ( $amount >= 1.0e16 ) {
+			/* The DECIMAL(18,2) column would silently clamp this (non-strict
+			 * MariaDB) or fail the insert with a misleading "open request"
+			 * error — reject it here, before the pending row exists. */
+			return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ وارد‌شده خارج از محدودهٔ مجاز است.', 'hamishop-elementor-widgets' ) );
 		}
 
 		/*
@@ -1340,7 +1616,16 @@ class HSW_Wallet {
 		 * credited, and then wrote `done`; two admins (or a double click in two
 		 * tabs) both passed the check and both credited. The WHERE clause makes
 		 * only one of them the winner.
+		 *
+		 * Claim + credit + receipt now run inside ONE InnoDB transaction. A
+		 * process death before COMMIT rolls the claim back with the credit, so
+		 * the request stays pending and the admin can simply retry — the old
+		 * "marked done but never credited" window (which repair_gaps then used
+		 * to paper over) is gone. The manual "put the request back" UPDATE is
+		 * no longer needed: ROLLBACK restores the claimed row by itself.
 		 */
+		self::transaction_begin();
+
 		$claimed = $wpdb->query( // phpcs:ignore WordPress.DB
 			$wpdb->prepare(
 				"UPDATE {$table} SET status = %s, actor_id = %d, note = %s, ref = NULL
@@ -1353,6 +1638,7 @@ class HSW_Wallet {
 		);
 
 		if ( ! $claimed ) {
+			self::transaction_rollback();
 			return new WP_Error( 'hsw_wallet_state', __( 'این درخواست دیگر در انتظار نیست.', 'hamishop-elementor-widgets' ) );
 		}
 
@@ -1363,25 +1649,27 @@ class HSW_Wallet {
 			$balance = self::apply_balance( (int) $row->user_id, (float) $row->amount );
 
 			if ( false === $balance ) {
-				/* Nothing moved: put the request back (with its claim ref) so the admin can retry. */
-				$wpdb->query( // phpcs:ignore WordPress.DB
-					$wpdb->prepare(
-						"UPDATE {$table} SET status = 'pending', ref = %s WHERE id = %d",
-						self::open_request_ref( (int) $row->user_id ),
-						(int) $row->id
-					)
-				);
+				/* Nothing moved: ROLLBACK also un-claims the request, so it
+				 * stays pending with its `pending:<user>` ref for a retry. */
+				self::transaction_rollback();
 				return new WP_Error( 'hsw_wallet_amount', __( 'مبلغ این درخواست قابل اعمال نیست.', 'hamishop-elementor-widgets' ) );
 			}
 
-			$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			/* J2: a failed receipt write must not pass silently. */
+			$recorded = $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$table,
 				array( 'balance_after' => $balance ),
 				array( 'id' => (int) $row->id ),
 				array( '%f' ),
 				array( '%d' )
 			);
+			if ( false === $recorded ) {
+				self::transaction_rollback();
+				return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت رسید درخواست ناموفق بود؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
+			}
 		}
+
+		self::transaction_commit();
 
 		do_action( 'hsw_wallet_request_decided', (int) $row->id, (bool) $approve, (int) $row->user_id );
 
@@ -1453,6 +1741,17 @@ class HSW_Wallet {
 		}
 
 		$per_point = max( 1, (int) HSW_Account::instance()->setting( 'wallet.point_value', 100 ) );
+
+		/*
+		 * The seed INSERT below creates a zero-balance row when none exists.
+		 * Before the migration has run, that row would silently replace the
+		 * legacy meta balance (adoption never fires for an existing row and
+		 * the migration skips users that have one). Triggering balance() first
+		 * adopts the legacy money, so the seed finds its row already there.
+		 */
+		if ( ! self::migration_done() ) {
+			self::balance( $user_id );
+		}
 		$money     = $points * $per_point;
 		$table     = self::balance_table();
 		$earned    = max( 0, (int) HSW_Account::instance()->loyalty_points( $user_id ) );
@@ -1464,9 +1763,21 @@ class HSW_Wallet {
 		 * guarded the payout also refused *legitimate* parallel conversions
 		 * (four parallel 100-point requests with 1000 points available paid out
 		 * three times instead of four).
+		 *
+		 * Seed + claim + credit now run inside ONE InnoDB transaction: a death
+		 * before COMMIT rolls the claimed points back together with the credit,
+		 * so the old crash window (points burned, money never paid) is gone and
+		 * the manual "give the points back" UPDATE is no longer needed.
 		 */
+		self::transaction_begin();
+
 		$wpdb->query( // phpcs:ignore WordPress.DB
-			$wpdb->prepare( "INSERT IGNORE INTO {$table} (user_id, balance, points_used, updated_at) VALUES (%d, 0, 0, %s)", $user_id, current_time( 'mysql' ) )
+			$wpdb->prepare(
+				"INSERT IGNORE INTO {$table} (user_id, balance, points_used, updated_at) VALUES (%d, 0, %d, %s)",
+				$user_id,
+				(int) get_user_meta( $user_id, self::POINTS_META, true ),
+				current_time( 'mysql' )
+			)
 		);
 
 		$claimed = $wpdb->query( // phpcs:ignore WordPress.DB
@@ -1482,6 +1793,7 @@ class HSW_Wallet {
 		);
 
 		if ( ! $claimed ) {
+			self::transaction_rollback();
 			return new WP_Error(
 				'hsw_points_short',
 				sprintf(
@@ -1506,13 +1818,12 @@ class HSW_Wallet {
 		);
 
 		if ( is_wp_error( $credited ) ) {
-			/* Give the points back: no money moved. */
-			$wpdb->query( // phpcs:ignore WordPress.DB
-				$wpdb->prepare( "UPDATE {$table} SET points_used = points_used - %d WHERE user_id = %d", $points, $user_id )
-			);
-
+			/* No money moved: ROLLBACK also restores the claimed points. */
+			self::transaction_rollback();
 			return $credited;
 		}
+
+		self::transaction_commit();
 
 		return $credited;
 	}
@@ -1697,16 +2008,28 @@ class HSW_Wallet {
 			$amount = isset( $_POST['amount'] ) ? (float) wp_unslash( $_POST['amount'] ) : 0;
 			$note   = isset( $_POST['note'] ) ? sanitize_text_field( wp_unslash( $_POST['note'] ) ) : '';
 			$sms    = isset( $_POST['send_sms'] );
+			$batch  = isset( $_POST['hsw_batch'] ) ? sanitize_key( wp_unslash( $_POST['hsw_batch'] ) ) : '';
 
 			if ( $amount <= 0 || ! $ids ) {
 				$msg = 'invalid';
 			} else {
-				$sent = 0;
+				/*
+				 * J1: every credit carries `admin-batch:<token>:<user>` as its
+				 * unique ledger reference. A double submit reuses the same form
+				 * token, the unique index refuses the second charge, and only
+				 * real successes (plus already-done duplicates) are counted.
+				 * Without a token from an older cached form, one is minted per
+				 * request — that request still can't charge twice.
+				 */
+				$batch = '' !== $batch ? $batch : wp_generate_password( 12, false, false );
+				$sent  = 0;
 				foreach ( array_unique( $ids ) as $user_id ) {
-					self::credit( $user_id, $amount, 'admin', $note, get_current_user_id() );
-					$sent++;
+					$result = self::credit( $user_id, $amount, 'admin', $note, get_current_user_id(), 'admin-batch:' . $batch . ':' . $user_id );
+					if ( ! is_wp_error( $result ) || 'hsw_wallet_duplicate' === $result->get_error_code() ) {
+						$sent++;
+					}
 
-					if ( $sms ) {
+					if ( $sms && ! is_wp_error( $result ) ) {
 						$phone = (string) get_user_meta( $user_id, 'billing_phone', true );
 						if ( '' !== $phone ) {
 							self::send_sms( $phone, self::credit_message( $amount ) );
@@ -1801,6 +2124,7 @@ class HSW_Wallet {
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="hsw_wallet_action">
 					<input type="hidden" name="hsw_do" value="bulk">
+					<input type="hidden" name="hsw_batch" value="<?php echo esc_attr( wp_generate_password( 12, false, false ) ); ?>">
 					<?php wp_nonce_field( 'hsw_wallet_action' ); ?>
 
 					<table class="widefat striped" style="max-width:1000px">

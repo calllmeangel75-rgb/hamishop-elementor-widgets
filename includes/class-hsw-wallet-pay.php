@@ -69,7 +69,22 @@ class HSW_Wallet_Refunds {
 	 */
 	public function refund_order( $order_id, $refund_id = 0 ) {
 		$order = wc_get_order( $order_id );
-		if ( ! $order || 'hsw_wallet' !== $order->get_payment_method() ) {
+		if ( ! $order ) {
+			return 0.0;
+		}
+
+		/*
+		 * A cancelled / refunded TOP-UP order must take the wallet credit back.
+		 * Until now the credit survived: the customer kept the wallet money
+		 * AND got the gateway refund. Top-up orders are paid through a normal
+		 * gateway, so the branch below used to be unreachable for them.
+		 */
+		$topup_user = (int) $order->get_meta( \HSW_Wallet_Topup::META_USER );
+		if ( $topup_user ) {
+			return $this->reverse_topup( $order, $topup_user, $refund_id );
+		}
+
+		if ( 'hsw_wallet' !== $order->get_payment_method() ) {
 			return 0.0;
 		}
 
@@ -130,6 +145,102 @@ class HSW_Wallet_Refunds {
 			sprintf(
 				/* translators: %s: formatted amount. */
 				__( 'مبلغ %s به کیف پول مشتری بازگشت.', 'hamishop-elementor-widgets' ),
+				wp_strip_all_tags( wc_price( $amount ) )
+			)
+		);
+		$order->save();
+
+		return $amount;
+	}
+
+	/**
+	 * Take a top-up order's credit back out of the wallet.
+	 *
+	 * E: a PARTIAL refund now debits only that refund's amount under its own
+	 * unique reference (`topup-reverse:<order>:<refund_id>`); a cancel or a
+	 * full refund debits the remaining credit under `topup-reverse:<order>:full`.
+	 * Everything stays inside what was actually credited, repeats are no-ops
+	 * (unique refs), and a customer who already spent the credit is never
+	 * pushed negative — the order gets an admin-review note instead.
+	 *
+	 * @param WC_Order $order     Top-up order.
+	 * @param int      $user_id   Wallet owner.
+	 * @param int      $refund_id Refund id (0 = cancel / full refund).
+	 * @return float|WP_Error Amount debited.
+	 */
+	private function reverse_topup( $order, $user_id, $refund_id = 0 ) {
+		global $wpdb;
+
+		$order_id = (int) $order->get_id();
+		$credited = (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				'SELECT COALESCE(SUM(amount),0) FROM ' . HSW_Wallet::table() . " WHERE kind = 'topup' AND status = 'done' AND ref = %s",
+				'topup:' . $order_id
+			)
+		);
+		if ( $credited <= 0 ) {
+			return 0.0;
+		}
+
+		$reversed = (float) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare(
+				'SELECT COALESCE(SUM(amount),0) FROM ' . HSW_Wallet::table() . " WHERE kind = 'topup-reverse' AND status = 'done' AND ref LIKE %s",
+				'topup-reverse:' . $order_id . ':%'
+			)
+		);
+		$remaining = round( $credited + $reversed, 2 ); // reversals are stored negative.
+		if ( $remaining <= 0 ) {
+			return 0.0;
+		}
+
+		if ( $refund_id > 0 ) {
+			$refund = wc_get_order( $refund_id );
+			$amount = $refund ? round( abs( (float) $refund->get_amount() ), 2 ) : 0.0;
+			/* A partial refund can never take back more than is left. */
+			$amount = min( $amount, $remaining );
+			$ref    = 'topup-reverse:' . $order_id . ':' . (int) $refund_id;
+		} else {
+			$amount = $remaining;
+			$ref    = 'topup-reverse:' . $order_id . ':full';
+		}
+
+		if ( $amount <= 0 ) {
+			return 0.0;
+		}
+
+		$debited = HSW_Wallet::debit(
+			$user_id,
+			$amount,
+			'topup-reverse',
+			sprintf(
+				/* translators: %s: order number. */
+				__( 'ابطال شارژ سفارش #%s (سفارش لغو/ریفاند شد)', 'hamishop-elementor-widgets' ),
+				$order->get_order_number()
+			),
+			0,
+			$ref
+		);
+
+		if ( is_wp_error( $debited ) ) {
+			if ( 'hsw_wallet_duplicate' === $debited->get_error_code() ) {
+				return 0.0; // Already reversed.
+			}
+			/* Insufficient balance: never go negative — ask a human. */
+			$order->add_order_note(
+				sprintf(
+					/* translators: %s: formatted amount. */
+					__( 'بازگشت اعتبار شارژ ناموفق بود (%s از کیف پول کسر نشد چون موجودی کافی نیست). بررسی دستی لازم است.', 'hamishop-elementor-widgets' ),
+					wp_strip_all_tags( wc_price( $amount ) )
+				)
+			);
+			$order->save();
+			return $debited;
+		}
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: formatted amount. */
+				__( 'مبلغ %s بابت ابطال شارژ از کیف پول مشتری کسر شد.', 'hamishop-elementor-widgets' ),
 				wp_strip_all_tags( wc_price( $amount ) )
 			)
 		);
@@ -559,6 +670,15 @@ function hsw_register_wallet_gateway() {
 				 * used the bare order id, so both are checked before charging.
 				 */
 				if ( self::order_already_paid( $order_id ) ) {
+					/*
+					 * B: the wallet was charged but a death before
+					 * payment_complete() left the order pending — a retry must
+					 * FINISH the order, not just smile at the customer while
+					 * their money sits on a pending order.
+					 */
+					if ( ! $order->is_paid() ) {
+						$order->payment_complete();
+					}
 					return array(
 						'result'   => 'success',
 						'redirect' => $this->get_return_url( $order ),
@@ -569,6 +689,15 @@ function hsw_register_wallet_gateway() {
 					wc_add_notice( __( 'موجودی کیف پول برای این سفارش کافی نیست.', 'hamishop-elementor-widgets' ), 'error' );
 					return array( 'result' => 'failure' );
 				}
+
+				/*
+				 * Debit + mark_paid are all-or-nothing: the debit runs inside a
+				 * wallet transaction (B2 — mark_paid's WC save runs AFTER the
+				 * commit, so no WC/HPOS write can ever interfere with the
+				 * wallet's transaction, and the ledger fallback covers a death
+				 * in the gap between the two).
+				 */
+				HSW_Wallet::transaction_begin();
 
 				$debit = HSW_Wallet::debit(
 					$user_id,
@@ -585,8 +714,14 @@ function hsw_register_wallet_gateway() {
 
 				/* debit() refuses to go negative and hands back a WP_Error. */
 				if ( is_wp_error( $debit ) ) {
+					HSW_Wallet::transaction_rollback();
+
 					if ( 'hsw_wallet_duplicate' === $debit->get_error_code() ) {
-						/* The other request already charged this order. */
+						/* The other request already charged this order — same
+						 * reasoning as the early branch: finish the order. */
+						if ( ! $order->is_paid() ) {
+							$order->payment_complete();
+						}
 						return array(
 							'result'   => 'success',
 							'redirect' => $this->get_return_url( $order ),
@@ -596,6 +731,8 @@ function hsw_register_wallet_gateway() {
 					wc_add_notice( $debit->get_error_message(), 'error' );
 					return array( 'result' => 'failure' );
 				}
+
+				HSW_Wallet::transaction_commit();
 
 				HSW_Wallet_Refunds::mark_paid( $order_id, $total );
 

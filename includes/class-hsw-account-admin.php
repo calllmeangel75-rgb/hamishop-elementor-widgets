@@ -23,9 +23,13 @@ final class HSW_Account_Admin {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( HSW_FILE ), array( $this, 'plugin_action_links' ) );
 
-		add_action( 'show_user_profile', array( $this, 'user_fields' ) );
+		/*
+		 * ONLY edit_user_profile (an administrator editing someone else).
+		 * show_user_profile would render the field on the user's OWN profile,
+		 * and WordPress maps "edit yourself" to no capability at all — that
+		 * combination let every subscriber hand themselves wallet money.
+		 */
 		add_action( 'edit_user_profile', array( $this, 'user_fields' ) );
-		add_action( 'personal_options_update', array( $this, 'save_user_fields' ) );
 		add_action( 'edit_user_profile_update', array( $this, 'save_user_fields' ) );
 	}
 
@@ -783,6 +787,10 @@ final class HSW_Account_Admin {
 			return;
 		}
 		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user->ID ) : 0.0;
+		if ( get_transient( 'hsw_wallet_stale_' . get_current_user_id() ) ) {
+			delete_transient( 'hsw_wallet_stale_' . get_current_user_id() );
+			echo '<div class="notice notice-error"><p>موجودی کیف پول از زمان باز شدن فرم تغییر کرده بود (مشتری در این فاصله شارژ یا خرج کرده). هیچ تغییری ذخیره نشد — صفحه را دوباره باز کنید.</p></div>';
+		}
 		wp_nonce_field( 'hsw_account_user_' . $user->ID, 'hsw_account_user_nonce' );
 		?>
 		<h2>حساب HamiShop</h2>
@@ -791,7 +799,8 @@ final class HSW_Account_Admin {
 				<th><label for="hsw-wallet-balance">موجودی کیف پول</label></th>
 				<td>
 					<input type="number" step="0.01" min="0" class="regular-text" id="hsw-wallet-balance" name="hsw_wallet_balance" value="<?php echo esc_attr( number_format( $balance, 2, '.', '' ) ); ?>">
-					<p class="description">موجودی کیف پول مشتری در پنل حساب نمایش داده می‌شود. برای تنظیم موجودی از این فیلد استفاده کنید.</p>
+					<input type="hidden" name="hsw_wallet_balance_orig" value="<?php echo esc_attr( number_format( $balance, 2, '.', '' ) ); ?>">
+					<p class="description">موجودی کیف پول مشتری در پنل حساب نمایش داده می‌شود. برای تنظیم موجودی از این فیلد استفاده کنید. اگر مشتری در فاصلهٔ باز و ذخیره کردن این فرم تراکنشی داشته باشد، ذخیره رد می‌شود تا پولی پاک نشود.</p>
 				</td>
 			</tr>
 			<tr>
@@ -817,6 +826,8 @@ final class HSW_Account_Admin {
 		if ( isset( $_POST['hsw_wallet_balance'] ) ) {
 			$raw     = function_exists( 'wc_format_decimal' ) ? wc_format_decimal( wp_unslash( $_POST['hsw_wallet_balance'] ) ) : wp_unslash( $_POST['hsw_wallet_balance'] );
 			$target  = max( 0, round( (float) $raw, 2 ) );
+			/* A: what the form was rendered with — the compare-and-set anchor. */
+			$orig    = isset( $_POST['hsw_wallet_balance_orig'] ) ? round( (float) wp_unslash( $_POST['hsw_wallet_balance_orig'] ), 2 ) : null;
 
 			if ( ! class_exists( 'HSW_Wallet' ) ) {
 				/* No wallet class, no balance to set. Writing the legacy meta
@@ -824,17 +835,19 @@ final class HSW_Account_Admin {
 				return;
 			}
 
-			/*
-			 * One atomic write. The previous code read the balance and sent the
-			 * difference through credit()/debit(); two managers saving the same
-			 * form at once could apply both deltas.
-			 */
-			HSW_Wallet::set_balance(
+			$result = HSW_Wallet::set_balance(
 				$user_id,
 				$target,
 				__( 'تنظیم دستی موجودی توسط مدیر', 'hamishop-elementor-widgets' ),
-				get_current_user_id()
+				get_current_user_id(),
+				$orig
 			);
+
+			if ( is_wp_error( $result ) && 'hsw_wallet_stale' === $result->get_error_code() ) {
+				/* The customer transacted while the form was open — the CAS
+				 * refused the write; tell the admin on the next page load. */
+				set_transient( 'hsw_wallet_stale_' . get_current_user_id(), 1, 120 );
+			}
 		}
 	}
 
