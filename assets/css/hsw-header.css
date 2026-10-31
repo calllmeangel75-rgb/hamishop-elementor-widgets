@@ -336,11 +336,11 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
  * both the bundled storefront icon and an uploaded image logo, without an
  * extra DOM node or a second request.
  *
- * Light only. An earlier build mixed the palette accent into the trailing half
- * (`color-mix(--hsw-accent 42%, #fff)`), and because `--hsw-accent` is not
- * defined in the header scope it fell back to the literal #fc593a — a red/orange
- * stripe over the logo instead of a shine. The sweep is now a transparent white
- * band plus a blurred copy of itself for the glow.
+ * Light only. An earlier build mixed `--hsw-accent` into the trailing half of
+ * the sweep. That variable is the shop-wide palette accent (printed by
+ * HSW_Palette, and reused by the loop badges), so on a shop with a red accent
+ * every shine ended in a red band over the logo. The sweep is now a transparent
+ * white band plus a blurred copy of itself for the glow.
  */
 .hsw-hd__logomark--shine::after {
 	content: '';
