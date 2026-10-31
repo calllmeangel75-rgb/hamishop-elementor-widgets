@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.176
+Stable tag: 1.11.177
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.177 =
+* **کیف پول: نوشتن پول تراکنشی و اتمیک شد؛ لغو/ریفاند سفارش شارژ، اعتبار را پس می‌گیرد.**
+  - **اتمیسیتی:** `credit`/`debit`/`decide`/`convert_points`/`repair_gaps` داخل یک `START TRANSACTION … COMMIT` (با شمارندهٔ عمق، پس فراخوانی تودرتو تراکنش بیرونی را زودتر commit نمی‌کند).
+  - **هوک پس از COMMIT:** `hsw_wallet_changed` در صف می‌ماند و فقط بعد از commit واقعی اجرا می‌شود؛ تراکنش برگشت‌خورده هیچ اعلانی نمی‌فرستد.
+  - **ابطال شارژ:** لغو یا ریفاند کامل سفارش شارژ با `topup-reverse:<order>:full` و ریفاند جزئی با `topup-reverse:<order>:<refund_id>` برمی‌گردد؛ تکرار no-op است و موجودی هرگز منفی نمی‌شود (در این حالت یادداشت «بررسی دستی» روی سفارش ثبت می‌شود).
+  - **خطای پایگاه‌داده از کمبود موجودی جدا شد:** deadlock یا خطای سرور پیام مستقل می‌گیرد، نه «موجودی کافی نیست».
+  - **`repair_gaps`:** قفل ردیف، بازبینی گپ زیر قفل، و ref بر پایهٔ آخرین ردیف همان کاربر (نه MAX سراسری).
+  - **فرم ادمین:** CAS با `hsw_wallet_balance_orig`؛ اگر مشتری بین باز و بستهٔ فرم تراکنش کرده باشد، ذخیره رد و پیام داده می‌شود (به‌جای پاک‌شدن تراکنش).
+  - **مهاجرت:** ردیف زودهنگام (ساخته‌شده پیش از مهاجرت) به‌صورت idempotent ترمیم می‌شود.
+  - **تست:** `tests/qa/remediation.php` روی MySQL 8 و MariaDB 11 در CI اجرا می‌شود.
 
 = 1.11.176 =
 * **امنیت و اتمیک‌بودن: یافته‌های بازبینی مستقل بسته شدند؛ اسکریپت‌های فرانت defer شدند.**
