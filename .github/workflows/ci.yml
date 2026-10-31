@@ -123,12 +123,17 @@ jobs:
           MARIADB_DATABASE: hsw_qa
         ports:
           - 3307:3306
+        # `docker create` rejects a flag it does not know, and a service that
+        # fails to start fails the whole job before a single test runs: the
+        # previous `--command=--sql-mode=…` line did exactly that
+        # ("unknown flag: --command"). MariaDB 11 already defaults to
+        # STRICT_TRANS_TABLES, which is the realistic hosting mode this test is
+        # meant to prove.
         options: >-
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
-          --command=--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
     steps:
       - uses: actions/checkout@v4
 
@@ -139,9 +144,10 @@ jobs:
           coverage: none
           tools: none
 
-      # Server defaults stay in force (strict + NO_ZERO_DATE on MySQL 8; the
-      # MariaDB service pins the same mode). The old `SET SESSION sql_mode`
-      # escape hatch is gone — the DDL must hold on a strict server.
+      # Server defaults stay in force on both engines (MySQL 8 is strict with
+      # NO_ZERO_DATE; MariaDB 11 defaults to STRICT_TRANS_TABLES). The old
+      # `SET SESSION sql_mode` escape hatch is gone — the DDL must hold on a
+      # strict server.
       - name: Wallet statements on MySQL 8
         run: |
           HSW_QA_DSN="mysql:host=127.0.0.1;port=3306;dbname=hsw_qa" \
