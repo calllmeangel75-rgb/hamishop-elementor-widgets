@@ -520,7 +520,11 @@ function WC() {
  * only declares it when WC_Payment_Gateway exists). */
 class WC_Payment_Gateway {
 	public $id = 'stub';
+	public $settings = array();
 	public function init_settings() {
+	}
+	public function get_option( $key, $default = '' ) {
+		return $this->settings[ $key ] ?? $default;
 	}
 	public function get_return_url( $order ) {
 		return 'http://localhost/return/';
@@ -708,6 +712,14 @@ if ( $CRASH_CHILD ) {
  * #1 — profile balance save: subscriber must NOT be able to credit
  * themselves through the personal_options_update hook with a real POST.
  * ==================================================================== */
+
+/*
+ * The whole suite exercises the wallet, so the master switch has to be on:
+ * with `hsw_wallet_gateway_on` absent every wallet surface (including the
+ * admin profile field) is deliberately inert — that is 1.11.179 behaviour and
+ * is asserted separately in tests/qa/prelive*.php.
+ */
+update_option( 'hsw_wallet_gateway_on', 'yes' );
 
 $wpdb->query( "INSERT INTO wp_users (ID, user_login, user_email, display_name) VALUES (9001, 'sub9001', 'sub9001@example.com', 'Sub 9001')" );
 update_user_meta( 9001, '_hsw_auth_phone', '09120009001' );

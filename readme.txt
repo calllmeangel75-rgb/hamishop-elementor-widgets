@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.179
+Stable tag: 1.11.180
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.180 =
+* **فقط هارنس آزمون:** emediation.php سوئیچ کیف پول را روشن می‌کند و استاب درگاه get_option() دارد؛ کد افزونه تغییر نکرده است.
+
 
 = 1.11.179 =
 * **کیف پول با خاموش‌بودن کاملاً پنهان می‌شود و تأییدیهٔ ایمیل ثبت‌نام تلفنی کامل شد.**
