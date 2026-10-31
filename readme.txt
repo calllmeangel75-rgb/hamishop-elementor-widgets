@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.182
+Stable tag: 1.11.183
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,12 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.183 =
+* **فونت وزیرمتن، رنگ صورتی المنتور روی دکمه‌ها و شاین قرمز لوگو.**
+  - **فونت:** `font-display: optional` باعث می‌شد اگر فایل وزیرمتن به پنجرهٔ ~۱۰۰ms نرسد، کل صفحه روی Tahoma بماند و هیچ‌وقت swap نشود (با تغییر ریسپانسیو درست می‌شد). حالا `swap` است + فایل فونت با `<link rel="preload" as="font">` پیش‌بارگذاری می‌شود؛ `format('woff2-variations')` (منسوخ) هم به `format('woff2')` تبدیل شد.
+  - **صورتی rgb(204,51,102):** از قاعدهٔ خام تم Hello Elementor روی `button:hover, button:focus` می‌آمد (پس `#c36`)، نه از افزونه. حالت `:focus` به دکمهٔ بستن سبد، بستن درِ پنل و دکمه‌های آیکونی اضافه شد و تب‌های باشگاه مشتریان (`hsw-ac__member-tabs`) قاعدهٔ hover/focus گرفتند.
+  - **شاین لوگو:** استاپ رنگی `color-mix(--hsw-accent, #fc593a)` حذف شد؛ سوییپ حالا شفافِ سفید است و درخشش با blur + drop-shadow ساخته می‌شود.
 
 = 1.11.182 =
 * **فقط هارنس آزمون — کد افزونه بدون تغییر.** هارنس پیش از لایو (`tests/qa/prelive*.php`: ۵۴ سنجهٔ احراز هویت، 2FA، شمارش حساب، خاموشی کیف پول، تأیید ایمیل، مسیریابی تسویه و لیست سفید «نت ملی» + اثبات‌های دیتابیس واقعی) در ریپو ثبت شد. پوشهٔ `tests/` با `export-ignore` از ZIP انتشار بیرون است و در اجرا تغییر ایجاد نمی‌کند.
