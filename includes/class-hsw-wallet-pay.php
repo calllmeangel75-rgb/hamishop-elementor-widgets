@@ -373,6 +373,11 @@ class HSW_Wallet_Topup {
 		$s       = self::settings();
 		$minimum = max( 1000, (int) $s['min'] );
 
+		/* Emergency stop: no new top-up order may be created while it is set. */
+		if ( defined( 'HSW_DISABLE_WALLET' ) && HSW_DISABLE_WALLET ) {
+			return new WP_Error( 'hsw_wallet_disabled', __( 'شارژ کیف پول موقتاً غیرفعال است.', 'hamishop-elementor-widgets' ) );
+		}
+
 		if ( ! $user_id || $amount < $minimum ) {
 			return new WP_Error( 'hsw_bad_amount', sprintf(
 				/* translators: %s: minimum amount. */
@@ -573,9 +578,58 @@ function hsw_register_wallet_gateway() {
 
 				$this->init_settings();
 				$this->title   = __( 'پرداخت از کیف پول', 'hamishop-elementor-widgets' );
-				$this->enabled = 'yes';
+				/*
+				 * Kill switch. The gateway used to hard-code `enabled = yes`, so a shop
+				 * could not turn wallet payments off from WooCommerce at all — the one
+				 * thing a rollback plan needs. It now requires the WooCommerce toggle,
+				 * the dedicated option (`hsw_wallet_gateway_on`, default 'no') and no
+				 * emergency constant.
+				 */
+				$this->enabled = $this->wallet_enabled_for_checkout() ? 'yes' : 'no';
 
 				add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+			}
+
+			/**
+			 * Emergency stop: `define( 'HSW_DISABLE_WALLET', true );` in wp-config.php.
+			 *
+			 * @return bool
+			 */
+			public static function disabled() {
+				return defined( 'HSW_DISABLE_WALLET' ) && HSW_DISABLE_WALLET;
+			}
+
+			/**
+			 * Is wallet payment switched on for this shop?
+			 *
+			 * Option-only (no WooCommerce settings object), so the pay-methods widget
+			 * can ask the same question without instantiating a gateway.
+			 *
+			 * @return bool
+			 */
+			public static function is_globally_enabled() {
+				if ( self::disabled() ) {
+					return false;
+				}
+
+				return 'yes' === (string) get_option( 'hsw_wallet_gateway_on', 'no' );
+			}
+
+			/**
+			 * WooCommerce toggle + shop option + constant, all three must agree.
+			 *
+			 * @return bool
+			 */
+			protected function wallet_enabled_for_checkout() {
+				if ( ! self::is_globally_enabled() ) {
+					return false;
+				}
+				/* The WooCommerce checkbox exists once the gateway is listed; absent = on. */
+				if ( 'yes' !== (string) $this->get_option( 'enabled', 'yes' ) ) {
+					return false;
+				}
+
+				return (bool) apply_filters( 'hsw_wallet_gateway_enabled', true );
 			}
 
 			/**
@@ -618,6 +672,9 @@ function hsw_register_wallet_gateway() {
 			}
 
 			public function is_available() {
+				if ( ! $this->wallet_enabled_for_checkout() ) {
+					return false;
+				}
 				if ( ! is_user_logged_in() || ! parent::is_available() ) {
 					return false;
 				}

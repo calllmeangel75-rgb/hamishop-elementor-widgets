@@ -1082,6 +1082,17 @@ $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'hsw_wallet_ledger' );
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'hsw_wallet' );
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'hsw_wallet_meta_backup' );
 delete_option( 'hsw_wallet_db' );
+
+/*
+ * Schema creation from `init` is opt-in (P0-0b). Both halves are asserted: off
+ * by default nothing is created, and with the option on the DDL still runs.
+ */
+delete_option( 'hsw_wallet_autoinstall' );
+HSW_Wallet::instance()->maybe_install();
+$qa_created_while_off = $wpdb->get_var( $wpdb->prepare( 'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s', $wpdb->prefix . 'hsw_wallet' ) );
+qa( '#12 autoinstall off: maybe_install() creates nothing', null === $qa_created_while_off, 'table=' . var_export( $qa_created_while_off, true ) );
+
+update_option( 'hsw_wallet_autoinstall', 'yes' );
 HSW_Wallet::instance()->maybe_install();
 $engines = array();
 foreach ( array( 'hsw_wallet_ledger', 'hsw_wallet', 'hsw_wallet_meta_backup' ) as $qa_table ) {

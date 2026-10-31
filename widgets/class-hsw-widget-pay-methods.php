@@ -372,7 +372,14 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                 $banks   = $this->banks();
                 $ribbon  = $this->ribbon_index( $options );
                 $wallet_bal = (float) apply_filters( 'hsw_wallet_balance', 0 );
-                $show_w     = ( 'yes' === ( $s['show_wallet'] ?? 'yes' )
+                /*
+                 * The deduction switch must follow the gateway, not the design:
+                 * with wallet payments switched off (or the emergency constant
+                 * set) the row would promise a deduction that can never happen.
+                 */
+                $wallet_live = ! class_exists( 'HSW_Wallet_Gateway' ) || HSW_Wallet_Gateway::is_globally_enabled();
+                $show_w      = ( 'yes' === ( $s['show_wallet'] ?? 'yes' )
+                        && $wallet_live
                         && ( $this->is_demo() || $this->is_editing() || 0 < $wallet_bal ) );
                 $wallet_on = $this->wallet_enabled();
                 $ribbon_t  = $this->opt( 'ribbon_text', __( 'توصیه شده', 'hamishop-elementor-widgets' ) );

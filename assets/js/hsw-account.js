@@ -1265,7 +1265,7 @@
 			var disablePanel = setupDisable.closest('[data-hsw-2fa]');
 			if (disablePanel) {
 				var disableMessage = disablePanel.querySelector('[data-hsw-2fa-message]');
-				ajax('hsw_2fa_disable', {}, data().twoFactorNonce)
+				ajax('hsw_2fa_disable', { password: (disablePanel.querySelector('[data-hsw-2fa-pass]') || {}).value || '' }, data().twoFactorNonce)
 					.then(function (payload) {
 						if (!payload || !payload.success) {
 							setMessage(disableMessage, payload && payload.data ? payload.data.message : (data().verifyError || 'عملیات ناموفق بود.'), 'error');

@@ -128,12 +128,21 @@ class HSW_Throttle {
 		$expires = $now + $window;
 		$table   = self::table();
 
-		/* phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-		$wpdb->query(
+		/*
+		 * One statement decides both the write and the number to compare against.
+		 * LAST_INSERT_ID(expr) is connection-local, so the value read back belongs
+		 * to THIS request — the old "upsert, then SELECT hits" pair read whatever a
+		 * parallel request had written in the meantime (a 30-way burst pushed the
+		 * row to 30 before anybody read it, which denied every single caller).
+		 *
+		 * The assignment order matters: hits is computed from the OLD expires, so
+		 * it must be assigned before expires is overwritten.
+		 */
+		$written = $wpdb->query( // phpcs:ignore WordPress.DB
 			$wpdb->prepare(
-				"INSERT INTO {$table} (bucket, hits, expires) VALUES (%s, 1, %d)
+				"INSERT INTO {$table} (bucket, hits, expires) VALUES (%s, LAST_INSERT_ID(1), %d)
 				 ON DUPLICATE KEY UPDATE
-				   hits = IF(expires > %d, hits + 1, 1),
+				   hits = LAST_INSERT_ID(IF(expires > %d, hits + 1, 1)),
 				   expires = IF(expires > %d, expires, %d)",
 				$bucket,
 				$expires,
@@ -142,13 +151,31 @@ class HSW_Throttle {
 				$expires
 			)
 		);
+		$write_error = (string) $wpdb->last_error;
 
-		$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare( "SELECT hits, expires FROM {$table} WHERE bucket = %s", $bucket )
+		$hits = (int) $wpdb->get_var( 'SELECT LAST_INSERT_ID()' ); // phpcs:ignore WordPress.DB
+
+		/*
+		 * Fail closed. A missing table, a lost connection or a read that returns
+		 * nothing must never be read as "under the limit": that turned every
+		 * throttle in the plugin into a no-op the moment the table went away.
+		 */
+		if ( false === $written || '' !== $write_error || $hits < 1 ) {
+			self::log_failure_once( $write_error );
+			return array(
+				'allowed'     => false,
+				'hits'        => 0,
+				'retry_after' => max( 1, min( 60, $window ) ),
+			);
+		}
+
+		$expiry = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB
+			$wpdb->prepare( "SELECT expires FROM {$table} WHERE bucket = %s", $bucket )
 		);
+		if ( $expiry <= 0 ) {
+			$expiry = $expires;
+		}
 
-		$hits    = $row ? (int) $row->hits : 1;
-		$expiry  = $row ? (int) $row->expires : $expires;
 		$allowed = $hits <= $limit;
 
 		/* 1-in-50 chance: drop expired rows so the table cannot grow forever. */
@@ -161,6 +188,23 @@ class HSW_Throttle {
 			'hits'        => $hits,
 			'retry_after' => $allowed ? 0 : max( 1, $expiry - $now ),
 		);
+	}
+
+	/**
+	 * Report an unusable counter once per request, not once per call.
+	 *
+	 * @param string $error Driver error, if any.
+	 */
+	private static function log_failure_once( $error = '' ) {
+		static $logged = false;
+
+		if ( $logged ) {
+			return;
+		}
+		$logged = true;
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( 'HamiShop throttle: counter table unavailable, failing closed. ' . $error );
 	}
 
 	/**

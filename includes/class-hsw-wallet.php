@@ -66,13 +66,25 @@ class HSW_Wallet {
 	 * without this notice the admin would only find out when checkout breaks.
 	 */
 	public function install_failed_notice() {
-		if ( '1' !== get_option( 'hsw_wallet_install_failed' ) || ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
+
+		$failed  = '1' === get_option( 'hsw_wallet_install_failed' );
+		$missing = '1' === get_option( 'hsw_wallet_missing_tables' );
+
+		if ( ! $failed && ! $missing ) {
+			return;
+		}
+
+		$text = $failed
+			? __( 'جدول‌های کیف پول ساخته نشدند (احتمالاً نسخه/حالت MySQL قدیمی است). هر بار تلاش دوباره خودکار انجام می‌شود؛ خطای دقیق در error_log سرور ثبت شده است.', 'hamishop-elementor-widgets' )
+			: __( 'جدول‌های کیف پول نصب نشده‌اند و نصب خودکار روی درخواست سایت خاموش است. برای ساختشان یک‌بار دستی اجرا کنید: wp hsw wallet migrate', 'hamishop-elementor-widgets' );
+
 		printf(
 			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
 			esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
-			esc_html__( 'جدول‌های کیف پول ساخته نشدند (احتمالاً نسخه/حالت MySQL قدیمی است). هر بار تلاش دوباره خودکار انجام می‌شود؛ خطای دقیق در error_log سرور ثبت شده است.', 'hamishop-elementor-widgets' )
+			esc_html( $text )
 		);
 	}
 
@@ -81,6 +93,11 @@ class HSW_Wallet {
 	 * ------------------------------------------------------------------ */
 
 	public function routes() {
+		/* Emergency stop: the customer-facing wallet endpoints disappear entirely. */
+		if ( self::disabled() ) {
+			return;
+		}
+
 		$auth = function () {
 			return is_user_logged_in();
 		};
@@ -221,10 +238,34 @@ class HSW_Wallet {
 		return $wpdb->prefix . 'hsw_wallet';
 	}
 
+	/**
+	 * Emergency stop shared with the gateway.
+	 *
+	 * @return bool
+	 */
+	public static function disabled() {
+		return defined( 'HSW_DISABLE_WALLET' ) && HSW_DISABLE_WALLET;
+	}
+
 	public function maybe_install() {
 		if ( self::DB_VERSION === get_option( 'hsw_wallet_db' ) ) {
 			return;
 		}
+
+		/*
+		 * Schema creation used to run from `init`, so the first visitor after an
+		 * upgrade could trigger DDL (table locks, timeouts, half-created tables).
+		 * It is now opt-in (`hsw_wallet_autoinstall`, default 'no') and never runs
+		 * under the emergency constant; `wp hsw wallet migrate` does the work.
+		 */
+		if ( self::disabled() ) {
+			return;
+		}
+		if ( 'yes' !== (string) get_option( 'hsw_wallet_autoinstall', 'no' ) ) {
+			update_option( 'hsw_wallet_missing_tables', '1', false );
+			return;
+		}
+		delete_option( 'hsw_wallet_missing_tables' );
 
 		global $wpdb;
 		$table   = self::table();

@@ -22,6 +22,12 @@ final class HSW_Account_Auth {
 	/** @var bool */
 	private $skip_2fa = false;
 
+	/** @var string Session token WordPress issued in this request. */
+	private $issued_token = '';
+
+	/** @var int */
+	private $issued_user_id = 0;
+
 	public function __construct( $account ) {
 		$this->account = $account;
 
@@ -35,6 +41,63 @@ final class HSW_Account_Auth {
 
 		add_action( 'init', array( $this, 'maybe_handle_telegram_webhook' ), 0 );
 		add_action( 'wp_login', array( $this, 'maybe_start_2fa' ), 99, 2 );
+		/*
+		 * The session cookie is written *before* `wp_login` fires, so the token has
+		 * to be captured there: clearing the cookie afterwards only hides it from
+		 * the browser, while the session row in usermeta stays valid — the first
+		 * Set-Cookie header of the response still carried a working cookie.
+		 */
+		add_action( 'set_auth_cookie', array( $this, 'remember_issued_token' ), 10, 6 );
+
+		/*
+		 * `wp_login` never fires on XML-RPC and on Application Password requests,
+		 * so the second factor above is simply not consulted there. Both doors are
+		 * closed by default; a shop that needs them can opt out with a filter.
+		 */
+		add_filter( 'xmlrpc_enabled', array( $this, 'filter_xmlrpc_enabled' ) );
+		add_filter( 'wp_is_application_passwords_available_for_user', array( $this, 'filter_app_password_for_user' ), 10, 2 );
+	}
+
+	/**
+	 * XML-RPC is off unless the shop opts back in.
+	 *
+	 * @param bool $enabled Current value.
+	 * @return bool
+	 */
+	public function filter_xmlrpc_enabled( $enabled ) {
+		if ( ! apply_filters( 'hsw_disable_xmlrpc', true ) ) {
+			return $enabled;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Application Passwords are refused for accounts that carry a second factor
+	 * or a shop-wide capability.
+	 *
+	 * @param bool         $available Current value.
+	 * @param WP_User|mixed $user     Account being checked.
+	 * @return bool
+	 */
+	public function filter_app_password_for_user( $available, $user = null ) {
+		if ( ! $user instanceof WP_User ) {
+			return $available;
+		}
+
+		$protected = 'yes' === (string) get_user_meta( $user->ID, '_hsw_2fa_enabled', true )
+			|| user_can( $user, 'manage_options' )
+			|| user_can( $user, 'manage_woocommerce' );
+
+		if ( ! $protected ) {
+			return $available;
+		}
+
+		if ( apply_filters( 'hsw_app_passwords_for_privileged', false, $user ) ) {
+			return $available;
+		}
+
+		return false;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -356,8 +419,26 @@ final class HSW_Account_Auth {
 		return $url;
 	}
 
+	/**
+	 * A per-challenge token that survives every reader.
+	 *
+	 * `wp_generate_password()` mixes upper and lower case, while every reader
+	 * used `sanitize_key()` (which lowercases) — so a shell of a 28-char token
+	 * never matched the transient it was stored under and the 2FA screen /
+	 * Telegram link silently never worked. Tokens are hex now and are read
+	 * through this one parser.
+	 *
+	 * @param mixed $value Raw token from $_GET/$_POST.
+	 * @return string Token, or '' when the shape is wrong.
+	 */
+	private function parse_token( $value ) {
+		$token = (string) wp_unslash( (string) $value );
+
+		return preg_match( '/^[a-f0-9]{28,64}$/', $token ) ? $token : '';
+	}
+
 	private function telegram_link_token( $user_id ) {
-		$token = wp_generate_password( 28, false, false );
+		$token = bin2hex( random_bytes( 14 ) ); // 28 hex chars — the documented shape.
 		set_transient( 'hsw_telegram_link_' . $token, (int) $user_id, 15 * MINUTE_IN_SECONDS );
 		return $token;
 	}
@@ -403,8 +484,17 @@ final class HSW_Account_Auth {
 		 * reproduced). The table upsert is a single atomic statement.
 		 */
 		$max = max( 1, min( 20, absint( $this->s( 'otp_max_attempts', 5 ) ) ) );
-		$att = HSW_Throttle::hit(
-			'otp_attempt:' . md5( $key ),
+		/*
+		 * The counter is keyed by the code that is on screen, not by the slot
+		 * (recipient|channel|context). Keyed by the slot, the claim bucket stayed
+		 * "used" for the whole TTL, so a second login inside five minutes was
+		 * answered with "this code has expired" and five wrong guesses locked the
+		 * customer out even after a fresh code was issued. `otp_verify_fail`
+		 * (per number, across resends) still bounds the guessing.
+		 */
+		$bind = md5( $key . '|' . (string) $data['hash'] );
+		$att  = HSW_Throttle::hit(
+			'otp_attempt:' . $bind,
 			$max,
 			max( 60, (int) $data['expires'] - time() )
 		);
@@ -426,7 +516,7 @@ final class HSW_Account_Auth {
 		 * `delete_transient()` can report success without a real delete.
 		 */
 		$claim = HSW_Throttle::hit(
-			'otp_claim:' . md5( $key ),
+			'otp_claim:' . $bind,
 			1,
 			max( 60, (int) $data['expires'] - time() )
 		);
@@ -846,27 +936,36 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'ورود با کد یکبارمصرف غیرفعال است.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 
-		$user = ( 'email' === $channel ) ? get_user_by( 'email', $phone ) : $this->find_user_by_phone( $phone );
-		if ( 'login' === $context && ! $user ) {
-			wp_send_json_error( array( 'message' => 'email' === $channel ? __( 'حسابی با این ایمیل پیدا نشد. از تب ثبت‌نام استفاده کنید.', 'hamishop-elementor-widgets' ) : __( 'حسابی با این شماره پیدا نشد. از تب ثبت‌نام استفاده کنید.', 'hamishop-elementor-widgets' ), 'switch_tab' => 'register' ), 404 );
-		}
-		if ( 'register' === $context && $user ) {
-			wp_send_json_error( array( 'message' => __( 'این حساب قبلاً ثبت‌نام کرده است. از تب ورود استفاده کنید.', 'hamishop-elementor-widgets' ), 'switch_tab' => 'login' ), 409 );
-		}
-
-		/* A phone is one factor; staff accounts must not be reachable with it alone. */
-		if ( 'login' === $context && $user && ! $this->otp_allowed( $user ) ) {
-			wp_send_json_error( array( 'message' => __( 'برای حساب‌های مدیریتی ورود با کد یکبارمصرف فعال نیست. با نام کاربری و رمز عبور وارد شوید.', 'hamishop-elementor-widgets' ) ), 403 );
-		}
-
+		/*
+		 * Throttle BEFORE any account lookup. Running it after the "no such
+		 * account" exit meant an unknown address never consumed a slot, so the
+		 * 20/hour ceiling could be walked around with made-up addresses.
+		 */
 		$throttle = $this->check_send_throttle( $phone, $channel );
 		if ( is_wp_error( $throttle ) ) {
 			wp_send_json_error( array( 'message' => $throttle->get_error_message() ), 429 );
 		}
 
+		$user = ( 'email' === $channel ) ? get_user_by( 'email', $phone ) : $this->find_user_by_phone( $phone );
+
+		/*
+		 * Account enumeration: "exists", "does not exist" and "is an admin" used to
+		 * answer 200 / 404 / 403 with different copy and a `switch_tab` hint. They
+		 * now answer identically; the code is simply not sent when there is nobody
+		 * to sign in, and the same bcrypt work is done so the timing matches.
+		 */
+		if ( 'login' === $context && ( ! $user || ! $this->otp_allowed( $user ) ) ) {
+			wp_hash_password( wp_generate_password( 12 ) );
+			wp_send_json_success( $this->send_ack( $channel ) );
+		}
+
 		$limit = $this->rate_limit( $phone, $channel, $context );
 		if ( is_wp_error( $limit ) ) {
-			wp_send_json_error( array( 'message' => $limit->get_error_message() ), 429 );
+			/*
+			 * A cooldown answer must look exactly like a sent code: a 429 here told
+			 * an attacker "this identifier just received something".
+			 */
+			wp_send_json_success( $this->send_ack( $channel ) );
 		}
 
 		$code = $this->store_code( $phone, $channel, $context, $user ? $user->ID : 0 );
@@ -874,22 +973,72 @@ final class HSW_Account_Auth {
 		if ( is_wp_error( $sent ) ) {
 			delete_transient( $this->code_key( $phone, $channel, $context ) );
 			$this->clear_rate_limit( $phone, $channel, $context );
-			$data = array( 'message' => $sent->get_error_message() );
-			$link = $sent->get_error_data();
-			if ( is_array( $link ) && ! empty( $link['link'] ) ) {
-				$data['link']      = esc_url_raw( $link['link'] );
-				$data['link_text'] = __( 'باز کردن ربات تلگرام', 'hamishop-elementor-widgets' );
+
+			/* Only a signup may say what went wrong with the delivery. */
+			if ( 'register' === $context ) {
+				$data = array( 'message' => $sent->get_error_message() );
+				$link = $sent->get_error_data();
+				if ( is_array( $link ) && ! empty( $link['link'] ) ) {
+					$data['link']      = esc_url_raw( $link['link'] );
+					$data['link_text'] = __( 'باز کردن ربات تلگرام', 'hamishop-elementor-widgets' );
+				}
+				wp_send_json_error( $data, 400 );
 			}
-			wp_send_json_error( $data, 400 );
+
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( sprintf( 'HamiShop OTP: %s delivery failed (%s) in the %s flow.', $channel, $sent->get_error_code(), $context ) );
+			wp_send_json_success( $this->send_ack( $channel ) );
 		}
 
-		wp_send_json_success(
-			array(
-				'message' => __( 'کد تأیید ارسال شد. ایمیل، تلگرام یا پیامک خود را بررسی کنید.', 'hamishop-elementor-widgets' ),
-				'expires' => max( 60, min( 900, absint( $this->s( 'otp_ttl', 300 ) ) ) ),
-				'channel' => $channel,
-			)
+		wp_send_json_success( $this->send_ack( $channel ) );
+	}
+
+	/**
+	 * A unique, deliberately undeliverable address for a phone-only signup.
+	 *
+	 * @param string $phone Normalised phone.
+	 * @return string
+	 */
+	private function placeholder_email( $phone ) {
+		$local = preg_replace( '/[^0-9]/', '', (string) $phone );
+		$local = '' !== $local ? $local : 'user' . wp_rand( 1000, 9999 );
+		$host  = (string) apply_filters( 'hsw_signup_placeholder_domain', 'noreply.invalid' );
+		$email = $local . '@' . $host;
+
+		$i = 1;
+		while ( email_exists( $email ) && $i < 5 ) {
+			$email = $local . '-' . $i . '@' . $host;
+			$i++;
+		}
+
+		return (string) apply_filters( 'hsw_signup_placeholder_email', $email, $phone );
+	}
+
+	/**
+	 * The one answer "send a code" may give, whatever the account state is.
+	 *
+	 * @param string $channel Channel that was asked for.
+	 * @return array
+	 */
+	private function send_ack( $channel ) {
+		return array(
+			'message' => __( 'اگر حسابی با این مشخصات وجود داشته باشد و کانال انتخاب‌شده متصل باشد، کد تأیید ارسال شد.', 'hamishop-elementor-widgets' ),
+			'expires' => max( 60, min( 900, absint( $this->s( 'otp_ttl', 300 ) ) ) ),
+			'channel' => $channel,
 		);
+	}
+
+	/**
+	 * The one answer a failed verification may give.
+	 *
+	 * "expired", "wrong", "too many attempts" and "no such account" all answer
+	 * with this sentence and a 400, so the response cannot be used to learn
+	 * whether an account exists.
+	 *
+	 * @return string
+	 */
+	private function verify_fail_message() {
+		return __( 'کد وارد شده صحیح نیست یا منقضی شده است. اگر کدی دریافت نکردید، دوباره درخواست کنید.', 'hamishop-elementor-widgets' );
 	}
 
 	public function ajax_otp_verify() {
@@ -923,42 +1072,30 @@ final class HSW_Account_Auth {
 		}
 
 		$user = ( 'email' === $channel ) ? get_user_by( 'email', $phone ) : $this->find_user_by_phone( $phone );
-		if ( 'login' === $context && ! $user ) {
-			wp_send_json_error( array( 'message' => __( 'حسابی با این شناسه پیدا نشد.', 'hamishop-elementor-widgets' ), 'switch_tab' => 'register' ), 404 );
+		if ( 'login' === $context && ( ! $user || ! $this->otp_allowed( $user ) ) ) {
+			/* Same work and same words as a wrong code — no account oracle. */
+			$this->check_code( $phone, $channel, $context, $code );
+			wp_send_json_error( array( 'message' => $this->verify_fail_message() ), 400 );
 		}
 
 		$name  = '';
 		$email = '';
 		if ( 'register' === $context ) {
-			if ( $user ) {
-				wp_send_json_error( array( 'message' => __( 'این شماره قبلاً ثبت‌نام کرده است.', 'hamishop-elementor-widgets' ), 'switch_tab' => 'login' ), 409 );
-			}
 			$name  = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 			$email = ( 'email' === $channel ) ? $phone : ( isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '' );
 			if ( ! $name || ! $email || ! is_email( $email ) ) {
 				wp_send_json_error( array( 'message' => __( 'برای ثبت‌نام، نام و ایمیل معتبر را وارد کنید.', 'hamishop-elementor-widgets' ) ), 400 );
 			}
-			if ( email_exists( $email ) ) {
-				wp_send_json_error( array( 'message' => __( 'این ایمیل قبلاً در سایت ثبت شده است.', 'hamishop-elementor-widgets' ) ), 409 );
-			}
-		}
-
-		if ( 'login' === $context && $user && ! $this->otp_allowed( $user ) ) {
-			wp_send_json_error( array( 'message' => __( 'برای حساب‌های مدیریتی ورود با کد یکبارمصرف فعال نیست. با نام کاربری و رمز عبور وارد شوید.', 'hamishop-elementor-widgets' ) ), 403 );
+			/*
+			 * "already registered" / `email_exists()` move below the code check:
+			 * answered up front they told anyone which addresses have an account.
+			 */
 		}
 
 		$locked = $this->verify_lock_seconds( $phone );
 		if ( $locked > 0 ) {
-			wp_send_json_error(
-				array(
-					'message' => sprintf(
-						/* translators: %s: minutes left. */
-						__( 'به دلیل تلاش‌های ناموفق، ورود با کد برای این شماره تا %s دقیقه قفل است.', 'hamishop-elementor-widgets' ),
-						HSW_Helpers::fa_num( (int) ceil( $locked / 60 ) )
-					),
-				),
-				429
-			);
+			/* The lock is per number, not per account — but the answer stays generic. */
+			wp_send_json_error( array( 'message' => $this->verify_fail_message() ), 400 );
 		}
 
 		$checked = $this->check_code( $phone, $channel, $context, $code );
@@ -966,7 +1103,7 @@ final class HSW_Account_Auth {
 			if ( 'hsw_otp_invalid' === $checked->get_error_code() ) {
 				$this->note_failed_verify( $phone );
 			}
-			wp_send_json_error( array( 'message' => $checked->get_error_message() ), 400 );
+			wp_send_json_error( array( 'message' => $this->verify_fail_message() ), 400 );
 		}
 
 		$this->clear_failed_verify( $phone );
@@ -981,6 +1118,14 @@ final class HSW_Account_Auth {
 			);
 		}
 
+		/* Only now — after the code has proved ownership of the identifier. */
+		if ( $user ) {
+			wp_send_json_error( array( 'message' => __( 'این حساب قبلاً ثبت‌نام کرده است.', 'hamishop-elementor-widgets' ) ), 409 );
+		}
+		if ( 'email' === $channel && email_exists( $email ) ) {
+			wp_send_json_error( array( 'message' => __( 'این ایمیل قبلاً در سایت ثبت شده است.', 'hamishop-elementor-widgets' ) ), 409 );
+		}
+
 		$parts = preg_split( '/\s+/u', $name, 2 );
 		$first = $parts[0];
 		$last  = isset( $parts[1] ) ? $parts[1] : '';
@@ -990,9 +1135,18 @@ final class HSW_Account_Auth {
 		 * `hsw_@gmail.com`), for a phone the last ten digits.
 		 */
 		if ( 'email' === $channel ) {
-			$base = sanitize_user( current( explode( '@', $email ) ), true );
+			/* The code arrived at this address, so it really belongs to them. */
+			$account_email = $email;
+			$base          = sanitize_user( current( explode( '@', $email ) ), true );
 		} else {
-			$base = 'hsw_' . substr( $phone, -10 );
+			/*
+			 * A phone proves the number, never the mailbox. Storing the typed address
+			 * here let anyone claim a stranger's e-mail at signup — and with it every
+			 * guest order and saved address that address already had. The account gets
+			 * a unique placeholder and the typed address is kept as unverified.
+			 */
+			$account_email = $this->placeholder_email( $phone );
+			$base          = 'hsw_' . substr( $phone, -10 );
 		}
 		$base  = $base ? $base : 'hsw_user';
 		$login = $base;
@@ -1006,7 +1160,7 @@ final class HSW_Account_Auth {
 		}
 		$password = wp_generate_password( 24, true, true );
 		$new_user = wc_create_new_customer(
-			$email,
+			$account_email,
 			$login,
 			$password,
 			array(
@@ -1028,6 +1182,10 @@ final class HSW_Account_Auth {
 		} else {
 			update_user_meta( $user_id, 'billing_phone', $phone );
 			update_user_meta( $user_id, '_hsw_auth_phone', $phone );
+			if ( '' !== $email ) {
+				/* Typed, never proved: kept for the e-mail verification step only. */
+				update_user_meta( $user_id, '_hsw_pending_email', $email );
+			}
 			$chat = $this->telegram_chat_id( 0, $phone );
 			if ( $chat ) {
 				update_user_meta( $user_id, '_hsw_telegram_chat_id', $chat );
@@ -1081,8 +1239,50 @@ final class HSW_Account_Auth {
 	 * Two-factor authentication
 	 * ------------------------------------------------------------------ */
 
+	/**
+	 * Remember the session token WordPress just minted for this request.
+	 *
+	 * @param string $cookie     Cookie value.
+	 * @param int    $expire     Expiry timestamp.
+	 * @param int    $expiration Expiration.
+	 * @param int    $user_id    User.
+	 * @param string $scheme     Cookie scheme.
+	 * @param string $token      Session token (the part that matters).
+	 */
+	public function remember_issued_token( $cookie = '', $expire = 0, $expiration = 0, $user_id = 0, $scheme = '', $token = '' ) {
+		$this->issued_token   = (string) $token;
+		$this->issued_user_id = (int) $user_id;
+	}
+
+	/**
+	 * Kill the session that was just created, before redirecting to the challenge.
+	 *
+	 * @param int $user_id User the session belongs to.
+	 */
+	private function destroy_issued_session( $user_id ) {
+		$token = (string) $this->issued_token;
+		if ( '' === $token || (int) $this->issued_user_id !== (int) $user_id ) {
+			$from_cookie = function_exists( 'wp_get_session_token' ) ? (string) wp_get_session_token() : '';
+			$token       = '' !== $from_cookie ? $from_cookie : '';
+		}
+
+		if ( '' === $token ) {
+			return;
+		}
+
+		if ( class_exists( 'WP_Session_Tokens' ) ) {
+			WP_Session_Tokens::get_instance( $user_id )->destroy( $token );
+			return;
+		}
+
+		/* Fallback for a trimmed core: drop every session of this user. */
+		if ( function_exists( 'wp_destroy_all_sessions' ) ) {
+			wp_destroy_all_sessions( $user_id );
+		}
+	}
+
 	public function is_2fa_challenge() {
-		$token = isset( $_GET['hsw_2fa'] ) ? sanitize_key( wp_unslash( $_GET['hsw_2fa'] ) ) : '';
+		$token = isset( $_GET['hsw_2fa'] ) ? $this->parse_token( $_GET['hsw_2fa'] ) : '';
 		if ( ! $token ) {
 			return false;
 		}
@@ -1091,7 +1291,14 @@ final class HSW_Account_Auth {
 	}
 
 	public function maybe_start_2fa( $user_login, $user ) {
-		if ( $this->skip_2fa || ! $this->enabled() || 'yes' !== $this->s( 'otp_2fa', 'yes' ) || ! $user instanceof WP_User ) {
+		/*
+		 * Deliberately NOT gated on otp_enabled: switching OTP *login* off used to
+		 * silently drop the second factor for everyone who had enabled it.
+		 */
+		if ( defined( 'HSW_DISABLE_2FA' ) && HSW_DISABLE_2FA ) {
+			return;
+		}
+		if ( $this->skip_2fa || 'yes' !== $this->s( 'otp_2fa', 'yes' ) || ! $user instanceof WP_User ) {
 			return;
 		}
 		if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) ) {
@@ -1108,11 +1315,38 @@ final class HSW_Account_Auth {
 		}
 		$challenge = $this->create_2fa_challenge( $user->ID, $channel, $phone );
 		if ( is_wp_error( $challenge ) ) {
+			$code = (string) $challenge->get_error_code();
+
+			/*
+			 * Fail-open is for a broken transport ONLY. It used to cover every
+			 * WP_Error — including "a code was sent 30 seconds ago" — so anyone with
+			 * the admin password could log in twice and walk past the second factor.
+			 * Cooldown / throttle / configuration errors now block.
+			 */
+			$transport = (bool) preg_match( '/^hsw_(email_failed|sms_failed|sms_missing|telegram_http|wa_http|wa_phone)$/', $code );
+
+			if ( $transport ) {
+				$privileged = user_can( $user, 'manage_options' ) || user_can( $user, 'manage_woocommerce' );
+				if ( $privileged && apply_filters( 'hsw_2fa_fail_open_privileged', false, $user, $challenge ) ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					error_log( 'HamiShop 2FA: delivery failed for a privileged account and fail-open is enabled; letting the login continue.' );
+					return;
+				}
+			}
+
 			wp_clear_auth_cookie();
-			wp_safe_redirect( add_query_arg( 'hsw_2fa_error', 'delivery', wc_get_page_permalink( 'myaccount' ) ) );
+			$this->destroy_issued_session( $user->ID );
+			wp_safe_redirect(
+				add_query_arg(
+					'hsw_2fa_error',
+					$transport ? 'delivery' : 'cooldown',
+					wc_get_page_permalink( 'myaccount' )
+				)
+			);
 			exit;
 		}
 		wp_clear_auth_cookie();
+		$this->destroy_issued_session( $user->ID );
 		wp_safe_redirect( add_query_arg( 'hsw_2fa', $challenge, wc_get_page_permalink( 'myaccount' ) ) );
 		exit;
 	}
@@ -1122,7 +1356,7 @@ final class HSW_Account_Auth {
 		if ( is_wp_error( $limit ) ) {
 			return $limit;
 		}
-		$token = wp_generate_password( 32, false, false );
+		$token = bin2hex( random_bytes( 16 ) ); // 32 hex chars — survives parse_token() untouched.
 		$code  = (string) wp_rand( 100000, 999999 );
 		$ttl   = max( 60, min( 900, absint( $this->s( 'otp_ttl', 300 ) ) ) );
 		$data  = array(
@@ -1145,16 +1379,18 @@ final class HSW_Account_Auth {
 
 	public function ajax_2fa_verify() {
 		check_ajax_referer( 'hsw_2fa', 'nonce' );
-		$token = isset( $_POST['token'] ) ? sanitize_key( wp_unslash( $_POST['token'] ) ) : '';
+		$token = isset( $_POST['token'] ) ? $this->parse_token( $_POST['token'] ) : '';
 		$code  = isset( $_POST['code'] ) ? preg_replace( '/[^0-9]/', '', wp_unslash( $_POST['code'] ) ) : '';
 		$data  = $token ? get_transient( 'hsw_2fa_' . $token ) : false;
 		if ( ! is_array( $data ) || empty( $data['expires'] ) || $data['expires'] < time() ) {
 			wp_send_json_error( array( 'message' => __( 'درخواست ورود منقضی شده است. دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		$max = max( 1, min( 20, absint( $this->s( 'otp_max_attempts', 5 ) ) ) );
+		/* Same per-code binding as check_code(): a resent code gets a fresh budget. */
+		$bind = md5( (string) $token . '|' . (string) $data['hash'] );
 		/* Atomic attempt counter (same reasoning as check_code()). */
 		$att = HSW_Throttle::hit(
-			'2fa_attempt:' . md5( (string) $token ),
+			'2fa_attempt:' . $bind,
 			$max,
 			max( 60, (int) $data['expires'] - time() )
 		);
@@ -1182,7 +1418,7 @@ final class HSW_Account_Auth {
 		}
 		/* Atomic single-use claim (same reasoning as check_code()). */
 		$claim = HSW_Throttle::hit(
-			'2fa_claim:' . md5( (string) $token ),
+			'2fa_claim:' . $bind,
 			1,
 			max( 60, (int) $data['expires'] - time() )
 		);
@@ -1208,21 +1444,31 @@ final class HSW_Account_Auth {
 
 	public function ajax_2fa_resend() {
 		check_ajax_referer( 'hsw_2fa', 'nonce' );
-		$token = isset( $_POST['token'] ) ? sanitize_key( wp_unslash( $_POST['token'] ) ) : '';
+		$token = isset( $_POST['token'] ) ? $this->parse_token( $_POST['token'] ) : '';
 		$data  = $token ? get_transient( 'hsw_2fa_' . $token ) : false;
 		if ( ! is_array( $data ) || empty( $data['expires'] ) || $data['expires'] < time() ) {
 			wp_send_json_error( array( 'message' => __( 'درخواست ورود منقضی شده است. دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+		/* Same ceilings as a first send: per IP, per number, and per channel. */
+		$throttle = $this->check_send_throttle( (string) $data['phone'], (string) $data['channel'] );
+		if ( is_wp_error( $throttle ) ) {
+			wp_send_json_error( array( 'message' => $throttle->get_error_message() ), 429 );
 		}
 		$limit = $this->rate_limit( $data['phone'], $data['channel'], '2fa' );
 		if ( is_wp_error( $limit ) ) {
 			wp_send_json_error( array( 'message' => $limit->get_error_message() ), 429 );
 		}
+		/* Three resends per challenge, counted atomically. */
+		$resends = HSW_Throttle::hit( '2fa_resend:' . md5( (string) $token ), 3, max( 60, (int) $data['expires'] - time() ) );
+		if ( ! $resends['allowed'] ) {
+			wp_send_json_error( array( 'message' => __( 'برای این ورود به اندازهٔ کافی کد فرستاده شده است؛ دوباره وارد شوید.', 'hamishop-elementor-widgets' ) ), 429 );
+		}
 		$old_data = $data;
 		$code = (string) wp_rand( 100000, 999999 );
 		$data['hash']     = wp_hash_password( $code );
 		$data['attempts'] = 0;
-		$data['expires']  = time() + max( 60, min( 900, absint( $this->s( 'otp_ttl', 300 ) ) ) );
-		set_transient( 'hsw_2fa_' . $token, $data, max( 60, $data['expires'] - time() ) );
+		/* The expiry is NOT pushed back: a resend must not extend the session. */
+		set_transient( 'hsw_2fa_' . $token, $data, max( 1, (int) $data['expires'] - time() ) );
 		$sent = $this->deliver_code( $data['channel'], $data['phone'], $code, (int) $data['user_id'], array( 'context' => '2fa' ) );
 		if ( is_wp_error( $sent ) ) {
 			set_transient( 'hsw_2fa_' . $token, $old_data, max( 1, (int) $old_data['expires'] - time() ) );
@@ -1234,7 +1480,7 @@ final class HSW_Account_Auth {
 
 	public function ajax_2fa_setup_send() {
 		check_ajax_referer( 'hsw_2fa', 'nonce' );
-		if ( ! is_user_logged_in() || ! $this->enabled() || 'yes' !== $this->s( 'otp_2fa', 'yes' ) ) {
+		if ( ! is_user_logged_in() || 'yes' !== $this->s( 'otp_2fa', 'yes' ) || ( defined( 'HSW_DISABLE_2FA' ) && HSW_DISABLE_2FA ) ) {
 			wp_send_json_error( array( 'message' => __( 'برای تنظیم ورود دوعاملی باید وارد حساب شوید.', 'hamishop-elementor-widgets' ) ), 403 );
 		}
 		$user_id = get_current_user_id();
@@ -1317,13 +1563,22 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'کد منقضی شده است. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		$max = max( 1, min( 20, absint( $this->s( 'otp_max_attempts', 5 ) ) ) );
-		if ( (int) $data['attempts'] >= $max ) {
+		/*
+		 * Attempts are counted in the atomic table, not in the transient: the old
+		 * read-modify-write lost every parallel increment, so a burst of guesses
+		 * against the setup code was never capped.
+		 */
+		$bind = md5( 'hsw_2fa_setup_' . $user_id . '|' . (string) $data['hash'] );
+		$att  = HSW_Throttle::hit(
+			'2fa_setup_attempt:' . $bind,
+			$max,
+			max( 60, (int) $data['expires'] - time() )
+		);
+		if ( ! $att['allowed'] ) {
 			delete_transient( 'hsw_2fa_setup_' . $user_id );
 			wp_send_json_error( array( 'message' => __( 'تعداد تلاش‌ها بیش از حد مجاز است. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ) ), 429 );
 		}
 		if ( ! wp_check_password( (string) $code, $data['hash'] ) ) {
-			$data['attempts'] = (int) $data['attempts'] + 1;
-			set_transient( 'hsw_2fa_setup_' . $user_id, $data, max( 1, (int) $data['expires'] - time() ) );
 			wp_send_json_error( array( 'message' => __( 'کد وارد شده صحیح نیست.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 		delete_transient( 'hsw_2fa_setup_' . $user_id );
@@ -1345,6 +1600,7 @@ final class HSW_Account_Auth {
 
 		update_user_meta( $user_id, '_hsw_2fa_enabled', 'yes' );
 		update_user_meta( $user_id, '_hsw_2fa_channel', $data['channel'] );
+		$this->notify_security_change( $user_id, __( 'ورود دوعاملی برای حساب شما فعال شد.', 'hamishop-elementor-widgets' ) );
 		wp_send_json_success( array( 'message' => __( 'ورود دوعاملی فعال شد.', 'hamishop-elementor-widgets' ), 'reload' => true ) );
 	}
 
@@ -1354,10 +1610,90 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'دسترسی غیرمجاز.', 'hamishop-elementor-widgets' ) ), 403 );
 		}
 		$user_id = get_current_user_id();
+
+		/* Turning the second factor off is exactly what a stolen session wants. */
+		$proof = $this->verify_disable_proof( $user_id );
+		if ( is_wp_error( $proof ) ) {
+			$status = 'hsw_2fa_disable_locked' === $proof->get_error_code() ? 429 : 403;
+			wp_send_json_error( array( 'message' => $proof->get_error_message() ), $status );
+		}
+
 		delete_user_meta( $user_id, '_hsw_2fa_enabled' );
 		delete_user_meta( $user_id, '_hsw_2fa_channel' );
 		delete_user_meta( $user_id, '_hsw_2fa_phone' );
+		$this->notify_security_change( $user_id, __( 'ورود دوعاملی برای حساب شما غیرفعال شد.', 'hamishop-elementor-widgets' ) );
 		wp_send_json_success( array( 'message' => __( 'ورود دوعاملی غیرفعال شد.', 'hamishop-elementor-widgets' ), 'reload' => true ) );
+	}
+
+	/**
+	 * Proof of possession for "switch 2FA off": the current password, or a code
+	 * that was just delivered to the 2FA channel.
+	 *
+	 * @param int $user_id User.
+	 * @return true|WP_Error
+	 */
+	private function verify_disable_proof( $user_id ) {
+		/*
+		 * A session alone must not be enough, and a session alone must not be able
+		 * to *try* either: five wrong proofs per user and quarter of an hour, in
+		 * the atomic counter (a transient read-modify-write loses parallel hits).
+		 */
+		$attempts = HSW_Throttle::hit( '2fa_disable:' . (int) $user_id, 5, 15 * MINUTE_IN_SECONDS );
+		if ( ! $attempts['allowed'] ) {
+			return new WP_Error(
+				'hsw_2fa_disable_locked',
+				sprintf(
+					/* translators: %s: minutes. */
+					__( 'تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را غیرفعال کنید.', 'hamishop-elementor-widgets' ),
+					HSW_Helpers::fa_num( (int) ceil( max( 1, (int) $attempts['retry_after'] ) / 60 ) )
+				)
+			);
+		}
+
+		$code = isset( $_POST['code'] ) ? preg_replace( '/[^0-9]/', '', wp_unslash( $_POST['code'] ) ) : '';
+		if ( '' !== $code ) {
+			$data = get_transient( 'hsw_2fa_setup_' . $user_id );
+			if ( is_array( $data ) && ! empty( $data['hash'] ) && wp_check_password( $code, $data['hash'] ) ) {
+				delete_transient( 'hsw_2fa_setup_' . $user_id );
+				return true;
+			}
+			return new WP_Error( 'hsw_2fa_proof', __( 'کد وارد شده صحیح نیست یا منقضی شده است.', 'hamishop-elementor-widgets' ) );
+		}
+
+		/* A shop that cannot ask for a password can opt out explicitly. */
+		if ( 'none' === (string) apply_filters( 'hsw_2fa_disable_proof', 'password' ) ) {
+			return true;
+		}
+
+		$password = isset( $_POST['password'] ) ? (string) wp_unslash( $_POST['password'] ) : '';
+		$user     = get_user_by( 'id', $user_id );
+		if ( '' === $password || ! $user || ! wp_check_password( $password, (string) ( $user->user_pass ?? '' ) ) ) {
+			return new WP_Error( 'hsw_2fa_proof', __( 'برای غیرفعال‌سازی، رمز عبور فعلی یا کد تأیید را وارد کنید.', 'hamishop-elementor-widgets' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Tell the account owner by e-mail that a security setting moved.
+	 *
+	 * @param int    $user_id User.
+	 * @param string $what    Human sentence.
+	 */
+	private function notify_security_change( $user_id, $what ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user || ! is_email( (string) $user->user_email ) ) {
+			return;
+		}
+		wp_mail(
+			$user->user_email,
+			sprintf(
+				/* translators: %s: site name. */
+				__( 'تغییر امنیتی حساب در %s', 'hamishop-elementor-widgets' ),
+				get_bloginfo( 'name' )
+			),
+			$what . "\n" . home_url( '/' )
+		);
 	}
 
 	/* ---------------------------------------------------------------------
@@ -1488,7 +1824,7 @@ final class HSW_Account_Auth {
 				}
 			}
 		} elseif ( preg_match( '/^\/start(?:\s+(\S+))?/u', $text, $matches ) ) {
-			$token   = isset( $matches[1] ) ? sanitize_key( $matches[1] ) : '';
+			$token   = isset( $matches[1] ) ? $this->parse_token( $matches[1] ) : '';
 			$user_id = $token ? (int) get_transient( 'hsw_telegram_link_' . $token ) : 0;
 			if ( $user_id ) {
 				update_user_meta( $user_id, '_hsw_telegram_chat_id', $chat_id );
@@ -1556,7 +1892,8 @@ final class HSW_Account_Auth {
 	}
 
 	public function security_panel( $ctx ) {
-		if ( ! $this->enabled() ) {
+		/* Independent of the OTP *login* switch, like maybe_start_2fa(). */
+		if ( 'yes' !== $this->s( 'otp_2fa', 'yes' ) || ( defined( 'HSW_DISABLE_2FA' ) && HSW_DISABLE_2FA ) ) {
 			return '';
 		}
 		$channels = $this->available_channels();
@@ -1582,6 +1919,11 @@ final class HSW_Account_Auth {
 		if ( $enabled ) {
 			$where = ( 'email' === $active ) ? $phone : $this->mask_phone( $phone );
 			$html .= '<div class="hsw-ac__security-active"><span class="hsw-ac__security-dot"></span><div><strong>' . esc_html__( 'ورود دوعاملی فعال است', 'hamishop-elementor-widgets' ) . '</strong><p>' . esc_html( sprintf( 'کد ورود از طریق %s به %s ارسال می‌شود.', $this->channel_label( $active ), $where ) ) . '</p></div></div>';
+			/*
+			 * Switching the second factor off needs proof of possession (password or
+			 * a fresh code); a session cookie alone used to be enough.
+			 */
+			$html .= '<div class="hsw-ac-field"><label for="hsw-2fa-off-pass">' . esc_html__( 'برای غیرفعال‌سازی، رمز عبور فعلی', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'shield' ) . '<input type="password" id="hsw-2fa-off-pass" autocomplete="current-password" dir="ltr" data-hsw-2fa-pass></div></div>';
 			$html .= '<button type="button" class="hsw-ac__btn hsw-ac__btn--ghost" data-hsw-2fa-disable>' . $this->account->icon( 'x' ) . esc_html__( 'غیرفعال کردن', 'hamishop-elementor-widgets' ) . '</button>';
 			$html .= '<p class="hsw-ac-otp__message" data-hsw-2fa-message role="status" aria-live="polite"></p>';
 			return $html . '</section>';
@@ -1622,7 +1964,7 @@ final class HSW_Account_Auth {
 	}
 
 	public function render_2fa_challenge( $opts ) {
-		$token = isset( $_GET['hsw_2fa'] ) ? sanitize_key( wp_unslash( $_GET['hsw_2fa'] ) ) : '';
+		$token = isset( $_GET['hsw_2fa'] ) ? $this->parse_token( $_GET['hsw_2fa'] ) : '';
 		$data  = $token ? get_transient( 'hsw_2fa_' . $token ) : false;
 		if ( ! is_array( $data ) ) {
 			return '';
