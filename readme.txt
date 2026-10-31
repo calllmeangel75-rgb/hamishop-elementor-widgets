@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.181
+Stable tag: 1.11.182
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.182 =
+* **فقط هارنس آزمون — کد افزونه بدون تغییر.** هارنس پیش از لایو (`tests/qa/prelive*.php`: ۵۴ سنجهٔ احراز هویت، 2FA، شمارش حساب، خاموشی کیف پول، تأیید ایمیل، مسیریابی تسویه و لیست سفید «نت ملی» + اثبات‌های دیتابیس واقعی) در ریپو ثبت شد. پوشهٔ `tests/` با `export-ignore` از ZIP انتشار بیرون است و در اجرا تغییر ایجاد نمی‌کند.
 
 = 1.11.181 =
 * **جریان خرید و پاک‌سازی‌های امنیتی.**
