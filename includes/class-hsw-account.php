@@ -291,7 +291,22 @@ final class HSW_Account {
 		if ( $refresh ) {
 			$this->settings = $this->load_settings();
 		}
-		return $this->settings;
+
+		$out = $this->settings;
+
+		/*
+		 * The master wallet switch wins over the per-site preference: with wallet
+		 * payments off, the account panel must not advertise an endpoint that
+		 * cannot take money and must not touch the `{prefix}hsw_wallet*` tables.
+		 * `$refresh` is used only by the settings screen, so the merchant still
+		 * sees — and keeps — their own choice there.
+		 */
+		if ( ! $refresh && is_array( $out ) && isset( $out['wallet']['enabled'] )
+			&& class_exists( 'HSW_Wallet' ) && ! HSW_Wallet::customer_features_on() ) {
+			$out['wallet']['enabled'] = 'no';
+		}
+
+		return $out;
 	}
 
 	public function setting( $path, $fallback = null ) {
@@ -884,6 +899,16 @@ final class HSW_Account {
 		$base['context']     = isset( $args['context'] ) ? sanitize_key( $args['context'] ) : 'widget';
 		$base['extra_class'] = isset( $args['extra_class'] ) ? sanitize_html_class( $args['extra_class'] ) : '';
 		$base['inline_vars'] = isset( $args['inline_vars'] ) && is_array( $args['inline_vars'] ) ? $args['inline_vars'] : array();
+
+		/*
+		 * Re-applied after the merge: a widget control (or a saved Elementor
+		 * template) must not be able to switch a globally disabled feature back on
+		 * for one page.
+		 */
+		if ( class_exists( 'HSW_Wallet' ) && ! HSW_Wallet::customer_features_on() && isset( $base['wallet']['enabled'] ) ) {
+			$base['wallet']['enabled'] = 'no';
+		}
+
 		return $base;
 	}
 
@@ -2542,7 +2567,20 @@ final class HSW_Account {
 	}
 
 	public function render_wallet_endpoint( $value = '' ) {
-		if ( ! is_user_logged_in() || ! $this->endpoint_enabled( 'wallet' ) ) {
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		/*
+		 * A bookmarked URL must not render a blank panel after the shop switched
+		 * wallet payments off.
+		 */
+		if ( class_exists( 'HSW_Wallet' ) && ! HSW_Wallet::customer_features_on() ) {
+			echo '<div class="hsw-ac__card"><p>' . esc_html__( 'این بخش در حال حاضر غیرفعال است.', 'hamishop-elementor-widgets' ) . '</p></div>';
+			return;
+		}
+
+		if ( ! $this->endpoint_enabled( 'wallet' ) ) {
 			return;
 		}
 		$ctx = $this->build_context( $this->resolve_args( array() ) );
@@ -2942,6 +2980,11 @@ final class HSW_Account {
 	}
 
 	public function wallet_balance( $user_id = 0 ) {
+		/* A switched-off feature never queries the wallet tables. */
+		if ( class_exists( 'HSW_Wallet' ) && ! HSW_Wallet::customer_features_on() ) {
+			return 0.0;
+		}
+
 		$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
 		/* The wallet table is the only source; the legacy meta is a frozen snapshot. */
 		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user_id ) : 0.0;

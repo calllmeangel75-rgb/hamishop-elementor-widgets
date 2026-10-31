@@ -786,6 +786,10 @@ final class HSW_Account_Admin {
 		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'edit_user', $user->ID ) ) {
 			return;
 		}
+		/* The balance field belongs to a switched-off feature. */
+		if ( class_exists( 'HSW_Wallet' ) && ! HSW_Wallet::customer_features_on() ) {
+			return;
+		}
 		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user->ID ) : 0.0;
 		if ( get_transient( 'hsw_wallet_stale_' . get_current_user_id() ) ) {
 			delete_transient( 'hsw_wallet_stale_' . get_current_user_id() );
@@ -818,6 +822,10 @@ final class HSW_Account_Admin {
 		/* Same rule as the form above: shop money needs manage_woocommerce,
 		 * and self-editing alone must never reach set_balance(). */
 		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'edit_user', $user_id ) ) {
+			return;
+		}
+		/* Refuse a crafted POST too, not only the rendering. */
+		if ( class_exists( 'HSW_Wallet' ) && ! HSW_Wallet::customer_features_on() ) {
 			return;
 		}
 		if ( ! isset( $_POST['hsw_account_user_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hsw_account_user_nonce'] ) ), 'hsw_account_user_' . $user_id ) ) {

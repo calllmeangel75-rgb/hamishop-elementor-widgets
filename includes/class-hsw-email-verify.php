@@ -45,6 +45,9 @@ class HSW_Email_Verify {
 	/** Wrong guesses allowed before the code is burnt. */
 	const MAX_TRIES = 5;
 
+	/** Address the customer typed at phone signup, never proved. */
+	const META_PENDING = '_hsw_pending_email';
+
 	/** @var HSW_Email_Verify|null */
 	private static $instance = null;
 
@@ -66,6 +69,47 @@ class HSW_Email_Verify {
 
 		add_action( 'wp_ajax_hsw_email_send', array( $this, 'ajax_send' ) );
 		add_action( 'wp_ajax_hsw_email_verify', array( $this, 'ajax_verify' ) );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Placeholder addresses (phone signups)
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Domain used for the undeliverable address a phone signup starts with.
+	 *
+	 * @return string
+	 */
+	public static function placeholder_domain() {
+		return (string) apply_filters( 'hsw_signup_placeholder_domain', 'noreply.invalid' );
+	}
+
+	/**
+	 * Is this the stand-in address created by a phone signup?
+	 *
+	 * @param string $email Address.
+	 * @return bool
+	 */
+	public static function is_placeholder( $email ) {
+		$email  = strtolower( trim( (string) $email ) );
+		$domain = strtolower( trim( self::placeholder_domain() ) );
+
+		if ( '' === $email || '' === $domain ) {
+			return false;
+		}
+
+		return substr( $email, -strlen( '@' . $domain ) ) === '@' . $domain;
+	}
+
+	/**
+	 * Drop a transactional recipient that cannot receive mail.
+	 *
+	 * @param string $recipient Address.
+	 * @param mixed  $object    WC email object (unused).
+	 * @return string Empty string suppresses the e-mail.
+	 */
+	public static function skip_placeholder_recipient( $recipient, $object = null ) {
+		return self::is_placeholder( $recipient ) ? '' : $recipient;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -148,6 +192,15 @@ class HSW_Email_Verify {
 
 		$user  = get_user_by( 'id', $user_id );
 		$email = $user ? $user->user_email : '';
+
+		/*
+		 * A phone signup starts on a placeholder address: offer the address the
+		 * customer actually typed (kept unverified) instead of the stand-in.
+		 */
+		if ( self::is_placeholder( $email ) ) {
+			$pending = (string) get_user_meta( $user_id, self::META_PENDING, true );
+			$email   = is_email( $pending ) ? $pending : '';
+		}
 		$id    = 'hsw-verify-' . wp_rand( 1000, 9999 );
 
 		$html  = '<section class="hsw-ac__verify" data-hsw-verify>';
@@ -204,6 +257,11 @@ class HSW_Email_Verify {
 
 		if ( ! is_email( $email ) ) {
 			wp_send_json_error( array( 'message' => __( 'ایمیل واردشده معتبر نیست.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		/* The stand-in address of a phone signup cannot receive mail. */
+		if ( self::is_placeholder( $email ) ) {
+			wp_send_json_error( array( 'message' => __( 'یک ایمیل واقعی وارد کنید؛ آدرس پیش‌فرض حساب قابل تحویل نیست.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
 
 		/* Never let a customer claim an address that already belongs to someone. */
@@ -317,6 +375,7 @@ class HSW_Email_Verify {
 
 		update_user_meta( $user_id, 'billing_email', $for );
 		update_user_meta( $user_id, self::META_VERIFIED, time() );
+		delete_user_meta( $user_id, self::META_PENDING );
 		$this->clear_code( $user_id );
 
 		wp_send_json_success(
@@ -387,3 +446,10 @@ class HSW_Email_Verify {
 		return $name . '***@' . $parts[1];
 	}
 }
+
+/*
+ * Registered at file scope, not in the constructor: a phone signup runs inside
+ * admin-ajax, where this class is never instantiated, yet WooCommerce still
+ * sends “your new account” to the undeliverable placeholder address.
+ */
+add_filter( 'woocommerce_email_recipient_customer_new_account', array( 'HSW_Email_Verify', 'skip_placeholder_recipient' ), 10, 2 );

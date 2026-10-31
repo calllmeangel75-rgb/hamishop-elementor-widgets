@@ -247,6 +247,28 @@ class HSW_Wallet {
 		return defined( 'HSW_DISABLE_WALLET' ) && HSW_DISABLE_WALLET;
 	}
 
+	/**
+	 * Is the wallet a customer-facing feature on this shop right now?
+	 *
+	 * One answer for the whole plugin: the gateway, the account endpoint, the
+	 * dashboard card, the points conversion and the admin profile field all ask
+	 * this. It is false unless the shop explicitly switched wallet payments on
+	 * (`hsw_wallet_gateway_on = yes`) and the emergency constant is absent.
+	 *
+	 * @return bool
+	 */
+	public static function customer_features_on() {
+		if ( self::disabled() ) {
+			return false;
+		}
+
+		if ( 'yes' !== (string) get_option( 'hsw_wallet_gateway_on', 'no' ) ) {
+			return false;
+		}
+
+		return (bool) apply_filters( 'hsw_wallet_customer_features', true );
+	}
+
 	public function maybe_install() {
 		if ( self::DB_VERSION === get_option( 'hsw_wallet_db' ) ) {
 			return;
@@ -2013,6 +2035,14 @@ class HSW_Wallet {
 	 * ------------------------------------------------------------------ */
 
 	public function menu() {
+		/*
+		 * Nothing to approve or credit while wallet payments are switched off.
+		 * `wp hsw wallet …` stays available for a technician.
+		 */
+		if ( ! self::customer_features_on() ) {
+			return;
+		}
+
 		add_submenu_page(
 			'hamishop',
 			__( 'کیف پول', 'hamishop-elementor-widgets' ),
