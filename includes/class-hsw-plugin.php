@@ -38,6 +38,7 @@ final class HSW_Plugin {
                 HSW_Branding::instance();
                 HSW_Security::instance();
                 HSW_Cache_Guard::instance();
+                HSW_Optimizer::instance();
                 HSW_Throttle::instance();
                 HSW_Wallet::instance();
                 new HSW_Wallet_Topup();
@@ -222,6 +223,9 @@ final class HSW_Plugin {
                 /* A failed query leaves the marker alone so the next request retries. */
                 if ( false !== $deleted && $css_cleared ) {
                         update_option( 'hsw_asset_version', HSW_VERSION, false );
+                        /* Elementor's CSS was regenerated; an optimizer holding the old
+                        * combined/UCSS copy must not keep serving it. */
+                        HSW_Optimizer::purge( 'HamiShop: assets regenerated for ' . HSW_VERSION );
                 }
         }
 
@@ -297,6 +301,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-branding.php';
                 require_once HSW_DIR . 'includes/class-hsw-security.php';
                 require_once HSW_DIR . 'includes/class-hsw-cache-guard.php';
+                require_once HSW_DIR . 'includes/class-hsw-optimizer.php';
                 require_once HSW_DIR . 'includes/class-hsw-throttle.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet-pay.php';

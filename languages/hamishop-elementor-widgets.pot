@@ -73,6 +73,10 @@ msgstr ""
 msgid "CTA مراحل خرید (کلیک)"
 msgstr ""
 
+#: includes/class-hsw-optimizer.php:245
+msgid "Font Display"
+msgstr ""
+
 #: includes/class-hsw-assets.php:763
 msgid "HamiShop (لوکال)"
 msgstr ""
@@ -85,8 +89,16 @@ msgstr ""
 msgid "HamiShop:"
 msgstr ""
 
+#: includes/class-hsw-optimizer.php:238
+msgid "HamiShop: سازگاری با بهینه‌ساز لایت‌اسپید"
+msgstr ""
+
 #: includes/class-hsw-security.php:1253
 msgid "REST API"
+msgstr ""
+
+#: includes/class-hsw-optimizer.php:248
+msgid "UCSS/Critical CSS قاعده‌های سبد کشویی، تب‌ها و آکاردئون‌ها را «استفاده‌نشده» می‌بیند و حذفشان می‌کند؛ اگر بعد از فعال‌بودنش استایل این‌ها پرید، UCSS را برای این صفحه‌ها خاموش کنید."
 msgstr ""
 
 #: includes/class-hsw-security.php:1268
@@ -1744,6 +1756,10 @@ msgstr ""
 msgid "این محصول موجود نیست."
 msgstr ""
 
+#: includes/class-hsw-optimizer.php:245
+msgid "این مقدار روی همهٔ @font-faceها نوشته می‌شود؛ اگر روی optional یا block باشد فونت گاهی روی Tahoma می‌ماند. آن را روی swap بگذارید."
+msgstr ""
+
 #: includes/class-hsw-widget-base.php:828
 #: includes/class-hsw-widget-base.php:1491
 #: includes/class-hsw-widget-base.php:3030
@@ -2024,6 +2040,10 @@ msgstr ""
 
 #: includes/class-hsw-wallet.php:657
 msgid "بازیابی موجودی قدیمی (ردیف در میانهٔ مهاجرت ساخته شده بود)"
+msgstr ""
+
+#: includes/class-hsw-optimizer.php:254
+msgid "باشه، فعلاً نشان نده"
 msgstr ""
 
 #: includes/class-hsw-account.php:1423
@@ -3556,6 +3576,10 @@ msgstr ""
 msgid "تمامی قیمت‌ها شامل مالیات بر ارزش افزوده قانونی است."
 msgstr ""
 
+#: includes/class-hsw-optimizer.php:243
+msgid "تنظیم Font Display روی swap است؛ خوب است."
+msgstr ""
+
 #: includes/class-hsw-account-admin.php:849
 msgid "تنظیم دستی موجودی توسط مدیر"
 msgstr ""
@@ -3719,7 +3743,7 @@ msgstr ""
 msgid "توضیحات برگهٔ فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:270
+#: includes/class-hsw-plugin.php:274
 msgid "توضیحات محصول"
 msgstr ""
 
@@ -4343,31 +4367,31 @@ msgstr ""
 msgid "حالت‌های ویژه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:360
+#: includes/class-hsw-plugin.php:365
 msgid "حامی — هدر و ناوبری"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:364
+#: includes/class-hsw-plugin.php:369
 msgid "حامی — ویجت‌های آرشیو محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:363
+#: includes/class-hsw-plugin.php:368
 msgid "حامی — ویجت‌های سبد خرید و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:361
+#: includes/class-hsw-plugin.php:366
 msgid "حامی — ویجت‌های صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:362
+#: includes/class-hsw-plugin.php:367
 msgid "حامی — ویجت‌های لوپ محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:366
+#: includes/class-hsw-plugin.php:371
 msgid "حامی — ویجت‌های مجله و وبلاگ"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:365
+#: includes/class-hsw-plugin.php:370
 msgid "حامی — پنل حساب کاربری"
 msgstr ""
 
@@ -4540,7 +4564,7 @@ msgid "حساب، سبد و پشتیبانی"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:392
-#: includes/class-hsw-plugin.php:250
+#: includes/class-hsw-plugin.php:254
 msgid "خالی"
 msgstr ""
 
@@ -5598,7 +5622,7 @@ msgstr ""
 msgid "دیدگاه‌ها و فرم ثبت نظر"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:272
+#: includes/class-hsw-plugin.php:276
 msgid "دیدگاه‌ها و نظرات"
 msgstr ""
 
@@ -5635,6 +5659,10 @@ msgstr ""
 
 #: includes/class-hsw-palette.php:645
 msgid "ذخیره پالت"
+msgstr ""
+
+#: includes/class-hsw-optimizer.php:241
+msgid "را در «CSS Excludes» نگه دارید؛ CSS المنتور با هر ذخیره عوض می‌شود و ادغام آن باعث تولید مداوم فایل ترکیبی و بی‌اعتبارشدن کش می‌شود."
 msgstr ""
 
 #: includes/class-hsw-header-base.php:985
@@ -8554,6 +8582,10 @@ msgstr ""
 msgid "فایل .htaccess قابل نوشتن نیست، پس آدرس سفارشی فعال نشد. دسترسی نوشتن بدهید یا قواعد را دستی اضافه کنید."
 msgstr ""
 
+#: includes/class-hsw-optimizer.php:239
+msgid "فایل‌های CSS این افزونه از ادغام و از حذف قاعده‌های UCSS خارج می‌شوند (فقط در حافظه، تنظیمات شما دست‌نخورده است). برای اینکه ساختار صفحه و فونت وزیرمتن همیشه درست بماند، این موارد را هم در نظر بگیرید:"
+msgstr ""
+
 #: widgets/class-hsw-widget-pay-recall.php:117
 #: widgets/class-hsw-widget-pay-recall.php:205
 msgid "فردا (پنجشنبه) - ساعت ۱۴ الی ۱۸"
@@ -10477,7 +10509,7 @@ msgstr ""
 msgid "مشخصات تحویل سفارش (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:271
+#: includes/class-hsw-plugin.php:275
 #: widgets/class-hsw-widget-product-tabs.php:70
 #: widgets/class-hsw-widget-product-tabs.php:275
 msgid "مشخصات فنی"
@@ -11790,6 +11822,10 @@ msgstr ""
 msgid "هیچ‌وقت 00:00:00 مرده نمایش داده نمی‌شود؛ در حالت «کل ویجت پنهان شود» ارتفاع صفحه تغییر نمی‌کند."
 msgstr ""
 
+#: includes/class-hsw-optimizer.php:241
+msgid "و"
+msgstr ""
+
 #: widgets/class-hsw-widget-pay-summary.php:164
 msgid "و حفظ حریم خصوصی فروشگاه را مطالعه کرده و می‌پذیرم."
 msgstr ""
@@ -11974,6 +12010,10 @@ msgstr ""
 #: widgets/class-hsw-widget-complete-hero.php:163
 #: widgets/class-hsw-widget-complete-hero.php:309
 msgid "وضعیت سفارش"
+msgstr ""
+
+#: includes/class-hsw-optimizer.php:252
+msgid "وضعیت فعلی CSS Combine در لایت‌اسپید:"
 msgstr ""
 
 #: includes/class-hsw-account.php:2248
