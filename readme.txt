@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.177
+Stable tag: 1.11.178
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.178 =
+* **احراز هویت، 2FA و throttle: یافته‌های بازبینی پیش از لایو بسته شد.**
+  - **بایپس 2FA:** fail-open فقط برای خطای واقعی ارسال؛ cooldown/throttle/پیکربندی مسدود می‌کند. پیش‌فرض `hsw_2fa_fail_open_privileged` حالا `false` است.
+  - **نشست بعد از دروازهٔ 2FA:** توکن `set_auth_cookie` با `WP_Session_Tokens::destroy()` نابود می‌شود، نه فقط کوکی مرورگر.
+  - **throttle اتمیک و fail-closed:** شمارش با `LAST_INSERT_ID(...)` در همان اتصال؛ خطای DB یا جدول غایب یعنی `allowed=false` (قبلاً همه مجاز می‌شدند).
+  - **شمارش حساب:** throttle و cooldown قبل از جستجوی کاربر؛ پاسخ موجود/ناموجود/ادمین یکسان؛ همهٔ شکست‌های verify یک پیام.
+  - **غیرفعال‌کردن 2FA:** رمز فعلی یا کد تازه لازم است، با سقف ۵ تلاش / ۱۵ دقیقه.
+  - **XML-RPC و Application Passwords** برای حساب‌های 2FA‌دار و مدیران پیش‌فرض بسته شد.
+  - **OTP:** کلید شمارنده‌ها به خود کد بسته شد؛ توکن‌های hex با پارسر واحد؛ resend سقف ۳ و بدون تمدید؛ 2FA مستقل از `otp_enabled`؛ ثبت‌نام تلفنی ایمیل تأییدنشده را روی حساب نمی‌گذارد.
+  - **کیف پول:** حذف `enabled='yes'` هاردکد (گزینهٔ `hsw_wallet_gateway_on` + ثابت `HSW_DISABLE_WALLET`)؛ ساخت جدول روی `init` فقط با `hsw_wallet_autoinstall=yes`.
 
 = 1.11.177 =
 * **کیف پول: نوشتن پول تراکنشی و اتمیک شد؛ لغو/ریفاند سفارش شارژ، اعتبار را پس می‌گیرد.**
