@@ -12,9 +12,18 @@
  * so the same file can be pointed at a MySQL 8 container in CI.
  */
 
-$dsn  = getenv( 'HSW_QA_DSN' ) ?: 'mysql:host=127.0.0.1;port=3306;dbname=sks';
-$user = getenv( 'HSW_QA_USER' ) ?: 'supports';
-$pass = getenv( 'HSW_QA_PASS' ) ?: 'support$$$SKYSTORE';
+/*
+ * SECURITY: no built-in credentials. The old defaults carried a real live
+ * database user, password and dbname — running this file without env vars hit
+ * the live server. Without the variables the script skips itself.
+ */
+$dsn  = getenv( 'HSW_QA_DSN' );
+$user = getenv( 'HSW_QA_USER' );
+$pass = getenv( 'HSW_QA_PASS' );
+if ( ! $dsn || ! $user ) {
+	echo "SKIP  set HSW_QA_DSN and HSW_QA_USER (HSW_QA_PASS optional) to run this suite.\n";
+	exit( 0 );
+}
 
 $pass_count = 0;
 $fail_count = 0;
@@ -35,12 +44,8 @@ $version = (string) $pdo->query( 'SELECT VERSION()' )->fetchColumn();
 echo "server: {$version}\n";
 
 /*
- * WordPress relaxes the SQL mode of its own connection (it drops strict mode and
- * NO_ZERO_DATE) so the `0000-00-00` defaults in core tables are accepted. Mirror
- * that here, otherwise the scratch table fails for a reason the plugin never
  * meets in production.
  */
-$pdo->exec( "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'" );
 
 $t = 'hsw_qa_sql_compat';
 $pdo->exec( "DROP TABLE IF EXISTS {$t}" );
@@ -49,7 +54,7 @@ $pdo->exec(
 		user_id bigint unsigned NOT NULL,
 		balance decimal(18,2) NOT NULL DEFAULT 0,
 		points_used decimal(12,0) NOT NULL DEFAULT 0,
-		updated_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+		updated_at datetime NOT NULL,
 		PRIMARY KEY (user_id)
 	) ENGINE=InnoDB"
 );

@@ -100,8 +100,8 @@ jobs:
       - name: Jalali + number_words
         run: php tests/unit/run.php
 
-  mysql8:
-    name: SQL compatibility (MySQL 8)
+  sqlengines:
+    name: SQL compatibility (MySQL 8 + MariaDB, strict)
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -116,6 +116,19 @@ jobs:
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: hsw_qa
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+          --command=--sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
     steps:
       - uses: actions/checkout@v4
 
@@ -126,12 +139,30 @@ jobs:
           coverage: none
           tools: none
 
+      # Server defaults stay in force (strict + NO_ZERO_DATE on MySQL 8; the
+      # MariaDB service pins the same mode). The old `SET SESSION sql_mode`
+      # escape hatch is gone — the DDL must hold on a strict server.
       - name: Wallet statements on MySQL 8
         run: |
           HSW_QA_DSN="mysql:host=127.0.0.1;port=3306;dbname=hsw_qa" \
           HSW_QA_USER=root \
           HSW_QA_PASS=root \
           php tests/qa/sql-compat.php
+          HSW_QA_DSN="mysql:host=127.0.0.1;port=3306;dbname=hsw_qa" \
+          HSW_QA_USER=root \
+          HSW_QA_PASS=root \
+          php tests/qa/remediation.php
+
+      - name: Wallet statements on MariaDB 11
+        run: |
+          HSW_QA_DSN="mysql:host=127.0.0.1;port=3307;dbname=hsw_qa" \
+          HSW_QA_USER=root \
+          HSW_QA_PASS=root \
+          php tests/qa/sql-compat.php
+          HSW_QA_DSN="mysql:host=127.0.0.1;port=3307;dbname=hsw_qa" \
+          HSW_QA_USER=root \
+          HSW_QA_PASS=root \
+          php tests/qa/remediation.php
 
   checks:
     name: structural checks
