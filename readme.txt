@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.183
+Stable tag: 1.11.184
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.184 =
+* **سازگاری با بهینه‌ساز لایت‌اسپید (کلاس جدید `HSW_Optimizer`).**
+  - CSS خودکار از ادغام و از حذف قاعده‌های UCSS خارج می‌شود (`optm-css_exc` / `optm-ucss_exc`) — فقط در حافظه، بدون تغییر تنظیمات صاحب سایت و بدون نوشتن در دیتابیس؛ خطوط موجود حفظ و از تکرار جلوگیری می‌شود.
+  - بعد از تعویض نسخه (همراه پاک‌شدن کش CSS المنتور) و بعد از ذخیرهٔ پالت/حساب/امنیت، `litespeed_purge_all` اجرا می‌شود؛ برای WP Rocket / W3TC / SiteGround هم با تابع رسمی خودشان.
+  - در پیش‌نمایش/ویرایش المنتور بهینه‌ساز برای همان درخواست خاموش می‌شود (`litespeed_disable_all`).
+  - اعلان قابل‌بستن در صفحهٔ HamiShop: وضعیت Combine/UCSS/Font-Display و توصیهٔ خارج‌کردن `elementor/css/post-` از ادغام؛ اگر Font Display روی `optional`/`block` باشد هشدار می‌دهد (همان مقدار روی فونت وزیرمتن نوشته می‌شود).
+  - بدون لایت‌اسپید هیچ کاری انجام نمی‌شود (تشخیص با `LSCWP_CTRL` / `has_filter('litespeed_conf')`). فیلتر `hsw_optimizer_exclude` برای تغییر خطوط.
+  - تست: `tests/qa/prelive-optimizer.php` ۶ سنجه (قرمز ۶/۶ بدون این کلاس، سبز ۶/۶ با آن).
 
 = 1.11.183 =
 * **فونت وزیرمتن، رنگ صورتی المنتور روی دکمه‌ها و شاین قرمز لوگو.**
