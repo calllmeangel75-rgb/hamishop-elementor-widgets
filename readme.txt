@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.178
+Stable tag: 1.11.179
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.179 =
+* **کیف پول با خاموش‌بودن کاملاً پنهان می‌شود و تأییدیهٔ ایمیل ثبت‌نام تلفنی کامل شد.**
+  - **گیت واحد:** `HSW_Wallet::customer_features_on()` (گزینهٔ `hsw_wallet_gateway_on` + ثابت `HSW_DISABLE_WALLET`)؛ `HSW_Account::settings()` در زمان اجرا `wallet.enabled` را خاموش می‌کند، پس منو، اندپوینت `/wallet/`، کارت آمار، تبدیل امتیاز و فیلد پروفایل ادمین همه با هم حذف می‌شوند.
+  - **صفر کوئری:** `wallet_balance()` در حالت خاموش مقدار ۰ برمی‌گرداند و به جدول `hsw_wallet` دست نمی‌زند (اندازه‌گیری شده: ۲۷۰٬۶۰۰/۱ کوئری → ۰/۰).
+  - **تأییدیهٔ ایمیل:** کنترلر مستقل `hsw_email_send`/`hsw_email_verify` با nonce خودش (بدون دستزدن به OTP/پیامک)؛ بنر آدرس تایپ‌شده در ثبت‌نام (`_hsw_pending_email`) را پیشنهاد می‌دهد، ارسال به آدرس جای‌گزین را رد می‌کند، و پس از تأیید ایمیل حساب را به آدرس واقعی تغییر می‌دهد.
+  - **ایمیل حساب جدید** برای آدرس `@noreply.invalid` ارسال نمی‌شود.
 
 = 1.11.178 =
 * **احراز هویت، 2FA و throttle: یافته‌های بازبینی پیش از لایو بسته شد.**
