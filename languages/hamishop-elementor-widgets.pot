@@ -85,15 +85,15 @@ msgstr ""
 msgid "HamiShop:"
 msgstr ""
 
-#: includes/class-hsw-security.php:1146
+#: includes/class-hsw-security.php:1253
 msgid "REST API"
 msgstr ""
 
-#: includes/class-hsw-security.php:1161
+#: includes/class-hsw-security.php:1268
 msgid "XML-RPC"
 msgstr ""
 
-#: includes/class-hsw-security.php:1132
+#: includes/class-hsw-security.php:1239
 msgid "admin-ajax.php و admin-post.php باز می‌مانند، چون فرم‌ها و فیلترهای فروشگاه از آن‌ها استفاده می‌کنند."
 msgstr ""
 
@@ -101,7 +101,7 @@ msgstr ""
 msgid "nofollow"
 msgstr ""
 
-#: includes/class-hsw-security.php:1129
+#: includes/class-hsw-security.php:1236
 msgid "wp-login.php سر جای خود باز می‌ماند و هیچ‌جا مخفی نمی‌شود — این ماژول صفحهٔ ورود را جابه‌جا نمی‌کند. یعنی کسی که آدرس ورود را می‌داند همچنان به فرم ورود دسترسی دارد؛ چیزی که کم می‌شود «پیدا کردن خودکار پیشخوان» است، نه «ورود». برای محدودکردن تلاش ورود از یک افزونهٔ مخصوص همین کار استفاده کنید. همچنین توجه کنید این قابلیت کوکی نشست مدیر را برای همان درخواست از روی کوکی ورود می‌سازد تا آدرس سفارشی احراز هویت شود؛ اگر این سطح از اعتماد را نمی‌پسندید، با ثابت HSW_DISABLE_ADMIN_URL در wp-config.php خاموشش کنید."
 msgstr ""
 
@@ -197,11 +197,11 @@ msgstr ""
 msgid "{time} = تاریخ و ساعت فعلی سایت."
 msgstr ""
 
-#: includes/class-hsw-security.php:540
+#: includes/class-hsw-security.php:558
 msgid "«%1$s» با %2$s تداخل دارد. نام دیگری انتخاب کنید."
 msgstr ""
 
-#: includes/class-hsw-security.php:531
+#: includes/class-hsw-security.php:549
 msgid "«%s» جزو مسیرهای رزروشدهٔ وردپرس است. نام دیگری انتخاب کنید."
 msgstr ""
 
@@ -234,11 +234,11 @@ msgstr ""
 msgid "آدرس"
 msgstr ""
 
-#: includes/class-hsw-security.php:524
+#: includes/class-hsw-security.php:542
 msgid "آدرس باید حداقل ۳ کاراکتر باشد."
 msgstr ""
 
-#: includes/class-hsw-security.php:518
+#: includes/class-hsw-security.php:536
 msgid "آدرس باید فقط شامل حروف انگلیسی کوچک، عدد، خط تیره یا زیرخط باشد."
 msgstr ""
 
@@ -260,7 +260,7 @@ msgstr ""
 msgid "آدرس دقیق ثبتی، کد پستی و مشخصات دفتر مرکزی برای سربرگ فاکتور."
 msgstr ""
 
-#: includes/class-hsw-security.php:1100
+#: includes/class-hsw-security.php:1207
 msgid "آدرس دلخواه"
 msgstr ""
 
@@ -272,7 +272,7 @@ msgstr ""
 msgid "آدرس ذخیره شد."
 msgstr ""
 
-#: includes/class-hsw-security.php:1037
+#: includes/class-hsw-security.php:1144
 msgid "آدرس سفارشی ذخیره شد ولی تست خودکار دسترسی ممکن نبود. یک‌بار آدرس را در مرورگر باز کنید؛ اگر خطای ۴۰۴ دیدید، قواعد .htaccess را دستی بررسی کنید."
 msgstr ""
 
@@ -288,7 +288,7 @@ msgstr ""
 msgid "آدرس فرم (اختیاری)"
 msgstr ""
 
-#: includes/class-hsw-security.php:1110
+#: includes/class-hsw-security.php:1217
 msgid "آدرس فعلی پیشخوان:"
 msgstr ""
 
@@ -317,7 +317,7 @@ msgstr ""
 msgid "آدرس پل واتساپ تنظیم نشده است."
 msgstr ""
 
-#: includes/class-hsw-security.php:1096
+#: includes/class-hsw-security.php:1203
 msgid "آدرس پیشخوان"
 msgstr ""
 
@@ -584,7 +584,7 @@ msgstr ""
 msgid "اثر بر همهٔ ایمیل‌ها"
 msgstr ""
 
-#: includes/class-hsw-security.php:1202
+#: includes/class-hsw-security.php:1309
 msgid "اجبار font-display: swap روی همهٔ فونت‌های سایت"
 msgstr ""
 
@@ -985,7 +985,7 @@ msgstr ""
 msgid "استایل یادداشت سفارش"
 msgstr ""
 
-#: includes/class-hsw-security.php:1234
+#: includes/class-hsw-security.php:1341
 msgid "استفاده از صفحهٔ ورود شیشه‌ای با گرادیانت آبی"
 msgstr ""
 
@@ -1005,7 +1005,7 @@ msgstr ""
 msgid "اسلاگ صفت رنگ"
 msgstr ""
 
-#: includes/class-hsw-security.php:1181
+#: includes/class-hsw-security.php:1288
 msgid "اسکریپت ایموجی، RSD، WLW، shortlink، generator و لینک‌های oEmbed حذف می‌شوند. نه کوئری‌ای اضافه می‌کند نه چیزی را کند می‌کند — فقط چند تگ و یک درخواست کمتر."
 msgstr ""
 
@@ -1279,9 +1279,9 @@ msgstr ""
 msgid "امضای خریدار"
 msgstr ""
 
-#: includes/class-hsw-security.php:967
-#: includes/class-hsw-security.php:968
-#: includes/class-hsw-security.php:1080
+#: includes/class-hsw-security.php:1074
+#: includes/class-hsw-security.php:1075
+#: includes/class-hsw-security.php:1187
 msgid "امنیت"
 msgstr ""
 
@@ -1534,11 +1534,11 @@ msgstr ""
 msgid "اولین سفارش خود را ثبت کنید تا وضعیت آن را از همین‌جا پیگیری کنید."
 msgstr ""
 
-#: includes/class-hsw-security.php:1135
+#: includes/class-hsw-security.php:1242
 msgid "اگر از Nginx استفاده می‌کنید، .htaccess کار نمی‌کند؛ این دو خط را به کانفیگ سایت اضافه کنید:"
 msgstr ""
 
-#: includes/class-hsw-security.php:1168
+#: includes/class-hsw-security.php:1275
 msgid "اگر از اپلیکیشن وردپرس یا جت‌پک استفاده نمی‌کنید، خاموش‌کردنش امن‌تر است؛ XML-RPC یکی دیگر از راه‌های لو دادن نام کاربری است."
 msgstr ""
 
@@ -1592,7 +1592,7 @@ msgstr ""
 msgid "اگر محصولات موجود کمتر از این تعداد باشند، همان تعداد نمایش داده می‌شود؛ حداقل تعداد اجباری نیست."
 msgstr ""
 
-#: includes/class-hsw-security.php:1189
+#: includes/class-hsw-security.php:1296
 msgid "اگر نوشته‌های بلاگ‌تان را با ویرایشگر بلاک (گوتنبرگ) نوشته‌اید، این گزینه را نزنید؛ استایل بلاک‌ها لازم می‌شود. با فیلتر hsw_keep_block_styles هم می‌توانید فقط استایل بلاک‌ها را نگه دارید."
 msgstr ""
 
@@ -1795,7 +1795,7 @@ msgstr ""
 msgid "با dir=ltr و ارقام لاتین هم پشتیبانی می‌شود."
 msgstr ""
 
-#: includes/class-hsw-security.php:1205
+#: includes/class-hsw-security.php:1312
 msgid "با font-display: block متن تا سه ثانیه نامرئی می‌ماند تا فونت برسد. با swap، متن با فونت جایگزین نمایش داده می‌شود و بعد فونت اصلی جای آن می‌نشیند. این گزینه مقدار auto/block/fallback را در استایل‌های درون‌صفحه و آدرس‌های Google Fonts به swap تغییر می‌دهد؛ روی فایل‌های CSS خارجی دست نمی‌برد."
 msgstr ""
 
@@ -1819,8 +1819,8 @@ msgstr ""
 msgid "با خاموش کردن، نوار در جای خود (static) نمایش داده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-security.php:1255
-msgid "با روشن بودن این گزینه، به‌روزرسانی خودکار وردپرس/افزونه‌ها و اتصال درگاه‌هایی که به سرور خارجی وصل می‌شوند کار نمی‌کند. دامنهٔ خود سایت هرگز مسدود نمی‌شود."
+#: includes/class-hsw-security.php:1376
+msgid "با روشن بودن این گزینه به‌روزرسانی خودکار وردپرس و افزونه‌ها متوقف می‌شود."
 msgstr ""
 
 #: includes/class-hsw-widget-manager.php:1101
@@ -2112,7 +2112,7 @@ msgstr ""
 msgid "بدون اسپم؛ هر زمان بخواهید لغو عضویت کنید."
 msgstr ""
 
-#: includes/class-hsw-security.php:1153
+#: includes/class-hsw-security.php:1260
 msgid "بدون این گزینه، هر کسی می‌تواند با یک درخواست ساده نام کاربری مدیر را پیدا کند. مدیران و ویرایشگران دسترسی خود را حفظ می‌کنند."
 msgstr ""
 
@@ -2667,7 +2667,7 @@ msgstr ""
 msgid "بستن"
 msgstr ""
 
-#: includes/class-hsw-security.php:1150
+#: includes/class-hsw-security.php:1257
 msgid "بستن /wp-json/wp/v2/users برای کاربران مهمان"
 msgstr ""
 
@@ -2691,7 +2691,7 @@ msgstr ""
 msgid "بعد از متن"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:314
+#: includes/class-hsw-complete-route.php:382
 msgid "بعد از پرداخت (و بازگشت از درگاه)، مشتری به این صفحه هدایت می‌شود و شماره و جزئیات سفارش را می‌بیند. خالی = رفتار پیش‌فرض ووکامرس."
 msgstr ""
 
@@ -2756,7 +2756,7 @@ msgstr ""
 msgid "بهای واحد"
 msgstr ""
 
-#: includes/class-hsw-security.php:1174
+#: includes/class-hsw-security.php:1281
 msgid "بهینه‌سازی و پاکسازی فرانت"
 msgstr ""
 
@@ -3320,6 +3320,10 @@ msgstr ""
 msgid "تصویر مهر فروشگاه"
 msgstr ""
 
+#: includes/class-hsw-security.php:1370
+msgid "تعارض با درگاه:"
+msgstr ""
+
 #: includes/class-hsw-account.php:2171
 #: includes/class-hsw-cart-drawer.php:165
 #: includes/class-hsw-invoice.php:317
@@ -3617,7 +3621,7 @@ msgstr ""
 msgid "تنظیمات اقلام"
 msgstr ""
 
-#: includes/class-hsw-security.php:1065
+#: includes/class-hsw-security.php:1172
 msgid "تنظیمات امنیتی ذخیره شد."
 msgstr ""
 
@@ -3654,10 +3658,6 @@ msgstr ""
 
 #: widgets/class-hsw-widget-archive-grid.php:58
 msgid "تهران"
-msgstr ""
-
-#: includes/class-hsw-security.php:1254
-msgid "توجه:"
 msgstr ""
 
 #: includes/trait-hsw-product-page-style-parts-3.php:203
@@ -4449,7 +4449,7 @@ msgstr ""
 msgid "حذف"
 msgstr ""
 
-#: includes/class-hsw-security.php:1186
+#: includes/class-hsw-security.php:1293
 msgid "حذف wp-embed و استایل بلاک‌ها در صفحات غیر از سبد/تسویه/حساب"
 msgstr ""
 
@@ -4466,7 +4466,7 @@ msgstr ""
 msgid "حذف از علاقه‌مندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-security.php:1178
+#: includes/class-hsw-security.php:1285
 msgid "حذف ایموجی و تگ‌های اضافی هدر"
 msgstr ""
 
@@ -4475,7 +4475,7 @@ msgstr ""
 msgid "حذف تخفیف"
 msgstr ""
 
-#: includes/class-hsw-security.php:1220
+#: includes/class-hsw-security.php:1327
 msgid "حذف لوگوی وردپرس از نوار بالای پیشخوان"
 msgstr ""
 
@@ -4488,7 +4488,7 @@ msgstr ""
 msgid "حذف همه"
 msgstr ""
 
-#: includes/class-hsw-security.php:1194
+#: includes/class-hsw-security.php:1301
 msgid "حذف ویجت‌های کم‌کاربرد (تقویم، متا، RSS، ابر برچسب، لینک‌ها)"
 msgstr ""
 
@@ -4610,7 +4610,7 @@ msgstr ""
 msgid "خالی = پیش‌فرض."
 msgstr ""
 
-#: includes/class-hsw-security.php:1106
+#: includes/class-hsw-security.php:1213
 msgid "خالی بگذارید تا wp-admin به حالت عادی برگردد. فقط حروف انگلیسی کوچک، عدد، خط تیره و زیرخط."
 msgstr ""
 
@@ -4894,7 +4894,11 @@ msgstr ""
 msgid "خیلی ضعیف"
 msgstr ""
 
-#: includes/class-hsw-security.php:1259
+#: includes/class-hsw-security.php:1371
+msgid "دامنهٔ درگاه‌های روشن روی لیست مسدودی است و پرداخت می‌شکند؛ از لیست حذفشان کنید:"
+msgstr ""
+
+#: includes/class-hsw-security.php:1380
 msgid "دامنه‌های اضافه (هر خط یک دامنه)"
 msgstr ""
 
@@ -5001,7 +5005,7 @@ msgstr ""
 msgid "درخت دسته‌بندی"
 msgstr ""
 
-#: includes/class-hsw-request-blocker.php:138
+#: includes/class-hsw-request-blocker.php:208
 msgid "درخواست خارجی توسط «قفل درخواست‌های خارجی» مسدود شد: %s"
 msgstr ""
 
@@ -5036,7 +5040,7 @@ msgstr ""
 msgid "درخواست‌های زیادی ثبت شده است؛ چند لحظه صبر کنید و دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-security.php:1251
+#: includes/class-hsw-security.php:1358
 msgid "درخواست‌های سمت سرور به سرورهای آپدیت، لایسنس، آمار و CDN مسدود می‌شوند تا هنگام قطعی اینترنت، سایت و پیشخوان پشت تایم‌اوت نمانند. تا وقتی تیک نخورده، هیچ هوکی ثبت نمی‌شود (سربار صفر)."
 msgstr ""
 
@@ -5198,7 +5202,7 @@ msgstr ""
 msgid "دقیقاً همان نام font-face که قالب لود کرده؛ مثلاً Peyda یا IRANSansX"
 msgstr ""
 
-#: includes/class-hsw-security.php:1124
+#: includes/class-hsw-security.php:1231
 msgid "دقیقاً چه چیزی محافظت می‌شود؟"
 msgstr ""
 
@@ -5621,7 +5625,7 @@ msgstr ""
 msgid "ذخیره تغییرات"
 msgstr ""
 
-#: includes/class-hsw-security.php:1279
+#: includes/class-hsw-security.php:1400
 msgid "ذخیره تنظیمات"
 msgstr ""
 
@@ -5841,7 +5845,7 @@ msgstr ""
 msgid "رفتار پس از پایان زمان"
 msgstr ""
 
-#: includes/class-hsw-security.php:989
+#: includes/class-hsw-security.php:1096
 msgid "رفتن به تنظیمات امنیت"
 msgstr ""
 
@@ -7031,7 +7035,7 @@ msgstr ""
 msgid "سبز"
 msgstr ""
 
-#: includes/class-hsw-security.php:1082
+#: includes/class-hsw-security.php:1189
 msgid "سبک و بدون بار اضافه: فقط دو قاعدهٔ ساده که روی هر درخواست هزینهٔ محسوسی ندارند."
 msgstr ""
 
@@ -7620,31 +7624,31 @@ msgstr ""
 msgid "صفحه کامل پرداخت — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-security.php:463
+#: includes/class-hsw-security.php:481
 msgid "صفحهٔ تسویه‌حساب ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:313
+#: includes/class-hsw-complete-route.php:381
 msgid "صفحهٔ تکمیل خرید (مرحلهٔ ۴)"
 msgstr ""
 
-#: includes/class-hsw-security.php:464
+#: includes/class-hsw-security.php:482
 msgid "صفحهٔ حساب کاربری ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-security.php:462
+#: includes/class-hsw-security.php:480
 msgid "صفحهٔ سبد خرید ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-security.php:461
+#: includes/class-hsw-security.php:479
 msgid "صفحهٔ فروشگاه ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-security.php:1229
+#: includes/class-hsw-security.php:1336
 msgid "صفحهٔ ورود سفارشی"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:303
+#: includes/class-hsw-complete-route.php:371
 msgid "صفحهٔ پرداخت (مرحلهٔ ۳)"
 msgstr ""
 
@@ -7661,7 +7665,7 @@ msgstr ""
 msgid "صفحه‌ای که دنبالش بودید پیدا نشد!"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:304
+#: includes/class-hsw-complete-route.php:372
 msgid "صفحه‌ای که ویجت «صفحه کامل پرداخت — حامی» دارد. دکمهٔ «ادامه و ورود به مرحله پرداخت» در صفحهٔ تسویه به این صفحه می‌رود. خالی = همان صفحهٔ تسویه ووکامرس."
 msgstr ""
 
@@ -7709,7 +7713,7 @@ msgstr ""
 msgid "صفر یعنی نمایش همه تصاویر گالری."
 msgstr ""
 
-#: includes/class-hsw-security.php:1210
+#: includes/class-hsw-security.php:1317
 msgid "صفر. این گزینه‌ها فقط چیزهایی را که وردپرس اضافه می‌کند حذف می‌کنند؛ هیچ کوئری یا فایلی اضافه نمی‌شود و در ویرایشگر المنتور هم اجرا نمی‌شوند."
 msgstr ""
 
@@ -7808,7 +7812,7 @@ msgstr ""
 msgid "طول خلاصه (کلمه)"
 msgstr ""
 
-#: includes/class-hsw-security.php:1215
+#: includes/class-hsw-security.php:1322
 msgid "ظاهر پیشخوان"
 msgstr ""
 
@@ -8239,7 +8243,7 @@ msgstr ""
 msgid "غیرفعال کردن حرکت کارت در هاور"
 msgstr ""
 
-#: includes/class-hsw-security.php:1165
+#: includes/class-hsw-security.php:1272
 msgid "غیرفعال‌کردن XML-RPC"
 msgstr ""
 
@@ -8546,7 +8550,7 @@ msgstr ""
 msgid "فاکتور چاپی و برچسب پستی"
 msgstr ""
 
-#: includes/class-hsw-security.php:1016
+#: includes/class-hsw-security.php:1123
 msgid "فایل .htaccess قابل نوشتن نیست، پس آدرس سفارشی فعال نشد. دسترسی نوشتن بدهید یا قواعد را دستی اضافه کنید."
 msgstr ""
 
@@ -8609,7 +8613,7 @@ msgstr ""
 msgid "فروشگاه اینترنتی"
 msgstr ""
 
-#: includes/class-hsw-security.php:1113
+#: includes/class-hsw-security.php:1220
 #: includes/class-hsw-widget-manager.php:904
 #: includes/class-hsw-widget-manager.php:987
 #: widgets/class-hsw-widget-account.php:626
@@ -8620,7 +8624,7 @@ msgstr ""
 msgid "فعال در پنل کاربری"
 msgstr ""
 
-#: includes/class-hsw-security.php:1248
+#: includes/class-hsw-security.php:1355
 msgid "فعال‌سازی حالت «نت ملی»"
 msgstr ""
 
@@ -8651,7 +8655,7 @@ msgstr ""
 msgid "فقط %s عدد در انبار"
 msgstr ""
 
-#: includes/class-hsw-security.php:1223
+#: includes/class-hsw-security.php:1330
 msgid "فقط آیکن و منوی «وردپرس» از نوار ادمین حذف می‌شود؛ روی سایت اثری ندارد."
 msgstr ""
 
@@ -8693,7 +8697,7 @@ msgstr ""
 msgid "فقط فهرست دستی"
 msgstr ""
 
-#: includes/class-hsw-security.php:1197
+#: includes/class-hsw-security.php:1304
 msgid "فقط فهرست ویجت‌های پیشخوان کوتاه می‌شود؛ روی سرعت سایت اثری ندارد."
 msgstr ""
 
@@ -8780,7 +8784,7 @@ msgstr ""
 msgid "فهرست پربازدیدترین مقالات."
 msgstr ""
 
-#: includes/class-hsw-security.php:1267
+#: includes/class-hsw-security.php:1388
 msgid "فهرست پیش‌فرض: %s"
 msgstr ""
 
@@ -8968,7 +8972,7 @@ msgstr ""
 msgid "قرمز"
 msgstr ""
 
-#: includes/class-hsw-security.php:1243
+#: includes/class-hsw-security.php:1350
 msgid "قفل درخواست‌های خارجی"
 msgstr ""
 
@@ -8976,15 +8980,15 @@ msgstr ""
 msgid "قلب / علاقه‌مندی"
 msgstr ""
 
-#: includes/class-hsw-security.php:987
+#: includes/class-hsw-security.php:1094
 msgid "قواعد بازنویسی آدرس پیشخوان از فایل .htaccess حذف شده است. تا وقتی دوباره ذخیره نکنید، آدرس سفارشی کار نمی‌کند و wp-admin برای همه باز است."
 msgstr ""
 
-#: includes/class-hsw-security.php:1089
+#: includes/class-hsw-security.php:1196
 msgid "قواعد بازنویسی در .htaccess پیدا نشد؛ آدرس سفارشی الان کار نمی‌کند و wp-admin برای همه باز است. یک‌بار ذخیره کنید تا دوباره نوشته شود."
 msgstr ""
 
-#: includes/class-hsw-security.php:1027
+#: includes/class-hsw-security.php:1134
 msgid "قواعد در .htaccess نوشته شد ولی وب‌سرور آن را اجرا نمی‌کند (احتمالاً Nginx یا AllowOverride خاموش است). برای جلوگیری از قفل‌شدن، آدرس سفارشی فعال نشد. قواعد Nginx در پایین همین صفحه آمده است."
 msgstr ""
 
@@ -9109,7 +9113,7 @@ msgstr ""
 msgid "لوگو، نشانی، تلفن و کد پستی فروشگاه از %s خوانده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-security.php:1237
+#: includes/class-hsw-security.php:1344
 msgid "لوگوی وردپرس حذف می‌شود و فرم ورود به‌صورت کارت گلس‌مورفیسم روی گرادیانت آبی با انیمیشن ملایم نمایش داده می‌شود. فقط روی صفحهٔ wp-login اثر دارد و هیچ فایل اضافه‌ای لود نمی‌کند."
 msgstr ""
 
@@ -10178,7 +10182,7 @@ msgstr ""
 msgid "مخفی شدن هوشمند هنگام اسکرول"
 msgstr ""
 
-#: includes/class-hsw-security.php:1142
+#: includes/class-hsw-security.php:1249
 msgid "مخفی‌کردن فهرست کاربران"
 msgstr ""
 
@@ -10329,11 +10333,11 @@ msgstr ""
 msgid "مسیر خانه، فروشگاه و دسته‌بندی محصول."
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:297
+#: includes/class-hsw-complete-route.php:365
 msgid "مسیر خرید (حامی)"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:300
+#: includes/class-hsw-complete-route.php:368
 msgid "مسیر خرید با ویجت‌های جامع حامی: سبد خرید → تسویه حساب (اطلاعات ارسال) → پرداخت → تکمیل خرید. برای هر مرحله یک صفحه بسازید و ویجت جامع همان مرحله را داخل آن قرار دهید."
 msgstr ""
 
@@ -11611,6 +11615,10 @@ msgstr ""
 msgid "هر فونت که روی سایت بارگذاری شده باشد اینجا فهرست می‌شود و روی همهٔ ویجت‌های HamiShop اعمال می‌گردد. کنترل فونت هر ویجت، در صورت تنظیم، اولویت دارد."
 msgstr ""
 
+#: includes/class-hsw-security.php:1365
+msgid "هرگز مسدود نمی‌شوند:"
+msgstr ""
+
 #: widgets/class-hsw-widget-checkout-shipping.php:138
 msgid "هزینه (تومان)"
 msgstr ""
@@ -11659,7 +11667,7 @@ msgstr ""
 msgid "هزینهٔ ارسال"
 msgstr ""
 
-#: includes/class-hsw-security.php:1209
+#: includes/class-hsw-security.php:1316
 msgid "هزینهٔ کارایی:"
 msgstr ""
 
@@ -12165,7 +12173,7 @@ msgstr ""
 msgid "پایان سطر (چپ در RTL)"
 msgstr ""
 
-#: includes/class-hsw-security.php:487
+#: includes/class-hsw-security.php:505
 msgid "پایهٔ آدرس «%s»"
 msgstr ""
 
@@ -13171,7 +13179,7 @@ msgstr ""
 msgid "چطور انتخاب کنیم؟"
 msgstr ""
 
-#: includes/class-hsw-security.php:1128
+#: includes/class-hsw-security.php:1235
 msgid "چه چیزی محافظت نمی‌شود؟"
 msgstr ""
 
@@ -13256,7 +13264,7 @@ msgstr ""
 msgid "کاربر مهمان"
 msgstr ""
 
-#: includes/class-hsw-security.php:1125
+#: includes/class-hsw-security.php:1232
 msgid "کاربر مهمان (کسی که وارد نشده) با باز کردن wp-admin صفحهٔ ۴۰۴ می‌بیند؛ اسکنرها و ربات‌های حمله دیگر مسیر پیشخوان را پیدا نمی‌کنند. کاربر واردشده همیشه دسترسی دارد، پس امکان قفل‌شدن حساب مدیر وجود ندارد. آدرس سفارشی همیشه کار می‌کند و می‌توانید آن را بوکمارک کنید."
 msgstr ""
 
@@ -14124,7 +14132,7 @@ msgstr ""
 msgid "یه عکس اضافه کن"
 msgstr ""
 
-#: includes/class-hsw-security.php:452
+#: includes/class-hsw-security.php:470
 msgid "یک %s موجود با همین آدرس"
 msgstr ""
 

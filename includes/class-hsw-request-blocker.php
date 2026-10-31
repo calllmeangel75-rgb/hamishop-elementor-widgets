@@ -73,7 +73,19 @@ class HSW_Request_Blocker {
 	public static function blocked_hosts() {
 		$hosts = self::default_hosts();
 
-		$extra = preg_split( '/\R+/', (string) ( HSW_Security::get()['block_hosts'] ?? '' ), -1, PREG_SPLIT_NO_EMPTY );
+		/*
+		 * The saved value is an array of lines (sanitize_hosts() returns one), but
+		 * an option written by an older build or by hand can still be a string.
+		 * Casting an array with (string) raised an array-to-string notice and
+		 * silently dropped every domain the shop owner typed.
+		 */
+		$raw = HSW_Security::get()['block_hosts'] ?? '';
+		if ( is_array( $raw ) ) {
+			$extra = array_filter( array_map( 'trim', $raw ) );
+		} else {
+			$split = preg_split( '/\R+/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY );
+			$extra = is_array( $split ) ? $split : array();
+		}
 		if ( $extra ) {
 			$hosts = array_merge( $hosts, $extra );
 		}
@@ -91,12 +103,60 @@ class HSW_Request_Blocker {
 	}
 
 	/**
+	 * Hosts that must never be blocked: the shop itself and the endpoints the
+	 * shop configured for its own payments and messaging.
+	 *
+	 * Blocking them turns «net melli» mode into a broken checkout or a shop that
+	 * can no longer reach its own SMS / Telegram / WhatsApp bridge.
+	 *
+	 * @return string[]
+	 */
+	public static function allowed_hosts() {
+		$hosts = array();
+
+		$own = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		if ( '' !== $own ) {
+			$hosts[] = $own;
+		}
+
+		/* Telegram (the API base is filterable) and the WhatsApp Cloud endpoint. */
+		$hosts[] = strtolower( (string) wp_parse_url( (string) apply_filters( 'hsw_telegram_api_base', 'https://api.telegram.org' ), PHP_URL_HOST ) );
+		$hosts[] = 'graph.facebook.com';
+
+		if ( class_exists( 'HSW_Account' ) && method_exists( 'HSW_Account', 'instance' ) ) {
+			$account  = HSW_Account::instance();
+			$configured = array(
+				$account->setting( 'auth.whatsapp_bridge_url', '' ),
+				$account->setting( 'wallet.sms_url', '' ),
+			);
+			foreach ( $configured as $url ) {
+				$host = strtolower( (string) wp_parse_url( trim( (string) $url ), PHP_URL_HOST ) );
+				if ( '' !== $host ) {
+					$hosts[] = $host;
+				}
+			}
+		}
+
+		$hosts = array_values( array_filter( array_unique( $hosts ) ) );
+
+		/* The domains of the gateways that are switched on, when WooCommerce runs. */
+		if ( class_exists( 'HSW_Security' ) && method_exists( 'HSW_Security', 'gateway_hosts' ) ) {
+			foreach ( HSW_Security::gateway_hosts() as $gateway_host ) {
+				$hosts[] = $gateway_host;
+			}
+			$hosts = array_values( array_unique( $hosts ) );
+		}
+
+		return (array) apply_filters( 'hsw_allowed_hosts', $hosts );
+	}
+
+	/**
 	 * Does the host (or a parent domain) match the block list?
 	 *
 	 * @param string $url Request URL.
 	 * @return bool
 	 */
-	private static function host_is_blocked( $url ) {
+	public static function host_is_blocked( $url ) {
 		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
 		if ( '' === $host ) {
 			return false;
@@ -105,6 +165,16 @@ class HSW_Request_Blocker {
 		$own = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
 		if ( '' !== $own && ( $host === $own || substr( $host, -strlen( '.' . $own ) ) === '.' . $own ) ) {
 			return false;
+		}
+
+		/* The shop's own services win over any block entry, defaults included. */
+		foreach ( self::allowed_hosts() as $allowed ) {
+			if ( '' === $allowed ) {
+				continue;
+			}
+			if ( $host === $allowed || substr( $host, -strlen( '.' . $allowed ) ) === '.' . $allowed ) {
+				return false;
+			}
 		}
 
 		foreach ( self::blocked_hosts() as $blocked ) {

@@ -40,6 +40,7 @@ class HSW_Security {
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_init', array( $this, 'keep_rewrite_alive' ), 20 );
 		add_filter( 'rest_endpoints', array( $this, 'filter_rest_users' ) );
+		add_action( 'template_redirect', array( $this, 'maybe_block_author_query' ), 5 );
 		add_action( 'admin_notices', array( $this, 'rewrite_notice' ) );
 
 		/* Optional: hide the WordPress logo from the admin bar. */
@@ -142,30 +143,38 @@ class HSW_Security {
 		}
 
 		/*
-		 * Only touch <style> blocks; inline attributes never carry font-display.
-		 * The pattern is written with double quotes so the character class can
-		 * hold both quote types without escaping gymnastics.
+		 * preg_replace_callback() returns null when PCRE runs out of backtrack
+		 * budget, and this filter wraps the WHOLE response — passing that null on
+		 * printed a blank page. Keep the original HTML whenever a rewrite fails.
 		 */
-		$html = preg_replace_callback(
+		$styles = preg_replace_callback(
 			"#<style\b[^>]*>.*?</style>#is",
 			static function ( $match ) {
-				return preg_replace( '/font-display\s*:\s*(?:auto|block|fallback)\b/i', 'font-display:swap', $match[0] );
+				$css = preg_replace( '/font-display\s*:\s*(?:auto|block|fallback)\b/i', 'font-display:swap', $match[0] );
+				return null === $css ? $match[0] : $css;
 			},
 			$html
 		);
+		if ( null !== $styles ) {
+			$html = $styles;
+		}
 
 		/* Google Fonts: `display=block` (or a missing parameter) → swap. */
-		$html = preg_replace_callback(
+		$fonts = preg_replace_callback(
 			"#https://fonts\.googleapis\.com/[^\"'\s>]+#i",
 			static function ( $match ) {
 				$url = $match[0];
 				if ( preg_match( '/[?&]display=/i', $url ) ) {
-					return preg_replace( '/([?&]display=)[a-z]+/i', '$1swap', $url );
+					$rewritten = preg_replace( '/([?&]display=)[a-z]+/i', '$1swap', $url );
+					return null === $rewritten ? $url : $rewritten;
 				}
 				return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . 'display=swap';
 			},
 			$html
 		);
+		if ( null !== $fonts ) {
+			$html = $fonts;
+		}
 
 		return $html;
 	}
@@ -222,6 +231,15 @@ class HSW_Security {
 		}
 
 		wp_dequeue_script( 'wp-embed' );
+
+		/*
+		 * WooCommerce's block styles must survive on any page that carries a
+		 * WooCommerce block (a product gallery or reviews block in a post, for
+		 * example), not only on the cart / checkout / account screens.
+		 */
+		if ( function_exists( 'has_block' ) && has_block( 'woocommerce/' ) ) {
+			return;
+		}
 
 		$is_account_area = function_exists( 'is_cart' ) && ( is_cart() || is_checkout() || is_account_page() );
 		if ( $is_account_area ) {
@@ -887,10 +905,65 @@ class HSW_Security {
 	 * ------------------------------------------------------------------ */
 
 	/**
+	 * Hosts of the payment gateways that are switched on.
+	 *
+	 * Turning on «net melli» mode while a gateway domain sits on the block list
+	 * breaks the shop's own money flow: the redirect to the bank is a browser
+	 * call, but the server-side purchase / verify / callback is not.
+	 *
+	 * @return string[]
+	 */
+	public static function gateway_hosts() {
+		$hosts = array();
+
+		if ( ! function_exists( 'WC' ) || ! is_object( WC() ) || ! method_exists( WC(), 'payment_gateways' ) ) {
+			return $hosts;
+		}
+
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			if ( ! is_object( $gateway ) || 'yes' !== (string) $gateway->get_option( 'enabled', 'no' ) ) {
+				continue;
+			}
+			foreach ( array( 'gateway_url', 'api_url', 'gateway_uri', 'callback_url' ) as $key ) {
+				$value = (string) $gateway->get_option( $key, '' );
+				if ( '' === $value || ! preg_match( '#^https?://#i', $value ) ) {
+					continue;
+				}
+				$host = strtolower( (string) wp_parse_url( $value, PHP_URL_HOST ) );
+				if ( '' !== $host ) {
+					$hosts[] = $host;
+				}
+			}
+		}
+
+		return array_values( array_unique( $hosts ) );
+	}
+
+	/**
+	 * Gateway hosts that the current block list would kill.
+	 *
+	 * @return string[]
+	 */
+	public static function gateway_host_conflicts() {
+		$conflicts = array();
+		foreach ( self::gateway_hosts() as $host ) {
+			foreach ( HSW_Request_Blocker::blocked_hosts() as $blocked ) {
+				if ( $host === $blocked || substr( $host, -strlen( '.' . $blocked ) ) === '.' . $blocked ) {
+					$conflicts[] = $host;
+					break;
+				}
+			}
+		}
+		return array_values( array_unique( $conflicts ) );
+	}
+
+	/**
 	 * Remove the user endpoints for anyone who cannot already list users.
 	 *
 	 * `/wp/v2/users/me` is left alone on purpose — the block editor and the
-	 * account panel rely on it for the signed-in user.
+	 * account panel rely on it for the signed-in user. Editors keep the list:
+	 * the media/gallery UIs and the Elementor link controls query users, and a
+	 * user is not secret from anyone allowed to publish content.
 	 *
 	 * @param array $endpoints Registered REST endpoints.
 	 * @return array
@@ -900,7 +973,7 @@ class HSW_Security {
 		if ( 'yes' !== $s['block_rest_users'] ) {
 			return $endpoints;
 		}
-		if ( current_user_can( 'list_users' ) ) {
+		if ( current_user_can( 'list_users' ) || current_user_can( 'edit_posts' ) ) {
 			return $endpoints;
 		}
 
@@ -908,6 +981,40 @@ class HSW_Security {
 		unset( $endpoints['/wp/v2/users/(?P<id>[\d]+)'] );
 
 		return $endpoints;
+	}
+
+	/**
+	 * The REST user list is not the only enumeration door: `/?author=1` answers
+	 * with a listing of that author's posts, and the slug is the login name.
+	 *
+	 * Only the raw query form is closed by default. The pretty `/author/name/`
+	 * archive is left alone, because shops that are built for search have those
+	 * URLs in their sitemap and internal links; `hsw_block_author_archive_pretty`
+	 * turns that part on for owners who really want it.
+	 */
+	public function maybe_block_author_query() {
+		$s = self::get();
+		if ( 'yes' !== $s['block_rest_users'] || is_user_logged_in() || is_admin() ) {
+			return;
+		}
+
+		$by_id = isset( $_GET['author'] ) ? (int) $_GET['author'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only.
+
+		if ( $by_id >= 1 ) {
+			if ( apply_filters( 'hsw_block_author_archive', true, $by_id, '' ) ) {
+				status_header( 404 );
+				return;
+			}
+			return;
+		}
+
+		$by_nicename = ( isset( $GLOBALS['wp_query'] ) && ! empty( $GLOBALS['wp_query']->query_vars['author_name'] ) )
+			? (string) $GLOBALS['wp_query']->query_vars['author_name']
+			: '';
+
+		if ( '' !== $by_nicename && apply_filters( 'hsw_block_author_archive_pretty', false, $by_nicename ) ) {
+			status_header( 404 );
+		}
 	}
 
 	/**
@@ -1251,8 +1358,22 @@ class HSW_Security {
 								<?php esc_html_e( 'درخواست‌های سمت سرور به سرورهای آپدیت، لایسنس، آمار و CDN مسدود می‌شوند تا هنگام قطعی اینترنت، سایت و پیشخوان پشت تایم‌اوت نمانند. تا وقتی تیک نخورده، هیچ هوکی ثبت نمی‌شود (سربار صفر).', 'hamishop-elementor-widgets' ); ?>
 							</p>
 							<p class="description" style="margin-top:8px">
-								<strong><?php esc_html_e( 'توجه:', 'hamishop-elementor-widgets' ); ?></strong>
-								<?php esc_html_e( 'با روشن بودن این گزینه، به‌روزرسانی خودکار وردپرس/افزونه‌ها و اتصال درگاه‌هایی که به سرور خارجی وصل می‌شوند کار نمی‌کند. دامنهٔ خود سایت هرگز مسدود نمی‌شود.', 'hamishop-elementor-widgets' ); ?>
+								<?php
+								$never_hosted = class_exists( 'HSW_Request_Blocker' ) ? HSW_Request_Blocker::allowed_hosts() : array();
+								$conflicts    = self::gateway_host_conflicts();
+								?>
+								<strong><?php esc_html_e( 'هرگز مسدود نمی‌شوند:', 'hamishop-elementor-widgets' ); ?></strong>
+								<code><?php echo esc_html( implode( ', ', $never_hosted ) ); ?></code>
+							</p>
+							<?php if ( $conflicts ) : ?>
+							<p class="description" style="color:#b32d2e">
+								<strong><?php esc_html_e( 'تعارض با درگاه:', 'hamishop-elementor-widgets' ); ?></strong>
+								<?php esc_html_e( 'دامنهٔ درگاه‌های روشن روی لیست مسدودی است و پرداخت می‌شکند؛ از لیست حذفشان کنید:', 'hamishop-elementor-widgets' ); ?>
+								<code><?php echo esc_html( implode( ', ', $conflicts ) ); ?></code>
+							</p>
+							<?php endif; ?>
+							<p class="description">
+								<?php esc_html_e( 'با روشن بودن این گزینه به‌روزرسانی خودکار وردپرس و افزونه‌ها متوقف می‌شود.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 
 							<p style="margin-top:12px">

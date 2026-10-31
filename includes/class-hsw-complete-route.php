@@ -56,12 +56,63 @@ final class HSW_Complete_Route {
             return $id;
         }
 
+        /*
+         * The slug is only a fallback when the page really belongs to HamiShop.
+         * A shop with an unrelated page on /payment/ or /complete/ used to have
+         * its checkout or its thank-you route hijacked by that page.
+         */
         $page = get_page_by_path( $slug, OBJECT, 'page' );
-        if ( $page instanceof WP_Post && 'publish' === $page->post_status ) {
+        if ( $page instanceof WP_Post && 'publish' === $page->post_status && self::page_is_ours( $page->ID, $slug ) ) {
             return (int) $page->ID;
         }
 
         return 0;
+    }
+
+    /**
+     * Does this page actually carry the matching HamiShop widget or shortcode?
+     *
+     * @param int    $id   Post ID.
+     * @param string $slug 'payment' or 'complete'.
+     * @return bool
+     */
+    private static function page_is_ours( $id, $slug ) {
+        $widgets = array(
+            'payment'  => array( 'hsw-pay-page', 'hsw-payment-page' ),
+            'complete' => array( 'hsw-complete-page' ),
+        );
+        $shortcodes = array(
+            'payment'  => array( '[hamishop_pay', '[hamishop_payment' ),
+            'complete' => array( '[hamishop_complete' ),
+        );
+
+        $want_widgets   = isset( $widgets[ $slug ] ) ? $widgets[ $slug ] : array();
+        $want_shortcode = isset( $shortcodes[ $slug ] ) ? $shortcodes[ $slug ] : array();
+
+        $data = get_post_meta( (int) $id, '_elementor_data', true );
+        if ( is_string( $data ) && '' !== $data ) {
+            foreach ( $want_widgets as $widget ) {
+                if ( false !== strpos( $data, '"' . $widget . '"' ) ) {
+                    return true;
+                }
+            }
+        } elseif ( is_array( $data ) ) {
+            $data = (string) wp_json_encode( $data );
+            foreach ( $want_widgets as $widget ) {
+                if ( false !== strpos( $data, $widget ) ) {
+                    return true;
+                }
+            }
+        }
+
+        $content = (string) get_post_field( 'post_content', (int) $id );
+        foreach ( $want_shortcode as $shortcode ) {
+            if ( false !== strpos( $content, $shortcode ) ) {
+                return true;
+            }
+        }
+
+        return (bool) apply_filters( 'hsw_page_route_slug_accepted', false, (int) $id, $slug );
     }
 
     /**
@@ -161,6 +212,11 @@ final class HSW_Complete_Route {
         if ( ! apply_filters( 'hsw_require_login_checkout', true ) ) {
             return;
         }
+        /* WooCommerce itself allows guests to order: do not override the shop. */
+        $checkout = function_exists( 'WC' ) && WC() && method_exists( WC(), 'checkout' ) ? WC()->checkout() : null;
+        if ( $checkout && ! $checkout->is_registration_required() ) {
+            return;
+        }
         if ( ! function_exists( 'wc_get_page_id' ) || ! function_exists( 'WC' ) || ! WC()->cart ) {
             return;
         }
@@ -178,7 +234,14 @@ final class HSW_Complete_Route {
             return;
         }
 
-        wp_safe_redirect( add_query_arg( 'redirect_to', wc_get_checkout_url(), $login ) );
+        /*
+         * WooCommerce's own login form posts its hidden `redirect` field and
+         * ignores `redirect_to`; the OTP endpoint reads `redirect_to`. Carrying
+         * both brings the customer back to the checkout either way.
+         */
+        $back  = wc_get_checkout_url();
+        $login = add_query_arg( array( 'redirect_to' => $back, 'redirect' => $back ), $login );
+        wp_safe_redirect( $login );
         exit;
     }
 
@@ -189,6 +252,11 @@ final class HSW_Complete_Route {
      */
     public function guard_pay_address() {
         if ( is_admin() || ! function_exists( 'WC' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+            return;
+        }
+
+        /* A cart of virtual or downloadable products needs no address at all. */
+        if ( method_exists( WC()->cart, 'needs_shipping' ) && ! WC()->cart->needs_shipping() ) {
             return;
         }
 
