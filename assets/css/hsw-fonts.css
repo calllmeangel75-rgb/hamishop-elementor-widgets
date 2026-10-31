@@ -9,7 +9,7 @@
    Registered in Elementor font list as: «Vazirmatn HSW». */
 @font-face {
         font-family: 'Vazirmatn HSW';
-        src: url('../fonts/vazirmatn.woff2') format('woff2-variations');
+        src: url('../fonts/vazirmatn.woff2') format('woff2'); /* was 'woff2-variations': an experimental value that engines skip, which stops the face loading. The variable axis comes from font-weight below. */
         font-weight: 100 900;
         font-style: normal;
         /*
@@ -20,7 +20,7 @@
          * brand font is still used; a slow first load simply keeps the fallback
          * for that page view instead of shifting the layout.
          */
-        font-display: optional;
+        font-display: swap; /* was 'optional', which is the "font breaks at random" bug: when the file missed the ~100ms block window the browser kept Tahoma for the whole page view and never swapped (a resize forced a re-layout and hid it). HSW_Assets::preload_font() fetches the file early so the swap rarely shifts layout. */
         /*
          * Full basic Latin + Latin-1 as well as the Arabic blocks: the old range
          * skipped A-Z, a-z, ':' and ';', so every Latin fragment inside a widget

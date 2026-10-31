@@ -651,9 +651,25 @@
 	font-weight: 700;
 	color: var(--hsw-ac-muted);
 	padding: 5px 4px;
+	transition: background-color .15s, color .15s;
 }
 
-.hsw-ac__member-tabs button.is-active {
+/*
+ * Hello Elementor styles every bare `button:hover, button:focus` with its
+ * default pink (#c36 = rgb(204,51,102)). Without a state rule of our own the
+ * active tab and the tab being clicked turned pink, so the palette is stated
+ * explicitly for hover and for both focus variants.
+ */
+.hsw-ac__member-tabs button:hover,
+.hsw-ac__member-tabs button:focus,
+.hsw-ac__member-tabs button:focus-visible {
+	background: #eaf0f8;
+	color: var(--hsw-ac-primary);
+}
+
+.hsw-ac__member-tabs button.is-active,
+.hsw-ac__member-tabs button.is-active:hover,
+.hsw-ac__member-tabs button.is-active:focus {
 	background: #fff;
 	color: var(--hsw-ac-primary);
 	box-shadow: 0 2px 7px rgba(15, 23, 42, .08);

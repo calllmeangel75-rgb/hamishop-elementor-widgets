@@ -336,9 +336,11 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
  * both the bundled storefront icon and an uploaded image logo, without an
  * extra DOM node or a second request.
  *
- * Two tones instead of one flat band: the palette accent tints the trailing
- * half, so the sweep reads as a gradient (the store's own "shiny logo" look)
- * and follows the dashboard palette instead of always being plain white.
+ * Light only. An earlier build mixed the palette accent into the trailing half
+ * (`color-mix(--hsw-accent 42%, #fff)`), and because `--hsw-accent` is not
+ * defined in the header scope it fell back to the literal #fc593a — a red/orange
+ * stripe over the logo instead of a shine. The sweep is now a transparent white
+ * band plus a blurred copy of itself for the glow.
  */
 .hsw-hd__logomark--shine::after {
 	content: '';
@@ -346,10 +348,10 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	inset: -35% -55%;
 	z-index: 2;
 	background: linear-gradient(115deg,
-		transparent 28%,
-		var(--hsw-hd-shine-c, rgba(255, 255, 255, .82)) 46%,
-		color-mix(in srgb, var(--hsw-accent, #fc593a) 42%, #fff) 54%,
-		transparent 70%);
+		transparent 30%,
+		var(--hsw-hd-shine-c, rgba(255, 255, 255, .82)) 48%,
+		transparent 66%);
+	filter: blur(2px) drop-shadow(0 0 10px var(--hsw-hd-shine-c, rgba(255, 255, 255, .55)));
 	pointer-events: none;
 	transform: translateX(-170%) rotate(8deg);
 	animation: hsw-hd-logo-shine var(--hsw-hd-shine-dur, 5s) ease-in-out infinite;
@@ -2030,6 +2032,7 @@ html { overflow-x: clip; }
 }
 
 .hsw-hd__drawerclose:hover,
+.hsw-hd__drawerclose:focus,
 .hsw-hd__drawerclose:focus-visible {
 	background: var(--hsw-hd-search);
 	color: var(--hsw-hover, var(--hsw-hd-primary));
@@ -2766,6 +2769,7 @@ html { overflow-x: clip; }
 }
 
 .hsw-hd__iconbtn:hover,
+.hsw-hd__iconbtn:focus,
 .hsw-hd__iconbtn:focus-visible {
 	border-color: color-mix(in srgb, var(--hsw-hover, var(--hsw-hd-primary)) 45%, var(--hsw-hd-border));
 	background: var(--hsw-hd-search);
@@ -2956,7 +2960,14 @@ html { overflow-x: clip; }
 	transition: background-color .15s, color .15s, border-color .15s;
 }
 
+/*
+ * `:focus` as well as `:focus-visible`: the drawer focuses this button from
+ * script when it opens, and a scripted focus does not match :focus-visible —
+ * Hello Elementor's bare `button:focus { background: #c36 }` then painted the
+ * control pink.
+ */
 .hsw-hd__cartclose:hover,
+.hsw-hd__cartclose:focus,
 .hsw-hd__cartclose:focus-visible {
 	border-color: color-mix(in srgb, var(--hsw-hd-primary, #4d85ff) 38%, var(--hsw-hd-border, #e7e8eb));
 	background: color-mix(in srgb, var(--hsw-hd-primary, #4d85ff) 7%, #fff);

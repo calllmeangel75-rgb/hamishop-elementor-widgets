@@ -15,6 +15,7 @@ class HSW_Assets {
 		add_filter( 'wp_resource_hints', array( $this, 'resource_hints' ), 10, 2 );
                 add_filter( 'elementor/frontend/print_google_fonts', array( $this, 'filter_google_fonts' ) );
                 add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
+                add_action( 'wp_head', array( $this, 'preload_font' ), 4 );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
@@ -75,6 +76,33 @@ class HSW_Assets {
                 }
         }
 
+        /**
+         * Preload the bundled Vazirmatn file on pages that actually load it.
+         *
+         * `hsw-fonts.css` declares the face with `font-display: swap`, but the font
+         * request only starts once the browser has parsed that stylesheet and met a
+         * text node asking for the family — late enough to re-flow the header. The
+         * link is printed in the head (priority 4, before wp_print_styles) and only
+         * when the stylesheet is really enqueued, so a page without any HSW widget
+         * downloads nothing extra.
+         */
+        public function preload_font() {
+        	if ( ! apply_filters( 'hsw_preload_font', true ) ) {
+        		return;
+        	}
+        
+        	if ( ! wp_style_is( 'hsw-fonts', 'enqueued' ) && ! wp_style_is( 'hsw-fonts', 'registered' ) ) {
+        		return;
+        	}
+        
+        	$url = $this->asset( 'assets/fonts/vazirmatn.woff2' );
+        	if ( '' === $url ) {
+        		return;
+        	}
+        
+        	echo '<link rel="preload" href="' . esc_url( $url ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
+        }
+        
         /**
          * Whether the current request is a WooCommerce product archive screen
          * handled by the HSW archive widgets.
