@@ -906,6 +906,75 @@ case_run(
 );
 
 /* =====================================================================
+ * 11 — P1-4: changing an active 2FA setup needs the password
+ * ==================================================================== */
+
+case_run(
+	'11.1',
+	'2FA is on and no password was sent: the setup request is refused',
+	static function () {
+		prelive_reset();
+		$uid = prelive_user_with_password( '2re@example.com', 'secret123' );
+		update_user_meta( $uid, '_hsw_2fa_enabled', 'yes' );
+		update_user_meta( $uid, '_hsw_2fa_channel', 'email' );
+
+		$r = prelive_call( 'ajax_2fa_setup_send', array( 'channel' => 'email', 'nonce' => 'x' ) );
+		$msg = isset( $r['data']['message'] ) ? (string) $r['data']['message'] : '';
+		return array( 403 === (int) $r['status'] && false !== strpos( $msg, 'رمز عبور' ), 'status=' . $r['status'] . ' message=' . $msg );
+	}
+);
+
+case_run(
+	'11.2',
+	'a wrong password is refused too, and never reaches the channel',
+	static function () {
+		prelive_reset();
+		$uid = prelive_user_with_password( '2rw@example.com', 'secret123' );
+		update_user_meta( $uid, '_hsw_2fa_enabled', 'yes' );
+
+		$r   = prelive_call( 'ajax_2fa_setup_send', array( 'channel' => 'email', 'password' => 'guess-me', 'nonce' => 'x' ) );
+		$msg = isset( $r['data']['message'] ) ? (string) $r['data']['message'] : '';
+		return array( 403 === (int) $r['status'] && false !== strpos( $msg, 'رمز عبور' ), 'status=' . $r['status'] . ' message=' . $msg );
+	}
+);
+
+case_run(
+	'11.3',
+	'the right password opens the gate (it fails later, on the channel)',
+	static function () {
+		prelive_reset();
+		$uid = prelive_user_with_password( '2ok@example.com', 'secret123' );
+		update_user_meta( $uid, '_hsw_2fa_enabled', 'yes' );
+
+		$r   = prelive_call( 'ajax_2fa_setup_send', array( 'channel' => 'carrier-pigeon', 'password' => 'secret123', 'nonce' => 'x' ) );
+		$msg = isset( $r['data']['message'] ) ? (string) $r['data']['message'] : '';
+		$passed = false === strpos( $msg, 'رمز عبور' );
+		return array( $passed, 'status=' . $r['status'] . ' message=' . $msg . ' passwordGatePassed=' . ( $passed ? 'yes' : 'NO' ) );
+	}
+);
+
+case_run(
+	'11.4',
+	'six wrong attempts lock the change for a quarter of an hour',
+	static function () {
+		prelive_reset();
+		$uid = prelive_user_with_password( '2lk@example.com', 'secret123' );
+		update_user_meta( $uid, '_hsw_2fa_enabled', 'yes' );
+
+		$statuses = array();
+		$messages = array();
+		for ( $i = 0; $i < 6; $i++ ) {
+			$r          = prelive_call( 'ajax_2fa_setup_send', array( 'channel' => 'email', 'password' => 'wrong' . $i, 'nonce' => 'x' ) );
+			$statuses[] = (int) $r['status'];
+			$messages[] = isset( $r['data']['message'] ) ? (string) $r['data']['message'] : '';
+		}
+		/* the sixth must complain about too many tries, not about the password */
+		$locked = false !== strpos( (string) end( $messages ), 'تلاش' );
+		return array( 403 === $statuses[0] && $locked, 'statuses=' . implode( ',', $statuses ) . ' last=' . (string) end( $messages ) );
+	}
+);
+
+/* =====================================================================
  * Runner
  * ------------------------------------------------------------------ */
 
