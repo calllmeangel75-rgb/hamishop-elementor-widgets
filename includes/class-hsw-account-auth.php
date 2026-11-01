@@ -1484,6 +1484,19 @@ final class HSW_Account_Auth {
 			wp_send_json_error( array( 'message' => __( 'برای تنظیم ورود دوعاملی باید وارد حساب شوید.', 'hamishop-elementor-widgets' ) ), 403 );
 		}
 		$user_id = get_current_user_id();
+		/*
+		 * P1-4: replacing a 2FA setup that is already ON must prove the password.
+		 * A code delivered to the new channel is not proof — claiming that channel
+		 * is exactly what this request does, and for SMS/WhatsApp a customer may
+		 * type a number that was never attached to the account. Without this check
+		 * an open session is enough to move the second factor to somebody else.
+		 */
+		if ( 'yes' === (string) get_user_meta( $user_id, '_hsw_2fa_enabled', true ) ) {
+			$proof = $this->verify_2fa_reconfig_proof( $user_id );
+			if ( is_wp_error( $proof ) ) {
+				wp_send_json_error( array( 'message' => $proof->get_error_message() ), 403 );
+			}
+		}
 		$channel = isset( $_POST['channel'] ) ? sanitize_key( wp_unslash( $_POST['channel'] ) ) : '';
 		if ( ! $this->channel_enabled( $channel ) ) {
 			wp_send_json_error( array( 'message' => __( 'این کانال فعال نیست.', 'hamishop-elementor-widgets' ) ), 400 );
@@ -1623,6 +1636,38 @@ final class HSW_Account_Auth {
 		delete_user_meta( $user_id, '_hsw_2fa_phone' );
 		$this->notify_security_change( $user_id, __( 'ورود دوعاملی برای حساب شما غیرفعال شد.', 'hamishop-elementor-widgets' ) );
 		wp_send_json_success( array( 'message' => __( 'ورود دوعاملی غیرفعال شد.', 'hamishop-elementor-widgets' ), 'reload' => true ) );
+	}
+
+	/**
+	 * Proof of possession for changing an already-active 2FA setup: the password.
+	 *
+	 * Same five-tries-per-quarter limit as switching 2FA off, in the atomic
+	 * counter, and the same reason: a session by itself must not be able to try.
+	 *
+	 * @param int $user_id User.
+	 * @return true|WP_Error
+	 */
+	private function verify_2fa_reconfig_proof( $user_id ) {
+		$attempts = HSW_Throttle::hit( '2fa_reconfig:' . (int) $user_id, 5, 15 * MINUTE_IN_SECONDS );
+		if ( ! $attempts['allowed'] ) {
+			return new WP_Error(
+				'hsw_2fa_reconfig_locked',
+				sprintf(
+					/* translators: %s: minutes. */
+					__( 'تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را تغییر دهید.', 'hamishop-elementor-widgets' ),
+					HSW_Helpers::fa_num( (int) ceil( max( 1, (int) $attempts['retry_after'] ) / 60 ) )
+				)
+			);
+		}
+
+		$password = isset( $_POST['password'] ) ? (string) wp_unslash( $_POST['password'] ) : '';
+		$user     = get_user_by( 'id', (int) $user_id );
+
+		if ( '' === $password || ! $user || ! wp_check_password( $password, $user->user_pass, (int) $user_id ) ) {
+			return new WP_Error( 'hsw_2fa_reconfig_proof', __( 'برای تغییر ورود دوعاملی، رمز عبور حساب را وارد کنید.', 'hamishop-elementor-widgets' ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -1956,6 +2001,13 @@ final class HSW_Account_Auth {
 				$html .= ' <a href="' . esc_url( $link ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'اتصال به ربات تلگرام', 'hamishop-elementor-widgets' ) . '</a>';
 			}
 			$html .= '</p>';
+		}
+		if ( $enabled ) {
+			/*
+			 * P1-4: moving an active second factor to another channel (or another
+			 * typed phone number) needs the password, not only the session.
+			 */
+			$html .= '<div class="hsw-ac-field"><label for="hsw-2fa-reconfig-pass">' . esc_html__( 'برای تغییر، رمز عبور فعلی', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'shield' ) . '<input type="password" id="hsw-2fa-reconfig-pass" autocomplete="current-password" dir="ltr" data-hsw-2fa-reconfig-pass></div></div>';
 		}
 		$html .= '<div class="hsw-ac-otp__code-step" data-hsw-2fa-code-step hidden><label for="hsw-2fa-setup-code">' . esc_html__( 'کد تأیید', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'shield' ) . '<input type="text" id="hsw-2fa-setup-code" inputmode="numeric" maxlength="6" dir="ltr" data-hsw-2fa-code></div><div class="hsw-ac-otp__actions"><button type="button" class="hsw-ac__btn hsw-ac__btn--primary" data-hsw-2fa-verify>' . esc_html__( 'تأیید و فعال‌سازی', 'hamishop-elementor-widgets' ) . '</button><button type="button" class="hsw-ac-otp__resend" data-hsw-2fa-setup-resend>' . esc_html__( 'ارسال دوباره', 'hamishop-elementor-widgets' ) . '</button></div></div>';
 		$html .= '<button type="button" class="hsw-ac__btn hsw-ac__btn--primary" data-hsw-2fa-setup>' . esc_html__( 'فعال‌سازی ورود دوعاملی', 'hamishop-elementor-widgets' ) . '</button>';

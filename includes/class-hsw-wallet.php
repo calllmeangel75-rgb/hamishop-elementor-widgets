@@ -50,6 +50,7 @@ class HSW_Wallet {
 		add_action( 'admin_post_hsw_wallet_action', array( $this, 'handle_admin_action' ) );
 		add_action( 'rest_api_init', array( $this, 'routes' ) );
 		add_action( 'admin_notices', array( $this, 'install_failed_notice' ) );
+		add_action( 'shutdown', array( __CLASS__, 'release_open_transaction' ), 99 );
 		/*
 		 * Registering the CLI here, not at the tail of maybe_install(): on an
 		 * installed site that method returns before its tail (schema version
@@ -73,7 +74,9 @@ class HSW_Wallet {
 		$failed  = '1' === get_option( 'hsw_wallet_install_failed' );
 		$missing = '1' === get_option( 'hsw_wallet_missing_tables' );
 
-		if ( ! $failed && ! $missing ) {
+		$not_innodb = (string) get_option( 'hsw_wallet_not_innodb', '' );
+
+		if ( ! $failed && ! $missing && '' === $not_innodb ) {
 			return;
 		}
 
@@ -86,6 +89,72 @@ class HSW_Wallet {
 			esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
 			esc_html( $text )
 		);
+
+		if ( '' !== $not_innodb ) {
+			/*
+			 * Not cosmetic: on MyISAM there is no transaction and no row lock, so a
+			 * concurrent payment can double-credit or lose money without any error.
+			 */
+			printf(
+				'<div class="notice notice-error"><p><strong>%s</strong> %s <code>%s</code></p></div>',
+				esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
+				esc_html__( 'جدول‌های کیف پول موتور InnoDB ندارند و جابه‌جایی پول بدون تراکنش و بدون قفل سطری انجام می‌شود. از یک نفر با دسترسی دیتابیس بخواهید این را اجرا کند:', 'hamishop-elementor-widgets' ),
+				esc_html( 'ALTER TABLE ' . str_replace( ',', ', ', $not_innodb ) . ' ENGINE=InnoDB;' )
+			);
+		}
+	}
+
+	/**
+	 * Wallet tables that are not InnoDB (P1-3).
+	 *
+	 * @return string[] table names, empty when everything is InnoDB
+	 */
+	public static function non_innodb_tables() {
+		global $wpdb;
+
+		$tables = array( self::table(), self::balance_table(), self::backup_table() );
+		$wrong  = array();
+
+		foreach ( $tables as $t ) {
+			$engine = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$wpdb->prepare(
+					'SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
+					$wpdb->dbname,
+					$t
+				)
+			);
+
+			if ( null !== $engine && false !== $engine && 'InnoDB' !== $engine ) {
+				$wrong[] = $t;
+			}
+		}
+
+		return $wrong;
+	}
+
+	/**
+	 * Close a transaction frame an exception left open anywhere in the request.
+	 *
+	 * MySQL rolls back at connection end anyway, so the money is safe; what this
+	 * protects is the rest of the SAME request (WooCommerce keeps running after a
+	 * caught exception) and the log, which now says that it happened.
+	 *
+	 * @return int number of frames that were still open
+	 */
+	public static function release_open_transaction() {
+		if ( self::$tx_depth <= 0 ) {
+			return 0;
+		}
+
+		$open = self::$tx_depth;
+		while ( self::$tx_depth > 0 ) {
+			self::transaction_rollback();
+		}
+		self::$hook_queue = array();
+
+		error_log( 'HamiShop wallet: closed ' . $open . ' transaction frame(s) left open by an exception.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+
+		return $open;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -148,7 +217,48 @@ class HSW_Wallet {
 		);
 	}
 
+	/**
+	 * Rate-limit a customer wallet call (P1-6).
+	 *
+	 * These three routes create real records — a pending request, an order, a
+	 * points conversion — and were open to any logged-in session without a
+	 * throttle, so a script (or a stolen cookie) could fill the ledger and the
+	 * shop with junk or hammer the points balance. The counter is the atomic one,
+	 * keyed per user, and fails closed like every other HSW_Throttle use.
+	 *
+	 * @param string $route  Route name used in the bucket key.
+	 * @param int    $limit  Hits allowed per window.
+	 * @param int    $window Window in seconds.
+	 * @return true|WP_Error
+	 */
+	private function rest_throttle( $route, $limit = 10, $window = 600 ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id || ! class_exists( 'HSW_Throttle' ) ) {
+			return true;
+		}
+
+		$result = HSW_Throttle::hit( 'wallet_rest:' . $route . ':' . $user_id, $limit, $window );
+		if ( ! empty( $result['allowed'] ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'hsw_wallet_rate_limited',
+			sprintf(
+				/* translators: %s: minutes. */
+				__( 'درخواست‌های زیادی ارسال کرده‌اید؛ تا %s دقیقه دیگر صبر کنید.', 'hamishop-elementor-widgets' ),
+				HSW_Helpers::fa_num( (int) ceil( max( 1, (int) $result['retry_after'] ) / 60 ) )
+			),
+			array( 'status' => 429 )
+		);
+	}
+
 	public function rest_topup( $request ) {
+		$limited = $this->rest_throttle( 'topup', 10, 15 * MINUTE_IN_SECONDS );
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+
 		$result = self::request_topup(
 			get_current_user_id(),
 			(float) $request->get_param( 'amount' ),
@@ -169,6 +279,11 @@ class HSW_Wallet {
 	}
 
 	public function rest_pay( $request ) {
+		$limited = $this->rest_throttle( 'pay', 10, 5 * MINUTE_IN_SECONDS );
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+
 		if ( ! class_exists( 'HSW_Wallet_Topup' ) ) {
 			return new WP_REST_Response( array( 'message' => __( 'شارژ آنلاین در دسترس نیست.', 'hamishop-elementor-widgets' ) ), 400 );
 		}
@@ -196,6 +311,11 @@ class HSW_Wallet {
 	}
 
 	public function rest_convert( $request ) {
+		$limited = $this->rest_throttle( 'convert', 5, 15 * MINUTE_IN_SECONDS );
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+
 		$result = self::convert_points( get_current_user_id(), (int) $request->get_param( 'points' ) );
 
 		if ( is_wp_error( $result ) ) {
@@ -292,7 +412,7 @@ class HSW_Wallet {
 		global $wpdb;
 		$table   = self::table();
 		$balances = self::balance_table();
-		$collate = $wpdb->get_charset_collate();
+		$collate = 'ENGINE=InnoDB ' . $wpdb->get_charset_collate();
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		/*
@@ -380,6 +500,22 @@ class HSW_Wallet {
 			error_log( 'HamiShop wallet: table creation failed; will retry on the next request.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			update_option( 'hsw_wallet_install_failed', '1', false );
 			return;
+		}
+
+		/*
+		 * P1-3: the money tables only work as InnoDB. `START TRANSACTION`, the row
+		 * locks behind apply_balance()/repair_gaps() and the unique-ref guard all
+		 * become silent no-ops on MyISAM, so a host whose default_storage_engine is
+		 * MyISAM would take payments and move balances without any atomicity.
+		 * The CREATE statements now say ENGINE=InnoDB explicitly; this audit catches
+		 * tables that already existed as MyISAM (dbDelta does not convert engines).
+		 */
+		$wrong_engine = self::non_innodb_tables();
+		if ( $wrong_engine ) {
+			update_option( 'hsw_wallet_not_innodb', implode( ',', $wrong_engine ), false );
+			error_log( 'HamiShop wallet: table(s) not InnoDB — ' . implode( ', ', $wrong_engine ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+		} else {
+			delete_option( 'hsw_wallet_not_innodb' );
 		}
 
 		delete_option( 'hsw_wallet_install_failed' );
@@ -1499,57 +1635,72 @@ class HSW_Wallet {
 		 * A death anywhere before COMMIT rolls the pair back together.
 		 */
 		self::transaction_begin();
+		$tx_was = self::$tx_depth;
 
-		$balance = self::apply_balance( $user_id, $delta, $min );
+		try {
+			$balance = self::apply_balance( $user_id, $delta, $min );
 
-		if ( false === $balance ) {
-			/* J4: a real DB error (deadlock, …) is not "not enough money". */
-			$db_error = (string) $wpdb->last_error;
-			self::transaction_rollback();
+			if ( false === $balance ) {
+				/* J4: a real DB error (deadlock, …) is not "not enough money". */
+				$db_error = (string) $wpdb->last_error;
+				self::transaction_rollback();
 
-			if ( '' !== $db_error ) {
-				return new WP_Error( 'hsw_wallet_db', __( 'خطای پایگاه‌داده در ثبت تراکنش کیف پول؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
-			}
-			return new WP_Error( 'hsw_wallet_short', __( 'موجودی کیف پول کافی نیست.', 'hamishop-elementor-widgets' ) );
-		}
-
-		$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			self::table(),
-			array(
-				'user_id'       => $user_id,
-				'amount'        => $delta,
-				'balance_after' => $balance,
-				'kind'          => substr( sanitize_key( $kind ), 0, 32 ),
-				'status'        => 'done',
-				'note'          => (string) $note,
-				/* NULL, not '': a unique index allows many NULLs but one ''. */
-				'ref'           => '' !== (string) $ref ? (string) $ref : null,
-				'actor_id'      => absint( $actor_id ),
-				'created_at'    => current_time( 'mysql' ),
-			),
-			array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
-		);
-
-		if ( ! $inserted ) {
-			/* Read the error before the rollback resets `last_error`. */
-			$db_error = (string) $wpdb->last_error;
-
-			self::transaction_rollback();
-
-			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
-				return new WP_Error( 'hsw_wallet_duplicate', __( 'این تراکنش قبلاً ثبت شده است.', 'hamishop-elementor-widgets' ) );
+				if ( '' !== $db_error ) {
+					return new WP_Error( 'hsw_wallet_db', __( 'خطای پایگاه‌داده در ثبت تراکنش کیف پول؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
+				}
+				return new WP_Error( 'hsw_wallet_short', __( 'موجودی کیف پول کافی نیست.', 'hamishop-elementor-widgets' ) );
 			}
 
-			return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
+			$inserted = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				self::table(),
+				array(
+					'user_id'       => $user_id,
+					'amount'        => $delta,
+					'balance_after' => $balance,
+					'kind'          => substr( sanitize_key( $kind ), 0, 32 ),
+					'status'        => 'done',
+					'note'          => (string) $note,
+					/* NULL, not '': a unique index allows many NULLs but one ''. */
+					'ref'           => '' !== (string) $ref ? (string) $ref : null,
+					'actor_id'      => absint( $actor_id ),
+					'created_at'    => current_time( 'mysql' ),
+				),
+				array( '%d', '%f', '%f', '%s', '%s', '%s', '%s', '%d', '%s' )
+			);
+
+			if ( ! $inserted ) {
+				/* Read the error before the rollback resets `last_error`. */
+				$db_error = (string) $wpdb->last_error;
+
+				self::transaction_rollback();
+
+				if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
+					return new WP_Error( 'hsw_wallet_duplicate', __( 'این تراکنش قبلاً ثبت شده است.', 'hamishop-elementor-widgets' ) );
+				}
+
+				return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد.', 'hamishop-elementor-widgets' ) );
+			}
+
+			self::transaction_commit();
+
+			/* J3: inside a transaction the hook is queued and fires after COMMIT,
+			 * so an email/SMS listener can never announce a rolled-back movement. */
+			self::queue_hook( 'hsw_wallet_changed', $user_id, $delta, $balance, $kind );
+
+			return $balance;
+		} finally {
+			/*
+			 * P1-2: an exception (or a fatal turning into one) escaping between BEGIN
+			 * and COMMIT used to leave the depth counter raised, so every later wallet
+			 * write in the same request joined a broken frame and never committed.
+			 * Our own frame is closed here if the body never reached its COMMIT; a
+			 * committed body leaves the depth back where it found it, so an outer
+			 * transaction is never rolled back by mistake.
+			 */
+			if ( self::$tx_depth > $tx_was ) {
+				self::transaction_rollback();
+			}
 		}
-
-		self::transaction_commit();
-
-		/* J3: inside a transaction the hook is queued and fires after COMMIT,
-		 * so an email/SMS listener can never announce a rolled-back movement. */
-		self::queue_hook( 'hsw_wallet_changed', $user_id, $delta, $balance, $kind );
-
-		return $balance;
 	}
 
 	/**

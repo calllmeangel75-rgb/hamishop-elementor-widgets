@@ -295,6 +295,17 @@ class HSW_Wallet_Topup {
 	/** Order meta: guards against crediting twice (payment_complete can fire again). */
 	const META_DONE = '_hsw_wallet_topup_credited';
 
+	/**
+	 * Order meta: the wallet amount the customer actually asked for.
+	 *
+	 * Stored at creation because `get_total()` is not the top-up amount: a gateway
+	 * that adds its own fee makes the total larger (free wallet money), and a
+	 * coupon makes it smaller (the customer is short). The credit is
+	 * `min( this meta, what was paid )` — never more than the shop received, never
+	 * less than what was bought.
+	 */
+	const META_AMOUNT = '_hsw_wallet_topup_amount';
+
 	public function __construct() {
 		add_action( 'woocommerce_payment_complete', array( $this, 'settle' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'settle' ) );
@@ -439,6 +450,7 @@ class HSW_Wallet_Topup {
 		}
 
 		$order->update_meta_data( self::META_USER, $user_id );
+		$order->update_meta_data( self::META_AMOUNT, (float) $amount );
 		$order->calculate_totals();
 		$order->set_status( 'pending', __( 'در انتظار پرداخت شارژ کیف پول', 'hamishop-elementor-widgets' ) );
 		$order->save();
@@ -476,7 +488,20 @@ class HSW_Wallet_Topup {
 			return;
 		}
 
-		$amount = (float) $order->get_total();
+		$paid = (float) $order->get_total();
+
+		/*
+		 * What was bought, capped by what was actually paid. Orders made before
+		 * this meta existed fall back to the order total, so nothing that is
+		 * already in flight stops crediting.
+		 */
+		$want = (float) $order->get_meta( self::META_AMOUNT );
+		if ( $want > 0 ) {
+			$amount = min( $want, $paid );
+		} else {
+			$amount = $paid;
+		}
+
 		if ( $amount <= 0 ) {
 			return;
 		}
@@ -671,8 +696,32 @@ function hsw_register_wallet_gateway() {
 				return ( WC()->cart ) ? (float) WC()->cart->get_total( 'edit' ) : 0.0;
 			}
 
+			/**
+			 * Is the order being paid right now a wallet top-up order?
+			 *
+			 * @return bool
+			 */
+			private function is_topup_order_context() {
+				if ( ! isset( $GLOBALS['wp']->query_vars['order-pay'] ) || ! function_exists( 'wc_get_order' ) ) {
+					return false;
+				}
+
+				$order = wc_get_order( (int) $GLOBALS['wp']->query_vars['order-pay'] );
+
+				return $order && '' !== (string) $order->get_meta( \HSW_Wallet_Topup::META_USER );
+			}
+
 			public function is_available() {
 				if ( ! $this->wallet_enabled_for_checkout() ) {
+					return false;
+				}
+
+				/*
+				 * Paying a top-up with the wallet is circular: the credit would come
+				 * out of the very balance it is meant to raise, and a failed gateway
+				 * call could leave the customer holding the same money twice.
+				 */
+				if ( $this->is_topup_order_context() ) {
 					return false;
 				}
 				if ( ! is_user_logged_in() || ! parent::is_available() ) {

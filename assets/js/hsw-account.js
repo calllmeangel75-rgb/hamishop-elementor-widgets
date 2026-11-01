@@ -1043,6 +1043,11 @@
 		if (phoneInput && phoneInput.value.trim()) {
 			payload.phone = phoneInput.value.trim();
 		}
+		/* P1-4: changing an active setup must prove the password. */
+		var passInput = panel.querySelector('[data-hsw-2fa-reconfig-pass]');
+		if (passInput && passInput.value) {
+			payload.password = passInput.value;
+		}
 		setMessage(message, data().sending || 'در حال ارسال کد...');
 		ajax('hsw_2fa_setup_send', payload, data().twoFactorNonce)
 			.then(function (payload) {
