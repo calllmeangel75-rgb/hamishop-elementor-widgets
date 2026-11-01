@@ -282,6 +282,12 @@
 					if (response.data.row) {
 						setRow(wrapRow(response.data.row, replyForm.getAttribute('data-ticket')));
 					}
+					/* The reply re-opens the ticket: keep the header chip honest. */
+					var badge = chat.querySelector('.hsw-ac__status-badge');
+					if (badge && response.data.status_label) {
+						badge.textContent = response.data.status_label;
+						badge.className = 'hsw-ac__status-badge is-' + response.data.status_tone;
+					}
 					scrollThread();
 				})
 				.catch(function () {

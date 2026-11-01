@@ -1202,12 +1202,22 @@ final class HSW_Account_Support {
 
 		$this->notify_admin( $ticket_id, true );
 
+		/*
+		 * The reply puts the ticket back in the admin's queue, but the chip in the
+		 * thread header kept saying «پاسخ داده شده» until a reload — the customer
+		 * had just written to support and the page still looked answered.
+		 */
+		$status = $this->get_status( $ticket_id );
+
 		wp_send_json_success(
 			array(
-				'message' => __( 'پاسخ شما ارسال شد.', 'hamishop-elementor-widgets' ),
-				'html'    => $this->bubble_html( $user_id, $message, time(), false, 0 ),
-				'row'     => $this->chat_row_html( get_post( $ticket_id ) ),
-				'comment' => (int) $comment_id,
+				'message'      => __( 'پاسخ شما ارسال شد.', 'hamishop-elementor-widgets' ),
+				'html'         => $this->bubble_html( $user_id, $message, time(), false, 0 ),
+				'row'          => $this->chat_row_html( get_post( $ticket_id ) ),
+				'comment'      => (int) $comment_id,
+				'status'       => $status,
+				'status_label' => $this->status_label( $status ),
+				'status_tone'  => $this->status_tone( $status ),
 			)
 		);
 	}
@@ -1560,7 +1570,13 @@ final class HSW_Account_Support {
 				<option value="answered" <?php selected( $status, 'answered' ); ?>>پاسخ داده شده</option>
 				<option value="closed" <?php selected( $status, 'closed' ); ?>>بسته شده</option>
 			</select></p>
-			<p><strong>اولویت:</strong> <?php echo esc_html( $this->priority_label( $priority ) ); ?><br>
+			<p><label for="hsw-ticket-priority"><strong>اولویت:</strong></label><br>
+			<select name="hsw_ticket_priority" id="hsw-ticket-priority">
+				<?php foreach ( (array) $this->account->setting( 'support.priorities', array() ) as $pkey => $plabel ) : ?>
+					<option value="<?php echo esc_attr( $pkey ); ?>" <?php selected( $priority, $pkey ); ?>><?php echo esc_html( $plabel ); ?></option>
+				<?php endforeach; ?>
+			</select></p>
+			<p><br>
 			<strong>دپارتمان:</strong> <?php echo esc_html( $dept ? $dept : '—' ); ?><br>
 			<strong>ایجاد:</strong> <?php echo esc_html( $this->format_date( $this->timestamp_from_local( $post->post_date ) ) ); ?><br>
 			<strong>آخرین به‌روزرسانی:</strong> <?php echo esc_html( $updated ? $this->format_date( $updated ) : '—' ); ?></p>
@@ -1630,6 +1646,21 @@ final class HSW_Account_Support {
 			$status = sanitize_key( wp_unslash( $_POST['hsw_ticket_status'] ) );
 			if ( in_array( $status, array( 'open', 'answered', 'closed' ), true ) ) {
 				update_post_meta( $post_id, self::STATUS_META, $status );
+				update_post_meta( $post_id, self::UPDATED_META, time() );
+			}
+		}
+
+		/*
+		 * The customer picks the priority when they open a ticket, and until now
+		 * that was the last word: the agent could not escalate «فوری» back down
+		 * or bump a calm-sounding ticket that is actually on fire. The box was
+		 * read-only text; it is a select now, saved with the rest of the ticket.
+		 */
+		if ( isset( $_POST['hsw_ticket_priority'] ) ) {
+			$priority = sanitize_key( wp_unslash( $_POST['hsw_ticket_priority'] ) );
+			$allowed  = (array) $this->account->setting( 'support.priorities', array() );
+			if ( isset( $allowed[ $priority ] ) ) {
+				update_post_meta( $post_id, self::PRIORITY, $priority );
 				update_post_meta( $post_id, self::UPDATED_META, time() );
 			}
 		}
