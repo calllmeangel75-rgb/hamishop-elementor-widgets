@@ -40,6 +40,7 @@ class HSW_Security {
 		add_action( 'admin_init', array( $this, 'maybe_save' ) );
 		add_action( 'admin_init', array( $this, 'keep_rewrite_alive' ), 20 );
 		add_filter( 'rest_endpoints', array( $this, 'filter_rest_users' ) );
+		add_filter( 'rest_pre_dispatch', array( $this, 'guard_rest_users' ), 10, 3 );
 		add_action( 'template_redirect', array( $this, 'maybe_block_author_query' ), 5 );
 		add_action( 'admin_notices', array( $this, 'rewrite_notice' ) );
 
@@ -164,11 +165,32 @@ class HSW_Security {
 			"#https://fonts\.googleapis\.com/[^\"'\s>]+#i",
 			static function ( $match ) {
 				$url = $match[0];
-				if ( preg_match( '/[?&]display=/i', $url ) ) {
-					$rewritten = preg_replace( '/([?&]display=)[a-z]+/i', '$1swap', $url );
+
+				/*
+				 * WordPress prints hrefs through esc_url(), so the query separator
+				 * arrives as `&#038;` (Elementor uses `&amp;`). Matching only
+				 * `[?&]display=` missed both: the URL looked like it had no display
+				 * parameter, a second one was appended, and Google Fonts was left
+				 * with `…&#038;display=auto&#038;display=swap` — two values for the
+				 * same key. Match the entity form too, and reuse the separator that
+				 * is already in the URL when appending.
+				 */
+				if ( preg_match( '/[?&](?:amp;|#0*38;)?display=/i', $url ) ) {
+					$rewritten = preg_replace( '/([?&](?:amp;|#0*38;)?display=)[a-z]+/i', '$1swap', $url );
 					return null === $rewritten ? $url : $rewritten;
 				}
-				return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . 'display=swap';
+
+				if ( false === strpos( $url, '?' ) ) {
+					$sep = '?';
+				} elseif ( false !== strpos( $url, '&#038;' ) ) {
+					$sep = '&#038;';
+				} elseif ( false !== strpos( $url, '&amp;' ) ) {
+					$sep = '&amp;';
+				} else {
+					$sep = '&';
+				}
+
+				return $url . $sep . 'display=swap';
 			},
 			$html
 		);
@@ -977,10 +999,102 @@ class HSW_Security {
 			return $endpoints;
 		}
 
+		/*
+		 * `rest_endpoints` is built in `parse_request`, before a cookie request has
+		 * been authenticated: nonce and cookie validation run later, on
+		 * `rest_authentication_errors`. So `current_user_can()` is false even for
+		 * the administrator using the editor, and dropping the route here answered
+		 * 404 to Elementor's link picker — whose user search is this endpoint.
+		 *
+		 * Keep the route when the request carries a credential, and let
+		 * guard_rest_users() decide after authentication. A scanner that sends
+		 * nothing at all still sees a 404.
+		 */
+		if ( self::request_has_credential() ) {
+			return $endpoints;
+		}
+
 		unset( $endpoints['/wp/v2/users'] );
 		unset( $endpoints['/wp/v2/users/(?P<id>[\d]+)'] );
 
 		return $endpoints;
+	}
+
+	/**
+	 * Second half of the users-route block: enforce it once the user is known.
+	 *
+	 * `/wp/v2/users` is a PUBLIC route in core — its permission callback only
+	 * hides the `edit` context. Keeping the route for credentialed requests
+	 * therefore meant a request with a forged cookie still received the public
+	 * list (id, name, slug), which is exactly the enumeration this option exists
+	 * to stop. Here the credential has already been validated, so the check is
+	 * real: no `list_users`, no list.
+	 *
+	 * @param mixed            $result  Pre-dispatch result.
+	 * @param WP_REST_Server   $server  Server instance.
+	 * @param WP_REST_Request  $request Current request.
+	 * @return mixed
+	 */
+	public function guard_rest_users( $result, $server, $request ) {
+		if ( 'yes' !== self::get()['block_rest_users'] ) {
+			return $result;
+		}
+
+		$route = (string) $request->get_route();
+		if ( '/wp/v2/users' !== $route && 0 !== strpos( $route, '/wp/v2/users/' ) ) {
+			return $result;
+		}
+
+		if ( current_user_can( 'list_users' ) ) {
+			return $result;
+		}
+
+		/*
+		 * `rest_pre_dispatch` runs before route matching, so the "remove the route"
+		 * branch above no longer produces the 404 on its own. Answer with the same
+		 * code core uses for an unknown route when the request carried no
+		 * credential at all, so a scanner still cannot tell the endpoint exists.
+		 */
+		if ( ! self::request_has_credential() ) {
+			return new WP_Error(
+				'rest_no_route',
+				__( 'هیچ مسیری با این آدرس و روش پیدا نشد.', 'hamishop-elementor-widgets' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return new WP_Error(
+			'rest_forbidden',
+			__( 'دسترسی به فهرست کاربران بسته است.', 'hamishop-elementor-widgets' ),
+			array( 'status' => 401 )
+		);
+	}
+
+	/**
+	 * Does this request carry anything that could authenticate it?
+	 *
+	 * Deliberately not a validity check: the point is only to tell "anonymous
+	 * visitor with no credentials at all" apart from "someone who might be
+	 * logged in", because the REST route is removed before authentication runs.
+	 *
+	 * @return bool
+	 */
+	private static function request_has_credential() {
+		$cookies = array( LOGGED_IN_COOKIE, SECURE_AUTH_COOKIE, AUTH_COOKIE );
+
+		foreach ( $cookies as $name ) {
+			if ( ! empty( $_COOKIE[ $name ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- presence only, no value is read.
+				return true;
+			}
+		}
+
+		foreach ( array( 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'HTTP_X_WP_NONCE' ) as $key ) {
+			if ( ! empty( $_SERVER[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- presence only, no value is read.
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1268,11 +1382,14 @@ class HSW_Security {
 						<th scope="row"><?php esc_html_e( 'XML-RPC', 'hamishop-elementor-widgets' ); ?></th>
 						<td>
 							<label>
-								<input type="checkbox" name="hsw_security[disable_xmlrpc]" value="yes" <?php checked( 'yes', $s['disable_xmlrpc'] ); ?> />
-								<?php esc_html_e( 'غیرفعال‌کردن XML-RPC', 'hamishop-elementor-widgets' ); ?>
+								<input type="checkbox" checked disabled />
+								<?php esc_html_e( 'XML-RPC خاموش است', 'hamishop-elementor-widgets' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'اگر از اپلیکیشن وردپرس یا جت‌پک استفاده نمی‌کنید، خاموش‌کردنش امن‌تر است؛ XML-RPC یکی دیگر از راه‌های لو دادن نام کاربری است.', 'hamishop-elementor-widgets' ); ?>
+								<?php esc_html_e( 'از نسخهٔ ۱.۱۱.۱۷۸ خاموش است و این کادر فقط وضعیت را نشان می‌دهد: ورود دوعاملی روی XML-RPC اجرا نمی‌شود، پس هر ورودی از آن مسیر عامل دوم را دور می‌زد. اگر واقعاً به XML-RPC نیاز دارید، فقط از کد بازش کنید: فیلتر hsw_disable_xmlrpc را false کنید.', 'hamishop-elementor-widgets' ); ?>
+							</p>
+							<p class="description">
+								<?php esc_html_e( 'روشن‌کردنش از این صفحه امن نیست؛ به همین دلیل چک‌باکس غیرفعال است و مقداری در تنظیمات ذخیره نمی‌کند.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 						</td>
 					</tr>

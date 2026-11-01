@@ -8,6 +8,17 @@
 
 require_once __DIR__ . '/prelive-lib.php';
 
+/*
+ * Auth-cookie constants. WordPress defines these in default-constants.php;
+ * HSW_Security::request_has_credential() reads them by name, so the harness
+ * has to define them before any case runs (not next to the case that needs it).
+ */
+if ( ! defined( 'LOGGED_IN_COOKIE' ) ) {
+	define( 'LOGGED_IN_COOKIE', 'wordpress_logged_in_test' );
+	define( 'SECURE_AUTH_COOKIE', 'wordpress_sec_test' );
+	define( 'AUTH_COOKIE', 'wordpress_test' );
+}
+
 /* ---- extra stubs this file needs ------------------------------------ */
 
 class WP_Post {
@@ -386,6 +397,135 @@ r_case(
 
 		$ok = $blocked && $blocked2 && ! $notices;
 		return array( $ok, sprintf( 'evil=%s sub-of-list=%s notices=%d%s', var_export( $blocked, true ), var_export( $blocked2, true ), count( $notices ), $notices ? ' (' . $notices[0] . ')' : '' ) );
+	}
+);
+
+/* ---------------------------------------------------------------------
+ * 15) Security tab — the three defects the live sweep found on 1.11.188
+ *
+ *  a) font_swap missed the `&#038;` separator that esc_url() prints, so the
+ *     Google Fonts URL ended up with display=auto AND display=swap.
+ *  b) block_rest_users removed the /wp/v2/users route before authentication,
+ *     so the editor's link picker got 404 even for an administrator.
+ *  c) …and once the route was kept, a forged cookie still received the public
+ *     user list, because that core route is public by default.
+ * ------------------------------------------------------------------ */
+
+r_case(
+	'15.1',
+	'a Google Fonts URL printed through esc_url() gets one display=swap, not two',
+	static function () {
+		r_reset();
+		$html = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400&#038;display=auto" />';
+		$out  = HSW_Security::instance()->rewrite_font_display( $html );
+		$ok   = 1 === substr_count( $out, 'display=' ) && false !== strpos( $out, 'display=swap' );
+		return array( $ok, 'display-params=' . substr_count( $out, 'display=' ) . ' out=' . $out );
+	}
+);
+
+r_case(
+	'15.2',
+	'the &amp; form is rewritten in place too',
+	static function () {
+		r_reset();
+		$html = '<a href="https://fonts.googleapis.com/css2?family=Inter&amp;display=block">x</a>';
+		$out  = HSW_Security::instance()->rewrite_font_display( $html );
+		$ok   = 1 === substr_count( $out, 'display=' ) && false !== strpos( $out, 'display=swap' );
+		return array( $ok, 'out=' . $out );
+	}
+);
+
+r_case(
+	'15.3',
+	'a URL with no display parameter gets exactly one, with the right separator',
+	static function () {
+		r_reset();
+		$html = '<link href="https://fonts.googleapis.com/css?family=Inter&#038;wght@400" />';
+		$out  = HSW_Security::instance()->rewrite_font_display( $html );
+		$ok   = 1 === substr_count( $out, 'display=' ) && false !== strpos( $out, '&#038;display=swap' ) && false === strpos( $out, '&display=swap' );
+		return array( $ok, 'out=' . $out );
+	}
+);
+
+r_case(
+	'15.4',
+	'a guest with no credential still sees "no route" on /wp/v2/users',
+	static function () {
+		r_reset();
+		$_COOKIE = array();
+		update_option( 'hsw_security', array( 'block_rest_users' => 'yes' ) );
+		$GLOBALS['hsw_caps'] = array( 'list_users' => false, 'edit_posts' => false );
+
+		$request = new class() {
+			public function get_route() { return '/wp/v2/users'; }
+		};
+		$out = HSW_Security::instance()->guard_rest_users( null, null, $request );
+
+		$ok = is_wp_error( $out ) && 'rest_no_route' === $out->get_error_code() && 404 === $out->get_error_data()['status'];
+		return array( $ok, 'code=' . ( is_wp_error( $out ) ? $out->get_error_code() : var_export( $out, true ) ) );
+	}
+);
+
+r_case(
+	'15.5',
+	'a forged cookie gets 401 — the public user list must not leak',
+	static function () {
+		r_reset();
+		$_COOKIE = array( LOGGED_IN_COOKIE => 'forged' );
+		update_option( 'hsw_security', array( 'block_rest_users' => 'yes' ) );
+		$GLOBALS['hsw_caps'] = array( 'list_users' => false, 'edit_posts' => false );
+
+		$request = new class() {
+			public function get_route() { return '/wp/v2/users'; }
+		};
+		$out = HSW_Security::instance()->guard_rest_users( null, null, $request );
+		$_COOKIE = array();
+
+		$ok = is_wp_error( $out ) && 'rest_forbidden' === $out->get_error_code() && 401 === $out->get_error_data()['status'];
+		return array( $ok, 'code=' . ( is_wp_error( $out ) ? $out->get_error_code() : var_export( $out, true ) ) );
+	}
+);
+
+r_case(
+	'15.6',
+	'an administrator passes, and an unrelated route is never touched',
+	static function () {
+		r_reset();
+		$_COOKIE = array( LOGGED_IN_COOKIE => 'whatever' );
+		update_option( 'hsw_security', array( 'block_rest_users' => 'yes' ) );
+		$GLOBALS['hsw_caps'] = array( 'list_users' => true );
+
+		$users = new class() {
+			public function get_route() { return '/wp/v2/users'; }
+		};
+		$posts = new class() {
+			public function get_route() { return '/wp/v2/posts'; }
+		};
+		$admin = HSW_Security::instance()->guard_rest_users( null, null, $users );
+		$other = HSW_Security::instance()->guard_rest_users( null, null, $posts );
+		$_COOKIE = array();
+		$GLOBALS['hsw_caps'] = array();
+
+		$ok = null === $admin && null === $other;
+		return array( $ok, 'admin=' . var_export( $admin, true ) . ' posts=' . var_export( $other, true ) );
+	}
+);
+
+r_case(
+	'15.7',
+	'with the option off, the users route is not guarded at all',
+	static function () {
+		r_reset();
+		$_COOKIE = array();
+		update_option( 'hsw_security', array( 'block_rest_users' => 'no' ) );
+		$GLOBALS['hsw_caps'] = array( 'list_users' => false );
+
+		$request = new class() {
+			public function get_route() { return '/wp/v2/users'; }
+		};
+		$out = HSW_Security::instance()->guard_rest_users( null, null, $request );
+		$GLOBALS['hsw_caps'] = array();
+		return array( null === $out, 'out=' . var_export( $out, true ) );
 	}
 );
 
