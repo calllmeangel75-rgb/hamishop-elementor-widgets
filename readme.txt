@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.186
+Stable tag: 1.11.187
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.187 =
+* **هندسهٔ بلوک‌های اولین ویوپورت از قبل رزرو می‌شود (CLS).**
+  - `HSW_Assets::print_layout_guard()` یک `<style id="hsw-layout-guard">` حدوداً ۷۰۰ بایتی در `wp_head` چاپ می‌کند که فقط هندسهٔ سطر هدر (`.hsw-hd__maininner`, `.hsw-hd__pill`)، بدنهٔ کمپوزیت (`.hsw-cp__body`, `.hsw-cp__col`) و گرید آرشیو (`.hsw-ag__grid`) را با همان fallbackهای متغیرهای خود سوئیت تکرار می‌کند — بدون تکرار رنگ/فونت/بک‌گراند.
+  - با Playwright و Slow 4G اندازه‌گیری شد: شیفت ۰٫۰۵۱۷ سطر هدر (عرض 338px → 411px هنگام رسیدن دیرهنگام `hsw-header.min.css`) **حذف شد**.
+  - با فیلتر `hsw_layout_guard = false` کاملاً خاموش می‌شود.
+  - رویداد بزرگ CLS (≈۰٫۶۰) هنوز باقی است و علتش وزن HTML صفحه گزارش‌شده (۳۲KB اسپرایت SVG + ۱۷KB استایل inline از کل ۲۰۶KB) — در نسخه‌های بعد.
 
 = 1.11.186 =
 * **شش مورد P1 بسته شد و سیاست اعتبار شارژ قابل انتخاب شد.**
