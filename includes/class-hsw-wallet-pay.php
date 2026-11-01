@@ -364,6 +364,36 @@ class HSW_Wallet_Topup {
 		add_action( 'woocommerce_payment_complete', array( $this, 'settle' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'settle' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'settle' ) );
+		add_action( 'template_redirect', array( $this, 'remember_order_pay' ), 1 );
+	}
+
+	/**
+	 * Remember the order being paid, so the next step still knows it.
+	 *
+	 * `/order-pay/<id>/` and the pay page are two separate requests, and after
+	 * «ادامه و ورود به مرحله پرداخت» the URL carries no order id at all. The
+	 * checkout stores it in `order_awaiting_payment`; a wallet top-up never goes
+	 * through the checkout, and a retried payment starts straight at `/order-pay/`
+	 * — both landed on a payment step with no order, which is why it printed
+	 * «۰ تومان» for a 150,000 top-up.
+	 *
+	 * @return void
+	 */
+	public function remember_order_pay() {
+		global $wp;
+
+		if ( empty( $wp->query_vars['order-pay'] ) ) {
+			return;
+		}
+
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return;
+		}
+
+		$id = absint( $wp->query_vars['order-pay'] );
+		if ( $id ) {
+			WC()->session->set( 'order_awaiting_payment', $id );
+		}
 	}
 
 	/**
@@ -508,6 +538,17 @@ class HSW_Wallet_Topup {
 		$order->calculate_totals();
 		$order->set_status( 'pending', __( 'در انتظار پرداخت شارژ کیف پول', 'hamishop-elementor-widgets' ) );
 		$order->save();
+
+		/*
+		 * Hand the order to the pay page exactly the way the checkout does. After
+		 * «ادامه و ورود به مرحله پرداخت» the URL is the pay page, not
+		 * `/order-pay/<id>/`, and the order only lives in the session — without
+		 * this the payment step had no order and printed «۰ تومان» for a
+		 * 150,000 top-up.
+		 */
+		if ( function_exists( 'WC' ) && WC()->session ) {
+			WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		}
 
 		return $order->get_id();
 	}

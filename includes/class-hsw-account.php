@@ -365,6 +365,8 @@ final class HSW_Account {
 		$defaults = self::defaults();
 		$input    = is_array( $input ) ? $input : array();
 		$out      = self::merge_defaults( $this->settings( true ) );
+		/* Snapshot before the merge below, so a real toggle can be told apart. */
+		$before_wallet = (string) ( $out['wallet']['enabled'] ?? 'yes' );
 
 		if ( isset( $input['general'] ) && is_array( $input['general'] ) ) {
 			$g = $input['general'];
@@ -519,6 +521,21 @@ final class HSW_Account {
 			foreach ( $defaults['design'] as $key => $fallback ) {
 				$out['design'][ $key ] = $this->clean_color( $design[ $key ] ?? '', $out['design'][ $key ] );
 			}
+		}
+
+		/*
+		 * «فعال بودن کیف پول» is the switch the shop owner sees, but every wallet
+		 * surface (page, gateway, admin screen, points conversion) reads the
+		 * separate `hsw_wallet_gateway_on` gate — and nothing in the panel wrote
+		 * it, so the switch could never actually turn the wallet on.
+		 *
+		 * Synced only when the box really changed: a site that keeps the default
+		 * (`yes`) and merely saves this screen must not switch a half-configured
+		 * wallet on. One explicit tick does.
+		 */
+		if ( isset( $input['wallet'] ) && is_array( $input['wallet'] )
+			&& (string) $out['wallet']['enabled'] !== $before_wallet ) {
+			update_option( 'hsw_wallet_gateway_on', 'yes' === $out['wallet']['enabled'] ? 'yes' : 'no' );
 		}
 
 		$out['version'] = defined( 'HSW_VERSION' ) ? HSW_VERSION : self::VERSION;
@@ -1438,7 +1455,7 @@ final class HSW_Account {
 				. '<div class="hsw-ac__member-points"><strong>' . esc_html( HSW_Helpers::fa_num( $loyalty['points'] ) ) . '</strong><span>' . esc_html( $ctx['opts']['loyalty']['label'] ) . '</span></div>'
 				. '<div class="hsw-ac__member-tier"><span>' . esc_html( $loyalty['tier'] ) . '</span><small>' . esc_html( $loyalty['progress_text'] ) . '</small></div>'
 				. '<div class="hsw-ac__progress" aria-hidden="true"><span style="width:' . esc_attr( $loyalty['progress'] ) . '%"></span></div>'
-				. '<p class="hsw-ac__member-note">' . esc_html( sprintf( 'هر %s تومان خرید معتبر = ۱ امتیاز. امتیازها سطح شما را تعیین می‌کنند و فعلاً به کیف پول تبدیل نمی‌شوند.', HSW_Helpers::fa_num( (int) $ctx['opts']['loyalty']['rate'] ) ) ) . '</p>'
+				. '<p class="hsw-ac__member-note">' . esc_html( $this->loyalty_note( (int) $ctx['opts']['loyalty']['rate'] ) ) . '</p>'
 				. '</div>';
 			$html   .= '<div class="hsw-ac__member-panel" id="' . esc_attr( $id . '-loyal' ) . '" role="tabpanel" data-hsw-member-panel="loyal" hidden>'
 				. '<div class="hsw-ac__member-points"><strong>' . esc_html( HSW_Helpers::fa_num( $loyalty['completed'] ) ) . '</strong><span>' . esc_html__( 'سفارش تحویل‌شده', 'hamishop-elementor-widgets' ) . '</span></div>'
@@ -2598,6 +2615,34 @@ final class HSW_Account {
 		echo $this->wallet_content( $ctx );
 	}
 
+	/**
+	 * The line under the points card.
+	 *
+	 * It used to say «فعلاً به کیف پول تبدیل نمی‌شوند» unconditionally, while the
+	 * wallet page right next to it showed a working conversion form — the card
+	 * and the wallet disagreed about the same setting.
+	 *
+	 * @param int $rate Points rate (currency per point).
+	 * @return string
+	 */
+	private function loyalty_note( $rate ) {
+		$convertible = class_exists( 'HSW_Wallet' ) && HSW_Wallet::points_convert_allowed();
+
+		if ( ! $convertible ) {
+			/* translators: %s: amount. */
+			return sprintf( 'هر %s تومان خرید معتبر = ۱ امتیاز. امتیازها سطح شما را تعیین می‌کنند.', HSW_Helpers::fa_num( $rate ) );
+		}
+
+		$per_point = max( 1, (int) $this->setting( 'wallet.point_value', 100 ) );
+
+		/* translators: 1: amount, 2: credit per point. */
+		return sprintf(
+			'هر %1$s تومان خرید معتبر = ۱ امتیاز. هر امتیاز %2$s تومان اعتبار کیف پول است.',
+			HSW_Helpers::fa_num( $rate ),
+			HSW_Helpers::fa_num( number_format( $per_point ) )
+		);
+	}
+
 	private function notifications_content( $ctx ) {
 		$items  = $ctx['notifications'];
 		$unread = (int) $ctx['unread_notifications'];
@@ -3006,8 +3051,58 @@ final class HSW_Account {
 		$rate    = (int) ( is_array( $opts ) ? $opts['loyalty']['rate'] : $this->setting( 'loyalty.rate', 10000 ) );
 		$rate    = max( 1, $rate );
 		$spent   = function_exists( 'wc_get_customer_total_spent' ) ? (float) wc_get_customer_total_spent( $user_id ) : 0;
+
+		/*
+		 * Wallet top-ups are not purchases: the customer moved money into the
+		 * shop, and that money is still theirs. WooCommerce counts them in
+		 * `total_spent` like any other paid order, so with a 10,000-per-point rate
+		 * and a 1,000-per-point payout every top-up earned 10% of its own amount
+		 * back as points — top up 200,000, convert 20 points, get 20,000 — which
+		 * repeats for free. Excluded here, where the rate is applied.
+		 */
+		$spent  -= $this->wallet_topup_spent( $user_id );
+		$spent   = max( 0, $spent );
 		$points  = (int) floor( $spent / $rate );
+
 		return (int) apply_filters( 'hsw_account_loyalty_points', $points, $user_id, $spent );
+	}
+
+	/**
+	 * How much of this customer's `total_spent` came from wallet top-ups.
+	 *
+	 * @param int $user_id Customer.
+	 * @return float
+	 */
+	private function wallet_topup_spent( $user_id ) {
+		if ( ! function_exists( 'wc_get_orders' ) ) {
+			return 0.0;
+		}
+
+		/*
+		 * `meta_query` is silently ignored by WC_Order_Query here (the query came
+		 * back with every order of the customer, top-ups or not, which zeroed the
+		 * points of a real 29M purchase). Reading the meta off each order is
+		 * boring and correct — a customer has tens of orders, not thousands.
+		 */
+		$orders = wc_get_orders(
+			array(
+				'customer_id' => absint( $user_id ),
+				'status'      => array( 'processing', 'completed' ),
+				'limit'       => -1,
+			)
+		);
+
+		$sum = 0.0;
+		foreach ( (array) $orders as $order ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+			if ( (int) $order->get_meta( '_hsw_wallet_topup_user' ) ) {
+				$sum += (float) $order->get_total();
+			}
+		}
+
+		return $sum;
 	}
 
 	/* ---------------------------------------------------------------------

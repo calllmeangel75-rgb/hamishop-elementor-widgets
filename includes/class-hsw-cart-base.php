@@ -37,6 +37,109 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
         }
 
         /**
+         * The order being paid on an order-pay screen, or null.
+         *
+         * `?pay_for_order=true` empties the cart: everything the summary needs is
+         * on the order. Without this the wallet top-up page (and every retried
+         * payment) printed «جمع قیمت اقلام (۰): ۰ تومان» and «مبلغ قابل پرداخت:
+         * ۰ تومان» while the gateway was about to charge the real total — the
+         * customer was looking at a free order.
+         *
+         * @return WC_Order|null
+         */
+        protected function paying_order() {
+                if ( ! function_exists( 'wc_get_order' ) ) {
+                        return null;
+                }
+
+                global $wp;
+
+                $id = isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
+
+                /*
+                 * After «ادامه و ورود به مرحله پرداخت» the URL is the pay page, not
+                 * `/order-pay/<id>/`, and the order only lives in the session. Use
+                 * it when the cart is empty — that is exactly the case where there
+                 * is nothing else to show. With a cart (the normal checkout step)
+                 * the cart stays the source of truth, so a customer who comes back
+                 * to edit quantities never sees a stale order total.
+                 */
+                if ( ! $id && function_exists( 'WC' ) && WC()->session ) {
+                        $empty_cart = ! WC()->cart || 0 === (int) WC()->cart->get_cart_contents_count();
+                        if ( $empty_cart ) {
+                                $id = absint( WC()->session->get( 'order_awaiting_payment' ) );
+                        }
+                }
+
+                if ( ! $id ) {
+                        return null;
+                }
+
+                $order = wc_get_order( $id );
+
+                return $order instanceof WC_Order ? $order : null;
+        }
+
+        /**
+         * Line items of the order being paid, in the same shape as cart items.
+         *
+         * Fees are included on purpose: a wallet top-up order is a single fee and
+         * no products, and a summary that ignores it shows zero for the only
+         * thing the customer is paying for.
+         *
+         * @param WC_Order $order Order being paid.
+         * @return array<int,array<string,mixed>>
+         */
+        protected function order_lines( $order ) {
+                $rows = array();
+
+                foreach ( $order->get_items() as $item ) {
+                        $product = method_exists( $item, 'get_product' ) ? $item->get_product() : null;
+                        $total   = (float) $item->get_total() + (float) $item->get_total_tax();
+
+                        $rows[] = array(
+                                'key'      => 'order-' . $item->get_id(),
+                                'name'     => $item->get_name(),
+                                'url'      => $product ? $product->get_permalink() : '',
+                                'img'      => $product ? $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy' ) ) : '',
+                                'eyebrow'  => '',
+                                'chips'    => array(),
+                                'warranty' => '',
+                                'qty'      => (int) $item->get_quantity(),
+                                'min'      => 1,
+                                'max'      => 0,
+                                'price'    => $total,
+                                'regular'  => $total,
+                                'disc'     => 0,
+                                'remove'   => '',
+                        );
+                }
+
+                foreach ( $order->get_fees() as $fee ) {
+                        $total = (float) $fee->get_total() + (float) $fee->get_total_tax();
+
+                        $rows[] = array(
+                                'key'      => 'fee-' . $fee->get_id(),
+                                'name'     => $fee->get_name(),
+                                'url'      => '',
+                                'img'      => '',
+                                'eyebrow'  => '',
+                                'chips'    => array(),
+                                'warranty' => '',
+                                'qty'      => 1,
+                                'min'      => 1,
+                                'max'      => 0,
+                                'price'    => $total,
+                                'regular'  => $total,
+                                'disc'     => 0,
+                                'remove'   => '',
+                        );
+                }
+
+                return $rows;
+        }
+
+        /**
          * True while inside the Elementor editor / preview iframe (any context).
          */
         protected function is_editing() {
@@ -162,6 +265,14 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Number of units in the cart.
          */
         protected function cart_count() {
+                if ( $order = $this->paying_order() ) {
+                        $count = 0;
+                        foreach ( $this->order_lines( $order ) as $line ) {
+                                $count += (int) $line['qty'];
+                        }
+                        return $count;
+                }
+
                 if ( ! $this->has_cart() ) {
                         return 0;
                 }
@@ -172,6 +283,10 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Normalized cart items (array of render payloads).
          */
         protected function cart_items() {
+                if ( $order = $this->paying_order() ) {
+                        return $this->order_lines( $order );
+                }
+
                 if ( ! $this->has_cart() ) {
                         return array();
                 }
@@ -300,6 +415,14 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Base (regular-price) subtotal of the cart — «قیمت پایه اقلام».
          */
         protected function base_subtotal() {
+                if ( $order = $this->paying_order() ) {
+                        $sum = 0;
+                        foreach ( $this->order_lines( $order ) as $line ) {
+                                $sum += (float) $line['price'];
+                        }
+                        return $sum;
+                }
+
                 if ( ! $this->has_cart() ) {
                         return 0;
                 }
@@ -346,6 +469,11 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Shipping row state: [ 'amount', float ] | [ 'free', 0 ].
          */
         protected function shipping_row() {
+                if ( $order = $this->paying_order() ) {
+                        $ship = (float) $order->get_shipping_total();
+                        return array( ( $ship > 0 ) ? 'amount' : 'free', $ship );
+                }
+
                 if ( ! $this->has_cart() ) {
                         return array( 'free', 0 );
                 }
@@ -360,6 +488,10 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Final payable amount (get_total).
          */
         protected function cart_total() {
+                if ( $order = $this->paying_order() ) {
+                        return (float) $order->get_total();
+                }
+
                 if ( ! $this->has_cart() ) {
                         return 0;
                 }
@@ -370,6 +502,10 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
          * Total tax amount (0 when taxes disabled).
          */
         protected function taxes_total() {
+                if ( $order = $this->paying_order() ) {
+                        return (float) $order->get_total_tax();
+                }
+
                 if ( ! $this->has_cart() || ! wc_tax_enabled() ) {
                         return 0;
                 }

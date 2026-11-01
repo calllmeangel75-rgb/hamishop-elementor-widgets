@@ -139,6 +139,19 @@ class HSW_Checkout_Complete {
 			return $gate;
 		}
 
+		/*
+		 * An order can already exist and still need payment: a wallet top-up (the
+		 * order is created by the wallet endpoint, there is no cart at all) and a
+		 * retried payment from «سفارش‌های من» both land on the pay page with the
+		 * order only in `order_awaiting_payment`. The old flow created a NEW order
+		 * from the cart here, so the pay button answered «سبد خرید خالی است» and a
+		 * 150,000 top-up could never be paid.
+		 */
+		$awaiting = $this->awaiting_order();
+		if ( $awaiting ) {
+			return $this->pay_awaiting_order( $awaiting, $request );
+		}
+
 		if ( WC()->cart->is_empty() ) {
 			return new WP_Error( 'hsw_empty_cart', __( 'سبد خرید خالی است؛ ابتدا محصولی به سبد اضافه کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
 		}
@@ -288,6 +301,103 @@ class HSW_Checkout_Complete {
 	/* =========================================================================
 	 *  INTERNALS
 	 * ====================================================================== */
+
+	/**
+	 * The order the customer is paying, when it is not built from the cart.
+	 *
+	 * Ownership is checked: the session id is not trusted on its own, because a
+	 * shared browser or a copied cookie must never let someone pay (or read) an
+	 * order that belongs to another account.
+	 *
+	 * @return WC_Order|null
+	 */
+	protected function awaiting_order() {
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return null;
+		}
+
+		$id = absint( WC()->session->get( 'order_awaiting_payment' ) );
+		if ( ! $id ) {
+			return null;
+		}
+
+		$order = wc_get_order( $id );
+		if ( ! $order instanceof WC_Order || ! $order->needs_payment() ) {
+			return null;
+		}
+
+		$owner = (int) $order->get_customer_id();
+		if ( $owner && get_current_user_id() !== $owner ) {
+			return null;
+		}
+
+		return $order;
+	}
+
+	/**
+	 * Send an existing order to the gateway instead of creating a new one.
+	 *
+	 * @param WC_Order        $order   Order awaiting payment.
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	protected function pay_awaiting_order( $order, $request ) {
+		if ( ! rest_sanitize_boolean( $request->get_param( 'terms' ) ) ) {
+			return new WP_Error(
+				'hsw_terms',
+				__( 'برای ثبت سفارش باید قوانین و شرایط فروشگاه را بپذیرید.', 'hamishop-elementor-widgets' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$gateways = WC()->payment_gateways() ? WC()->payment_gateways()->get_available_payment_gateways() : array();
+		$method   = sanitize_text_field( (string) $request->get_param( 'method' ) );
+		if ( '' === $method ) {
+			$method = (string) $order->get_payment_method();
+		}
+
+		if ( ! isset( $gateways[ $method ] ) ) {
+			return new WP_Error( 'hsw_bad_gateway', __( 'روش پرداخت انتخاب‌شده در دسترس نیست؛ روش دیگری را انتخاب کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+		}
+
+		if ( $method !== (string) $order->get_payment_method() ) {
+			$order->set_payment_method( $gateways[ $method ] );
+			$order->save();
+		}
+
+		try {
+			$result = $gateways[ $method ]->process_payment( $order->get_id() );
+		} catch ( Throwable $e ) {
+			$result = array( 'result' => 'failure', 'messages' => wp_strip_all_tags( $e->getMessage() ) );
+		}
+
+		if ( ! is_array( $result ) || empty( $result['result'] ) || 'success' !== $result['result'] ) {
+			$msg = '';
+			if ( is_array( $result ) && ! empty( $result['messages'] ) ) {
+				$msg = wp_strip_all_tags( is_array( $result['messages'] ) ? implode( ' ', $result['messages'] ) : (string) $result['messages'] );
+			}
+			return new WP_Error(
+				'hsw_pay_failed',
+				'' !== trim( $msg ) ? $msg : __( 'پرداخت انجام نشد؛ دوباره تلاش کنید یا روش پرداخت دیگری انتخاب کنید.', 'hamishop-elementor-widgets' ),
+				array( 'status' => 402 )
+			);
+		}
+
+		$result   = apply_filters( 'woocommerce_payment_successful_result', $result, $order->get_id() );
+		$redirect = ! empty( $result['redirect'] ) ? (string) $result['redirect'] : $order->get_checkout_order_received_url();
+
+		/* One order, one payment: nothing may be paid twice from this session. */
+		WC()->session->set( 'order_awaiting_payment', null );
+
+		return rest_ensure_response(
+			array(
+				'ok'       => true,
+				'result'   => 'success',
+				'order_id' => (int) $order->get_id(),
+				'redirect' => $redirect,
+			)
+		);
+	}
 
 	/**
 	 * Place the order behind an atomic one-shot lock.
