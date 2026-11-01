@@ -181,6 +181,23 @@ class HSW_Assets {
                     . '.hsw-cp__body,.hsw-cp__panels{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--hsw-cp-gap,24px)}'
                     . '.hsw-cp__col{min-width:0;display:flex;flex-direction:column;gap:var(--hsw-cp-gap,24px)}'
                     . '.hsw-ag__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px 0}'
+                    /*
+                     * The archive sidebar is a desktop column: its widgets carry
+                     * `.hsw-d` and the mobile filters live in the bottom sheet.
+                     * What actually hides them is Elementor's per-page CSS — the
+                     * LAST stylesheet of the head — so on a slow connection the
+                     * column paints full height (892px here) and collapses when
+                     * that file lands. Chrome scored the collapse as 0.5967 CLS
+                     * on /shop/ at 411x731; hiding the column up front takes it
+                     * to 0.1581 (the rest is product images inside the cards).
+                     *
+                     * Specificity, not !important: 0,3,0 beats `.hsw-cp__col`
+                     * (0,1,0) whatever the order, and a site that really wants
+                     * the column on mobile can still win with a more specific
+                     * rule. Scoped to the archive composite so the cart, checkout
+                     * and blog sidebars (which ARE used on mobile) never match.
+                     */
+                    . '@media(max-width:767.98px){.hsw-cp--archive .hsw-cp__body>.hsw-cp__col--side{display:none}}'
                     . '</style>' . "\n";
         }
 
