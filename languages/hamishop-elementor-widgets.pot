@@ -73,10 +73,6 @@ msgstr ""
 msgid "CTA مراحل خرید (کلیک)"
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:245
-msgid "Font Display"
-msgstr ""
-
 #: includes/class-hsw-assets.php:763
 msgid "HamiShop (لوکال)"
 msgstr ""
@@ -89,7 +85,7 @@ msgstr ""
 msgid "HamiShop:"
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:238
+#: includes/class-hsw-optimizer.php:243
 msgid "HamiShop: سازگاری با بهینه‌ساز لایت‌اسپید"
 msgstr ""
 
@@ -97,8 +93,8 @@ msgstr ""
 msgid "REST API"
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:248
-msgid "UCSS/Critical CSS قاعده‌های سبد کشویی، تب‌ها و آکاردئون‌ها را «استفاده‌نشده» می‌بیند و حذفشان می‌کند؛ اگر بعد از فعال‌بودنش استایل این‌ها پرید، UCSS را برای این صفحه‌ها خاموش کنید."
+#: includes/class-hsw-optimizer.php:251
+msgid "UCSS/Critical CSS قاعده‌های سبد کشویی، تب‌ها و آکاردئون‌ها را «استفاده‌نشده» می‌بیند و حذفشان می‌کند؛ اگر استایل این‌ها پرید، UCSS را برای این صفحه‌ها خاموش کن."
 msgstr ""
 
 #: includes/class-hsw-security.php:1268
@@ -1756,8 +1752,8 @@ msgstr ""
 msgid "این محصول موجود نیست."
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:245
-msgid "این مقدار روی همهٔ @font-faceها نوشته می‌شود؛ اگر روی optional یا block باشد فونت گاهی روی Tahoma می‌ماند. آن را روی swap بگذارید."
+#: includes/class-hsw-optimizer.php:248
+msgid "این مقدار روی همهٔ @font-faceها نوشته می‌شود؛ اگر optional یا block باشد فونت گاهی روی Tahoma می‌ماند. آن را swap یا خالی بگذارید."
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:828
@@ -2042,7 +2038,7 @@ msgstr ""
 msgid "بازیابی موجودی قدیمی (ردیف در میانهٔ مهاجرت ساخته شده بود)"
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:254
+#: includes/class-hsw-optimizer.php:255
 msgid "باشه، فعلاً نشان نده"
 msgstr ""
 
@@ -3574,10 +3570,6 @@ msgstr ""
 
 #: widgets/class-hsw-widget-cart-coupon.php:126
 msgid "تمامی قیمت‌ها شامل مالیات بر ارزش افزوده قانونی است."
-msgstr ""
-
-#: includes/class-hsw-optimizer.php:243
-msgid "تنظیم Font Display روی swap است؛ خوب است."
 msgstr ""
 
 #: includes/class-hsw-account-admin.php:849
@@ -5661,8 +5653,8 @@ msgstr ""
 msgid "ذخیره پالت"
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:241
-msgid "را در «CSS Excludes» نگه دارید؛ CSS المنتور با هر ذخیره عوض می‌شود و ادغام آن باعث تولید مداوم فایل ترکیبی و بی‌اعتبارشدن کش می‌شود."
+#: includes/class-hsw-optimizer.php:246
+msgid "را هم در «CSS Excludes» بگذارید؛ CSS المنتور با هر ذخیره عوض می‌شود و ادغام آن باعث تولید مداوم فایل ترکیبی و بی‌اعتبارشدن کش می‌شود."
 msgstr ""
 
 #: includes/class-hsw-header-base.php:985
@@ -8582,8 +8574,8 @@ msgstr ""
 msgid "فایل .htaccess قابل نوشتن نیست، پس آدرس سفارشی فعال نشد. دسترسی نوشتن بدهید یا قواعد را دستی اضافه کنید."
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:239
-msgid "فایل‌های CSS این افزونه از ادغام و از حذف قاعده‌های UCSS خارج می‌شوند (فقط در حافظه، تنظیمات شما دست‌نخورده است). برای اینکه ساختار صفحه و فونت وزیرمتن همیشه درست بماند، این موارد را هم در نظر بگیرید:"
+#: includes/class-hsw-optimizer.php:244
+msgid "فایل‌های CSS این افزونه از ادغام و از حذف قاعده‌های UCSS خارج می‌شوند (تنظیمات شما دست‌نخورده می‌ماند). برای اینکه ساختار صفحه و فونت وزیرمتن همیشه درست بماند، این موارد را هم در نظر بگیرید:"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:117
@@ -11822,7 +11814,7 @@ msgstr ""
 msgid "هیچ‌وقت 00:00:00 مرده نمایش داده نمی‌شود؛ در حالت «کل ویجت پنهان شود» ارتفاع صفحه تغییر نمی‌کند."
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:241
+#: includes/class-hsw-optimizer.php:246
 msgid "و"
 msgstr ""
 
@@ -12012,8 +12004,8 @@ msgstr ""
 msgid "وضعیت سفارش"
 msgstr ""
 
-#: includes/class-hsw-optimizer.php:252
-msgid "وضعیت فعلی CSS Combine در لایت‌اسپید:"
+#: includes/class-hsw-optimizer.php:254
+msgid "وضعیت فعلی:"
 msgstr ""
 
 #: includes/class-hsw-account.php:2248

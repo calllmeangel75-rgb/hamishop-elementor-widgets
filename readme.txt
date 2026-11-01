@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.184
+Stable tag: 1.11.185
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.185 =
+* **رفع باگ خود HSW_Optimizer — با لایت‌اسپید کار نمی‌کرد و نوتیس PHP می‌داد.**
+  - ۱.۱۱.۱۸۴ گزینهٔ `optm-css_exc` را که در لایت‌اسپید **آرایه** است با رشته بازنویسی می‌کرد؛ روی سایت لوکال با لایت‌اسپید ۷.۹.۲ اندازه‌گیری شد: هر صفحه **۶ بار** `PHP Warning: Array to string conversion` و بدون اثر.
+  - حالا از فیلترهای رسمی خود لایت‌اسپید در نقطهٔ مصرف استفاده می‌شود: `litespeed_optimize_css_excludes` (اولویت ۲۰، بعد از `Data::load_css_exc`) و `litespeed_ucss_exc`؛ ورودی/خروجی آرایه، خطوط صاحب سایت حفظ، بدون تکرار.
+  - تشخیص اصلاح شد: `LSCWP_CTRL` ثابت نیست (کلید query در router است)؛ حالا `defined('LSCWP_V') || has_filter('litespeed_conf')`.
+  - تست: `prelive-optimizer.php` با ۸ سنجه (قرمز ۸/۸ بدون کلاس، سبز ۸/۸ با آن) و صفر نوتیس روی سایت واقعی.
 
 = 1.11.184 =
 * **سازگاری با بهینه‌ساز لایت‌اسپید (کلاس جدید `HSW_Optimizer`).**
