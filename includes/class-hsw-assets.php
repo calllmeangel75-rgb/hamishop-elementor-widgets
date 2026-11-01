@@ -16,6 +16,7 @@ class HSW_Assets {
                 add_filter( 'elementor/frontend/print_google_fonts', array( $this, 'filter_google_fonts' ) );
                 add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
                 add_action( 'wp_head', array( $this, 'preload_font' ), 4 );
+                add_action( 'wp_head', array( $this, 'print_layout_guard' ), 2 );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
@@ -148,6 +149,39 @@ class HSW_Assets {
          */
         public function print_sheet_guard() {
                 echo self::sheet_guard(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal style tag.
+        }
+
+        /**
+         * Geometry-only guard for the blocks that define the first viewport.
+         *
+         * Measured on a live shop with Lighthouse-like Slow 4G: the header row
+         * re-flowed (`.hsw-hd__maininner` 338px -> 411px) and the whole product
+         * grid painted ~2s after the first paint, which Chrome scores as a single
+         * CLS event of 0.52-0.60. The cause is not a missing box reservation but
+         * the order the stylesheets land in: the suite CSS that positions these
+         * blocks arrives after the first paint.
+         *
+         * So repeat only the GEOMETRY of those rules here, with the very same
+         * custom-property fallbacks the suite uses. Nothing about colour, font or
+         * background is duplicated, so once the suite loads it either agrees
+         * (no change) or wins (it is later in the cascade). A wrong guess here
+         * would create a shift instead of removing one, which is why every value
+         * below is copied from hsw-header.css / hsw-composite.css / hsw-archive.css.
+         *
+         * @return void
+         */
+        public function print_layout_guard() {
+                if ( is_admin() || ! (bool) apply_filters( 'hsw_layout_guard', true ) ) {
+                        return;
+                }
+
+                echo '<style id="hsw-layout-guard">'
+                    . '.hsw-hd__maininner{display:flex;align-items:center;gap:18px;width:100%;max-width:var(--hsw-hd-width,none);margin:0 auto}'
+                    . '.hsw-hd__pill{display:flex;align-items:center;gap:var(--hsw-hd-pill-gap,14px);min-height:var(--hsw-hd-pill-h,58px);padding:var(--hsw-hd-pill-py,8px) var(--hsw-hd-pill-px,13px);border:var(--hsw-hd-pill-bw,1px) solid var(--hsw-hd-pill-border,#e6ebf2);border-radius:999px}'
+                    . '.hsw-cp__body,.hsw-cp__panels{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--hsw-cp-gap,24px)}'
+                    . '.hsw-cp__col{min-width:0;display:flex;flex-direction:column;gap:var(--hsw-cp-gap,24px)}'
+                    . '.hsw-ag__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px 0}'
+                    . '</style>' . "\n";
         }
 
         /**
