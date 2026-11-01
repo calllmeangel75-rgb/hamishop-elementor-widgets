@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.185
+Stable tag: 1.11.186
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.186 =
+* **شش مورد P1 بسته شد و سیاست اعتبار شارژ قابل انتخاب شد.**
+  - **سیاست اعتبار شارژ (هر سایت):** متای `_hsw_wallet_topup_amount` هنگام ساخت سفارش ثبت می‌شود و مبلغ اعتبار از تابع خالص `HSW_Wallet_Topup::credit_amount()` می‌آید. دو انتخاب در تنظیمات کیف پول: `cap` (پیش‌فرض: بیشتر از مبلغ دریافتی اعتبار نده) و `exact` (دقیقاً مبلغ انتخابی مشتری)؛ فیلتر `hsw_wallet_topup_policy`. کارمزد درگاه دیگر اعتبار رایگان تولید نمی‌کند و با `paid = 0` هیچ اعتباری ثبت نمی‌شود.
+  - **نشت تراکنش:** بدنهٔ `apply()` در `try/finally` با بستن همهٔ فریم‌های بازِ همان فراخوان؛ یک exception دیگر عمق را باز نمی‌گذارد. `release_open_transaction()` روی `shutdown` هم هر فریم باز دیگری را می‌بندد.
+  - **InnoDB:** `CREATE TABLE`ها صریحاً `ENGINE=InnoDB` و پس از نصب بررسی `information_schema`؛ جدول MyISAM با اعلان قرمز و `ALTER TABLE … ENGINE=InnoDB;` قابل کپی گزارش می‌شود.
+  - **احراز هویت:** تغییر 2FA فعال حالا رمز عبور می‌خواهد (۵ تلاش / ۱۵ دقیقه)؛ قبلاً یک سشن باز کافی بود تا عامل دوم به کانال یا شمارهٔ مهاجم منتقل شود.
+  - **درگاه:** کیف پول روی سفارش شارژ دیگر پیشنهاد نمی‌شود (پرداخت شارژ با کیف پول دور باطل بود).
+  - **REST:** `topup` / `pay` / `convert` با شمارندۀ اتمیک per-user محدود شدند و ۴۲۹ با پیام فارسی می‌دهند.
+  - **امتیاز به کیف پول:** سوئیچ «تبدیل امتیاز به اعتبار» در تنظیمات کیف پول (پیش‌فرض روشن، فقط `no` صریح خاموش می‌کند) + فیلتر `hsw_wallet_points_convert`؛ با خاموشی فرم تبدیل رندر نمی‌شود و `convert_points()` قبل از هر کوئری رد می‌کند.
+  - تست: `tests/qa/prelive-p1.php` ۱۲ سنجه (۱۲/۱۲ قرمز روی ۱.۱۱.۱۸۵ → ۱۲/۱۲ سبز)؛ روی دیتابیس واقعی `remediation` ۵۵/۰ و `sql-compat` ۱۲/۰.
 
 = 1.11.185 =
 * **رفع باگ خود HSW_Optimizer — با لایت‌اسپید کار نمی‌کرد و نوتیس PHP می‌داد.**
