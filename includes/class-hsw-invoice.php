@@ -269,6 +269,15 @@ class HSW_Invoice {
 		if ( '' !== trim( (string) ( $brand['store_phone'] ?? '' ) ) ) {
 			$html .= '<div><dt>' . esc_html__( 'تلفن', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( HSW_Helpers::fa_num( (string) $brand['store_phone'] ) ) . '</dd></div>';
 		}
+		/*
+		 * The branding screen calls this «ایمیل فروشگاه — برای پرسش‌های حسابداری
+		 * خریداران», but only the in-panel invoice printed it; the printable sheet
+		 * the customer actually keeps had no address to ask a question at. Printed
+		 * raw (no fa_num) because a mail address is latin.
+		 */
+		if ( '' !== trim( (string) ( $brand['store_email'] ?? '' ) ) ) {
+			$html .= '<div><dt>' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( (string) $brand['store_email'] ) . '</dd></div>';
+		}
 		$html .= '</dl></div>';
 
 		/* recipient */

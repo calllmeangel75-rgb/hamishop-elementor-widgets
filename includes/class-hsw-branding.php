@@ -63,7 +63,17 @@ class HSW_Branding {
 	public function filter_from_name( $name ) {
 		$b     = self::get();
 		$value = trim( (string) $b['from_name'] );
-		return '' !== $value ? $value : $name;
+
+		if ( '' !== $value ) {
+			return $value;
+		}
+
+		/*
+		 * The field's own help text promises «خالی بگذارید تا نام برند بالا
+		 * استفاده شود» — so an empty box means the brand, not WordPress. Passing
+		 * `$name` through sent every order mail as "WordPress".
+		 */
+		return self::name();
 	}
 
 	/* ---------------------------------------------------------------------
