@@ -1,6 +1,6 @@
 # نقشهٔ فنی HamiShop Elementor Widgets
 
-> تولید شده از خود کد (v1.11.160). هر عدد از فایل واقعی خوانده شده است.
+> تولید شده از خود کد (v1.11.188). هر عدد از فایل واقعی خوانده شده است.
 > برای فهرست کامل ویجت‌ها و مکانیزم‌ها به `WIDGETS-REFERENCE.md` مراجعه کنید.
 
 ## ۱) لایه‌ها
@@ -22,13 +22,13 @@ hamishop-elementor-widgets.php
 
 | خانواده | کلاس پایه | CSS | حجم (min) |
 |---|---|---|---|
-| hsw-header | HSW_Header_Base | assets/css/hsw-header.css | 31.8 KB |
-| hsw-product | HSW_Product_Base | assets/css/hsw-product.css | 56.6 KB |
-| hsw-cart | HSW_Cart_Base | assets/css/hsw-cart.css | 29.7 KB |
-| hsw-checkout | HSW_Checkout_Base | assets/css/hsw-checkout.css | 64.1 KB |
+| hsw-header | HSW_Header_Base | assets/css/hsw-header.css | 53.6 KB |
+| hsw-product | HSW_Product_Base | assets/css/hsw-product.css | 59.4 KB |
+| hsw-cart | HSW_Cart_Base | assets/css/hsw-cart.css | 29.9 KB |
+| hsw-checkout | HSW_Checkout_Base | assets/css/hsw-checkout.css | 64.4 KB |
 | hsw-complete | HSW_Complete_Base | assets/css/hsw-complete.css | 10.2 KB |
-| hsw-archive | HSW_Archive_Base | assets/css/hsw-archive.css | 40.3 KB |
-| hsw-blog | HSW_Blog_Base | assets/css/hsw-blog.css | 12.3 KB |
+| hsw-archive | HSW_Archive_Base | assets/css/hsw-archive.css | 41.3 KB |
+| hsw-blog | HSW_Blog_Base | assets/css/hsw-blog.css | 13.6 KB |
 | hsw-post | HSW_Post_Base | assets/css/hsw-post.css | 20.6 KB |
 | hsw-account | HSW_Account | assets/css/hsw-account.css | 100.7 KB |
 | hsw-loop | HSW_Widget_Base(override) | assets/css/hsw-loop.css | 21.1 KB |
