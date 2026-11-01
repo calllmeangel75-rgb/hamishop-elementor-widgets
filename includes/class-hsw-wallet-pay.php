@@ -306,6 +306,60 @@ class HSW_Wallet_Topup {
 	 */
 	const META_AMOUNT = '_hsw_wallet_topup_amount';
 
+	/**
+	 * How much wallet credit a paid top-up order earns.
+	 *
+	 * A pure function on purpose: the money rule can be tested without a
+	 * database, and the shop's policy is visible in one place instead of buried
+	 * in a hook callback.
+	 *
+	 * @param float  $intended The amount the customer chose (order meta).
+	 * @param float  $paid     What the order total came to.
+	 * @param string $policy   'cap' = never more than received, 'exact' = the chosen amount.
+	 * @return float
+	 */
+	public static function credit_amount( $intended, $paid, $policy = 'cap' ) {
+		$intended = round( (float) $intended, 2 );
+		$paid     = round( (float) $paid, 2 );
+
+		if ( $paid <= 0 ) {
+			/* Nothing was received: a credit here would be free money. */
+			return 0.0;
+		}
+
+		if ( $intended <= 0 ) {
+			/* Orders created before the amount meta existed fall back to the total. */
+			return $paid;
+		}
+
+		if ( 'exact' === $policy ) {
+			return $intended;
+		}
+
+		return min( $intended, $paid );
+	}
+
+	/**
+	 * The shop's crediting policy: 'cap' (default) or 'exact'.
+	 *
+	 * Chosen per site in the wallet settings, overridable in code with the
+	 * `hsw_wallet_topup_policy` filter.
+	 *
+	 * @return string
+	 */
+	public static function policy() {
+		$policy = 'cap';
+
+		if ( class_exists( 'HSW_Account' ) && method_exists( 'HSW_Account', 'instance' ) ) {
+			$saved = (string) HSW_Account::instance()->setting( 'wallet.topup_policy', 'cap' );
+			if ( 'exact' === $saved ) {
+				$policy = 'exact';
+			}
+		}
+
+		return (string) apply_filters( 'hsw_wallet_topup_policy', $policy );
+	}
+
 	public function __construct() {
 		add_action( 'woocommerce_payment_complete', array( $this, 'settle' ) );
 		add_action( 'woocommerce_order_status_processing', array( $this, 'settle' ) );
@@ -491,16 +545,10 @@ class HSW_Wallet_Topup {
 		$paid = (float) $order->get_total();
 
 		/*
-		 * What was bought, capped by what was actually paid. Orders made before
-		 * this meta existed fall back to the order total, so nothing that is
-		 * already in flight stops crediting.
+		 * What the customer chose, under the shop's crediting policy ('cap' by
+		 * default: never credit more than the money that actually arrived).
 		 */
-		$want = (float) $order->get_meta( self::META_AMOUNT );
-		if ( $want > 0 ) {
-			$amount = min( $want, $paid );
-		} else {
-			$amount = $paid;
-		}
+		$amount = self::credit_amount( (float) $order->get_meta( self::META_AMOUNT ), $paid, self::policy() );
 
 		if ( $amount <= 0 ) {
 			return;

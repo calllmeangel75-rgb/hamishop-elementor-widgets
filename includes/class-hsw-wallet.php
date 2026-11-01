@@ -218,6 +218,27 @@ class HSW_Wallet {
 	}
 
 	/**
+	 * May customers convert loyalty points into wallet credit on this shop?
+	 *
+	 * @return bool
+	 */
+	public static function points_convert_allowed() {
+		if ( self::disabled() ) {
+			return false;
+		}
+
+		$on = true;
+		if ( class_exists( 'HSW_Account' ) && method_exists( 'HSW_Account', 'instance' ) ) {
+			/* Only an explicit 'no' disables it, so a site that never saw this
+			 * setting (or a stub that returns nothing) keeps converting. */
+			$raw = HSW_Account::instance()->setting( 'wallet.points_convert', 'yes' );
+			$on  = 'no' !== (string) $raw;
+		}
+
+		return (bool) apply_filters( 'hsw_wallet_points_convert', $on );
+	}
+
+	/**
 	 * Rate-limit a customer wallet call (P1-6).
 	 *
 	 * These three routes create real records — a pending request, an order, a
@@ -1634,8 +1655,8 @@ class HSW_Wallet {
 		 * counter joins the outer transaction instead of committing early.
 		 * A death anywhere before COMMIT rolls the pair back together.
 		 */
-		self::transaction_begin();
 		$tx_was = self::$tx_depth;
+		self::transaction_begin();
 
 		try {
 			$balance = self::apply_balance( $user_id, $delta, $min );
@@ -1693,11 +1714,11 @@ class HSW_Wallet {
 			 * P1-2: an exception (or a fatal turning into one) escaping between BEGIN
 			 * and COMMIT used to leave the depth counter raised, so every later wallet
 			 * write in the same request joined a broken frame and never committed.
-			 * Our own frame is closed here if the body never reached its COMMIT; a
-			 * committed body leaves the depth back where it found it, so an outer
-			 * transaction is never rolled back by mistake.
+			 * Close every frame this call opened — including the inner ones opened by
+			 * apply_balance() — but never the caller's frame: a committed body leaves
+			 * the depth exactly where it found it, so an outer transaction stays open.
 			 */
-			if ( self::$tx_depth > $tx_was ) {
+			while ( self::$tx_depth > $tx_was ) {
 				self::transaction_rollback();
 			}
 		}
@@ -1940,6 +1961,14 @@ class HSW_Wallet {
 
 		if ( ! $user_id || $points < 1 ) {
 			return new WP_Error( 'hsw_points_invalid', __( 'تعداد امتیاز را وارد کنید.', 'hamishop-elementor-widgets' ) );
+		}
+
+		/*
+		 * Per-shop switch (HamiShop → حساب کاربری → کیف پول): some shops run points
+		 * as a status badge only and do not want them spent as money.
+		 */
+		if ( ! self::points_convert_allowed() ) {
+			return new WP_Error( 'hsw_points_convert_off', __( 'تبدیل امتیاز به اعتبار کیف پول در این فروشگاه فعال نیست.', 'hamishop-elementor-widgets' ) );
 		}
 
 		$available = self::points_available( $user_id );

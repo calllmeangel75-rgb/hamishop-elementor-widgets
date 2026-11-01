@@ -548,6 +548,22 @@ final class HSW_Account_Admin {
 					</select>
 				</p>
 				<p>
+					<label for="hsw-wallet-topup-policy"><strong>سیاست اعتبار شارژ</strong></label><br>
+					<select id="hsw-wallet-topup-policy" name="<?php echo esc_attr( $this->name( 'wallet', 'topup_policy' ) ); ?>">
+						<option value="cap" <?php selected( $this->val( $s, 'wallet', 'topup_policy' ), 'cap' ); ?>>بیشتر از مبلغ دریافتی اعتبار نده (پیش‌فرض)</option>
+						<option value="exact" <?php selected( $this->val( $s, 'wallet', 'topup_policy' ), 'exact' ); ?>>دقیقاً همان مبلغی که مشتری انتخاب کرده اعتبار شود</option>
+					</select>
+					<br><small>اگر کوپن یا کارمزد درگاه مبلغ نهایی را عوض کند، این انتخاب تعیین می‌کند موجودی کیف پول بر اساس مبلغ انتخابی مشتری محاسبه شود یا مبلغی که واقعاً به حساب شما آمده. در حالت «بیشتر نده»، کارمزد درگاه هرگز به‌صورت اعتبار رایگان برنمی‌گردد.</small>
+				</p>
+				<p>
+					<label>
+						<input type="hidden" name="<?php echo esc_attr( $this->name( 'wallet', 'points_convert' ) ); ?>" value="no" />
+						<input type="checkbox" name="<?php echo esc_attr( $this->name( 'wallet', 'points_convert' ) ); ?>" value="yes" <?php checked( $this->val( $s, 'wallet', 'points_convert' ), 'yes' ); ?> />
+						<strong>تبدیل امتیاز به اعتبار کیف پول</strong>
+					</label>
+					<br><small>نرخ تبدیل از «مبلغ شارژ به‌ازای هر امتیاز» گرفته می‌شود؛ با خاموش‌کردن، دکمهٔ تبدیل در پنل حساب و مسیر REST آن غیرفعال می‌شود.</small>
+				</p>
+				<p>
 					<label for="hsw-wallet-topup-gateway"><strong>درگاه شارژ</strong></label><br>
 					<select id="hsw-wallet-topup-gateway" name="<?php echo esc_attr( $this->name( 'wallet', 'topup_gateway' ) ); ?>">
 						<option value="">— خودکار (اولین درگاه فعال) —</option>

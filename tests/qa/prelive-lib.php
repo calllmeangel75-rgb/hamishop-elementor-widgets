@@ -138,6 +138,8 @@ class HSW_Prelive_WPDB {
 	public $queries = array();
 	/** Emulates MySQL's connection-local LAST_INSERT_ID(expr). */
 	public $last_insert = 0;
+	/** Optional test hook: called with every SQL; may throw or return a value. */
+	public $on_query = null;
 
 	public function get_charset_collate() {
 		return 'DEFAULT CHARACTER SET utf8mb4';
@@ -178,6 +180,13 @@ class HSW_Prelive_WPDB {
 	public function query( $sql ) {
 		$this->queries[]   = $sql;
 		$this->last_insert = 0;
+
+		if ( is_callable( $this->on_query ) ) {
+			$forced = call_user_func( $this->on_query, $sql );
+			if ( null !== $forced ) {
+				return $forced;
+			}
+		}
 
 		/* INSERT … ON DUPLICATE KEY UPDATE hits = LAST_INSERT_ID(IF(expires > $now, hits + 1, 1)), … */
 		if ( preg_match( '/INSERT INTO\s+\S*hsw_throttle\s*\(bucket, hits, expires\)\s*VALUES\s*\(\s*\'((?:[^\'\\\\]|\\\\.)*)\',\s*[^,]+,\s*(\d+)\s*\).*?hits\s*=\s*(?:LAST_INSERT_ID\()?IF\(expires > (\d+),\s*hits \+ 1,\s*1\).*?expires\s*=\s*IF\(expires > (\d+),\s*expires,\s*(\d+)\)/is', $sql, $m ) ) {

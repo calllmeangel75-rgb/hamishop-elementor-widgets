@@ -190,6 +190,14 @@ final class HSW_Account {
 				'sms_secret' => '',
 				'topup_mode'    => 'gateway',
 				'topup_gateway' => '',
+				/*
+				 * How much wallet credit a paid top-up earns: 'cap' never credits more
+				 * than the money that arrived (safe default), 'exact' credits the
+				 * amount the customer chose even if a coupon lowered the total.
+				 */
+				'topup_policy'    => 'cap',
+				/* Whether customers may turn loyalty points into wallet credit. */
+				'points_convert'  => 'yes',
 				'card_number'   => '',
 				'card_owner'    => '',
 				'card_bank'     => '',
@@ -446,6 +454,8 @@ final class HSW_Account {
 			$out['wallet']['sms_url']     = esc_url_raw( (string) ( $w['sms_url'] ?? $out['wallet']['sms_url'] ) );
 			$out['wallet']['sms_secret']  = sanitize_text_field( (string) ( $w['sms_secret'] ?? $out['wallet']['sms_secret'] ) );
 			$out['wallet']['topup_mode']    = ( 'card' === ( $w['topup_mode'] ?? '' ) ) ? 'card' : 'gateway';
+			$out['wallet']['topup_policy']  = ( 'exact' === ( $w['topup_policy'] ?? '' ) ) ? 'exact' : 'cap';
+			$out['wallet']['points_convert'] = $this->yes_no( $w['points_convert'] ?? $out['wallet']['points_convert'] );
 			$out['wallet']['topup_gateway'] = sanitize_text_field( (string) ( $w['topup_gateway'] ?? '' ) );
 			$out['wallet']['card_number']   = sanitize_text_field( (string) ( $w['card_number'] ?? '' ) );
 			$out['wallet']['card_owner']    = sanitize_text_field( (string) ( $w['card_owner'] ?? '' ) );
@@ -2762,7 +2772,7 @@ final class HSW_Account {
 				)
 			) . '</p>';
 
-			if ( $available > 0 ) {
+			if ( $available > 0 && ( ! class_exists( 'HSW_Wallet' ) || HSW_Wallet::points_convert_allowed() ) ) {
 				$html .= '<form class="hsw-ac__wallet-form" data-hsw-wallet-convert>';
 				$html .= '<label class="hsw-ac__wallet-label" for="hsw-wallet-points">' . esc_html__( 'تعداد امتیاز', 'hamishop-elementor-widgets' ) . '</label>';
 				$html .= '<input class="hsw-ac__wallet-input" id="hsw-wallet-points" name="points" type="text" inputmode="numeric" value="' . esc_attr( HSW_Helpers::fa_num( $available ) ) . '" dir="ltr">';
