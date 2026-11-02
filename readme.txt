@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.207
+Stable tag: 1.11.208
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.208 =
+* Fix: the wallet notices asked a person to run `ALTER TABLE ... ENGINE=InnoDB` and to press the create-tables button even when the tables existed. The two flags were only cleared by a later install run, so they outlived the problem. The notice now re-checks the real state first and removes itself.
+* New: tables that exist as MyISAM are converted to InnoDB by the plugin itself (authenticated admin path only: the create/repair button, or the admin notice at most once an hour). The SQL hint is shown only if the server refuses the ALTER.
 
 = 1.11.207 =
 * Fix: uploading a new release from the dashboard installed it NEXT TO the old copy (two folders, the duplicate-copy notice, the old code still running) whenever the zip's top-level folder was not named exactly like the running one - e.g. GitHub's `Source code` archive `hamishop-elementor-widgets-1.11.x`. `upgrader_source_selection` now renames a HamiShop package to the folder this copy runs from, so `Replace current with uploaded` overwrites in place.

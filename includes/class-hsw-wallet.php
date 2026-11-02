@@ -76,23 +76,57 @@ class HSW_Wallet {
 
 		$not_innodb = (string) get_option( 'hsw_wallet_not_innodb', '' );
 
+		/*
+		 * Both flags are written at one moment and only cleared by the next
+		 * install run, so they outlived the problem (tables present, engine
+		 * fixed in phpMyAdmin) and kept asking for work already done. Re-check
+		 * the facts before shouting; this runs only while a flag is set.
+		 */
+		if ( '' !== $not_innodb ) {
+			$still = self::non_innodb_tables();
+			if ( $still && ! get_transient( 'hsw_wallet_innodb_try' ) ) {
+				global $wpdb;
+				set_transient( 'hsw_wallet_innodb_try', 1, HOUR_IN_SECONDS );
+				foreach ( $still as $t ) {
+					$wpdb->query( 'ALTER TABLE `' . esc_sql( $t ) . '` ENGINE=InnoDB' ); // phpcs:ignore WordPress.DB
+				}
+				$still = self::non_innodb_tables();
+			}
+			if ( ! $still ) {
+				delete_option( 'hsw_wallet_not_innodb' );
+				$not_innodb = '';
+			} else {
+				$not_innodb = implode( ',', $still );
+			}
+		}
+		if ( ( $missing || $failed ) && self::tables_exist() ) {
+			delete_option( 'hsw_wallet_missing_tables' );
+			delete_option( 'hsw_wallet_install_failed' );
+			$failed  = false;
+			$missing = false;
+		}
+
 		if ( ! $failed && ! $missing && '' === $not_innodb ) {
 			return;
 		}
 
-		$text = $failed
-			? __( 'جدول‌های کیف پول ساخته نشدند (احتمالاً نسخه/حالت MySQL قدیمی است). هر بار تلاش دوباره خودکار انجام می‌شود؛ خطای دقیق در error_log سرور ثبت شده است.', 'hamishop-elementor-widgets' )
-			: sprintf(
-				/* translators: %s: link to the wallet screen. */
-				__( 'جدول‌های کیف پول ساخته نشده‌اند، پس شارژ کیف پول و پرداخت با کیف پول کار نمی‌کند. از %s دکمهٔ «ساخت / ترمیم جدول‌های کیف پول» را بزنید (یا با WP-CLI: wp hsw wallet migrate).', 'hamishop-elementor-widgets' ),
-				'<a href="' . esc_url( admin_url( 'admin.php?page=hamishop-wallet' ) ) . '">' . esc_html__( 'صفحهٔ کیف پول', 'hamishop-elementor-widgets' ) . '</a>'
-			);
+		/* The InnoDB notice needs a different text than the missing-table one. */
+		$text = '';
+		if ( $failed || $missing ) {
+			$text = $failed
+				? __( 'جدول‌های کیف پول ساخته نشدند (احتمالاً نسخه/حالت MySQL قدیمی است). هر بار تلاش دوباره خودکار انجام می‌شود؛ خطای دقیق در error_log سرور ثبت شده است.', 'hamishop-elementor-widgets' )
+				: sprintf(
+					/* translators: %s: link to the wallet screen. */
+					__( 'جدول‌های کیف پول ساخته نشده‌اند، پس شارژ کیف پول و پرداخت با کیف پول کار نمی‌کند. از %s دکمهٔ «ساخت / ترمیم جدول‌های کیف پول» را بزنید (یا با WP-CLI: wp hsw wallet migrate).', 'hamishop-elementor-widgets' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=hamishop-wallet' ) ) . '">' . esc_html__( 'صفحهٔ کیف پول', 'hamishop-elementor-widgets' ) . '</a>'
+				);
 
-		printf(
-			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
-			esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
-			wp_kses_post( $text )
-		);
+			printf(
+				'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
+				esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
+				wp_kses_post( $text )
+			);
+		}
 
 		if ( '' !== $not_innodb ) {
 			/*
@@ -106,6 +140,23 @@ class HSW_Wallet {
 				esc_html( 'ALTER TABLE ' . str_replace( ',', ', ', $not_innodb ) . ' ENGINE=InnoDB;' )
 			);
 		}
+	}
+
+	/**
+	 * Do all three wallet tables exist right now?
+	 *
+	 * @return bool
+	 */
+	public static function tables_exist() {
+		global $wpdb;
+
+		foreach ( array( self::table(), self::balance_table(), self::backup_table() ) as $t ) {
+			if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $t ) ) !== $t ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -563,6 +614,19 @@ class HSW_Wallet {
 		 * tables that already existed as MyISAM (dbDelta does not convert engines).
 		 */
 		$wrong_engine = self::non_innodb_tables();
+
+		/*
+		 * Do not ask a human to run SQL we can run ourselves: this code only
+		 * executes for an authenticated shop manager (button / wp-admin / CLI)
+		 * and the ledger is a few rows, so converting costs nothing. The
+		 * notice stays only if the server refuses (no ALTER privilege).
+		 */
+		foreach ( $wrong_engine as $t ) {
+			$wpdb->query( 'ALTER TABLE `' . esc_sql( $t ) . '` ENGINE=InnoDB' ); // phpcs:ignore WordPress.DB
+		}
+		if ( $wrong_engine ) {
+			$wrong_engine = self::non_innodb_tables();
+		}
 		if ( $wrong_engine ) {
 			update_option( 'hsw_wallet_not_innodb', implode( ',', $wrong_engine ), false );
 			error_log( 'HamiShop wallet: table(s) not InnoDB — ' . implode( ', ', $wrong_engine ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
