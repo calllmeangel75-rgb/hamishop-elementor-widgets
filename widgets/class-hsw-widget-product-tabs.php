@@ -165,6 +165,34 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                         )
                 );
 
+                $this->add_control(
+                        'tabs_style',
+                        array(
+                                'label'       => __( 'سبک تب‌ها', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'tabs',
+                                'separator'   => 'before',
+                                'options'     => array(
+                                        'tabs'  => __( 'تب‌بندی کلاسیک (یک پنل در هر لحظه)', 'hamishop-elementor-widgets' ),
+                                        'stack' => __( 'بخش‌های زیرهم + نوار چسبان زیر هدر', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'در سبک دوم همهٔ بخش‌ها زیر هم می‌آیند و نوار عنوان‌ها هنگام اسکرول زیر هدر اصلی می‌چسبد.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'stk_gap',
+                        array(
+                                'label'      => __( 'فاصلهٔ نوار چسبان از هدر (px)', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px' ),
+                                'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+                                'default'    => array( 'size' => 8, 'unit' => 'px' ),
+                                'condition'  => array( 'tabs_style' => 'stack' ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-ptabs' => '--hsw-stk-gap: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
                 $this->end_controls_section();
 
                 /* ------------------------- STYLE ------------------------- */
@@ -300,8 +328,10 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                  * read the same tabs, and on a narrow screen the strip scrolls
                  * sideways with a thin chevron hinting there is more.
                  */
+                $stack = ( 'stack' === ( $s['tabs_style'] ?? 'tabs' ) );
                 ?>
-                <section class="<?php echo esc_attr( $this->root_class( 'ptabs' ) ); ?>" data-hsw-ptabs>
+                <section class="<?php echo esc_attr( $this->root_class( 'ptabs', $stack ? 'hsw-ptabs--stack' : '' ) ); ?>" data-hsw-ptabs<?php echo $stack ? ' data-hsw-ptabs-stack' : ''; ?>>
+                        <div class="hsw-ptabs__navslot">
                         <div class="hsw-ptabs__navwrap">
                         <div class="hsw-ptabs__nav" data-hsw-tabs-scroll>
                                 <?php if ( $show_review ) : ?>
@@ -333,6 +363,28 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 6l-6 6 6 6"></path><path d="M19 6l-6 6 6 6" opacity=".4"></path></svg>
                         </button>
                         </div>
+                        </div>
+
+                        <?php if ( $show_review ) : ?>
+                                <div class="hsw-ptabs__panel<?php echo 'review' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="review">
+                                        <?php if ( $stack ) : ?>
+                                                <h2 class="hsw-ptabs__h2"><?php echo esc_html( $lbl_review ); ?></h2>
+                                        <?php endif; ?>
+                                        <div class="hsw-ptabs__review">
+                                                <?php if ( $demo ) : ?>
+                                                        <p><?php echo esc_html( 'پرچمدار جدید سامسونگ نقطه عطف یکپارچه‌سازی سخت‌افزار ممتاز با الگوریتم‌های هوش مصنوعی اختصاصی است. بدنه تیتانیومی مستحکم علاوه بر جلوه مدرن و فوق‌العاده مینیمال، مقاومت دستگاه را در برابر صدمات روزمره تضمین می‌کند.' ); ?></p>
+                                                        <p><?php echo esc_html( 'نمایشگر مسطح جدید بازتاب نور محیط را به حداقل ممکن رسانده است، و استفاده از قلم S-Pen در کنار قابلیت‌های پردازش بلادرنگ متن، ابزاری ایده‌آل را برای حرفه‌ای‌ها خلق کرده است.' ); ?></p>
+                                                <?php else : ?>
+                                                        <?php $desc = (string) $product->get_description(); ?>
+                                                        <?php if ( '' === trim( $desc ) ) : ?>
+                                                                <p><?php esc_html_e( 'توضیحی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
+                                                        <?php else : ?>
+                                                                <?php echo HSW_Helpers::demote_content_h1( apply_filters( 'the_content', $desc ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- standard WP content pipeline. ?>
+                                                        <?php endif; ?>
+                                                <?php endif; ?>
+                                        </div>
+                                </div>
+                        <?php endif; ?>
 
                         <?php if ( $show_warranty ) : ?>
                                 <div class="hsw-ptabs__panel<?php echo 'warranty' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="warranty">
@@ -373,24 +425,6 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                                                         <?php endforeach; ?>
                                                 </div>
                                         <?php endif; ?>
-                                </div>
-                        <?php endif; ?>
-
-                        <?php if ( $show_review ) : ?>
-                                <div class="hsw-ptabs__panel<?php echo 'review' === $first_tab ? ' is-active' : ''; ?>" data-hsw-panel="review">
-                                        <div class="hsw-ptabs__review">
-                                                <?php if ( $demo ) : ?>
-                                                        <p><?php echo esc_html( 'پرچمدار جدید سامسونگ نقطه عطف یکپارچه‌سازی سخت‌افزار ممتاز با الگوریتم‌های هوش مصنوعی اختصاصی است. بدنه تیتانیومی مستحکم علاوه بر جلوه مدرن و فوق‌العاده مینیمال، مقاومت دستگاه را در برابر صدمات روزمره تضمین می‌کند.' ); ?></p>
-                                                        <p><?php echo esc_html( 'نمایشگر مسطح جدید بازتاب نور محیط را به حداقل ممکن رسانده است، و استفاده از قلم S-Pen در کنار قابلیت‌های پردازش بلادرنگ متن، ابزاری ایده‌آل را برای حرفه‌ای‌ها خلق کرده است.' ); ?></p>
-                                                <?php else : ?>
-                                                        <?php $desc = (string) $product->get_description(); ?>
-                                                        <?php if ( '' === trim( $desc ) ) : ?>
-                                                                <p><?php esc_html_e( 'توضیحی ثبت نشده است.', 'hamishop-elementor-widgets' ); ?></p>
-                                                        <?php else : ?>
-                                                                <?php echo HSW_Helpers::demote_content_h1( apply_filters( 'the_content', $desc ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- standard WP content pipeline. ?>
-                                                        <?php endif; ?>
-                                                <?php endif; ?>
-                                        </div>
                                 </div>
                         <?php endif; ?>
 

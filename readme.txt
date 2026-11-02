@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.208
+Stable tag: 1.11.209
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.209 =
+* New: استایل دوم برای «۸. تب‌ها (دسکتاپ و موبایل)» در ویجت جامع صفحه کامل محصول و ویجت مستقل تب‌های محصول (`بخش‌های زیرهم + نوار چسبان زیر هدر`).
+* در این حالت، بخش‌ها به ترتیب (۱. بررسی تخصصی کالا → ۲. گارانتی و خدمات → ۳. مشخصات فنی → ۴. دیدگاه‌ها و نظرات خریداران) زیر هم قرار می‌گیرند، نوار تب‌ها (`data-hsw-tabs-scroll`) هنگام اسکرول با فاصلهٔ قابل تنظیم زیر هدر اصلی چسبان می‌ماند و با رسیدن به هر سکشن، خط ظریف زیر تب مربوطه فعال می‌شود.
 
 = 1.11.208 =
 * Fix: the wallet notices asked a person to run `ALTER TABLE ... ENGINE=InnoDB` and to press the create-tables button even when the tables existed. The two flags were only cleared by a later install run, so they outlived the problem. The notice now re-checks the real state first and removes itself.

@@ -49,12 +49,12 @@ trait HSW_Product_Page_Style_Parts_4 {
 		$this->pps_heading( 'tb_active_h', __( 'تب فعال', 'hamishop-elementor-widgets' ) );
 		$this->pps_color( 'tb_active_c', __( 'رنگ متن تب فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__btn.is-active', 'color' );
 		$this->pps_color( 'tb_active_bg', __( 'پس‌زمینه تب فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__btn.is-active', 'background-color' );
-		$this->pps_color( 'tb_active_bc', __( 'رنگ خط زیر تب فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__btn.is-active', 'border-bottom-color' );
+		$this->pps_var_color( 'tb_active_bc', __( 'رنگ خط زیر تب فعال', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__btn.is-active', '--hsw-tab-abc' );
 		$this->pps_slider(
 			'tb_active_bw',
 			__( 'ضخامت خط زیر تب فعال', 'hamishop-elementor-widgets' ),
-			'{{WRAPPER}} .hsw-ptabs__btn.is-active',
-			'border-bottom-width: {{SIZE}}{{UNIT}};',
+			array( '{{WRAPPER}} .hsw-ptabs__btn.is-active', '{{WRAPPER}} .hsw-ptabs--stack .hsw-ptabs__btn::after' ),
+			'border-bottom-width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};',
 			array( 'range' => array( 'px' => array( 'min' => 0, 'max' => 8 ) ) )
 		);
 

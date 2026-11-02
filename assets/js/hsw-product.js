@@ -249,6 +249,10 @@
 			var id = tabBtn.getAttribute('data-hsw-tab');
 			tabsRoot.querySelectorAll('.hsw-ptabs__btn').forEach(function (b) { b.classList.toggle('is-active', b === tabBtn); });
 			tabsRoot.querySelectorAll('.hsw-ptabs__panel').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-hsw-panel') === id); });
+			if (tabsRoot.classList.contains('hsw-ptabs--stack') || tabsRoot.hasAttribute('data-hsw-ptabs-stack')) {
+				var targetPanel = tabsRoot.querySelector('.hsw-ptabs__panel[data-hsw-panel="' + id + '"]');
+				if (targetPanel) { scrollTo(targetPanel); }
+			}
 			return;
 		}
 
@@ -1186,6 +1190,139 @@
 
 		sync();
 		setTimeout(sync, 200);
+
+		if (root.classList.contains('hsw-ptabs--stack') || root.hasAttribute('data-hsw-ptabs-stack')) {
+			initStackTabs(root, nav, wrap, sync);
+		}
+	}
+
+	/*
+	 * Style 2 (stacked sections + sticky header bar):
+	 * - Detects the visible fixed/sticky main header (and WP admin bar) so the
+	 *   tab strip stays cleanly spaced below it (--hsw-stk-top + --hsw-stk-gap).
+	 * - Pins the tab strip while the user scrolls through the stacked panels and
+	 *   unpins once the last panel passes.
+	 * - Highlights the active tab button (with the subtle underline) as each
+	 *   section enters the reading zone.
+	 */
+	function initStackTabs(root, nav, wrap, syncStrip) {
+		if (!wrap || root.getAttribute('data-hsw-stack-ready') === '1') { return; }
+		root.setAttribute('data-hsw-stack-ready', '1');
+
+		var slot = root.querySelector('.hsw-ptabs__navslot') || wrap.parentElement;
+		var panels = Array.prototype.slice.call(root.querySelectorAll('.hsw-ptabs__panel[data-hsw-panel]'));
+		var buttons = Array.prototype.slice.call(root.querySelectorAll('.hsw-ptabs__btn[data-hsw-tab]'));
+		if (!panels.length || !buttons.length) { return; }
+
+		var activeId = '';
+		var ticking = false;
+
+		function headerBottom() {
+			var top = 0;
+			var adminBar = document.getElementById('wpadminbar');
+			if (adminBar) {
+				var ar = adminBar.getBoundingClientRect();
+				var apos = getComputedStyle(adminBar).position;
+				if ((apos === 'fixed' || apos === 'sticky') && ar.height > 0 && ar.bottom > top) {
+					top = ar.bottom;
+				}
+			}
+			var hds = document.querySelectorAll('.hsw-hd--sticky, header, .elementor-location-header');
+			for (var i = 0; i < hds.length; i++) {
+				var hd = hds[i];
+				if (!hd.offsetWidth || hd.classList.contains('is-hidden')) { continue; }
+				var cs = getComputedStyle(hd);
+				var pos = cs.position;
+				var target = hd;
+				if (pos !== 'fixed' && pos !== 'sticky') {
+					var fixedChild = hd.querySelector('.is-fixed, .elementor-sticky--active');
+					if (!fixedChild) { continue; }
+					target = fixedChild;
+				}
+				var r = target.getBoundingClientRect();
+				if (r.height > 0 && r.top <= top + 24 && r.bottom > top && r.bottom < window.innerHeight * 0.45) {
+					top = r.bottom;
+				}
+			}
+			return Math.max(0, Math.round(top));
+		}
+
+		function gapPx() {
+			var raw = getComputedStyle(root).getPropertyValue('--hsw-stk-gap') || '8px';
+			var n = parseFloat(raw);
+			return isNaN(n) ? 8 : Math.max(0, n);
+		}
+
+		function setActive(id) {
+			if (!id || id === activeId) { return; }
+			activeId = id;
+			var activeBtn = null;
+			buttons.forEach(function (b) {
+				var on = b.getAttribute('data-hsw-tab') === id;
+				b.classList.toggle('is-active', on);
+				if (on) { activeBtn = b; }
+			});
+			if (activeBtn && nav.scrollWidth > nav.clientWidth + 4) {
+				var navRect = nav.getBoundingClientRect();
+				var btnRect = activeBtn.getBoundingClientRect();
+				var delta = (btnRect.left + btnRect.width / 2) - (navRect.left + navRect.width / 2);
+				if (Math.abs(delta) > 12) {
+					nav.scrollBy({ left: delta, behavior: 'smooth' });
+					if (typeof syncStrip === 'function') { setTimeout(syncStrip, 340); }
+				}
+			}
+		}
+
+		function update() {
+			ticking = false;
+			if (!root.offsetWidth) { return; }
+
+			var hBottom = headerBottom();
+			var gap = gapPx();
+			var pinTop = hBottom + gap;
+			var slotRect = (slot || root).getBoundingClientRect();
+			var rootRect = root.getBoundingClientRect();
+			var navH = wrap.offsetHeight || 56;
+
+			root.style.setProperty('--hsw-stk-top', hBottom + 'px');
+			root.style.setProperty('--hsw-stk-navh', navH + 'px');
+
+			var shouldPin = slotRect.top <= pinTop && (rootRect.bottom - navH - 24) > pinTop;
+			if (shouldPin) {
+				if (slot) { slot.style.height = navH + 'px'; }
+				wrap.classList.add('is-pinned');
+				wrap.style.left = Math.round(rootRect.left) + 'px';
+				wrap.style.width = Math.round(rootRect.width) + 'px';
+			} else {
+				wrap.classList.remove('is-pinned');
+				wrap.style.left = '';
+				wrap.style.width = '';
+				if (slot) { slot.style.height = ''; }
+			}
+
+			/* Scrollspy: find the last panel whose top has crossed the reading line. */
+			var probeY = pinTop + navH + 28;
+			var chosen = panels[0].getAttribute('data-hsw-panel');
+			for (var i = 0; i < panels.length; i++) {
+				var pr = panels[i].getBoundingClientRect();
+				if (pr.top <= probeY) {
+					chosen = panels[i].getAttribute('data-hsw-panel');
+				}
+			}
+			setActive(chosen);
+		}
+
+		function requestUpdate() {
+			if (!ticking) {
+				ticking = true;
+				window.requestAnimationFrame(update);
+			}
+		}
+
+		window.addEventListener('scroll', requestUpdate, { passive: true });
+		window.addEventListener('resize', requestUpdate, { passive: true });
+		update();
+		setTimeout(update, 250);
 	}
 
 	/* ================= CAROUSEL ================= */
