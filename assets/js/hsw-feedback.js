@@ -460,7 +460,13 @@
 		var cfg = payload.labels || {};
 		var style = payload.style || window.hswFeedbackStyle || 'modal';
 
-		if ('toast' === style) {
+		/*
+		 * The settings screen calls this mode «نوار» and the PHP hands over
+		 * `bar`, while the module only knew `toast` — so picking «نوار تک‌خطی»
+		 * in the panel still opened the full cart modal. Both names mean the
+		 * same single line now.
+		 */
+		if ('toast' === style || 'bar' === style) {
 			lineNotice(payload, cfg);
 			return;
 		}
