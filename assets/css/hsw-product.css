@@ -965,7 +965,19 @@
 .hsw-ptabs__more:hover,
 .hsw-ptabs__more:focus-visible { color: var(--hsw-primary, #4d85ff); }
 .hsw-ptabs__more.is-off { opacity: 0; pointer-events: none; }
-.hsw-ptabs__more svg { display: block; }
+.hsw-ptabs__more svg {
+        display: block;
+        transform: translate3d(0, var(--hsw-more-y, 0px), 0);
+        animation: hswMorePulse 2.2s ease-in-out infinite;
+}
+.hsw-ptabs__more.is-off svg { animation: none; }
+@keyframes hswMorePulse {
+        0%, 100% { opacity: 1; transform: translate3d(0, var(--hsw-more-y, 0px), 0); }
+        50% { opacity: .38; transform: translate3d(-3px, var(--hsw-more-y, 0px), 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+        .hsw-ptabs__more svg { animation: none; }
+}
 
 /* Warranty tab list. */
 .hsw-ptabs__warranty {
@@ -991,8 +1003,8 @@
 @media (max-width: 767.98px) {
         .hsw-ptabs__nav { padding-inline: 12px; }
         .hsw-ptabs__more { width: 46px; }
-        /* The mobile «more tabs» chevron sits 10px higher on request. */
-        .hsw-ptabs__more svg { transform: translateY(-10px); }
+        /* The mobile «more tabs» chevron sits 13px higher (-10px + 3px higher). */
+        .hsw-ptabs__more svg { --hsw-more-y: -13px; }
 }
 .hsw-ptabs__btn {
         display: flex;

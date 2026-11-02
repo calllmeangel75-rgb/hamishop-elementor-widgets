@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.209
+Stable tag: 1.11.210
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.210 =
+* Fix: اسکرول دقیق به ابتدای هر بخش در استایل دوم تب‌های محصول (`scrollToStackPanel`) بدون تداخل با اسکرول افقی نوار تب‌ها (`scrollIntoView`).
+* UI: فلش راهنمای تب‌های بیشتر در موبایل ۳ پیکسل بالاتر قرار گرفت (`-13px`) و انیمیشن ملایم GPU-only (`opacity` + `translate3d`) بدون افت امتیاز Lighthouse به آن اضافه شد.
 
 = 1.11.209 =
 * New: استایل دوم برای «۸. تب‌ها (دسکتاپ و موبایل)» در ویجت جامع صفحه کامل محصول و ویجت مستقل تب‌های محصول (`بخش‌های زیرهم + نوار چسبان زیر هدر`).

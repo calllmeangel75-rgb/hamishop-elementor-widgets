@@ -235,7 +235,56 @@
 	}
 	function scrollTo(el) {
 		if (!el) { return; }
+		var stackRoot = el.closest && el.closest('.hsw-ptabs--stack, [data-hsw-ptabs-stack]');
+		if (stackRoot) {
+			scrollToStackPanel(stackRoot, el);
+			return;
+		}
 		if (el.scrollIntoView) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+	}
+
+	function stackHeaderBottom() {
+		var top = 0;
+		var adminBar = document.getElementById('wpadminbar');
+		if (adminBar) {
+			var ar = adminBar.getBoundingClientRect();
+			var apos = getComputedStyle(adminBar).position;
+			if ((apos === 'fixed' || apos === 'sticky') && ar.height > 0 && ar.bottom > top) {
+				top = ar.bottom;
+			}
+		}
+		var hds = document.querySelectorAll('.hsw-hd--sticky, header, .elementor-location-header');
+		for (var i = 0; i < hds.length; i++) {
+			var hd = hds[i];
+			if (!hd.offsetWidth || hd.classList.contains('is-hidden')) { continue; }
+			var cs = getComputedStyle(hd);
+			var pos = cs.position;
+			var target = hd;
+			if (pos !== 'fixed' && pos !== 'sticky') {
+				var fixedChild = hd.querySelector('.is-fixed, .elementor-sticky--active');
+				if (!fixedChild) { continue; }
+				target = fixedChild;
+			}
+			var r = target.getBoundingClientRect();
+			if (r.height > 0 && r.top <= top + 24 && r.bottom > top && r.bottom < window.innerHeight * 0.45) {
+				top = r.bottom;
+			}
+		}
+		return Math.max(0, Math.round(top));
+	}
+
+	function scrollToStackPanel(stackRoot, targetEl) {
+		var wrap = stackRoot.querySelector('.hsw-ptabs__navwrap');
+		var navH = (wrap && wrap.offsetHeight) ? wrap.offsetHeight : 56;
+		var rawGap = getComputedStyle(stackRoot).getPropertyValue('--hsw-stk-gap') || '8px';
+		var gap = parseFloat(rawGap);
+		if (isNaN(gap)) { gap = 8; }
+		var hBottom = stackHeaderBottom();
+		var offset = hBottom + Math.max(0, gap) + navH + 12;
+		var rect = targetEl.getBoundingClientRect();
+		var destY = Math.max(0, Math.round(window.pageYOffset + rect.top - offset));
+		stackRoot._hswLockUntil = Date.now() + 700;
+		window.scrollTo({ top: destY, behavior: 'smooth' });
 	}
 
 	/* ================= CLICK DELEGATION ================= */
@@ -247,6 +296,7 @@
 		if (tabBtn) {
 			var tabsRoot = tabBtn.closest('.hsw-ptabs');
 			var id = tabBtn.getAttribute('data-hsw-tab');
+			tabsRoot._hswActiveId = id;
 			tabsRoot.querySelectorAll('.hsw-ptabs__btn').forEach(function (b) { b.classList.toggle('is-active', b === tabBtn); });
 			tabsRoot.querySelectorAll('.hsw-ptabs__panel').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-hsw-panel') === id); });
 			if (tabsRoot.classList.contains('hsw-ptabs--stack') || tabsRoot.hasAttribute('data-hsw-ptabs-stack')) {
@@ -1181,8 +1231,13 @@
 
 		root.querySelectorAll('[data-hsw-tab]').forEach(function (btn) {
 			btn.addEventListener('click', function () {
-				if (btn.scrollIntoView) {
-					btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+				if (nav.scrollWidth > nav.clientWidth + 4) {
+					var navRect = nav.getBoundingClientRect();
+					var btnRect = btn.getBoundingClientRect();
+					var delta = (btnRect.left + btnRect.width / 2) - (navRect.left + navRect.width / 2);
+					if (Math.abs(delta) > 8) {
+						nav.scrollBy({ left: delta, behavior: 'smooth' });
+					}
 				}
 				setTimeout(sync, 340);
 			});
@@ -1217,36 +1272,6 @@
 		var activeId = '';
 		var ticking = false;
 
-		function headerBottom() {
-			var top = 0;
-			var adminBar = document.getElementById('wpadminbar');
-			if (adminBar) {
-				var ar = adminBar.getBoundingClientRect();
-				var apos = getComputedStyle(adminBar).position;
-				if ((apos === 'fixed' || apos === 'sticky') && ar.height > 0 && ar.bottom > top) {
-					top = ar.bottom;
-				}
-			}
-			var hds = document.querySelectorAll('.hsw-hd--sticky, header, .elementor-location-header');
-			for (var i = 0; i < hds.length; i++) {
-				var hd = hds[i];
-				if (!hd.offsetWidth || hd.classList.contains('is-hidden')) { continue; }
-				var cs = getComputedStyle(hd);
-				var pos = cs.position;
-				var target = hd;
-				if (pos !== 'fixed' && pos !== 'sticky') {
-					var fixedChild = hd.querySelector('.is-fixed, .elementor-sticky--active');
-					if (!fixedChild) { continue; }
-					target = fixedChild;
-				}
-				var r = target.getBoundingClientRect();
-				if (r.height > 0 && r.top <= top + 24 && r.bottom > top && r.bottom < window.innerHeight * 0.45) {
-					top = r.bottom;
-				}
-			}
-			return Math.max(0, Math.round(top));
-		}
-
 		function gapPx() {
 			var raw = getComputedStyle(root).getPropertyValue('--hsw-stk-gap') || '8px';
 			var n = parseFloat(raw);
@@ -1254,8 +1279,8 @@
 		}
 
 		function setActive(id) {
-			if (!id || id === activeId) { return; }
-			activeId = id;
+			if (!id || id === root._hswActiveId) { return; }
+			root._hswActiveId = id;
 			var activeBtn = null;
 			buttons.forEach(function (b) {
 				var on = b.getAttribute('data-hsw-tab') === id;
@@ -1277,7 +1302,7 @@
 			ticking = false;
 			if (!root.offsetWidth) { return; }
 
-			var hBottom = headerBottom();
+			var hBottom = stackHeaderBottom();
 			var gap = gapPx();
 			var pinTop = hBottom + gap;
 			var slotRect = (slot || root).getBoundingClientRect();
@@ -1298,6 +1323,10 @@
 				wrap.style.left = '';
 				wrap.style.width = '';
 				if (slot) { slot.style.height = ''; }
+			}
+
+			if (root._hswLockUntil && Date.now() < root._hswLockUntil) {
+				return;
 			}
 
 			/* Scrollspy: find the last panel whose top has crossed the reading line. */
