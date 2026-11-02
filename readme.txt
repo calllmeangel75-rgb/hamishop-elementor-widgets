@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.202
+Stable tag: 1.11.203
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.203 =
+* New: the digital-checkout behaviour is a switch, not a rule — HamiShop → کنترل ویجت‌ها →
+  تنظیمات فروشگاه → «خرید محصولات دانلودی» → «غیرفعال‌سازی فیلدهای اضافه هنگام خرید
+  محصولات دانلودی» (on by default). Off returns the plain WooCommerce checkout with every
+  address field, the shipping method and the delivery slot.
+* A mixed cart still keeps every field: the check is `needs_shipping()`, so a single
+  physical item among downloads turns the trimming off for that cart.
+* Tests: switch on/off against a digital-only cart (3 fields vs 8 + shipping), a mixed
+  cart with the switch on (full form), and the settings page rendering the new group
+  inside the options.php form next to the existing switches.
 
 = 1.11.202 =
 * New: a cart of downloads no longer asks for a delivery address. When every item is

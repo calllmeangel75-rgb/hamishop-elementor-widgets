@@ -716,6 +716,18 @@ final class HSW_Widget_Manager {
 			)
 		);
 
+		/* Digital carts: drop the delivery fields the customer cannot use. */
+		register_setting(
+			'hsw_widgets_group',
+			HSW_Checkout_Digital::OPTION,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( __CLASS__, 'sanitize_yes_no' ),
+				'default'           => 'yes',
+				'show_in_rest'      => false,
+			)
+		);
+
 		/* Printable invoice: on by default, and the monochrome switch beside it. */
 		register_setting(
 			'hsw_widgets_group',
@@ -1070,6 +1082,30 @@ final class HSW_Widget_Manager {
 										</select>
 									</span>
 								</div>
+							</div>
+						</section>
+
+						<section class="hsw-wm-group" id="hsw-group-digital" style="--hsw-wm-accent:#0f766e">
+							<header class="hsw-wm-grouphead">
+								<span class="hsw-wm-groupicon dashicons dashicons-download" aria-hidden="true"></span>
+								<div class="hsw-wm-grouptitle">
+									<h2><?php esc_html_e( 'خرید محصولات دانلودی', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'وقتی سبد خرید فقط محصول مجازی یا دانلودی است، فرم تسویه‌حساب چه شکلی باشد؟', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
+							</header>
+
+							<div class="hsw-wm-rows">
+								<label class="hsw-wm-row hsw-wm-row--field" for="hsw-digital-checkout">
+									<span class="hsw-wm-rowtext">
+										<strong><?php esc_html_e( 'غیرفعال‌سازی فیلدهای اضافه هنگام خرید محصولات دانلودی', 'hamishop-elementor-widgets' ); ?></strong>
+										<small><?php esc_html_e( 'کد پستی، استان، شهر، نشانی، روش ارسال و بازهٔ زمانی تحویل حذف می‌شوند و فقط نام و شماره تماس می‌ماند. اگر سبد ترکیبی باشد (حتی یک کالای فیزیکی) همهٔ فیلدها مثل قبل برمی‌گردند.', 'hamishop-elementor-widgets' ); ?></small>
+									</span>
+									<span class="hsw-wm-switch">
+										<input type="hidden" name="<?php echo esc_attr( HSW_Checkout_Digital::OPTION ); ?>" value="no" />
+										<input type="checkbox" id="hsw-digital-checkout" name="<?php echo esc_attr( HSW_Checkout_Digital::OPTION ); ?>" value="yes" <?php checked( 'yes', get_option( HSW_Checkout_Digital::OPTION, 'yes' ) ); ?> />
+										<span class="hsw-wm-track" aria-hidden="true"></span>
+									</span>
+								</label>
 							</div>
 						</section>
 

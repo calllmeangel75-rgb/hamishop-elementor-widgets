@@ -19,6 +19,8 @@ defined( 'ABSPATH' ) || exit;
 
 class HSW_Checkout_Digital {
 
+	const OPTION = 'hsw_digital_checkout';
+
 	/**
 	 * Billing fields that describe a delivery, not a customer.
 	 *
@@ -39,14 +41,28 @@ class HSW_Checkout_Digital {
 	}
 
 	/**
+	 * Is the feature switched on? (HamiShop → ویجت‌ها → تنظیمات فروشگاه)
+	 *
+	 * @return bool
+	 */
+	public static function enabled() {
+		return 'yes' === get_option( self::OPTION, 'yes' );
+	}
+
+	/**
 	 * Is the current cart made only of products that need no shipping?
 	 *
 	 * An empty cart returns false on purpose: `needs_shipping()` is also false
-	 * there, and a checkout with nothing in it must keep its normal shape.
+	 * there, and a checkout with nothing in it must keep its normal shape. A
+	 * mixed cart (one physical item among downloads) needs shipping too, so it
+	 * keeps every field.
 	 *
 	 * @return bool
 	 */
 	public static function is_digital() {
+		if ( ! self::enabled() ) {
+			return false;
+		}
 		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
 			return false;
 		}
