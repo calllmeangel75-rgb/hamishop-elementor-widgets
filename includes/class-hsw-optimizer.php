@@ -65,6 +65,17 @@ class HSW_Optimizer {
 		add_filter( 'litespeed_optimize_css_excludes', array( $this, 'add_excludes' ), 20 );
 		add_filter( 'litespeed_ucss_exc', array( $this, 'add_excludes' ), 20 );
 
+		/*
+		 * WP Rocket: the same rule for the same reason. Our stylesheets carry
+		 * the layout (grid columns, the pinned header, the bottom sheets), so a
+		 * "Remove Unused CSS" pass that decides a rule is unused does not just
+		 * change a colour — it moves blocks, which is exactly the layout shift
+		 * this plugin spends its time removing. `rocket_exclude_css` is the
+		 * documented filter behind the "Excluded CSS files" field, and it takes
+		 * the same substring lines LiteSpeed does.
+		 */
+		add_filter( 'rocket_exclude_css', array( $this, 'add_excludes' ) );
+
 		add_action( 'init', array( $this, 'disable_in_editor' ), 2 );
 
 		/* Style choices live in these three options; a saved change must reach

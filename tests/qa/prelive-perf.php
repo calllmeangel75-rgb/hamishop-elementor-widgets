@@ -166,6 +166,56 @@ p_case(
 	}
 );
 
+/*
+ * Cache plugins are the reason this flag can silently stop working: LiteSpeed
+ * and WP Rocket both defer/delay scripts, and a deferred flag is a flag that
+ * arrives after the first paint. The attributes below are their opt-out, and
+ * LiteSpeed's own source confirms each one (optimize.cls.php 877/880/883/971).
+ */
+p_case(
+	'P10',
+	'the flag opts out of LiteSpeed / WP Rocket JS optimization and delay',
+	static function () use ( $assets ) {
+		p_reset();
+		$out = p_capture( array( $assets, 'print_js_flag' ) );
+		$need = array( 'data-no-optimize="1"', 'data-no-defer="1"', 'data-no-delay="1"', 'data-cfasync="false"' );
+		$miss = array();
+		foreach ( $need as $attr ) {
+			if ( false === strpos( $out, $attr ) ) {
+				$miss[] = $attr;
+			}
+		}
+		return array( empty( $miss ), $miss ? 'missing: ' . implode( ' ', $miss ) : 'all four present' );
+	}
+);
+
+/*
+ * LiteSpeed's "CSS Combine" deletes inline <style> blocks: with it on, the
+ * layout guard printed in the head disappears from the HTML entirely. Our own
+ * stylesheets are excluded from its optimization, so every rule that has to
+ * survive on a LiteSpeed site must ALSO exist in a real file.
+ */
+p_case(
+	'P11',
+	'the mobile sidebar rule also lives in a real stylesheet, not only inline',
+	static function () {
+		$css = file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/hsw-composite.css' );
+		$ok  = false !== strpos( $css, '@media (max-width: 767.98px)' )
+			&& false !== strpos( $css, '.hsw-cp--archive .hsw-cp__body > .hsw-cp__col--side { display: none; }' );
+		return array( $ok, 'composite.css=' . ( $ok ? 'has the file copy' : 'INLINE ONLY (lost under LiteSpeed combine)' ) );
+	}
+);
+
+p_case(
+	'P12',
+	'the compiled stylesheet carries it too (the file the browser gets)',
+	static function () {
+		$min = file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/hsw-composite.min.css' );
+		$ok  = false !== strpos( $min, '.hsw-cp--archive .hsw-cp__body>.hsw-cp__col--side{display:none}' );
+		return array( $ok, 'composite.min.css=' . ( $ok ? 'present' : 'MISSING — rebuild assets' ) );
+	}
+);
+
 $failed = 0;
 foreach ( $GLOBALS['hsw_results'] as $r ) {
 	$failed += $r[0] ? 0 : 1;

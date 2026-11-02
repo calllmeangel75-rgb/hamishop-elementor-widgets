@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.194
+Stable tag: 1.11.195
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,21 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.195 =
+* Compat: LiteSpeed's "CSS Combine" deletes inline <style> blocks, so the layout guard
+  printed in the head vanished from the HTML on every site with it enabled. The mobile
+  archive-sidebar rule now also lives in hsw-composite.css, which LiteSpeed is told to
+  leave alone. Verified with Combine + Minify + JS Delay all on: sidebar hidden, CLS 0.
+* Compat: the `hsw-js` flag script now carries data-no-optimize / data-no-defer /
+  data-no-delay / data-cfasync="false", so LiteSpeed and WP Rocket cannot defer or
+  delay it. Verified against LiteSpeed's own source and with its JS Delay enabled.
+* Compat: WP Rocket gets the CSS exclusion too (rocket_exclude_css), so "Remove Unused
+  CSS" cannot drop the rules that position the header, grid and sheets.
+* Perf: removed a 21ms forced reflow from the sticky header (align() read the
+  placeholder right after writing is-fixed; pin() now measures first). The font-ready
+  handler only re-syncs when the header height actually changed.
+* Tests: perf 12 cases, optimizer 9 cases.
 
 = 1.11.194 =
 * Perf: the mobile filter/sort sheets left the normal flow only after `hsw-archive.js`

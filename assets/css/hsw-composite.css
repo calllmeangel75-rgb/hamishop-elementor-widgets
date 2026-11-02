@@ -70,6 +70,27 @@
         .hsw-cp--archive .hsw-cp__col--side { position: sticky; top: 16px; align-self: start; }
 }
 
+/*
+ * The archive sidebar is a desktop column: its widgets carry `.hsw-d` and the
+ * mobile filters live in the bottom sheet.
+ *
+ * The same rule also ships inline, in `HSW_Assets::print_layout_guard()`, so it
+ * is in place before Elementor's per-page CSS (the last stylesheet of the head)
+ * decides what to hide — the column painting 892px tall and collapsing to 0 was
+ * a 0.5967 layout shift on /shop/. It has to live here as well because
+ * LiteSpeed's "CSS Combine" DELETES inline <style> blocks: with it on, the head
+ * copy disappears from the HTML entirely and this rule is the only one left.
+ * Our own files are excluded from LiteSpeed's optimization (class-hsw-optimizer),
+ * so a real stylesheet survives every setting.
+ *
+ * Specificity 0,3,0 on purpose, not !important: a site that really wants the
+ * column on mobile can still win with a more specific rule, and the cart,
+ * checkout and blog sidebars (which ARE used on mobile) never match.
+ */
+@media (max-width: 767.98px) {
+        .hsw-cp--archive .hsw-cp__body > .hsw-cp__col--side { display: none; }
+}
+
 /* -------------------------------------------------------------------------
  * Family typography
  *

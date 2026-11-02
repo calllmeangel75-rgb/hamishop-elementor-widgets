@@ -40,6 +40,7 @@ if ( ! getenv( 'HSW_OPT_ABSENT' ) ) {
 	$GLOBALS['hsw_opt_filters'] = array(
 		'litespeed_optimize_css_excludes' => (bool) has_filter( 'litespeed_optimize_css_excludes' ),
 		'litespeed_ucss_exc'              => (bool) has_filter( 'litespeed_ucss_exc' ),
+		'rocket_exclude_css'              => (bool) has_filter( 'rocket_exclude_css' ),
 	);
 } else {
 	$GLOBALS['hsw_opt_filters'] = array();
@@ -182,6 +183,22 @@ o_case(
 		$GLOBALS['hsw_filters']['litespeed_conf'] = array( '__return_false' );
 		$with = HSW_Optimizer::litespeed_active();
 		return array( false === $bare && true === (bool) $with, 'withoutFilter=' . var_export( $bare, true ) . ' withFilter=' . var_export( (bool) $with, true ) );
+	}
+);
+
+o_case(
+	'O9',
+	'WP Rocket gets the same exclusion through rocket_exclude_css',
+	static function () {
+		o_reset();
+		$registered = ! empty( $GLOBALS['hsw_opt_filters']['rocket_exclude_css'] );
+		$out        = HSW_Optimizer::instance()->add_excludes( array( 'themes/child/style.css' ) );
+		$has_ours   = in_array( 'hamishop-elementor-widgets/assets/css', $out, true );
+		$keeps_own  = in_array( 'themes/child/style.css', $out, true );
+		return array(
+			$registered && $has_ours && $keeps_own,
+			'registered=' . var_export( $registered, true ) . ' ours=' . var_export( $has_ours, true ) . ' owner=' . var_export( $keeps_own, true ),
+		);
 	}
 );
 

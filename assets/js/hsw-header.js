@@ -152,13 +152,20 @@
 		 * boxed (non full-bleed) header keeps its width and side offsets. Full
 		 * width headers need no inline styles at all.
 		 */
-		function align() {
-			var r = ph.getBoundingClientRect();
+		/*
+		 * `r` is optional: the caller may pass a box it measured BEFORE it
+		 * touched the DOM. Reading it here, after `is-fixed` and the new
+		 * placeholder height invalidated the style, is a forced synchronous
+		 * layout — the Lighthouse "Forced reflow" audit pinned 21ms of it on
+		 * this function.
+		 */
+		function align(r) {
+			r = r || ph.getBoundingClientRect();
 
 			/* The widget is hidden at this breakpoint (a site can ship a store
 			   header for desktop and a minimal pill for mobile). Leave the CSS
 			   alone instead of collapsing the header to zero width. */
-			if (!r.width || !r.height) {
+			if (!r.width) {
 				return;
 			}
 
@@ -182,10 +189,20 @@
 			if (!root.offsetWidth) {
 				return;
 			}
-			ph.style.height = root.offsetHeight + 'px';
+
+			/* Measure first, write once: `left`/`width` of the placeholder do
+			   not depend on the header being pinned, so they can be read before
+			   the class and the height change invalidate the style. */
+			var h = root.offsetHeight;
+			var r = ph.getBoundingClientRect();
+			if (!h || !r.width) {
+				return;
+			}
+
+			ph.style.height = h + 'px';
 			root.classList.add('is-fixed');
 			pinned = true;
-			align();
+			align(r);
 		}
 
 		function sync() {
@@ -212,7 +229,18 @@
 
 		/* Web fonts change the header height after first paint. */
 		if (document.fonts && document.fonts.ready) {
-			document.fonts.ready.then(sync);
+			document.fonts.ready.then(function () {
+				/*
+				 * Read before writing: `sync()` clears the inline width and then
+				 * measures, which forces a reflow. That is fine on a resize, but
+				 * a font finishing its download must not pay for it when the
+				 * header height did not move at all — and it usually did not.
+				 */
+				var h = root.offsetHeight;
+				if (h && Math.round(h) !== Math.round(ph.offsetHeight)) {
+					sync();
+				}
+			});
 		}
 
 		if (!autohide) {

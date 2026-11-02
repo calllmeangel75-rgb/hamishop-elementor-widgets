@@ -226,7 +226,21 @@ class HSW_Assets {
                         return;
                 }
 
-                echo '<script id="hsw-js-flag">document.documentElement.classList.add("hsw-js")</script>' . "\n";
+                /*
+                 * The four attributes are the whole point of this tag, not
+                 * decoration: a cache plugin that defers or delays it puts the
+                 * flag back where it was — after the first paint — and the
+                 * 0.134 shift returns. Checked against the installed LiteSpeed
+                 * source, not guessed:
+                 *   optimize.cls.php:880  data-no-optimize  -> skips JS combine
+                 *   optimize.cls.php:877  data-no-defer     -> skips defer
+                 *   optimize.cls.php:883  data-cfasync=false-> skips both
+                 *   optimize.cls.php:971  data-no-defer     -> inline bypass
+                 * WP Rocket honours data-no-delay for its "Delay JavaScript"
+                 * and data-cfasync="false" as well, so the same tag is safe on
+                 * both. A browser ignores all four.
+                 */
+                echo '<script id="hsw-js-flag" data-no-optimize="1" data-no-defer="1" data-no-delay="1" data-cfasync="false">document.documentElement.classList.add("hsw-js")</script>' . "\n";
         }
 
         /**
