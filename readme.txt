@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.206
+Stable tag: 1.11.207
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.207 =
+* Fix: uploading a new release from the dashboard installed it NEXT TO the old copy (two folders, the duplicate-copy notice, the old code still running) whenever the zip's top-level folder was not named exactly like the running one - e.g. GitHub's `Source code` archive `hamishop-elementor-widgets-1.11.x`. `upgrader_source_selection` now renames a HamiShop package to the folder this copy runs from, so `Replace current with uploaded` overwrites in place.
+* Fix: LiteSpeed/WP Rocket exclusions matched only the literal `hamishop-elementor-widgets/assets/...`. A copy living in a versioned folder was merged into the combined CSS, which reordered the cascade and broke the layout as soon as the optimizer was on. The exclusion list now also contains the real install folder, for both CSS and JS.
 
 = 1.11.206 =
 * Fix: a colour term without the `color` meta printed its name as text while the other

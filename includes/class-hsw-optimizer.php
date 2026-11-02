@@ -125,6 +125,19 @@ class HSW_Optimizer {
 			'hamishop-elementor-widgets/assets/css',
 		);
 
+		/*
+		 * The folder the plugin REALLY runs from. A package unzipped from a
+		 * GitHub "Source code" archive lands in `hamishop-elementor-widgets-1.11.x/`,
+		 * and the fixed slug above is not a substring of that path — the optimizer
+		 * then merged our CSS into its combined file and the layout broke.
+		 */
+		if ( defined( 'HSW_DIR' ) ) {
+			$real = basename( rtrim( (string) HSW_DIR, '/\\' ) );
+			if ( '' !== $real && 'hamishop-elementor-widgets' !== $real ) {
+				$lines[] = $real . '/assets/css';
+			}
+		}
+
 		return (array) apply_filters( 'hsw_optimizer_exclude', $lines );
 	}
 
@@ -137,6 +150,14 @@ class HSW_Optimizer {
 		$lines = array(
 			'hamishop-elementor-widgets/assets/js',
 		);
+
+		/* Same reason as exclude_lines(): match the real install folder. */
+		if ( defined( 'HSW_DIR' ) ) {
+			$real = basename( rtrim( (string) HSW_DIR, '/\\' ) );
+			if ( '' !== $real && 'hamishop-elementor-widgets' !== $real ) {
+				$lines[] = $real . '/assets/js';
+			}
+		}
 
 		return (array) apply_filters( 'hsw_optimizer_js_exclude', $lines );
 	}

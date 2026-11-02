@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک با دارایی‌های لوکال و بارگذاری شرطی.
- * Version:     1.11.206
+ * Version:     1.11.207
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -77,10 +77,60 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.206' );
+define( 'HSW_VERSION', '1.11.207' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * UPDATE-IN-PLACE GUARD.
+ *
+ * Uploading a new release from Plugins → Add New → Upload used to install it
+ * NEXT TO the old one whenever the zip's top-level folder was not named exactly
+ * like the running folder (GitHub "Source code" archives are called
+ * `hamishop-elementor-widgets-1.11.x`). Two folders → two copies → the
+ * duplicate-copy notice, and the old code kept running.
+ *
+ * WordPress lets a plugin rename the unpacked package before it is moved into
+ * place (`upgrader_source_selection`). If the package is HamiShop, rename it to
+ * the folder THIS copy runs from, so "Replace current with uploaded" overwrites
+ * in place and the plugin keeps its slug, its active state and its settings.
+ */
+if ( ! function_exists( 'hsw_align_package_folder' ) ) {
+        function hsw_align_package_folder( $source, $remote_source = '', $upgrader = null, $hook_extra = array() ) {
+                if ( is_wp_error( $source ) || ! is_string( $source ) || '' === $source ) {
+                        return $source;
+                }
+                unset( $upgrader, $hook_extra );
+
+                $main = trailingslashit( $source ) . 'hamishop-elementor-widgets.php';
+                if ( ! is_file( $main ) ) {
+                        return $source; // some other plugin or theme.
+                }
+                $head = (string) file_get_contents( $main, false, null, 0, 2048 );
+                if ( false === strpos( $head, 'Plugin Name: HamiShop Elementor Widgets' ) ) {
+                        return $source;
+                }
+
+                $target  = basename( rtrim( HSW_DIR, '/\\' ) );
+                $current = basename( rtrim( $source, '/\\' ) );
+                /* Already right, or the zip had no top-level folder at all. */
+                if ( '' === $target || $current === $target || trailingslashit( $source ) === trailingslashit( (string) $remote_source ) ) {
+                        return $source;
+                }
+
+                global $wp_filesystem;
+                if ( ! $wp_filesystem ) {
+                        return $source;
+                }
+                $new = trailingslashit( dirname( rtrim( $source, '/\\' ) ) ) . $target . '/';
+                if ( $wp_filesystem->exists( $new ) ) {
+                        $wp_filesystem->delete( $new, true );
+                }
+                return $wp_filesystem->move( $source, $new, true ) ? $new : $source;
+        }
+        add_filter( 'upgrader_source_selection', 'hsw_align_package_folder', 10, 4 );
+}
 
 /**
  * Report a caught fatal (Throwable) without ever killing the site:
