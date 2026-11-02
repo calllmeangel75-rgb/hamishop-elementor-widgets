@@ -216,6 +216,37 @@ p_case(
 	}
 );
 
+/*
+ * The archive card is the LCP element on /shop/. `sizes="45vw"` was 185px on a
+ * 412px phone for a 136px box, so the browser needed 324 device pixels, the
+ * 300w candidate was not enough, and it fell through to the 500x500 original:
+ * 29,468 bytes instead of 11,098 for the same picture. Measured end to end on
+ * the live archive.
+ */
+p_case(
+	'P13',
+	'the archive card sizes is the real box, not 45vw',
+	static function () {
+		$php = file_get_contents( dirname( __DIR__, 2 ) . '/widgets/class-hsw-widget-archive-grid.php' );
+		$ok  = false !== strpos( $php, "'sizes'         => '(max-width: 767px) calc(50vw - 42px), 196px'" )
+			&& false === strpos( $php, "'sizes'         => '(max-width: 480px) 45vw" );
+		return array( $ok, 'archive-grid=' . ( $ok ? 'computed' : 'STILL 45vw' ) );
+	}
+);
+
+p_case(
+	'P14',
+	'the 42px in that formula still matches the card CSS',
+	static function () {
+		$css = file_get_contents( dirname( __DIR__, 2 ) . '/assets/css/hsw-archive.css' );
+		/* gap 12 (base grid) + card padding 10x2 + media padding 8x2 = 42. */
+		$gap  = false !== strpos( $css, 'grid-template-columns: repeat(2, minmax(0, 1fr));' );
+		$card = false !== strpos( $css, 'padding: 10px;' );
+		$media = false !== strpos( $css, 'padding: 8px;' );
+		return array( $gap && $card && $media, 'two-col=' . var_export( $gap, true ) . ' card10=' . var_export( $card, true ) . ' media8=' . var_export( $media, true ) );
+	}
+);
+
 $failed = 0;
 foreach ( $GLOBALS['hsw_results'] as $r ) {
 	$failed += $r[0] ? 0 : 1;

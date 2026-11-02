@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.195
+Stable tag: 1.11.196
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.196 =
+* Perf: the archive card declared `sizes="45vw"` — 185px on a 412px phone for a 136px
+  box — so the browser needed 324 device pixels, the 300w candidate was not enough, and
+  it downloaded the 500x500 original instead: 29,468 bytes for a thumbnail, on the LCP
+  element. `sizes` is now `(max-width: 767px) calc(50vw - 42px), 196px`, built from the
+  card's own gap and padding. Measured on the live archive: 29,468 -> 11,098 bytes, same
+  rendered box, image still sharp at 1.75x.
+* Tests: perf 14 cases.
 
 = 1.11.195 =
 * Compat: LiteSpeed's "CSS Combine" deletes inline <style> blocks, so the layout guard

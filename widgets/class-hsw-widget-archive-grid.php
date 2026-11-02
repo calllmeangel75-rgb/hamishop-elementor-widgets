@@ -232,8 +232,26 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                          * 196px card downloaded the 300w file. Declaring
                                          * the real box lets the browser pick a smaller
                                          * candidate and shrinks the LCP payload.
+                                         *
+                                         * `45vw` was the first attempt and it was 36%
+                                         * too wide: 185px on a 412px phone for a 136px
+                                         * box, which pushed the browser past the 300w
+                                         * candidate into the 500x500 original — 28.8 KiB
+                                         * for a thumbnail, on the LCP element. Measured
+                                         * on the live archive: 500w picked before,
+                                         * 300w (10.8 KiB) after.
+                                         *
+                                         * The 42px is exact and comes from our own CSS,
+                                         * not from the site: half the 12px grid gap (6)
+                                         * + card padding (10x2) + media padding (8x2).
+                                         * The Elementor container padding is not in the
+                                         * formula on purpose — it only makes the real box
+                                         * narrower, so this can overstate but never
+                                         * understate, and an understated `sizes` is what
+                                         * blurs product photos. Desktop stays the 196px
+                                         * that was measured (the box is 195 at 1280).
                                          */
-                                        'sizes'         => '(max-width: 480px) 45vw, (max-width: 767px) 30vw, 196px',
+                                        'sizes'         => '(max-width: 767px) calc(50vw - 42px), 196px',
                                 )
                         );
                         if ( $html ) {

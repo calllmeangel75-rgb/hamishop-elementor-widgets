@@ -1180,9 +1180,9 @@ msgstr ""
 
 #: includes/class-hsw-widget-base.php:837
 #: includes/class-hsw-widget-base.php:3039
-#: widgets/class-hsw-widget-archive-grid.php:401
-#: widgets/class-hsw-widget-archive-grid.php:401
-#: widgets/class-hsw-widget-archive-grid.php:404
+#: widgets/class-hsw-widget-archive-grid.php:419
+#: widgets/class-hsw-widget-archive-grid.php:419
+#: widgets/class-hsw-widget-archive-grid.php:422
 msgid "افزودن به سبد خرید"
 msgstr ""
 
@@ -1191,7 +1191,7 @@ msgstr ""
 msgid "افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-grid.php:353
+#: widgets/class-hsw-widget-archive-grid.php:371
 msgid "افزودن به علاقه‌مندی‌ها"
 msgstr ""
 
@@ -3205,7 +3205,7 @@ msgstr ""
 #: includes/class-hsw-invoice.php:359
 #: includes/class-hsw-widget-base.php:832
 #: includes/class-hsw-widget-base.php:3034
-#: widgets/class-hsw-widget-archive-grid.php:345
+#: widgets/class-hsw-widget-archive-grid.php:363
 #: widgets/class-hsw-widget-product-related.php:250
 msgid "تخفیف"
 msgstr ""
@@ -10216,7 +10216,7 @@ msgstr ""
 msgid "محصولاتی که در این مرورگر ذخیره کرده‌اید."
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-grid.php:439
+#: widgets/class-hsw-widget-archive-grid.php:457
 msgid "محصولی با این فیلترها یافت نشد."
 msgstr ""
 
@@ -10476,8 +10476,8 @@ msgid "مشاهده فهرست کامل"
 msgstr ""
 
 #: includes/class-hsw-account.php:3212
-#: widgets/class-hsw-widget-archive-grid.php:408
-#: widgets/class-hsw-widget-archive-grid.php:411
+#: widgets/class-hsw-widget-archive-grid.php:426
+#: widgets/class-hsw-widget-archive-grid.php:429
 #: widgets/class-hsw-widget-product-related.php:255
 msgid "مشاهده محصول"
 msgstr ""
@@ -10997,7 +10997,7 @@ msgstr ""
 
 #: includes/class-hsw-palette.php:709
 #: widgets/class-hsw-widget-archive-grid.php:195
-#: widgets/class-hsw-widget-archive-grid.php:362
+#: widgets/class-hsw-widget-archive-grid.php:380
 #: widgets/class-hsw-widget-product-title.php:279
 msgid "ناموجود"
 msgstr ""
@@ -12150,7 +12150,7 @@ msgstr ""
 
 #: includes/class-hsw-widget-base.php:833
 #: includes/class-hsw-widget-base.php:3035
-#: widgets/class-hsw-widget-archive-grid.php:347
+#: widgets/class-hsw-widget-archive-grid.php:365
 msgid "ویژه"
 msgstr ""
 
@@ -13064,7 +13064,7 @@ msgstr ""
 msgid "پیشنهاد فروشگاه"
 msgstr ""
 
-#: widgets/class-hsw-widget-archive-grid.php:347
+#: widgets/class-hsw-widget-archive-grid.php:365
 msgid "پیشنهاد ویژه"
 msgstr ""
 
