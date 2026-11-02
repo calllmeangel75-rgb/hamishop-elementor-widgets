@@ -270,10 +270,16 @@ final class HSW_Complete_Route {
             return;
         }
 
-        foreach ( array( 'get_shipping_city', 'get_shipping_address_1', 'get_billing_city', 'get_billing_address_1' ) as $getter ) {
-            if ( '' !== trim( (string) $customer->$getter() ) ) {
-                return;
-            }
+        /*
+         * The old check stopped at the city and the street, so a customer with
+         * half an address still reached the pay step — and the order button
+         * answered «مقدار «نام خانوادگی» را کامل کنید». Ask for everything
+         * WooCommerce requires before letting them in, and send them back to
+         * the form that can actually fix it.
+         */
+        $missing = class_exists( 'HSW_Checkout_Rest' ) ? HSW_Checkout_Rest::missing_address_fields( $customer ) : array();
+        if ( ! $missing ) {
+            return;
         }
 
         wp_safe_redirect( add_query_arg( 'hsw-need-address', '1', wc_get_checkout_url() ) );

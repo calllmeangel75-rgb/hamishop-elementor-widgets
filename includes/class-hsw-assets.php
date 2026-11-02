@@ -725,6 +725,12 @@ class HSW_Assets {
                                 'nonce'       => wp_create_nonce( 'wp_rest' ),
                                 'errorText'   => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
                                 'addressRequired' => __( 'نام، شماره تماس، استان، شهر و نشانی را کامل کنید.', 'hamishop-elementor-widgets' ),
+                                /* Same lists the REST route validates against, so the
+                                   form can never ask for less than the order needs. */
+                                'addressFields'         => HSW_Checkout_Rest::address_fields(),
+                                'addressRequiredFields' => HSW_Checkout_Rest::required_address_fields(),
+                                'addressLabels'         => HSW_Checkout_Rest::address_labels(),
+                                'addressMissing'        => __( 'برای ادامه، این موارد را کامل کنید: %s', 'hamishop-elementor-widgets' ),
                         ) ) . ';',
                         'before'
                 );;

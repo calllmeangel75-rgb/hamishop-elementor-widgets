@@ -240,6 +240,84 @@
         } );
 
         /* Day pills (desktop buttons + mobile pills share one selectable order) */
+
+        /* =====================================================
+         * Delivery address — one field list for every save path
+         *
+         * The «ادامه و ورود به مرحله پرداخت» button used to post only five
+         * fields, so the server wrote the missing ones as empty strings and
+         * wiped the customer's family name and postcode. The order then died
+         * on the pay button with «مقدار ... را کامل کنید». Both paths now
+         * send the whole form and validate against the same list.
+         * ===================================================== */
+        var ADDRESS_FIELDS = CFG.addressFields || [ 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' ];
+        var ADDRESS_REQUIRED = CFG.addressRequiredFields || [ 'first_name', 'phone', 'state', 'city', 'address_1' ];
+        var ADDRESS_LABELS = CFG.addressLabels || {};
+
+        function addressForm() {
+                return document.querySelector( '[data-hsw-address-form]' );
+        }
+
+        function collectAddress( form ) {
+                var body = {};
+                ADDRESS_FIELDS.forEach( function ( key ) {
+                        var el = form.querySelector( '[name="' + key + '"]' );
+                        body[ key ] = el ? el.value.trim() : '';
+                } );
+                return body;
+        }
+
+        function missingAddress( body ) {
+                var missing = [];
+                ADDRESS_REQUIRED.forEach( function ( key ) {
+                        if ( ! body[ key ] ) {
+                                missing.push( key );
+                        }
+                } );
+                return missing;
+        }
+
+        function addressMessage( missing ) {
+                var names = missing.map( function ( key ) {
+                        return ADDRESS_LABELS[ key ] || key;
+                } );
+                var tpl = CFG.addressMissing || 'برای ادامه، این موارد را کامل کنید: %s';
+                return tpl.replace( '%s', names.join( '، ' ) );
+        }
+
+        /* Persian/Arabic digits are what a Persian keyboard types; the postcode
+           label asks for English digits, so convert them instead of scolding. */
+        var DIGIT_MAP = {
+                '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+                '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9',
+                '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+                '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+        };
+
+        document.addEventListener( 'input', function ( event ) {
+                var el = event.target;
+                if ( ! el || ! el.name || ( 'postcode' !== el.name && 'phone' !== el.name ) ) {
+                        return;
+                }
+                if ( ! el.closest || ! el.closest( '[data-hsw-address-form]' ) ) {
+                        return;
+                }
+
+                var next = String( el.value ).replace( /[۰-۹٠-٩]/g, function ( ch ) {
+                        return DIGIT_MAP[ ch ] || ch;
+                } );
+                if ( 'postcode' === el.name ) {
+                        next = next.replace( /\s+/g, '' );
+                }
+                if ( next === el.value ) {
+                        return;
+                }
+
+                var pos = el.selectionStart;
+                el.value = next;
+                try { el.setSelectionRange( pos, pos ); } catch ( e ) {}
+        } );
+
         /*
  * «ادامه و ورود به مرحله پرداخت» must not leave the page while the delivery
  * address is incomplete. With a filled form we save it first and then continue
@@ -252,7 +330,7 @@ document.addEventListener( 'click', function ( event ) {
 	if ( document.body.classList.contains( 'elementor-editor-active' ) ) { return; }
 
 	var has    = cta.getAttribute( 'data-has-address' ) === '1';
-	var form   = document.querySelector( '[data-hsw-address-form]' );
+	var form   = addressForm();
 	var drawer = form ? form.closest( '[data-hsw-address-drawer]' ) : null;
 	var open   = !!( form && form.offsetParent !== null );
 
@@ -265,16 +343,15 @@ document.addEventListener( 'click', function ( event ) {
 
 	if ( drawer ) { drawer.hidden = false; }
 
-	var keys = [ 'first_name', 'phone', 'state', 'city', 'address_1' ];
-	var body = {};
-	var missing = [];
-	keys.forEach( function ( key ) {
+	var body    = collectAddress( form );
+	var missing = missingAddress( body );
+
+	ADDRESS_FIELDS.forEach( function ( key ) {
 		var el = form.querySelector( '[name="' + key + '"]' );
-		body[ key ] = el ? el.value.trim() : '';
-		if ( ! body[ key ] ) {
-			missing.push( key );
-			if ( el ) { el.classList.add( 'is-missing' ); }
-		} else if ( el ) {
+		if ( ! el ) { return; }
+		if ( missing.indexOf( key ) !== -1 ) {
+			el.classList.add( 'is-missing' );
+		} else {
 			el.classList.remove( 'is-missing' );
 		}
 	} );
@@ -287,12 +364,12 @@ document.addEventListener( 'click', function ( event ) {
 		if ( first && first.focus ) { first.focus( { preventScroll: true } ); }
 		if ( msg ) {
 			msg.hidden = false;
-			msg.textContent = 'لطفاً برای ادامه و ورود به مرحله پرداخت، اطلاعات و نشانی تحویل سفارش را تکمیل کنید.';
+			msg.textContent = addressMessage( missing );
 		}
 		return;
 	}
 
-	/* All five fields are there: save, then continue. */
+	/* Every field is there: save the whole form, then continue. */
 	var btn = form.querySelector( '.hsw-ckaddr__fsubmit' );
 	if ( btn ) { btn.disabled = true; btn.classList.add( 'is-busy' ); }
 	if ( msg ) { msg.hidden = true; }
@@ -307,11 +384,11 @@ document.addEventListener( 'click', function ( event ) {
 	var req = ( typeof post === 'function' ) ? post( '/checkout/address', Object.assign( {}, body, extra ) ) : Promise.reject( new Error( 'no transport' ) );
 	req.then( function () {
 		window.location.href = payUrl;
-	} ).catch( function () {
+	} ).catch( function ( err ) {
 		if ( btn ) { btn.disabled = false; btn.classList.remove( 'is-busy' ); }
 		if ( msg ) {
 			msg.hidden = false;
-			msg.textContent = 'ذخیرهٔ نشانی انجام نشد؛ دوباره تلاش کنید.';
+			msg.textContent = ( err && err.message ) ? err.message : 'ذخیرهٔ نشانی انجام نشد؛ دوباره تلاش کنید.';
 		}
 	} );
 } );
@@ -799,13 +876,12 @@ document.addEventListener( 'click', function ( event ) {
          * Delivery address form (shown while none is saved)
          * ===================================================== */
         ( function () {
-                var form = document.querySelector( '[data-hsw-address-form]' );
+                var form = addressForm();
                 if ( ! form ) {
                         return;
                 }
                 var msg = form.querySelector( '[data-hsw-address-msg]' );
                 var btn = form.querySelector( '.hsw-ckaddr__fsubmit' );
-                var FIELDS = [ 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' ];
 
                 function say( text ) {
                         if ( ! msg ) {
@@ -821,14 +897,13 @@ document.addEventListener( 'click', function ( event ) {
                                 return;
                         }
 
-                        var body = {};
-                        FIELDS.forEach( function ( key ) {
-                                var el = form.querySelector( '[name="' + key + '"]' );
-                                body[ key ] = el ? el.value.trim() : '';
-                        } );
+                        var body    = collectAddress( form );
+                        var missing = missingAddress( body );
 
-                        if ( ! body.first_name || ! body.phone || ! body.state || ! body.city || ! body.address_1 ) {
-                                say( CFG.addressRequired || 'نام، شماره تماس، استان، شهر و نشانی را کامل کنید.' );
+                        if ( missing.length ) {
+                                say( addressMessage( missing ) );
+                                var first = form.querySelector( '[name="' + missing[0] + '"]' );
+                                if ( first && first.focus ) { first.focus( { preventScroll: true } ); }
                                 return;
                         }
 

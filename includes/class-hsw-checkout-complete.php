@@ -190,6 +190,30 @@ class HSW_Checkout_Complete {
 			);
 		}
 
+		/*
+		 * Half an address is not an address. Name the missing fields and hand
+		 * the customer a link back to the form instead of letting WooCommerce
+		 * answer «مقدار ... را کامل کنید» with no way out of the pay page.
+		 */
+		$missing = HSW_Checkout_Rest::missing_address_fields( WC()->customer );
+		if ( $missing ) {
+			return new WP_Error(
+				'hsw_incomplete_address',
+				sprintf(
+					/* translators: %s: comma separated field labels. */
+					__( 'نشانی تحویل کامل نیست؛ این موارد را تکمیل کنید: %s', 'hamishop-elementor-widgets' ),
+					implode( '، ', array_values( $missing ) )
+				),
+				array(
+					'status'   => 400,
+					'hsw_link' => array(
+						'url'   => wc_get_checkout_url(),
+						'label' => __( 'تکمیل نشانی تحویل', 'hamishop-elementor-widgets' ),
+					),
+				)
+			);
+		}
+
 		$errors = $this->validate( $data );
 		if ( $errors ) {
 			return new WP_Error( 'hsw_checkout_validation', implode( ' ', array_slice( $errors, 0, 3 ) ), array( 'status' => 400 ) );

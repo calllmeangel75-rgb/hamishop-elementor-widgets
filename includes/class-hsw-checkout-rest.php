@@ -117,11 +117,159 @@ class HSW_Checkout_Rest {
         }
 
         /**
+         * Every delivery-address field the checkout collects.
+         *
+         * One list, read by the REST route, the widget and the JavaScript, so a
+         * new field only has to be added here.
+         *
+         * @return string[]
+         */
+        public static function address_fields() {
+                return array( 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' );
+        }
+
+        /**
+         * Which address fields the store actually requires.
+         *
+         * WooCommerce decides this per country — for Iran `billing_last_name`
+         * and `billing_postcode` are required, `billing_company` is not — so the
+         * form and the REST route ask WooCommerce instead of hard-coding five
+         * fields. The old hard-coded list let a customer continue with a name
+         * and a street but no family name and no postcode, and the order then
+         * died on the very last click of the pay button.
+         *
+         * @return string[]
+         */
+        public static function required_address_fields() {
+                $required = array();
+
+                if ( function_exists( 'WC' ) && WC()->checkout() ) {
+                        $fields = (array) WC()->checkout()->get_checkout_fields( 'billing' );
+                        foreach ( array( 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode' ) as $key ) {
+                                $field = isset( $fields[ 'billing_' . $key ] ) ? $fields[ 'billing_' . $key ] : array();
+                                if ( ! empty( $field['required'] ) ) {
+                                        $required[] = $key;
+                                }
+                        }
+                }
+
+                /* A courier cannot deliver without these, whatever the settings say. */
+                foreach ( array( 'first_name', 'phone', 'state', 'city', 'address_1' ) as $key ) {
+                        if ( ! in_array( $key, $required, true ) ) {
+                                $required[] = $key;
+                        }
+                }
+
+                return $required;
+        }
+
+        /**
+         * Field labels straight from WooCommerce, so every message names the
+         * field exactly the way the customer sees it.
+         *
+         * @return array<string,string>
+         */
+        public static function address_labels() {
+                $labels = array(
+                        'first_name' => __( 'نام', 'hamishop-elementor-widgets' ),
+                        'last_name'  => __( 'نام خانوادگی', 'hamishop-elementor-widgets' ),
+                        'phone'      => __( 'شماره تماس', 'hamishop-elementor-widgets' ),
+                        'state'      => __( 'استان', 'hamishop-elementor-widgets' ),
+                        'city'       => __( 'شهر', 'hamishop-elementor-widgets' ),
+                        'address_1'  => __( 'نشانی', 'hamishop-elementor-widgets' ),
+                        'address_2'  => __( 'پلاک و واحد', 'hamishop-elementor-widgets' ),
+                        'postcode'   => __( 'کد پستی', 'hamishop-elementor-widgets' ),
+                        'country'    => __( 'کشور', 'hamishop-elementor-widgets' ),
+                );
+
+                if ( function_exists( 'WC' ) && WC()->checkout() ) {
+                        $fields = (array) WC()->checkout()->get_checkout_fields( 'billing' );
+                        foreach ( $labels as $key => $label ) {
+                                if ( ! empty( $fields[ 'billing_' . $key ]['label'] ) ) {
+                                        $labels[ $key ] = wp_strip_all_tags( (string) $fields[ 'billing_' . $key ]['label'] );
+                                }
+                        }
+                }
+
+                return $labels;
+        }
+
+        /**
+         * A field's current value on the customer: shipping first, billing next.
+         *
+         * @param WC_Customer $customer Customer.
+         * @param string      $key      Field name without prefix.
+         * @return string
+         */
+        protected static function customer_value( $customer, $key ) {
+                foreach ( array( 'get_shipping_', 'get_billing_' ) as $prefix ) {
+                        $getter = $prefix . $key;
+                        if ( ! is_callable( array( $customer, $getter ) ) ) {
+                                continue;
+                        }
+                        $value = trim( (string) $customer->$getter() );
+                        if ( '' !== $value ) {
+                                return $value;
+                        }
+                }
+                return '';
+        }
+
+        /**
+         * Required fields that are still empty.
+         *
+         * The pay-page guard and the order endpoint both use this, so a customer
+         * with half an address is sent back to the form instead of reaching the
+         * last click and reading «مقدار ... را کامل کنید».
+         *
+         * @param WC_Customer|null $customer Customer (defaults to WC()->customer).
+         * @return array<string,string> field => label
+         */
+        public static function missing_address_fields( $customer = null ) {
+                if ( ! $customer && function_exists( 'WC' ) ) {
+                        $customer = WC()->customer;
+                }
+                if ( ! $customer ) {
+                        return array();
+                }
+
+                $labels = self::address_labels();
+                $out    = array();
+
+                foreach ( self::required_address_fields() as $key ) {
+                        if ( '' === self::customer_value( $customer, $key ) ) {
+                                $out[ $key ] = isset( $labels[ $key ] ) ? $labels[ $key ] : $key;
+                        }
+                }
+
+                return $out;
+        }
+
+        /**
+         * Latin digits only; a leading + survives (international numbers).
+         *
+         * @param string $value Raw input.
+         * @return string
+         */
+        protected static function normalize_phone( $value ) {
+                $plus  = ( 0 === strpos( ltrim( (string) $value ), '+' ) );
+                $value = HSW_Helpers::en_num( $value );
+
+                return ( $plus && '' !== $value ) ? '+' . $value : $value;
+        }
+
+        /**
          * Save the delivery address entered during checkout.
          *
          * Writes to billing **and** shipping so the order, the account address
          * book and the pay step all agree, then recalculates shipping because
          * the province/city decide the rate.
+         *
+         * Only the fields the request actually carried are written. The
+         * «ادامه و ورود به مرحله پرداخت» button posts a subset of the form, and
+         * the old code wrote every field — absent ones as an empty string — so
+         * it silently erased the customer's family name and postcode, and the
+         * order then failed WooCommerce's required-field check.
          *
          * @param WP_REST_Request $request Request.
          * @return WP_REST_Response|WP_Error
@@ -135,41 +283,55 @@ class HSW_Checkout_Rest {
 
                 $country = strtoupper( (string) $request->get_param( 'country' ) );
                 if ( '' === $country ) {
+                        $country = self::customer_value( $customer, 'country' );
+                }
+                if ( '' === $country ) {
                         $base    = function_exists( 'wc_get_base_location' ) ? wc_get_base_location() : array( 'country' => 'IR' );
                         $country = isset( $base['country'] ) && '' !== $base['country'] ? (string) $base['country'] : 'IR';
                 }
 
-                $values = array(
-                        'first_name' => trim( (string) $request->get_param( 'first_name' ) ),
-                        'last_name'  => trim( (string) $request->get_param( 'last_name' ) ),
-                        'phone'      => trim( (string) $request->get_param( 'phone' ) ),
-                        'state'      => trim( (string) $request->get_param( 'state' ) ),
-                        'city'       => trim( (string) $request->get_param( 'city' ) ),
-                        'address_1'  => trim( (string) $request->get_param( 'address_1' ) ),
-                        'address_2'  => trim( (string) $request->get_param( 'address_2' ) ),
-                        'postcode'   => trim( (string) $request->get_param( 'postcode' ) ),
-                );
+                $values = array();
+                foreach ( self::address_fields() as $key ) {
+                        if ( 'country' === $key || ! $request->has_param( $key ) ) {
+                                continue;
+                        }
 
-                /* Only the fields a delivery cannot work without. */
-                $required = array(
-                        'first_name' => __( 'نام گیرنده', 'hamishop-elementor-widgets' ),
-                        'phone'      => __( 'شماره تماس', 'hamishop-elementor-widgets' ),
-                        'state'      => __( 'استان', 'hamishop-elementor-widgets' ),
-                        'city'       => __( 'شهر', 'hamishop-elementor-widgets' ),
-                        'address_1'  => __( 'نشانی', 'hamishop-elementor-widgets' ),
-                );
-                foreach ( $required as $key => $label ) {
-                        if ( '' === $values[ $key ] ) {
+                        $value = trim( (string) $request->get_param( $key ) );
+
+                        if ( 'postcode' === $key ) {
+                                /* «بدون فاصله و با اعداد انگلیسی» — the label's own promise. */
+                                $value = HSW_Helpers::en_num( $value );
+                        } elseif ( 'phone' === $key ) {
+                                $value = self::normalize_phone( $value );
+                        }
+
+                        $values[ $key ] = $value;
+                }
+
+                $labels = self::address_labels();
+
+                foreach ( self::required_address_fields() as $key ) {
+                        $value = array_key_exists( $key, $values ) ? $values[ $key ] : self::customer_value( $customer, $key );
+                        if ( '' === trim( (string) $value ) ) {
                                 return new WP_Error(
                                         'hsw_address_' . $key,
                                         sprintf(
                                                 /* translators: %s: field label. */
                                                 __( '%s را وارد کنید.', 'hamishop-elementor-widgets' ),
-                                                $label
+                                                isset( $labels[ $key ] ) ? $labels[ $key ] : $key
                                         ),
                                         array( 'status' => 400 )
                                 );
                         }
+                }
+
+                $postcode = array_key_exists( 'postcode', $values ) ? $values['postcode'] : self::customer_value( $customer, 'postcode' );
+                if ( 'IR' === $country && '' !== $postcode && ! preg_match( '/^[0-9]{10}$/', $postcode ) ) {
+                        return new WP_Error(
+                                'hsw_address_postcode',
+                                __( 'کد پستی باید ۱۰ رقم و فقط با اعداد انگلیسی باشد.', 'hamishop-elementor-widgets' ),
+                                array( 'status' => 400 )
+                        );
                 }
 
                 foreach ( $values as $key => $value ) {
@@ -197,12 +359,22 @@ class HSW_Checkout_Rest {
 
                 return rest_ensure_response(
                         array(
-                                'ok'      => true,
-                                'name'    => trim( $values['first_name'] . ' ' . $values['last_name'] ),
-                                'phone'   => $values['phone'],
-                                'postcode' => $values['postcode'],
-                                'line'    => implode( '، ', array_filter( array( $values['state'], $values['city'], $values['address_1'], $values['address_2'] ) ) ),
-                                'message' => __( 'آدرس ذخیره شد.', 'hamishop-elementor-widgets' ),
+                                'ok'       => true,
+                                'name'     => trim( self::customer_value( $customer, 'first_name' ) . ' ' . self::customer_value( $customer, 'last_name' ) ),
+                                'phone'    => self::customer_value( $customer, 'phone' ),
+                                'postcode' => self::customer_value( $customer, 'postcode' ),
+                                'line'     => implode(
+                                        '، ',
+                                        array_filter(
+                                                array(
+                                                        self::customer_value( $customer, 'state' ),
+                                                        self::customer_value( $customer, 'city' ),
+                                                        self::customer_value( $customer, 'address_1' ),
+                                                        self::customer_value( $customer, 'address_2' ),
+                                                )
+                                        )
+                                ),
+                                'message'  => __( 'آدرس ذخیره شد.', 'hamishop-elementor-widgets' ),
                         )
                 );
         }

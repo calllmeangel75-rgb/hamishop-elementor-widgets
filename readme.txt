@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.197
+Stable tag: 1.11.198
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,29 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.198 =
+* Fix: the pay button refused every new customer with «مقدار «نام خانوادگی» را کامل
+  کنید. مقدار «کدپستی (بدون فاصله و با اعداد انگلیسی)» را کامل کنید». Cause: the
+  «ادامه و ورود به مرحله پرداخت» button posted five fields (`first_name`, `phone`,
+  `state`, `city`, `address_1`) and `save_address()` wrote every absent field as an
+  empty string — so the family name and postcode the customer had just typed were
+  erased. The pay step then saw an incomplete address and `validate()` rejected the
+  order. Both save paths now send the whole form, and a partial request only writes
+  the fields it actually carries.
+* One source for the field lists: `HSW_Checkout_Rest::address_fields()`,
+  `required_address_fields()` and `address_labels()` read
+  `WC_Checkout::get_checkout_fields()`, so the form, the REST route and the pay guard
+  can never ask for less than the order needs (`last_name` and `postcode` are required
+  for Iran and now show as required).
+* Postcode: Persian/Arabic digits are converted to Latin and spaces stripped in the
+  browser as the customer types; the server normalises again and requires 10 digits
+  for Iran.
+* `guard_pay_address()` now checks every required field instead of only the city and
+  street, and the order error names the missing fields and links back to the form.
+* Tests: the reported error reproduced, partial save, Persian digits, invalid
+  postcode, a fresh customer through to a placed order, and no redirect for a complete
+  address.
 
 = 1.11.197 =
 * Fix: the product page reported NO_LCP in Lighthouse. Cause: `scroll-behavior: smooth`
