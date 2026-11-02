@@ -339,6 +339,39 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
         protected function item_chips( $cart_item, $product ) {
                 $chips     = array();
                 $variation = ( isset( $cart_item['variation'] ) && is_array( $cart_item['variation'] ) ) ? $cart_item['variation'] : array();
+
+                /*
+                 * A simple product keeps the customer's colour/size in
+                 * `hsw_picked` (HSW_Simple_Attributes) because WooCommerce has no
+                 * variation to hang it on. Print it like a variation chip so the
+                 * cart line says which one was ordered.
+                 */
+                if ( class_exists( 'HSW_Simple_Attributes' ) && ! empty( $cart_item[ HSW_Simple_Attributes::KEY ] ) && is_array( $cart_item[ HSW_Simple_Attributes::KEY ] ) ) {
+                        foreach ( $cart_item[ HSW_Simple_Attributes::KEY ] as $tax => $row ) {
+                                if ( empty( $row['value'] ) ) {
+                                        continue;
+                                }
+                                $hex = '';
+                                if ( taxonomy_exists( (string) $tax ) && ! empty( $row['slug'] ) ) {
+                                        $term = get_term_by( 'slug', (string) $row['slug'], (string) $tax );
+                                        if ( $term instanceof WP_Term ) {
+                                                foreach ( array( 'color', 'hex', 'color_hex', 'wpcsw_color' ) as $meta_key ) {
+                                                        $meta = get_term_meta( $term->term_id, $meta_key, true );
+                                                        if ( $meta && preg_match( '/^#[0-9a-fA-F]{3,8}$/', (string) $meta ) ) {
+                                                                $hex = (string) $meta;
+                                                                break;
+                                                        }
+                                                }
+                                        }
+                                }
+                                $chips[] = array(
+                                        'label' => (string) $row['value'],
+                                        'hex'   => $hex,
+                                        'icon'  => '',
+                                );
+                        }
+                }
+
                 foreach ( $variation as $attr => $value ) {
                         if ( '' === $value || null === $value ) {
                                 continue;
@@ -579,12 +612,14 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
 
         protected function demo_totals() {
                 return array(
-                        'count'    => 2,
-                        'base'     => 69950000,
-                        'savings'  => 2740000,
-                        'shipping' => array( 'free', 0 ),
-                        'taxes'    => 0,
-                        'total'    => 67210000,
+                        'count'          => 2,
+                        'base'           => 69950000,
+                        'savings'        => 2740000,
+                        'saving_product' => 2690000,
+                        'saving_coupon'  => 50000,
+                        'shipping'       => array( 'free', 0 ),
+                        'taxes'          => 0,
+                        'total'          => 67210000,
                 );
         }
 

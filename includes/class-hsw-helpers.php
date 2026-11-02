@@ -187,13 +187,47 @@ class HSW_Helpers {
                         return '';
                 }
 
-                $amount = self::fa_num( html_entity_decode( (string) wc_price( $saving['total'] ), ENT_QUOTES, 'UTF-8' ) );
+                /*
+                 * One lumped number left the customer guessing where it came
+                 * from — the shop's sale price or the coupon. When both are
+                 * present the row splits in two; a single source keeps the old
+                 * one-line markup exactly, so existing layouts do not move.
+                 */
+                $parts = array();
+                if ( $saving['product'] > 0 ) {
+                        $parts[] = array( 'percent', __( 'تخفیف محصول', 'hamishop-elementor-widgets' ), (float) $saving['product'] );
+                }
+                if ( $saving['coupon'] > 0 ) {
+                        $parts[] = array( 'sell', __( 'کد تخفیف', 'hamishop-elementor-widgets' ), (float) $saving['coupon'] );
+                }
 
-                return '<div class="hsw-savings ' . esc_attr( $extra_class ) . '">'
-                        . '<span class="hsw-savings__ic">' . self::icon( 'savings' ) . '</span>'
-                        . '<span class="hsw-savings__label">' . esc_html__( 'سود شما از خرید', 'hamishop-elementor-widgets' ) . '</span>'
-                        . '<span class="hsw-savings__amount">' . wp_kses_post( $amount ) . '</span>'
-                        . '</div>';
+                if ( ! $parts ) {
+                        return '';
+                }
+
+                $money = static function ( $amount ) {
+                        return self::fa_num( html_entity_decode( (string) wc_price( $amount ), ENT_QUOTES, 'UTF-8' ) );
+                };
+
+                if ( 1 === count( $parts ) ) {
+                        return '<div class="hsw-savings ' . esc_attr( $extra_class ) . '">'
+                                . '<span class="hsw-savings__ic">' . self::icon( $parts[0][0] ) . '</span>'
+                                . '<span class="hsw-savings__label">' . esc_html( $parts[0][1] ) . '</span>'
+                                . '<span class="hsw-savings__amount">' . wp_kses_post( $money( $parts[0][2] ) ) . '</span>'
+                                . '</div>';
+                }
+
+                $out = '<div class="hsw-savings hsw-savings--split ' . esc_attr( $extra_class ) . '">';
+                foreach ( $parts as $part ) {
+                        $out .= '<div class="hsw-savings__row">'
+                                . '<span class="hsw-savings__ic">' . self::icon( $part[0] ) . '</span>'
+                                . '<span class="hsw-savings__label">' . esc_html( $part[1] ) . '</span>'
+                                . '<span class="hsw-savings__amount">' . wp_kses_post( $money( $part[2] ) ) . '</span>'
+                                . '</div>';
+                }
+                $out .= '</div>';
+
+                return $out;
         }
 
         /**
@@ -783,26 +817,74 @@ JS;
          * same variation: the cheapest one, which is the price the card prints.
          */
         public static function discount_percent( $product ) {
-                if ( self::is_call_for_price( $product ) ) {
-                        return 0;
-                }
+                $badge = self::discount_badge( $product );
 
+                return (int) $badge['percent'];
+        }
+
+        /**
+         * Discount percentage **and** whether it is only reachable on some
+         * variations.
+         *
+         * The archive card prints the cheapest price. When that variation is on
+         * sale the percentage is exact. When it is not, but a dearer variation
+         * is, the card can only promise «تا N٪» — the number is real, but it
+         * belongs to another variation than the price on the card.
+         *
+         * @param WC_Product $product Product.
+         * @return array{percent:int,up_to:bool}
+         */
+        public static function discount_badge( $product ) {
+                $none = array( 'percent' => 0, 'up_to' => false );
+
+                if ( ! $product instanceof WC_Product || self::is_call_for_price( $product ) ) {
+                        return $none;
+                }
                 if ( ! $product->is_on_sale() ) {
-                        return 0;
+                        return $none;
                 }
 
-                if ( $product->is_type( 'variable' ) ) {
-                        $regular = (float) $product->get_variation_regular_price( 'min', true );
-                        $sale    = (float) $product->get_variation_price( 'min', true );
-                } else {
+                if ( ! $product->is_type( 'variable' ) ) {
                         $regular = (float) $product->get_regular_price();
                         $sale    = (float) $product->get_price();
+                        if ( $regular <= 0 || $sale <= 0 || $sale >= $regular ) {
+                                return $none;
+                        }
+                        return array(
+                                'percent' => (int) round( ( ( $regular - $sale ) / $regular ) * 100 ),
+                                'up_to'   => false,
+                        );
                 }
 
-                if ( $regular <= 0 || $sale <= 0 || $sale >= $regular ) {
-                        return 0;
+                /* The variation behind the printed "from" price. */
+                $regular = (float) $product->get_variation_regular_price( 'min', true );
+                $sale    = (float) $product->get_variation_price( 'min', true );
+                if ( $regular > 0 && $sale > 0 && $sale < $regular ) {
+                        return array(
+                                'percent' => (int) round( ( ( $regular - $sale ) / $regular ) * 100 ),
+                                'up_to'   => false,
+                        );
                 }
-                return (int) round( ( ( $regular - $sale ) / $regular ) * 100 );
+
+                /* Cheapest variation is not discounted: report the best one that is. */
+                $best = 0;
+                foreach ( $product->get_children() as $child_id ) {
+                        $variation = wc_get_product( $child_id );
+                        if ( ! $variation instanceof WC_Product || ! $variation->is_on_sale() ) {
+                                continue;
+                        }
+                        $v_regular = (float) $variation->get_regular_price();
+                        $v_sale    = (float) $variation->get_price();
+                        if ( $v_regular <= 0 || $v_sale <= 0 || $v_sale >= $v_regular ) {
+                                continue;
+                        }
+                        $best = max( $best, (int) round( ( ( $v_regular - $v_sale ) / $v_regular ) * 100 ) );
+                }
+
+                return array(
+                        'percent' => $best,
+                        'up_to'   => ( $best > 0 ),
+                );
         }
 
         /**

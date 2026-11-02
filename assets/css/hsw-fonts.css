@@ -603,6 +603,20 @@ body.hsw-scroll-lock {
 	white-space: nowrap;
 }
 
+/* Two sources (product sale + coupon): stack them instead of one lumped line. */
+.hsw-savings--split {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 4px;
+}
+
+.hsw-savings__row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
 /* Inside the pay summary the row sits between other total rows. */
 .hsw-psum__rows .hsw-savings {
 	margin: 6px 0;
@@ -865,8 +879,6 @@ ul.products.is-pg-leaving,
 }
 @media (prefers-reduced-motion: reduce) {
 	.hsw-pg__pill, .hsw-pg__arrow, .hsw-loop.is-pg-leaving { transition: none !important; }
-}
-
 }
 
 /* Global font from HamiShop → پالت رنگی (--hsw-font).

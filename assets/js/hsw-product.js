@@ -31,6 +31,73 @@
 		return document.querySelectorAll('.hsw-p[data-hsw-product="' + pid + '"], .hsw-p[data-hsw-variants="' + pid + '"]');
 	}
 
+	/* ---------- simple-product attribute picker ---------- */
+	/*
+	 * A simple product can carry a visible colour attribute without being
+	 * variable, so its picker has no variation to match. The only job here is to
+	 * remember the answer and to keep the buy button locked until every group has
+	 * one — the warehouse cannot ship "any colour".
+	 */
+	function pickerFor(pid) {
+		return document.querySelector('[data-hsw-attr-picker][data-hsw-variants="' + pid + '"]');
+	}
+
+	function pickedValues(root) {
+		var out = {};
+		root.querySelectorAll('[data-hsw-pick-group]').forEach(function (g) {
+			var tax = g.getAttribute('data-hsw-pick-group');
+			if (out[tax] === undefined) { out[tax] = ''; }
+		});
+		root.querySelectorAll('[data-hsw-pick].is-active').forEach(function (b) {
+			out[b.getAttribute('data-hsw-pick')] = b.getAttribute('data-hsw-pick-value');
+		});
+		return out;
+	}
+
+	function paintPick(root, tax, value, text) {
+		root.querySelectorAll('[data-hsw-pick]').forEach(function (b) {
+			var on = (b.getAttribute('data-hsw-pick') === tax && b.getAttribute('data-hsw-pick-value') === value);
+			b.classList.toggle('is-active', on);
+			b.setAttribute('aria-pressed', on ? 'true' : 'false');
+		});
+		root.querySelectorAll('[data-hsw-pick-group="' + tax + '"]').forEach(function (g) {
+			var name = g.querySelector('[data-hsw-pick-name]');
+			if (!name) { return; }
+			name.textContent = text || '';
+			name.classList.toggle('is-empty', !text);
+		});
+	}
+
+	/* Returns the label of the first unanswered group, or '' when all are set. */
+	function gateAddButtons(root) {
+		var pid = root.getAttribute('data-hsw-variants') || '';
+		var picked = pickedValues(root);
+		var missing = '';
+
+		root.querySelectorAll('[data-hsw-pick-group]').forEach(function (g) {
+			var tax = g.getAttribute('data-hsw-pick-group');
+			if (!missing && !picked[tax]) {
+				missing = g.getAttribute('data-hsw-pick-label') || tax;
+			}
+		});
+
+		var scopes = pid ? roots(pid) : [root];
+		Array.prototype.forEach.call(scopes, function (scope) {
+			scope.querySelectorAll('[data-hsw-add]').forEach(function (btn) {
+				btn.classList.toggle('is-locked', !!missing);
+				if (missing) {
+					btn.setAttribute('aria-disabled', 'true');
+					btn.setAttribute('data-hsw-need-attr', missing);
+				} else {
+					btn.removeAttribute('aria-disabled');
+					btn.removeAttribute('data-hsw-need-attr');
+				}
+			});
+		});
+
+		return missing;
+	}
+
 	/* ---------- variation matching ---------- */
 	/*
 	 * One selection map covers every picker: the colour role, the primary chip
@@ -250,7 +317,12 @@
 		}
 
 		/* --- color swatch --- */
+		/*
+		 * The simple-product picker reuses the swatch/chip classes for its look,
+		 * but it has no variation to match — let its own branch below handle it.
+		 */
 		var sw = t.closest('.hsw-pvar__swatch, .hsw-pvar__mswatch');
+		if (sw && sw.closest('[data-hsw-attr-picker]')) { sw = null; }
 		if (sw) {
 			var vr = sw.closest('.hsw-pvar');
 			var pid = vr.getAttribute('data-hsw-variants') || vr.getAttribute('data-hsw-product');
@@ -268,6 +340,7 @@
 
 		/* --- attribute chips (ram, ssd, size, …) --- */
 		var chip = t.closest('.hsw-pvar__chip, .hsw-pvar__mchip');
+		if (chip && chip.closest('[data-hsw-attr-picker]')) { chip = null; }
 		if (chip) {
 			var vr2 = chip.closest('.hsw-pvar');
 			var pid2 = vr2.getAttribute('data-hsw-variants') || vr2.getAttribute('data-hsw-product');
@@ -322,16 +395,46 @@
 			return;
 		}
 
-		/* --- add to cart --- */
-		var addBtn = t.closest('[data-hsw-add]');
-		if (addBtn) {
-			var scope3 = addBtn.closest('.hsw-p');
-			if (!scope3 || scope3.hasAttribute('data-hsw-cfp')) { return; }
-			var pid4 = scope3.getAttribute('data-hsw-product');
-			var st4 = state(pid4);
-			addToCart(addBtn, pid4, st4);
+	/* --- attribute picker (simple products) --- */
+	var pickChip = t.closest('[data-hsw-pick]');
+	if (pickChip) {
+		var pickRoot = pickChip.closest('[data-hsw-attr-picker]');
+		if (!pickRoot) { return; }
+		var pickTax = pickChip.getAttribute('data-hsw-pick');
+		var pickVal = pickChip.getAttribute('data-hsw-pick-value');
+		var pickTxt = pickChip.getAttribute('data-hsw-pick-text') || '';
+		var wasOn = pickChip.classList.contains('is-active');
+		paintPick(pickRoot, pickTax, wasOn ? '' : pickVal, wasOn ? '' : pickTxt);
+		gateAddButtons(pickRoot);
+		return;
+	}
+
+	/* --- add to cart --- */
+	var addBtn = t.closest('[data-hsw-add]');
+	if (addBtn) {
+		var scope3 = addBtn.closest('.hsw-p');
+		if (!scope3 || scope3.hasAttribute('data-hsw-cfp')) { return; }
+		var pid4 = scope3.getAttribute('data-hsw-product');
+
+		/* Locked until the colour/size picker has an answer. */
+		if (addBtn.classList.contains('is-locked')) {
+			var need = addBtn.getAttribute('data-hsw-need-attr') || '';
+			var picker = pickerFor(pid4);
+			var tpl = picker ? (picker.getAttribute('data-hsw-pick-msg') || '') : '';
+			var text = tpl ? tpl.replace('%s', need) : ('ابتدا ' + (need || 'ویژگی محصول') + ' را انتخاب کنید.');
+			if (window.HSWFeedback && window.HSWFeedback.toast) {
+				window.HSWFeedback.toast(text, { tone: 'error' });
+			}
+			if (picker && picker.scrollIntoView) {
+				picker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
 			return;
 		}
+
+		var st4 = state(pid4);
+		addToCart(addBtn, pid4, st4);
+		return;
+	}
 	});
 
 	/* ---------- quantity ---------- */
@@ -342,6 +445,11 @@
 			var val = box.querySelector('[data-hsw-qval]');
 			var n = val ? parseInt(String(val.value).replace(/[^0-9]/g, ''), 10) : 1;
 			box.classList.toggle('is-min', !(n > 1));
+		});
+
+		/* A simple product's picker starts unanswered: keep the buy button locked. */
+		document.querySelectorAll('[data-hsw-attr-picker]').forEach(function (root) {
+			gateAddButtons(root);
 		});
 	});
 
@@ -579,6 +687,19 @@
 		body.set('product_id', st.variation && st.variation.id ? st.variation.id : pid);
 		if (st.variation && st.variation.id) { body.set('variation_id', st.variation.id); }
 		body.set('quantity', addQty);
+
+		/*
+		 * Simple product with a colour/size picker: the answer travels with the
+		 * add so WooCommerce can store it on the cart line and the order. A
+		 * variable product never reaches this branch — it sends variation_id.
+		 */
+		var picker = pickerFor(pid);
+		if (picker && !(st.variation && st.variation.id)) {
+			var picked = pickedValues(picker);
+			Object.keys(picked).forEach(function (tax) {
+				if (picked[tax]) { body.set('attribute_' + tax, picked[tax]); }
+			});
+		}
 
 		var url = D.wcAjax || '/?wc-ajax=add_to_cart';
 		fetch(url, {

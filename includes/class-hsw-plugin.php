@@ -30,6 +30,7 @@ final class HSW_Plugin {
 
                 $this->helpers  = new HSW_Helpers();
                 $this->products = new HSW_Products();
+                new HSW_Simple_Attributes();
 
                 HSW_Account::instance();
 
@@ -326,6 +327,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-coupon-messages.php';
                 require_once HSW_DIR . 'includes/class-hsw-composite.php';
                 require_once HSW_DIR . 'includes/class-hsw-products.php';
+                require_once HSW_DIR . 'includes/class-hsw-simple-attributes.php';
                 require_once HSW_DIR . 'includes/class-hsw-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-assets.php';
                 require_once HSW_DIR . 'includes/class-hsw-archive-query.php';

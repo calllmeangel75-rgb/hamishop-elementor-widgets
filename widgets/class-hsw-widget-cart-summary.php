@@ -128,18 +128,28 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 $this->add_control(
                         'show_savings',
                         array(
-                                'label'   => __( 'ردیف سود شما از این خرید', 'hamishop-elementor-widgets' ),
+                                'label'   => __( 'ردیف‌های تخفیف (محصول و کد تخفیف)', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::SWITCHER,
                                 'default' => 'yes',
                         )
                 );
 
                 $this->add_control(
-                        'savings_label',
+                        'saving_product_label',
                         array(
-                                'label'     => __( 'برچسب سود', 'hamishop-elementor-widgets' ),
+                                'label'     => __( 'برچسب تخفیف محصول', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::TEXT,
-                                'default'   => __( 'سود شما از این خرید', 'hamishop-elementor-widgets' ),
+                                'default'   => __( 'تخفیف محصول', 'hamishop-elementor-widgets' ),
+                                'condition' => array( 'show_savings' => 'yes' ),
+                        )
+                );
+
+                $this->add_control(
+                        'saving_coupon_label',
+                        array(
+                                'label'     => __( 'برچسب کد تخفیف', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::TEXT,
+                                'default'   => __( 'کد تخفیف', 'hamishop-elementor-widgets' ),
                                 'condition' => array( 'show_savings' => 'yes' ),
                         )
                 );
@@ -429,13 +439,23 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 if ( $this->is_demo() ) {
                         return $this->demo_totals();
                 }
+
+                /*
+                 * The customer has to be able to tell where the saving comes
+                 * from, so the shop discount and the coupon are separate rows
+                 * instead of one lumped «سود شما».
+                 */
+                $saving = class_exists( 'HSW_Helpers' ) ? HSW_Helpers::savings() : array();
+
                 return array(
-                        'count'    => $this->cart_count(),
-                        'base'     => $this->base_subtotal(),
-                        'savings'  => $this->savings(),
-                        'shipping' => $this->shipping_row(),
-                        'taxes'    => $this->taxes_total(),
-                        'total'    => $this->cart_total(),
+                        'count'          => $this->cart_count(),
+                        'base'           => $this->base_subtotal(),
+                        'savings'        => (float) ( $saving['total'] ?? 0 ),
+                        'saving_product' => (float) ( $saving['product'] ?? 0 ),
+                        'saving_coupon'  => (float) ( $saving['coupon'] ?? 0 ),
+                        'shipping'       => $this->shipping_row(),
+                        'taxes'          => $this->taxes_total(),
+                        'total'          => $this->cart_total(),
                 );
         }
 
@@ -476,13 +496,23 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                         <span class="hsw-csummary__val"><?php echo $this->money( $t['base'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- internal money HTML. ?></span>
                                                 </div>
 
-                                                <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < $t['savings'] ) ) : ?>
+                                                <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < (float) ( $t['saving_product'] ?? 0 ) ) ) : ?>
                                                         <div class="hsw-csummary__row is-save">
                                                                 <span class="hsw-csummary__lbl is-save-lbl">
-                                                                        <span><?php echo esc_html( $this->opt( 'savings_label', __( 'سود شما از این خرید', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                                        <span><?php echo esc_html( $this->opt( 'saving_product_label', __( 'تخفیف محصول', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                                         <?php echo HSW_Helpers::icon( 'percent' ); ?>
                                                                 </span>
-                                                                <span class="hsw-csummary__val is-save-v"><?php echo esc_html( $this->money( -1 * $t['savings'], false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
+                                                                <span class="hsw-csummary__val is-save-v"><?php echo esc_html( $this->money( -1 * (float) ( $t['saving_product'] ?? 0 ), false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
+                                                        </div>
+                                                <?php endif; ?>
+
+                                                <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < (float) ( $t['saving_coupon'] ?? 0 ) ) ) : ?>
+                                                        <div class="hsw-csummary__row is-save">
+                                                                <span class="hsw-csummary__lbl is-save-lbl">
+                                                                        <span><?php echo esc_html( $this->opt( 'saving_coupon_label', __( 'کد تخفیف', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                                        <?php echo HSW_Helpers::icon( 'sell' ); ?>
+                                                                </span>
+                                                                <span class="hsw-csummary__val is-save-v"><?php echo esc_html( $this->money( -1 * (float) ( $t['saving_coupon'] ?? 0 ), false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
                                                         </div>
                                                 <?php endif; ?>
 
@@ -576,13 +606,23 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                         <span class="hsw-csummary__mval"><?php echo esc_html( $this->money( $t['base'] ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
                                 </div>
 
-                                <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < $t['savings'] ) ) : ?>
+                                <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < (float) ( $t['saving_product'] ?? 0 ) ) ) : ?>
                                         <div class="hsw-csummary__mrow is-save">
                                                 <span class="hsw-csummary__lbl is-save-lbl">
-                                                        <?php echo HSW_Helpers::icon( 'savings' ); ?>
-                                                        <span><?php echo esc_html( $this->opt( 'savings_label', __( 'سود شما از این خرید', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                        <?php echo HSW_Helpers::icon( 'percent' ); ?>
+                                                        <span><?php echo esc_html( $this->opt( 'saving_product_label', __( 'تخفیف محصول', 'hamishop-elementor-widgets' ) ) ); ?></span>
                                                 </span>
-                                                <span class="hsw-csummary__mval is-save-v"><?php echo esc_html( $this->money( -1 * $t['savings'], false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
+                                                <span class="hsw-csummary__mval is-save-v"><?php echo esc_html( $this->money( -1 * (float) ( $t['saving_product'] ?? 0 ), false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
+                                        </div>
+                                <?php endif; ?>
+
+                                <?php if ( 'yes' === ( $s['show_savings'] ?? 'yes' ) && ( $demo || 0 < (float) ( $t['saving_coupon'] ?? 0 ) ) ) : ?>
+                                        <div class="hsw-csummary__mrow is-save">
+                                                <span class="hsw-csummary__lbl is-save-lbl">
+                                                        <?php echo HSW_Helpers::icon( 'sell' ); ?>
+                                                        <span><?php echo esc_html( $this->opt( 'saving_coupon_label', __( 'کد تخفیف', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                </span>
+                                                <span class="hsw-csummary__mval is-save-v"><?php echo esc_html( $this->money( -1 * (float) ( $t['saving_coupon'] ?? 0 ), false, true ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
                                         </div>
                                 <?php endif; ?>
 

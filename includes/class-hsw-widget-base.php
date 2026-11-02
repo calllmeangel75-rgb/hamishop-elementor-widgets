@@ -492,14 +492,17 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 $badge = '';
 
                 if ( ! $oos && ! HSW_Helpers::is_call_for_price( $product ) && ! empty( $args['show_badge'] ) ) {
-                        $percent = HSW_Helpers::discount_percent( $product );
+                        $badge_d = HSW_Helpers::discount_badge( $product );
+                        $percent = (int) $badge_d['percent'];
+                        /* «تا ۲۵٪» when the discount belongs to another variation. */
+                        $prefix  = ! empty( $badge_d['up_to'] ) ? __( 'تا', 'hamishop-elementor-widgets' ) . ' ' : '';
                         $mod     = '';
                         $text    = '';
                         $label   = '';
 
                         if ( 'deal' === $type && $percent > 0 ) {
                                 $mod   = 'sale';
-                                $text  = HSW_Helpers::fa_num( $percent ) . '٪';
+                                $text  = $prefix . HSW_Helpers::fa_num( $percent ) . '٪';
                                 $label = $text . ' ' . $args['txt_sale'];
                         } elseif ( 'popular' === $type ) {
                                 $featured = $product->is_featured();
@@ -510,7 +513,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                         $label = $text;
                                 } elseif ( $percent > 0 ) {
                                         $mod   = 'sale';
-                                        $text  = HSW_Helpers::fa_num( $percent ) . '٪';
+                                        $text  = $prefix . HSW_Helpers::fa_num( $percent ) . '٪';
                                         $label = $text . ' ' . $args['txt_sale'];
                                 } elseif ( $ship_min > 0 && (float) $product->get_price() >= $ship_min ) {
                                         $mod   = 'ship';

@@ -235,12 +235,16 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $d = $this->demo();
 
                 /*
-                 * A simple product has no variation to select. A visible
-                 * colour attribute on one is just a specification, and showing
-                 * swatches for it would promise a price/stock/cart change that
-                 * cannot happen. The specs widget still prints it.
+                 * A simple product has no variation to select — but it can still
+                 * carry a visible colour attribute, and then the customer has to
+                 * be able to say which colour. Those attributes get a picker of
+                 * their own; everything below this line is variation machinery.
                  */
                 if ( $product && ! $product->is_type( 'variable' ) ) {
+                        $pickable = $this->pickable_attributes( $product );
+                        if ( $pickable ) {
+                                echo $this->simple_picker_html( $product, $pickable ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside.
+                        }
                         return;
                 }
 
@@ -463,5 +467,109 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                         </div>
                 </div>
                 <?php
+        }
+
+        /**
+         * Picker for a simple product's visible attributes.
+         *
+         * Same markup and classes as the variation picker, minus the variation
+         * data: no chip starts selected, and every group reports its choice
+         * through `data-hsw-pick` so the buy button can stay locked until each
+         * group has an answer.
+         *
+         * @param WC_Product $product Product.
+         * @param array      $groups  Output of pickable_attributes().
+         * @return string
+         */
+        protected function simple_picker_html( $product, $groups ) {
+                $pid  = $product->get_id();
+                $hint = __( 'انتخاب کنید', 'hamishop-elementor-widgets' );
+
+                $out = '<div class="' . esc_attr( $this->root_class( 'pvar' ) ) . '" data-hsw-variants="' . esc_attr( $pid ) . '" data-hsw-attr-picker="1"'
+                        . ' data-hsw-pick-msg="' . esc_attr__( 'برای افزودن به سبد، ابتدا %s را انتخاب کنید.', 'hamishop-elementor-widgets' ) . '">';
+
+                /* ---------------- desktop ---------------- */
+                $out .= '<div class="hsw-d">';
+                foreach ( $groups as $group ) {
+                        $is_color = ( 'color' === $group['type'] );
+
+                        $out .= '<div class="hsw-pvar__group" data-hsw-pick-group="' . esc_attr( $group['tax'] ) . '" data-hsw-pick-label="' . esc_attr( $group['label'] ) . '">';
+                        $out .= '<div class="hsw-pvar__head"><span class="hsw-pvar__label">' . esc_html( $group['label'] ) . ': ';
+                        $out .= '<strong class="hsw-pvar__selname is-empty" data-hsw-pick-name>' . esc_html( $hint ) . '</strong></span></div>';
+                        $out .= $is_color ? '<div class="hsw-pvar__swatches">' : '<div class="hsw-pvar__chips">';
+
+                        foreach ( $group['terms'] as $term ) {
+                                $hex = (string) $term['hex'];
+                                $cls = $is_color ? 'hsw-pvar__swatch' : 'hsw-pvar__chip';
+                                if ( $is_color && '' === $hex ) {
+                                        $cls .= ' hsw-pvar__swatch--named';
+                                }
+
+                                $out .= '<button type="button" class="' . esc_attr( $cls ) . '"'
+                                        . ' data-hsw-pick="' . esc_attr( $group['tax'] ) . '"'
+                                        . ' data-hsw-pick-value="' . esc_attr( $term['slug'] ) . '"'
+                                        . ' data-hsw-pick-text="' . esc_attr( $term['name'] ) . '"'
+                                        . ' aria-pressed="false"'
+                                        . ( $is_color && '' !== $hex ? ' style="--sw:' . esc_attr( $hex ) . '"' : '' )
+                                        . ' aria-label="' . esc_attr( $term['name'] ) . '">';
+
+                                if ( $is_color ) {
+                                        $out .= '' !== $hex
+                                                ? '<span class="hsw-pvar__swdot"></span>'
+                                                : '<span class="hsw-pvar__swname">' . esc_html( $term['name'] ) . '</span>';
+                                } else {
+                                        $out .= esc_html( $term['name'] );
+                                }
+
+                                $out .= '</button>';
+                        }
+
+                        $out .= '</div></div>';
+                }
+                $out .= '</div>';
+
+                /* ---------------- mobile ---------------- */
+                $out .= '<div class="hsw-m">';
+                foreach ( $groups as $group ) {
+                        $is_color = ( 'color' === $group['type'] );
+
+                        $out .= '<div class="hsw-pvar__mcard" data-hsw-pick-group="' . esc_attr( $group['tax'] ) . '" data-hsw-pick-label="' . esc_attr( $group['label'] ) . '">';
+                        $out .= '<div class="hsw-pvar__head"><span class="hsw-pvar__label">' . esc_html( $group['label'] ) . ':</span>';
+                        $out .= '<span class="hsw-pvar__label hsw-pvar__selname is-empty" data-hsw-pick-name>' . esc_html( $hint ) . '</span></div>';
+                        $out .= $is_color ? '<div class="hsw-pvar__swatches">' : '<div class="hsw-pvar__mchips">';
+
+                        foreach ( $group['terms'] as $term ) {
+                                $hex = (string) $term['hex'];
+                                $cls = $is_color ? 'hsw-pvar__mswatch' : 'hsw-pvar__mchip';
+                                if ( $is_color && '' === $hex ) {
+                                        $cls .= ' hsw-pvar__mswatch--named';
+                                }
+
+                                $out .= '<button type="button" class="' . esc_attr( $cls ) . '"'
+                                        . ' data-hsw-pick="' . esc_attr( $group['tax'] ) . '"'
+                                        . ' data-hsw-pick-value="' . esc_attr( $term['slug'] ) . '"'
+                                        . ' data-hsw-pick-text="' . esc_attr( $term['name'] ) . '"'
+                                        . ' aria-pressed="false"'
+                                        . ( $is_color && '' !== $hex ? ' style="--sw:' . esc_attr( $hex ) . '"' : '' )
+                                        . ' aria-label="' . esc_attr( $term['name'] ) . '">';
+
+                                if ( $is_color ) {
+                                        $out .= '' !== $hex
+                                                ? '<span class="hsw-pvar__swdot"></span>'
+                                                : '<span class="hsw-pvar__swname">' . esc_html( $term['name'] ) . '</span>';
+                                } else {
+                                        $out .= esc_html( $term['name'] );
+                                }
+
+                                $out .= '</button>';
+                        }
+
+                        $out .= '</div></div>';
+                }
+                $out .= '</div>';
+
+                $out .= '</div>';
+
+                return $out;
         }
 }

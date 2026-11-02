@@ -209,6 +209,11 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                 $hidden   = ( 0 === $discount ) ? ' style="display:none"' : '';
                 $is_fixed = ( 'yes' === ( $s['sticky_fixed'] ?? 'yes' ) );
                 $static   = $is_fixed ? '' : ' style="position:static"';
+
+                /* Same lock as the purchase box: no colour picked, no add. */
+                $need_picks = ( ! $cfp && $product ) ? $this->pickable_attributes( $product ) : array();
+                $lock_class = $need_picks ? ' is-locked' : '';
+                $lock_attr  = $need_picks ? ' aria-disabled="true" data-hsw-need-attr="' . esc_attr( $need_picks[0]['label'] ) . '"' : '';
                 ?>
                 <aside class="<?php echo esc_attr( $classes ); ?>" data-hsw-product="<?php echo esc_attr( $pid ); ?>"<?php echo $cfp ? ' data-hsw-cfp="1"' : ''; ?><?php echo $static; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>>
                         <div class="hsw-psticky__inner">
@@ -252,7 +257,7 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                                                                         <?php echo HSW_Helpers::icon( 'delete' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 </button>
                                                         </div>
-                                                        <button type="button" class="hsw-psticky__cart" data-hsw-add>
+                                                        <button type="button" class="hsw-psticky__cart<?php echo esc_attr( $lock_class ); ?>" data-hsw-add<?php echo $lock_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr above. ?>>
                                                                 <?php echo HSW_Helpers::icon( 'shopping_cart' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
                                                                 <span><?php echo esc_html( $cart_text ); ?></span>
                                                         </button>

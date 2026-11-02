@@ -431,6 +431,16 @@
 }
 .hsw-pvar__label { font-size: 14px; line-height: 22px; font-weight: 600; color: var(--hsw-var-label, var(--hsw-on-surface, #191c1e)); }
 .hsw-pvar__selname { font-weight: 700; color: var(--hsw-var-sel, var(--hsw-primary, #4d85ff)); }
+/* A group the customer has not answered yet (simple-product picker). */
+.hsw-pvar__selname.is-empty { color: var(--hsw-muted, #75777f); font-weight: 500; }
+
+/* Buy button locked until every picker group has an answer. */
+.hsw-ppurch__cart.is-locked,
+.hsw-psticky__cart.is-locked {
+        opacity: .55;
+        cursor: not-allowed;
+        filter: grayscale(.15);
+}
 .hsw-pvar__swatches { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .hsw-pvar__swatch {
         width: 36px;

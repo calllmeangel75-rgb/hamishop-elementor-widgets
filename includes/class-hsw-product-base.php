@@ -151,6 +151,94 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         }
 
         /**
+         * Attributes a **simple** product asks the customer to pick.
+         *
+         * A simple product has no variations, so WooCommerce prints its
+         * attributes as a specification row and nothing else. A shop that sells
+         * one product in three colours therefore had no way to let the customer
+         * say which colour — the archive's colour filter knew the terms, the
+         * product page did not. Every visible attribute with more than one
+         * option becomes a picker; the buy button stays locked until each one is
+         * answered.
+         *
+         * @param WC_Product|null $product Product.
+         * @return array<int,array{tax:string,label:string,type:string,terms:array<int,array{slug:string,name:string,hex:string}>}>
+         */
+        protected function pickable_attributes( $product ) {
+                if ( ! $product instanceof WC_Product || ! $product->is_type( 'simple' ) ) {
+                        return array();
+                }
+
+                $out = array();
+
+                foreach ( $product->get_attributes() as $attribute ) {
+                        if ( ! $attribute instanceof WC_Product_Attribute ) {
+                                continue;
+                        }
+                        /* Hidden specs stay specs; variation attributes belong to the variation picker. */
+                        if ( ! $attribute->get_visible() || $attribute->get_variation() ) {
+                                continue;
+                        }
+
+                        $taxonomy = (string) $attribute->get_name();
+                        $terms    = array();
+
+                        if ( $attribute->is_taxonomy() ) {
+                                $list = wc_get_product_terms( $product->get_id(), $taxonomy, array( 'fields' => 'all' ) );
+                                if ( is_wp_error( $list ) ) {
+                                        continue;
+                                }
+                                foreach ( $list as $term ) {
+                                        $hex = '';
+                                        foreach ( array( 'color', 'colour' ) as $meta_key ) {
+                                                $maybe = get_term_meta( $term->term_id, $meta_key, true );
+                                                if ( is_string( $maybe ) && '' !== trim( $maybe ) ) {
+                                                        $hex = trim( $maybe );
+                                                        break;
+                                                }
+                                        }
+                                        $terms[] = array(
+                                                'slug' => (string) $term->slug,
+                                                'name' => (string) $term->name,
+                                                'hex'  => $hex,
+                                        );
+                                }
+                        } else {
+                                foreach ( (array) $attribute->get_options() as $value ) {
+                                        $value = trim( (string) $value );
+                                        if ( '' === $value ) {
+                                                continue;
+                                        }
+                                        $terms[] = array(
+                                                'slug' => sanitize_title( $value ),
+                                                'name' => $value,
+                                                'hex'  => '',
+                                        );
+                                }
+                        }
+
+                        /* One option is not a question — nothing to ask. */
+                        if ( count( $terms ) < 2 ) {
+                                continue;
+                        }
+
+                        $label = $attribute->is_taxonomy()
+                                ? wc_attribute_label( $taxonomy, $product )
+                                : (string) $attribute->get_name();
+
+                        $probe = strtolower( $taxonomy . ' ' . $label );
+                        $out[] = array(
+                                'tax'   => $taxonomy,
+                                'label' => $label,
+                                'type'  => ( false !== strpos( $probe, 'color' ) || false !== strpos( $probe, 'colour' ) || false !== strpos( $label, 'رنگ' ) ) ? 'color' : 'text',
+                                'terms' => $terms,
+                        );
+                }
+
+                return $out;
+        }
+
+        /**
          * Full variations payload for the JS variant engine.
          * Attribute values are resolved to display labels (term names).
          */

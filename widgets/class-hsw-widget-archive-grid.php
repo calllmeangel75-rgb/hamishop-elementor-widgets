@@ -328,7 +328,9 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 $reg      = (float) wc_get_price_to_display( $product, array( 'price' => $reg_raw ) );
                                 $price    = HSW_Helpers::price_num( $sale > 0 ? $sale : $reg );
                                 $regular  = ( $reg > 0 && $sale > 0 && $sale < $reg ) ? HSW_Helpers::price_num( $reg ) : '';
-                                $discount = HSW_Helpers::discount_percent( $product );
+                                $badge_d  = HSW_Helpers::discount_badge( $product );
+                                $discount = (int) $badge_d['percent'];
+                                $up_to    = ! empty( $badge_d['up_to'] );
                                 $badge    = ( $discount > 0 ) ? 'sale' : ( $product->is_featured() ? 'featured' : '' );
                                 $addable  = $product->is_type( 'simple' ) && $product->is_in_stock() && $product->is_purchasable();
                         }
@@ -369,7 +371,7 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                         <?php if ( 'sale' === $badge || 'featured' === $badge ) : ?>
                                 <div class="hsw-ag__badges">
                                         <?php if ( 'sale' === $badge ) : ?>
-                                                <span class="hsw-ag__badge hsw-ag__badge--sale"><span class="hsw-d"><?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>٪ <?php esc_html_e( 'تخفیف', 'hamishop-elementor-widgets' ); ?></span><span class="hsw-m"><?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>٪</span></span>
+                                                <span class="hsw-ag__badge hsw-ag__badge--sale"><span class="hsw-d"><?php echo $up_to ? esc_html__( 'تا', 'hamishop-elementor-widgets' ) . ' ' : ''; ?><?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>٪ <?php esc_html_e( 'تخفیف', 'hamishop-elementor-widgets' ); ?></span><span class="hsw-m"><?php echo $up_to ? esc_html__( 'تا', 'hamishop-elementor-widgets' ) . ' ' : ''; ?><?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>٪</span></span>
                                         <?php else : ?>
                                                 <span class="hsw-ag__badge hsw-ag__badge--featured"><span class="hsw-d"><?php esc_html_e( 'پیشنهاد ویژه', 'hamishop-elementor-widgets' ); ?></span><span class="hsw-m"><?php esc_html_e( 'ویژه', 'hamishop-elementor-widgets' ); ?></span></span>
                                         <?php endif; ?>

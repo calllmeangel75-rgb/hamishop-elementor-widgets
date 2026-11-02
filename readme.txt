@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.200
+Stable tag: 1.11.201
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,27 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.201 =
+* New: a simple product with a visible colour attribute now gets a real picker. The buy
+  button starts locked (`aria-disabled`) and a click tells the customer which attribute
+  is missing, then scrolls them to it. The pick is stored on the cart line, shown in the
+  cart and the header drawer, and copied to the order line item, so the warehouse knows
+  which colour to ship. Two colours = two cart lines. Variable products are untouched.
+* New: «تا ۲۵٪ تخفیف» for a variable product whose cheapest variation is not on sale but
+  another one is — `HSW_Helpers::discount_badge()` returns the percentage plus an `up_to`
+  flag, and the archive card, the product gallery badge and the loop badges all use it.
+  `discount_percent()` still returns the number for existing callers.
+* New: the saving row splits in two — «تخفیف محصول» and «کد تخفیف» — in the cart summary,
+  checkout, payment and the cart items line, so the customer can see where the money came
+  from. A single source keeps the old one-line markup. Labels are editable in Elementor.
+* Fix: `hsw-fonts.css` had one closing brace too many (120 `{` against 121 `}`). A strict
+  minifier silently dropped the global widget font rule after it; the file is balanced now.
+* Fix: the simple-product picker reused the variation chip classes, so the variation click
+  handler swallowed the click. That branch now ignores chips inside `[data-hsw-attr-picker]`.
+* Tests: picker lock/unlock/notice, add-to-cart payload, cart line, header drawer, order
+  item meta (رنگ = سبز), the «تا» badge on archive + product page, split savings with a 50%
+  coupon, and the variable-product picker still switching price (798,600 → 66,550).
 
 = 1.11.200 =
 * Fix: a variable product was badged «۹۲٪ تخفیف» in the archive while its own product

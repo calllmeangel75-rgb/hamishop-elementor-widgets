@@ -239,6 +239,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                         $data     = $this->demo();
                         $images   = isset( $data['gallery'] ) && ! empty( $data['gallery'] ) ? $data['gallery'] : array( $placeholder );
                         $discount = isset( $data['discount'] ) ? (int) $data['discount'] : 0;
+                        $up_to    = false;
                         $title    = isset( $data['name'] ) ? $data['name'] : '';
                 } else {
                         if ( ! $product ) {
@@ -253,7 +254,9 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                 $images = array( $placeholder );
                         }
                         $prices   = $this->display_prices( $product );
-                        $discount = (int) $prices['discount'];
+                        $badge_d  = HSW_Helpers::discount_badge( $product );
+                        $discount = (int) $badge_d['percent'];
+                        $up_to    = ! empty( $badge_d['up_to'] );
                         $title    = $product->get_name();
                 }
 
@@ -278,7 +281,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                         $thumb_ids = ( $limit > 0 ) ? array_slice( $ids, 0, $limit ) : $ids;
                 }
                 $thumb_px = isset( $s['gal_thumb_size']['size'] ) ? max( 32, (int) $s['gal_thumb_size']['size'] ) : 64;
-                $badge  = HSW_Helpers::fa_num( $discount ) . '٪ ' . __( 'تخفیف', 'hamishop-elementor-widgets' );
+                $badge  = ( ! empty( $up_to ) ? __( 'تا', 'hamishop-elementor-widgets' ) . ' ' : '' ) . HSW_Helpers::fa_num( $discount ) . '٪ ' . __( 'تخفیف', 'hamishop-elementor-widgets' );
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'pgal' ) ); ?>" data-hsw-images="<?php echo esc_attr( (string) wp_json_encode( array_values( $images ) ) ); ?>">
                         <div class="hsw-pgal__card">

@@ -292,6 +292,20 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 $has_discount = ( $discount > 0 );
                 $hide_attr    = $has_discount ? '' : ' style="display:none"';
 
+                /*
+                 * A simple product with a visible colour/size attribute needs an
+                 * answer before it can go to the cart: the warehouse cannot ship
+                 * "any colour". The button therefore starts locked and the JS
+                 * unlocks it once every picker group has a value.
+                 */
+                $need_picks = ( ! $demo && $product && ! $cfp ) ? $this->pickable_attributes( $product ) : array();
+                $lock_attr  = '';
+                $lock_class = '';
+                if ( $need_picks ) {
+                        $lock_class = ' is-locked';
+                        $lock_attr  = ' aria-disabled="true" data-hsw-need-attr="' . esc_attr( $need_picks[0]['label'] ) . '"';
+                }
+
                 $cart_text = ( isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ) ? $s['cart_text'] : __( 'خرید آنلاین', 'hamishop-elementor-widgets' );
                 $qty_max   = isset( $s['qty_max'] ) ? max( 1, (int) $s['qty_max'] ) : 99;
 
@@ -392,7 +406,7 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                                         <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></button>
                                                 </div>
                                         </div>
-                                        <button type="button" class="hsw-ppurch__cart" data-hsw-add>
+                                        <button type="button" class="hsw-ppurch__cart<?php echo esc_attr( $lock_class ); ?>" data-hsw-add<?php echo $lock_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr above. ?>>
                                                 <?php /* Icon after the label: in RTL it lands on the left edge, like the reference. */ ?>
                                                 <span><?php echo esc_html( $cart_text ); ?></span>
                                                 <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
