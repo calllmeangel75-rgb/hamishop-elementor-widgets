@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.193
+Stable tag: 1.11.194
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.194 =
+* Perf: the mobile filter/sort sheets left the normal flow only after `hsw-archive.js`
+  ran, shrinking the document by 219px after the first paint — one 0.134 layout-shift
+  event, 76% of the page CLS. `hsw-js` is now set in the head, before the first paint,
+  so the no-JS fallback never applies on a JS-capable page. Archive CLS 0.175 -> 0.006.
+* Perf: the header logo declared `sizes="38vw"` (156px on a phone) for a box the CSS
+  caps at 34px, so a 300x300 file was downloaded into 60px while a 100w candidate sat
+  unused. `sizes` is computed from the height control and the image ratio now.
+* Perf: the logo is `loading="eager"` with `skip-lazy`/`data-no-lazy`, so LiteSpeed and
+  WP Rocket stop replacing the brand mark with a 1x1 GIF.
+* Tests: new `tests/qa/prelive-perf.php` (9 cases).
 
 = 1.11.193 =
 * **حالت «نوار تک‌خطی» برای بازخورد افزودن به سبد کار نمی‌کرد.**

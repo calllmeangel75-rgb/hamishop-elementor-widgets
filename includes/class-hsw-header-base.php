@@ -233,21 +233,49 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			 * logos use the space they need without forcing a square box.
 			 * Declare that width so the browser can pick a suitable file.
 			 */
+			/*
+			 * `sizes` must describe the RENDERED box, not the widest the box is
+			 * allowed to get: the browser picks the srcset candidate from it.
+			 * It said 38vw — 156px on a 412px phone — for a logo the CSS caps at
+			 * `--hsw-hd-logow` (44px by default, 34px on mobile), so a 25.5 KB
+			 * 300x300 file was downloaded into a 60px box while a 100w
+			 * candidate sat unused in the same srcset. The rendered width is
+			 * height x ratio, and the desktop control value is the largest of
+			 * the responsive ones, so it covers every breakpoint; `38vw` stays
+			 * as the second term because a very wide logo really is capped by
+			 * the viewport on a phone.
+			 */
+			$logo_cap   = isset( $s['logo_width']['size'] ) ? (float) $s['logo_width']['size'] : 44.0;
+			$logo_box   = $logo_ratio > 0 ? (int) round( $logo_ratio * max( 1.0, $logo_cap ) ) : 0;
+			/* The CSS also caps at the file's own width, so never claim more. */
+			if ( $logo_box > 0 && $logo_width > 0 ) {
+				$logo_box = min( $logo_box, $logo_width );
+			}
+			$logo_sizes = $logo_box > 0 ? 'min(' . $logo_box . 'px, 38vw)' : '(max-width: 767px) 38vw, 264px';
+
 			$logo = wp_get_attachment_image(
 				$logo_id,
 				array( 320, 320 ),
 				false,
 				array(
-					'class'         => 'hsw-hd__logoimg',
+					/*
+					 * The logo is the top of the page: LiteSpeed Cache and WP
+					 * Rocket swap any image without `skip-lazy` for a 1x1 GIF
+					 * and load it after the JS, which is what turned a static
+					 * brand mark into a late arrival. Same two hints the archive
+					 * card uses for its first image.
+					 */
+					'class'         => 'hsw-hd__logoimg skip-lazy',
 					'alt'           => $aria_name,
-					'sizes'         => '(max-width: 767px) 38vw, 264px',
-					'fetchpriority' => 'high',
+					'sizes'         => $logo_sizes,
+					'loading'       => 'eager',
+					'data-no-lazy'  => '1',
 					'decoding'      => 'async',
 				)
 			);
 		}
 		if ( ! $logo && ! empty( $s['logo']['url'] ) ) {
-			$logo = '<img class="hsw-hd__logoimg" src="' . esc_url( $s['logo']['url'] ) . '" alt="' . esc_attr( $aria_name ) . '" loading="lazy" decoding="async">';
+			$logo = '<img class="hsw-hd__logoimg skip-lazy" src="' . esc_url( $s['logo']['url'] ) . '" alt="' . esc_attr( $aria_name ) . '" loading="eager" fetchpriority="high" data-no-lazy="1" decoding="async">';
 		}
 
 		$shine        = isset( $s['logo_shine'] ) && 'yes' === $s['logo_shine'];

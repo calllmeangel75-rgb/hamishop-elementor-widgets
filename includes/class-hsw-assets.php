@@ -17,6 +17,7 @@ class HSW_Assets {
                 add_action( 'wp', array( $this, 'tweak_theme_a11y' ) );
                 add_action( 'wp_head', array( $this, 'preload_font' ), 4 );
                 add_action( 'wp_head', array( $this, 'print_layout_guard' ), 2 );
+                add_action( 'wp_head', array( $this, 'print_js_flag' ), 2 );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
@@ -199,6 +200,33 @@ class HSW_Assets {
                      */
                     . '@media(max-width:767.98px){.hsw-cp--archive .hsw-cp__body>.hsw-cp__col--side{display:none}}'
                     . '</style>' . "\n";
+        }
+
+        /**
+         * Mark the document as JS-capable in the head, before the first paint.
+         *
+         * `hsw-archive.js` sets `hsw-js` on <html> as well, but it is a footer
+         * script: until it runs, every `html:not(.hsw-js)` rule applies and the
+         * mobile filter/sort sheets are the no-JS fallback — `position: static`,
+         * in the normal flow, 219px tall on /shop/. The moment the class lands
+         * they become `position: fixed`, the document shrinks by their height
+         * and the whole product grid jumps up. Measured on the live shop with
+         * Lighthouse throttling: a single 0.134 layout-shift event, 76% of the
+         * page's total CLS.
+         *
+         * Setting the flag here removes the fallback BEFORE the first paint
+         * instead of after it. It stays a script and not a `<noscript>` swap on
+         * purpose: with JavaScript off it never runs, `html:not(.hsw-js)` keeps
+         * the sheets inline, and the filters stay usable without JS.
+         *
+         * @return void
+         */
+        public function print_js_flag() {
+                if ( is_admin() || ! (bool) apply_filters( 'hsw_js_flag', true ) ) {
+                        return;
+                }
+
+                echo '<script id="hsw-js-flag">document.documentElement.classList.add("hsw-js")</script>' . "\n";
         }
 
         /**
