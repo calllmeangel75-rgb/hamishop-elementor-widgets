@@ -210,40 +210,52 @@ class HSW_Header_Cascade {
 			return $cache[ $key ];
 		}
 
-		$args = array(
-			'taxonomy'   => 'product_cat',
-			'hide_empty' => true,
-			'parent'     => $parent,
-			'orderby'    => 'name',
-			'order'      => 'ASC',
-		);
-		if ( $limit > 0 ) {
-			/*
-			 * Fetch a couple of spares: the default/uncategorized term is
-			 * filtered below, and asking for exactly N would otherwise show
-			 * N-1 rows for every setting.
-			 */
-			$args['number'] = $limit + 2;
+		/*
+		 * One query per parent, whatever limit the caller asks for.
+		 *
+		 * The search box wants 12 root categories and the mega menu wants 5, and
+		 * a LIMIT in the query gave each of them its own term query — two
+		 * identical JOINs of wp_terms/wp_term_taxonomy on every page that shows
+		 * the header. Root categories are a handful even on a large catalogue,
+		 * so the full list is fetched once and sliced in PHP.
+		 *
+		 * Children keep the LIMIT: a deep category can hold hundreds of terms
+		 * and only the expanded column needs them.
+		 */
+		$all_key = ( 0 === $parent ) ? 'all|0' : $key;
+		if ( ! isset( $cache[ $all_key ] ) ) {
+			$args = array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => true,
+				'parent'     => $parent,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			);
+			if ( $parent > 0 && $limit > 0 ) {
+				/* A couple of spares: the default term is filtered below. */
+				$args['number'] = $limit + 2;
+			}
+
+			$terms = get_terms( $args );
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				$cache[ $all_key ] = array();
+			} else {
+				$default_id        = (int) get_option( 'default_product_cat', 0 );
+				$cache[ $all_key ] = array_values(
+					array_filter(
+						$terms,
+						static function ( $term ) use ( $default_id ) {
+							if ( $default_id && (int) $term->term_id === $default_id ) {
+								return false;
+							}
+							return ! in_array( $term->slug, array( 'uncategorized', 'بدون-دسته‌بندی' ), true );
+						}
+					)
+				);
+			}
 		}
 
-		$terms = get_terms( $args );
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			$cache[ $key ] = array();
-			return $cache[ $key ];
-		}
-
-		$default_id = (int) get_option( 'default_product_cat', 0 );
-		$terms      = array_values(
-			array_filter(
-				$terms,
-				static function ( $term ) use ( $default_id ) {
-					if ( $default_id && (int) $term->term_id === $default_id ) {
-						return false;
-					}
-					return ! in_array( $term->slug, array( 'uncategorized', 'بدون-دسته‌بندی' ), true );
-				}
-			)
-		);
+		$terms = $cache[ $all_key ];
 
 		if ( $limit > 0 && count( $terms ) > $limit ) {
 			$terms = array_slice( $terms, 0, $limit );

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.198
+Stable tag: 1.11.199
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,24 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.199 =
+* Fix: in hover mode, clicking the category trigger closed the menu the pointer had
+  just opened (`mouseenter` opened it, the same click toggled it shut). A pointer click
+  now keeps it open; it still closes on pointer-leave or Escape, and keyboard
+  activation still toggles.
+* Fix: a cascade row never received `is-open`. `itemForNode()` only matched
+  `[data-hsw-hd-mega-item]`, while the cascade renders `.hsw-hd__cascadeitem` — so the
+  CSS highlight, the chevron flip and the sibling collapse all keyed off a class that
+  was never set.
+* Perf: the search box asked for 12 root categories and the mega menu for 5, and the
+  LIMIT sat in the query, so every page ran two identical `wp_terms`/`wp_term_taxonomy`
+  joins. Root categories are now fetched once and sliced in PHP (children keep their
+  LIMIT). Header: 9 -> 8 queries.
+* Perf: `hsw-header.min.js` rebuilt with terser, 26.8KB -> 18.7KB.
+* Tests: real Chromium at 1440x900 and 390x844 — sticky/placeholder, hide-on-scroll,
+  return-on-scroll-up, mega hover + click, cascade column over REST, cart drawer,
+  mobile drawer + submenu accordion, mobile search panel; zero console errors.
 
 = 1.11.198 =
 * Fix: the pay button refused every new customer with «مقدار «نام خانوادگی» را کامل

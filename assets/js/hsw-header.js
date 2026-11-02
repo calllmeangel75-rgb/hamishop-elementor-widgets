@@ -402,8 +402,15 @@
 				return megaCascade ? all(megaCascade, '[data-hsw-hd-mega-col]') : [];
 			};
 
+			/*
+			 * The row that owns a node is the <li> around it. The cascade markup
+			 * uses `.hsw-hd__cascadeitem`; `[data-hsw-hd-mega-item]` is the older
+			 * flat-mega markup. Matching only the attribute meant the cascade row
+			 * never received `is-open` — the CSS highlight, the chevron flip and
+			 * the sibling collapse all key off that class.
+			 */
 			var itemForNode = function (node) {
-				return node ? node.closest('[data-hsw-hd-mega-item]') : null;
+				return node ? node.closest('[data-hsw-hd-mega-item], .hsw-hd__cascadeitem') : null;
 			};
 
 			var setNodeOpen = function (node, open) {
@@ -626,6 +633,17 @@
 
 			megaButton.addEventListener('click', function (event) {
 				event.preventDefault();
+				/*
+				 * In hover mode the pointer has already opened the menu by the
+				 * time the click lands, so toggling here shut a menu the user
+				 * was looking at — it read as "the button is broken". A pointer
+				 * click keeps it open; the menu closes when the pointer leaves,
+				 * or with Escape. Keyboard activation still toggles.
+				 */
+				if (mega.classList.contains('hsw-hd__mega--hover') && event.detail > 0) {
+					setMegaOpen(true);
+					return;
+				}
 				setMegaOpen(!mega.classList.contains('is-open'));
 			});
 
