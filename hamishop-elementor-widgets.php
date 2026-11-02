@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک با دارایی‌های لوکال و بارگذاری شرطی.
- * Version:     1.11.203
+ * Version:     1.11.204
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -29,21 +29,55 @@ defined( 'ABSPATH' ) || exit;
  * nothing and shows a notice instead.
  */
 if ( defined( 'HSW_VERSION' ) ) {
+        /*
+         * This copy never boots, so it never reaches the
+         * `FeaturesUtil::declare_compatibility()` call in HSW_Plugin. WooCommerce
+         * scans every *active* plugin for that declaration, so the inert copy
+         * showed up in «ناسازگاری افزونهها» next to the real one — the warning
+         * the shop owner saw. Declare it here too: this file really is inert,
+         * and the feature it is being judged on is handled by the running copy.
+         */
+        add_action(
+                'before_woocommerce_init',
+                function () {
+                        if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+                                \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+                        }
+                }
+        );
+
         if ( is_admin() ) {
                 add_action( 'admin_notices', function () {
                         if ( ! current_user_can( 'activate_plugins' ) ) {
                                 return;
                         }
+
+                        /* Name both folders: "delete the extra one" is useless when
+                           both rows in the list carry the same name. */
+                        $mine  = basename( __DIR__ );
+                        $other = '';
+                        foreach ( (array) get_option( 'active_plugins', array() ) as $rel ) {
+                                $dir = basename( dirname( (string) $rel ) );
+                                /* Only another copy of THIS plugin counts. */
+                                if ( '' !== $dir && $dir !== $mine && 0 === strpos( $dir, 'hamishop-elementor-widgets' ) ) {
+                                        $other = $dir;
+                                        break;
+                                }
+                        }
+
                         printf(
-                                '<div class="notice notice-warning"><p><strong>HamiShop Elementor Widgets:</strong> %s</p></div>',
-                                esc_html( 'یک نسخهٔ تکراری از این افزونه شناسایی شد؛ این کپی غیرفعال ماند. لطفاً از فهرست افزونه‌ها نسخهٔ اضافی را حذف (Delete) کنید.' )
+                                '<div class="notice notice-error"><p><strong>HamiShop Elementor Widgets:</strong> %s</p><p>%s</p></div>',
+                                esc_html__( 'دو نسخهٔ هم‌زمان از این افزونه فعال است؛ این کپی کاری انجام نمی‌دهد.', 'hamishop-elementor-widgets' ),
+                                $other
+                                        ? esc_html( sprintf( 'نسخهٔ در حال اجرا در پوشهٔ «%1$s» است. پوشهٔ «%2$s» را از هاست (یا با Delete در فهرست افزونه‌ها) حذف کنید. تا وقتی هر دو نصب باشند، ووکامرس هم این کپی را در فهرست ناسازگاری نشان می‌دهد.', $other, $mine ) )
+                                        : esc_html( 'لطفاً از فهرست افزونه‌ها نسخهٔ اضافی را حذف (Delete) کنید.' )
                         );
                 } );
         }
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.203' );
+define( 'HSW_VERSION', '1.11.204' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );

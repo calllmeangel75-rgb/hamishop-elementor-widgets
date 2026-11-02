@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.203
+Stable tag: 1.11.204
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.204 =
+* Fix: a second copy of the plugin made WooCommerce report an incompatible plugin. The
+  duplicate guard returns before `FeaturesUtil::declare_compatibility()`, and WooCommerce
+  treats any active plugin without that declaration as incompatible by default — so the
+  inert copy landed in the incompatibility list next to the running one. The guard now
+  declares `custom_order_tables` compatibility before it returns.
+* The duplicate notice names both folders («نسخهٔ در حال اجرا در پوشهٔ X … پوشهٔ Y را حذف
+  کنید») and is an error-level notice instead of a warning.
+* Tests: a real second copy was created, activated, and checked — the notice names both
+  folders, and `get_compatible_plugins_for_feature('custom_order_tables')` reports both
+  copies as compatible with none in incompatible/uncertain.
 
 = 1.11.203 =
 * New: the digital-checkout behaviour is a switch, not a rule — HamiShop → کنترل ویجت‌ها →
