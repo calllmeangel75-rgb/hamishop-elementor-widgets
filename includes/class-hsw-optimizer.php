@@ -66,6 +66,16 @@ class HSW_Optimizer {
 		add_filter( 'litespeed_ucss_exc', array( $this, 'add_excludes' ), 20 );
 
 		/*
+		 * JS is not CSS: combining it changes *when* the code runs. Our files are
+		 * already deferred and order-sensitive (feedback → product → checkout),
+		 * and the header/menu/picker handlers rely on running before the first
+		 * paint settles. LiteSpeed's "JS Combine" (on in the shop's export) would
+		 * fold them into one file with someone else's script in the middle.
+		 */
+		add_filter( 'litespeed_optimize_js_excludes', array( $this, 'add_js_excludes' ), 20 );
+		add_filter( 'litespeed_optm_js_defer_exc', array( $this, 'add_js_excludes' ), 20 );
+
+		/*
 		 * WP Rocket: the same rule for the same reason. Our stylesheets carry
 		 * the layout (grid columns, the pinned header, the bottom sheets), so a
 		 * "Remove Unused CSS" pass that decides a rule is unused does not just
@@ -116,6 +126,29 @@ class HSW_Optimizer {
 		);
 
 		return (array) apply_filters( 'hsw_optimizer_exclude', $lines );
+	}
+
+	/**
+	 * Stable path fragments of HamiShop's own scripts.
+	 *
+	 * @return string[]
+	 */
+	public static function js_exclude_lines() {
+		$lines = array(
+			'hamishop-elementor-widgets/assets/js',
+		);
+
+		return (array) apply_filters( 'hsw_optimizer_js_exclude', $lines );
+	}
+
+	/**
+	 * LiteSpeed filter callback for the JS lists (combine + defer).
+	 *
+	 * @param array|string $list The list LiteSpeed built so far.
+	 * @return array
+	 */
+	public function add_js_excludes( $list ) {
+		return self::merge_list( $list, self::js_exclude_lines() );
 	}
 
 	/**
@@ -252,7 +285,7 @@ class HSW_Optimizer {
 		$font    = (string) apply_filters( 'litespeed_conf', self::LS_FONT_DISPLAY );
 
 		echo '<div class="notice notice-info"><p><strong>' . esc_html__( 'HamiShop: سازگاری با بهینه‌ساز لایت‌اسپید', 'hamishop-elementor-widgets' ) . '</strong></p>';
-		echo '<p>' . esc_html__( 'فایل‌های CSS این افزونه از ادغام و از حذف قاعده‌های UCSS خارج می‌شوند (تنظیمات شما دست‌نخورده می‌ماند). برای اینکه ساختار صفحه و فونت وزیرمتن همیشه درست بماند، این موارد را هم در نظر بگیرید:', 'hamishop-elementor-widgets' ) . '</p>';
+		echo '<p>' . esc_html__( 'فایل‌های CSS و JS این افزونه از ادغام، از حذف قاعده‌های UCSS و از defer خودکار خارج می‌شوند؛ استایل‌های inline (پالت، گاردِ چیدمان و شیت‌ها) هم با data-no-optimize دست‌نخورده می‌مانند (تنظیمات شما تغییر نمی‌کند). برای اینکه ساختار صفحه و فونت وزیرمتن همیشه درست بماند، این موارد را هم در نظر بگیرید:', 'hamishop-elementor-widgets' ) . '</p>';
 		echo '<ul style="margin:0 0 8px 14px">';
 		echo '<li><code>elementor/css/post-</code> ' . esc_html__( 'و', 'hamishop-elementor-widgets' ) . ' <code>elementor/assets/css</code> ' . esc_html__( 'را هم در «CSS Excludes» بگذارید؛ CSS المنتور با هر ذخیره عوض می‌شود و ادغام آن باعث تولید مداوم فایل ترکیبی و بی‌اعتبارشدن کش می‌شود.', 'hamishop-elementor-widgets' ) . '</li>';
 		if ( '' !== $font && 'swap' !== $font ) {

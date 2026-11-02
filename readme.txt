@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.205
+Stable tag: 1.11.206
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,21 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.206 =
+* Fix: a colour term without the `color` meta printed its name as text while the other
+  swatches showed dots («سبز» in the test shop). `HSW_Helpers::color_from_name()` maps the
+  common Persian/English colour names to a hex value as a fallback.
+* Fix: cart colour chips required `#hex` while this shop stores `rgb(30,115,190)`, so the
+  same colour had a dot on the product page and none in the cart. `css_color()` accepts
+  `#hex`, `rgb()/rgba()` and CSS colour keywords, and every chip path uses it.
+* Fix: LiteSpeed JS Combine and Defer now skip our scripts (`litespeed_optimize_js_excludes`,
+  `litespeed_optm_js_defer_exc`) — CSS was already excluded, JS was not.
+* Fix: the inline palette, layout guard and sheet guard carry `data-no-optimize="1"`, so
+  CSS Combine/UCSS leave them where they are instead of moving them into the combined file.
+* Tests: with the shop's own LiteSpeed settings enabled (CSS Combine + Ext Inline + JS
+  Combine), CSS links drop 22 -> 4 with our files still separate, the guard stays inline,
+  the header renders 164px fixed, and no console errors.
 
 = 1.11.205 =
 * Fix: a shop owner without WP-CLI had no way to create the wallet tables. The notice

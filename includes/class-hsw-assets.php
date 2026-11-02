@@ -176,7 +176,7 @@ class HSW_Assets {
                         return;
                 }
 
-                echo '<style id="hsw-layout-guard">'
+                echo '<style id="hsw-layout-guard" data-no-optimize="1">'
                     . '.hsw-hd__maininner{display:flex;align-items:center;gap:18px;width:100%;max-width:var(--hsw-hd-width,none);margin:0 auto}'
                     . '.hsw-hd__pill{display:flex;align-items:center;gap:var(--hsw-hd-pill-gap,14px);min-height:var(--hsw-hd-pill-h,58px);padding:var(--hsw-hd-pill-py,8px) var(--hsw-hd-pill-px,13px);border:var(--hsw-hd-pill-bw,1px) solid var(--hsw-hd-pill-border,#e6ebf2);border-radius:999px}'
                     . '.hsw-cp__body,.hsw-cp__panels{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--hsw-cp-gap,24px)}'
@@ -261,7 +261,7 @@ class HSW_Assets {
 
                 $done = true;
 
-                return '<style id="hsw-sheet-guard">.hsw-asheet:not(.is-open),.hsw-agd__modal:not(.is-open){visibility:hidden}</style>';
+                return '<style id="hsw-sheet-guard" data-no-optimize="1">.hsw-asheet:not(.is-open),.hsw-agd__modal:not(.is-open){visibility:hidden}</style>';
         }
 
         public function print_viewport() {

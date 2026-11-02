@@ -356,7 +356,7 @@ class HSW_Palette {
 	 * editor preview and the settings screen both match the site).
 	 */
 	public function print_css() {
-		echo "\n<style id=\"hsw-palette\">" . $this->css() . "</style>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from sanitized hex colours only.
+		echo "\n<style id=\"hsw-palette\" data-no-optimize=\"1\">" . $this->css() . "</style>\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from sanitized hex colours only.
 	}
 
 	/* ---------------------------------------------------------------------

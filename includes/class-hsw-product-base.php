@@ -197,6 +197,11 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                                         break;
                                                 }
                                         }
+                                        /* No colour meta on the term — a shop that just
+                                           typed «سبز» still deserves a green dot. */
+                                        if ( '' === $hex && class_exists( 'HSW_Helpers' ) ) {
+                                                $hex = HSW_Helpers::color_from_name( $term->name );
+                                        }
                                         $terms[] = array(
                                                 'slug' => (string) $term->slug,
                                                 'name' => (string) $term->name,

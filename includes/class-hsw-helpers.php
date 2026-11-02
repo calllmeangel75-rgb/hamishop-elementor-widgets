@@ -888,6 +888,130 @@ JS;
         }
 
         /**
+         * A hex colour for a colour **name**.
+         *
+         * Swatches read the term's `color` meta (Woodmart and most Persian themes
+         * store it there). A term created without that meta — «سبز» in the test
+         * shop — fell back to printing its name as text while the other colours
+         * showed dots, so the row looked broken. Map the common Persian and
+         * English colour names instead.
+         *
+         * @param string $name Term name or slug.
+         * @return string Hex colour, or '' when the name is not a colour.
+         */
+        public static function color_from_name( $name ) {
+                $key = self::normalize_color_name( $name );
+                if ( '' === $key ) {
+                        return '';
+                }
+
+                $map = array(
+                        'black'    => '#111111',
+                        'مشکی'     => '#111111',
+                        'سیاه'     => '#111111',
+                        'white'    => '#f7f7f7',
+                        'سفید'     => '#f7f7f7',
+                        'red'      => '#dd3333',
+                        'قرمز'     => '#dd3333',
+                        'سرخ'      => '#dd3333',
+                        'blue'     => '#1e73be',
+                        'آبی'      => '#1e73be',
+                        'ابی'      => '#1e73be',
+                        'green'    => '#2e9e44',
+                        'سبز'      => '#2e9e44',
+                        'yellow'   => '#f5c400',
+                        'زرد'      => '#f5c400',
+                        'orange'   => '#f08a24',
+                        'نارنجی'   => '#f08a24',
+                        'purple'   => '#7c3aed',
+                        'بنفش'     => '#7c3aed',
+                        'pink'     => '#e83e8c',
+                        'صورتی'    => '#e83e8c',
+                        'brown'    => '#7b4b2a',
+                        'قهوه'     => '#7b4b2a',
+                        'gray'     => '#808080',
+                        'grey'     => '#808080',
+                        'خاکستری'  => '#808080',
+                        'طوسی'     => '#808080',
+                        'silver'   => '#c0c0c0',
+                        'نقره'     => '#c0c0c0',
+                        'gold'     => '#d4af37',
+                        'طلایی'    => '#d4af37',
+                        'beige'    => '#e8dcc4',
+                        'بژ'       => '#e8dcc4',
+                        'cream'    => '#f5f1e1',
+                        'کرم'      => '#f5f1e1',
+                        'teal'     => '#14b8a6',
+                        'turquoise' => '#14b8a6',
+                        'فیروزه'   => '#14b8a6',
+                        'navy'     => '#0f2042',
+                        'سرمه'     => '#0f2042',
+                        'maroon'   => '#800000',
+                        'زرشکی'    => '#800000',
+                        'magenta'  => '#c026d3',
+                        'ارغوانی'  => '#c026d3',
+                );
+
+                if ( isset( $map[ $key ] ) ) {
+                        return $map[ $key ];
+                }
+
+                /* «سبز تیره»، «آبی روشن» … — the first colour word wins. */
+                foreach ( $map as $needle => $hex ) {
+                        if ( '' !== $needle && false !== strpos( $key, $needle ) ) {
+                                return $hex;
+                        }
+                }
+
+                return '';
+        }
+
+        /**
+         * Accept a value a CSS custom property can hold: #hex, rgb()/rgba() or a
+         * named colour. Returns '' for anything else.
+         *
+         * Persian shops store swatches as `rgb(30,115,190)` (Woodmart writes that
+         * shape), and the cart chip used to require `#hex` — so the same colour
+         * had a dot in the picker and none in the cart.
+         *
+         * @param string $value Raw meta value.
+         * @return string
+         */
+        public static function css_color( $value ) {
+                $value = trim( (string) $value );
+                if ( '' === $value ) {
+                        return '';
+                }
+                if ( preg_match( '/^#[0-9a-fA-F]{3,8}$/', $value ) ) {
+                        return $value;
+                }
+                if ( preg_match( '/^rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*(?:,\s*[\d.]+\s*)?\)$/', $value ) ) {
+                        return $value;
+                }
+                /* A plain CSS colour keyword: red, teal, transparent… */
+                if ( preg_match( '/^[a-z]{3,20}$/i', $value ) ) {
+                        return $value;
+                }
+                return '';
+        }
+
+        /**
+         * Lowercase, no ZWNJ/Arabic variants, no spaces — for colour matching.
+         *
+         * @param string $name Raw name.
+         * @return string
+         */
+        private static function normalize_color_name( $name ) {
+                $name = (string) $name;
+                $name = str_replace( array( "\xE2\x80\x8C", "\xE2\x80\x8D" ), '', $name ); // ZWNJ / ZWJ.
+                $name = str_replace( array( 'ي', 'ك', 'ة' ), array( 'ی', 'ک', 'ه' ), $name );
+                $name = function_exists( 'mb_strtolower' ) ? mb_strtolower( $name, 'UTF-8' ) : strtolower( $name );
+                $name = preg_replace( '/[\s\-_]+/u', '', $name );
+
+                return is_string( $name ) ? $name : '';
+        }
+
+        /**
          * Keep the template's H1 authoritative inside editor-managed content.
          * A heading a client typed as H1 in a post/product body would otherwise
          * create a second page title next to the HSW single-title H1.

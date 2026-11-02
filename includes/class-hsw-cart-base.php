@@ -356,13 +356,19 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                                         $term = get_term_by( 'slug', (string) $row['slug'], (string) $tax );
                                         if ( $term instanceof WP_Term ) {
                                                 foreach ( array( 'color', 'hex', 'color_hex', 'wpcsw_color' ) as $meta_key ) {
-                                                        $meta = get_term_meta( $term->term_id, $meta_key, true );
-                                                        if ( $meta && preg_match( '/^#[0-9a-fA-F]{3,8}$/', (string) $meta ) ) {
-                                                                $hex = (string) $meta;
+                                                        $meta = class_exists( 'HSW_Helpers' ) ? HSW_Helpers::css_color( get_term_meta( $term->term_id, $meta_key, true ) ) : '';
+                                                        if ( '' !== $meta ) {
+                                                                $hex = $meta;
                                                                 break;
                                                         }
                                                 }
+                                                if ( '' === $hex && class_exists( 'HSW_Helpers' ) ) {
+                                                        $hex = HSW_Helpers::color_from_name( $term->name );
+                                                }
                                         }
+                                }
+                                if ( '' === $hex && class_exists( 'HSW_Helpers' ) ) {
+                                        $hex = HSW_Helpers::color_from_name( (string) $row['value'] );
                                 }
                                 $chips[] = array(
                                         'label' => (string) $row['value'],
@@ -386,10 +392,15 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                                         $display = $term->name;
                                         foreach ( array( 'color', 'hex', 'color_hex', 'wpcsw_color' ) as $meta_key ) {
                                                 $meta = get_term_meta( $term->term_id, $meta_key, true );
-                                                if ( $meta && preg_match( '/^#[0-9a-fA-F]{3,8}$/', (string) $meta ) ) {
-                                                        $hex = (string) $meta;
+                                                /* rgb() counts too — Woodmart stores that shape. */
+                                                $meta = class_exists( 'HSW_Helpers' ) ? HSW_Helpers::css_color( $meta ) : '';
+                                                if ( '' !== $meta ) {
+                                                        $hex = $meta;
                                                         break;
                                                 }
+                                        }
+                                        if ( '' === $hex && class_exists( 'HSW_Helpers' ) ) {
+                                                $hex = HSW_Helpers::color_from_name( $term->name );
                                         }
                                 }
                         }
