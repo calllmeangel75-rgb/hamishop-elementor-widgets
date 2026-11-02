@@ -537,6 +537,19 @@ class HSW_Checkout_Complete {
 			$data['billing_email'] = (string) $user->user_email;
 		}
 
+		/*
+		 * The SMS login already proved a number; a customer who logged in that
+		 * way should not have to type it again — and a digital order has no
+		 * address to fall back on.
+		 */
+		if ( '' === trim( (string) $data['billing_phone'] ) && class_exists( 'HSW_Checkout_Digital' ) ) {
+			$verified = HSW_Checkout_Digital::verified_phone();
+			if ( '' !== $verified ) {
+				$data['billing_phone']   = $verified;
+				$data['shipping_phone']  = $verified;
+			}
+		}
+
 		/* WooCommerce's "ship to billing" default when no separate address exists. */
 		foreach ( $fields as $field ) {
 			if ( '' === $data[ 'shipping_' . $field ] ) {

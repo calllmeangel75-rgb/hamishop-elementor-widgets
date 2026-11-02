@@ -241,6 +241,11 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
         }
 
         protected function render() {
+                /* A download has no delivery day or time slot. */
+                if ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) {
+                        return;
+                }
+
                 $s = $this->effective_settings();
 
                 $title   = $this->opt( 'title', __( 'انتخاب زمان و روز تحویل', 'hamishop-elementor-widgets' ) );

@@ -270,6 +270,22 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                 $slot      = $this->slot_text();
                 $free      = $this->opt( 'free_text', __( 'رایگان', 'hamishop-elementor-widgets' ) );
                 $ship_free = $is_demo ? $this->demo_pay_shipping()['free'] : ( (float) $this->chosen_shipping_cost() <= 0 );
+
+                /*
+                 * A download has no address, no courier and no time slot; the
+                 * card only confirms who receives the link and where it goes.
+                 */
+                $digital = ( ! $is_demo && class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() );
+                if ( $digital && '' === trim( (string) $phone ) && class_exists( 'HSW_Checkout_Digital' ) ) {
+                        $phone = HSW_Checkout_Digital::verified_phone();
+                }
+                $digital_email = '';
+                if ( $digital && function_exists( 'WC' ) && WC()->customer ) {
+                        $digital_email = (string) WC()->customer->get_billing_email();
+                }
+                if ( $digital && '' === trim( $digital_email ) && is_user_logged_in() ) {
+                        $digital_email = (string) wp_get_current_user()->user_email;
+                }
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'prec' ) ); ?>">
 
@@ -277,7 +293,7 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                         <div class="hsw-prec__card hsw-d">
                                 <div class="hsw-prec__hd">
                                         <div class="hsw-prec__hd-r">
-                                                <?php echo HSW_Helpers::icon( 'local_shipping' ); ?>
+                                                <?php echo HSW_Helpers::icon( $digital ? 'inventory_2' : 'local_shipping' ); ?>
                                                 <h2 class="hsw-prec__hd-t"><?php echo esc_html( $this->opt( 'title_d', __( 'مشخصات تحویل سفارش', 'hamishop-elementor-widgets' ) ) ); ?></h2>
                                         </div>
                                         <a class="hsw-prec__edit" href="<?php echo esc_url( $this->edit_url() ); ?>">
@@ -294,12 +310,13 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                                                         <span><?php echo esc_html( trim( $name . ( $phone ? ' (' . $phone . ')' : '' ) ) ); ?></span>
                                                 </div>
                                                 <div class="hsw-prec__row is-start">
-                                                        <?php echo HSW_Helpers::icon( 'pin_drop' ); ?>
-                                                        <span class="hsw-prec__lbl"><?php echo esc_html( $this->opt( 'addr_label', __( 'آدرس:', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                        <span class="hsw-prec__addr"><?php echo esc_html( $addr ); ?></span>
+                                                        <?php echo HSW_Helpers::icon( $digital ? 'mail' : 'pin_drop' ); ?>
+                                                        <span class="hsw-prec__lbl"><?php echo esc_html( $digital ? __( 'ایمیل دریافت لینک:', 'hamishop-elementor-widgets' ) : $this->opt( 'addr_label', __( 'آدرس:', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                        <span class="hsw-prec__addr"><?php echo esc_html( $digital ? $digital_email : $addr ); ?></span>
                                                 </div>
                                         </div>
 
+                                        <?php if ( ! $digital ) : ?>
                                         <div class="hsw-prec__box">
                                                 <div class="hsw-prec__box-r">
                                                         <span class="hsw-prec__lbl is-icon">
@@ -316,6 +333,7 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                                                         <span><?php echo esc_html( $slot ); ?></span>
                                                 </div>
                                         </div>
+                                        <?php endif; ?>
                                 </div>
                         </div>
 
@@ -334,9 +352,10 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
 
                                 <div class="hsw-prec__mbody">
                                         <div class="hsw-prec__mrow">
-                                                <?php echo HSW_Helpers::icon( 'location_on' ); ?>
-                                                <p class="hsw-prec__maddr"><?php echo esc_html( $addr ); ?></p>
+                                                <?php echo HSW_Helpers::icon( $digital ? 'mail' : 'location_on' ); ?>
+                                                <p class="hsw-prec__maddr"><?php echo esc_html( $digital ? $digital_email : $addr ); ?></p>
                                         </div>
+                                        <?php if ( ! $digital ) : ?>
                                         <div class="hsw-prec__mfoot">
                                                 <span class="hsw-prec__mdeliv">
                                                         <?php echo HSW_Helpers::icon( 'schedule' ); ?>
@@ -346,6 +365,7 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                                                         <span class="hsw-prec__mfree"><?php echo esc_html( $free ); ?></span>
                                                 <?php endif; ?>
                                         </div>
+                                        <?php endif; ?>
                                 </div>
                         </section>
 

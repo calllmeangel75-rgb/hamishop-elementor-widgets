@@ -153,10 +153,13 @@ class HSW_Checkout_Rest {
                         }
                 }
 
-                /* A courier cannot deliver without these, whatever the settings say. */
-                foreach ( array( 'first_name', 'phone', 'state', 'city', 'address_1' ) as $key ) {
-                        if ( ! in_array( $key, $required, true ) ) {
-                                $required[] = $key;
+                /* A courier cannot deliver without these, whatever the settings say —
+                   but a digital cart has no courier at all. */
+                if ( ! ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) ) {
+                        foreach ( array( 'first_name', 'phone', 'state', 'city', 'address_1' ) as $key ) {
+                                if ( ! in_array( $key, $required, true ) ) {
+                                        $required[] = $key;
+                                }
                         }
                 }
 

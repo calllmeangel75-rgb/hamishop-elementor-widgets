@@ -230,6 +230,19 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                  * had nothing to deliver to.
                  */
                 $has_address = $demo || $this->customer_has_address();
+
+                /*
+                 * A cart of downloads has nothing to deliver. The whole address
+                 * block (postcode, city, street) is noise there: the customer
+                 * only has to be reachable, and the phone is usually already
+                 * proven by the SMS login.
+                 */
+                if ( ! $demo && class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) {
+                        echo '<section class="' . esc_attr( $this->root_class( 'ckaddr' ) ) . '">';
+                        echo $this->digital_html( $this->opt( 'digital_title', __( 'تحویل دیجیتال سفارش', 'hamishop-elementor-widgets' ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside.
+                        echo '</section>';
+                        return;
+                }
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'ckaddr' ) ); ?>">
 
@@ -344,15 +357,64 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
         }
 
         /**
+         * Delivery block for a cart of downloads.
+         *
+         * When the customer's name and phone are already known (the phone can
+         * come from the SMS login) there is nothing left to ask: the block only
+         * confirms where the download link goes. Otherwise the same inline form
+         * opens, trimmed to the two fields that matter.
+         *
+         * @param string $title Section title.
+         * @return string
+         */
+        protected function digital_html( $title ) {
+                $name  = $this->customer_name();
+                $phone = $this->customer_phone();
+                if ( '' === trim( (string) $phone ) && class_exists( 'HSW_Checkout_Digital' ) ) {
+                        $phone = HSW_Checkout_Digital::verified_phone();
+                }
+
+                $email = '';
+                if ( function_exists( 'WC' ) && WC()->customer ) {
+                        $email = (string) WC()->customer->get_billing_email();
+                }
+                if ( '' === trim( $email ) && is_user_logged_in() ) {
+                        $email = (string) wp_get_current_user()->user_email;
+                }
+
+                /* Something is still missing → ask for it, but only for it. */
+                if ( '' === trim( (string) $name ) || '' === trim( (string) $phone ) ) {
+                        return $this->address_form_html( $title, true );
+                }
+
+                $out  = '<article class="hsw-ckaddr__card hsw-ckaddr__card--digital">';
+                $out .= '<div class="hsw-ckaddr__hd"><div class="hsw-ckaddr__hd-r">';
+                $out .= HSW_Helpers::icon( 'inventory_2', true );
+                $out .= '<h2 class="hsw-ckaddr__hd-t">' . esc_html( $title ) . '</h2>';
+                $out .= '</div></div>';
+                $out .= '<p class="hsw-ckaddr__formhint">' . esc_html__( 'این سفارش محصول دانلودی است و ارسال فیزیکی ندارد؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+                $out .= '<div class="hsw-ckaddr__meta">';
+                $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'person' ) . '<span>' . esc_html( $name ) . '</span></span>';
+                $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'call' ) . '<b class="hsw-ckaddr__ltr">' . esc_html( $phone ) . '</b></span>';
+                if ( '' !== trim( $email ) ) {
+                        $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'mail' ) . '<span>' . esc_html( $email ) . '</span></span>';
+                }
+                $out .= '</div></article>';
+
+                return $out;
+        }
+
+        /**
          * Inline delivery-address form, shown while the customer has no address.
          *
          * Deliberately short: the five fields a courier needs. Everything else
          * (company, second line, notes) stays optional in the account editor.
          *
          * @param string $title Section title.
+         * @param bool   $digital Trim to name + phone (cart of downloads).
          * @return string
          */
-        protected function address_form_html( $title ) {
+        protected function address_form_html( $title, $digital = false ) {
                 $country = '';
                 $state   = '';
                 $city    = '';
@@ -388,6 +450,11 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         if ( '' === trim( $phone ) ) {
                                 $phone = (string) $c->get_billing_phone();
                         }
+                }
+
+                /* The SMS login already proved this number; do not ask again. */
+                if ( '' === trim( (string) $phone ) && $digital && class_exists( 'HSW_Checkout_Digital' ) ) {
+                        $phone = HSW_Checkout_Digital::verified_phone();
                 }
 
                 if ( '' === $country ) {
@@ -432,7 +499,13 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         </div>
 
                         <p class="hsw-ckaddr__formhint">
-                                <?php esc_html_e( 'برای ادامهٔ خرید، نشانی تحویل را کامل کنید. این آدرس در حساب کاربری شما هم ذخیره می‌شود.', 'hamishop-elementor-widgets' ); ?>
+                                <?php
+                                if ( $digital ) {
+                                        esc_html_e( 'برای این سفارش فقط نام و شماره تماس لازم است؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود.', 'hamishop-elementor-widgets' );
+                                } else {
+                                        esc_html_e( 'برای ادامهٔ خرید، نشانی تحویل را کامل کنید. این آدرس در حساب کاربری شما هم ذخیره می‌شود.', 'hamishop-elementor-widgets' );
+                                }
+                                ?>
                         </p>
 
                         <form class="hsw-ckaddr__form" id="hsw-ckaddr-form" data-hsw-address-form novalidate>
@@ -445,6 +518,13 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                         </div>
                                 </div>
 
+                                <?php if ( $digital ) : ?>
+                                <div class="hsw-ckaddr__frow">
+                                        <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
+                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                </div>
+                                <?php else : ?>
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
                                                 <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', $needs( 'phone' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -484,6 +564,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                                 <?php echo $field( 'address_2', __( 'پلاک، واحد، طبقه (اختیاری)', 'hamishop-elementor-widgets' ), $line2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
+                                <?php endif; ?>
 
                                 <input type="hidden" name="country" value="<?php echo esc_attr( $country ); ?>">
 
@@ -491,7 +572,7 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
 
                                 <button type="submit" class="hsw-ckaddr__fsubmit">
                                         <?php echo HSW_Helpers::icon( 'check' ); ?>
-                                        <span><?php esc_html_e( 'ثبت آدرس و ادامه', 'hamishop-elementor-widgets' ); ?></span>
+                                        <span><?php echo $digital ? esc_html__( 'ثبت و ادامه', 'hamishop-elementor-widgets' ) : esc_html__( 'ثبت آدرس و ادامه', 'hamishop-elementor-widgets' ); ?></span>
                                 </button>
                         </form>
                 </article>

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.201
+Stable tag: 1.11.202
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,23 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.202 =
+* New: a cart of downloads no longer asks for a delivery address. When every item is
+  virtual/downloadable the checkout drops postcode, province, city, street, the shipping
+  method and the delivery time slot; the address block becomes a «تحویل دیجیتال» card
+  with the name, phone and the e-mail the download link goes to. A mixed cart stays
+  physical. The billing address fields are removed from `woocommerce_checkout_fields`
+  for those carts, so WooCommerce's own validation agrees.
+* New: the phone proven by the SMS login (`_hsw_auth_phone`) is prefilled in the address
+  form and used on the order when `billing_phone` is empty — the customer no longer types
+  a number the site already verified.
+* Note: the field filter runs at priority 20 on `WC_Checkout::get_checkout_fields()`, so
+  a shop that manages its own fields (WooCommerce Persian and friends) keeps the last
+  word: we only relax what is still there.
+* Tests: digital-only checkout (3 fields, no shipping/schedule), digital order placed
+  without any address, pay-page recall card, mixed cart, and an unchanged physical
+  checkout (8 fields + shipping + schedule).
 
 = 1.11.201 =
 * New: a simple product with a visible colour attribute now gets a real picker. The buy

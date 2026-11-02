@@ -285,6 +285,11 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
         }
 
         protected function render() {
+                /* Nothing to ship, nothing to choose. */
+                if ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) {
+                        return;
+                }
+
                 list( $options, $live ) = $this->options_list();
 
                 $title  = $this->opt( 'title', __( 'انتخاب روش ارسال', 'hamishop-elementor-widgets' ) );
