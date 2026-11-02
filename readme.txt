@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.204
+Stable tag: 1.11.205
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.205 =
+* Fix: a shop owner without WP-CLI had no way to create the wallet tables. The notice
+  told them to run `wp hsw wallet migrate` and nothing else.
+* An administrator loading wp-admin now installs them automatically (at most once an
+  hour, so a failing server is not hammered with DDL). Site visitors still never trigger
+  schema changes.
+* The wallet screen shows a «ساخت / ترمیم جدول‌های کیف پول» button while the schema is
+  missing, with the same code path and a success/failure message. The notice links there
+  and mentions both routes.
+* Tests: schema forced stale -> an admin page load rebuilt it and cleared the notice; the
+  button ran the migration and redirected back with `hsw_msg=wallet-migrated`.
 
 = 1.11.204 =
 * Fix: a second copy of the plugin made WooCommerce report an incompatible plugin. The

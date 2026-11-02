@@ -82,12 +82,16 @@ class HSW_Wallet {
 
 		$text = $failed
 			? __( 'جدول‌های کیف پول ساخته نشدند (احتمالاً نسخه/حالت MySQL قدیمی است). هر بار تلاش دوباره خودکار انجام می‌شود؛ خطای دقیق در error_log سرور ثبت شده است.', 'hamishop-elementor-widgets' )
-			: __( 'جدول‌های کیف پول نصب نشده‌اند و نصب خودکار روی درخواست سایت خاموش است. برای ساختشان یک‌بار دستی اجرا کنید: wp hsw wallet migrate', 'hamishop-elementor-widgets' );
+			: sprintf(
+				/* translators: %s: link to the wallet screen. */
+				__( 'جدول‌های کیف پول ساخته نشده‌اند، پس شارژ کیف پول و پرداخت با کیف پول کار نمی‌کند. از %s دکمهٔ «ساخت / ترمیم جدول‌های کیف پول» را بزنید (یا با WP-CLI: wp hsw wallet migrate).', 'hamishop-elementor-widgets' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=hamishop-wallet' ) ) . '">' . esc_html__( 'صفحهٔ کیف پول', 'hamishop-elementor-widgets' ) . '</a>'
+			);
 
 		printf(
 			'<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
 			esc_html__( 'HamiShop:', 'hamishop-elementor-widgets' ),
-			esc_html( $text )
+			wp_kses_post( $text )
 		);
 
 		if ( '' !== $not_innodb ) {
@@ -424,12 +428,39 @@ class HSW_Wallet {
 		if ( self::disabled() ) {
 			return;
 		}
-		if ( 'yes' !== (string) get_option( 'hsw_wallet_autoinstall', 'no' ) ) {
+
+		/*
+		 * …but a shop owner without WP-CLI had no way in: the notice told them to
+		 * run a command they may not have. An administrator loading wp-admin is a
+		 * deliberate, authenticated request, so the tables are created there —
+		 * once an hour at most, so a failing server is not hammered with DDL on
+		 * every page load.
+		 */
+		$admin_context = is_admin() && current_user_can( 'manage_woocommerce' );
+
+		if ( $admin_context ) {
+			if ( get_transient( 'hsw_wallet_install_try' ) ) {
+				update_option( 'hsw_wallet_missing_tables', '1', false );
+				return;
+			}
+			set_transient( 'hsw_wallet_install_try', 1, HOUR_IN_SECONDS );
+		} elseif ( 'yes' !== (string) get_option( 'hsw_wallet_autoinstall', 'no' ) ) {
 			update_option( 'hsw_wallet_missing_tables', '1', false );
 			return;
 		}
-		delete_option( 'hsw_wallet_missing_tables' );
 
+		$this->install_tables();
+	}
+
+	/**
+	 * Create/repair the wallet tables and stamp the schema version.
+	 *
+	 * Split out of `maybe_install()` so the «ساخت جدول‌ها» button on the wallet
+	 * screen runs exactly the same code as the automatic path.
+	 *
+	 * @return bool True when all three tables exist afterwards.
+	 */
+	public function install_tables() {
 		global $wpdb;
 		$table   = self::table();
 		$balances = self::balance_table();
@@ -520,7 +551,7 @@ class HSW_Wallet {
 		if ( ! $installed ) {
 			error_log( 'HamiShop wallet: table creation failed; will retry on the next request.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			update_option( 'hsw_wallet_install_failed', '1', false );
-			return;
+			return false;
 		}
 
 		/*
@@ -540,9 +571,12 @@ class HSW_Wallet {
 		}
 
 		delete_option( 'hsw_wallet_install_failed' );
+		delete_option( 'hsw_wallet_missing_tables' );
 		self::migrate();
 
 		update_option( 'hsw_wallet_db', self::DB_VERSION, false );
+
+		return true;
 	}
 
 	/* ---------------------------------------------------------------------
@@ -2246,6 +2280,13 @@ class HSW_Wallet {
 		$back   = admin_url( 'admin.php?page=hamishop-wallet' );
 		$msg    = '';
 
+		if ( 'migrate' === $action ) {
+			/* The manual escape hatch: same code the automatic path runs. */
+			delete_transient( 'hsw_wallet_install_try' );
+			$ok  = $this->install_tables();
+			$msg = $ok ? 'wallet-migrated' : 'wallet-migrate-failed';
+		}
+
 		if ( 'decide' === $action ) {
 			$id      = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
 			$approve = isset( $_POST['approve'] ) && '1' === (string) $_POST['approve'];
@@ -2307,6 +2348,19 @@ class HSW_Wallet {
 		<div class="wrap">
 			<h1><?php esc_html_e( 'کیف پول', 'hamishop-elementor-widgets' ); ?></h1>
 
+			<?php if ( self::DB_VERSION !== get_option( 'hsw_wallet_db' ) ) : ?>
+				<div class="notice notice-error">
+					<p><strong><?php esc_html_e( 'جدول‌های کیف پول ساخته نشده‌اند.', 'hamishop-elementor-widgets' ); ?></strong>
+						<?php esc_html_e( 'تا وقتی ساخته نشوند، شارژ کیف پول و پرداخت با کیف پول کار نمی‌کند. با دکمهٔ زیر بسازید (همان کاری که دستور wp hsw wallet migrate انجام می‌دهد).', 'hamishop-elementor-widgets' ); ?></p>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<input type="hidden" name="action" value="hsw_wallet_action">
+						<input type="hidden" name="hsw_do" value="migrate">
+						<?php wp_nonce_field( 'hsw_wallet_action' ); ?>
+						<p><button class="button button-primary"><?php esc_html_e( 'ساخت / ترمیم جدول‌های کیف پول', 'hamishop-elementor-widgets' ); ?></button></p>
+					</form>
+				</div>
+			<?php endif; ?>
+
 			<?php if ( 'approved' === $msg ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'شارژ تایید و به کیف پول مشتری اضافه شد.', 'hamishop-elementor-widgets' ); ?></p></div>
 			<?php elseif ( 'rejected' === $msg ) : ?>
@@ -2323,6 +2377,10 @@ class HSW_Wallet {
 					);
 					?>
 				</p></div>
+			<?php elseif ( 'wallet-migrated' === $msg ) : ?>
+				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'جدول‌های کیف پول ساخته شدند؛ کیف پول حالا کار می‌کند.', 'hamishop-elementor-widgets' ); ?></p></div>
+			<?php elseif ( 'wallet-migrate-failed' === $msg ) : ?>
+				<div class="notice notice-error"><p><?php esc_html_e( 'ساخت جدول‌ها انجام نشد. خطای دقیق در error_log سرور است؛ معمولاً یعنی نسخهٔ MySQL قدیمی است یا کاربر دیتابیس اجازهٔ CREATE TABLE ندارد.', 'hamishop-elementor-widgets' ); ?></p></div>
 			<?php endif; ?>
 
 			<h2><?php esc_html_e( 'درخواست‌های شارژ در انتظار', 'hamishop-elementor-widgets' ); ?></h2>
