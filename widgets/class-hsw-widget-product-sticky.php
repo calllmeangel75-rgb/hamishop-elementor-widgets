@@ -224,7 +224,7 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                                                 <div class="hsw-psticky__price">
                                                         <div class="hsw-psticky__oldrow">
                                                                 <span class="hsw-psticky__old" data-hsw-old<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>><?php echo esc_html( $regular ); ?></span>
-                                                                <span class="hsw-psticky__off" data-hsw-off<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>>٪<?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>-</span>
+                                                                <span class="hsw-psticky__off" data-hsw-off<?php echo $hidden; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- hardcoded static attribute. ?>><?php echo esc_html( HSW_Helpers::fa_num( $discount ) ); ?>٪</span>
                                                         </div>
                                                         <div class="hsw-psticky__prow">
                                                                 <span class="hsw-psticky__pval" data-hsw-price><?php echo esc_html( $sale ); ?></span>

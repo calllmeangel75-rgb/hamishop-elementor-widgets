@@ -773,15 +773,27 @@ JS;
 
         /**
          * Discount percentage of a product (0 when not on sale).
+         *
+         * A variable product used to compare its **highest** regular price with
+         * its **lowest** sale price — two different variations. A test product
+         * with variations at 798,600 and 66,550 and no sale price at all was
+         * badged «۹۲٪ تخفیف» in the archive, while its own product page (which
+         * asks the same question through HSW_Product_Base::display_prices(),
+         * min against min) correctly showed no discount. Both sides now read the
+         * same variation: the cheapest one, which is the price the card prints.
          */
         public static function discount_percent( $product ) {
                 if ( self::is_call_for_price( $product ) ) {
                         return 0;
                 }
 
+                if ( ! $product->is_on_sale() ) {
+                        return 0;
+                }
+
                 if ( $product->is_type( 'variable' ) ) {
-                        $regular = (float) $product->get_variation_regular_price( 'max' );
-                        $sale    = (float) $product->get_variation_price( 'min' );
+                        $regular = (float) $product->get_variation_regular_price( 'min', true );
+                        $sale    = (float) $product->get_variation_price( 'min', true );
                 } else {
                         $regular = (float) $product->get_regular_price();
                         $sale    = (float) $product->get_price();

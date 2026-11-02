@@ -673,8 +673,16 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 $sale    = (float) $product->get_price();
 
                 if ( $product->is_type( 'variable' ) ) {
-                        $regular = (float) $product->get_variation_regular_price( 'max' );
-                        $sale    = (float) $product->get_variation_price( 'min' );
+                        /*
+                         * Both numbers must come from the same variation. The
+                         * card prints the cheapest price, so the struck-through
+                         * "old" price has to be that variation's regular price;
+                         * max-regular above min-price drew 798,600 over 66,550
+                         * — a 92% discount — for a product whose variations had
+                         * no sale price at all.
+                         */
+                        $regular = (float) $product->get_variation_regular_price( 'min', true );
+                        $sale    = (float) $product->get_variation_price( 'min', true );
                 }
 
                 $on_sale = $sale > 0 && $regular > 0 && $sale < $regular;

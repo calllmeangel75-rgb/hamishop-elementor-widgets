@@ -369,9 +369,13 @@ class HSW_Rest {
 
                         $image = get_the_post_thumbnail_url( $pid, 'woocommerce_thumbnail' );
 
-                        $regular = (float) $product->get_regular_price();
+                        $regular = $product->is_type( 'variable' )
+                                ? (float) $product->get_variation_regular_price( 'min', true )
+                                : (float) $product->get_regular_price();
                         $sale    = (float) $product->get_price();
-                        $off     = ( $regular > 0 && $sale > 0 && $sale < $regular ) ? (int) round( ( ( $regular - $sale ) / $regular ) * 100 ) : 0;
+                        /* Same percentage the cards show (max-regular vs min-price
+                           used to invent a discount for variable products). */
+                        $off     = HSW_Helpers::discount_percent( $product );
 
                         $out[] = array(
                                 'id'       => (int) $pid,

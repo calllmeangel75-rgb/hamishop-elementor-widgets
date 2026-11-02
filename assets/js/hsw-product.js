@@ -89,7 +89,7 @@
 					save.style.display = (variation.discount > 0) ? '' : 'none';
 				}
 				if (off) {
-					off.textContent = '٪' + fa(variation.discount) + '-';
+					off.textContent = fa(variation.discount) + '٪';
 					off.style.display = (variation.discount > 0) ? '' : 'none';
 				}
 				root.classList.toggle('is-oos', !variation.in_stock);

@@ -278,7 +278,7 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                         $thumb_ids = ( $limit > 0 ) ? array_slice( $ids, 0, $limit ) : $ids;
                 }
                 $thumb_px = isset( $s['gal_thumb_size']['size'] ) ? max( 32, (int) $s['gal_thumb_size']['size'] ) : 64;
-                $badge  = '٪' . HSW_Helpers::fa_num( $discount ) . ' تخفیف';
+                $badge  = HSW_Helpers::fa_num( $discount ) . '٪ ' . __( 'تخفیف', 'hamishop-elementor-widgets' );
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'pgal' ) ); ?>" data-hsw-images="<?php echo esc_attr( (string) wp_json_encode( array_values( $images ) ) ); ?>">
                         <div class="hsw-pgal__card">

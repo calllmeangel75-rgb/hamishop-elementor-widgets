@@ -316,7 +316,16 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                 $badge    = $product->is_featured() ? 'featured' : '';
                         } else {
                                 $sale     = (float) wc_get_price_to_display( $product );
-                                $reg      = (float) wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) );
+                                /*
+                                 * A variable product has no regular price of its own, so
+                                 * the card printed no struck-through price next to a
+                                 * badge that said «۲۲٪ تخفیف». Read the same variation
+                                 * the price comes from.
+                                 */
+                                $reg_raw  = $product->is_type( 'variable' )
+                                        ? $product->get_variation_regular_price( 'min', true )
+                                        : $product->get_regular_price();
+                                $reg      = (float) wc_get_price_to_display( $product, array( 'price' => $reg_raw ) );
                                 $price    = HSW_Helpers::price_num( $sale > 0 ? $sale : $reg );
                                 $regular  = ( $reg > 0 && $sale > 0 && $sale < $reg ) ? HSW_Helpers::price_num( $reg ) : '';
                                 $discount = HSW_Helpers::discount_percent( $product );

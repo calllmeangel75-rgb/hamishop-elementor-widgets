@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.199
+Stable tag: 1.11.200
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,24 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.200 =
+* Fix: a variable product was badged «۹۲٪ تخفیف» in the archive while its own product
+  page showed no discount at all. `discount_percent()` compared the **highest**
+  variation regular price with the **lowest** variation sale price — two different
+  variations. A product with variations at 798,600 and 66,550 and no sale price
+  anywhere produced 92%. Both sides now read the same variation (the cheapest, which
+  is the price the card prints), and no sale means no badge.
+* Fix: the loop card drew a struck-through max-regular price above the min price for
+  the same reason (`HSW_Widget_Base::price_html()`), inventing a 92% saving that did
+  not exist. The archive card and the product-search payload had the same split; all
+  four now agree.
+* Fix: the percent sign sat before the number in three places («٪۲۲») instead of after
+  it («۲۲٪») — product gallery badge, product sticky bar, and the variation JS.
+* Perf: `hsw-product.min.js` rebuilt, 30,718 -> 24,782 bytes.
+* Tests: percentages checked against real product data (0 / 22 / 0 / 29), a variable
+  product with a genuine per-variation sale, the archive card, both product pages and
+  the cart totals.
 
 = 1.11.199 =
 * Fix: in hover mode, clicking the category trigger closed the menu the pointer had
