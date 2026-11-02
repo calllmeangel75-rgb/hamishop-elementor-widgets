@@ -262,6 +262,22 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
 
                 $limit  = isset( $s['thumbs_count'] ) ? (int) $s['thumbs_count'] : 0;
                 $thumbs = ( $limit > 0 ) ? array_slice( $images, 0, $limit ) : $images;
+
+                /*
+                 * The thumbnails are 64px boxes by default (the «اندازه بندانگشت»
+                 * control), but they were printed as bare <img src> tags: no
+                 * srcset, no sizes, so the browser downloaded the 600x600
+                 * `woocommerce_single` file — 29.4 KiB for a 95px box, per
+                 * Lighthouse on the live product page. Keep the attachment ids
+                 * alongside the URLs so the thumbnails can go through core's
+                 * srcset builder like every other image in the plugin.
+                 */
+                $thumb_ids = array();
+                if ( ! $demo && $product ) {
+                        $ids       = $this->gallery_ids( $product );
+                        $thumb_ids = ( $limit > 0 ) ? array_slice( $ids, 0, $limit ) : $ids;
+                }
+                $thumb_px = isset( $s['gal_thumb_size']['size'] ) ? max( 32, (int) $s['gal_thumb_size']['size'] ) : 64;
                 $badge  = '٪' . HSW_Helpers::fa_num( $discount ) . ' تخفیف';
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'pgal' ) ); ?>" data-hsw-images="<?php echo esc_attr( (string) wp_json_encode( array_values( $images ) ) ); ?>">
@@ -284,8 +300,25 @@ class HSW_Widget_Product_Gallery extends HSW_Product_Base {
                                         <div class="hsw-pgal__wrap">
                                                 <div class="hsw-pgal__thumbs" data-hsw-track>
                                                         <?php foreach ( $thumbs as $i => $url ) : ?>
+                                                                <?php
+                                                                $tid        = isset( $thumb_ids[ $i ] ) ? absint( $thumb_ids[ $i ] ) : 0;
+                                                                $thumb_html = $tid ? wp_get_attachment_image(
+                                                                        $tid,
+                                                                        'woocommerce_thumbnail',
+                                                                        false,
+                                                                        array(
+                                                                                'alt'      => '',
+                                                                                'sizes'    => $thumb_px . 'px',
+                                                                                'loading'  => 'lazy',
+                                                                                'decoding' => 'async',
+                                                                        )
+                                                                ) : '';
+                                                                if ( ! $thumb_html ) {
+                                                                        $thumb_html = '<img src="' . esc_url( $url ) . '" alt="" loading="lazy" decoding="async">';
+                                                                }
+                                                                ?>
                                                                 <button type="button" class="hsw-pgal__thumb<?php echo esc_attr( 0 === $i ? ' is-active' : '' ); ?>" data-hsw-src="<?php echo esc_url( $url ); ?>" aria-label="<?php echo esc_attr( $this->image_label( $i + 1 ) ); ?>">
-                                                                        <img src="<?php echo esc_url( $url ); ?>" alt="" loading="lazy" decoding="async">
+                                                                        <?php echo $thumb_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core image markup. ?>
                                                                 </button>
                                                         <?php endforeach; ?>
                                                 </div>

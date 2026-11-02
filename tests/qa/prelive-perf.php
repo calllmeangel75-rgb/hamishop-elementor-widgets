@@ -247,6 +247,49 @@ p_case(
 	}
 );
 
+/*
+ * `scroll-behavior: smooth` on a scroll-snap track makes the load-time snap an
+ * ANIMATED scroll, and Chrome then never reports the page's LCP: the product
+ * page came out as NO_LCP with zero paint-timing candidates, on all product
+ * pages, while removing this one line per track brought the gallery image back
+ * as the LCP element. The JS asks for smooth motion explicitly where it
+ * scrolls, so only the load-time snap changes.
+ */
+p_case(
+	'P15',
+	'no scroll-snap track declares scroll-behavior: smooth',
+	static function () {
+		$bad = array();
+		foreach ( array( 'hsw-product.css', 'hsw-loop.css', 'hsw-archive.css', 'hsw-blog.css' ) as $file ) {
+			$path = dirname( __DIR__, 2 ) . '/assets/css/' . $file;
+			if ( ! is_readable( $path ) ) {
+				continue;
+			}
+			/* Comments mention the property by name; only real declarations count. */
+			$css = preg_replace( '#/\*.*?\*/#s', '', (string) file_get_contents( $path ) );
+			/* Any rule that snaps and also smooth-scrolls is a NO_LCP waiting to happen. */
+			foreach ( preg_split( '/}/', $css ) as $rule ) {
+				if ( false !== strpos( $rule, 'scroll-snap-type' ) && false !== strpos( $rule, 'scroll-behavior: smooth' ) ) {
+					$bad[] = $file . ':' . trim( substr( $rule, 0, 40 ) );
+				}
+			}
+		}
+		return array( empty( $bad ), $bad ? implode( ', ', $bad ) : 'no snapping rule smooth-scrolls' );
+	}
+);
+
+p_case(
+	'P16',
+	'the product gallery thumbnails carry a srcset instead of a bare src',
+	static function () {
+		$php = file_get_contents( dirname( __DIR__, 2 ) . '/widgets/class-hsw-widget-product-gallery.php' );
+		$ok  = false !== strpos( $php, "wp_get_attachment_image(" )
+			&& false !== strpos( $php, "'woocommerce_thumbnail'" )
+			&& false !== strpos( $php, "'sizes'    => \$thumb_px . 'px'" );
+		return array( $ok, 'gallery=' . ( $ok ? 'uses core srcset' : 'still bare img' ) );
+	}
+);
+
 $failed = 0;
 foreach ( $GLOBALS['hsw_results'] as $r ) {
 	$failed += $r[0] ? 0 : 1;

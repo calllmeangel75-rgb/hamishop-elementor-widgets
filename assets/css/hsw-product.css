@@ -914,7 +914,19 @@
         background: var(--hsw-tabnav-bg, var(--hsw-surface-bright));
         overflow-x: auto;
         overflow-y: hidden;
-        scroll-behavior: smooth;
+        /*
+         * No `scroll-behavior: smooth` here on purpose.
+         *
+         * The track snaps (`scroll-snap-type`) and the browser aligns the snap
+         * position during layout. With smooth scrolling that alignment becomes an
+         * animated scroll while the page is still loading, and Chrome stops
+         * reporting the page's LCP: the product page came out as NO_LCP in
+         * Lighthouse, with zero paint-timing candidates in the trace, while the
+         * same markup with this one line removed reported the gallery image as LCP.
+         * The JS already asks for smooth motion explicitly
+         * (`scrollTo`/`scrollBy`/`scrollIntoView({ behavior: 'smooth' })`), so
+         * only the load-time snap is affected — which is exactly what we want.
+         */
         scroll-snap-type: x proximity;
         scrollbar-width: none;
         -ms-overflow-style: none;
@@ -1687,7 +1699,19 @@
 	gap: 16px;
 	overflow-x: auto;
 	overflow-y: hidden;
-	scroll-behavior: smooth;
+	/*
+	 * No `scroll-behavior: smooth` here on purpose.
+	 *
+	 * The track snaps (`scroll-snap-type`) and the browser aligns the snap
+	 * position during layout. With smooth scrolling that alignment becomes an
+	 * animated scroll while the page is still loading, and Chrome stops
+	 * reporting the page's LCP: the product page came out as NO_LCP in
+	 * Lighthouse, with zero paint-timing candidates in the trace, while the
+	 * same markup with this one line removed reported the gallery image as LCP.
+	 * The JS already asks for smooth motion explicitly
+	 * (`scrollTo`/`scrollBy`/`scrollIntoView({ behavior: 'smooth' })`), so
+	 * only the load-time snap is affected — which is exactly what we want.
+	 */
 	scroll-snap-type: x mandatory;
 	padding: 4px 2px 10px;
 	scrollbar-width: none;
@@ -1791,7 +1815,19 @@
 	display: flex;
 	gap: 8px;
 	overflow-x: auto;
-	scroll-behavior: smooth;
+	/*
+	 * No `scroll-behavior: smooth` here on purpose.
+	 *
+	 * The track snaps (`scroll-snap-type`) and the browser aligns the snap
+	 * position during layout. With smooth scrolling that alignment becomes an
+	 * animated scroll while the page is still loading, and Chrome stops
+	 * reporting the page's LCP: the product page came out as NO_LCP in
+	 * Lighthouse, with zero paint-timing candidates in the trace, while the
+	 * same markup with this one line removed reported the gallery image as LCP.
+	 * The JS already asks for smooth motion explicitly
+	 * (`scrollTo`/`scrollBy`/`scrollIntoView({ behavior: 'smooth' })`), so
+	 * only the load-time snap is affected — which is exactly what we want.
+	 */
 	scroll-snap-type: x mandatory;
 	padding: 2px;
 	scrollbar-width: none;

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.196
+Stable tag: 1.11.197
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,19 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.197 =
+* Fix: the product page reported NO_LCP in Lighthouse. Cause: `scroll-behavior: smooth`
+  on a `scroll-snap-type` track. The browser aligns the snap during layout, and with
+  smooth scrolling that alignment is an animated scroll while the page loads — Chrome
+  then never reports an LCP candidate. Removed from all four snapping tracks (tabs nav,
+  related products, gallery thumbs, loop rail); the JS already passes
+  `behavior: 'smooth'` where it scrolls, so only the load-time snap changed. The product
+  page now reports the gallery image as LCP.
+* Perf: the gallery thumbnails were bare `<img src>` tags loading the 600x600
+  `woocommerce_single` file into a 64px box (29.4 KiB). They now go through
+  `wp_get_attachment_image()` with `sizes`, like every other image in the plugin.
+* Tests: perf 16 cases.
 
 = 1.11.196 =
 * Perf: the archive card declared `sizes="45vw"` — 185px on a 412px phone for a 136px

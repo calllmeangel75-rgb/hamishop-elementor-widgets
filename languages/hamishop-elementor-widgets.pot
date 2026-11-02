@@ -2676,11 +2676,11 @@ msgstr ""
 msgid "برچسب‌های مرتبط:"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-gallery.php:274
+#: widgets/class-hsw-widget-product-gallery.php:290
 msgid "بزرگنمایی تصویر"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-gallery.php:279
+#: widgets/class-hsw-widget-product-gallery.php:295
 msgid "بزرگ‌نمایی تصویر"
 msgstr ""
 
@@ -3330,11 +3330,11 @@ msgstr ""
 msgid "تسویه حساب"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-gallery.php:294
+#: widgets/class-hsw-widget-product-gallery.php:327
 msgid "تصاویر بعدی"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-gallery.php:295
+#: widgets/class-hsw-widget-product-gallery.php:328
 msgid "تصاویر قبلی"
 msgstr ""
 
