@@ -225,7 +225,7 @@ final class HSW_Account {
 				'otp_2fa'           => 'yes',
 				'otp_sms'           => 'no',
 				'otp_email'         => 'yes',
-				'otp_telegram'      => 'no',
+				'otp_telegram'      => 'yes',
 				'otp_whatsapp'      => 'no',
 				'otp_default_channel' => 'email',
 				'email_from_address' => '',
@@ -501,7 +501,12 @@ final class HSW_Account {
 			if ( '' === $out['auth']['email_from_name'] ) {
 				$out['auth']['email_from_name'] = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 			}
+			$before_tg_token                    = trim( (string) ( $out['auth']['telegram_token'] ?? '' ) );
 			$out['auth']['telegram_token']      = sanitize_text_field( wp_unslash( (string) ( $a['telegram_token'] ?? '' ) ) );
+			if ( '' !== $out['auth']['telegram_token'] && '' === $before_tg_token ) {
+				$out['auth']['otp_telegram'] = 'yes';
+				$out['auth']['otp_enabled']  = 'yes';
+			}
 			$out['auth']['telegram_bot']        = ltrim( preg_replace( '/[^a-zA-Z0-9_]/', '', sanitize_text_field( wp_unslash( (string) ( $a['telegram_bot'] ?? '' ) ) ) ), '@' );
 			$out['auth']['telegram_secret']     = sanitize_text_field( wp_unslash( (string) ( $a['telegram_secret'] ?? '' ) ) );
 			if ( '' === $out['auth']['telegram_secret'] ) {

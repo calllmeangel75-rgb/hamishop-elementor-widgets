@@ -120,7 +120,7 @@ final class HSW_Account_Auth {
 			return 'yes' === $this->s( 'otp_whatsapp', 'no' ) && $this->whatsapp_configured();
 		}
 		if ( 'telegram' === $channel ) {
-			return 'yes' === $this->s( 'otp_telegram', 'no' ) && '' !== trim( (string) $this->s( 'telegram_token' ) );
+			return 'yes' === $this->s( 'otp_telegram', 'yes' ) && '' !== trim( (string) $this->s( 'telegram_token' ) );
 		}
 		if ( 'email' === $channel ) {
 			/* On by default: no API key, no per-message cost. */

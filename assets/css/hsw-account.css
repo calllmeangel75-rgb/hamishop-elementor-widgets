@@ -6597,12 +6597,170 @@ a.hsw-ac__stat:hover {
 	font-weight: 700;
 }
 
-/* Heading: smaller on phones so «ثبت‌نام سریع با کد یکبارمصرف» fits on one line. */
+/* Mobile polish for Login & Registration (.hsw-ac--auth / .hsw-ac-auth) */
 @media (max-width: 767.98px) {
-	.hsw-ac-otp__head h2 { font-size: 19px !important; line-height: 1.7 !important; }
-	.hsw-ac-otp__head p { font-size: 12px !important; line-height: 2 !important; }
-	.hsw-ac-auth__panel { min-height: 0 !important; }
-	.hsw-ac-otp { padding-bottom: 8px; }
+	.hsw-ac.hsw-ac--auth {
+		min-height: auto !important;
+		align-items: stretch !important;
+		padding: 12px 10px 24px !important;
+	}
+	.hsw-ac-auth {
+		border-radius: 20px !important;
+		box-shadow: 0 14px 36px rgba(7, 26, 47, .10) !important;
+	}
+	.hsw-ac-auth__brand {
+		min-height: 0 !important;
+		padding: 14px 18px !important;
+		flex-direction: row !important;
+		align-items: center !important;
+		justify-content: space-between !important;
+		gap: 10px !important;
+	}
+	.hsw-ac-auth__logo {
+		font-size: 16px !important;
+		gap: 8px !important;
+	}
+	.hsw-ac-auth__logo-mark {
+		width: 34px !important;
+		height: 34px !important;
+		border-radius: 10px !important;
+		font-size: 17px !important;
+	}
+	.hsw-ac-auth__brand-copy {
+		margin: 0 !important;
+	}
+	.hsw-ac-auth__brand-copy h2,
+	.hsw-ac-auth__brand-copy p {
+		display: none !important;
+	}
+	.hsw-ac-auth__brand-copy .hsw-ac-auth__eyebrow {
+		margin: 0 !important;
+		font-size: 10px !important;
+		padding: 3px 10px !important;
+		white-space: nowrap;
+	}
+	.hsw-ac-auth__panel-wrap {
+		padding: 18px 16px 22px !important;
+	}
+	.hsw-ac-auth__panel {
+		min-height: 0 !important;
+		max-width: 100% !important;
+	}
+	.hsw-ac-auth__home,
+	.hsw-ac-auth__back {
+		margin-bottom: 10px !important;
+		font-size: 11px !important;
+	}
+	.hsw-ac-auth__heading {
+		margin-bottom: 14px !important;
+	}
+	.hsw-ac-auth__heading .hsw-ac-auth__eyebrow {
+		display: none !important;
+	}
+	.hsw-ac-auth__heading h1 {
+		font-size: 18.5px !important;
+		line-height: 1.45 !important;
+		margin: 0 0 4px !important;
+	}
+	.hsw-ac-auth__heading p {
+		font-size: 12px !important;
+		line-height: 1.75 !important;
+		margin: 0 !important;
+	}
+	.hsw-ac-auth__tabs {
+		padding: 4px !important;
+		border-radius: 12px !important;
+		margin-bottom: 14px !important;
+		border: 1px solid var(--hsw-ac-line, #e6ebf2);
+	}
+	.hsw-ac-auth__tabs button {
+		min-height: 40px !important;
+		padding: 7px 10px !important;
+		font-size: 12.5px !important;
+		border-radius: 9px !important;
+	}
+	.hsw-ac-otp {
+		padding-bottom: 4px;
+	}
+	.hsw-ac-otp__head {
+		margin-bottom: 12px !important;
+		padding: 10px 12px !important;
+		border-radius: 12px !important;
+		background: #f8fafc !important;
+		border: 1px solid var(--hsw-ac-line, #e6ebf2) !important;
+	}
+	.hsw-ac-otp__eyebrow {
+		display: none !important;
+	}
+	.hsw-ac-otp__head h2 {
+		font-size: 13.5px !important;
+		line-height: 1.5 !important;
+		margin: 0 0 3px !important;
+	}
+	.hsw-ac-otp__head p {
+		font-size: 11.5px !important;
+		line-height: 1.75 !important;
+		margin: 0 !important;
+	}
+	.hsw-ac-otp__channels {
+		margin: 0 0 14px !important;
+		flex-wrap: wrap !important;
+	}
+	.hsw-ac-otp__channel {
+		min-height: 38px !important;
+		padding: 7px 10px !important;
+		font-size: 11.5px !important;
+	}
+	.hsw-ac-form .hsw-ac-field {
+		margin-bottom: 13px !important;
+	}
+	.hsw-ac-form .hsw-ac-field > label,
+	.hsw-ac-otp__form .hsw-ac-field label {
+		font-size: 12px !important;
+		margin-bottom: 5px !important;
+	}
+	.hsw-ac-form .hsw-ac-input-wrap,
+	.hsw-ac-otp__form .hsw-ac-input-wrap {
+		height: 46px !important;
+		min-height: 46px !important;
+		border-radius: 11px !important;
+	}
+	.hsw-ac-form .hsw-ac-input-wrap input,
+	.hsw-ac-otp__form .hsw-ac-input-wrap input {
+		height: 46px !important;
+		line-height: 46px !important;
+		font-size: 13.5px !important;
+		border-radius: 11px !important;
+		padding-inline-start: 38px !important;
+		padding-inline-end: 12px !important;
+	}
+	.hsw-ac-form .hsw-ac-input-wrap input[type="password"] {
+		padding-inline-end: 42px !important;
+	}
+	.hsw-ac-auth__row {
+		margin: 4px 0 14px !important;
+		font-size: 11.5px !important;
+	}
+	.hsw-ac-check,
+	.hsw-ac-auth__link {
+		font-size: 11.5px !important;
+	}
+	.hsw-ac-auth__submit,
+	.hsw-ac-otp__send {
+		height: 46px !important;
+		min-height: 46px !important;
+		border-radius: 12px !important;
+		font-size: 13.5px !important;
+		font-weight: 800 !important;
+	}
+	.hsw-ac-auth__switch {
+		min-height: 44px !important;
+		margin-top: 12px !important;
+		padding: 10px 12px !important;
+		border-radius: 12px !important;
+		background-color: #f8fafc !important;
+		font-size: 12px !important;
+	}
 }
 
 /* =========================================================================
