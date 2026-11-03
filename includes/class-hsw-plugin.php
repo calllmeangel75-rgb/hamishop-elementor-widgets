@@ -102,6 +102,12 @@ final class HSW_Plugin {
                 add_action( 'woocommerce_product_set_stock', array( 'HSW_Helpers', 'remember_initial_stock' ), 20 );
                 add_action( 'woocommerce_variation_set_stock', array( 'HSW_Helpers', 'remember_initial_stock' ), 20 );
                 add_action( 'woocommerce_update_product', array( 'HSW_Helpers', 'remember_initial_stock' ), 20 );
+
+                /* Comment & review submission via admin-ajax.php and admin-post.php (bypasses WAF 403 on wp-comments-post.php). */
+                add_action( 'wp_ajax_hsw_submit_comment', array( $this, 'submit_comment' ) );
+                add_action( 'wp_ajax_nopriv_hsw_submit_comment', array( $this, 'submit_comment' ) );
+                add_action( 'admin_post_hsw_submit_comment', array( $this, 'submit_comment' ) );
+                add_action( 'admin_post_nopriv_hsw_submit_comment', array( $this, 'submit_comment' ) );
         }
 
         /**
@@ -112,6 +118,151 @@ final class HSW_Plugin {
          *      percentage invented from `total_sales`; and drop the loop query
          *      transients once, because their shape changed with the baseline.
          */
+        /**
+         * Handle post comment & product review submissions via admin-ajax.php and
+         * admin-post.php so hosts/WAFs that block direct POST requests to
+         * `/wp-comments-post.php` with 403 Forbidden never reject customer reviews
+         * or article comments.
+         */
+        public function submit_comment() {
+                $is_ajax = wp_doing_ajax() || ! empty( $_REQUEST['hsw_ajax'] ) || ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && 'xmlhttprequest' === strtolower( (string) $_SERVER['HTTP_X_REQUESTED_WITH'] ) );
+
+                $send_error = static function ( $message, $code = 400 ) use ( $is_ajax ) {
+                        $clean = trim( wp_strip_all_tags( (string) $message ) );
+                        if ( '' === $clean ) {
+                                $clean = __( 'ثبت دیدگاه انجام نشد. لطفاً دوباره تلاش کنید.', 'hamishop-elementor-widgets' );
+                        }
+                        if ( $is_ajax ) {
+                                wp_send_json_error( array( 'message' => $clean ), (int) $code );
+                        }
+                        wp_die(
+                                '<p>' . esc_html( $clean ) . '</p>',
+                                esc_html__( 'خطا در ثبت دیدگاه', 'hamishop-elementor-widgets' ),
+                                array(
+                                        'response'  => (int) $code,
+                                        'back_link' => true,
+                                )
+                        );
+                };
+
+                if ( 'POST' !== strtoupper( isset( $_SERVER['REQUEST_METHOD'] ) ? (string) $_SERVER['REQUEST_METHOD'] : '' ) ) {
+                        $send_error( __( 'درخواست نامعتبر است.', 'hamishop-elementor-widgets' ), 405 );
+                }
+
+                $post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0;
+                $post    = $post_id ? get_post( $post_id ) : null;
+                if ( ! $post || ! comments_open( $post_id ) ) {
+                        $send_error( __( 'ثبت دیدگاه برای این بخش فعال نیست.', 'hamishop-elementor-widgets' ), 403 );
+                }
+
+                $is_product = ( 'product' === $post->post_type );
+                if ( $is_product && function_exists( 'wc_review_ratings_enabled' ) && wc_review_ratings_enabled() && function_exists( 'wc_review_ratings_required' ) && wc_review_ratings_required() ) {
+                        $rating = isset( $_POST['rating'] ) ? absint( $_POST['rating'] ) : 0;
+                        if ( $rating < 1 || $rating > 5 ) {
+                                $send_error( __( 'لطفاً امتیاز خود را (از ۱ تا ۵ ستاره) انتخاب کنید.', 'hamishop-elementor-widgets' ), 400 );
+                        }
+                }
+
+                $comment_text = isset( $_POST['comment'] ) ? trim( (string) wp_unslash( $_POST['comment'] ) ) : '';
+                if ( '' === $comment_text ) {
+                        $send_error( __( 'لطفاً متن دیدگاه خود را بنویسید.', 'hamishop-elementor-widgets' ), 400 );
+                }
+
+                if ( ! is_user_logged_in() && get_option( 'require_name_email' ) ) {
+                        $author = isset( $_POST['author'] ) ? trim( (string) wp_unslash( $_POST['author'] ) ) : '';
+                        $email  = isset( $_POST['email'] ) ? trim( (string) wp_unslash( $_POST['email'] ) ) : '';
+                        if ( '' === $author || '' === $email ) {
+                                $send_error( __( 'لطفاً نام و نشانی ایمیل خود را وارد کنید.', 'hamishop-elementor-widgets' ), 400 );
+                        }
+                        if ( ! is_email( $email ) ) {
+                                $send_error( __( 'لطفاً یک نشانی ایمیل معتبر وارد کنید.', 'hamishop-elementor-widgets' ), 400 );
+                        }
+                }
+
+                /* Catch any third-party preprocess_comment wp_die() call during AJAX. */
+                $die_filter = null;
+                if ( $is_ajax ) {
+                        $die_filter = static function () use ( $send_error ) {
+                                return static function ( $message = '', $title = '', $args = array() ) use ( $send_error ) {
+                                        $code = is_array( $args ) && isset( $args['response'] ) ? (int) $args['response'] : 400;
+                                        $send_error( is_scalar( $message ) ? (string) $message : '', $code ? $code : 400 );
+                                };
+                        };
+                        add_filter( 'wp_die_ajax_handler', $die_filter, 999 );
+                        add_filter( 'wp_die_handler', $die_filter, 999 );
+                }
+
+                $comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
+
+                if ( $die_filter ) {
+                        remove_filter( 'wp_die_ajax_handler', $die_filter, 999 );
+                        remove_filter( 'wp_die_handler', $die_filter, 999 );
+                }
+
+                if ( is_wp_error( $comment ) ) {
+                        $err_code = (string) $comment->get_error_code();
+                        $err_map  = array(
+                                'comment_duplicate'     => __( 'دیدگاه تکراری شناسایی شد؛ به نظر می‌رسد این دیدگاه را قبلاً ارسال کرده‌اید.', 'hamishop-elementor-widgets' ),
+                                'comment_flood'         => __( 'شما با سرعت زیادی در حال ارسال دیدگاه هستید. لطفاً کمی صبر کنید.', 'hamishop-elementor-widgets' ),
+                                'require_name_email'    => __( 'لطفاً نام و نشانی ایمیل خود را وارد کنید.', 'hamishop-elementor-widgets' ),
+                                'require_valid_email'   => __( 'لطفاً یک نشانی ایمیل معتبر وارد کنید.', 'hamishop-elementor-widgets' ),
+                                'require_valid_comment' => __( 'لطفاً متن دیدگاه خود را بنویسید.', 'hamishop-elementor-widgets' ),
+                        );
+                        $msg = isset( $err_map[ $err_code ] ) ? $err_map[ $err_code ] : $comment->get_error_message();
+                        $send_error( $msg, 400 );
+                }
+
+                $user            = wp_get_current_user();
+                $cookies_consent = ! empty( $_POST['wp-comment-cookies-consent'] );
+                do_action( 'set_comment_cookies', $comment, $user, $cookies_consent );
+
+                if ( $is_product && isset( $_POST['rating'] ) ) {
+                        $rating = max( 1, min( 5, absint( $_POST['rating'] ) ) );
+                        if ( $rating > 0 && '' === (string) get_comment_meta( $comment->comment_ID, 'rating', true ) ) {
+                                add_comment_meta( $comment->comment_ID, 'rating', $rating, true );
+                                if ( class_exists( 'WC_Comments' ) && method_exists( 'WC_Comments', 'clear_transients' ) ) {
+                                        WC_Comments::clear_transients( $post_id );
+                                }
+                        }
+                }
+
+                $approved = ( '1' === (string) $comment->comment_approved );
+                $location = empty( $_POST['redirect_to'] ) ? get_comment_link( $comment ) : wp_validate_redirect( wp_unslash( $_POST['redirect_to'] ), get_permalink( $post_id ) );
+                if ( ! $approved ) {
+                        $location = add_query_arg(
+                                array(
+                                        'unapproved'      => (int) $comment->comment_ID,
+                                        'moderation-hash' => wp_hash( $comment->comment_date_gmt ),
+                                ),
+                                $location
+                        );
+                }
+                $location = apply_filters( 'comment_post_redirect', $location, $comment );
+
+                if ( $is_ajax ) {
+                        $author_name = get_comment_author( $comment );
+                        $rating_val  = $is_product ? max( 0, min( 5, (int) get_comment_meta( $comment->comment_ID, 'rating', true ) ) ) : 0;
+                        wp_send_json_success(
+                                array(
+                                        'comment_id' => (int) $comment->comment_ID,
+                                        'approved'   => $approved,
+                                        'author'     => $author_name,
+                                        'date'       => HSW_Helpers::fa_num( get_comment_date( '', $comment ) ),
+                                        'content'    => wpautop( esc_html( $comment->comment_content ) ),
+                                        'text'       => wp_strip_all_tags( $comment->comment_content ),
+                                        'rating'     => $rating_val,
+                                        'redirect'   => $location,
+                                        'message'    => $approved
+                                                ? __( 'دیدگاه شما با موفقیت ثبت شد.', 'hamishop-elementor-widgets' )
+                                                : __( 'دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
+                                )
+                        );
+                }
+
+                wp_safe_redirect( $location );
+                exit;
+        }
+
         public static function migrate() {
                 $target  = '1';
                 $current = (string) get_option( 'hsw_db_version', '0' );

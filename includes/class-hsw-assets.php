@@ -765,6 +765,7 @@ class HSW_Assets {
                         'hsw-product',
                         'window.hswProductData=' . wp_json_encode( array(
                                 'wcAjax'      => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '/?wc-ajax=add_to_cart',
+                                'ajaxUrl'     => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
                                 /* Quantity stepper → real cart line (0 removes it). */
                                 'qtyAjax'     => class_exists( 'WooCommerce' ) ? WC_AJAX::get_endpoint( 'hsw_set_qty' ) : '/?wc-ajax=hsw_set_qty',
                                 'qtyNonce'    => wp_create_nonce( 'hsw-cart-qty' ),

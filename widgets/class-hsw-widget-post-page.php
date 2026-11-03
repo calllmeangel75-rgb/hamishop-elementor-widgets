@@ -835,7 +835,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 
 		$classes = 'hsw-pp hsw-vis-' . ( isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto' ) . $this->hsw_font_class();
 		?>
-		<div class="<?php echo esc_attr( $classes ); ?>" data-hsw-pp data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>">
+		<div class="<?php echo esc_attr( $classes ); ?>" data-hsw-pp data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
 
 			<?php if ( $on( 'show_progress' ) ) : ?>
 				<div class="hsw-pp__progress" aria-hidden="true"><span data-hsw-pp-progress></span></div>
@@ -1243,10 +1243,24 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 				echo '<p class="hsw-pp__noComments">' . esc_html__( 'هنوز دیدگاهی ثبت نشده — اولین نفر باشید.', 'hamishop-elementor-widgets' ) . '</p>';
 			}
 
+			if ( isset( $_GET['unapproved'] ) && absint( $_GET['unapproved'] ) > 0 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag from WordPress.
+				echo '<p class="hsw-pp__form-msg is-ok" role="status">' . esc_html__( 'دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+			}
+
 			if ( comments_open( $post ) ) {
 				add_filter( 'comment_form_defaults', array( $this, 'comment_form_args' ), 99 );
-				comment_form( array( 'post_id' => $post->ID ), $post->ID );
+				ob_start();
+				comment_form( array( 'post_id' => $post->ID, 'action' => admin_url( 'admin-post.php' ) ), $post->ID );
+				$form_html = (string) ob_get_clean();
 				remove_filter( 'comment_form_defaults', array( $this, 'comment_form_args' ), 99 );
+
+				$form_html = preg_replace(
+					'/<form\b([^>]*)\baction=["\'][^"\']*["\']/',
+					'<form$1action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" data-hsw-ajax-url="' . esc_url( admin_url( 'admin-ajax.php' ) ) . '"',
+					$form_html,
+					1
+				);
+				echo $form_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native comment_form markup.
 			}
 			?>
 		</section>
@@ -1316,13 +1330,16 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 	 * @return array
 	 */
 	public function comment_form_args( $defaults ) {
+		$defaults['action']               = admin_url( 'admin-post.php' );
 		$defaults['class_form']           = 'hsw-pp__form';
 		$defaults['class_submit']         = 'hsw-pp__submit';
 		$defaults['title_reply']          = __( 'ارسال دیدگاه یا پرسش درباره این مقاله', 'hamishop-elementor-widgets' );
 		$defaults['title_reply_before']   = '<h3 class="hsw-pp__formtitle">';
 		$defaults['title_reply_after']    = '</h3>';
 		$defaults['comment_notes_before'] = '';
-		$defaults['comment_field']        = '<p class="hsw-pp__field hsw-pp__field--full"><label for="comment">' . esc_html__( 'متن دیدگاه شما', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><textarea id="comment" name="comment" rows="4" required></textarea></p>';
+		$defaults['comment_field']        = '<p class="hsw-pp__field hsw-pp__field--full"><label for="comment">' . esc_html__( 'متن دیدگاه شما', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><textarea id="comment" name="comment" rows="4" required></textarea></p>'
+			. '<input type="hidden" name="action" value="hsw_submit_comment" />'
+			. '<input type="hidden" name="redirect_to" value="' . esc_url( get_permalink() . '#hsw-comments' ) . '" />';
 
 		foreach ( array( 'author', 'email', 'url' ) as $field ) {
 			if ( isset( $defaults[ 'fields' ][ $field ] ) ) {

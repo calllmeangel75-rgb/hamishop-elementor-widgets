@@ -65,8 +65,8 @@
         line-height: 1.6;
 }
 .hsw-p :where(h1, h2, h3, p) { margin: 0; }
-.hsw-p :where(a) { text-decoration: none; }
-.hsw-p :where(button) { font-family: inherit; cursor: pointer; }
+.hsw-p a, .hsw-p a:hover, .hsw-p a:focus, .hsw-p a:focus-visible { text-decoration: none; }
+.hsw-p button, .hsw-p [type="button"], .hsw-p [type="submit"] { font-family: inherit; cursor: pointer; box-shadow: none; background-image: none; }
 
 /* ======================================================================
  *  1) BREADCRUMB  (.hsw-pbread)
@@ -1291,6 +1291,8 @@ body.admin-bar .hsw-ptabs--stack { --hsw-stk-top: 32px; }
 .hsw-review-form .comment-form-cookies-consent label { margin: 0; font-weight: 400; }
 .hsw-review-form .comment-form-cookies-consent input { margin-top: 4px; }
 .hsw-review-form__submit { padding-top: 2px; }
+.hsw-p .hsw-review-submit,
+.hsw-p input[type="submit"].hsw-review-submit,
 .hsw-review-submit {
         display: inline-flex;
         align-items: center;
@@ -1308,7 +1310,23 @@ body.admin-bar .hsw-ptabs--stack { --hsw-stk-top: 32px; }
         cursor: pointer;
         transition: filter .15s, transform .15s;
 }
-.hsw-review-submit:hover { filter: brightness(.94); }
+.hsw-p .hsw-review-submit:hover,
+.hsw-p .hsw-review-submit:focus,
+.hsw-p .hsw-review-submit:focus-visible,
+.hsw-p input[type="submit"].hsw-review-submit:hover,
+.hsw-p input[type="submit"].hsw-review-submit:focus,
+.hsw-review-submit:hover {
+        background: var(--hsw-primary, #4d85ff);
+        background-color: var(--hsw-primary, #4d85ff);
+        color: var(--hsw-on-primary, #fff);
+        border: 0;
+        filter: brightness(.94);
+}
+.hsw-review-pending.is-err {
+        border-color: rgba(214, 54, 56, .35);
+        background: rgba(214, 54, 56, .08);
+        color: #b32d2e;
+}
 .hsw-review-submit:active { transform: translateY(1px); }
 .hsw-review-closed {
         margin: 20px 0 0;

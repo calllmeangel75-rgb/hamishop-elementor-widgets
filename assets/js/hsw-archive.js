@@ -576,7 +576,7 @@
                 btn.classList.remove('is-added', 'is-busy');
                 btn.style.pointerEvents = '';
                 var ic = btn.querySelector('.hsw-ic');
-                if (ic) { window.hswSetIcon(ic, btn.classList.contains('hsw-ag__cta--m') ? 'add' : 'add_shopping_cart'); }
+                if (ic) { window.hswSetIcon(ic, 'shopping_cart'); }
         }
 
         function addToCart(btn) {

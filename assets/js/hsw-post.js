@@ -296,5 +296,132 @@
 				}
 			});
 		});
+
+		/* -----------------------------------------------------------------
+		 * AJAX comment submission (bypasses 403 WAF blocks on wp-comments-post.php)
+		 * -------------------------------------------------------------- */
+		Array.prototype.forEach.call(root.querySelectorAll('.hsw-pp__form'), function (form) {
+			form.addEventListener('submit', function (event) {
+				if (!window.fetch || !window.FormData) {
+					return;
+				}
+				event.preventDefault();
+				if (form.classList.contains('is-busy')) {
+					return;
+				}
+
+				var submit = form.querySelector('.hsw-pp__submit, [type="submit"]');
+				var origLabel = submit ? (submit.value || submit.textContent || '') : '';
+				var msgBox = form.querySelector('.hsw-pp__form-msg');
+				if (!msgBox) {
+					msgBox = document.createElement('p');
+					msgBox.className = 'hsw-pp__form-msg';
+					msgBox.setAttribute('role', 'status');
+					form.insertBefore(msgBox, form.firstChild);
+				}
+				msgBox.className = 'hsw-pp__form-msg';
+				msgBox.textContent = '';
+				msgBox.hidden = true;
+
+				form.classList.add('is-busy');
+				if (submit) {
+					submit.disabled = true;
+					if ('INPUT' === submit.tagName) {
+						submit.value = 'در حال ارسال...';
+					} else {
+						submit.textContent = 'در حال ارسال...';
+					}
+				}
+
+				var fd = new FormData(form);
+				fd.set('action', 'hsw_submit_comment');
+				fd.set('hsw_ajax', '1');
+				var ajaxUrl = form.getAttribute('data-hsw-ajax-url') || root.getAttribute('data-ajax-url') || '/wp-admin/admin-ajax.php';
+
+				window.fetch(ajaxUrl, {
+					method: 'POST',
+					credentials: 'same-origin',
+					body: fd
+				})
+					.then(function (r) {
+						return r.json();
+					})
+					.then(function (res) {
+						var ok = !!(res && res.success && res.data);
+						var text = (res && res.data && res.data.message) ? res.data.message : (ok ? 'دیدگاه شما با موفقیت ثبت شد.' : 'ثبت دیدگاه انجام نشد. لطفاً دوباره تلاش کنید.');
+						msgBox.className = 'hsw-pp__form-msg ' + (ok ? 'is-ok' : 'is-err');
+						msgBox.textContent = text;
+						msgBox.hidden = false;
+
+						if (ok) {
+							var textarea = form.querySelector('textarea[name="comment"]');
+							if (textarea) {
+								textarea.value = '';
+							}
+							if (res.data.approved) {
+								var sec = root.querySelector('.hsw-pp__comments');
+								if (sec) {
+									var emptyNote = sec.querySelector('.hsw-pp__noComments');
+									if (emptyNote) {
+										emptyNote.remove();
+									}
+									var list = sec.querySelector('.hsw-pp__commentlist');
+									if (!list) {
+										list = document.createElement('div');
+										list.className = 'hsw-pp__commentlist';
+										var head = sec.querySelector('.hsw-pp__sechead');
+										if (head && head.nextSibling) {
+											sec.insertBefore(list, head.nextSibling);
+										} else {
+											sec.insertBefore(list, sec.firstChild);
+										}
+									}
+									var item = document.createElement('div');
+									item.className = 'hsw-pp__comment';
+									var headEl = document.createElement('div');
+									headEl.className = 'hsw-pp__commenthead';
+									var whoEl = document.createElement('div');
+									whoEl.className = 'hsw-pp__commentwho';
+									var metaWrap = document.createElement('div');
+									var nameEl = document.createElement('span');
+									nameEl.className = 'hsw-pp__commentname';
+									nameEl.textContent = res.data.author || '';
+									var dateEl = document.createElement('span');
+									dateEl.className = 'hsw-pp__commentdate';
+									dateEl.textContent = res.data.date || '';
+									metaWrap.appendChild(nameEl);
+									metaWrap.appendChild(dateEl);
+									whoEl.appendChild(metaWrap);
+									headEl.appendChild(whoEl);
+									var bodyEl = document.createElement('div');
+									bodyEl.className = 'hsw-pp__commentbody';
+									var pEl = document.createElement('p');
+									pEl.textContent = res.data.text || '';
+									bodyEl.appendChild(pEl);
+									item.appendChild(headEl);
+									item.appendChild(bodyEl);
+									list.appendChild(item);
+								}
+							}
+						}
+					})
+					.catch(function () {
+						msgBox.className = 'hsw-pp__form-msg is-err';
+						msgBox.textContent = 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.';
+						msgBox.hidden = false;
+					})
+					.finally(function () {
+						form.classList.remove('is-busy');
+						if (submit) {
+							submit.disabled = false;
+							if ('INPUT' === submit.tagName) {
+								submit.value = origLabel;
+							} else {
+								submit.textContent = origLabel;
+							}
+						}
+					});
+			});
+		});
 	});
 })();
