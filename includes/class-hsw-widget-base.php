@@ -88,6 +88,11 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 return ( null !== $this->hsw_injected_settings ) ? $this->hsw_injected_settings : $this->get_settings_for_display();
         }
 
+	protected function opt( $key, $default = '' ) {
+		$s = $this->effective_settings();
+		return ( isset( $s[ $key ] ) && is_scalar( $s[ $key ] ) && '' !== trim( (string) $s[ $key ] ) ) ? trim( (string) $s[ $key ] ) : $default;
+	}
+
         /**
          * True when the widget is rendering as a composite part.
          */

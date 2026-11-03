@@ -499,9 +499,13 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
 
                 echo '</div>'; // .hsw-cp__body
 
-                if ( 'yes' === $this->opt( 'bgrid_show_cat_desc', 'yes' ) ) {
+                $s = $this->effective_settings();
+                if ( 'yes' === ( $s['bgrid_show_cat_desc'] ?? 'yes' ) ) {
+                        $desc_title = ( isset( $s['bgrid_cat_desc_title'] ) && '' !== trim( (string) $s['bgrid_cat_desc_title'] ) )
+                                ? (string) $s['bgrid_cat_desc_title']
+                                : __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' );
                         echo '<div class="hsw-cp--blog__wide">';
-                        $this->render_blog_archive_description( (string) $this->opt( 'bgrid_cat_desc_title', __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ) ) );
+                        $this->render_blog_archive_description( $desc_title );
                         echo '</div>';
                 }
 
