@@ -127,6 +127,24 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
         protected function render() {
                 $root = $this->root_class( 'ccheckout', 'hsw-cp hsw-cp--checkout' );
 
+                /* Order-received (thank-you): the order is placed / paid — show the
+                 * confirmation card instead of the checkout form. */
+                if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) ) {
+                        echo '<div class="' . esc_attr( $root ) . '">';
+                        $this->render_order_received( $this->order_received_order() );
+                        echo '</div>';
+                        return;
+                }
+
+                /* Order-pay (redirect gateways / pay-links): WooCommerce's own pay
+                 * form owns this state — render it so the payment can complete. */
+                if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-pay' ) ) {
+                        echo '<div class="' . esc_attr( $root ) . '">';
+                        echo do_shortcode( '[woocommerce_checkout]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WooCommerce template.
+                        echo '</div>';
+                        return;
+                }
+
                 echo '<div class="' . esc_attr( $root ) . '">';
 
                 /* Prints and clears the WooCommerce notice queue. */

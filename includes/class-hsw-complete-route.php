@@ -27,6 +27,7 @@ final class HSW_Complete_Route {
 
     public function __construct() {
         add_filter( 'woocommerce_get_settings_checkout', array( $this, 'settings_field' ), 20, 2 );
+        add_filter( 'woocommerce_settings_pages', array( $this, 'settings_field_pages' ), 20, 1 );
         add_filter( 'woocommerce_get_checkout_order_received_url', array( $this, 'route_url' ), 20, 2 );
         add_action( 'template_redirect', array( $this, 'route_request' ) );
         add_action( 'template_redirect', array( $this, 'guard_pay_address' ), 5 );
@@ -361,10 +362,28 @@ final class HSW_Complete_Route {
      * @param string $current_section Current settings section.
      * @return array
      */
+    /**
+     * Also show the routing options in WooCommerce → Settings → Advanced (Page setup).
+     *
+     * @param array $settings Settings rows.
+     * @return array
+     */
+    public function settings_field_pages( $settings ) {
+        if ( ! is_array( $settings ) ) {
+            return $settings;
+        }
+
+        return $this->settings_field( $settings, '' );
+    }
+
     public function settings_field( $settings, $current_section = '' ) {
         if ( '' !== (string) $current_section || ! is_array( $settings ) ) {
             return $settings;
         }
+
+        /* Unhide save button in modern WooCommerce (tab=checkout hides it by default). */
+        global $hide_save_button;
+        $hide_save_button = false;
 
         $custom = array(
             array(
