@@ -1250,13 +1250,13 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			if ( comments_open( $post ) ) {
 				add_filter( 'comment_form_defaults', array( $this, 'comment_form_args' ), 99 );
 				ob_start();
-				comment_form( array( 'post_id' => $post->ID, 'action' => admin_url( 'admin-post.php' ) ), $post->ID );
+				comment_form( array(), $post->ID );
 				$form_html = (string) ob_get_clean();
 				remove_filter( 'comment_form_defaults', array( $this, 'comment_form_args' ), 99 );
 
 				$form_html = preg_replace(
-					'/<form\b([^>]*)\baction=["\'][^"\']*["\']/',
-					'<form$1action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" data-hsw-ajax-url="' . esc_url( admin_url( 'admin-ajax.php' ) ) . '"',
+					'/<form\b/',
+					'<form data-hsw-ajax-url="' . esc_url( admin_url( 'admin-ajax.php' ) ) . '"',
 					$form_html,
 					1
 				);
@@ -1337,9 +1337,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		$defaults['title_reply_before']   = '<h3 class="hsw-pp__formtitle">';
 		$defaults['title_reply_after']    = '</h3>';
 		$defaults['comment_notes_before'] = '';
-		$defaults['comment_field']        = '<p class="hsw-pp__field hsw-pp__field--full"><label for="comment">' . esc_html__( 'متن دیدگاه شما', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><textarea id="comment" name="comment" rows="4" required></textarea></p>'
-			. '<input type="hidden" name="action" value="hsw_submit_comment" />'
-			. '<input type="hidden" name="redirect_to" value="' . esc_url( get_permalink() . '#hsw-comments' ) . '" />';
+		$defaults['comment_field']        = '<p class="hsw-pp__field hsw-pp__field--full"><label for="comment">' . esc_html__( 'متن دیدگاه شما', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label><textarea id="comment" name="comment" rows="4" required></textarea></p>';
 
 		foreach ( array( 'author', 'email', 'url' ) as $field ) {
 			if ( isset( $defaults[ 'fields' ][ $field ] ) ) {

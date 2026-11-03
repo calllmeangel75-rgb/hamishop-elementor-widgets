@@ -1387,9 +1387,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         $comment_field .= '</div></fieldset>';
                 }
                 $comment_field .= '<p class="comment-form-comment"><label for="' . esc_attr( $uid . '-comment' ) . '">' . esc_html__( 'دیدگاه شما', 'hamishop-elementor-widgets' ) . '&nbsp;<span class="required">*</span></label>';
-                $comment_field .= '<textarea id="' . esc_attr( $uid . '-comment' ) . '" name="comment" cols="45" rows="6" required></textarea></p>'
-                        . '<input type="hidden" name="action" value="hsw_submit_comment" />'
-                        . '<input type="hidden" name="redirect_to" value="' . esc_url( $product->get_permalink() . '#reviews' ) . '" />';
+                $comment_field .= '<textarea id="' . esc_attr( $uid . '-comment' ) . '" name="comment" cols="45" rows="6" required></textarea></p>';
 
                 $fields = array();
                 if ( ! is_user_logged_in() ) {
@@ -1403,7 +1401,6 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 $account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : wp_login_url();
                 $args        = array(
                         'id_form'              => $uid,
-                        'action'               => admin_url( 'admin-post.php' ),
                         'class_form'           => 'hsw-review-form comment-form',
                         'id_submit'            => $uid . '-submit',
                         'class_submit'         => 'hsw-review-submit submit',
@@ -1428,13 +1425,8 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
 
                 /* Core wrapper/input ids are hard-coded; make them unique per form. */
                 $html = preg_replace( '/<div id="respond" class="comment-respond">/', '<div id="' . esc_attr( $uid . '-respond' ) . '" class="comment-respond hsw-review-respond">', $html, 1 );
-                $html = preg_replace(
-                        '/<form\b([^>]*)\baction=["\'][^"\']*["\']/',
-                        '<form$1action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" data-hsw-ajax-url="' . esc_url( admin_url( 'admin-ajax.php' ) ) . '"',
-                        $html,
-                        1
-                );
-                $html = str_replace( array( "id='comment_post_ID'", 'id="comment_post_ID"' ), 'id="' . esc_attr( $uid . '-comment-post-id' ) . '"', $html );
+                $html = preg_replace( '/<form\\b/', '<form data-hsw-ajax-url="' . esc_url( admin_url( 'admin-ajax.php' ) ) . '"', $html, 1 );
+		$html = str_replace( array( "id='comment_post_ID'", 'id="comment_post_ID"' ), 'id="' . esc_attr( $uid . '-comment-post-id' ) . '"', $html );
                 $html = str_replace( array( "id='comment_parent'", 'id="comment_parent"' ), 'id="' . esc_attr( $uid . '-comment-parent' ) . '"', $html );
                 $html = str_replace( array( "id='cancel-comment-reply-link'", 'id="cancel-comment-reply-link"' ), 'id="' . esc_attr( $uid . '-cancel-comment-reply' ) . '"', $html );
                 $html = str_replace( '_wp_unfiltered_html_comment_disabled', esc_attr( $uid . '-unfiltered-html-comment' ), $html );
