@@ -236,6 +236,19 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 }
 
                 /*
+                 * A digital cart needs no courier, so street/city/state are irrelevant.
+                 * Customer only needs first_name and phone.
+                 */
+                if ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) {
+                        $name  = $this->customer_name();
+                        $phone = $this->customer_phone();
+                        if ( '' === trim( (string) $phone ) ) {
+                                $phone = HSW_Checkout_Digital::verified_phone();
+                        }
+                        return ( '' !== trim( (string) $name ) && '' !== trim( (string) $phone ) );
+                }
+
+                /*
                  * Every field a courier needs must be there. The old check was
                  * an OR: a city alone counted as "has address", the customer
                  * reached the pay step, and the order had no street or phone.

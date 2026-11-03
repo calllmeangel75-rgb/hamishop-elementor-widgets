@@ -402,19 +402,36 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         return $this->address_form_html( $title, true );
                 }
 
+                $edit = $this->opt( 'edit_label', __( 'ویرایش', 'hamishop-elementor-widgets' ) );
+
                 $out  = '<article class="hsw-ckaddr__card hsw-ckaddr__card--digital">';
                 $out .= '<div class="hsw-ckaddr__hd"><div class="hsw-ckaddr__hd-r">';
                 $out .= HSW_Helpers::icon( 'inventory_2', true );
                 $out .= '<h2 class="hsw-ckaddr__hd-t">' . esc_html( $title ) . '</h2>';
-                $out .= '</div></div>';
-                $out .= '<p class="hsw-ckaddr__formhint">' . esc_html__( 'این سفارش محصول دانلودی است و ارسال فیزیکی ندارد؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
+                $out .= '</div>';
+                $out .= '<a class="hsw-ckaddr__op" href="#hsw-ckaddr-form" data-hsw-address-edit="1">';
+                $out .= HSW_Helpers::icon( 'edit' );
+                $out .= '<span>' . esc_html( $edit ) . '</span>';
+                $out .= '</a>';
+                $out .= '</div>';
+
+                $out .= '<div class="hsw-ckaddr__formhint">';
+                $out .= '<span class="hsw-ckaddr__formhint-ic" aria-hidden="true">' . HSW_Helpers::icon( 'info' ) . '</span>';
+                $out .= '<span>' . esc_html__( 'این سفارش محصول دانلودی است و ارسال فیزیکی ندارد؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود.', 'hamishop-elementor-widgets' ) . '</span>';
+                $out .= '</div>';
+
                 $out .= '<div class="hsw-ckaddr__meta">';
                 $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'person' ) . '<span>' . esc_html( $name ) . '</span></span>';
-                $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'call' ) . '<b class="hsw-ckaddr__ltr">' . esc_html( $phone ) . '</b></span>';
+                $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'phone_iphone' ) . '<b class="hsw-ckaddr__ltr">' . esc_html( $phone ) . '</b></span>';
                 if ( '' !== trim( $email ) ) {
-                        $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'mail' ) . '<span>' . esc_html( $email ) . '</span></span>';
+                        $out .= '<span class="hsw-ckaddr__meta-i">' . HSW_Helpers::icon( 'mail' ) . '<span class="hsw-ckaddr__ltr">' . esc_html( $email ) . '</span></span>';
                 }
                 $out .= '</div></article>';
+
+                // Hidden drawer with digital form so "ویرایش" opens smoothly
+                $out .= '<div data-hsw-address-drawer hidden>';
+                $out .= $this->address_form_html( $title, true );
+                $out .= '</div>';
 
                 return $out;
         }
@@ -485,10 +502,23 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         }
                 }
 
-                $field = function ( $name, $label, $value, $type = 'text', $extra = '', $required = false ) {
+                $email = '';
+                if ( function_exists( 'WC' ) && WC()->customer ) {
+                        $email = (string) WC()->customer->get_billing_email();
+                }
+                if ( '' === trim( $email ) && is_user_logged_in() ) {
+                        $email = (string) wp_get_current_user()->user_email;
+                }
+
+                $field = function ( $name, $label, $value, $type = 'text', $extra = '', $required = false, $icon = '' ) {
                         $mark  = $required ? ' <span class="hsw-ckaddr__req" aria-hidden="true">*</span>' : '';
                         $html  = '<label class="hsw-ckaddr__fl" for="hsw-ckaddr-' . esc_attr( $name ) . '">' . esc_html( $label ) . $mark . '</label>';
+                        $html .= '<div class="hsw-ckaddr__fi-wrap' . ( '' !== $icon ? ' has-icon' : '' ) . '">';
+                        if ( '' !== $icon ) {
+                                $html .= '<span class="hsw-ckaddr__fi-icon" aria-hidden="true">' . HSW_Helpers::icon( $icon ) . '</span>';
+                        }
                         $html .= '<input class="hsw-ckaddr__fi" id="hsw-ckaddr-' . esc_attr( $name ) . '" type="' . esc_attr( $type ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '"' . ( $required ? ' required aria-required="true"' : '' ) . $extra . '>';
+                        $html .= '</div>';
                         return $html;
                 };
 
@@ -508,44 +538,48 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                 <article class="hsw-ckaddr__card hsw-ckaddr__card--form">
                         <div class="hsw-ckaddr__hd">
                                 <div class="hsw-ckaddr__hd-r">
-                                        <?php echo HSW_Helpers::icon( 'location_on', true ); ?>
+                                        <?php echo HSW_Helpers::icon( $digital ? 'inventory_2' : 'location_on', true ); ?>
                                         <h2 class="hsw-ckaddr__hd-t"><?php echo esc_html( $title ); ?></h2>
                                 </div>
                         </div>
 
-                        <p class="hsw-ckaddr__formhint">
-                                <?php
+                        <div class="hsw-ckaddr__formhint">
+                                <span class="hsw-ckaddr__formhint-ic" aria-hidden="true"><?php echo HSW_Helpers::icon( 'info' ); ?></span>
+                                <span><?php
                                 if ( $digital ) {
                                         esc_html_e( 'برای این سفارش فقط نام و شماره تماس لازم است؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود.', 'hamishop-elementor-widgets' );
                                 } else {
                                         esc_html_e( 'برای ادامهٔ خرید، نشانی تحویل را کامل کنید. این آدرس در حساب کاربری شما هم ذخیره می‌شود.', 'hamishop-elementor-widgets' );
                                 }
-                                ?>
-                        </p>
+                                ?></span>
+                        </div>
 
-                        <form class="hsw-ckaddr__form" id="hsw-ckaddr-form" data-hsw-address-form novalidate>
+                        <form class="hsw-ckaddr__form" id="hsw-ckaddr-form" data-hsw-address-form<?php echo $digital ? ' data-hsw-digital="1"' : ''; ?> novalidate>
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'first_name', __( 'نام', 'hamishop-elementor-widgets' ), $first, 'text', ' autocomplete="given-name"', $needs( 'first_name' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'first_name', __( 'نام', 'hamishop-elementor-widgets' ), $first, 'text', ' autocomplete="given-name"', $needs( 'first_name' ), 'person' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'last_name', __( 'نام خانوادگی', 'hamishop-elementor-widgets' ), $last, 'text', ' autocomplete="family-name"', $needs( 'last_name' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'last_name', __( 'نام خانوادگی', 'hamishop-elementor-widgets' ), $last, 'text', ' autocomplete="family-name"', $needs( 'last_name' ), 'badge' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
 
                                 <?php if ( $digital ) : ?>
                                 <div class="hsw-ckaddr__frow">
-                                        <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
-                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', true, 'phone_iphone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        </div>
+                                        <div class="hsw-ckaddr__fcell">
+                                                <?php echo $field( 'email', __( 'ایمیل (ارسال لینک دانلود)', 'hamishop-elementor-widgets' ), $email, 'email', ' inputmode="email" dir="ltr" autocomplete="email"', false, 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
                                 <?php else : ?>
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', $needs( 'phone' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', $needs( 'phone' ), 'phone_iphone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'postcode', __( 'کد پستی', 'hamishop-elementor-widgets' ), $postcode, 'text', ' inputmode="numeric" dir="ltr" autocomplete="postal-code" maxlength="10"', $needs( 'postcode' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'postcode', __( 'کد پستی', 'hamishop-elementor-widgets' ), $postcode, 'text', ' inputmode="numeric" dir="ltr" autocomplete="postal-code" maxlength="10"', $needs( 'postcode' ), 'markunread_mailbox' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
 
@@ -553,30 +587,33 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                         <div class="hsw-ckaddr__fcell">
                                                 <label class="hsw-ckaddr__fl" for="hsw-ckaddr-state"><?php esc_html_e( 'استان', 'hamishop-elementor-widgets' ); ?><?php if ( $needs( 'state' ) ) : ?> <span class="hsw-ckaddr__req" aria-hidden="true">*</span><?php endif; ?></label>
                                                 <?php if ( $states ) : ?>
-                                                        <select class="hsw-ckaddr__fi" id="hsw-ckaddr-state" name="state"<?php echo $needs( 'state' ) ? ' required aria-required="true"' : ''; ?>>
-                                                                <option value=""><?php esc_html_e( 'انتخاب کنید', 'hamishop-elementor-widgets' ); ?></option>
-                                                                <?php foreach ( $states as $code => $label ) : ?>
-                                                                        <option value="<?php echo esc_attr( $code ); ?>"<?php selected( $state, $code ); ?>><?php echo esc_html( $label ); ?></option>
-                                                                <?php endforeach; ?>
-                                                        </select>
+                                                        <div class="hsw-ckaddr__fi-wrap has-icon">
+                                                                <span class="hsw-ckaddr__fi-icon" aria-hidden="true"><?php echo HSW_Helpers::icon( 'map' ); ?></span>
+                                                                <select class="hsw-ckaddr__fi" id="hsw-ckaddr-state" name="state"<?php echo $needs( 'state' ) ? ' required aria-required="true"' : ''; ?>>
+                                                                        <option value=""><?php esc_html_e( 'انتخاب استان', 'hamishop-elementor-widgets' ); ?></option>
+                                                                        <?php foreach ( $states as $code => $label ) : ?>
+                                                                                <option value="<?php echo esc_attr( $code ); ?>"<?php selected( $state, $code ); ?>><?php echo esc_html( $label ); ?></option>
+                                                                        <?php endforeach; ?>
+                                                                </select>
+                                                        </div>
                                                 <?php else : ?>
-                                                        <?php echo $field( 'state', __( 'استان', 'hamishop-elementor-widgets' ), $state, 'text', '', $needs( 'state' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                        <?php echo $field( 'state', __( 'استان', 'hamishop-elementor-widgets' ), $state, 'text', '', $needs( 'state' ), 'map' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                                 <?php endif; ?>
                                         </div>
                                         <div class="hsw-ckaddr__fcell">
-                                                <?php echo $field( 'city', __( 'شهر', 'hamishop-elementor-widgets' ), $city, 'text', ' autocomplete="address-level2"', $needs( 'city' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'city', __( 'شهر', 'hamishop-elementor-widgets' ), $city, 'text', ' autocomplete="address-level2"', $needs( 'city' ), 'location_city' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
 
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
-                                                <?php echo $field( 'address_1', __( 'نشانی کامل', 'hamishop-elementor-widgets' ), $line1, 'text', ' autocomplete="street-address"', $needs( 'address_1' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'address_1', __( 'نشانی کامل', 'hamishop-elementor-widgets' ), $line1, 'text', ' autocomplete="street-address"', $needs( 'address_1' ), 'home' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
 
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
-                                                <?php echo $field( 'address_2', __( 'پلاک، واحد، طبقه (اختیاری)', 'hamishop-elementor-widgets' ), $line2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                <?php echo $field( 'address_2', __( 'پلاک، واحد، طبقه (اختیاری)', 'hamishop-elementor-widgets' ), $line2, 'text', '', false, 'apartment' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
                                 <?php endif; ?>

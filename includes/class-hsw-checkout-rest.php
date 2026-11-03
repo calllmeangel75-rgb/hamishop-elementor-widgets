@@ -125,7 +125,7 @@ class HSW_Checkout_Rest {
          * @return string[]
          */
         public static function address_fields() {
-                return array( 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' );
+                return array( 'first_name', 'last_name', 'phone', 'email', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' );
         }
 
         /**
@@ -153,13 +153,20 @@ class HSW_Checkout_Rest {
                         }
                 }
 
+                /* In a digital cart, never require delivery address fields under any circumstances. */
+                if ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) {
+                        $digital_req = array( 'first_name', 'phone' );
+                        if ( in_array( 'last_name', $required, true ) ) {
+                                $digital_req[] = 'last_name';
+                        }
+                        return $digital_req;
+                }
+
                 /* A courier cannot deliver without these, whatever the settings say —
                    but a digital cart has no courier at all. */
-                if ( ! ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) ) {
-                        foreach ( array( 'first_name', 'phone', 'state', 'city', 'address_1' ) as $key ) {
-                                if ( ! in_array( $key, $required, true ) ) {
-                                        $required[] = $key;
-                                }
+                foreach ( array( 'first_name', 'phone', 'state', 'city', 'address_1' ) as $key ) {
+                        if ( ! in_array( $key, $required, true ) ) {
+                                $required[] = $key;
                         }
                 }
 
@@ -177,6 +184,7 @@ class HSW_Checkout_Rest {
                         'first_name' => __( 'نام', 'hamishop-elementor-widgets' ),
                         'last_name'  => __( 'نام خانوادگی', 'hamishop-elementor-widgets' ),
                         'phone'      => __( 'شماره تماس', 'hamishop-elementor-widgets' ),
+                        'email'      => __( 'ایمیل', 'hamishop-elementor-widgets' ),
                         'state'      => __( 'استان', 'hamishop-elementor-widgets' ),
                         'city'       => __( 'شهر', 'hamishop-elementor-widgets' ),
                         'address_1'  => __( 'نشانی', 'hamishop-elementor-widgets' ),
@@ -306,6 +314,8 @@ class HSW_Checkout_Rest {
                                 $value = HSW_Helpers::en_num( $value );
                         } elseif ( 'phone' === $key ) {
                                 $value = self::normalize_phone( $value );
+                        } elseif ( 'email' === $key ) {
+                                $value = sanitize_email( $value );
                         }
 
                         $values[ $key ] = $value;

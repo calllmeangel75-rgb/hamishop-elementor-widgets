@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.219
+Stable tag: 1.11.220
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.220 =
+* Fix: Digital and downloadable products checkout flow reliability — accurately detects downloadable products even when merchant leaves "Virtual" checkbox unticked in WooCommerce, preventing shipping and delivery address fields from showing.
+* Fix: Prevent checkout summary button blocking digital orders with missing address error when only name and phone are needed.
+* Feature: Modernize checkout input fields with crisp leading micro-icons (name, phone, email, state, city, address, postcode).
+* Feature: Modernize digital delivery notice banner and customer credentials card with edit drawer.
+* Feature: Support optional email field in digital checkout for order download links.
 
 = 1.11.219 =
 * Feature: Modernize checkout address fields, select dropdowns, labels, and textarea with sleek elevation, rounded borders, and smooth focus glow.

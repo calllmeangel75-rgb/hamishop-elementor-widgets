@@ -25,6 +25,9 @@ function get_option( $name, $default = false ) {
 function apply_filters( $tag, $value ) {
 	return $value;
 }
+function add_filter( $tag, $callback, $priority = 10, $accepted_args = 1 ) {
+	return true;
+}
 
 require __DIR__ . '/../../includes/class-hsw-jalali.php';
 require __DIR__ . '/../../includes/class-hsw-helpers.php';
@@ -203,6 +206,98 @@ same(
 );
 same( 'decimal part is floored', HSW_Helpers::number_words( 12.75 ), 'دوازده' );
 ok( 'string amount works', '' !== HSW_Helpers::number_words( '2500' ) );
+
+/* --------------------------------------------------------------------- */
+group( 'HSW_Checkout_Digital' );
+
+require __DIR__ . '/../../includes/class-hsw-checkout-digital.php';
+
+class Mock_WC_Product {
+	protected $virtual;
+	protected $downloadable;
+	public function __construct( $virtual, $downloadable ) {
+		$this->virtual      = $virtual;
+		$this->downloadable = $downloadable;
+	}
+	public function is_virtual() { return $this->virtual; }
+	public function is_downloadable() { return $this->downloadable; }
+	public function needs_shipping() { return ! $this->virtual; }
+}
+
+class Mock_WC_Product_Real extends Mock_WC_Product {}
+if ( ! class_exists( 'WC_Product' ) ) {
+	class_alias( 'Mock_WC_Product_Real', 'WC_Product' );
+}
+
+class Mock_WC_Cart {
+	public $items = array();
+	public function is_empty() { return empty( $this->items ); }
+	public function get_cart() { return $this->items; }
+	public function needs_shipping() {
+		foreach ( $this->items as $item ) {
+			if ( $item['data']->needs_shipping() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+class Mock_WC_App {
+	public $cart;
+	public function __construct() {
+		$this->cart = new Mock_WC_Cart();
+	}
+}
+
+global $mock_wc;
+$mock_wc = new Mock_WC_App();
+function WC() {
+	global $mock_wc;
+	return $mock_wc;
+}
+
+// 1. Empty cart
+$mock_wc->cart->items = array();
+same( 'empty cart is not digital', HSW_Checkout_Digital::is_digital(), false );
+
+// 2. Downloadable only (with virtual = false, which WC core treats as physical)
+$p_dl_only = new Mock_WC_Product_Real( false, true );
+$mock_wc->cart->items = array( array( 'data' => $p_dl_only ) );
+same( 'WC thinks needs_shipping is true for dl-only', $mock_wc->cart->needs_shipping(), true );
+same( 'HSW recognizes dl-only cart as digital', HSW_Checkout_Digital::is_digital(), true );
+
+// 3. Mixed cart (physical item + downloadable item)
+$p_phys = new Mock_WC_Product_Real( false, false );
+$mock_wc->cart->items = array(
+	array( 'data' => $p_dl_only ),
+	array( 'data' => $p_phys ),
+);
+same( 'mixed cart is not digital', HSW_Checkout_Digital::is_digital(), false );
+
+// 4. Virtual only cart
+$p_virt = new Mock_WC_Product_Real( true, false );
+$mock_wc->cart->items = array( array( 'data' => $p_virt ) );
+same( 'virtual cart is digital', HSW_Checkout_Digital::is_digital(), true );
+
+// 5. Product filter
+$digital_inst = new HSW_Checkout_Digital();
+same( 'product filter returns false for downloadable', $digital_inst->filter_product_needs_shipping( true, $p_dl_only ), false );
+same( 'product filter leaves physical unchanged', $digital_inst->filter_product_needs_shipping( true, $p_phys ), true );
+
+// 6. Field relaxation
+$fields = array(
+	'billing' => array(
+		'billing_first_name' => array(),
+		'billing_postcode'   => array(),
+		'billing_city'       => array(),
+	),
+	'shipping' => array( 'shipping_postcode' => array() ),
+);
+$relaxed = $digital_inst->relax_fields( $fields );
+same( 'relax_fields unsets billing_postcode and billing_city', isset( $relaxed['billing']['billing_postcode'] ) || isset( $relaxed['billing']['billing_city'] ), false );
+same( 'relax_fields keeps billing_first_name', isset( $relaxed['billing']['billing_first_name'] ), true );
+same( 'relax_fields unsets shipping section', isset( $relaxed['shipping'] ), false );
 
 /* --------------------------------------------------------------------- */
 echo "\n" . str_repeat( '-', 60 ) . "\n";

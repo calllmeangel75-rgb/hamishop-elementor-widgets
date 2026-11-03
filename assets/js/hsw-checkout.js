@@ -250,7 +250,7 @@
          * on the pay button with «مقدار ... را کامل کنید». Both paths now
          * send the whole form and validate against the same list.
          * ===================================================== */
-        var ADDRESS_FIELDS = CFG.addressFields || [ 'first_name', 'last_name', 'phone', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' ];
+        var ADDRESS_FIELDS = CFG.addressFields || [ 'first_name', 'last_name', 'phone', 'email', 'state', 'city', 'address_1', 'address_2', 'postcode', 'country' ];
         var ADDRESS_REQUIRED = CFG.addressRequiredFields || [ 'first_name', 'phone', 'state', 'city', 'address_1' ];
         var ADDRESS_LABELS = CFG.addressLabels || {};
 
@@ -267,9 +267,16 @@
                 return body;
         }
 
-        function missingAddress( body ) {
+        function missingAddress( body, form ) {
                 var missing = [];
-                ADDRESS_REQUIRED.forEach( function ( key ) {
+                var isDigital = form && ( form.getAttribute( 'data-hsw-digital' ) === '1' || form.hasAttribute( 'data-hsw-digital' ) );
+                var requiredList = isDigital ? [ 'first_name', 'phone' ] : ADDRESS_REQUIRED;
+
+                requiredList.forEach( function ( key ) {
+                        var el = form ? form.querySelector( '[name="' + key + '"]' ) : null;
+                        if ( form && ! el ) {
+                                return;
+                        }
                         if ( ! body[ key ] ) {
                                 missing.push( key );
                         }
@@ -344,7 +351,7 @@ document.addEventListener( 'click', function ( event ) {
 	if ( drawer ) { drawer.hidden = false; }
 
 	var body    = collectAddress( form );
-	var missing = missingAddress( body );
+	var missing = missingAddress( body, form );
 
 	ADDRESS_FIELDS.forEach( function ( key ) {
 		var el = form.querySelector( '[name="' + key + '"]' );
@@ -898,7 +905,7 @@ document.addEventListener( 'click', function ( event ) {
                         }
 
                         var body    = collectAddress( form );
-                        var missing = missingAddress( body );
+                        var missing = missingAddress( body, form );
 
                         if ( missing.length ) {
                                 say( addressMessage( missing ) );

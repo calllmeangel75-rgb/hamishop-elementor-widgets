@@ -38,6 +38,9 @@ class HSW_Checkout_Digital {
 
 	public function __construct() {
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'relax_fields' ), 20 );
+		add_filter( 'woocommerce_billing_fields', array( $this, 'relax_billing_fields' ), 20 );
+		add_filter( 'woocommerce_product_needs_shipping', array( $this, 'filter_product_needs_shipping' ), 20, 2 );
+		add_filter( 'woocommerce_cart_needs_shipping', array( $this, 'filter_cart_needs_shipping' ), 20 );
 	}
 
 	/**
@@ -57,6 +60,10 @@ class HSW_Checkout_Digital {
 	 * mixed cart (one physical item among downloads) needs shipping too, so it
 	 * keeps every field.
 	 *
+	 * If every product in the cart is virtual or downloadable, it is treated
+	 * as a digital cart even if the merchant only checked "Downloadable"
+	 * without checking "Virtual" in WooCommerce.
+	 *
 	 * @return bool
 	 */
 	public static function is_digital() {
@@ -69,7 +76,97 @@ class HSW_Checkout_Digital {
 		if ( WC()->cart->is_empty() ) {
 			return false;
 		}
-		return ! WC()->cart->needs_shipping();
+		if ( ! WC()->cart->needs_shipping() ) {
+			return true;
+		}
+		return self::cart_items_all_digital();
+	}
+
+	/**
+	 * Are all items currently in the cart virtual or downloadable?
+	 *
+	 * In standard WooCommerce, products marked only as "Downloadable" still
+	 * report `needs_shipping() === true` unless also marked "Virtual". This
+	 * helper ensures downloadable items never force physical delivery fields.
+	 *
+	 * @return bool
+	 */
+	public static function cart_items_all_digital() {
+		if ( ! function_exists( 'WC' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+			return false;
+		}
+		$cart = WC()->cart->get_cart();
+		if ( empty( $cart ) ) {
+			return false;
+		}
+		foreach ( $cart as $item ) {
+			if ( empty( $item['data'] ) || ! is_object( $item['data'] ) ) {
+				return false;
+			}
+			$product = $item['data'];
+			if ( ! is_a( $product, 'WC_Product' ) ) {
+				return false;
+			}
+			if ( ! ( $product->is_virtual() || $product->is_downloadable() ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Inform WooCommerce whether a product needs shipping.
+	 *
+	 * Downloadable items without the "Virtual" checkbox in WooCommerce
+	 * normally default to needing shipping. If digital checkout is enabled,
+	 * any downloadable product needs no shipping.
+	 *
+	 * @param bool       $needs_shipping Current value.
+	 * @param WC_Product $product        Product instance.
+	 * @return bool
+	 */
+	public function filter_product_needs_shipping( $needs_shipping, $product ) {
+		if ( self::enabled() && $product && is_a( $product, 'WC_Product' ) ) {
+			if ( $product->is_virtual() || $product->is_downloadable() ) {
+				return false;
+			}
+		}
+		return $needs_shipping;
+	}
+
+	/**
+	 * Inform WooCommerce whether the cart needs shipping.
+	 *
+	 * @param bool $needs_shipping Current value.
+	 * @return bool
+	 */
+	public function filter_cart_needs_shipping( $needs_shipping ) {
+		if ( self::is_digital() ) {
+			return false;
+		}
+		return $needs_shipping;
+	}
+
+	/**
+	 * Drop address fields from billing fields for digital carts.
+	 *
+	 * @param array $fields Billing fields.
+	 * @return array
+	 */
+	public function relax_billing_fields( $fields ) {
+		if ( ! self::is_digital() || ! is_array( $fields ) ) {
+			return $fields;
+		}
+
+		foreach ( self::ADDRESS_FIELDS as $key ) {
+			unset( $fields[ $key ] );
+			$bare = preg_replace( '/^billing_/', '', $key );
+			if ( $bare !== $key ) {
+				unset( $fields[ $bare ] );
+			}
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -89,6 +186,10 @@ class HSW_Checkout_Digital {
 
 		foreach ( self::ADDRESS_FIELDS as $key ) {
 			unset( $fields['billing'][ $key ] );
+			$bare = preg_replace( '/^billing_/', '', $key );
+			if ( $bare !== $key ) {
+				unset( $fields['billing'][ $bare ] );
+			}
 		}
 		unset( $fields['shipping'] );
 
