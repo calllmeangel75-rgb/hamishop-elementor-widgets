@@ -31,7 +31,7 @@ final class HSW_Account_Auth {
 	public function __construct( $account ) {
 		$this->account = $account;
 
-		foreach ( array( 'hsw_otp_send', 'hsw_otp_verify', 'hsw_2fa_verify', 'hsw_2fa_resend' ) as $action ) {
+		foreach ( array( 'hsw_otp_send', 'hsw_otp_verify', 'hsw_2fa_verify', 'hsw_2fa_resend', 'hsw_tg_start', 'hsw_tg_status', 'hsw_tg_verify' ) as $action ) {
 			add_action( 'wp_ajax_nopriv_' . $action, array( $this, 'ajax_' . str_replace( 'hsw_', '', $action ) ) );
 			add_action( 'wp_ajax_' . $action, array( $this, 'ajax_' . str_replace( 'hsw_', '', $action ) ) );
 		}
@@ -120,7 +120,8 @@ final class HSW_Account_Auth {
 			return 'yes' === $this->s( 'otp_whatsapp', 'no' ) && $this->whatsapp_configured();
 		}
 		if ( 'telegram' === $channel ) {
-			return 'yes' === $this->s( 'otp_telegram', 'yes' ) && '' !== trim( (string) $this->s( 'telegram_token' ) );
+			/* A BotFather token is the switch: no second hidden toggle to forget. */
+			return '' !== trim( (string) $this->s( 'telegram_token' ) );
 		}
 		if ( 'email' === $channel ) {
 			/* On by default: no API key, no per-message cost. */
@@ -1931,11 +1932,25 @@ final class HSW_Account_Auth {
 							update_user_meta( $user->ID, '_hsw_telegram_chat_id', $chat_id );
 						}
 
+						if ( ! $user ) {
+							/* Account created through Telegram: attach the verified number to it. */
+							$by_chat = get_users( array( 'meta_key' => '_hsw_telegram_chat_id', 'meta_value' => $chat_id, 'number' => 1, 'fields' => 'ID' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+							if ( $by_chat && '' === $this->user_phone( (int) $by_chat[0] ) && true === $this->claim_phone( (int) $by_chat[0], $phone ) ) {
+								update_user_meta( (int) $by_chat[0], 'billing_phone', $phone );
+							}
+						}
+
 						$this->telegram_send( $chat_id, __( 'شماره شما با موفقیت به حساب فروشگاه متصل شد.', 'hamishop-elementor-widgets' ) );
 					}
 				}
 			}
 		} elseif ( preg_match( '/^\/start(?:\s+(\S+))?/u', $text, $matches ) ) {
+			if ( isset( $matches[1] ) && preg_match( '/^lg_([a-f0-9]{32})$/', $matches[1], $lg ) ) {
+				if ( '' === $chat_type || 'private' === $chat_type ) {
+					$this->telegram_login_start( $chat_id, $lg[1], $message );
+				}
+				return;
+			}
 			$token   = isset( $matches[1] ) ? $this->parse_token( $matches[1] ) : '';
 			$user_id = $token ? (int) get_transient( 'hsw_telegram_link_' . $token ) : 0;
 			if ( $user_id ) {
@@ -1973,6 +1988,249 @@ final class HSW_Account_Auth {
 	 * Render helpers
 	 * ------------------------------------------------------------------ */
 
+	/* ---------------------------------------------------------------------
+	 * Telegram deep-link login / registration
+	 *
+	 * Telegram never lets a bot message someone by phone number or @username —
+	 * the person has to press Start first. So the flow starts there:
+	 *   1. the site makes a one-time session and a t.me/<bot>?start=lg_<sid> link;
+	 *   2. the bot answers /start with a 6-digit code (hashed here, 5 tries);
+	 *   3. the visitor types the code on the site: known chat -> login, unknown
+	 *      chat -> a new account (placeholder e-mail, synced later in the panel).
+	 * ------------------------------------------------------------------ */
+
+	private function tg_ttl() {
+		return max( 120, min( 900, absint( $this->s( 'otp_ttl', 300 ) ) ) );
+	}
+
+	private function tg_hash( $sid, $code ) {
+		return hash_hmac( 'sha256', $sid . '|' . $code, wp_salt( 'auth' ) );
+	}
+
+	private function tg_sid( $value ) {
+		$sid = (string) wp_unslash( (string) $value );
+
+		return preg_match( '/^[a-f0-9]{32}$/', $sid ) ? $sid : '';
+	}
+
+	private function tg_context_allowed( $context ) {
+		if ( 'register' === $context ) {
+			return 'yes' === $this->s( 'otp_register', 'yes' ) && 'yes' === get_option( 'woocommerce_enable_myaccount_registration' );
+		}
+
+		return 'yes' === $this->s( 'otp_login', 'yes' );
+	}
+
+	public function ajax_tg_start() {
+		check_ajax_referer( 'hsw_otp', 'nonce' );
+		if ( ! $this->enabled() || ! $this->channel_enabled( 'telegram' ) ) {
+			wp_send_json_error( array( 'message' => __( 'ورود با تلگرام فعال نیست.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		$context = isset( $_POST['context'] ) && 'register' === sanitize_key( wp_unslash( $_POST['context'] ) ) ? 'register' : 'login';
+		if ( ! $this->tg_context_allowed( $context ) ) {
+			wp_send_json_error( array( 'message' => __( 'این روش ورود فعال نیست.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+		if ( '' === $this->telegram_link() ) {
+			wp_send_json_error( array( 'message' => __( 'نام کاربری ربات تلگرام در تنظیمات افزونه وارد نشده است.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		/* Cheap per-IP ceiling: every call stores a transient. */
+		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) wp_unslash( $_SERVER['REMOTE_ADDR'] ) : '';
+		$tkey  = 'hsw_tgs_' . md5( $ip );
+		$count = (int) get_transient( $tkey );
+		if ( $count >= 12 ) {
+			wp_send_json_error( array( 'message' => __( 'تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کنید.', 'hamishop-elementor-widgets' ) ), 429 );
+		}
+		set_transient( $tkey, $count + 1, 10 * MINUTE_IN_SECONDS );
+
+		$sid = bin2hex( random_bytes( 16 ) );
+		set_transient(
+			'hsw_tgl_' . $sid,
+			array(
+				'state'   => 'wait',
+				'context' => $context,
+			),
+			$this->tg_ttl()
+		);
+
+		wp_send_json_success(
+			array(
+				'sid'     => $sid,
+				'link'    => esc_url_raw( $this->telegram_link( 'lg_' . $sid ) ),
+				'expires' => $this->tg_ttl(),
+				'message' => __( 'ربات تلگرام را باز کنید و روی Start بزنید؛ کد ۶ رقمی همان‌جا ارسال می‌شود. سپس کد را اینجا وارد کنید.', 'hamishop-elementor-widgets' ),
+			)
+		);
+	}
+
+	public function ajax_tg_status() {
+		check_ajax_referer( 'hsw_otp', 'nonce' );
+		$sid = isset( $_POST['sid'] ) ? $this->tg_sid( $_POST['sid'] ) : '';
+		$row = $sid ? get_transient( 'hsw_tgl_' . $sid ) : false;
+		if ( ! is_array( $row ) ) {
+			wp_send_json_error(
+				array(
+					'state'   => 'expired',
+					'message' => __( 'زمان این درخواست تمام شد. دوباره روی دکمهٔ تلگرام بزنید.', 'hamishop-elementor-widgets' ),
+				),
+				400
+			);
+		}
+
+		/* No webhook on this host? Pull the pending /start now. */
+		if ( 'wait' === $row['state'] && class_exists( 'HSW_Telegram_Poller' ) ) {
+			HSW_Telegram_Poller::poll_now();
+			$row = get_transient( 'hsw_tgl_' . $sid );
+			$row = is_array( $row ) ? $row : array( 'state' => 'expired' );
+		}
+
+		wp_send_json_success( array( 'state' => (string) $row['state'] ) );
+	}
+
+	/**
+	 * Bot side of the flow: /start lg_<sid> arrived — send the code.
+	 *
+	 * @param string $chat_id Chat.
+	 * @param string $sid     Session id from the deep link.
+	 * @param array  $message Telegram message.
+	 */
+	private function telegram_login_start( $chat_id, $sid, $message ) {
+		$key = 'hsw_tgl_' . $sid;
+		$row = get_transient( $key );
+		if ( ! is_array( $row ) || 'wait' !== ( isset( $row['state'] ) ? $row['state'] : '' ) ) {
+			$this->telegram_send( $chat_id, __( 'این لینک منقضی شده یا قبلاً استفاده شده است. از سایت دوباره روی دکمهٔ تلگرام بزنید.', 'hamishop-elementor-widgets' ) );
+			return;
+		}
+
+		$from = isset( $message['from'] ) && is_array( $message['from'] ) ? $message['from'] : array();
+		$code = (string) wp_rand( 100000, 999999 );
+
+		$row['state']    = 'sent';
+		$row['chat_id']  = (string) $chat_id;
+		$row['hash']     = $this->tg_hash( $sid, $code );
+		$row['tries']    = 0;
+		$row['first']    = sanitize_text_field( isset( $from['first_name'] ) ? (string) $from['first_name'] : '' );
+		$row['last']     = sanitize_text_field( isset( $from['last_name'] ) ? (string) $from['last_name'] : '' );
+		$row['username'] = sanitize_user( isset( $from['username'] ) ? (string) $from['username'] : '', true );
+		set_transient( $key, $row, $this->tg_ttl() );
+
+		$this->telegram_send( $chat_id, $this->message( $code ) );
+	}
+
+	public function ajax_tg_verify() {
+		check_ajax_referer( 'hsw_otp', 'nonce' );
+		if ( ! $this->enabled() || ! $this->channel_enabled( 'telegram' ) ) {
+			wp_send_json_error( array( 'message' => __( 'ورود با تلگرام فعال نیست.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		$sid  = isset( $_POST['sid'] ) ? $this->tg_sid( $_POST['sid'] ) : '';
+		$code = isset( $_POST['code'] ) ? preg_replace( '/[^0-9]/', '', wp_unslash( $_POST['code'] ) ) : '';
+		$fail = array( 'message' => $this->verify_fail_message() );
+		$key  = 'hsw_tgl_' . $sid;
+		$row  = $sid ? get_transient( $key ) : false;
+
+		if ( ! $sid || '' === $code || ! is_array( $row ) || 'sent' !== $row['state'] ) {
+			wp_send_json_error( $fail, 400 );
+		}
+
+		$row['tries'] = isset( $row['tries'] ) ? (int) $row['tries'] + 1 : 1;
+		if ( $row['tries'] > 5 ) {
+			delete_transient( $key );
+			wp_send_json_error( $fail, 400 );
+		}
+		set_transient( $key, $row, $this->tg_ttl() );
+
+		if ( ! hash_equals( (string) $row['hash'], $this->tg_hash( $sid, $code ) ) ) {
+			wp_send_json_error( $fail, 400 );
+		}
+		delete_transient( $key ); // single use.
+
+		$chat = (string) $row['chat_id'];
+		$ids  = get_users( array( 'meta_key' => '_hsw_telegram_chat_id', 'meta_value' => $chat, 'number' => 1, 'fields' => 'ID' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$user = $ids ? get_user_by( 'id', (int) $ids[0] ) : null;
+
+		if ( $user ) {
+			if ( ! $this->otp_allowed( $user ) ) {
+				wp_send_json_error( $fail, 400 );
+			}
+			$this->login_user( $user );
+			wp_send_json_success(
+				array(
+					'message'  => __( 'ورود با موفقیت انجام شد.', 'hamishop-elementor-widgets' ),
+					'redirect' => $this->redirect_after_login(),
+				)
+			);
+		}
+
+		/* Unknown chat: a Telegram signup, when registration is open. */
+		if ( ! $this->tg_context_allowed( 'register' ) ) {
+			wp_send_json_error( array( 'message' => __( 'حسابی به این تلگرام متصل نیست و ثبت‌نام غیرفعال است. با رمز عبور وارد شوید.', 'hamishop-elementor-widgets' ) ), 400 );
+		}
+
+		$name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+		if ( '' !== $name ) {
+			$parts = preg_split( '/\s+/u', $name, 2 );
+			$first = $parts[0];
+			$last  = isset( $parts[1] ) ? $parts[1] : '';
+		} else {
+			$first = (string) $row['first'];
+			$last  = (string) $row['last'];
+			if ( '' === $first && '' !== (string) $row['username'] ) {
+				$first = (string) $row['username'];
+			}
+			if ( '' === $first ) {
+				$first = __( 'کاربر تلگرام', 'hamishop-elementor-widgets' );
+			}
+		}
+
+		$base  = 'tg_' . preg_replace( '/[^0-9]/', '', $chat );
+		$login = $base;
+		$i     = 1;
+		while ( username_exists( $login ) && $i <= 20 ) {
+			$login = $base . '_' . $i;
+			$i++;
+		}
+
+		$new_user = wc_create_new_customer(
+			$this->placeholder_email( $chat ),
+			$login,
+			wp_generate_password( 24, true, true ),
+			array(
+				'first_name' => $first,
+				'last_name'  => $last,
+			)
+		);
+		if ( is_wp_error( $new_user ) ) {
+			wp_send_json_error( array( 'message' => $new_user->get_error_message() ), 400 );
+		}
+
+		$user_id = (int) $new_user;
+		update_user_meta( $user_id, 'billing_first_name', $first );
+		update_user_meta( $user_id, 'billing_last_name', $last );
+		update_user_meta( $user_id, '_hsw_telegram_chat_id', $chat );
+		update_user_meta( $user_id, '_hsw_tg_signup', time() );
+		if ( '' !== (string) $row['username'] ) {
+			update_user_meta( $user_id, '_hsw_tg_username', (string) $row['username'] );
+		}
+
+		$this->login_user( get_user_by( 'id', $user_id ) );
+
+		$kb = array(
+			'keyboard'          => array( array( array( 'text' => __( 'ارسال شماره موبایل', 'hamishop-elementor-widgets' ), 'request_contact' => true ) ) ),
+			'resize_keyboard'   => true,
+			'one_time_keyboard' => true,
+		);
+		$this->telegram_send( $chat, __( 'حساب شما ساخته شد و وارد شدید. برای اتصال شماره موبایل به حساب، دکمهٔ زیر را بزنید (اختیاری).', 'hamishop-elementor-widgets' ), $kb );
+
+		wp_send_json_success(
+			array(
+				'message'  => __( 'حساب شما ساخته شد و وارد شدید.', 'hamishop-elementor-widgets' ),
+				'redirect' => $this->redirect_after_login(),
+			)
+		);
+	}
+
 	public function otp_box( $context = 'login' ) {
 		if ( ! $this->enabled() ) {
 			return '';
@@ -2007,6 +2265,10 @@ final class HSW_Account_Auth {
 		}
 		$html .= '<div class="hsw-ac-field"' . ( $is_email_default ? ' hidden' : '' ) . ' data-hsw-otp-phone-field><label for="' . esc_attr( $id ) . '-phone">' . esc_html__( 'شماره موبایل', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'phone' ) . '<input type="tel" id="' . esc_attr( $id ) . '-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="09121234567" dir="ltr" data-hsw-otp-phone></div></div>';
 		$html .= '<div class="hsw-ac-field" data-hsw-otp-email-field' . ( $is_email_default ? '' : ' hidden' ) . '><label for="' . esc_attr( $id ) . '-emailid">' . esc_html__( 'ایمیل', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'mail' ) . '<input type="email" id="' . esc_attr( $id ) . '-emailid" name="email_id" autocomplete="email" placeholder="you@example.com" dir="ltr" data-hsw-otp-emailid></div></div>';
+		if ( isset( $channels['telegram'] ) ) {
+			$tg_label = 'register' === $context ? __( 'ثبت‌نام با تلگرام', 'hamishop-elementor-widgets' ) : __( 'ورود با تلگرام', 'hamishop-elementor-widgets' );
+			$html    .= '<div class="hsw-ac-otp__tg" data-hsw-otp-tg' . ( 'telegram' === $default ? '' : ' hidden' ) . '><p>' . esc_html__( 'بدون نیاز به شماره یا ایمیل: روی دکمه بزنید، در ربات تلگرام Start را بزنید و کد ۶ رقمی را همین‌جا وارد کنید. اگر حسابی با این تلگرام نباشد، ساخته می‌شود.', 'hamishop-elementor-widgets' ) . '</p><button type="button" class="hsw-ac__btn hsw-ac__btn--primary hsw-ac-otp__send" data-hsw-otp-tg-start>' . esc_html( $tg_label ) . $this->account->icon( 'send' ) . '</button></div>';
+		}
 		$html .= '<button type="button" class="hsw-ac__btn hsw-ac__btn--primary hsw-ac-otp__send" data-hsw-otp-send>' . esc_html__( 'دریافت کد تأیید', 'hamishop-elementor-widgets' ) . $this->account->icon( 'arrow-left' ) . '</button>';
 		$html .= '<div class="hsw-ac-otp__code-step" data-hsw-otp-code-step hidden><label for="' . esc_attr( $id ) . '-code">' . esc_html__( 'کد تأیید ۶ رقمی', 'hamishop-elementor-widgets' ) . '</label><div class="hsw-ac-input-wrap">' . $this->account->icon( 'shield' ) . '<input type="text" id="' . esc_attr( $id ) . '-code" name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" dir="ltr" data-hsw-otp-code></div><div class="hsw-ac-otp__actions"><button type="button" class="hsw-ac__btn hsw-ac__btn--primary" data-hsw-otp-verify>' . esc_html__( 'تأیید و ورود', 'hamishop-elementor-widgets' ) . '</button><button type="button" class="hsw-ac-otp__resend" data-hsw-otp-resend>' . esc_html__( 'ارسال دوباره', 'hamishop-elementor-widgets' ) . '</button></div></div>';
 		$html .= '<p class="hsw-ac-otp__message" data-hsw-otp-message role="status" aria-live="polite"></p>';

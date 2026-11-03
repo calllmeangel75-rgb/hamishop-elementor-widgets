@@ -881,6 +881,19 @@
 		/* Register form: the account email *is* the recipient on this channel. */
 		var regWrap = box.querySelector('[data-hsw-otp-regemail-wrap]');
 		if (regWrap) { setHidden(regWrap, isEmail); }
+		var isTg = 'telegram' === channel;
+		var tgPanel = box.querySelector('[data-hsw-otp-tg]');
+		var sendBtn = box.querySelector('[data-hsw-otp-send]');
+		if (tgPanel) {
+			setHidden(tgPanel, !isTg);
+			if (isTg) {
+				setHidden(phoneField, true);
+				setHidden(emailField, true);
+				setHidden(regWrap, true);
+			}
+			setHidden(sendBtn, isTg);
+		}
+		if (isTg && tgPanel) { return null; }
 		return isEmail ? box.querySelector('[data-hsw-otp-emailid]') : box.querySelector('[data-hsw-otp-phone]');
 	}
 
@@ -903,6 +916,7 @@
 
 	function setOtpChannel(box, channel) {
 		box.setAttribute('data-channel', channel);
+		box._hswTg = null;
 		box.querySelectorAll('[data-hsw-otp-channel]').forEach(function (button) {
 			var on = button.getAttribute('data-hsw-otp-channel') === channel;
 			button.classList.toggle('is-active', on);
@@ -924,6 +938,10 @@
 		var context = box.getAttribute('data-context') || 'login';
 		var phone = otpField(box, channel);
 		var isEmail = 'email' === channel;
+		if ('telegram' === channel) {
+			startTelegram(box);
+			return;
+		}
 		if (!phone || !phone.value.trim()) {
 			setMessage(message, isEmail ? 'ایمیل خود را وارد کنید.' : (data().phoneRequired || 'شماره موبایل را وارد کنید.'), 'error');
 			if (phone) {
@@ -977,6 +995,92 @@
 			});
 	}
 
+	function startTelegram(box) {
+		var message = box.querySelector('[data-hsw-otp-message]');
+		var context = box.getAttribute('data-context') || 'login';
+		var startBtn = box.querySelector('[data-hsw-otp-tg-start]');
+		var step = box.querySelector('[data-hsw-otp-code-step]');
+		var popup = null;
+		/* Opened synchronously so browsers do not treat it as a blocked popup. */
+		try { popup = window.open('', '_blank'); if (popup) { popup.opener = null; } } catch (e) { popup = null; }
+		if (startBtn) { startBtn.disabled = true; }
+		setMessage(message, 'در حال آماده‌سازی اتصال به تلگرام...');
+		ajax('hsw_tg_start', { context: context }, data().otpNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					if (popup) { popup.close(); }
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || 'اتصال به تلگرام ناموفق بود.', 'error');
+					return;
+				}
+				var info = payload.data;
+				box._hswTg = { sid: info.sid };
+				if (popup) { popup.location.href = info.link; }
+				setHidden(step, false);
+				setMessage(message, info.message, 'success', info.link, 'باز کردن ربات تلگرام');
+				var code = box.querySelector('[data-hsw-otp-code]');
+				if (code) { code.value = ''; }
+				pollTelegram(box, info.sid);
+			})
+			.catch(function () {
+				if (popup) { popup.close(); }
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			})
+			.finally(function () {
+				if (startBtn) { startBtn.disabled = false; }
+			});
+	}
+
+	function pollTelegram(box, sid) {
+		var message = box.querySelector('[data-hsw-otp-message]');
+		var rounds = 0;
+		(function tick() {
+			if (!box._hswTg || box._hswTg.sid !== sid || ++rounds > 40) { return; }
+			ajax('hsw_tg_status', { sid: sid }, data().otpNonce)
+				.then(function (payload) {
+					if (!box._hswTg || box._hswTg.sid !== sid) { return; }
+					if (payload && payload.success && payload.data && 'sent' === payload.data.state) {
+						setMessage(message, 'کد در تلگرام برایتان ارسال شد؛ آن را اینجا وارد کنید.', 'success');
+						var code = box.querySelector('[data-hsw-otp-code]');
+						if (code) { code.focus(); }
+						return;
+					}
+					if (payload && !payload.success) {
+						setMessage(message, (payload.data && payload.data.message) || 'زمان درخواست تمام شد.', 'error');
+						return;
+					}
+					setTimeout(tick, 3000);
+				})
+				.catch(function () { setTimeout(tick, 5000); });
+		}());
+	}
+
+	function verifyTelegram(box, code, context, name, message, button) {
+		var state = box._hswTg;
+		if (!state || !state.sid) {
+			setMessage(message, 'ابتدا روی دکمهٔ تلگرام بزنید و در ربات Start را بفرستید.', 'error');
+			return;
+		}
+		if (button) { button.disabled = true; }
+		setMessage(message, data().verifying || 'در حال بررسی کد...');
+		ajax('hsw_tg_verify', { sid: state.sid, code: code, context: context, name: name, redirect_to: otpRedirect() }, data().otpNonce)
+			.then(function (payload) {
+				if (!payload || !payload.success) {
+					var error = payload && payload.data ? payload.data : {};
+					setMessage(message, error.message || (data().verifyError || 'کد تأیید نامعتبر است.'), 'error');
+					return;
+				}
+				setMessage(message, payload.data.message || 'تأیید شد.', 'success');
+				window.location.href = payload.data.redirect || window.location.href;
+			})
+			.catch(function () {
+				setMessage(message, data().networkError || 'خطا در ارتباط با سرور. دوباره تلاش کنید.', 'error');
+			})
+			.finally(function () {
+				if (button) { button.disabled = false; }
+			});
+	}
+
 	function verifyOtp(box) {
 		var button = box.querySelector('[data-hsw-otp-verify]');
 		var message = box.querySelector('[data-hsw-otp-message]');
@@ -997,6 +1101,10 @@
 			button.disabled = true;
 		}
 		setMessage(message, data().verifying || 'در حال بررسی کد...');
+		if ('telegram' === channel) {
+			verifyTelegram(box, code.value.trim(), context, name ? name.value.trim() : '', message, button);
+			return;
+		}
 		ajax('hsw_otp_verify', {
 			phone: ('email' === channel) ? '' : (phone ? phone.value.trim() : ''),
 			email: ('email' === channel) ? (phone ? phone.value.trim() : '') : (email ? email.value.trim() : ''),
@@ -1177,6 +1285,16 @@
 			var otpBox = otpChannel.closest('[data-hsw-otp]');
 			if (otpBox) {
 				setOtpChannel(otpBox, otpChannel.getAttribute('data-hsw-otp-channel'));
+			}
+			return;
+		}
+
+		var tgStart = event.target.closest('[data-hsw-otp-tg-start]');
+		if (tgStart) {
+			event.preventDefault();
+			var tgBox = tgStart.closest('[data-hsw-otp]');
+			if (tgBox) {
+				startTelegram(tgBox);
 			}
 			return;
 		}

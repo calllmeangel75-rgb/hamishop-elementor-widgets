@@ -126,7 +126,8 @@ class HSW_Email_Verify {
 	 * @return bool
 	 */
 	public static function is_phone_account( $user_id ) {
-		return '' !== (string) get_user_meta( (int) $user_id, '_hsw_auth_phone', true );
+		return '' !== (string) get_user_meta( (int) $user_id, '_hsw_auth_phone', true )
+			|| '' !== (string) get_user_meta( (int) $user_id, '_hsw_tg_signup', true );
 	}
 
 	/**

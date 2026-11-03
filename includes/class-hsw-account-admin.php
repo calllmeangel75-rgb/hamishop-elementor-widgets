@@ -615,7 +615,6 @@ final class HSW_Account_Admin {
 				<?php $this->switch_field( $s, 'auth', 'otp_register', 'اجازهٔ ثبت‌نام با کد' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_2fa', 'امکان ورود دوعاملی برای کاربران' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_email', 'فعال‌سازی کانال ایمیل', 'رایگان و بدون نیاز به کلید API؛ پیشنهاد می‌شود.' ); ?>
-				<?php $this->switch_field( $s, 'auth', 'otp_telegram', 'فعال‌سازی کانال تلگرام' ); ?>
 				<?php $this->switch_field( $s, 'auth', 'otp_whatsapp', 'فعال‌سازی کانال واتساپ' ); ?>
 				<?php if ( $sms ) : ?>
 					<?php $this->switch_field( $s, 'auth', 'otp_sms', 'استفاده از افزونهٔ پیامکی فعال', 'افزونهٔ پیامک/OTP روی سایت شناسایی شد؛ ارسال از همان انجام می‌شود و اولویت دارد.' ); ?>
@@ -636,7 +635,7 @@ final class HSW_Account_Admin {
 
 		<div class="hsw-admin-card">
 			<h2>ربات تلگرام (رایگان)</h2>
-			<p class="hsw-admin-desc">در تلگرام با <code>@BotFather</code> یک ربات بسازید، توکن را اینجا وارد کنید و آدرس وبهوک زیر را با متد <code>setWebhook</code> روی ربات ثبت کنید. کاربر برای دریافت کد باید یک‌بار ربات را باز کند و شماره خود را ارسال کند.</p>
+			<p class="hsw-admin-desc"><strong>با ثبت توکن، ورود و ثبت‌نام با تلگرام خودکار فعال می‌شود</strong> (نام کاربری ربات را هم وارد کنید تا دکمهٔ «ورود با تلگرام» لینک درست بسازد). در تلگرام با <code>@BotFather</code> یک ربات بسازید، توکن را اینجا وارد کنید و آدرس وبهوک زیر را با متد <code>setWebhook</code> روی ربات ثبت کنید. کاربر برای دریافت کد باید یک‌بار ربات را باز کند و شماره خود را ارسال کند.</p>
 			<div class="hsw-admin-grid">
 				<?php $this->text_field( $s, 'auth', 'telegram_bot', 'نام کاربری ربات (بدون @)', 'مثلاً hamishop_bot' ); ?>
 				<?php $this->text_field( $s, 'auth', 'telegram_token', 'توکن ربات (BotFather)', 'این مقدار را در هیچ صفحهٔ عمومی قرار ندهید.' ); ?>

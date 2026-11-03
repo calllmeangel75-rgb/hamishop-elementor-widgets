@@ -6836,3 +6836,22 @@ a.hsw-ac__stat:hover {
 	.hsw-ac__side.is-open { transform: translateX(0) !important; visibility: visible; }
 	.hsw-ac__side .hsw-ac__menu-list { grid-template-columns: 1fr; }
 }
+
+/* Telegram deep-link login panel */
+.hsw-ac-otp [hidden] { display: none !important; }
+.hsw-ac-otp__tg {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 0 0 4px;
+}
+.hsw-ac-otp__tg p {
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: var(--hsw-ac-bg, #f3f6fa);
+	border: 1px solid var(--hsw-ac-line, #e6ebf2);
+	color: var(--hsw-ac-muted, #5b6b80);
+	font-size: 12px;
+	line-height: 1.9;
+}

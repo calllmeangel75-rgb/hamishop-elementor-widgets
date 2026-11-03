@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.215
+Stable tag: 1.11.216
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,7 +81,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == Changelog ==
 
-= 1.11.215 =
+= 1.11.216 =
 * Fix: رفع خطای `403 Forbidden` روی `wp-comments-post.php` هنگام ثبت نظر در مقالات (`.hsw-pp__form`) و ثبت دیدگاه و امتیاز در صفحه محصول (`.hsw-review-form`) برای کاربران مهمان و مشتریان واردشده؛ ارسال نظرات اکنون به‌صورت ایجکسی از طریق `admin-ajax.php` (`hsw_submit_comment`) همراه با پیام وضعیت درجا و پشتیبان `admin-post.php` انجام می‌شود.
 * Fix: خنثی‌سازی کامل رنگ صورتی هاور قالب Hello Elementor (`#c36`) روی دکمه‌های ثبت دیدگاه و ثبت نظر (`.hsw-pp__submit`، `.hsw-pp__seclink`، `.hsw-review-submit`).
 * UI: تغییر آیکن دکمه‌های سبد خرید در گرید آرشیو محصولات (`.hsw-ag__cta.hsw-d` و `.hsw-ag__cta--m.hsw-m`) به آیکن خطی و تمیز اختصاصی `shopping_cart` (همسان با کارت‌های لوپ).
