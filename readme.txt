@@ -82,10 +82,12 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 == Changelog ==
 
 = 1.11.219 =
+* Feature: Modernize checkout address fields, select dropdowns, labels, and textarea with sleek elevation, rounded borders, and smooth focus glow.
+* Feature: Modernize discount coupon forms in cart, checkout, and pay pages with unified capsule input-groups and chip-styled applied coupon tags.
 * Fix: Address submit button (`.hsw-ckaddr__fsubmit`) background transparency override by button reset rule in checkout CSS.
 * Feature: High-specificity Elementor style controls for address submit button normal and hover background/text colors (`fsubmit_bg`, `fsubmit_c`, `fsubmit_bg_hover`, `fsubmit_c_hover`).
 * Feature: Add customizable button text control (`fsubmit_label`) for address submit button in both standalone and composite checkout widgets.
-* Fix: Rebuild minified checkout stylesheets.
+* Fix: Rebuild minified cart and checkout stylesheets.
 
 = 1.11.218 =
 * Fix: رفع خطای `403 Forbidden` روی `wp-comments-post.php` هنگام ثبت نظر در مقالات (`.hsw-pp__form`) و ثبت دیدگاه و امتیاز در صفحه محصول (`.hsw-review-form`) برای کاربران مهمان و مشتریان واردشده؛ ارسال نظرات اکنون به‌صورت ایجکسی از طریق `admin-ajax.php` (`hsw_submit_comment`) همراه با پیام وضعیت درجا و پشتیبان `admin-post.php` انجام می‌شود.
