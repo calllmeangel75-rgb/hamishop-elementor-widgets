@@ -159,6 +159,16 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                         )
                 );
 
+                $this->add_control(
+                        'fsubmit_label',
+                        array(
+                                'label'       => __( 'متن دکمهٔ «ثبت آدرس»', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => '',
+                                'placeholder' => __( 'پیش‌فرض: ثبت آدرس و ادامه (یا ثبت و ادامه)', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
                 $this->end_controls_section();
 
                 /* ------------------------- STYLE ------------------------- */
@@ -176,8 +186,13 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                 $this->a_color( 'chip_bg', __( 'پس‌زمینه برچسب', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__chip', 'background-color' );
                 $this->a_text( 'line_tx', '{{WRAPPER}} .hsw-ckaddr__line', array( 'default' => 14 ) );
                 $this->a_color( 'meta_c', __( 'متن ردیف تماس/کدپستی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__meta' );
-                $this->a_color( 'fsubmit_bg', __( 'دکمهٔ «ثبت آدرس» — پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__fsubmit', '--hsw-ck-submit-bg' );
-                $this->a_color( 'fsubmit_c', __( 'دکمهٔ «ثبت آدرس» — متن', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ckaddr__fsubmit', '--hsw-ck-submit-tx' );
+                $btn_sel = '{{WRAPPER}} .hsw-ckaddr__fsubmit, {{WRAPPER}} .hsw-k button.hsw-ckaddr__fsubmit, {{WRAPPER}} .hsw-k [type="submit"].hsw-ckaddr__fsubmit';
+                $btn_hv  = '{{WRAPPER}} .hsw-ckaddr__fsubmit:hover, {{WRAPPER}} .hsw-k button.hsw-ckaddr__fsubmit:hover, {{WRAPPER}} .hsw-k [type="submit"].hsw-ckaddr__fsubmit:hover';
+
+                $this->a_color( 'fsubmit_bg', __( 'دکمهٔ «ثبت آدرس» — پس‌زمینه', 'hamishop-elementor-widgets' ), $btn_sel, 'background-color' );
+                $this->a_color( 'fsubmit_c', __( 'دکمهٔ «ثبت آدرس» — متن', 'hamishop-elementor-widgets' ), $btn_sel, 'color' );
+                $this->a_color( 'fsubmit_bg_hover', __( 'دکمهٔ «ثبت آدرس» — پس‌زمینه (هاور)', 'hamishop-elementor-widgets' ), $btn_hv, 'background-color' );
+                $this->a_color( 'fsubmit_c_hover', __( 'دکمهٔ «ثبت آدرس» — متن (هاور)', 'hamishop-elementor-widgets' ), $btn_hv, 'color' );
 
                 $this->end_controls_section();
         }
@@ -572,7 +587,14 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
 
                                 <button type="submit" class="hsw-ckaddr__fsubmit">
                                         <?php echo HSW_Helpers::icon( 'check' ); ?>
-                                        <span><?php echo $digital ? esc_html__( 'ثبت و ادامه', 'hamishop-elementor-widgets' ) : esc_html__( 'ثبت آدرس و ادامه', 'hamishop-elementor-widgets' ); ?></span>
+                                        <span><?php
+                                                $custom_fsubmit_lbl = trim( (string) $this->opt( 'fsubmit_label', '' ) );
+                                                if ( '' !== $custom_fsubmit_lbl ) {
+                                                        echo esc_html( $custom_fsubmit_lbl );
+                                                } else {
+                                                        echo $digital ? esc_html__( 'ثبت و ادامه', 'hamishop-elementor-widgets' ) : esc_html__( 'ثبت آدرس و ادامه', 'hamishop-elementor-widgets' );
+                                                }
+                                        ?></span>
                                 </button>
                         </form>
                 </article>

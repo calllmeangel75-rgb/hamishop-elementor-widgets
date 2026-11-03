@@ -83,9 +83,7 @@
 .hsw-k a:focus,
 .hsw-k a:active { text-decoration: none; color: inherit; }
 .hsw-k :where(button, input, select, textarea) { font: inherit; color: inherit; }
-.hsw-k button,
-.hsw-k [type="button"],
-.hsw-k [type="submit"] { font-family: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+.hsw-k :where(button, [type="button"], [type="submit"]) { font-family: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 .hsw-k :where(img) { max-width: 100%; }
 .hsw-k :where(input[type='radio']), .hsw-k :where(input[type='checkbox']) { accent-color: var(--hswk-primary); margin: 0; }
 .hsw-k .hsw-c-cur { font-size: .6875rem; line-height: 1rem; font-weight: 500; }
@@ -1813,6 +1811,8 @@ select.hsw-ckaddr__fi {
 	line-height: 1.8;
 }
 
+.hsw-k button.hsw-ckaddr__fsubmit,
+.hsw-k [type="submit"].hsw-ckaddr__fsubmit,
 .hsw-ckaddr__fsubmit {
 	display: inline-flex;
 	align-items: center;
@@ -1823,6 +1823,7 @@ select.hsw-ckaddr__fi {
 	border: 0;
 	border-radius: 12px;
 	background: var(--hsw-ck-submit-bg, var(--hswk-cta));
+	background-color: var(--hsw-ck-submit-bg, var(--hswk-cta));
 	color: var(--hsw-ck-submit-tx, var(--hswk-on-cta, #fff));
 	font-family: inherit;
 	font-size: .875rem;
@@ -1831,10 +1832,15 @@ select.hsw-ckaddr__fi {
 	transition: background-color .15s, transform .15s;
 }
 
+.hsw-k button.hsw-ckaddr__fsubmit:hover,
+.hsw-k button.hsw-ckaddr__fsubmit:focus-visible,
+.hsw-k [type="submit"].hsw-ckaddr__fsubmit:hover,
+.hsw-k [type="submit"].hsw-ckaddr__fsubmit:focus-visible,
 .hsw-ckaddr__fsubmit:hover,
 .hsw-ckaddr__fsubmit:focus-visible {
-	background: var(--hswk-cta-hover);
-	color: var(--hswk-on-cta, #fff);
+	background: var(--hsw-ck-submit-bg-hover, var(--hswk-cta-hover));
+	background-color: var(--hsw-ck-submit-bg-hover, var(--hswk-cta-hover));
+	color: var(--hsw-ck-submit-tx-hover, var(--hswk-on-cta, #fff));
 }
 
 .hsw-ckaddr__fsubmit:active {

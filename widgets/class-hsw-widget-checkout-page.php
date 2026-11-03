@@ -37,7 +37,7 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
         protected function register_controls() {
                 $this->part_section( 'ctop_', __( '۱. هدر و مراحل تسویه', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Top', array( 'vis', 'sticky', 'title', 'back_url', 'show_support', 'support_label', 'support_phone', 'support_url', 'steps_heading', 'active_step', 'steps' ) );
 
-                $this->part_section( 'caddr_', __( '۲. آدرس و مشخصات گیرنده', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Address', array( 'vis', 'title_d', 'title_m', 'chip_text', 'add_label_d', 'add_label_m', 'show_edit', 'edit_label', 'change_label', 'manage_url', 'phone_label', 'show_postcode', 'postcode_label' ) );
+                $this->part_section( 'caddr_', __( '۲. آدرس و مشخصات گیرنده', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Address', array( 'vis', 'title_d', 'title_m', 'chip_text', 'add_label_d', 'add_label_m', 'show_edit', 'edit_label', 'change_label', 'manage_url', 'phone_label', 'show_postcode', 'postcode_label', 'fsubmit_label' ) );
 
                 $this->part_section( 'cship_', __( '۳. روش ارسال', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Shipping', array( 'vis', 'title', 'title_m', 'free_text', 'badge_text', 'options' ) );
 
