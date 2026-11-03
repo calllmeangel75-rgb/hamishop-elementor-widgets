@@ -162,11 +162,12 @@ class HSW_Checkout_Rest {
                         return $digital_req;
                 }
 
-                /* A courier cannot deliver without these, whatever the settings say —
-                   but a digital cart has no courier at all. */
+                /* A courier cannot deliver without these, provided WooCommerce has not removed them. */
                 foreach ( array( 'first_name', 'phone', 'state', 'city', 'address_1' ) as $key ) {
-                        if ( ! in_array( $key, $required, true ) ) {
-                                $required[] = $key;
+                        if ( empty( $fields ) || isset( $fields[ 'billing_' . $key ] ) ) {
+                                if ( ! in_array( $key, $required, true ) ) {
+                                        $required[] = $key;
+                                }
                         }
                 }
 

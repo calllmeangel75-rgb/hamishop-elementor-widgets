@@ -528,6 +528,17 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                  * ask for five fields, let the customer continue, and the order
                  * then failed on the pay button; the two lists must match.
                  */
+                $wc_fields = array();
+                if ( function_exists( 'WC' ) && WC()->checkout() ) {
+                        $wc_fields = (array) WC()->checkout()->get_checkout_fields( 'billing' );
+                }
+                $is_active = function ( $key ) use ( $wc_fields ) {
+                        if ( empty( $wc_fields ) ) {
+                                return true;
+                        }
+                        return isset( $wc_fields[ 'billing_' . $key ] ) || isset( $wc_fields[ $key ] );
+                };
+
                 $required = class_exists( 'HSW_Checkout_Rest' ) ? HSW_Checkout_Rest::required_address_fields() : array( 'first_name', 'phone', 'state', 'city', 'address_1' );
                 $needs    = function ( $key ) use ( $required ) {
                         return in_array( $key, $required, true );
@@ -575,12 +586,14 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                 </div>
                                 <?php else : ?>
                                 <div class="hsw-ckaddr__frow">
-                                        <div class="hsw-ckaddr__fcell">
+                                        <div class="hsw-ckaddr__fcell<?php echo ! $is_active( 'postcode' ) ? ' hsw-ckaddr__fcell--wide' : ''; ?>">
                                                 <?php echo $field( 'phone', __( 'شماره تماس', 'hamishop-elementor-widgets' ), $phone, 'tel', ' inputmode="tel" dir="ltr" autocomplete="tel"', $needs( 'phone' ), 'phone_iphone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
+                                        <?php if ( $is_active( 'postcode' ) ) : ?>
                                         <div class="hsw-ckaddr__fcell">
                                                 <?php echo $field( 'postcode', __( 'کد پستی', 'hamishop-elementor-widgets' ), $postcode, 'text', ' inputmode="numeric" dir="ltr" autocomplete="postal-code" maxlength="10"', $needs( 'postcode' ), 'markunread_mailbox' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
+                                        <?php endif; ?>
                                 </div>
 
                                 <div class="hsw-ckaddr__frow">
@@ -611,11 +624,13 @@ class HSW_Widget_Checkout_Address extends HSW_Checkout_Base {
                                         </div>
                                 </div>
 
+                                <?php if ( $is_active( 'address_2' ) ) : ?>
                                 <div class="hsw-ckaddr__frow">
                                         <div class="hsw-ckaddr__fcell hsw-ckaddr__fcell--wide">
                                                 <?php echo $field( 'address_2', __( 'پلاک، واحد، طبقه (اختیاری)', 'hamishop-elementor-widgets' ), $line2, 'text', '', false, 'apartment' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                         </div>
                                 </div>
+                                <?php endif; ?>
                                 <?php endif; ?>
 
                                 <input type="hidden" name="country" value="<?php echo esc_attr( $country ); ?>">
