@@ -157,6 +157,17 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                 );
 
                 $this->add_control(
+                        'terms_url',
+                        array(
+                                'label'       => __( 'لینک صفحه قوانین و مقررات', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::URL,
+                                'placeholder' => home_url( '/terms/' ),
+                                'default'     => array( 'url' => '' ),
+                                'description' => __( 'در صورت خالی بودن، به‌طور خودکار از برگهٔ شرایط و ضوابط ووکامرس یا حریم خصوصی وردپرس خوانده می‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
                         'terms_text',
                         array(
                                 'label'   => __( 'بقیه متن قوانین (دسکتاپ)', 'hamishop-elementor-widgets' ),

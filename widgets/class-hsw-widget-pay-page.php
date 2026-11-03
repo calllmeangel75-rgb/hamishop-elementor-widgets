@@ -43,7 +43,7 @@ class HSW_Widget_Pay_Page extends HSW_Pay_Base {
 
                 $this->part_section( 'pcpn_', __( '۴. کد تخفیف', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Coupon', array( 'vis', 'title', 'applied_tpl', 'deduct_tpl', 'remove_label', 'placeholder', 'button_label', 'm_placeholder', 'm_button_label', 'error_text' ) );
 
-                $this->part_section( 'psum_', __( '۵. خلاصه نهایی و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Summary', array( 'vis', 'sticky', 'title_d', 'count_tpl', 'subtotal_tpl', 'discount_label', 'coupon_tpl', 'shipping_label', 'free_note', 'total_label', 'taxes_note', 'cta_label', 'terms_link', 'terms_text', 'badges', 'show_help', 'help_title', 'help_text', 'subtotal_tpl_m', 'discount_label_m', 'shipping_label_m', 'free_note_m', 'total_label_m', 'terms_text_m', 'bar_pay_lbl', 'bar_cta' ) );
+                $this->part_section( 'psum_', __( '۵. خلاصه نهایی و پرداخت', 'hamishop-elementor-widgets' ), '\HSW_Widget_Pay_Summary', array( 'vis', 'sticky', 'title_d', 'count_tpl', 'subtotal_tpl', 'discount_label', 'coupon_tpl', 'shipping_label', 'free_note', 'total_label', 'taxes_note', 'cta_label', 'terms_link', 'terms_url', 'terms_text', 'badges', 'show_help', 'help_title', 'help_text', 'subtotal_tpl_m', 'discount_label_m', 'shipping_label_m', 'free_note_m', 'total_label_m', 'terms_text_m', 'bar_pay_lbl', 'bar_cta' ) );
 
                 $this->start_controls_section(
                         'sec_layout',

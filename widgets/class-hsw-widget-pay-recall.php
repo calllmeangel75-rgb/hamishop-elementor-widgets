@@ -199,10 +199,22 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
         }
 
         /**
-         * Delivery slot text (filter lets scheduling plugins inject the session slot).
+         * Delivery slot text (reads the chosen day/slot from WC session on the live site).
          */
         protected function slot_text() {
-                $default = $this->opt( 'slot_text', __( 'فردا (پنجشنبه) - ساعت ۱۴ الی ۱۸', 'hamishop-elementor-widgets' ) );
+                if ( ! $this->is_demo() && function_exists( 'WC' ) && WC()->session ) {
+                        $saved = WC()->session->get( 'hsw_delivery_schedule' );
+                        if ( is_array( $saved ) ) {
+                                $parts = array_filter( array_map( 'trim', array( (string) ( $saved['day'] ?? '' ), (string) ( $saved['slot'] ?? '' ) ) ) );
+                                if ( ! empty( $parts ) ) {
+                                        return (string) apply_filters( 'hsw_pay_slot_text', implode( ' — ', $parts ), $this->get_name() );
+                                }
+                        }
+                        if ( ! $this->is_editing() ) {
+                                return (string) apply_filters( 'hsw_pay_slot_text', '', $this->get_name() );
+                        }
+                }
+                $default = $this->opt( 'slot_text', __( 'فردا — ساعت ۱۴ الی ۱۸', 'hamishop-elementor-widgets' ) );
                 return (string) apply_filters( 'hsw_pay_slot_text', $default, $this->get_name() );
         }
 
@@ -214,7 +226,11 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                         return $this->opt( 'm_delivery', __( 'تحویل: فردا (۱۰ الی ۱۴) - ارسال اکسپرس', 'hamishop-elementor-widgets' ) );
                 }
                 $method = $this->method_title();
-                return ( '' !== $method ) ? 'تحویل: ' . $method : $this->opt( 'm_delivery', '' );
+                $slot   = $this->slot_text();
+                if ( '' !== $method && '' !== $slot ) {
+                        return 'تحویل: ' . $slot . ' — ' . $method;
+                }
+                return ( '' !== $method ) ? 'تحویل: ' . $method : $slot;
         }
 
         /**
@@ -325,6 +341,7 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                                                         </span>
                                                         <span class="hsw-prec__method"><?php echo esc_html( $method ); ?></span>
                                                 </div>
+                                                <?php if ( '' !== trim( $slot ) ) : ?>
                                                 <div class="hsw-prec__box-r">
                                                         <span class="hsw-prec__lbl is-icon">
                                                                 <?php echo HSW_Helpers::icon( 'schedule' ); ?>
@@ -332,6 +349,7 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                                                         </span>
                                                         <span><?php echo esc_html( $slot ); ?></span>
                                                 </div>
+                                                <?php endif; ?>
                                         </div>
                                         <?php endif; ?>
                                 </div>

@@ -64,9 +64,14 @@
         line-height: 1.6;
 }
 .hsw-a :where(h1, h2, h3, h4, p, ul) { margin: 0; padding: 0; }
-.hsw-a :where(a) { text-decoration: none; color: inherit; }
+.hsw-a a,
+.hsw-a a:hover,
+.hsw-a a:focus,
+.hsw-a a:active { text-decoration: none; color: inherit; }
 .hsw-a :where(button, input, select) { font: inherit; }
-.hsw-a :where(button) { font-family: inherit; cursor: pointer; }
+.hsw-a button,
+.hsw-a [type="button"],
+.hsw-a [type="submit"] { font-family: inherit; cursor: pointer; }
 
 /* Text clamp helpers */
 .hsw-a .is-clamped {
@@ -1550,8 +1555,9 @@ body.hsw-noscroll { overflow: hidden; }
 
 .hsw-a .hsw-ag__cta,
 .hsw-a .hsw-ag__cta--m {
-        width: 28px;
-        height: 28px;
+        box-sizing: border-box;
+        width: 30px;
+        height: 30px;
         min-width: 0;
         min-height: 0;
         padding: 0;
@@ -1560,15 +1566,44 @@ body.hsw-noscroll { overflow: hidden; }
         border-radius: 8px;
         box-shadow: var(--hswa-shadow-xs);
         color: #fff;
+        text-decoration: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-size: 0;
         line-height: 0;
+        flex-shrink: 0;
+}
+.hsw-a .hsw-ag__cta .hsw-ic,
+.hsw-a .hsw-ag__cta--m .hsw-ic {
+        font-size: 16px;
+        width: 1em;
+        height: 1em;
+        color: inherit;
+}
+@media (min-width: 768px) {
+        .hsw-a .hsw-ag__cta {
+                width: 36px;
+                height: 36px;
+                border-radius: var(--hswa-r-xl);
+        }
+        .hsw-a .hsw-ag__cta .hsw-ic {
+                font-size: 18px;
+        }
 }
 .hsw-a .hsw-ag__cta:hover,
-.hsw-a .hsw-ag__cta--m:hover { background: var(--hswa-primary-dark); }
-.hsw-a .hsw-ag__cta.is-added { background: var(--hswa-emerald); }
+.hsw-a .hsw-ag__cta:focus,
+.hsw-a .hsw-ag__cta:focus-visible,
+.hsw-a .hsw-ag__cta--m:hover,
+.hsw-a .hsw-ag__cta--m:focus,
+.hsw-a .hsw-ag__cta--m:focus-visible {
+        background: var(--hswa-primary-dark);
+        color: #fff;
+        border: 0;
+        text-decoration: none;
+}
+.hsw-a .hsw-ag__cta.is-added,
+.hsw-a .hsw-ag__cta--m.is-added { background: var(--hswa-emerald); color: #fff; }
 
 .hsw-a .hsw-ag__wish {
         width: 30px;

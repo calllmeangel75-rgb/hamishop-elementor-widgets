@@ -40,9 +40,35 @@
 	height: auto;
 }
 
-.hsw-pp a {
+.hsw-pp a,
+.hsw-pp a:hover,
+.hsw-pp a:focus,
+.hsw-pp a:focus-visible {
 	color: inherit;
 	text-decoration: none;
+}
+
+/*
+ * Neutralize Hello Elementor / Hello Child default pink (`#c36` / `rgb(204, 51, 102)`)
+ * on links, buttons, and `[type="button"]` / `[type="submit"]` inside single posts.
+ */
+.hsw-pp button,
+.hsw-pp [type="button"],
+.hsw-pp [type="submit"] {
+	font-family: inherit;
+	box-shadow: none;
+	background-image: none;
+}
+
+.hsw-pp .hsw-pp__body a {
+	color: var(--hsw-pp-brand);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.hsw-pp .hsw-pp__body a:hover,
+.hsw-pp .hsw-pp__body a:focus-visible {
+	color: var(--hsw-pp-accent);
 }
 
 /* =========================================================================
@@ -431,6 +457,7 @@
  * «بدون لینک لنگر» mode renders buttons instead of fragment links, so no
  * `…/#heading` URL exists for Google to index. Same look as the links.
  */
+.hsw-pp .hsw-pp__tocbtn,
 .hsw-pp__tocbtn {
 	display: flex;
 	align-items: baseline;
@@ -438,13 +465,13 @@
 	width: 100%;
 	padding: 5px 0;
 	border: 0;
-	background: none;
+	background: transparent;
 	color: var(--hsw-pp-muted);
 	font: inherit;
 	font-size: 12px;
 	text-align: start;
 	cursor: pointer;
-	transition: color .15s;
+	transition: color .15s, border-color .15s;
 }
 
 .hsw-pp__tocbtn::before {
@@ -459,8 +486,13 @@
 	content: '–';
 }
 
+.hsw-pp .hsw-pp__tocbtn:hover,
+.hsw-pp .hsw-pp__tocbtn:focus,
+.hsw-pp .hsw-pp__tocbtn:focus-visible,
+.hsw-pp .hsw-pp__tocbtn.is-active,
 .hsw-pp__tocbtn:hover,
 .hsw-pp__tocbtn.is-active {
+	background: transparent;
 	color: var(--hsw-pp-brand);
 }
 
@@ -1271,23 +1303,34 @@
 	gap: 2px;
 }
 
+.hsw-pp .hsw-pp__sidelink,
+.hsw-pp .hsw-pp__sidelink.hsw-pp__tocbtn,
 .hsw-pp__sidelink {
 	padding: 5px 0;
 	padding-inline-start: 10px;
+	border: 0;
 	border-inline-start: 2px solid transparent;
+	background: transparent;
 	color: var(--hsw-pp-muted);
 	font-size: 11.5px;
 	line-height: 1.8;
 	transition: color .15s, border-color .15s;
 }
 
+.hsw-pp .hsw-pp__sidelink--h3,
+.hsw-pp .hsw-pp__sidelink--h3.hsw-pp__tocbtn,
 .hsw-pp__sidelink--h3 {
 	padding-inline-start: 20px;
 	font-size: 11px;
 }
 
+.hsw-pp .hsw-pp__sidelink:hover,
+.hsw-pp .hsw-pp__sidelink:focus,
+.hsw-pp .hsw-pp__sidelink:focus-visible,
+.hsw-pp .hsw-pp__sidelink.is-active,
 .hsw-pp__sidelink:hover,
 .hsw-pp__sidelink.is-active {
+	background: transparent;
 	border-inline-start-color: var(--hsw-pp-accent);
 	color: var(--hsw-pp-brand);
 }
@@ -1430,8 +1473,14 @@
 	transition: color .15s;
 }
 
+.hsw-pp .hsw-pp__dockbtn:hover,
+.hsw-pp .hsw-pp__dockbtn:focus,
+.hsw-pp .hsw-pp__dockbtn:focus-visible,
+.hsw-pp .hsw-pp__dockbtn.is-on,
 .hsw-pp__dockbtn:hover,
 .hsw-pp__dockbtn.is-on {
+	background: transparent;
+	border: 0;
 	color: var(--hsw-pp-accent);
 }
 

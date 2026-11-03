@@ -92,6 +92,22 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                         'default' => __( 'مقاله‌ای برای نمایش پیدا نشد.', 'hamishop-elementor-widgets' ),
                 ) );
 
+                $this->add_control( 'show_cat_desc', array(
+                        'label'        => __( 'نمایش توضیحات دسته‌بندی در پایین آرشیو', 'hamishop-elementor-widgets' ),
+                        'type'         => Controls_Manager::SWITCHER,
+                        'default'      => 'yes',
+                        'return_value' => 'yes',
+                        'separator'    => 'before',
+                ) );
+
+                $this->add_control( 'cat_desc_title', array(
+                        'label'       => __( 'الگوی عنوان توضیحات دسته‌بندی', 'hamishop-elementor-widgets' ),
+                        'type'        => Controls_Manager::TEXT,
+                        'default'     => __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ),
+                        'description' => __( 'از {name} برای نام دسته‌بندی استفاده کنید.', 'hamishop-elementor-widgets' ),
+                        'condition'   => array( 'show_cat_desc' => 'yes' ),
+                ) );
+
                 $this->end_controls_section();
 
                 $this->start_controls_section(
@@ -217,6 +233,10 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                                         echo '<nav class="hsw-bgrid__pagi" aria-label="' . esc_attr__( 'صفحه‌بندی مقالات', 'hamishop-elementor-widgets' ) . '">' . $links . '</nav>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                                 }
                         }
+                }
+
+                if ( ! HSW_Composite::is_active() && 'yes' === ( $s['show_cat_desc'] ?? 'yes' ) ) {
+                        $this->render_blog_archive_description( (string) ( $s['cat_desc_title'] ?? __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ) ) );
                 }
 
                 echo '</div>';

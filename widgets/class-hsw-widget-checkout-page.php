@@ -41,7 +41,7 @@ class HSW_Widget_Checkout_Page extends HSW_Checkout_Base {
 
                 $this->part_section( 'cship_', __( '۳. روش ارسال', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Shipping', array( 'vis', 'title', 'title_m', 'free_text', 'badge_text', 'options' ) );
 
-                $this->part_section( 'csched_', __( '۴. زمان تحویل', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Schedule', array( 'vis', 'title', 'title_m', 'days_label', 'slots_label', 'slots_label_m', 'days', 'day_active', 'slots', 'slot_active' ) );
+                $this->part_section( 'csched_', __( '۴. زمان تحویل', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Schedule', array( 'vis', 'days_source', 'title', 'title_m', 'days_label', 'slots_label', 'slots_label_m', 'days', 'day_active', 'slots', 'slot_active' ) );
 
                 $this->part_section( 'cnote_', __( '۵. یادداشت سفارش و فاکتور', 'hamishop-elementor-widgets' ), '\HSW_Widget_Checkout_Note', array( 'vis', 'label_d', 'placeholder_d', 'rows_d', 'label_m', 'placeholder_m', 'rows_m', 'show_invoice', 'invoice_label' ) );
 

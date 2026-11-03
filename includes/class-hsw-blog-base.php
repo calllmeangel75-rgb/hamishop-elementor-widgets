@@ -116,11 +116,19 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
          * @return array{cat:string,sort:string,s:string,page:int}
          */
         protected function blog_filters() {
+                $cat = isset( $_GET['blog_cat'] ) ? sanitize_title( wp_unslash( $_GET['blog_cat'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public read-only filter.
+                if ( '' === $cat && function_exists( 'is_category' ) && is_category() ) {
+                        $queried = get_queried_object();
+                        if ( $queried instanceof WP_Term && ! empty( $queried->slug ) ) {
+                                $cat = (string) $queried->slug;
+                        }
+                }
+                $page = isset( $_GET['blog_page'] ) ? max( 1, (int) $_GET['blog_page'] ) : max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                 return array(
-                        'cat'  => isset( $_GET['blog_cat'] ) ? sanitize_title( wp_unslash( $_GET['blog_cat'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public read-only filter.
+                        'cat'  => $cat,
                         'sort' => isset( $_GET['blog_sort'] ) ? sanitize_key( wp_unslash( $_GET['blog_sort'] ) ) : '',    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                         's'    => isset( $_GET['blog_s'] ) ? sanitize_text_field( wp_unslash( $_GET['blog_s'] ) ) : '',   // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                        'page' => isset( $_GET['blog_page'] ) ? max( 1, (int) $_GET['blog_page'] ) : 1,                   // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                        'page' => $page,
                 );
         }
 
@@ -353,6 +361,90 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
                         'popular' => __( 'پربحث‌ترین', 'hamishop-elementor-widgets' ),
                         'oldest'  => __( 'قدیمی‌ترین', 'hamishop-elementor-widgets' ),
                 );
+        }
+
+        /**
+         * Resolve the active post category / archive description for the bottom SEO box.
+         *
+         * Works both on native WordPress category/tag archives (`is_category()`,
+         * `is_tag()`, `is_tax()`) and when a category tab is active via `?blog_cat=slug`.
+         *
+         * @return array{name:string,html:string}|null
+         */
+        protected function blog_archive_description_data() {
+                if ( $this->is_demo() ) {
+                        return array(
+                                'name' => __( 'تکنولوژی و گجت', 'hamishop-elementor-widgets' ),
+                                'html' => '<p>' . esc_html__( 'در این بخش جدیدترین مقالات تخصصی، راهنمای خرید، بررسی عمیق محصولات و اخبار روز دنیای فناوری را مطالعه می‌کنید. برای نمایش این کادر در سایت، کافی است در پیشخوان وردپرس (نوشته‌ها ← دسته‌ها) متن «توضیح» دسته‌بندی مورد نظر را تکمیل کنید.', 'hamishop-elementor-widgets' ) . '</p>',
+                        );
+                }
+
+                $term = null;
+                $f    = $this->blog_filters();
+                if ( '' !== $f['cat'] ) {
+                        $by_slug = get_term_by( 'slug', $f['cat'], 'category' );
+                        if ( $by_slug instanceof WP_Term ) {
+                                $term = $by_slug;
+                        }
+                }
+                if ( ! $term && ( is_category() || is_tag() || is_tax() ) ) {
+                        $queried = get_queried_object();
+                        if ( $queried instanceof WP_Term ) {
+                                $term = $queried;
+                        }
+                }
+
+                if ( $term instanceof WP_Term ) {
+                        $raw = term_description( (int) $term->term_id, (string) $term->taxonomy );
+                        if ( '' === trim( wp_strip_all_tags( (string) $raw ) ) && '' !== trim( (string) $term->description ) ) {
+                                $raw = wpautop( (string) $term->description );
+                        }
+                        if ( '' !== trim( wp_strip_all_tags( (string) $raw ) ) ) {
+                                return array(
+                                        'name' => (string) $term->name,
+                                        'html' => wp_kses_post( (string) $raw ),
+                                );
+                        }
+                }
+
+                if ( function_exists( 'get_the_archive_description' ) && is_archive() ) {
+                        $arch_desc = (string) get_the_archive_description();
+                        if ( '' !== trim( wp_strip_all_tags( $arch_desc ) ) ) {
+                                return array(
+                                        'name' => wp_strip_all_tags( (string) get_the_archive_title() ),
+                                        'html' => wp_kses_post( $arch_desc ),
+                                );
+                        }
+                }
+
+                return null;
+        }
+
+        /**
+         * Print the bottom category/archive description box when available.
+         *
+         * @param string $title_tpl Optional heading pattern (`{name}` is replaced with term name).
+         * @return void
+         */
+        protected function render_blog_archive_description( $title_tpl = '' ) {
+                $desc = $this->blog_archive_description_data();
+                if ( ! $desc || '' === trim( $desc['html'] ) ) {
+                        return;
+                }
+                $heading = '';
+                if ( '' !== trim( (string) $title_tpl ) ) {
+                        $heading = str_replace( '{name}', $desc['name'], (string) $title_tpl );
+                } elseif ( '' !== $desc['name'] ) {
+                        $heading = sprintf( __( 'دربارهٔ %s', 'hamishop-elementor-widgets' ), $desc['name'] );
+                }
+                ?>
+                <section class="hsw-bdesc" aria-label="<?php echo esc_attr( '' !== $heading ? $heading : __( 'توضیحات دسته‌بندی', 'hamishop-elementor-widgets' ) ); ?>">
+                        <?php if ( '' !== trim( $heading ) ) : ?>
+                                <h2 class="hsw-bdesc__title"><?php echo esc_html( $heading ); ?></h2>
+                        <?php endif; ?>
+                        <div class="hsw-bdesc__body"><?php echo $desc['html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- sanitized via wp_kses_post(). ?></div>
+                </section>
+                <?php
         }
 
 }

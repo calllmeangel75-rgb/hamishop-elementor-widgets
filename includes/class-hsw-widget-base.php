@@ -2011,7 +2011,17 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'separator' => 'before',
                         )
                 );
-                $this->add_control( 'hdr_title_c', array( 'label' => __( 'رنگ عنوان', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__header' => '--hsw-loop-hdr-title-c: {{VALUE}};' ) ) );
+                $this->add_control(
+                        'hdr_title_c',
+                        array(
+                                'label'     => __( 'رنگ عنوان', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array(
+                                        '{{WRAPPER}} .hsw-loop, {{WRAPPER}} .hsw-loop__header' => '--hsw-loop-hdr-title-c: {{VALUE}};',
+                                        '{{WRAPPER}} .hsw-loop__title' => 'color: {{VALUE}};',
+                                ),
+                        )
+                );
 
                 $this->add_group_control(
                         Group_Control_Typography::get_type(),
@@ -2022,7 +2032,17 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'separator' => 'before',
                         )
                 );
-                $this->add_control( 'hdr_sub_c', array( 'label' => __( 'رنگ توضیح', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__header' => '--hsw-loop-hdr-sub-c: {{VALUE}};' ) ) );
+                $this->add_control(
+                        'hdr_sub_c',
+                        array(
+                                'label'     => __( 'رنگ توضیح', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array(
+                                        '{{WRAPPER}} .hsw-loop, {{WRAPPER}} .hsw-loop__header' => '--hsw-loop-hdr-sub-c: {{VALUE}};',
+                                        '{{WRAPPER}} .hsw-loop__subtitle' => 'color: {{VALUE}};',
+                                ),
+                        )
+                );
 
                 $this->add_control( 'hdr_badge_bg', array( 'label' => __( 'پس‌زمینه برچسب', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__header' => '--hsw-loop-hdr-badge-bg: {{VALUE}};' ) ) );
                 $this->add_control( 'hdr_badge_c', array( 'label' => __( 'رنگ برچسب', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__header' => '--hsw-loop-hdr-badge-c: {{VALUE}};' ) ) );
@@ -2367,8 +2387,28 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'selector' => '{{WRAPPER}} .hsw-loop__name',
                         )
                 );
-                $this->add_control( 'title_c', array( 'label' => __( 'رنگ عنوان', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__card' => '--hsw-loop-title-c: {{VALUE}};' ) ) );
-                $this->add_control( 'title_ch', array( 'label' => __( 'رنگ عنوان (هاور)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop' => '--hsw-loop-title-hover: {{VALUE}};' ) ) );
+                $this->add_control(
+                        'title_c',
+                        array(
+                                'label'     => __( 'رنگ عنوان محصول', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array(
+                                        '{{WRAPPER}} .hsw-loop, {{WRAPPER}} .hsw-loop__card' => '--hsw-loop-title-c: {{VALUE}};',
+                                        '{{WRAPPER}} .hsw-loop__name, {{WRAPPER}} .hsw-loop__name a' => 'color: {{VALUE}};',
+                                ),
+                        )
+                );
+                $this->add_control(
+                        'title_ch',
+                        array(
+                                'label'     => __( 'رنگ عنوان محصول (هاور)', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::COLOR,
+                                'selectors' => array(
+                                        '{{WRAPPER}} .hsw-loop' => '--hsw-loop-title-hover: {{VALUE}};',
+                                        '{{WRAPPER}} .hsw-loop__card:hover .hsw-loop__name, {{WRAPPER}} .hsw-loop__card:hover .hsw-loop__name a' => 'color: {{VALUE}};',
+                                ),
+                        )
+                );
 
                 $this->add_group_control(
                         Group_Control_Typography::get_type(),

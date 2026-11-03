@@ -115,6 +115,21 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
                         array( 'label' => __( 'روزها', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' )
                 );
 
+                $this->add_control(
+                        'days_source',
+                        array(
+                                'label'       => __( 'حالت تاریخ‌های تحویل', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'auto',
+                                'options'     => array(
+                                        'auto'   => __( 'خودکار (تقویم شمسی زنده بر اساس روز جاری)', 'hamishop-elementor-widgets' ),
+                                        'manual' => __( 'دستی (از لیست روزهای زیر)', 'hamishop-elementor-widgets' ),
+                                        'off'    => __( 'غیرفعال (عدم نمایش بخش زمان‌بندی)', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'در حالت خودکار، ۴ روز آینده به‌صورت داینامیک با تاریخ شمسی واقعی ساخته می‌شوند و روز جمعه خودکار تعطیل در نظر گرفته می‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
                 $days = new Repeater();
                 $days->add_control(
                         'meta',
@@ -240,22 +255,86 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
                 $this->end_controls_section();
         }
 
+        /**
+         * Generate 4 dynamic upcoming delivery days in Jalali calendar.
+         *
+         * @return array<int, array{meta:string,day:string,weekday:string,tag:string,disabled:string}>
+         */
+        protected function auto_days() {
+                $now      = function_exists( 'current_time' ) ? (int) current_time( 'timestamp' ) : time();
+                $weekdays = array(
+                        0 => __( 'یکشنبه', 'hamishop-elementor-widgets' ),
+                        1 => __( 'دوشنبه', 'hamishop-elementor-widgets' ),
+                        2 => __( 'سه‌شنبه', 'hamishop-elementor-widgets' ),
+                        3 => __( 'چهارشنبه', 'hamishop-elementor-widgets' ),
+                        4 => __( 'پنج‌شنبه', 'hamishop-elementor-widgets' ),
+                        5 => __( 'جمعه', 'hamishop-elementor-widgets' ),
+                        6 => __( 'شنبه', 'hamishop-elementor-widgets' ),
+                );
+
+                $out = array();
+                for ( $offset = 1; $offset <= 4; $offset++ ) {
+                        $ts        = $now + ( $offset * DAY_IN_SECONDS );
+                        $w         = (int) gmdate( 'w', $ts );
+                        $wd        = isset( $weekdays[ $w ] ) ? $weekdays[ $w ] : '';
+                        $date_str  = class_exists( 'HSW_Jalali' )
+                                ? HSW_Helpers::fa_num( HSW_Jalali::format( $ts, 'j F' ) )
+                                : HSW_Helpers::fa_num( date_i18n( 'j F', $ts ) );
+                        $is_friday = ( 5 === $w );
+
+                        if ( 1 === $offset ) {
+                                $meta = __( 'فردا', 'hamishop-elementor-widgets' );
+                        } elseif ( 2 === $offset ) {
+                                $meta = __( 'پس‌فردا', 'hamishop-elementor-widgets' );
+                        } else {
+                                $meta = $wd;
+                        }
+
+                        $out[] = array(
+                                'meta'     => $meta,
+                                'day'      => $date_str,
+                                'weekday'  => $wd,
+                                'tag'      => $is_friday ? __( 'تعطیل', 'hamishop-elementor-widgets' ) : '',
+                                'disabled' => $is_friday ? 'yes' : '',
+                        );
+                }
+
+                return $out;
+        }
+
         protected function render() {
                 /* A download has no delivery day or time slot. */
                 if ( class_exists( 'HSW_Checkout_Digital' ) && HSW_Checkout_Digital::is_digital() ) {
                         return;
                 }
 
-                $s = $this->effective_settings();
+                $s      = $this->effective_settings();
+                $source = isset( $s['days_source'] ) ? (string) $s['days_source'] : 'auto';
+                if ( 'off' === $source && ! $this->is_editing() ) {
+                        return;
+                }
 
                 $title   = $this->opt( 'title', __( 'انتخاب زمان و روز تحویل', 'hamishop-elementor-widgets' ) );
                 $title_m = $this->opt( 'title_m', __( 'زمان‌بندی تحویل مرسوله', 'hamishop-elementor-widgets' ) );
 
-                $days  = ( isset( $s['days'] ) && is_array( $s['days'] ) && ! empty( $s['days'] ) ) ? $s['days'] : $this->demo_days();
-                $slots = ( isset( $s['slots'] ) && is_array( $s['slots'] ) && ! empty( $s['slots'] ) ) ? $s['slots'] : $this->demo_slots();
+                $raw_days    = ( isset( $s['days'] ) && is_array( $s['days'] ) && ! empty( $s['days'] ) ) ? $s['days'] : array();
+                $is_mock_day = isset( $raw_days[0]['day'] ) && '۲۴ دی' === trim( (string) $raw_days[0]['day'] );
+                $days        = ( 'manual' === $source && ! empty( $raw_days ) && ! $is_mock_day ) ? $raw_days : $this->auto_days();
+                $slots       = ( isset( $s['slots'] ) && is_array( $s['slots'] ) && ! empty( $s['slots'] ) ) ? $s['slots'] : $this->demo_slots();
 
                 $day_on  = max( 1, (int) $this->opt( 'day_active', '1' ) );
                 $slot_on = max( 1, (int) $this->opt( 'slot_active', '3' ) );
+
+                /* If the preferred day index lands on a disabled day (e.g. Friday), pick the first active day. */
+                $active_d = isset( $days[ $day_on - 1 ] ) ? $days[ $day_on - 1 ] : null;
+                if ( ! $active_d || '' !== trim( (string) ( $active_d['tag'] ?? '' ) ) || 'yes' === ( $active_d['disabled'] ?? '' ) ) {
+                        foreach ( $days as $idx => $cand ) {
+                                if ( '' === trim( (string) ( $cand['tag'] ?? '' ) ) && 'yes' !== ( $cand['disabled'] ?? '' ) ) {
+                                        $day_on = $idx + 1;
+                                        break;
+                                }
+                        }
+                }
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'cksched' ) ); ?>">
 

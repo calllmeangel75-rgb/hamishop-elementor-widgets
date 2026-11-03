@@ -78,9 +78,14 @@
 }
 .hsw-k *, .hsw-k *::before, .hsw-k *::after { box-sizing: border-box; }
 .hsw-k :where(h1, h2, h3, h4, p) { margin: 0; padding: 0; }
-.hsw-k :where(a) { text-decoration: none; color: inherit; }
+.hsw-k a,
+.hsw-k a:hover,
+.hsw-k a:focus,
+.hsw-k a:active { text-decoration: none; color: inherit; }
 .hsw-k :where(button, input, select, textarea) { font: inherit; color: inherit; }
-.hsw-k :where(button) { font-family: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
+.hsw-k button,
+.hsw-k [type="button"],
+.hsw-k [type="submit"] { font-family: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 .hsw-k :where(img) { max-width: 100%; }
 .hsw-k :where(input[type='radio']), .hsw-k :where(input[type='checkbox']) { accent-color: var(--hswk-primary); margin: 0; }
 .hsw-k .hsw-c-cur { font-size: .6875rem; line-height: 1rem; font-weight: 500; }
@@ -1496,8 +1501,8 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 .hsw-psum__terms-l .hsw-k-terms { margin-top: .25rem; width: 1rem; height: 1rem; border-radius: .25rem; accent-color: var(--hswk-btn); }
 .hsw-psum__terms-l.is-m { gap: .5rem; padding-top: .5rem; }
 .hsw-psum__terms-tx { font-size: .6875rem; line-height: 1.25rem; color: var(--hswk-text2); }
-.hsw-psum__terms-a { color: var(--hswk-accent2); font-weight: 500; }
-.hsw-psum__terms-a:hover { text-decoration: underline; }
+.hsw-k .hsw-psum__terms-a { color: var(--hswk-accent2); font-weight: 500; }
+.hsw-k .hsw-psum__terms-a:hover { color: var(--hswk-accent2); text-decoration: underline; }
 
 .hsw-psum__cta {
         width: 100%; height: 3rem;

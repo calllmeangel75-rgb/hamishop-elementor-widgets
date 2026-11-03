@@ -42,7 +42,7 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
 
                 $this->part_section( 'bfeat_', __( '۳. مقاله ویژه', 'hamishop-elementor-widgets' ), '\HSW_Widget_Blog_Featured', array( 'vis', 'badge_text', 'cta_label', 'show_author', 'show_excerpt', 'excerpt_len' ) );
 
-                $this->part_section( 'bgrid_', __( '۴. شبکه مقالات و صفحه‌بندی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Blog_Grid', array( 'vis', 'per_page', 'skip_first', 'show_excerpt', 'excerpt_len', 'show_author', 'show_read', 'show_pagination', 'empty_text', 'cols', 'gap' ) );
+                $this->part_section( 'bgrid_', __( '۴. شبکه مقالات و صفحه‌بندی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Blog_Grid', array( 'vis', 'per_page', 'skip_first', 'show_excerpt', 'excerpt_len', 'show_author', 'show_read', 'show_pagination', 'empty_text', 'show_cat_desc', 'cat_desc_title', 'cols', 'gap' ) );
 
                 $this->part_section( 'bpop_', __( '۵. پربازدیدترین‌ها (سایدبار)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Blog_Popular', array( 'vis', 'title', 'count', 'days', 'meta_label', 'show_cat' ) );
 
@@ -439,6 +439,10 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
 
                 $this->a_color( 'bs_empty_tx', __( 'رنگ متن «مطلبی یافت نشد»', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bgrid__empty' );
                 $this->a_text( 'bs_empty_fs', '{{WRAPPER}} .hsw-bgrid__empty', array( 'default' => 14 ) );
+                $this->a_color( 'bs_desc_bg', __( 'پس‌زمینهٔ کادر توضیحات دسته‌بندی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bdesc', 'background-color' );
+                $this->a_color( 'bs_desc_bd', __( 'حاشیهٔ کادر توضیحات دسته‌بندی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bdesc', 'border-color' );
+                $this->a_color( 'bs_desc_hd', __( 'رنگ عنوان توضیحات دسته‌بندی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bdesc__title' );
+                $this->a_color( 'bs_desc_tx', __( 'رنگ متن توضیحات دسته‌بندی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-bdesc__body' );
 
                 $this->end_controls_section();
         }
@@ -494,6 +498,13 @@ class HSW_Widget_Blog_Page extends HSW_Blog_Base {
                 echo '</aside>';
 
                 echo '</div>'; // .hsw-cp__body
+
+                if ( 'yes' === $this->opt( 'bgrid_show_cat_desc', 'yes' ) ) {
+                        echo '<div class="hsw-cp--blog__wide">';
+                        $this->render_blog_archive_description( (string) $this->opt( 'bgrid_cat_desc_title', __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ) ) );
+                        echo '</div>';
+                }
+
                 echo '</div>';
         }
 }

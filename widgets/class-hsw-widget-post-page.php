@@ -138,13 +138,13 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			array(
 				'label'       => __( 'لنگر سرفصل‌ها', 'hamishop-elementor-widgets' ),
 				'type'        => Controls_Manager::SELECT,
-				'default'     => 'slug',
+				'default'     => 'none',
 				'options'     => array(
-					'slug'  => __( 'از متن تیتر (پیشنهادی)', 'hamishop-elementor-widgets' ),
-					'index' => __( 'شماره‌ای (hsw-h-1، hsw-h-2 …)', 'hamishop-elementor-widgets' ),
-					'none'  => __( 'بدون لینک لنگر (فقط اسکرول)', 'hamishop-elementor-widgets' ),
+					'none'  => __( 'بدون لینک لنگر — فقط اسکرول (پیشنهادی برای حفظ بودجه خزش)', 'hamishop-elementor-widgets' ),
+					'slug'  => __( 'لینک لنگر از متن تیتر (nofollow)', 'hamishop-elementor-widgets' ),
+					'index' => __( 'لینک لنگر شماره‌ای (hsw-h-1، hsw-h-2 …)', 'hamishop-elementor-widgets' ),
 				),
-				'description' => __( 'گوگل می‌تواند آدرس‌های لنگر (…/#heading) را جداگانه ایندکس کند. «از متن تیتر» آدرس خوانا و باثبات می‌سازد و «بدون لینک لنگر» هیچ آدرس اضافه‌ای تولید نمی‌کند.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'در حالت پیشنهادی «بدون لینک لنگر»، آیتم‌های فهرست مطالب با دکمه (`<button>`) رندر می‌شوند تا هیچ آدرس `#heading` در سورس صفحه تولید نشود و بودجه خزش گوگل مصرف نگردد.', 'hamishop-elementor-widgets' ),
 				'condition'   => array( 'show_toc' => 'yes' ),
 			)
 		);
@@ -691,13 +691,19 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			? '<i class="hsw-pp__tocdot" aria-hidden="true"></i><span>' . esc_html( $item['text'] ) . '</span>'
 			: esc_html( $item['text'] );
 
-		if ( 'none' === $mode ) {
+		/*
+		 * Sidebar TOC (`hsw-pp__side` / `hsw-pp__sidelink`) and `'none'` mode
+		 * always render `<button type="button">` with `data-target` instead of
+		 * `<a href="#...">` so crawlers never discover or waste crawl budget on
+		 * duplicate `#heading` fragment URLs.
+		 */
+		if ( 'none' === $mode || ! $is_main ) {
 			return '<button type="button" class="' . esc_attr( trim( $class . ' hsw-pp__tocbtn' ) ) . '"'
 				. ' data-hsw-pp-toclink data-target="' . esc_attr( $item['id'] ) . '">' . $inner . '</button>';
 		}
 
 		return '<a' . ( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ''
-			. ' href="#' . esc_attr( $item['id'] ) . '" data-hsw-pp-toclink>' . $inner . '</a>';
+			. ' href="#' . esc_attr( $item['id'] ) . '" rel="nofollow" data-hsw-pp-toclink>' . $inner . '</a>';
 	}
 
 	/**
@@ -819,7 +825,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		$on       = static function ( $key, $default = 'yes' ) use ( $s ) {
 			return ! isset( $s[ $key ] ) ? ( 'yes' === $default ) : ( 'yes' === $s[ $key ] );
 		};
-		$toc_mode = isset( $s['toc_anchor'] ) && in_array( $s['toc_anchor'], array( 'slug', 'index', 'none' ), true ) ? $s['toc_anchor'] : 'slug';
+		$toc_mode = isset( $s['toc_anchor'] ) && in_array( $s['toc_anchor'], array( 'slug', 'index', 'none' ), true ) ? $s['toc_anchor'] : 'none';
 		$content  = $this->prepared_content( $post, $toc_mode );
 		$category = $this->post_category( $post );
 		$author   = (int) $post->post_author;
@@ -939,7 +945,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 						<?php endif; ?>
 
 						<?php if ( $on( 'show_toc' ) && ! empty( $content['toc'] ) ) : ?>
-							<details class="hsw-pp__toc" open>
+							<details class="hsw-pp__toc" open data-nosnippet>
 								<summary class="hsw-pp__tochead">
 									<span class="hsw-pp__toctitle">
 										<?php HSW_Helpers::the_icon( 'format_list_numbered' ); ?>
@@ -1371,11 +1377,11 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 	 * @param array   $toc    TOC items.
 	 * @param string  $mode   Anchor mode (slug|index|none).
 	 */
-	protected function render_sidebar( $post, $author, $toc, $mode = 'slug' ) {
+	protected function render_sidebar( $post, $author, $toc, $mode = 'none' ) {
 		$popular = $this->popular_posts( 3 );
 		?>
 		<?php if ( ! empty( $toc ) ) : ?>
-			<div class="hsw-pp__sidebox hsw-pp__sidebox--toc">
+			<div class="hsw-pp__sidebox hsw-pp__sidebox--toc" data-nosnippet>
 				<div class="hsw-pp__sidehead">
 					<?php HSW_Helpers::the_icon( 'format_list_bulleted' ); ?>
 					<span><?php esc_html_e( 'فهرست مطالب مقاله', 'hamishop-elementor-widgets' ); ?></span>

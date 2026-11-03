@@ -183,7 +183,17 @@ final class HSW_Account_Auth {
 		if ( 'sms' === $channel ) {
 			return '' !== $typed ? $typed : $this->user_phone( $user_id );
 		}
-		return $this->two_factor_phone( $user_id );
+		$phone = $this->two_factor_phone( $user_id );
+		if ( ! $phone ) {
+			$phone = $this->user_phone( $user_id );
+		}
+		if ( ! $phone && 'telegram' === $channel ) {
+			$chat = $this->telegram_chat_id( $user_id );
+			if ( $chat ) {
+				return 'tg:' . $chat;
+			}
+		}
+		return $phone;
 	}
 
 	public function available_channels() {
@@ -262,6 +272,9 @@ final class HSW_Account_Auth {
 	 */
 	private function norm( $value ) {
 		$value = trim( (string) $value );
+		if ( 0 === strpos( $value, 'tg:' ) ) {
+			return 'tg:' . preg_replace( '/[^0-9-]/', '', substr( $value, 3 ) );
+		}
 		if ( false !== strpos( $value, '@' ) ) {
 			return strtolower( $value );
 		}
@@ -269,6 +282,9 @@ final class HSW_Account_Auth {
 	}
 
 	private function mask_phone( $phone ) {
+		if ( 0 === strpos( (string) $phone, 'tg:' ) ) {
+			return __( 'حساب تلگرام متصل‌شده', 'hamishop-elementor-widgets' );
+		}
 		$phone = $this->normalize_phone( $phone );
 		return $phone ? substr( $phone, 0, 4 ) . '***' . substr( $phone, -3 ) : '';
 	}
@@ -387,17 +403,23 @@ final class HSW_Account_Auth {
 		return (bool) array_intersect( (array) $user->roles, $roles );
 	}
 
-	private function telegram_chat_id( $user_id, $phone = '' ) {
-		$chat = get_user_meta( $user_id, '_hsw_telegram_chat_id', true );
+	private function telegram_chat_id( $user_id, $phone = '', $allow_poll = true ) {
+		$chat = $user_id ? get_user_meta( $user_id, '_hsw_telegram_chat_id', true ) : '';
 		if ( $chat ) {
 			return (string) $chat;
 		}
-		$phone = $this->normalize_phone( $phone ? $phone : $this->user_phone( $user_id ) );
-		if ( ! $phone ) {
-			return '';
+		$norm_phone = $this->normalize_phone( $phone ? $phone : ( $user_id ? $this->user_phone( $user_id ) : '' ) );
+		if ( $norm_phone ) {
+			$contacts = get_option( 'hsw_telegram_contacts', array() );
+			if ( is_array( $contacts ) && ! empty( $contacts[ $norm_phone ] ) ) {
+				return (string) $contacts[ $norm_phone ];
+			}
 		}
-		$contacts = get_option( 'hsw_telegram_contacts', array() );
-		return is_array( $contacts ) && ! empty( $contacts[ $phone ] ) ? (string) $contacts[ $phone ] : '';
+		if ( $allow_poll && class_exists( 'HSW_Telegram_Poller' ) ) {
+			HSW_Telegram_Poller::poll_now();
+			return $this->telegram_chat_id( $user_id, $phone, false );
+		}
+		return '';
 	}
 
 	/**
@@ -650,10 +672,11 @@ final class HSW_Account_Auth {
 		if ( 'telegram' === $channel ) {
 			$chat = $this->telegram_chat_id( $user_id, $phone );
 			if ( ! $chat ) {
+				$link_token = $user_id > 0 ? $this->telegram_link_token( $user_id ) : '';
 				return new WP_Error(
 					'hsw_telegram_not_connected',
-					__( 'برای دریافت کد در تلگرام، ابتدا ربات فروشگاه را باز کنید و شماره موبایل خود را ارسال کنید.', 'hamishop-elementor-widgets' ),
-					array( 'link' => $this->telegram_link() )
+					__( 'برای دریافت کد در تلگرام، ابتدا ربات فروشگاه را باز کنید و شماره موبایل خود را ارسال کنید، سپس دوباره روی دریافت کد کلیک کنید.', 'hamishop-elementor-widgets' ),
+					array( 'link' => $this->telegram_link( $link_token ) )
 				);
 			}
 			return $this->telegram_send( $chat, $this->message( $code ) );
@@ -949,6 +972,24 @@ final class HSW_Account_Auth {
 		$user = ( 'email' === $channel ) ? get_user_by( 'email', $phone ) : $this->find_user_by_phone( $phone );
 
 		/*
+		 * If the customer selected Telegram and this number is not yet linked to
+		 * the bot (even after an on-demand getUpdates poll), show the bot link
+		 * immediately in both login and register flows. Answering identically for
+		 * any unlinked phone number keeps account enumeration impossible while
+		 * preventing the user from waiting for a code the bot cannot deliver.
+		 */
+		if ( 'telegram' === $channel && ! $this->telegram_chat_id( $user ? $user->ID : 0, $phone ) ) {
+			wp_send_json_error(
+				array(
+					'message'   => __( 'برای دریافت کد در تلگرام، ابتدا ربات فروشگاه را باز کنید و شماره موبایل خود را ارسال کنید، سپس دوباره روی دریافت کد کلیک کنید.', 'hamishop-elementor-widgets' ),
+					'link'      => esc_url_raw( $this->telegram_link() ),
+					'link_text' => __( 'باز کردن ربات تلگرام', 'hamishop-elementor-widgets' ),
+				),
+				400
+			);
+		}
+
+		/*
 		 * Account enumeration: "exists", "does not exist" and "is an admin" used to
 		 * answer 200 / 404 / 403 with different copy and a `switch_tab` hint. They
 		 * now answer identically; the code is simply not sent when there is nobody
@@ -974,8 +1015,8 @@ final class HSW_Account_Auth {
 			delete_transient( $this->code_key( $phone, $channel, $context ) );
 			$this->clear_rate_limit( $phone, $channel, $context );
 
-			/* Only a signup may say what went wrong with the delivery. */
-			if ( 'register' === $context ) {
+			/* Surface bot-connection or gateway-configuration errors so the user can act. */
+			if ( 'register' === $context || in_array( $sent->get_error_code(), array( 'hsw_telegram_not_connected', 'hsw_telegram_config', 'hsw_telegram_http', 'hsw_telegram_send' ), true ) ) {
 				$data = array( 'message' => $sent->get_error_message() );
 				$link = $sent->get_error_data();
 				if ( is_array( $link ) && ! empty( $link['link'] ) ) {
@@ -1512,6 +1553,40 @@ final class HSW_Account_Auth {
 			if ( ! $phone || ! is_email( $phone ) ) {
 				wp_send_json_error( array( 'message' => __( 'برای این حساب ایمیل معتبری ثبت نشده است.', 'hamishop-elementor-widgets' ) ), 400 );
 			}
+		} elseif ( 'telegram' === $channel ) {
+			$phone = $this->user_phone( $user_id );
+			$typed = isset( $_POST['phone'] ) ? $this->normalize_phone( wp_unslash( $_POST['phone'] ) ) : '';
+			if ( ! $phone && $typed ) {
+				$owner = $this->phone_owner( $typed );
+				if ( $owner && $owner !== (int) $user_id ) {
+					wp_send_json_error( array( 'message' => __( 'این شماره قبلاً روی حساب دیگری تأیید شده است. با پشتیبانی تماس بگیرید.', 'hamishop-elementor-widgets' ) ), 409 );
+				}
+				$phone = $typed;
+			}
+			$chat = $this->telegram_chat_id( $user_id, $phone );
+			if ( ! $chat ) {
+				$token = $this->telegram_link_token( $user_id );
+				wp_send_json_error(
+					array(
+						'message'   => __( 'ابتدا ربات تلگرام را باز کنید، دکمه Start (و ارسال شماره موبایل) را بزنید و سپس دوباره روی فعال‌سازی کلیک کنید.', 'hamishop-elementor-widgets' ),
+						'link'      => $this->telegram_link( $token ),
+						'link_text' => __( 'اتصال به ربات تلگرام', 'hamishop-elementor-widgets' ),
+					),
+					400
+				);
+			}
+			if ( ! $phone ) {
+				$contacts = get_option( 'hsw_telegram_contacts', array() );
+				if ( is_array( $contacts ) ) {
+					$matched_phone = array_search( (string) $chat, array_map( 'strval', $contacts ), true );
+					if ( is_string( $matched_phone ) && '' !== $matched_phone ) {
+						$phone = $matched_phone;
+					}
+				}
+			}
+			if ( ! $phone ) {
+				$phone = 'tg:' . $chat;
+			}
 		} else {
 			$phone = $this->user_phone( $user_id );
 			if ( ! $phone ) {
@@ -1525,17 +1600,6 @@ final class HSW_Account_Auth {
 				}
 				$phone = $typed;
 			}
-		}
-		if ( 'telegram' === $channel && ! $this->telegram_chat_id( $user_id, $phone ) ) {
-			$token = $this->telegram_link_token( $user_id );
-			wp_send_json_error(
-				array(
-					'message'   => __( 'ابتدا ربات تلگرام را باز کنید و شماره خود را به آن ارسال کنید.', 'hamishop-elementor-widgets' ),
-					'link'      => $this->telegram_link( $token ),
-					'link_text' => __( 'اتصال به ربات تلگرام', 'hamishop-elementor-widgets' ),
-				),
-				400
-			);
 		}
 		$throttle = $this->check_send_throttle( $phone, $channel );
 		if ( is_wp_error( $throttle ) ) {
@@ -1602,11 +1666,14 @@ final class HSW_Account_Auth {
 		 * another account is refused here too, not only when it was typed.
 		 */
 		if ( 'email' !== $data['channel'] ) {
-			$claim = $this->claim_phone( $user_id, (string) $data['phone'] );
-			if ( is_wp_error( $claim ) ) {
-				wp_send_json_error( array( 'message' => $claim->get_error_message() ), 409 );
+			$setup_phone = (string) $data['phone'];
+			if ( '' !== $setup_phone && 0 !== strpos( $setup_phone, 'tg:' ) ) {
+				$claim = $this->claim_phone( $user_id, $setup_phone );
+				if ( is_wp_error( $claim ) ) {
+					wp_send_json_error( array( 'message' => $claim->get_error_message() ), 409 );
+				}
+				update_user_meta( $user_id, '_hsw_2fa_phone', $setup_phone );
 			}
-			update_user_meta( $user_id, '_hsw_2fa_phone', $data['phone'] );
 		} else {
 			update_user_meta( $user_id, '_hsw_email_verified', time() );
 		}
@@ -1873,8 +1940,19 @@ final class HSW_Account_Auth {
 			$user_id = $token ? (int) get_transient( 'hsw_telegram_link_' . $token ) : 0;
 			if ( $user_id ) {
 				update_user_meta( $user_id, '_hsw_telegram_chat_id', $chat_id );
+				$verified_phone = $this->user_phone( $user_id );
+				if ( $verified_phone ) {
+					$contacts = get_option( 'hsw_telegram_contacts', array() );
+					$contacts = is_array( $contacts ) ? $contacts : array();
+					$contacts[ $verified_phone ] = $chat_id;
+					update_option( 'hsw_telegram_contacts', $contacts, false );
+				}
 				delete_transient( 'hsw_telegram_link_' . $token );
-				$this->telegram_send( $chat_id, __( 'حساب شما به ربات متصل شد. حالا می‌توانید از ورود با کد تلگرام استفاده کنید.', 'hamishop-elementor-widgets' ) );
+				$this->telegram_send(
+					$chat_id,
+					__( 'حساب شما به ربات متصل شد. برای تکمیل اتصال شماره موبایل، دکمهٔ «ارسال شماره موبایل» را هم بزنید.', 'hamishop-elementor-widgets' ),
+					$keyboard
+				);
 			} else {
 				$this->telegram_send(
 					$chat_id,

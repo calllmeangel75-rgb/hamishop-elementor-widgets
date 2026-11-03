@@ -431,14 +431,14 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                                                         <?php echo HSW_Helpers::icon( 'add_shopping_cart' ); ?>
                                                 </button>
                                                 <button type="button" class="hsw-ag__cta--m hsw-m" data-hsw-add="<?php echo esc_attr( $pid ); ?>" data-hsw-name="<?php echo esc_attr( $name ); ?>" aria-label="<?php esc_attr_e( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ); ?>">
-                                                        <?php echo HSW_Helpers::icon( 'add' ); ?>
+                                                        <?php echo HSW_Helpers::icon( 'add_shopping_cart' ); ?>
                                                 </button>
                                         <?php else : ?>
-                                                <a class="hsw-ag__cta hsw-d" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
-                                                        <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
+                                                <a class="hsw-ag__cta hsw-d" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>" title="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
+                                                        <?php echo HSW_Helpers::icon( 'add_shopping_cart' ); ?>
                                                 </a>
                                                 <a class="hsw-ag__cta--m hsw-m" href="<?php echo esc_url( $url ); ?>" aria-label="<?php esc_attr_e( 'مشاهده محصول', 'hamishop-elementor-widgets' ); ?>">
-                                                        <?php echo HSW_Helpers::icon( 'shopping_cart' ); ?>
+                                                        <?php echo HSW_Helpers::icon( 'add_shopping_cart' ); ?>
                                                 </a>
                                         <?php endif; ?>
                                 <?php endif; ?>

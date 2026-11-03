@@ -34,7 +34,28 @@ class HSW_Telegram_Poller {
 	/** Seconds a run may keep the lock. */
 	const LOCK_TTL = 45;
 
-	public function __construct() {
+	/**
+	 * On-demand poll triggered right before looking up a user's Telegram chat ID.
+	 *
+	 * Covers three real-world cases where a customer just tapped `/start` or
+	 * shared their phone in Telegram and clicked "Send OTP" a few seconds later:
+	 *   1. Polling mode is on, and the 60-second WP-Cron tick hasn't fired yet.
+	 *   2. The site is running on HTTP/localhost where Telegram webhooks cannot work.
+	 *   3. The admin pasted the bot token on an HTTPS site without manually calling
+	 *      `setWebhook` in their browser — we process any pending updates via
+	 *      `getUpdates` and auto-register `setWebhook` once per token/URL hash.
+	 *
+	 * @return array Status summary.
+	 */
+	public static function poll_now() {
+		$worker = new self( false );
+		return $worker->run_on_demand();
+	}
+
+	public function __construct( $register_hooks = true ) {
+		if ( ! $register_hooks ) {
+			return;
+		}
 		/* Priority 1: answer the worker URL before anything renders. */
 		add_action( 'init', array( $this, 'maybe_serve' ), 1 );
 		add_action( self::CRON_HOOK, array( $this, 'cron_run' ) );
@@ -118,16 +139,53 @@ class HSW_Telegram_Poller {
 		}
 		set_transient( self::LOCK_KEY, time(), self::LOCK_TTL );
 
-		$out = $this->poll();
+		$out = $this->poll( true );
 
 		delete_transient( self::LOCK_KEY );
 
 		return $out;
 	}
 
-	private function poll() {
-		/* A registered webhook makes getUpdates answer 409, so drop it once. */
-		if ( ! $this->prepare_endpoint() ) {
+	/**
+	 * On-demand pass invoked during OTP / 2FA requests when no chat ID is stored yet.
+	 *
+	 * @return array
+	 */
+	public function run_on_demand() {
+		if ( '' === $this->token() ) {
+			return array(
+				'ok'    => false,
+				'error' => 'no-token',
+			);
+		}
+
+		if ( false !== get_transient( self::LOCK_KEY ) ) {
+			return array(
+				'ok'      => true,
+				'skipped' => 'busy',
+			);
+		}
+		set_transient( self::LOCK_KEY, time(), 10 );
+
+		$out = $this->poll( $this->enabled() );
+
+		/*
+		 * If polling is off and the site runs on HTTPS (not localhost), ensure
+		 * Telegram's webhook is registered automatically once per token+URL hash
+		 * after draining any pending updates.
+		 */
+		if ( ! $this->enabled() && is_ssl() ) {
+			$this->maybe_ensure_webhook();
+		}
+
+		delete_transient( self::LOCK_KEY );
+
+		return $out;
+	}
+
+	private function poll( $drop_webhook = true ) {
+		/* A registered webhook makes getUpdates answer 409, so drop it once when polling mode is active. */
+		if ( $drop_webhook && ! $this->prepare_endpoint() ) {
 			return array(
 				'ok'    => false,
 				'error' => 'deleteWebhook failed',
@@ -136,22 +194,10 @@ class HSW_Telegram_Poller {
 
 		$offset = (int) get_option( self::OFFSET_KEY, 0 );
 
-		/*
-		 * First run: ask for the newest update only. Without this the bot would
-		 * digest up to 100 old messages that queued while polling was off.
-		 */
-		if ( 0 === $offset ) {
-			$latest = $this->api( 'getUpdates', array( 'offset' => -1, 'limit' => 1 ) );
-			if ( isset( $latest['result'][0]['update_id'] ) ) {
-				$offset = (int) $latest['result'][0]['update_id'] + 1;
-				update_option( self::OFFSET_KEY, $offset, false );
-			}
-		}
-
 		$response = $this->api(
 			'getUpdates',
 			array(
-				'offset'          => $offset,
+				'offset'          => $offset > 0 ? $offset : -10,
 				'limit'           => 10,
 				'timeout'         => 0,
 				'allowed_updates' => wp_json_encode( array( 'message' ) ),
@@ -205,6 +251,7 @@ class HSW_Telegram_Poller {
 	/**
 	 * `deleteWebhook` once per token. The token hash doubles as the cache key,
 	 * so pasting a new bot token re-prepares the endpoint automatically.
+	 * Pending updates are kept so a user who just tapped `/start` is not lost.
 	 */
 	private function prepare_endpoint() {
 		$hash = md5( $this->token() );
@@ -215,7 +262,7 @@ class HSW_Telegram_Poller {
 
 		delete_option( self::OFFSET_KEY );
 
-		$deleted = $this->api( 'deleteWebhook', array( 'drop_pending_updates' => 'true' ) );
+		$deleted = $this->api( 'deleteWebhook', array() );
 		if ( ! is_array( $deleted ) || empty( $deleted['ok'] ) ) {
 			return false;
 		}
@@ -224,6 +271,40 @@ class HSW_Telegram_Poller {
 		update_option( self::READY_KEY . '_hash', $hash, false );
 
 		return true;
+	}
+
+	/**
+	 * Auto-register the HTTPS webhook once per token/secret/home_url when polling is off.
+	 */
+	private function maybe_ensure_webhook() {
+		$secret = trim( (string) $this->setting( 'telegram_secret' ) );
+		$host   = (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+		if ( '' === $secret || '' === $host || in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true ) ) {
+			return;
+		}
+		$webhook = add_query_arg(
+			array(
+				'hsw_telegram_webhook' => 1,
+				'secret'               => $secret,
+			),
+			home_url( '/', 'https' )
+		);
+		$hash = md5( $this->token() . '|' . $webhook );
+		if ( $hash === (string) get_option( 'hsw_tg_webhook_hash' ) ) {
+			return;
+		}
+		$res = $this->api(
+			'setWebhook',
+			array(
+				'url'             => $webhook,
+				'secret_token'    => $secret,
+				'allowed_updates' => wp_json_encode( array( 'message' ) ),
+			)
+		);
+		if ( is_array( $res ) && ! empty( $res['ok'] ) ) {
+			update_option( 'hsw_tg_webhook_hash', $hash, false );
+			delete_option( self::READY_KEY );
+		}
 	}
 
 	/**
