@@ -608,6 +608,9 @@ final class HSW_Account_Admin {
 		?>
 		<div class="hsw-admin-card">
 			<h2>ورود با کد یکبارمصرف</h2>
+			<?php if ( HSW_Account::instance()->sms_login_active() ) : ?>
+				<p class="hsw-notice">افزونهٔ ورود/ثبت‌نام پیامکی روی این سایت شناسایی شد؛ برای جلوگیری از تداخل، ورود و ثبت‌نام با کد HamiShop (ایمیل، تلگرام و ...) فعال نمی‌شود و فرم افزونهٔ پیامکی دست‌نخورده می‌ماند.</p>
+			<?php endif; ?>
 			<p class="hsw-admin-desc">ورود و ثبت‌نام با کد ۶ رقمی از طریق ایمیل (رایگان)، تلگرام، پیامک (افزونهٔ فعال) یا واتساپ. کدها یکبارمصرف و دارای محدودیت تلاش هستند.</p>
 			<div class="hsw-admin-grid">
 				<?php $this->switch_field( $s, 'auth', 'otp_enabled', 'فعال‌سازی ورود با کد یکبارمصرف', 'در صورت فعال بودن، فرم ورود سریع در کنار فرم رمز عبور نمایش داده می‌شود.' ); ?>
@@ -637,7 +640,7 @@ final class HSW_Account_Admin {
 			<h2>ربات تلگرام (رایگان)</h2>
 			<p class="hsw-admin-desc"><strong>با ثبت توکن، ورود و ثبت‌نام با تلگرام خودکار فعال می‌شود</strong> (نام کاربری ربات را هم وارد کنید تا دکمهٔ «ورود با تلگرام» لینک درست بسازد). در تلگرام با <code>@BotFather</code> یک ربات بسازید، توکن را اینجا وارد کنید و آدرس وبهوک زیر را با متد <code>setWebhook</code> روی ربات ثبت کنید. کاربر برای دریافت کد باید یک‌بار ربات را باز کند و شماره خود را ارسال کند.</p>
 			<div class="hsw-admin-grid">
-				<?php $this->text_field( $s, 'auth', 'telegram_bot', 'نام کاربری ربات (بدون @)', 'مثلاً hamishop_bot' ); ?>
+				<?php $this->text_field( $s, 'auth', 'telegram_bot', 'نام کاربری ربات (بدون @)', 'مثلاً my_shop_bot — ربات اختصاصی همین فروشگاه' ); ?>
 				<?php $this->text_field( $s, 'auth', 'telegram_token', 'توکن ربات (BotFather)', 'این مقدار را در هیچ صفحهٔ عمومی قرار ندهید.' ); ?>
 				<?php $this->text_field( $s, 'auth', 'telegram_secret', 'کلید امنیتی وبهوک', 'در هدر X-Telegram-Bot-Api-Secret-Token هم پذیرفته می‌شود.' ); ?>
 			</div>
@@ -739,7 +742,7 @@ final class HSW_Account_Admin {
 		$account_url = wc_get_page_permalink( 'myaccount' );
 		$content     = $account_id ? get_post_field( 'post_content', $account_id ) : '';
 		$native      = $content && has_shortcode( $content, 'woocommerce_my_account' );
-		$otp_enabled = 'yes' === $this->val( $s, 'auth', 'otp_enabled' );
+		$otp_enabled = HSW_Account::instance()->auth && HSW_Account::instance()->auth->enabled();
 		$sms_active  = HSW_Account::instance()->sms_login_active();
 		?>
 		<div class="hsw-admin-card">
@@ -749,7 +752,7 @@ final class HSW_Account_Admin {
 			<button type="button" class="button" data-hsw-copy="#hsw-account-shortcode">کپی شورت‌کد</button>
 			<p class="description">پارامترهای اختیاری: <code>layout="left|right"</code>، <code>show_header="yes|no"</code>، <code>show_menu="yes|no"</code>، <code>show_stats="yes|no"</code>، <code>hide="downloads,wallet"</code>، <code>class="..."</code></p>
 			<p class="description">با <code>hide</code> می‌توانید هر بخش را مستقیم از شورت‌کد مخفی کنید: <code>downloads</code>، <code>orders</code>، <code>address</code>، <code>wishlist</code>، <code>wallet</code>، <code>support</code>، <code>notifications</code>، <code>payments</code>، <code>account</code>.</p>
-			<p class="description">اگر افزونهٔ ورود پیامکی فعال باشد و ورود با کد HamiShop روشن نباشد، فرم ورود و ثبت‌نام این پنل به‌صورت خودکار نمایش داده نمی‌شود و ورود به‌طور کامل به افزونهٔ پیامکی واگذار می‌شود.</p>
+			<p class="description">اگر افزونهٔ ورود/ثبت‌نام پیامکی روی سایت فعال باشد، HamiShop هرگز جای آن را نمی‌گیرد: فرم ورود و ثبت‌نام این پنل و ورود با کد HamiShop (ایمیل/تلگرام) غیرفعال می‌شود و ورود به‌طور کامل به همان افزونه واگذار می‌شود.</p>
 			<p class="description">برای فعال‌کردن ورود/ثبت‌نام با ایمیل، تلگرام یا پیامک به تب <strong>ورود و امنیت</strong> بروید. ایمیل و تلگرام رایگان‌اند؛ برای واتساپ به Meta Cloud API یا پل self-hosted نیاز دارید.</p>
 		</div>
 		<div class="hsw-admin-card">

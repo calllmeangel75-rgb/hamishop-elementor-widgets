@@ -108,8 +108,31 @@ final class HSW_Account_Auth {
 		return $this->account->setting( 'auth.' . $path, $fallback );
 	}
 
+	/** @var bool|null Per-request cache of the SMS-login-plugin check. */
+	private $sms_plugin_owns_login = null;
+
+	/**
+	 * Is HamiShop's own code login on for this site?
+	 *
+	 * A site that already runs an SMS / OTP login plugin keeps it: HamiShop never
+	 * renders its form above it, never answers its AJAX actions and never takes
+	 * over the login or registration screen. A shop that really wants both can
+	 * opt in with `add_filter( 'hsw_allow_otp_with_sms_plugin', '__return_true' )`.
+	 *
+	 * @return bool
+	 */
 	public function enabled() {
-		return 'yes' === $this->s( 'otp_enabled', 'no' );
+		if ( 'yes' !== $this->s( 'otp_enabled', 'no' ) ) {
+			return false;
+		}
+		if ( null === $this->sms_plugin_owns_login ) {
+			$this->sms_plugin_owns_login = $this->account && method_exists( $this->account, 'sms_login_active' ) && $this->account->sms_login_active();
+		}
+		if ( $this->sms_plugin_owns_login && ! apply_filters( 'hsw_allow_otp_with_sms_plugin', false ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function channel_enabled( $channel ) {
@@ -2231,6 +2254,21 @@ final class HSW_Account_Auth {
 		);
 	}
 
+	/**
+	 * «کد تأیید به ایمیل یا تلگرام شما ارسال می‌شود…» from the channels that are really on.
+	 *
+	 * @param array<string,string> $channels Enabled channels.
+	 * @return string
+	 */
+	private function channels_sentence( $channels ) {
+		$labels = array_values( $channels );
+		$last   = array_pop( $labels );
+		$list   = $labels ? implode( '، ', $labels ) . ' ' . __( 'یا', 'hamishop-elementor-widgets' ) . ' ' . $last : (string) $last;
+
+		/* translators: %s: channel names. */
+		return sprintf( __( 'کد تأیید به %s شما ارسال می‌شود؛ نیازی به رمز عبور نیست.', 'hamishop-elementor-widgets' ), $list );
+	}
+
 	public function otp_box( $context = 'login' ) {
 		if ( ! $this->enabled() ) {
 			return '';
@@ -2251,7 +2289,7 @@ final class HSW_Account_Auth {
 
 		$is_email_default = ( 'email' === $default );
 		$html  = '<section class="hsw-ac-otp" data-hsw-otp data-context="' . esc_attr( $context ) . '" data-channel="' . esc_attr( $default ) . '" data-channels="' . esc_attr( implode( ',', array_keys( $channels ) ) ) . '">';
-		$html .= '<div class="hsw-ac-otp__head"><span class="hsw-ac-otp__eyebrow">' . esc_html__( 'ورود سریع', 'hamishop-elementor-widgets' ) . '</span><h2>' . esc_html( 'register' === $context ? __( 'ثبت‌نام سریع با کد یکبارمصرف', 'hamishop-elementor-widgets' ) : __( 'ورود با کد یکبارمصرف', 'hamishop-elementor-widgets' ) ) . '</h2><p>' . esc_html__( 'کد تأیید به ایمیل، تلگرام یا پیامک شما ارسال می‌شود؛ نیازی به رمز عبور نیست.', 'hamishop-elementor-widgets' ) . '</p></div>';
+		$html .= '<div class="hsw-ac-otp__head"><span class="hsw-ac-otp__eyebrow">' . esc_html__( 'ورود سریع', 'hamishop-elementor-widgets' ) . '</span><h2>' . esc_html( 'register' === $context ? __( 'ثبت‌نام سریع با کد یکبارمصرف', 'hamishop-elementor-widgets' ) : __( 'ورود با کد یکبارمصرف', 'hamishop-elementor-widgets' ) ) . '</h2><p>' . esc_html( $this->channels_sentence( $channels ) ) . '</p></div>';
 		$html .= '<div class="hsw-ac-otp__channels" role="radiogroup" aria-label="' . esc_attr__( 'کانال دریافت کد', 'hamishop-elementor-widgets' ) . '">';
 		foreach ( $channels as $key => $label ) {
 			$html .= '<button type="button" class="hsw-ac-otp__channel' . ( $key === $default ? ' is-active' : '' ) . '" data-hsw-otp-channel="' . esc_attr( $key ) . '" aria-pressed="' . ( $key === $default ? 'true' : 'false' ) . '">' . $this->account->icon( 'telegram' === $key ? 'send' : ( 'email' === $key ? 'mail' : 'phone' ) ) . esc_html( $label ) . '</button>';
