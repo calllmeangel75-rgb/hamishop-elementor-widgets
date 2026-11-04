@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.220
+Stable tag: 1.11.221
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.221 =
+* Fix: The header now obeys the site palette. Eleven colour controls carried hard-coded defaults that Elementor printed into the page CSS, so a saved header kept its blue/grey values and the palette never reached it.
+* Fix: Header font now follows HamiShop -> palette font (`--hsw-font`) instead of a hard-coded Vazirmatn stack.
+* Fix: Top bar, nav row, mega panel and cart drawer surfaces follow the palette instead of literal white/navy values.
+* Fix: Header text on primary fills uses the palette's computed `on-primary` colour, so a light primary no longer yields unreadable white text.
+* Fix: The per-widget font mode «فونت طرح (وزیرمتن لوکال)» was a no-op; it now forces the bundled Vazirmatn.
+* Note: Per-widget header colours are now opt-in (empty = palette). A header coloured by hand before this version must be re-picked once.
 
 = 1.11.220 =
 * Fix: Digital and downloadable products checkout flow reliability — accurately detects downloadable products even when merchant leaves "Virtual" checkbox unticked in WooCommerce, preventing shipping and delivery address fields from showing.

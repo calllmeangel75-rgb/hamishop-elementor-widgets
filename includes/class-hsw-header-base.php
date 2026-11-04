@@ -1231,6 +1231,10 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 	/**
 	 * Shared style controls.
 	 *
+	 * `$variant` is kept for the subclasses that pass it, but it no longer
+	 * changes a default: the palette owns the un-painted look of both headers
+	 * (the minimal variant derives its glass from `--hsw-pal-surface` in CSS).
+	 *
 	 * @param string $variant store|minimal.
 	 */
 	protected function content_style( $variant = 'store' ) {
@@ -1242,50 +1246,76 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			)
 		);
 
+		/*
+		 * COLOUR CONTROLS ARE OPT-IN ON PURPOSE.
+		 *
+		 * Every control below used to carry a hard-coded `default`. Elementor
+		 * prints a control's default into the page CSS, so a freshly dropped
+		 * header pinned `--hsw-hd-primary: #1d4ed8` on its wrapper — and the
+		 * site palette in HamiShop → پالت رنگی never reached it. That is why a
+		 * shop owner who picked a burgundy palette still saw blue buttons.
+		 *
+		 * The fix has three parts, and all three are needed:
+		 *
+		 * 1. No `default`. No default means no declaration, so an untouched
+		 *    header inherits the palette.
+		 * 2. The control id changed (`primary_color` → `hd_primary`). A page
+		 *    saved before this version still carries `primary_color: #1d4ed8`
+		 *    in its Elementor data; because that control no longer exists,
+		 *    Elementor stops emitting the old declaration. Without the rename
+		 *    the stale value would simply move to the new channel and the
+		 *    palette would keep losing.
+		 * 3. The selector writes `--hsw-hd-*-user`, which the stylesheet reads
+		 *    before the palette. So a colour picked here still wins for this
+		 *    one widget, exactly as the palette screen promises.
+		 *
+		 * Trade-off, documented in the release notes: a header that had been
+		 * hand-coloured before 1.11.221 has to be re-picked once.
+		 */
 		$this->add_control(
-			'primary_color',
+			'hd_primary',
 			array(
-				'label'     => __( 'رنگ اصلی', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#1d4ed8',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-primary: {{VALUE}}; --hsw-primary: {{VALUE}};',
+				'label'       => __( 'رنگ اصلی', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = رنگ اصلی پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-primary-user: {{VALUE}};',
 				),
 			)
 		);
 
 		$this->add_control(
-			'header_bg',
+			'hd_bg',
 			array(
-				'label'     => __( 'پس‌زمینه هدر', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => 'minimal' === $variant ? 'rgba(255,255,255,0.82)' : '#ffffff',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-bg: {{VALUE}};',
+				'label'       => __( 'پس‌زمینه هدر', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = پس‌زمینهٔ کارت پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-bg-user: {{VALUE}};',
 				),
 			)
 		);
 
 		$this->add_control(
-			'text_color',
+			'hd_text',
 			array(
-				'label'     => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#0f172a',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-text: {{VALUE}};',
+				'label'       => __( 'رنگ متن', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = رنگ متن پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-text-user: {{VALUE}};',
 				),
 			)
 		);
 
 		$this->add_control(
-			'muted_color',
+			'hd_muted',
 			array(
-				'label'     => __( 'رنگ متن کم‌رنگ', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#64748b',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-muted: {{VALUE}};',
+				'label'       => __( 'رنگ متن کم‌رنگ', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = متن کم‌رنگ پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-muted-user: {{VALUE}};',
 				),
 			)
 		);
@@ -1352,25 +1382,25 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
-			'border_color',
+			'hd_border',
 			array(
-				'label'     => __( 'رنگ حاشیه‌ها', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#e2e8f0',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-border: {{VALUE}};',
+				'label'       => __( 'رنگ حاشیه‌ها', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = رنگ حاشیهٔ پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-border-user: {{VALUE}};',
 				),
 			)
 		);
 
 		$this->add_control(
-			'search_bg',
+			'hd_search',
 			array(
-				'label'     => __( 'پس‌زمینه جستجو', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#f1f5f9',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-search: {{VALUE}};',
+				'label'       => __( 'پس‌زمینه جستجو', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = پس‌زمینهٔ ملایم پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-search-user: {{VALUE}};',
 				),
 			)
 		);
@@ -1603,25 +1633,25 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
-			'mgs_panel_bg',
+			'hd_mg_panel_bg',
 			array(
-				'label'     => __( 'پس‌زمینه پنل', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#ffffff',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-panel-bg: {{VALUE}};',
+				'label'       => __( 'پس‌زمینه پنل', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = پس‌زمینهٔ کارت پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-panel-bg-user: {{VALUE}};',
 				),
 			)
 		);
 
 		$this->add_control(
-			'mgs_divider_c',
+			'hd_mg_divider',
 			array(
-				'label'     => __( 'رنگ حاشیه و جداکننده ستون‌ها', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#e2e8f0',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-divider: {{VALUE}};',
+				'label'       => __( 'رنگ حاشیه و جداکننده ستون‌ها', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = رنگ حاشیهٔ پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-divider-user: {{VALUE}};',
 				),
 			)
 		);
@@ -1702,13 +1732,13 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
-			'mgs_head_bg',
+			'hd_mg_head_bg',
 			array(
-				'label'     => __( 'پس‌زمینه سرستون', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#f8fafc',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-head-bg: {{VALUE}};',
+				'label'       => __( 'پس‌زمینه سرستون', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = پس‌زمینهٔ ملایم پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-mg-head-bg-user: {{VALUE}};',
 				),
 			)
 		);

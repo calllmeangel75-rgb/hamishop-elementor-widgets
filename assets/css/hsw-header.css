@@ -16,15 +16,43 @@
 	box-sizing: border-box;
 }
 
+/*
+ * PALETTE-FIRST TOKEN LAYER — the header obeys HamiShop → پالت رنگی.
+ *
+ * Every colour token below resolves in three steps:
+ *
+ *   1. `--hsw-hd-*-user`  what the shop owner set on this one widget
+ *   2. `--hsw-*`          the site palette printed on html:root
+ *   3. a literal          the old hard-coded value, kept as a last resort
+ *
+ * The `!important` is not decoration. Elementor writes the widget's own
+ * control values as `{{WRAPPER}} .hsw-hd { --hsw-hd-primary: … }`, i.e. on
+ * this very element at specificity (0,3,0). That used to beat the palette
+ * for every header that had ever been saved in the editor — the controls
+ * carried a hard-coded `default`, Elementor baked it into the page CSS, and
+ * the palette silently did nothing. Declaring the real token here as
+ * `!important` makes this stylesheet the only writer of it, and the controls
+ * now write the separate `-user` channel instead, so a value the owner really
+ * picked still wins.
+ *
+ * Consequence for old pages: a stale `--hsw-hd-primary: #1d4ed8` sitting in
+ * the generated CSS is simply ignored — no re-save, no database migration.
+ */
 .hsw-h {
-	--hsw-hd-primary: var(--hsw-primary, #1d4ed8);
-	--hsw-hd-bg: var(--hsw-pal-surface, #fff);
-	--hsw-hd-text: var(--hsw-on-surface, #0f172a);
-	--hsw-hd-muted: var(--hsw-pal-muted, #64748b);
-	--hsw-hd-border: var(--hsw-pal-border, #e2e8f0);
-	--hsw-hd-search: var(--hsw-pal-surface-alt, #f1f5f9);
-	--hsw-hd-topbar: var(--hsw-primary-dark, #0f172a);
-	--hsw-hd-navbg: #f8fafc;
+	--hsw-hd-primary: var(--hsw-hd-primary-user, var(--hsw-primary, #1d4ed8)) !important;
+	--hsw-hd-bg: var(--hsw-hd-bg-user, var(--hsw-pal-surface, #fff)) !important;
+	--hsw-hd-text: var(--hsw-hd-text-user, var(--hsw-on-surface, #0f172a)) !important;
+	--hsw-hd-muted: var(--hsw-hd-muted-user, var(--hsw-pal-muted, #64748b)) !important;
+	--hsw-hd-border: var(--hsw-hd-border-user, var(--hsw-pal-border, #e2e8f0)) !important;
+	--hsw-hd-search: var(--hsw-hd-search-user, var(--hsw-pal-surface-alt, #f1f5f9)) !important;
+	--hsw-hd-topbar: var(--hsw-hd-topbar-user, var(--hsw-primary-dark, #0f172a)) !important;
+	--hsw-hd-navbg: var(--hsw-hd-navbg-user, var(--hsw-pal-surface-alt, #f8fafc)) !important;
+
+	/* Mega panel: same three steps, so an unpainted panel is a palette surface. */
+	--hsw-hd-mg-panel-bg: var(--hsw-hd-mg-panel-bg-user, var(--hsw-pal-surface, #fff)) !important;
+	--hsw-hd-mg-divider: var(--hsw-hd-mg-divider-user, var(--hsw-pal-border, #e2e8f0)) !important;
+	--hsw-hd-mg-head-bg: var(--hsw-hd-mg-head-bg-user, var(--hsw-pal-surface-alt, #f8fafc)) !important;
+
 	--hsw-hd-radius: 14px;
 	--hsw-hd-width: 1320px;
 	--hsw-hd-logow: 44px;
@@ -33,7 +61,8 @@
 	z-index: 100;
 	width: 100%;
 	color: var(--hsw-hd-text);
-	font-family: 'Vazirmatn HSW', Vazirmatn, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	/* Same source as every other family: HamiShop → پالت رنگی → فونت. */
+	font-family: var(--hsw-font, 'Vazirmatn HSW'), Vazirmatn, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	font-size: 13px;
 	line-height: 1.6;
 	direction: inherit;
@@ -199,7 +228,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	padding: 3px 8px;
 	border-radius: 999px;
 	background: var(--hsw-hd-primary);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	font-size: 9.5px;
 	font-weight: 800;
 	white-space: nowrap;
@@ -326,7 +355,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	overflow: hidden;
 	border-radius: calc(var(--hsw-hd-radius) * .8);
 	background: linear-gradient(135deg, var(--hsw-hd-primary), color-mix(in srgb, var(--hsw-hd-primary), #fff 26%));
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	box-shadow: 0 6px 16px color-mix(in srgb, var(--hsw-hd-primary) 22%, transparent);
 	isolation: isolate;
 }
@@ -570,7 +599,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	padding: 0 15px;
 	border-radius: calc(var(--hsw-hd-radius) - 4px);
 	background: var(--hsw-hd-primary);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	font-size: 11.5px;
 	font-weight: 800;
 	transition: background-color .15s, transform .15s;
@@ -578,7 +607,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 
 .hsw-hd__searchbtn:hover {
 	background: color-mix(in srgb, var(--hsw-hd-primary), #000 10%);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 }
 
 .hsw-hd__searchbtn:active {
@@ -742,7 +771,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	border: 2px solid var(--hsw-hd-bg);
 	border-radius: 999px;
 	background: var(--hsw-hd-primary);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	font-size: 9px;
 	font-weight: 800;
 	line-height: 1;
@@ -761,7 +790,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	padding: 0 14px;
 	border-radius: 999px;
 	background: var(--hsw-hd-primary);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	font-size: 11px;
 	font-weight: 800;
 	white-space: nowrap;
@@ -771,7 +800,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 
 .hsw-hd__cta:hover {
 	background: color-mix(in srgb, var(--hsw-hd-primary), #000 10%);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 }
 
 .hsw-hd__cta:active {
@@ -813,7 +842,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	border: 0;
 	border-radius: calc(var(--hsw-hd-radius) * .68);
 	background: var(--hsw-hd-primary);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	font-size: 11.5px;
 	font-weight: 800;
 	cursor: pointer;
@@ -822,7 +851,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 
 .hsw-hd__catbtn:hover {
 	background: color-mix(in srgb, var(--hsw-hd-primary), #000 10%);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 }
 
 .hsw-hd__catbtn .hsw-ic {
@@ -1767,6 +1796,12 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
  * ====================================================================== */
 
 .hsw-hd--minimal {
+	/*
+	 * The pill is glass: keep the translucency, but derive it from the palette
+	 * surface instead of a literal white, so a dark or tinted shop still looks
+	 * like itself. A value the owner set on this widget wins (step 1).
+	 */
+	--hsw-hd-bg: var(--hsw-hd-bg-user, color-mix(in srgb, var(--hsw-pal-surface, #fff) 82%, transparent)) !important;
 	background: transparent;
 }
 
@@ -2286,7 +2321,7 @@ html { overflow-x: clip; }
 		var(--hsw-hd-primary),
 		color-mix(in srgb, var(--hsw-hd-primary), #000 22%));
 	box-shadow: 0 6px 16px color-mix(in srgb, var(--hsw-hd-primary) 26%, transparent);
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 	font-size: 11.5px;
 	font-weight: 800;
 }
@@ -2295,7 +2330,7 @@ html { overflow-x: clip; }
 	background: linear-gradient(135deg,
 		color-mix(in srgb, var(--hsw-hd-primary), #000 8%),
 		color-mix(in srgb, var(--hsw-hd-primary), #000 30%));
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 }
 
 .hsw-hd__drawercart > .hsw-ic {
@@ -2786,12 +2821,12 @@ html { overflow-x: clip; }
 
 .hsw-hd__cta:hover {
 	background: var(--hsw-hover, var(--hsw-hd-primary));
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 }
 
 .hsw-hd__cta:active {
 	background: var(--hsw-primary-dark, var(--hsw-hd-primary));
-	color: #fff;
+	color: var(--hsw-on-primary, #fff);
 }
 
 /* =========================================================================
@@ -2905,7 +2940,7 @@ html { overflow-x: clip; }
 	flex: 0 0 auto;
 	padding: 17px 20px;
 	border-bottom: 1px solid var(--hsw-hd-border, #e7e8eb);
-	background: linear-gradient(180deg, #fff, #fbfbfd);
+	background: linear-gradient(180deg, var(--hsw-hd-bg), color-mix(in srgb, var(--hsw-hd-bg) 97%, var(--hsw-hd-text)));
 }
 
 .hsw-hd__carttitle {
@@ -2953,7 +2988,7 @@ html { overflow-x: clip; }
 	padding: 0;
 	border: 1px solid var(--hsw-hd-border, #e7e8eb);
 	border-radius: 10px;
-	background: #fff;
+	background: var(--hsw-pal-surface, #fff);
 	/* Header-owned token: do not inherit the product-page surface variable. */
 	color: var(--hsw-hd-text, #0f172a);
 	cursor: pointer;
@@ -3029,7 +3064,7 @@ html { overflow-x: clip; }
 	padding: 12px;
 	border: 1px solid var(--hsw-hd-border, #e7e8eb);
 	border-radius: 14px;
-	background: #fff;
+	background: var(--hsw-pal-surface, #fff);
 	box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
 }
 
@@ -3237,7 +3272,7 @@ html { overflow-x: clip; }
 	height: 40px;
 	border: 1px solid var(--hsw-hd-border, #e7e8eb);
 	border-radius: 11px;
-	background: #fff;
+	background: var(--hsw-pal-surface, #fff);
 	color: var(--hsw-on-surface, #191c1e);
 	font-size: 12px;
 	font-weight: 700;

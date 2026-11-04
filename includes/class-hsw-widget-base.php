@@ -48,11 +48,26 @@ abstract class HSW_Widget_Base extends Widget_Base {
 
         /**
          * Extra root class from the common «قالب‌سازگاری» style section.
-         * Returns ' hsw-font-inherit' when the widget must use the theme font.
+         *
+         * - `inherit` → `hsw-font-inherit`: take the theme font.
+         * - `design`  → `hsw-font-design`: force the plugin's bundled Vazirmatn
+         *   even when the palette points at another family. The mode existed in
+         *   the panel but had no class and no CSS, so picking it did nothing.
+         * - `palette` (default) / `custom` need no class: the palette prints
+         *   `--hsw-font`, and the custom mode writes it on the wrapper.
+         *
+         * @return string
          */
         public function hsw_font_class() {
-                $s = $this->effective_settings();
-                return ( isset( $s['hsw_font_mode'] ) && 'inherit' === $s['hsw_font_mode'] ) ? ' hsw-font-inherit' : '';
+                $s    = $this->effective_settings();
+                $mode = isset( $s['hsw_font_mode'] ) ? (string) $s['hsw_font_mode'] : '';
+                if ( 'inherit' === $mode ) {
+                        return ' hsw-font-inherit';
+                }
+                if ( 'design' === $mode ) {
+                        return ' hsw-font-design';
+                }
+                return '';
         }
 
         /* =========================================================================

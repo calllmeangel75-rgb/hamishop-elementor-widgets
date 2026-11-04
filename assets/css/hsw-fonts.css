@@ -68,6 +68,11 @@
    Icons are SVG sprites; everything else follows the theme font. */
 .hsw-font-inherit, .hsw-font-inherit *:not(.hsw-ic) { font-family: inherit !important; }
 
+/* «فونت طرح» mode: force the bundled Vazirmatn even when the site palette
+   points at another family. Without this the option was a no-op. */
+.hsw-font-design,
+.hsw-font-design *:not(.hsw-ic) { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important; }
+
 /* -------------------------------------------------------------------------
  * WooCommerce session notices (shared by cart / checkout / pay)
  *

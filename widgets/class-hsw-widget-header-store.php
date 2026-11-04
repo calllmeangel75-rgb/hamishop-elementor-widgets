@@ -274,25 +274,25 @@ class HSW_Widget_Header_Store extends HSW_Header_Base {
 		);
 
 		$this->add_control(
-			'topbar_bg',
+			'hd_topbar_bg',
 			array(
-				'label'     => __( 'پس‌زمینه نوار اعلان', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#0f172a',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-topbar: {{VALUE}};',
+				'label'       => __( 'پس‌زمینه نوار اعلان', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = رنگ اصلی تیرهٔ پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-topbar-user: {{VALUE}};',
 				),
 			)
 		);
 
 		$this->add_control(
-			'nav_bg',
+			'hd_nav_bg',
 			array(
-				'label'     => __( 'پس‌زمینه ردیف ناوبری', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::COLOR,
-				'default'   => '#f8fafc',
-				'selectors' => array(
-					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-navbg: {{VALUE}};',
+				'label'       => __( 'پس‌زمینه ردیف ناوبری', 'hamishop-elementor-widgets' ),
+				'description' => __( 'خالی = پس‌زمینهٔ ملایم پالت.', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::COLOR,
+				'selectors'   => array(
+					'{{WRAPPER}} .hsw-hd' => '--hsw-hd-navbg-user: {{VALUE}};',
 				),
 			)
 		);
