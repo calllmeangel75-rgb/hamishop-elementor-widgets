@@ -255,6 +255,20 @@ class HSW_Palette {
 			'--hsw-on-primary'         => $on_primary,
 			'--hsw-on-surface'         => $p['text'],
 
+			/*
+			 * Same two colours under an alias no widget control has ever written.
+			 *
+			 * Elementor used to bake `--hsw-primary: #1d4ed8` into the header's
+			 * generated CSS (a control default). Optimizers that serve a
+			 * combined/UCSS copy of that file keep the stale declaration alive
+			 * long after the control is gone, and it wins on the header element
+			 * because it is set there, not inherited. The header re-declares
+			 * `--hsw-primary` from these aliases, so the palette still wins on
+			 * a page whose cached CSS has not been regenerated yet.
+			 */
+			'--hsw-pal-primary'        => $p['primary'],
+			'--hsw-pal-primary-dark'   => $p['primary_dark'],
+
 			/* Purchase-step CTAs: one colour for cart → checkout → pay. */
 			'--hsw-cta'                => $p['cta'],
 			'--hsw-cta-hover'          => $p['cta_hover'],

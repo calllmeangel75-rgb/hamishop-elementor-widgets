@@ -39,6 +39,15 @@
  * the generated CSS is simply ignored — no re-save, no database migration.
  */
 .hsw-h {
+	/*
+	 * Neutralise a stale `--hsw-primary` that older page CSS still sets on this
+	 * very element (the retired `primary_color` control also wrote the global
+	 * name). Read from the palette aliases instead, so a cached/combined
+	 * stylesheet cannot keep the header blue.
+	 */
+	--hsw-primary: var(--hsw-pal-primary, #2563eb) !important;
+	--hsw-primary-dark: var(--hsw-pal-primary-dark, #1d4ed8) !important;
+
 	--hsw-hd-primary: var(--hsw-hd-primary-user, var(--hsw-primary, #1d4ed8)) !important;
 	--hsw-hd-bg: var(--hsw-hd-bg-user, var(--hsw-pal-surface, #fff)) !important;
 	--hsw-hd-text: var(--hsw-hd-text-user, var(--hsw-on-surface, #0f172a)) !important;
