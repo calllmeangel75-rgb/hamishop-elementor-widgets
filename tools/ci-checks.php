@@ -84,7 +84,9 @@ $v_stable = $stable[1] ?? '';
 
 hsw_ci( 'version: header == HSW_VERSION', '' !== $v_header && $v_header === $v_define, "{$v_header} vs {$v_define}" );
 hsw_ci( 'version: readme Stable tag matches', '' !== $v_header && $v_header === $v_stable, "{$v_header} vs {$v_stable}" );
-hsw_ci( 'version: release note exists', '' !== $v_header && is_file( $root . "/RELEASE-NOTES-{$v_header}.md" ), "RELEASE-NOTES-{$v_header}.md" );
+/* Release notes live in docs/archive/release-notes/ since the docs cleanup. */
+$note_path = $root . "/docs/archive/release-notes/RELEASE-NOTES-{$v_header}.md";
+hsw_ci( 'version: release note exists', '' !== $v_header && is_file( $note_path ), "docs/archive/release-notes/RELEASE-NOTES-{$v_header}.md" );
 hsw_ci( 'version: changelog mentions it', false !== strpos( $readme, "= {$v_header} =" ), $v_header );
 
 /* -------------------------------------------------------------------------
@@ -204,7 +206,7 @@ hsw_ci( 'repo: no node_modules / package.json / tests/_tmp-*', ! $stray, implode
 /* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */
-foreach ( array( 'README.md', 'TECHNICAL-BRIEF.md', 'MARKETING.md', 'WIDGET-GUIDE.md', 'WIDGETS-REFERENCE.md', 'STAGING-CHECKLIST.md' ) as $doc ) {
+foreach ( array( 'README.md', 'CHANGELOG.md', 'docs/WIDGETS.md', 'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PERFORMANCE.md', 'docs/STAGING-CHECKLIST.md', 'docs/MARKETING.md' ) as $doc ) {
 	$size = is_file( $root . '/' . $doc ) ? filesize( $root . '/' . $doc ) : 0;
 	hsw_ci( "docs: {$doc} present", $size > 500, $size . ' bytes' );
 }
