@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.231
+Stable tag: 1.11.232
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.232 =
+* Fix: The upgrade job no longer queues a cron event. WP-Cron is spawned by front-end visits, so a tick ran while a customer was waiting; on a small host one heavy Elementor page could hold a PHP worker long enough for the pool to answer 503. The work now runs only on an admin page load, throttled to one tick every 30 seconds.
+
 = 1.11.231 =
 * Fix: A real PHP fatal (uncaught Error, memory exhaustion, max_execution_time) now leaves a trace. A shutdown handler writes `[HSW/fatal] … — file.php:line` to the error log and, when the file belongs to this plugin, to the dashboard's «آخرین خطای ثبت‌شده».
 * Why: on a live shop the PHP log held only notices while uncached pages answered 503, so there was no way to tell a plugin fatal from a server-side kill.
@@ -92,10 +95,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Feature: A second title is used automatically when the page is empty because of filters or search, so the message never claims the category has nothing when it was a filter that hid it.
 * Feature: «پیش‌نمایش حالت خالی در ویرایشگر» — swaps the demo cards for the empty block so you can style it in Elementor.
 * Feature: Header chips hide empty categories by default (`pills_hide_empty`). The filter sidebar already did.
-
-= 1.11.227 =
-* Fix: The mobile «فیلتر پیشرفته» sheet never appeared on the archive composite. The column that holds the filters widget was hidden with `display: none` below 768px — and the bottom sheet lives inside that column, so it opened at 0×0. The desktop sidebar boxes are hidden instead; the column still collapses to zero height, so the layout-shift fix is unchanged.
-* Note: 1.11.226 fixed a different, real problem (LiteSpeed delaying our scripts). Both were needed.
 
 == Upgrade Notice ==
 

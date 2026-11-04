@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.232] — 2026-11-04
+
+### Fixed
+
+- The upgrade job no longer schedules a cron event. WP-Cron is spawned by front-end visits, so a tick executed while a customer waited: on a shared host one tick that parses a heavy Elementor page holds a PHP worker for seconds, and the pool answers 503 for everyone else. This is the shape of the intermittent outage on the live shop — no PHP fatal in the log, worse right after an update, gone once the job finished.
+- The work now happens only on an admin page load, one bounded tick every 30 seconds. Nothing is ever queued onto the front end, and `HSW_UPGRADER_OFF` still turns it off entirely.
+
 ## [1.11.231] — 2026-11-04
 
 ### Added

@@ -159,13 +159,17 @@ final class HSW_Upgrader {
 			return;
 		}
 
-		self::schedule();
-
 		/*
-		 * Cron is the intended runner, but plenty of hosts disable it
-		 * (DISABLE_WP_CRON) or run it on a long interval. One bounded tick per
-		 * admin page load keeps the job moving in that case — still never on the
-		 * front end, and throttled so a fast admin session cannot stack them.
+		 * No cron event is queued any more.
+		 *
+		 * WP-Cron is spawned by front-end visits (`wp-cron.php`), so a queued tick
+		 * runs while a customer is waiting — on a small host one tick that parses
+		 * a heavy Elementor page can hold a PHP worker for seconds, and the pool
+		 * answers 503 for everyone else. The work now happens only on an admin
+		 * page load, throttled below: nothing is ever scheduled onto the front end.
+		 *
+		 * A shop that wants it finished faster can still run
+		 * `wp hsw upgrader` or simply reload wp-admin a few times.
 		 */
 		$last = (int) get_option( self::THROTTLE_OPTION, 0 );
 		if ( ( time() - $last ) < self::THROTTLE_GAP ) {
