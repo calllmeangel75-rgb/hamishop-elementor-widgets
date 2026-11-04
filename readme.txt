@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.229
+Stable tag: 1.11.230
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.230 =
+* Fix: The background job can now be switched off entirely with `define( 'HSW_UPGRADER_OFF', true );` in wp-config.php — for shops whose host enforces tight CPU/entry-process limits and answers 503 on the front end while wp-admin still works.
+* Fix: Pages with more than 1 MB of Elementor data are skipped when rebuilding CSS. Parsing one of those inside a single cron request can exceed a shared host's memory cap and get the process killed.
+
 = 1.11.229 =
 * Fix (CLS): the subcategory pill row no longer wraps. When the theme font finished loading the row grew from 33px to 74px and pushed the page down — a single 0.2327 layout shift, which was the entire CLS of the shop page.
 * Fix (a11y): the category tree's items now carry `role="treeitem"` and `aria-level`, so `role="tree"` finally has the children it requires.
@@ -93,10 +97,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix: The mobile «فیلتر پیشرفته» button did nothing on sites where LiteSpeed's Delay JS rewrites scripts to `type="litespeed/javascript"`. The first tap was spent loading the script instead of opening the sheet.
 * Fix: Our script tags now carry `data-no-optimize` / `data-no-delay`, so LiteSpeed and WP Rocket leave them out of JS delay.
 * Fix: A small inline handler opens and closes the bottom sheets before the main bundle arrives, so the button works even when a page optimizer still delays it.
-
-= 1.11.225 =
-* Fix: Header menus no longer drop their third level. `wp_nav_menu` was called with `depth => 2`, so a sub-sub-item such as «ابزار قالی‌بافی و پرداخت فرش → …» never rendered and there was nothing in the panel to explain why. Depth is now unlimited.
-* Fix: A nested sub-menu opens beside its parent instead of on top of the list it belongs to, with the caret pointing at the side the flyout opens on.
 
 == Upgrade Notice ==
 

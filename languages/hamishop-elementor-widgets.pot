@@ -90,7 +90,7 @@ msgstr ""
 msgid "HamiShop: سازگاری با بهینه‌ساز لایت‌اسپید"
 msgstr ""
 
-#: includes/class-hsw-upgrader.php:734
+#: includes/class-hsw-upgrader.php:779
 msgid "HamiShop: پاک‌سازی پس‌زمینهٔ به‌روزرسانی کامل نشد"
 msgstr ""
 
@@ -7306,7 +7306,7 @@ msgstr ""
 msgid "سامانهٔ واتساپ شلوغ است. یک دقیقهٔ دیگر تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-upgrader.php:735
+#: includes/class-hsw-upgrader.php:780
 msgid "سایت سالم است و کار می‌کند؛ فقط بخشی از کش قدیمی باقی مانده. این کار در پس‌زمینه ادامه پیدا می‌کند و نیازی به اقدام شما نیست. اگر پیام ماند، یک‌بار صفحهٔ پیشخوان را باز کنید."
 msgstr ""
 

@@ -75,6 +75,17 @@ final class HSW_Upgrader {
 	/** Posts inspected per query. */
 	const POSTS_PER_QUERY = 40;
 
+	/**
+	 * Skip pages whose Elementor data is larger than this.
+	 *
+	 * `Post::update()` parses the whole document and writes a file; on a page with
+	 * megabytes of widget data that is seconds of CPU and a lot of memory inside
+	 * one cron request. On a shared host with a 256 MB cap that is enough to get
+	 * the process killed — the visitor sees 503 while wp-admin, which never runs
+	 * this job, keeps working. Such a page keeps its existing CSS instead.
+	 */
+	const MAX_META_BYTES = 1048576;
+
 	/** Products seeded per query. */
 	const PRODUCTS_PER_QUERY = 200;
 
@@ -123,6 +134,11 @@ final class HSW_Upgrader {
 	 * @return void
 	 */
 	public function maybe_start() {
+		if ( ! self::enabled() ) {
+			self::unschedule();
+			return;
+		}
+
 		/*
 		 * Admin-ajax and REST requests belong to the editor, the cart and the
 		 * checkout. A two-second maintenance batch inside one of them looks like a
@@ -161,6 +177,22 @@ final class HSW_Upgrader {
 	}
 
 	/**
+	 * Is the background job allowed to run at all?
+	 *
+	 * A shop that is already tight on CPU does not need a maintenance job on top
+	 * of it. Dropping `define( 'HSW_UPGRADER_OFF', true );` into wp-config.php
+	 * stops it dead — no cron, no ticks, no CSS rebuild — and the site keeps
+	 * serving the CSS it already has.
+	 *
+	 * @return bool
+	 */
+	public static function enabled() {
+		$on = ! ( defined( 'HSW_UPGRADER_OFF' ) && HSW_UPGRADER_OFF );
+
+		return (bool) apply_filters( 'hsw_upgrader_enabled', $on );
+	}
+
+	/**
 	 * Queue one tick if none is queued already.
 	 *
 	 * @return void
@@ -195,6 +227,12 @@ final class HSW_Upgrader {
 	 * @return void
 	 */
 	public function run() {
+		if ( ! self::enabled() ) {
+			self::unschedule();
+			delete_option( self::STATE_OPTION );
+			return;
+		}
+
 		/*
 		 * A cron event queued before the job finished would otherwise start it
 		 * again from scratch — the version marker is the single source of truth.
@@ -461,6 +499,13 @@ final class HSW_Upgrader {
 
 				/* Cheap substring test: a false positive only costs one rebuild. */
 				if ( false === strpos( (string) $row->meta_value, 'hsw-' ) ) {
+					$state['cursor'] = $cursor;
+					continue;
+				}
+
+				if ( strlen( (string) $row->meta_value ) > self::MAX_META_BYTES ) {
+					/* Too big to parse safely here; leave its CSS as it is. */
+					self::log( 'post_css', 'skipped oversized page #' . $post_id, false );
 					$state['cursor'] = $cursor;
 					continue;
 				}

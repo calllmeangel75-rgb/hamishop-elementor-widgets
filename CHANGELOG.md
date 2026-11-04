@@ -8,6 +8,16 @@
 
 ## [Unreleased]
 
+## [1.11.230] — 2026-11-04
+
+### Added
+
+- `define( 'HSW_UPGRADER_OFF', true );` (or the `hsw_upgrader_enabled` filter) switches the background job off completely — no cron event, no ticks, no CSS rebuild. For shops on hosts that enforce CPU / entry-process limits and answer `503` on the front end while wp-admin keeps working.
+
+### Fixed
+
+- Pages carrying more than 1 MB of Elementor data are skipped when rebuilding CSS. `Post::update()` parses the whole document in one request; on a shared host with a 256 MB cap that can get the process killed, which is exactly the "front end 503, wp-admin fine" signature. Those pages keep the CSS they already have.
+
 ## [1.11.229] — 2026-11-04
 
 ### Fixed
