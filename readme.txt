@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.239
+Stable tag: 1.11.240
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.240 =
+* Fix: «فونت پایه ویجت» was offered on every widget's Style tab but only four widgets applied it — on account, cart, checkout, header, archive, product, blog and footer it did nothing. The class now goes on the Elementor wrapper through `elementor/frontend/widget/before_render`. `palette` (the default) adds no class, so pages that never touched the control render byte-identical HTML (verified by diffing home, shop and account before/after).
+* New: `add_filter( 'hsw_disable_elementor_google_fonts', '__return_false' );` keeps Elementor's Google Fonts on archive and account pages. The suppression is unchanged by default.
+* Docs: the `preload_font()` comment claimed the font is only preloaded on pages that use it. It is preloaded on every front-end page, because `hsw-fonts` is registered on every request and no widget has rendered yet at `wp_head`. Comment corrected; behaviour untouched.
+
 = 1.11.239 =
 * Fix: The ticket CSV counted only approved replies, while `get_comments()` — used by the ticket list — defaults to `status => all`, which WordPress turns into `comment_approved = '0' OR comment_approved = '1'`. A ticket with a reply waiting for moderation therefore showed a lower number in the CSV than in the admin list. The query now matches `IN ('0', '1')`; spam and trash are excluded by both.
 * Verified against a ticket holding one approved, one pending, one spam and one trash reply: `get_comments()` = 4, `reply_counts()` = 4.
@@ -93,9 +98,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 = 1.11.236 =
 * Fix: The widget's own «لینک مرحله بعد» now counts as a next step. 1.11.233 only looked at «صفحهٔ پرداخت», so a shop that set the link on the summary widget had it ignored and the order was placed instead of navigating to the pay step.
-
-= 1.11.235 =
-* Fix: Clicking «ادامه و ورود به مرحله پرداخت» could submit the header search form and land on `/?s=` — `.woocommerce-checkout` is a body class, so the fallback selector matched the wrong form. The fallback now uses WooCommerce's own form markers only, rejects anything containing a search field, and does nothing when no checkout form is found.
 
 == Upgrade Notice ==
 

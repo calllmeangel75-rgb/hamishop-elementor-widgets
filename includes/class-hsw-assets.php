@@ -24,6 +24,13 @@ class HSW_Assets {
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
                 add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
                 add_filter( 'elementor/widget/render_content', array( $this, 'guard_icon_markup' ), 20, 2 );
+                /*
+                 * «فونت پایه ویجت» is added to every HSW widget's Style tab, but
+                 * only four widgets appended the class themselves — on the rest
+                 * the option was a silent no-op. The Elementor wrapper is the one
+                 * element every widget has in common.
+                 */
+                add_action( 'elementor/frontend/widget/before_render', array( $this, 'apply_font_mode' ) );
                 add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
                 add_filter( 'script_loader_tag', array( $this, 'guard_script_tag' ), 20, 3 );
         }
@@ -130,10 +137,45 @@ class HSW_Assets {
          * `hsw-fonts.css` declares the face with `font-display: swap`, but the font
          * request only starts once the browser has parsed that stylesheet and met a
          * text node asking for the family — late enough to re-flow the header. The
-         * link is printed in the head (priority 4, before wp_print_styles) and only
-         * when the stylesheet is really enqueued, so a page without any HSW widget
-         * downloads nothing extra.
+         * link is printed in the head (priority 4, before wp_print_styles).
+         *
+         * The guard accepts `registered` as well as `enqueued`, because at this
+         * point in the request no widget has rendered yet — Elementor enqueues a
+         * widget's stylesheet during render, long after wp_head. `hsw-fonts` is
+         * registered on every front-end request, so in practice the font is
+         * preloaded on every page, not only on pages that use it. Tightening this
+         * would mean guessing whether the page renders a widget, and a wrong guess
+         * brings back the layout shift the preload exists to prevent.
          */
+        /**
+         * Put the widget's font choice on its Elementor wrapper.
+         *
+         * `palette` (the default) adds no class at all, so a site that never
+         * touched the control renders exactly the HTML it rendered before.
+         * `inherit` and `design` were already implemented in `hsw-fonts.css`;
+         * what was missing is that the class never reached the markup on most
+         * widgets.
+         *
+         * @param \Elementor\Element_Base $widget Element being rendered.
+         * @return void
+         */
+        public function apply_font_mode( $widget ) {
+                if ( ! is_object( $widget ) || ! method_exists( $widget, 'get_settings_for_display' ) ) {
+                        return;
+                }
+                if ( ! method_exists( $widget, 'add_render_attribute' ) ) {
+                        return;
+                }
+
+                $mode = (string) $widget->get_settings_for_display( 'hsw_font_mode' );
+
+                if ( 'inherit' === $mode ) {
+                        $widget->add_render_attribute( '_wrapper', 'class', 'hsw-font-inherit' );
+                } elseif ( 'design' === $mode ) {
+                        $widget->add_render_attribute( '_wrapper', 'class', 'hsw-font-design' );
+                }
+        }
+
         public function preload_font() {
         	if ( ! apply_filters( 'hsw_preload_font', true ) ) {
         		return;
@@ -928,6 +970,19 @@ class HSW_Assets {
          * @return bool
          */
         public function filter_google_fonts( $print ) {
+                /*
+                 * Suppressing Elementor's Google Fonts on these screens saves a
+                 * request, but it also drops a Google font the admin picked for
+                 * some other element on the same page — that element then falls
+                 * back to a system face. A shop that would rather keep its
+                 * typography intact can turn the suppression off:
+                 *
+                 *   add_filter( 'hsw_disable_elementor_google_fonts', '__return_false' );
+                 */
+                if ( ! apply_filters( 'hsw_disable_elementor_google_fonts', true ) ) {
+                        return $print;
+                }
+
                 if ( function_exists( 'is_shop' ) && ( is_shop() || is_product_category() || is_product_tag() ) ) {
                         return false;
                 }

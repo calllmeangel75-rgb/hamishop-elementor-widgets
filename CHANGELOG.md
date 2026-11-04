@@ -8,6 +8,22 @@
 
 ## [Unreleased]
 
+## [1.11.240] — 2026-11-04
+
+### Fixed
+
+- «فونت پایه ویجت» was added to every HSW widget's Style tab through `elementor/element/after_section_end`, but the class that implements it was appended by only four widgets — best-sellers, popular, post-page and wonder-deals. On account, cart, checkout, header, archive, product, blog and footer the choice was a silent no-op. It now goes on the Elementor wrapper via `elementor/frontend/widget/before_render`, the one element every widget shares.
+- `palette` (the default) adds no class at all, so pages that never touched the control are unchanged: home, shop and account were captured before and after and diffed to identical HTML (nonces, asset versions and the cache timestamp normalised).
+- Verified the other direction on the local site: `hsw-account`, which never emitted the class, renders `<div class="hsw-font-design elementor-element …">` once set to «فونت طرح».
+
+### Added
+
+- `add_filter( 'hsw_disable_elementor_google_fonts', '__return_false' );` keeps Elementor's Google Fonts on archive and account pages. `filter_google_fonts()` drops them there to save a request, which also drops a Google font the admin picked for another element on the same page. Default behaviour unchanged.
+
+### Docs
+
+- The `preload_font()` comment claimed the font is preloaded only on pages that load it, "so a page without any HSW widget downloads nothing extra". That was not true: at `wp_head` no widget has rendered yet, and `hsw-fonts` is registered on every front-end request, so the font is preloaded everywhere. Comment corrected; behaviour deliberately untouched — tightening it means guessing whether the page renders a widget, and a wrong guess brings back the layout shift the preload exists to prevent.
+
 ## [1.11.239] — 2026-11-04
 
 ### Fixed
