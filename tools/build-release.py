@@ -28,11 +28,8 @@ TOP_LEVEL_FILES = (
     "readme.txt",
     "README.md",
     "LICENSE",
-    "WIDGET-GUIDE.md",
-    "WIDGETS-REFERENCE.md",
-    "ARCHITECTURE-MAP.md",
-    "STAGING-CHECKLIST.md",
-    "RELEASE-NOTES-1.11.159.md",
+    # Docs live in docs/ and are deliberately NOT shipped: the ZIP carries only
+    # runtime files. Release notes moved to docs/archive/release-notes/.
 )
 TOP_LEVEL_DIRS = ("assets", "includes", "widgets", "templates", "languages")
 EXCLUDED_NAMES = {".DS_Store", "Thumbs.db", "__pycache__"}
