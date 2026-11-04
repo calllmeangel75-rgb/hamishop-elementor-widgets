@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.222
+Stable tag: 1.11.223
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.223 =
+* Feature: The palette font list now also reads the WordPress font library's `custom` and `default` origins and the Elementor kit's `custom_typography`, so fonts added through the Site Editor finally show up.
+* Feature: A free-text font field next to the list. A variable font that a theme loads with its own @font-face is registered in no option at all, so no list can enumerate it — typing the exact family name now works.
 
 = 1.11.222 =
 * Fix: Updates no longer take the site down. The Elementor cache flush and the stock migration used to run on `init` — i.e. inside the first visitor's request — and could return HTTP 503 for several minutes on a shared host.

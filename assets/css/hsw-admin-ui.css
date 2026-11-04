@@ -204,6 +204,44 @@
 	gap: 9px;
 	flex: 0 0 auto;
 }
+
+/*
+ * Font row: a picker plus a free-text escape hatch. The text box exists because
+ * a variable font loaded by the theme's own @font-face is not registered in any
+ * option WordPress or Elementor can enumerate, so no list can ever be complete.
+ */
+.hsw-pal__field--stack {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	width: min(320px, 100%);
+	flex: 0 1 320px;
+}
+.hsw-pal__field--stack .hsw-pal__select,
+.hsw-pal__field--stack input.hsw-pal__select {
+	width: 100%;
+	min-height: 34px;
+	padding: 4px 10px;
+	border: 1px solid #dcdcde;
+	border-radius: 8px;
+	font-size: 12.5px;
+	box-shadow: none;
+}
+.hsw-pal__field--stack input.hsw-pal__select {
+	direction: ltr;
+	font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.hsw-pal__field--stack .hsw-pal__select:focus,
+.hsw-pal__field--stack input.hsw-pal__select:focus {
+	border-color: var(--pal-primary);
+	box-shadow: 0 0 0 1px var(--pal-primary);
+	outline: 0;
+}
+.hsw-pal__field--stack .hsw-pal__hint {
+	font-size: 11px;
+	color: #646970;
+	line-height: 1.6;
+}
 .hsw-pal__swatch {
 	width: 34px;
 	height: 34px;

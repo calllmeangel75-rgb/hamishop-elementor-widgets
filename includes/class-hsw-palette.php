@@ -136,6 +136,25 @@ class HSW_Palette {
 		return '"' . $font . '"';
 	}
 
+	/**
+	 * Font families offered in the palette screen.
+	 *
+	 * Four sources, in the order they are merged:
+	 *
+	 *  1. the plugin's own Vazirmatn;
+	 *  2. the WordPress font library (`theme.json`), all three origins —
+	 *     `theme`, `custom` (Site Editor → Typography → Fonts) and `default`;
+	 *  3. Elementor → Custom Fonts (`elementor_fonts_manager_fonts`);
+	 *  4. the Elementor kit typography, both `system_typography` and
+	 *     `custom_typography`.
+	 *
+	 * A family that is only declared in a stylesheet — the usual shape for a
+	 * variable font shipped by a theme or another plugin — is in NONE of these
+	 * options, so it cannot be discovered. That is why the palette screen also
+	 * accepts a hand-typed family name; see `render_page()`.
+	 *
+	 * @return array<string,string> CSS family => label.
+	 */
 	public static function font_choices() {
 		$choices = array(
 			''              => __( 'پیش‌فرض HamiShop (وزیرمتن)', 'hamishop-elementor-widgets' ),
@@ -144,13 +163,23 @@ class HSW_Palette {
 
 		if ( function_exists( 'wp_get_global_settings' ) ) {
 			$settings = wp_get_global_settings();
-			$families = $settings['typography']['fontFamilies']['theme'] ?? array();
-			foreach ( (array) $families as $family ) {
-				$name = is_array( $family ) ? ( $family['fontFamily'] ?? '' ) : (string) $family;
-				$slug = is_array( $family ) ? ( $family['name'] ?? $name ) : $name;
-				$name = trim( (string) $name );
-				if ( '' !== $name ) {
-					$choices[ $name ] = (string) $slug;
+
+			/*
+			 * `theme` is what a classic theme.json registers; `custom` is what the
+			 * shop owner adds through the Site Editor, and `default` ships with
+			 * WordPress. Reading only `theme` hid every font uploaded through the
+			 * Site Editor — the most common way to add one on a block theme.
+			 */
+			foreach ( array( 'theme', 'custom', 'default' ) as $origin ) {
+				$families = $settings['typography']['fontFamilies'][ $origin ] ?? array();
+
+				foreach ( (array) $families as $family ) {
+					$name = is_array( $family ) ? ( $family['fontFamily'] ?? '' ) : (string) $family;
+					$slug = is_array( $family ) ? ( $family['name'] ?? $name ) : $name;
+					$name = trim( (string) $name );
+					if ( '' !== $name && ! isset( $choices[ $name ] ) ) {
+						$choices[ $name ] = (string) $slug;
+					}
 				}
 			}
 		}
@@ -170,16 +199,20 @@ class HSW_Palette {
 			}
 		}
 
-		/* Elementor kit typography (custom + system families). */
+		/* Elementor kit typography — both the system and the custom rows. */
 		$kit_id = (int) get_option( 'elementor_active_kit' );
 		if ( $kit_id ) {
 			$kit = get_post_meta( $kit_id, '_elementor_page_settings', true );
-			$families = is_array( $kit ) ? ( $kit['system_typography'] ?? array() ) : array();
-			foreach ( (array) $families as $row ) {
-				$name = is_array( $row ) ? ( $row['typography_font_family'] ?? '' ) : '';
-				$name = trim( (string) $name );
-				if ( '' !== $name && ! isset( $choices[ $name ] ) ) {
-					$choices[ $name ] = $name;
+
+			foreach ( array( 'system_typography', 'custom_typography' ) as $key ) {
+				$rows = is_array( $kit ) ? ( $kit[ $key ] ?? array() ) : array();
+
+				foreach ( (array) $rows as $row ) {
+					$name = is_array( $row ) ? ( $row['typography_font_family'] ?? '' ) : '';
+					$name = trim( (string) $name );
+					if ( '' !== $name && ! isset( $choices[ $name ] ) ) {
+						$choices[ $name ] = $name;
+					}
 				}
 			}
 		}
@@ -538,7 +571,21 @@ class HSW_Palette {
 			$clean[ $key ] = $value ? $value : $default;
 		}
 
-		$clean['font']   = isset( $incoming['font'] ) ? sanitize_text_field( (string) $incoming['font'] ) : '';
+		/*
+		 * Two inputs, one value. The hand-typed family wins when it is not empty:
+		 * that is the only way to reach a variable font the theme loads with its
+		 * own @font-face and nothing registers in an option.
+		 */
+		$manual = isset( $incoming['font_manual'] ) ? trim( sanitize_text_field( (string) $incoming['font_manual'] ) ) : '';
+
+		if ( '' !== $manual ) {
+			$clean['font']        = $manual;
+			$clean['font_source'] = 'manual';
+		} else {
+			$clean['font']        = isset( $incoming['font'] ) ? sanitize_text_field( (string) $incoming['font'] ) : '';
+			$clean['font_source'] = 'list';
+		}
+
 		$clean['_saved'] = time();
 		update_option( self::OPTION, $clean );
 		add_settings_error( 'hsw_palette', 'saved', __( 'پالت رنگی ذخیره شد.', 'hamishop-elementor-widgets' ), 'updated' );
@@ -551,6 +598,19 @@ class HSW_Palette {
 		$p     = self::get();
 		$raw   = get_option( self::OPTION, array() );
 		$saved = ( is_array( $raw ) && isset( $raw['_saved'] ) ) ? (int) $raw['_saved'] : 0;
+
+		/*
+		 * Which of the two font inputs owns the saved value. Kept as its own key
+		 * so an empty manual box never silently overrides a pick from the list,
+		 * and a hand-typed family survives a page reload.
+		 */
+		$font_source  = ( is_array( $raw ) && isset( $raw['font_source'] ) && 'manual' === $raw['font_source'] ) ? 'manual' : 'list';
+		$font_choices = self::font_choices();
+
+		/* A family saved by an older build must stay visible in the list. */
+		if ( 'list' === $font_source && '' !== (string) ( $p['font'] ?? '' ) && ! isset( $font_choices[ $p['font'] ] ) ) {
+			$font_choices[ $p['font'] ] = $p['font'];
+		}
 
 		$groups = array(
 			__( 'برند و تعامل', 'hamishop-elementor-widgets' )        => array( 'primary', 'primary_dark', 'accent', 'hover' ),
@@ -609,14 +669,25 @@ class HSW_Palette {
 							<div class="hsw-pal__row">
 								<div class="hsw-pal__label">
 									<strong><?php esc_html_e( 'فونت پیش‌فرض ویجت‌ها', 'hamishop-elementor-widgets' ); ?></strong>
-									<small><?php esc_html_e( 'هر فونت که روی سایت بارگذاری شده باشد اینجا فهرست می‌شود و روی همهٔ ویجت‌های HamiShop اعمال می‌گردد. کنترل فونت هر ویجت، در صورت تنظیم، اولویت دارد.', 'hamishop-elementor-widgets' ); ?></small>
+									<small><?php esc_html_e( 'فونت‌های کتابخانهٔ وردپرس، فونت‌های سفارشی المنتور و تایپوگرافی کیت اینجا فهرست می‌شوند. اگر فونت شما در فهرست نیست — مثلاً یک فونت متغیر (variable) که فقط با @font-face در استایل قالب لود شده — نام دقیق خانواده را در کادر پایین بنویسید؛ همان مقدار در CSS استفاده می‌شود.', 'hamishop-elementor-widgets' ); ?></small>
 								</div>
-								<div class="hsw-pal__field">
-									<select class="hsw-pal__select" name="hsw_palette[font]">
-										<?php foreach ( self::font_choices() as $family => $label ) : ?>
-											<option value="<?php echo esc_attr( $family ); ?>" <?php selected( (string) ( $p['font'] ?? '' ), (string) $family ); ?>><?php echo esc_html( $label ); ?></option>
+								<div class="hsw-pal__field hsw-pal__field--stack">
+									<select class="hsw-pal__select" name="hsw_palette[font]" aria-label="<?php esc_attr_e( 'فونت پیش‌فرض ویجت‌ها', 'hamishop-elementor-widgets' ); ?>">
+										<?php foreach ( $font_choices as $family => $label ) : ?>
+											<option value="<?php echo esc_attr( $family ); ?>" <?php selected( 'manual' === $font_source ? '' : (string) ( $p['font'] ?? '' ), (string) $family ); ?>><?php echo esc_html( $label ); ?></option>
 										<?php endforeach; ?>
 									</select>
+									<input
+										type="text"
+										class="hsw-pal__select"
+										name="hsw_palette[font_manual]"
+										value="<?php echo 'manual' === $font_source ? esc_attr( (string) ( $p['font'] ?? '' ) ) : ''; ?>"
+										placeholder="<?php esc_attr_e( 'نام دقیق فونت — مثال: IRANSansXFaNum', 'hamishop-elementor-widgets' ); ?>"
+										dir="ltr"
+										spellcheck="false"
+										autocomplete="off"
+									/>
+									<small class="hsw-pal__hint"><?php esc_html_e( 'اگر این کادر پر باشد، بر فهرست بالا اولویت دارد.', 'hamishop-elementor-widgets' ); ?></small>
 								</div>
 							</div>
 
