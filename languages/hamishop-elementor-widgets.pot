@@ -163,7 +163,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-items.php:58
 #: widgets/class-hsw-widget-cart-items.php:354
 #: widgets/class-hsw-widget-checkout-summary.php:97
-#: widgets/class-hsw-widget-checkout-summary.php:436
+#: widgets/class-hsw-widget-checkout-summary.php:437
 msgid "{count} کالا"
 msgstr ""
 
@@ -623,7 +623,7 @@ msgstr ""
 #: includes/class-hsw-assets.php:848
 #: includes/class-hsw-assets.php:869
 #: includes/class-hsw-assets.php:897
-#: includes/class-hsw-checkout-base.php:143
+#: includes/class-hsw-checkout-base.php:158
 #: widgets/class-hsw-widget-complete-actions.php:95
 #: widgets/class-hsw-widget-complete-actions.php:260
 #: widgets/class-hsw-widget-complete-hero.php:222
@@ -640,7 +640,7 @@ msgid "ادامه مطلب"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:204
-#: widgets/class-hsw-widget-checkout-summary.php:522
+#: widgets/class-hsw-widget-checkout-summary.php:523
 msgid "ادامه و ورود به مرحله پرداخت"
 msgstr ""
 
@@ -695,7 +695,7 @@ msgstr ""
 msgid "ارسال ایمیل ناموفق بود. لطفاً بعداً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: widgets/class-hsw-widget-checkout-summary.php:484
+#: widgets/class-hsw-widget-checkout-summary.php:485
 msgid "ارسال بالای %s تومان رایگان است"
 msgstr ""
 
@@ -795,7 +795,7 @@ msgstr ""
 msgid "از حساب خود خارج شده‌اید. %s"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:94
+#: includes/class-hsw-checkout-base.php:109
 msgid "از خرید شما سپاسگزاریم؛ جزئیات سفارش برای شما ثبت شد."
 msgstr ""
 
@@ -2229,7 +2229,7 @@ msgstr ""
 msgid "برای ادامه خرید می‌توانید از فروشگاه شروع کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-checkout-summary.php:527
+#: widgets/class-hsw-widget-checkout-summary.php:528
 msgid "برای ادامه، ابتدا نشانی تحویل را در فرم بالا کامل کنید."
 msgstr ""
 
@@ -2938,7 +2938,7 @@ msgid "تأیید و ورود"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:342
-#: widgets/class-hsw-widget-checkout-summary.php:594
+#: widgets/class-hsw-widget-checkout-summary.php:595
 msgid "تأیید و پرداخت نهایی"
 msgstr ""
 
@@ -3326,12 +3326,12 @@ msgid "تخفیف محصول"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:306
-#: widgets/class-hsw-widget-checkout-summary.php:567
+#: widgets/class-hsw-widget-checkout-summary.php:568
 msgid "تخفیف کالاها"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:139
-#: widgets/class-hsw-widget-checkout-summary.php:466
+#: widgets/class-hsw-widget-checkout-summary.php:467
 msgid "تخفیف کالاها:"
 msgstr ""
 
@@ -4203,7 +4203,7 @@ msgid "جزئیات و پیگیری"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:288
-#: widgets/class-hsw-widget-checkout-summary.php:555
+#: widgets/class-hsw-widget-checkout-summary.php:556
 msgid "جزئیات پرداخت"
 msgstr ""
 
@@ -4341,7 +4341,7 @@ msgid "جمع فاکتور و اطلاعات نهایی ارسال."
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:130
-#: widgets/class-hsw-widget-checkout-summary.php:460
+#: widgets/class-hsw-widget-checkout-summary.php:461
 msgid "جمع قیمت اقلام ({count}):"
 msgstr ""
 
@@ -4748,7 +4748,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:1335
 #: includes/class-hsw-account.php:1351
-#: includes/class-hsw-checkout-base.php:141
+#: includes/class-hsw-checkout-base.php:156
 msgid "حساب کاربری من"
 msgstr ""
 
@@ -5115,7 +5115,7 @@ msgid "خلاصه پرداخت اطلاعات ارسال (HamiShop)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:88
-#: widgets/class-hsw-widget-checkout-summary.php:435
+#: widgets/class-hsw-widget-checkout-summary.php:436
 msgid "خلاصه پیش‌فاکتور"
 msgstr ""
 
@@ -7124,7 +7124,7 @@ msgstr ""
 msgid "روش ورود دوعاملی"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:114
+#: includes/class-hsw-checkout-base.php:129
 #: widgets/class-hsw-widget-complete-order.php:157
 #: widgets/class-hsw-widget-complete-order.php:342
 msgid "روش پرداخت"
@@ -7534,7 +7534,7 @@ msgstr ""
 msgid "سفارش شما با موفقیت ثبت شد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:91
+#: includes/class-hsw-checkout-base.php:106
 msgid "سفارش شما ثبت شد"
 msgstr ""
 
@@ -7555,7 +7555,7 @@ msgstr ""
 msgid "سفارش یافت نشد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:134
+#: includes/class-hsw-checkout-base.php:149
 msgid "سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است."
 msgstr ""
 
@@ -7855,7 +7855,7 @@ msgstr ""
 msgid "شمارهٔ تماس"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:98
+#: includes/class-hsw-checkout-base.php:113
 #: widgets/class-hsw-widget-complete-hero.php:111
 #: widgets/class-hsw-widget-complete-hero.php:123
 #: widgets/class-hsw-widget-complete-hero.php:293
@@ -9502,7 +9502,7 @@ msgid "قیمت کالاها ({count} عدد)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:297
-#: widgets/class-hsw-widget-checkout-summary.php:559
+#: widgets/class-hsw-widget-checkout-summary.php:560
 msgid "قیمت کالاها ({count} قلم)"
 msgstr ""
 
@@ -9727,7 +9727,7 @@ msgid "مالیات بر ارزش افزوده (۱۰٪ محاسبه‌شده)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:167
-#: widgets/class-hsw-widget-checkout-summary.php:502
+#: widgets/class-hsw-widget-checkout-summary.php:503
 msgid "مالیات بر ارزش افزوده:"
 msgstr ""
 
@@ -9771,13 +9771,13 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-summary.php:642
 #: widgets/class-hsw-widget-checkout-summary.php:184
 #: widgets/class-hsw-widget-checkout-summary.php:333
-#: widgets/class-hsw-widget-checkout-summary.php:590
+#: widgets/class-hsw-widget-checkout-summary.php:591
 #: widgets/class-hsw-widget-pay-summary.php:306
 msgid "مبلغ قابل پرداخت"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:186
-#: widgets/class-hsw-widget-checkout-summary.php:516
+#: widgets/class-hsw-widget-checkout-summary.php:517
 #: widgets/class-hsw-widget-pay-summary.php:324
 msgid "مبلغ قابل پرداخت:"
 msgstr ""
@@ -9799,7 +9799,7 @@ msgid "مبلغ نهایی (کارت)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:324
-#: widgets/class-hsw-widget-checkout-summary.php:579
+#: widgets/class-hsw-widget-checkout-summary.php:580
 msgid "مبلغ نهایی سفارش"
 msgstr ""
 
@@ -9828,7 +9828,7 @@ msgid "مبلغ کالاها ({count} قلم)"
 msgstr ""
 
 #: includes/class-hsw-account.php:2205
-#: includes/class-hsw-checkout-base.php:106
+#: includes/class-hsw-checkout-base.php:121
 #: includes/class-hsw-invoice.php:328
 #: includes/class-hsw-invoice.php:377
 #: widgets/class-hsw-widget-complete-order.php:136
@@ -10520,7 +10520,7 @@ msgid "مجموع خرید"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:176
-#: widgets/class-hsw-widget-checkout-summary.php:503
+#: widgets/class-hsw-widget-checkout-summary.php:504
 msgid "محاسبه در قیمت"
 msgstr ""
 
@@ -10922,7 +10922,7 @@ msgstr ""
 msgid "مشاهده همه"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:139
+#: includes/class-hsw-checkout-base.php:154
 msgid "مشاهدهٔ سفارش"
 msgstr ""
 
@@ -12128,7 +12128,7 @@ msgid "هزینه ارسال اکسپرس"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:315
-#: widgets/class-hsw-widget-checkout-summary.php:574
+#: widgets/class-hsw-widget-checkout-summary.php:575
 msgid "هزینه ارسال با پیک اختصاصی"
 msgstr ""
 
@@ -12143,7 +12143,7 @@ msgid "هزینه ارسال چقدر است و چند روزه به دستم م
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:148
-#: widgets/class-hsw-widget-checkout-summary.php:493
+#: widgets/class-hsw-widget-checkout-summary.php:494
 msgid "هزینه ارسال:"
 msgstr ""
 
@@ -12488,7 +12488,7 @@ msgstr ""
 msgid "وضعیت باز شدن شاخه‌ها"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:102
+#: includes/class-hsw-checkout-base.php:117
 #: widgets/class-hsw-widget-complete-hero.php:151
 #: widgets/class-hsw-widget-complete-hero.php:163
 #: widgets/class-hsw-widget-complete-hero.php:309

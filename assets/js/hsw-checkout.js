@@ -341,12 +341,40 @@ document.addEventListener( 'click', function ( event ) {
 	var drawer = form ? form.closest( '[data-hsw-address-drawer]' ) : null;
 	var open   = !!( form && form.offsetParent !== null );
 
-	if ( has && ! open ) { return; }
+	/*
+	 * A shop without a separate payment page (HamiShop → صفحهٔ پرداخت) used to
+	 * land back on the checkout it was already on: the fallback URL is the
+	 * checkout permalink, so the button reloaded the form and the order was
+	 * never placed. `data-hsw-pay-step="0"` means "there is nowhere to navigate
+	 * to" — submit WooCommerce's own checkout instead.
+	 */
+	var hasPay = cta.getAttribute( 'data-hsw-pay-step' ) !== '0';
+	var payUrl = cta.getAttribute( 'data-hsw-pay-url' ) || cta.getAttribute( 'href' ) || '';
+
+	function placeOrder() {
+		var place = document.getElementById( 'place_order' );
+		if ( place ) { place.click(); return; }
+		var checkoutForm = document.querySelector( 'form.checkout' );
+		if ( checkoutForm && checkoutForm.requestSubmit ) { checkoutForm.requestSubmit(); }
+	}
+
+	function continueToPayment() {
+		if ( hasPay && payUrl ) { window.location.href = payUrl; return; }
+		placeOrder();
+	}
+
+	if ( has && ! open ) {
+		/* Address already saved: straight to the next step — or place the order
+		   when this shop has no separate pay page. */
+		if ( hasPay ) { return; }
+		event.preventDefault();
+		continueToPayment();
+		return;
+	}
 
 	event.preventDefault();
 
-	var payUrl = cta.getAttribute( 'data-hsw-pay-url' ) || cta.getAttribute( 'href' ) || '';
-	if ( ! form ) { window.location.href = payUrl; return; }
+	if ( ! form ) { continueToPayment(); return; }
 
 	if ( drawer ) { drawer.hidden = false; }
 
@@ -390,7 +418,7 @@ document.addEventListener( 'click', function ( event ) {
 
 	var req = ( typeof post === 'function' ) ? post( '/checkout/address', Object.assign( {}, body, extra ) ) : Promise.reject( new Error( 'no transport' ) );
 	req.then( function () {
-		window.location.href = payUrl;
+		continueToPayment();
 	} ).catch( function ( err ) {
 		if ( btn ) { btn.disabled = false; btn.classList.remove( 'is-busy' ); }
 		if ( msg ) {

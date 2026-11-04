@@ -418,6 +418,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 }
                 $cta_attr = ' data-has-address="' . ( $has_address ? '1' : '0' ) . '"'
                         . ' data-hsw-pay-url="' . esc_url( $pay_url ) . '"'
+                        . ' data-hsw-pay-step="' . ( $this->has_pay_step() ? '1' : '0' ) . '"'
                         . ( $need_address ? ' data-hsw-need-address="1"' : '' );
                 $taxes_on = ( ! $this->is_demo() ) && $this->taxes_total() > 0;
 

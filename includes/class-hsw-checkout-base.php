@@ -42,6 +42,21 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
          * picked in WooCommerce → Settings → Checkout («صفحهٔ پرداخت»).
          * Falls back to the WooCommerce checkout URL when unset.
          */
+        /**
+         * Is a separate payment page configured?
+         *
+         * Without one `pay_step_url()` falls back to the checkout page itself, so
+         * the «ادامه و ورود به مرحله پرداخت» button pointed at the page it was
+         * already on and the order was never placed — the visitor just saw the
+         * form reload. When there is no pay page the CTA now submits the
+         * WooCommerce checkout instead of navigating.
+         *
+         * @return bool
+         */
+        protected function has_pay_step() {
+                return class_exists( 'HSW_Complete_Route' ) && '' !== (string) HSW_Complete_Route::pay_step_url();
+        }
+
         protected function pay_step_url() {
                 if ( class_exists( 'HSW_Complete_Route' ) ) {
                         $url = HSW_Complete_Route::pay_step_url();

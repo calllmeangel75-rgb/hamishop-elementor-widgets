@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.233] — 2026-11-04
+
+### Fixed
+
+- On a checkout without a separate payment page, «ادامه و ورود به مرحله پرداخت» pointed at the checkout page itself: `pay_step_url()` falls back to the checkout permalink when no pay page is configured, so the button reloaded the form and the order was never placed. The CTA now carries `data-hsw-pay-step="0"` and submits WooCommerce's checkout instead of navigating.
+- A configured «صفحهٔ پرداخت» (or the widget's «لینک مرحله بعد») still wins — the button navigates there as before.
+
 ## [1.11.232] — 2026-11-04
 
 ### Fixed

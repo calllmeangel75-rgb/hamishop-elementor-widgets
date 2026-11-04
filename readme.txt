@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.232
+Stable tag: 1.11.233
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.233 =
+* Fix: On a checkout with no separate payment page, «ادامه و ورود به مرحله پرداخت» linked to the checkout page itself, so the form reloaded and no order was ever placed. The button now submits the WooCommerce checkout in that case.
+* The same button still navigates to «صفحهٔ پرداخت» (or the widget's «لینک مرحله بعد») when one is configured.
+
 = 1.11.232 =
 * Fix: The upgrade job no longer queues a cron event. WP-Cron is spawned by front-end visits, so a tick ran while a customer was waiting; on a small host one heavy Elementor page could hold a PHP worker long enough for the pool to answer 503. The work now runs only on an admin page load, throttled to one tick every 30 seconds.
 
@@ -89,12 +93,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix (a11y): the category tree's items now carry `role="treeitem"` and `aria-level`, so `role="tree"` finally has the children it requires.
 * Fix (a11y): the closed mobile drawer is `inert`, so its links are no longer focusable inside an `aria-hidden` container.
 * Fix (a11y): small text (price labels, search select, guide answers, stock notes) uses AA-safe palette variants derived at render time, so a muted colour that lands at 4.39:1 on the merchant's surface is darkened to 4.5:1 instead of failing.
-
-= 1.11.228 =
-* Feature: Empty product categories get a real empty state — icon, title, description and a «بازگشت به فروشگاه» button — instead of one grey line, and it is now visible on mobile too. Every string and colour is a control in the archive grid widget.
-* Feature: A second title is used automatically when the page is empty because of filters or search, so the message never claims the category has nothing when it was a filter that hid it.
-* Feature: «پیش‌نمایش حالت خالی در ویرایشگر» — swaps the demo cards for the empty block so you can style it in Elementor.
-* Feature: Header chips hide empty categories by default (`pills_hide_empty`). The filter sidebar already did.
 
 == Upgrade Notice ==
 
