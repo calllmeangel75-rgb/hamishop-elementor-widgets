@@ -2217,7 +2217,7 @@ html.hsw-sheet-open { overflow: hidden; }
  * ====================================================================== */
 .hsw-sheet,
 .hsw-sheet * {
-	font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important;
+	font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif !important;
 }
 .hsw-sheet__panel { max-width: 640px; padding: 10px 14px 16px; }
 

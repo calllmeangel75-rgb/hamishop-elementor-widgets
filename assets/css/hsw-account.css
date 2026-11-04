@@ -31,7 +31,11 @@
 	--hsw-ac-max: 1280px;
 	--hsw-ac-radius: 20px;
 	direction: rtl;
-	font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, Arial, sans-serif;
+	/* The palette font, like every other panel. Hard-coding the bundled face
+	   here made the account screen the one place that ignored the shop's own
+	   choice (measured: --hsw-font "iryekan" on one live site, "peyda" on
+	   another, Vazirmatn here). */
+	font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
 	color: var(--hsw-ac-ink);
 	background: var(--hsw-ac-bg);
 	line-height: 1.75;

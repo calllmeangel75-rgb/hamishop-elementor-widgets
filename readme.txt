@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.240
+Stable tag: 1.11.241
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.241 =
+* Fix: The account panel, the blog post panel and the product sheet hard-coded the bundled Vazirmatn instead of reading `--hsw-font`, so on a shop whose palette font is something else those three screens rendered in a different face from the rest of the site. They use the palette font now, like every other stylesheet.
+* No change when the palette font is the default: measured in Chrome, `.hsw-ac` computes to the same font before and after. With the palette set to another family, all three follow it.
+* The `!important` on the product sheet is untouched — only the family now comes from the palette.
+
 = 1.11.240 =
 * Fix: «فونت پایه ویجت» was offered on every widget's Style tab but only four widgets applied it — on account, cart, checkout, header, archive, product, blog and footer it did nothing. The class now goes on the Elementor wrapper through `elementor/frontend/widget/before_render`. `palette` (the default) adds no class, so pages that never touched the control render byte-identical HTML (verified by diffing home, shop and account before/after).
 * New: `add_filter( 'hsw_disable_elementor_google_fonts', '__return_false' );` keeps Elementor's Google Fonts on archive and account pages. The suppression is unchanged by default.
@@ -95,9 +100,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix: «تحویل دیجیتال سفارش» no longer appears on a cart that holds a physical product. `is_digital()` returned true whenever `WC()->cart->needs_shipping()` was false — which WooCommerce reports for every cart on a shop with no shipping method configured. It now decides from the cart items only.
 * Fix: The checkout CTA could still reload the page it was on when the customer already had a saved address and the «next step» link pointed at the checkout itself. The self-navigation guard now runs on every path.
 * The digital-checkout regression test now covers the shipping-disabled shop and uses a real `WC_Product` stub.
-
-= 1.11.236 =
-* Fix: The widget's own «لینک مرحله بعد» now counts as a next step. 1.11.233 only looked at «صفحهٔ پرداخت», so a shop that set the link on the summary widget had it ignored and the order was placed instead of navigating to the pay step.
 
 == Upgrade Notice ==
 

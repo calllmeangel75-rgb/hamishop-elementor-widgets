@@ -8,6 +8,18 @@
 
 ## [Unreleased]
 
+## [1.11.241] — 2026-11-04
+
+### Fixed
+
+- Three stylesheets hard-coded the bundled Vazirmatn instead of reading the palette token: `.hsw-ac` (`hsw-account.css:34`), `.hsw-pp` (`hsw-post.css:26`) and `.hsw-sheet, .hsw-sheet *` (`hsw-product.css:2220`, with `!important`). On a shop whose palette font is not Vazirmatn — measured `"iryekan"` on one live site and `"peyda"` on another — the account panel, the blog post panel and the product sheet rendered in a different face from the rest of the site.
+- All three now use `var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif`, the pattern every other stylesheet already used. The `!important` on the sheet is untouched; only the family comes from the palette.
+
+### Verified
+
+- Palette at its default (Vazirmatn): `.hsw-ac` computes to `"Vazirmatn HSW", Tahoma, sans-serif` before and after — no visual change.
+- Palette set to `Tahoma` on the local site: `.hsw-ac`, `.hsw-ac-auth__panel` and `.hsw-pp` all compute to `Tahoma, Tahoma, sans-serif`. Palette restored afterwards.
+
 ## [1.11.240] — 2026-11-04
 
 ### Fixed
