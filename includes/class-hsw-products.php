@@ -60,6 +60,13 @@ class HSW_Products {
 	 */
 	public static function bump_version() {
 		update_option( 'hsw_loop_version', (string) microtime( true ), false );
+
+		/*
+		 * The filter sidebar caches the cheapest/priciest price for 12 hours.
+		 * Nothing used to clear it, so a new product above the old maximum was
+		 * unreachable with the price slider until the transient expired.
+		 */
+		delete_transient( 'hsw_price_bounds' );
 	}
 
 	/**
@@ -523,9 +530,19 @@ class HSW_Products {
 		}
 
 		$since = gmdate( 'Y-m-d H:i:s', time() - ( max( 1, $days ) * DAY_IN_SECONDS ) );
-		$hpos  = $wpdb->prefix . 'wc_orders';
+		$hpos = $wpdb->prefix . 'wc_orders';
 
-		if ( $this->table_exists( $hpos ) ) {
+		/*
+		 * Table existence is not the same question as "orders live here".
+		 * A shop that turned HPOS on and later switched back keeps the table,
+		 * and reading it then returns nothing — best sellers silently went
+		 * empty instead of falling back. WooCommerce answers the real question.
+		 */
+		$hpos_in_use = class_exists( '\Automattic\WooCommerce\Utilities\OrderUtil' )
+			&& method_exists( '\Automattic\WooCommerce\Utilities\OrderUtil', 'custom_orders_table_usage_is_enabled' )
+			&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+
+		if ( $hpos_in_use && $this->table_exists( $hpos ) ) {
 			$statuses = array( 'wc-completed', 'wc-processing', 'wc-on-hold' );
 			$placeholders = implode( ',', array_fill( 0, count( $statuses ), '%s' ) );
 			$sql = "SELECT o.product_id, SUM(o.product_qty) AS qty

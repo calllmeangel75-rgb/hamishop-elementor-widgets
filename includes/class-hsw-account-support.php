@@ -1841,6 +1841,13 @@ final class HSW_Account_Support {
 			array( 'شناسه', 'موضوع', 'کاربر', 'ایمیل', 'وضعیت', 'اولویت', 'دپارتمان', 'سفارش', 'تاریخ ایجاد', 'آخرین به‌روزرسانی', 'تعداد پاسخ', 'متن', 'پیوست' )
 		);
 
+		/*
+		 * One grouped query for the reply counts. `get_comments( count => true )`
+		 * inside the loop ran one query per ticket — an export of ten thousand
+		 * tickets ran ten thousand of them while the admin waited for a file.
+		 */
+		$reply_counts = $this->reply_counts( $ids );
+
 		foreach ( $ids as $id ) {
 			$ticket = get_post( $id );
 			if ( ! $ticket ) {
@@ -1864,7 +1871,7 @@ final class HSW_Account_Support {
 					absint( get_post_meta( $id, self::ORDER_META, true ) ) ? absint( get_post_meta( $id, self::ORDER_META, true ) ) : '',
 					$created ? gmdate( 'Y-m-d H:i', $created ) : '',
 					$updated ? gmdate( 'Y-m-d H:i', $updated ) : '',
-					(int) get_comments( array( 'post_id' => $id, 'type' => 'hsw_ticket_reply', 'count' => true ) ),
+					(int) ( $reply_counts[ $id ] ?? 0 ),
 					wp_strip_all_tags( (string) $ticket->post_content ),
 					$image_id ? (string) wp_get_attachment_url( $image_id ) : '',
 				)
@@ -1873,6 +1880,46 @@ final class HSW_Account_Support {
 
 		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		exit;
+	}
+
+	/**
+	 * Reply count per ticket, in a handful of queries instead of one per row.
+	 *
+	 * Matches `get_comments( array( 'post_id' => …, 'type' => …, 'count' => true ) )`:
+	 * approved comments only, same comment type. Chunked so an export of a very
+	 * large ticket set never builds one enormous `IN (…)` list.
+	 *
+	 * @param int[] $ids Ticket IDs.
+	 * @return array<int,int> Count keyed by ticket ID.
+	 */
+	private function reply_counts( array $ids ) {
+		global $wpdb;
+
+		$ids = array_values( array_filter( array_map( 'absint', $ids ) ) );
+		if ( ! $ids ) {
+			return array();
+		}
+
+		$counts = array();
+
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			$in  = implode( ',', $chunk );
+			$sql = "SELECT comment_post_ID AS pid, COUNT(*) AS n
+				FROM {$wpdb->comments}
+				WHERE comment_post_ID IN ({$in})
+					AND comment_approved = '1'
+					AND comment_type = %s
+				GROUP BY comment_post_ID";
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+			$rows = $wpdb->get_results( $wpdb->prepare( $sql, 'hsw_ticket_reply' ) );
+
+			foreach ( (array) $rows as $row ) {
+				$counts[ (int) $row->pid ] = (int) $row->n;
+			}
+		}
+
+		return $counts;
 	}
 
 	/**

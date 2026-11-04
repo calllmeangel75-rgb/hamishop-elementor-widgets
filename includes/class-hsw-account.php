@@ -3084,6 +3084,21 @@ final class HSW_Account {
 		}
 
 		/*
+		 * Memoised per request. The wallet screen asks for the points twice
+		 * (dashboard card + conversion box) and each call walked every order of
+		 * the customer. Same answer either way — this only stops the second walk.
+		 */
+		static $memo = array();
+
+		$user_id = absint( $user_id );
+		if ( ! $user_id ) {
+			return 0.0;
+		}
+		if ( isset( $memo[ $user_id ] ) ) {
+			return $memo[ $user_id ];
+		}
+
+		/*
 		 * `meta_query` is silently ignored by WC_Order_Query here (the query came
 		 * back with every order of the customer, top-ups or not, which zeroed the
 		 * points of a real 29M purchase). Reading the meta off each order is
@@ -3091,7 +3106,7 @@ final class HSW_Account {
 		 */
 		$orders = wc_get_orders(
 			array(
-				'customer_id' => absint( $user_id ),
+				'customer_id' => $user_id,
 				'status'      => array( 'processing', 'completed' ),
 				'limit'       => -1,
 			)
@@ -3106,6 +3121,8 @@ final class HSW_Account {
 				$sum += (float) $order->get_total();
 			}
 		}
+
+		$memo[ $user_id ] = $sum;
 
 		return $sum;
 	}

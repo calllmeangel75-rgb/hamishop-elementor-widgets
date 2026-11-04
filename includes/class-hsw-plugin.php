@@ -318,7 +318,29 @@ final class HSW_Plugin {
 
                 if ( $done ) {
                         /* Loop ID lists and HTML fragments are rebuilt on next render. */
-                        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_hsw_lp_%' OR option_name LIKE '_transient_timeout_hsw_lp_%' OR option_name LIKE '_transient_hsw_loop_%' OR option_name LIKE '_transient_timeout_hsw_loop_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                        /*
+                         * `esc_like()` on purpose, twice over: an unescaped `_` is a
+                         * single-character wildcard, so the pattern matched more option names
+                         * than intended — and because it started with a wildcard, MySQL could
+                         * not use the `option_name` index and scanned the whole table.
+                         */
+                        $patterns = array(
+                        	$wpdb->esc_like( '_transient_hsw_lp_' ) . '%',
+                        	$wpdb->esc_like( '_transient_timeout_hsw_lp_' ) . '%',
+                        	$wpdb->esc_like( '_transient_hsw_loop_' ) . '%',
+                        	$wpdb->esc_like( '_transient_timeout_hsw_loop_' ) . '%',
+                        );
+                        
+                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+                        $wpdb->query(
+                        	$wpdb->prepare(
+                        		"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
+                        		$patterns[0],
+                        		$patterns[1],
+                        		$patterns[2],
+                        		$patterns[3]
+                        	)
+                        );
 
                         update_option( 'hsw_db_version', $target, false );
                 }

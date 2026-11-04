@@ -2190,9 +2190,21 @@ class HSW_Wallet {
 		$stats = $wpdb->prefix . 'wc_order_stats';
 		$look  = $wpdb->prefix . 'wc_customer_lookup';
 
-		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats ) );
-		if ( ! $exists ) {
-			return array();
+		/*
+		 * Both tables are joined below, so both have to exist. The guard used to
+		 * check only the stats table, so a site whose lookup table was missing —
+		 * a half-finished analytics sync, a restored backup — got a SQL error
+		 * here instead of an empty list.
+		 *
+		 * `esc_like()` because `_` is a wildcard in LIKE: without it the check
+		 * could match a differently-named table and pass on a site that has no
+		 * analytics tables at all.
+		 */
+		foreach ( array( $stats, $look ) as $needed ) {
+			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $needed ) ) );
+			if ( $found !== $needed ) {
+				return array();
+			}
 		}
 
 		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */

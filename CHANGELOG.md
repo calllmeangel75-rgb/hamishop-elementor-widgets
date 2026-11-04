@@ -8,6 +8,20 @@
 
 ## [Unreleased]
 
+## [1.11.238] — 2026-11-04
+
+### Fixed
+
+- The transient cleanup used `LIKE '_transient_hsw_lp_%'` with an unescaped `_`. In SQL that is a single-character wildcard, so the pattern matched more option names than intended — and because the pattern began with a wildcard, MySQL could not use the `option_name` index and scanned the whole table. Built with `$wpdb->esc_like()` and run through `$wpdb->prepare()` now. Measured on a local database: the old pattern matched 2 synthetic rows, the new one matches 1.
+- «مشتریان طلایی» verified that `wc_order_stats` exists and then joined `wc_customer_lookup` without checking it. A site with a half-finished analytics sync got a SQL error instead of an empty list. Both tables are checked, with `esc_like` so the check itself cannot match a differently-named table.
+- Best sellers decided HPOS from the existence of the `wc_orders` table. A shop that enabled HPOS and later switched back keeps that table, and the query then returned nothing — the list silently went empty. It now asks WooCommerce through `OrderUtil::custom_orders_table_usage_is_enabled()`, guarded by `class_exists`/`method_exists`, with the table check kept as a second layer.
+- The ticket CSV export ran one `get_comments( count => true )` per ticket. It is one grouped query per 500 tickets now; compared against the old implementation on the local site, every row matches.
+- The price-slider bounds stayed cached for 12 hours after a product changed, so a product priced above the old maximum could not be reached with the slider. `bump_version()` — already fired on product save, delete and stock change — clears the transient.
+
+### Performance
+
+- The wallet top-up sum is memoised per request. The wallet screen asks for the loyalty points twice (dashboard card and conversion box) and each call walked every order of the customer. Measured locally: 21 queries for the first call, 2 for the second, same number of points.
+
 ## [1.11.237] — 2026-11-04
 
 ### Fixed

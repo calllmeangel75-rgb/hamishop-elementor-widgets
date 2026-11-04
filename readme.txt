@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.237
+Stable tag: 1.11.238
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,14 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.238 =
+* Fix: The transient cleanup used `LIKE '_transient_hsw_lp_%'` with an unescaped `_`. In SQL that is a single-character wildcard, so the pattern matched more option names than intended — and because it started with a wildcard, MySQL could not use the `option_name` index and scanned the whole table. It is built with `$wpdb->esc_like()` now.
+* Fix: «مشتریان طلایی» checked that `wc_order_stats` exists but then joined `wc_customer_lookup` anyway. A site missing the second table got a SQL error instead of an empty list. Both are checked.
+* Fix: Best sellers decided HPOS from the existence of the `wc_orders` table. A shop that switched HPOS off keeps that table, and the list came back empty. It now asks WooCommerce (`OrderUtil::custom_orders_table_usage_is_enabled()`), with the table check kept as a fallback.
+* Fix: The ticket CSV export ran one `get_comments( count => true )` per ticket. It is one grouped query in chunks of 500 now; the file is byte-for-byte the same.
+* Fix: The price-slider bounds stayed cached for 12 hours after a product changed, so a product priced above the old maximum could not be reached. The transient is cleared on product save.
+* Perf: The wallet top-up sum is memoised per request — the wallet screen asked for it twice and walked every order of the customer both times.
+
 = 1.11.237 =
 * Fix: «تحویل دیجیتال سفارش» no longer appears on a cart that holds a physical product. `is_digital()` returned true whenever `WC()->cart->needs_shipping()` was false — which WooCommerce reports for every cart on a shop with no shipping method configured. It now decides from the cart items only.
 * Fix: The checkout CTA could still reload the page it was on when the customer already had a saved address and the «next step» link pointed at the checkout itself. The self-navigation guard now runs on every path.
@@ -88,10 +96,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix (critical): `HSW_Checkout_Digital::is_digital()` called itself through the `woocommerce_cart_needs_shipping` filter it registers. With an item in the cart that recursed until the request died — the 503 on add-to-cart and checkout, with nothing in error_log. A re-entrancy guard breaks the loop; a regression test runs in CI.
 * Fix: A mixed cart (physical + downloadable) no longer shows «تحویل دیجیتال سفارش». The notice only appears when every item needs no shipping.
 * Fix: «ادامه و ورود به مرحله پرداخت» falls back to the checkout form when WooCommerce's `#place_order` is not on the page, and never reloads the page it is on.
-
-= 1.11.233 =
-* Fix: On a checkout with no separate payment page, «ادامه و ورود به مرحله پرداخت» linked to the checkout page itself, so the form reloaded and no order was ever placed. The button now submits the WooCommerce checkout in that case.
-* The same button still navigates to «صفحهٔ پرداخت» (or the widget's «لینک مرحله بعد») when one is configured.
 
 == Upgrade Notice ==
 
