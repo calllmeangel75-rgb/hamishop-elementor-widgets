@@ -89,6 +89,22 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                         )
                 );
 
+                /*
+                 * Empty categories in the chip row read as broken links: the
+                 * visitor taps «ابزار قالی‌بافی» and lands on a page with nothing
+                 * on it. Hidden by default, like the filter sidebar's tree.
+                 */
+                $this->add_control(
+                        'pills_hide_empty',
+                        array(
+                                'label'        => __( 'پنهان‌کردن دسته‌های خالی', 'hamishop-elementor-widgets' ),
+                                'type'         => Controls_Manager::SWITCHER,
+                                'default'      => 'yes',
+                                'description'  => __( 'دسته‌هایی که هیچ محصولی ندارند (حتی در زیرشاخه‌ها) در چیپ‌ها نمایش داده نمی‌شوند.', 'hamishop-elementor-widgets' ),
+                                'condition'    => array( 'pills_source!' => 'manual' ),
+                        )
+                );
+
                 $this->add_control(
                         'pills_attr',
                         array(
@@ -405,11 +421,16 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 }
 
                 $term = $this->current_term();
+                $hide_empty = ! isset( $s['pills_hide_empty'] ) || 'yes' === $s['pills_hide_empty'];
+
                 if ( 'attribute' === $src ) {
                         $tax  = $this->opt( 'pills_attr', 'pa_brand' );
                         $sel  = $this->selected_slugs( $tax );
                         $out  = array();
                         foreach ( $this->filter_terms( $tax ) as $t ) {
+                                if ( $hide_empty && (int) $t->count < 1 ) {
+                                        continue;
+                                }
                                 $out[] = array( $t->name, $this->filter_url( array( 'filter_' . $tax => $t->slug ) ), in_array( $t->slug, $sel, true ) );
                         }
                         return $out;
@@ -436,6 +457,19 @@ class HSW_Widget_Archive_Header extends HSW_Archive_Base {
                 );
                 if ( ! is_wp_error( $children ) ) {
                         foreach ( $children as $c ) {
+                                /*
+                                 * Descendant-inclusive count: a parent with no
+                                 * products of its own but stocked children is not
+                                 * empty, and must stay.
+                                 */
+                                if ( $hide_empty ) {
+                                        $total = class_exists( 'HSW_Header_Cascade' )
+                                                ? (int) \HSW_Header_Cascade::term_total_count( $c )
+                                                : (int) $c->count;
+                                        if ( $total < 1 ) {
+                                                continue;
+                                        }
+                                }
                                 $list[] = array( $c->name, get_term_link( $c ), false );
                         }
                 }

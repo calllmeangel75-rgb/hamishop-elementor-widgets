@@ -1174,14 +1174,93 @@ html:not(.hsw-js) .hsw-a .hsw-asheet--sort { margin-bottom: 12px; }
 .hsw-ag__cta .hsw-ic, .hsw-ag__cta--m .hsw-ic { font-size: 14px; }
 .hsw-ag__cta:hover, .hsw-ag__cta--m:hover { background: var(--hswa-primary-dark); box-shadow: var(--hswa-shadow-sm); }
 .hsw-ag__cta.is-added { background: var(--hswa-emerald); }
+/*
+ * Empty state. It used to be one grey sentence, desktop only. A dead-end page
+ * needs to look deliberate: an icon, a sentence that says what happened, and a
+ * way out. Every value here is overridable from the widget's Style tab.
+ */
 .hsw-ag__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 44px 20px;
         text-align: center;
-        padding: 32px 16px;
         background: var(--hswa-card);
         border: 1px dashed var(--hswa-line);
         border-radius: var(--hswa-r-2xl);
         color: var(--hswa-body);
-        font-size: 13px;
+}
+
+.hsw-ag__emptyicon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 6px;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--hswa-primary) 10%, transparent);
+        color: var(--hswa-primary);
+}
+
+.hsw-ag__emptyicon .hsw-ic {
+        width: 30px;
+        height: 30px;
+}
+
+.hsw-ag__emptytitle {
+        margin: 0;
+        color: var(--hswa-ink);
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.7;
+}
+
+.hsw-ag__emptytext {
+        max-width: 46ch;
+        margin: 0;
+        color: var(--hswa-body);
+        font-size: 12.5px;
+        line-height: 1.9;
+}
+
+.hsw-ag__emptybtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        padding: 10px 22px;
+        border-radius: 999px;
+        background: var(--hswa-primary);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background-color .15s ease, transform .15s ease;
+}
+
+.hsw-ag__emptybtn:hover {
+        background: color-mix(in srgb, var(--hswa-primary) 85%, #000);
+        color: #fff;
+        transform: translateY(-1px);
+}
+
+@media (max-width: 767.98px) {
+        .hsw-ag__empty {
+                padding: 32px 16px;
+        }
+        .hsw-ag__emptyicon {
+                width: 54px;
+                height: 54px;
+        }
+        .hsw-ag__emptyicon .hsw-ic {
+                width: 26px;
+                height: 26px;
+        }
+        .hsw-ag__emptytitle {
+                font-size: 14.5px;
+        }
 }
 
 /* Mobile: status note is plain text (per the mobile mock) */

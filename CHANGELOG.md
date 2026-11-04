@@ -8,6 +8,16 @@
 
 ## [Unreleased]
 
+## [1.11.228] — 2026-11-04
+
+### Added
+
+- Empty product categories now get a real empty state: a soft icon badge, a title, a description and a «بازگشت به فروشگاه» pill button. It replaces one grey sentence that was desktop-only (`hsw-d`), so mobile visitors used to see nothing at all.
+- Every string is an Elementor control in the archive grid widget (icon, title, description, button label, button URL), plus a Style section for the icon, title, text and button colours and the alignment.
+- `empty_filter_title` is used automatically when the page is empty because a filter, a price range or a search is active — «هیچ محصولی در این دسته‌بندی وجود ندارد» would be a lie when the category does have products.
+- «پیش‌نمایش حالت خالی در ویرایشگر» swaps the demo cards for the empty block, so the text and colours can be tuned in Elementor instead of blind.
+- Header chips (`hsw-ahd__chips`) hide empty categories by default (`pills_hide_empty`, on). The filter sidebar's tree already did.
+
 ## [1.11.227] — 2026-11-04
 
 ### Fixed

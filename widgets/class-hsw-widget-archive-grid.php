@@ -122,6 +122,110 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
 
                 $this->end_controls_section();
 
+                /* --------------------- EMPTY STATE --------------------- */
+                /*
+                 * A category with no products used to print one grey line, and
+                 * only on desktop (`.hsw-d`). Every word of it is now a control,
+                 * because the right sentence depends on the shop: «بهزودی» for a
+                 * new collection, «دستهٔ دیگری را ببینید» for a dead end.
+                 */
+                $this->start_controls_section(
+                        'sec_empty',
+                        array( 'label' => __( 'حالت خالی (بدون محصول)', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_CONTENT )
+                );
+
+                $this->add_control(
+                        'empty_icon',
+                        array(
+                                'label'   => __( 'آیکون', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::SELECT,
+                                'default' => 'inventory_2',
+                                'options' => array(
+                                        'inventory_2'  => __( 'جعبه خالی', 'hamishop-elementor-widgets' ),
+                                        'category'     => __( 'دسته‌بندی', 'hamishop-elementor-widgets' ),
+                                        'search'       => __( 'جستجو', 'hamishop-elementor-widgets' ),
+                                        'shopping_bag' => __( 'کیف خرید', 'hamishop-elementor-widgets' ),
+                                        'storefront'   => __( 'فروشگاه', 'hamishop-elementor-widgets' ),
+                                        'grid_view'    => __( 'شبکه محصولات', 'hamishop-elementor-widgets' ),
+                                        'filter_list'  => __( 'فیلتر', 'hamishop-elementor-widgets' ),
+                                ),
+                        )
+                );
+
+                $this->add_control(
+                        'empty_title',
+                        array(
+                                'label'       => __( 'عنوان', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => __( 'هیچ محصولی در حال حاضر در این دسته‌بندی وجود ندارد', 'hamishop-elementor-widgets' ),
+                                'label_block' => true,
+                        )
+                );
+
+                $this->add_control(
+                        'empty_text',
+                        array(
+                                'label'   => __( 'توضیح', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::TEXTAREA,
+                                'default' => __( 'می‌توانید دستهٔ دیگری را ببینید یا به فروشگاه برگردید.', 'hamishop-elementor-widgets' ),
+                                'rows'    => 2,
+                        )
+                );
+
+                $this->add_control(
+                        'empty_filter_title',
+                        array(
+                                'label'       => __( 'عنوان وقتی فیلتر فعال است', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::TEXT,
+                                'default'     => __( 'محصولی با این فیلترها یافت نشد', 'hamishop-elementor-widgets' ),
+                                'label_block' => true,
+                                'description' => __( 'اگر حداقل یک فیلتر یا جستجو فعال باشد، این عنوان جای عنوان بالا نمایش داده می‌شود.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
+                        'empty_show_btn',
+                        array(
+                                'label'   => __( 'دکمه بازگشت', 'hamishop-elementor-widgets' ),
+                                'type'    => Controls_Manager::SWITCHER,
+                                'default' => 'yes',
+                        )
+                );
+
+                $this->add_control(
+                        'empty_btn',
+                        array(
+                                'label'     => __( 'متن دکمه', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::TEXT,
+                                'default'   => __( 'بازگشت به فروشگاه', 'hamishop-elementor-widgets' ),
+                                'condition' => array( 'empty_show_btn' => 'yes' ),
+                        )
+                );
+
+                $this->add_control(
+                        'empty_btn_url',
+                        array(
+                                'label'       => __( 'لینک دکمه', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::URL,
+                                'default'     => array( 'url' => '' ),
+                                'description' => __( 'خالی بگذارید تا به صفحهٔ فروشگاه برود.', 'hamishop-elementor-widgets' ),
+                                'condition'   => array( 'empty_show_btn' => 'yes' ),
+                        )
+                );
+
+                $this->add_control(
+                        'empty_preview',
+                        array(
+                                'label'       => __( 'پیش‌نمایش حالت خالی در ویرایشگر', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SWITCHER,
+                                'default'     => '',
+                                'description' => __( 'وقتی روشن باشد، در ویرایشگر المنتور به‌جای کارت‌های نمونه همین بلوک نمایش داده می‌شود تا متن و رنگ‌ها را همان‌جا تنظیم کنید. در سایت واقعی هیچ اثری ندارد.', 'hamishop-elementor-widgets' ),
+                                'separator'   => 'before',
+                        )
+                );
+
+                $this->end_controls_section();
+
                 /* ------------------------- STYLE ------------------------- */
                 $this->start_controls_section(
                         'sec_style',
@@ -139,6 +243,40 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 $this->a_color( 'card_price', __( 'رنگ قیمت جدید', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__price' );
                 $this->a_color( 'card_cta', __( 'پس‌زمینه دکمه خرید', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__cta, {{WRAPPER}} .hsw-ag__cta--m', 'background-color' );
                 $this->a_color( 'card_media', __( 'پس‌زمینه محفظه تصویر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__media', 'background-color' );
+
+                $this->end_controls_section();
+
+                $this->start_controls_section(
+                        'sec_empty_style',
+                        array( 'label' => __( 'استایل حالت خالی', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
+                );
+
+                $this->add_responsive_control(
+                        'empty_align',
+                        array(
+                                'label'     => __( 'چینش', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::CHOOSE,
+                                'default'   => 'center',
+                                'options'   => array(
+                                        'start'  => array( 'title' => __( 'راست', 'hamishop-elementor-widgets' ), 'icon' => 'eicon-text-align-right' ),
+                                        'center' => array( 'title' => __( 'وسط', 'hamishop-elementor-widgets' ), 'icon' => 'eicon-text-align-center' ),
+                                        'end'    => array( 'title' => __( 'چپ', 'hamishop-elementor-widgets' ), 'icon' => 'eicon-text-align-left' ),
+                                ),
+                                'selectors' => array(
+                                        '{{WRAPPER}} .hsw-ag__empty' => 'text-align: {{VALUE}}; align-items: {{VALUE}};',
+                                ),
+                        )
+                );
+
+                $this->a_color( 'empty_bg', __( 'پس‌زمینه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__empty', 'background-color' );
+                $this->a_color( 'empty_border', __( 'رنگ حاشیه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__empty', 'border-color' );
+                $this->a_color( 'empty_iconbg', __( 'پس‌زمینه آیکون', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptyicon', 'background-color' );
+                $this->a_color( 'empty_iconc', __( 'رنگ آیکون', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptyicon' );
+                $this->a_color( 'empty_titlec', __( 'رنگ عنوان', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptytitle' );
+                $this->a_color( 'empty_textc', __( 'رنگ توضیح', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptytext' );
+                $this->a_color( 'empty_btnbg', __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptybtn', 'background-color' );
+                $this->a_color( 'empty_btnc', __( 'رنگ متن دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptybtn' );
+                $this->a_color( 'empty_btnhoverbg', __( 'پس‌زمینه دکمه (هاور)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ag__emptybtn:hover', 'background-color' );
 
                 $this->end_controls_section();
 
@@ -454,21 +592,117 @@ class HSW_Widget_Archive_Grid extends HSW_Archive_Base {
                 }
                 $products = $this->products();
                 $is_list  = ( isset( $this->current_params()['view'] ) && 'list' === $this->current_params()['view'] );
+
+                /*
+                 * The empty state is invisible in the editor otherwise — the demo
+                 * grid always has cards — so there was no way to see the text you
+                 * were writing. This switch swaps the demo grid for the block.
+                 */
+                $preview_empty = $this->is_demo() && isset( $s['empty_preview'] ) && 'yes' === $s['empty_preview'];
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'ag' ) ); ?><?php echo $is_list ? ' hsw-ag--list' : ''; ?>">
-                        <div class="hsw-ag__grid">
-                                <?php $hsw_i = 0; ?>
-                                <?php foreach ( $products as $row ) : ?>
-                                        <?php $this->card( $row[0], $row[1], $s, 0 === $hsw_i ); ?>
-                                        <?php $hsw_i++; ?>
-                                <?php endforeach; ?>
-                        </div>
-                        <?php if ( empty( $products ) ) : ?>
-                                <div class="hsw-ag__empty hsw-d">
-                                        <?php esc_html_e( 'محصولی با این فیلترها یافت نشد.', 'hamishop-elementor-widgets' ); ?>
+                        <?php if ( $preview_empty ) : ?>
+                                <?php echo $this->empty_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method. ?>
+                        <?php else : ?>
+                                <div class="hsw-ag__grid">
+                                        <?php $hsw_i = 0; ?>
+                                        <?php foreach ( $products as $row ) : ?>
+                                                <?php $this->card( $row[0], $row[1], $s, 0 === $hsw_i ); ?>
+                                                <?php $hsw_i++; ?>
+                                        <?php endforeach; ?>
                                 </div>
+                                <?php if ( empty( $products ) ) : ?>
+                                        <?php echo $this->empty_html( $s ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the method. ?>
+                                <?php endif; ?>
                         <?php endif; ?>
                 </div>
                 <?php
+        }
+
+        /**
+         * True when the visitor narrowed the archive with something other than
+         * the category itself: a filter, a price range, or a search.
+         *
+         * The empty state says «هیچ محصولی در این دسته‌بندی وجود ندارد» — which
+         * would be wrong when the category does have products and a filter hid
+         * them. `s` counts, `orderby`/`paged`/`view` do not.
+         *
+         * @return bool
+         */
+        protected function has_active_filters() {
+                $params = $this->current_params();
+
+                foreach ( array_keys( (array) $params ) as $key ) {
+                        $key = (string) $key;
+                        if ( 0 === strpos( $key, 'filter_' ) || 0 === strpos( $key, 'query_type_' ) ) {
+                                return true;
+                        }
+                }
+
+                foreach ( array( 'min_price', 'max_price', 'instock', 'onsale', 'express', 'rating_filter', 's' ) as $key ) {
+                        if ( isset( $params[ $key ] ) && '' !== trim( (string) $params[ $key ] ) ) {
+                                return true;
+                        }
+                }
+
+                return false;
+        }
+
+        /**
+         * Empty-state block: icon, title, description, back-to-shop button.
+         *
+         * Every string is a control with a sensible default, so a shop that
+         * wants «به‌زودی» instead of «هیچ محصولی وجود ندارد» changes one field
+         * in Elementor and nothing else.
+         *
+         * @param array $s Effective settings.
+         * @return string
+         */
+        protected function empty_html( $s ) {
+                $filtered = $this->has_active_filters();
+
+                $icon = isset( $s['empty_icon'] ) ? sanitize_key( (string) $s['empty_icon'] ) : 'inventory_2';
+                if ( '' === $icon ) {
+                        $icon = 'inventory_2';
+                }
+
+                $title_key = $filtered ? 'empty_filter_title' : 'empty_title';
+                $title     = isset( $s[ $title_key ] ) ? trim( (string) $s[ $title_key ] ) : '';
+
+                if ( '' === $title ) {
+                        $title = $filtered
+                                ? __( 'محصولی با این فیلترها یافت نشد', 'hamishop-elementor-widgets' )
+                                : __( 'هیچ محصولی در حال حاضر در این دسته‌بندی وجود ندارد', 'hamishop-elementor-widgets' );
+                }
+
+                $text     = isset( $s['empty_text'] ) ? trim( (string) $s['empty_text'] ) : '';
+                $show_btn = ! isset( $s['empty_show_btn'] ) || 'yes' === $s['empty_show_btn'];
+                $btn      = isset( $s['empty_btn'] ) ? trim( (string) $s['empty_btn'] ) : '';
+
+                if ( '' === $btn ) {
+                        $btn = __( 'بازگشت به فروشگاه', 'hamishop-elementor-widgets' );
+                }
+
+                $url = isset( $s['empty_btn_url']['url'] ) ? trim( (string) $s['empty_btn_url']['url'] ) : '';
+
+                if ( '' === $url ) {
+                        $url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+                }
+
+                $out  = '<div class="hsw-ag__empty" role="status">';
+                $out .= '<span class="hsw-ag__emptyicon" aria-hidden="true">' . HSW_Helpers::icon( $icon ) . '</span>';
+                $out .= '<p class="hsw-ag__emptytitle">' . esc_html( $title ) . '</p>';
+
+                if ( '' !== $text ) {
+                        $out .= '<p class="hsw-ag__emptytext">' . esc_html( $text ) . '</p>';
+                }
+
+                if ( $show_btn && '' !== $btn ) {
+                        $out .= '<a class="hsw-ag__emptybtn" href="' . esc_url( $url ) . '">' . esc_html( $btn ) . '</a>';
+                }
+
+                $out .= '</div>';
+
+                return $out;
         }
 }
