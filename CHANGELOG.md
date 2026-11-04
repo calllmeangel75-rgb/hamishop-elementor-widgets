@@ -8,6 +8,14 @@
 
 ## [Unreleased]
 
+## [1.11.239] — 2026-11-04
+
+### Fixed
+
+- The ticket CSV export counted only `comment_approved = '1'`. The call it replaced — `get_comments()` with no `status` — defaults to `all`, and `WP_Comment_Query` turns that into `comment_approved = '0' OR comment_approved = '1'`: approved replies **and** the ones waiting for moderation. A ticket with a pending reply therefore showed a lower number in the CSV than on the ticket list, which still calls `get_comments()`. The query now uses `IN ('0', '1')`; spam and trash are excluded by both.
+- Verified on a ticket carrying one approved, one pending, one spam and one trash reply, with the stored values forced by a direct `UPDATE` so the test measured what it claimed: `get_comments()` = 4, `reply_counts()` = 4. The 1.11.238 query returned 3.
+- Two checks in `tools/ci-checks.php` (now 22) fail if the approved-only filter returns.
+
 ## [1.11.238] — 2026-11-04
 
 ### Fixed

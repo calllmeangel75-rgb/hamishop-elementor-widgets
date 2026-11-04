@@ -1885,9 +1885,12 @@ final class HSW_Account_Support {
 	/**
 	 * Reply count per ticket, in a handful of queries instead of one per row.
 	 *
-	 * Matches `get_comments( array( 'post_id' => …, 'type' => …, 'count' => true ) )`:
-	 * approved comments only, same comment type. Chunked so an export of a very
-	 * large ticket set never builds one enormous `IN (…)` list.
+	 * Matches `get_comments( array( 'post_id' => …, 'type' => …, 'count' => true ) )`
+	 * exactly. That call leaves `status` unset, and WordPress then defaults it to
+	 * `all`, which is `comment_approved = '0' OR comment_approved = '1'` — the
+	 * approved replies AND the ones waiting for moderation. Spam and trash are
+	 * not counted. Counting only `'1'` made the CSV disagree with the reply
+	 * count on the ticket list, which still asks `get_comments()`.
 	 *
 	 * @param int[] $ids Ticket IDs.
 	 * @return array<int,int> Count keyed by ticket ID.
@@ -1907,7 +1910,7 @@ final class HSW_Account_Support {
 			$sql = "SELECT comment_post_ID AS pid, COUNT(*) AS n
 				FROM {$wpdb->comments}
 				WHERE comment_post_ID IN ({$in})
-					AND comment_approved = '1'
+					AND comment_approved IN ('0', '1')
 					AND comment_type = %s
 				GROUP BY comment_post_ID";
 

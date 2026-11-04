@@ -224,6 +224,26 @@ hsw_ci(
 );
 
 /* -------------------------------------------------------------------------
+ * 6c) The ticket CSV must count the same replies the ticket list counts
+ *
+ * `get_comments()` with no `status` defaults to `all`, which WordPress turns
+ * into `comment_approved = '0' OR comment_approved = '1'` — approved AND
+ * awaiting moderation. Counting only `'1'` made the CSV disagree with the
+ * reply count on the ticket list. Spam and trash are not counted by either.
+ * ---------------------------------------------------------------------- */
+$support = (string) file_get_contents( $root . '/includes/class-hsw-account-support.php' );
+hsw_ci(
+	'tickets: CSV counts approved + pending replies',
+	false !== strpos( $support, "comment_approved IN ('0', '1')" ),
+	'reply_counts() no longer matches get_comments() default status'
+);
+hsw_ci(
+	'tickets: CSV does not count only approved replies',
+	false === strpos( $support, "AND comment_approved = '1'" ),
+	'approved-only filter is back'
+);
+
+/* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */
 foreach ( array( 'README.md', 'CHANGELOG.md', 'docs/WIDGETS.md', 'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PERFORMANCE.md', 'docs/STAGING-CHECKLIST.md', 'docs/MARKETING.md' ) as $doc ) {

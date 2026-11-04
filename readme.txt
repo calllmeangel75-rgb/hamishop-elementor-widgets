@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.238
+Stable tag: 1.11.239
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.239 =
+* Fix: The ticket CSV counted only approved replies, while `get_comments()` — used by the ticket list — defaults to `status => all`, which WordPress turns into `comment_approved = '0' OR comment_approved = '1'`. A ticket with a reply waiting for moderation therefore showed a lower number in the CSV than in the admin list. The query now matches `IN ('0', '1')`; spam and trash are excluded by both.
+* Verified against a ticket holding one approved, one pending, one spam and one trash reply: `get_comments()` = 4, `reply_counts()` = 4.
+* Two checks in `tools/ci-checks.php` fail if the approved-only filter comes back.
+
 = 1.11.238 =
 * Fix: The transient cleanup used `LIKE '_transient_hsw_lp_%'` with an unescaped `_`. In SQL that is a single-character wildcard, so the pattern matched more option names than intended — and because it started with a wildcard, MySQL could not use the `option_name` index and scanned the whole table. It is built with `$wpdb->esc_like()` now.
 * Fix: «مشتریان طلایی» checked that `wc_order_stats` exists but then joined `wc_customer_lookup` anyway. A site missing the second table got a SQL error instead of an empty list. Both are checked.
@@ -91,11 +96,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 = 1.11.235 =
 * Fix: Clicking «ادامه و ورود به مرحله پرداخت» could submit the header search form and land on `/?s=` — `.woocommerce-checkout` is a body class, so the fallback selector matched the wrong form. The fallback now uses WooCommerce's own form markers only, rejects anything containing a search field, and does nothing when no checkout form is found.
-
-= 1.11.234 =
-* Fix (critical): `HSW_Checkout_Digital::is_digital()` called itself through the `woocommerce_cart_needs_shipping` filter it registers. With an item in the cart that recursed until the request died — the 503 on add-to-cart and checkout, with nothing in error_log. A re-entrancy guard breaks the loop; a regression test runs in CI.
-* Fix: A mixed cart (physical + downloadable) no longer shows «تحویل دیجیتال سفارش». The notice only appears when every item needs no shipping.
-* Fix: «ادامه و ورود به مرحله پرداخت» falls back to the checkout form when WooCommerce's `#place_order` is not on the page, and never reloads the page it is on.
 
 == Upgrade Notice ==
 
