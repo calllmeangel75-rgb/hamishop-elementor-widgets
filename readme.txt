@@ -2,7 +2,7 @@
 Contributors: hamisys
 Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
-Tested up to: 7.1
+Tested up to: 7.1.4
 Requires PHP: 7.4
 Stable tag: 1.11.223
 License: GPLv2 or later
@@ -47,8 +47,8 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Installation ==
 
-1. پوشهٔ افزونه را به ZIP تبدیل کنید (یا ZIP انتشار را از صفحهٔ Releases بردارید).
-2. پیشخوان ← افزونه‌ها ← افزودن ← بارگذاری افزونه ← همین ZIP را انتخاب کنید.
+1. ZIP آمادهٔ نصب را از صفحهٔ Releases بردارید (فایل `hamishop-elementor-widgets-<version>.zip`). از گزینهٔ «Download ZIP» در صفحهٔ کد استفاده نکنید؛ آن فایل سورس است و ساختار پوشهٔ نصبی را ندارد.
+2. پیشخوان ← افزونه‌ها ← افزودن ← بارگذاری افزونه ← همان ZIP را انتخاب کنید.
 3. WooCommerce و Elementor باید نصب و فعال باشند.
 4. در المنتور، دستهٔ «حامی» را باز کنید و ویجت موردنظر را بکشید.
 5. رنگ‌ها و فونت را یک‌بار در HamiShop ← پالت رنگی تنظیم کنید.

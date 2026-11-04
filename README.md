@@ -47,10 +47,14 @@
 
 ## نصب
 
-1. ZIP انتشار را از [Releases](https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases) بردارید (یا `python tools/build-release.py` بسازید).
-2. پیشخوان ← افزونه‌ها ← افزودن ← بارگذاری افزونه.
+نصب از **ZIP انتشار** انجام می‌شود، نه از سورس.
+
+1. به صفحهٔ [Releases](https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases) بروید و فایل `hamishop-elementor-widgets-<version>.zip` آخرین نسخه را دانلود کنید.
+2. پیشخوان وردپرس ← افزونه‌ها ← افزودن ← بارگذاری افزونه ← همان ZIP را انتخاب و نصب کنید.
 3. WooCommerce و Elementor را فعال کنید.
 4. در المنتور، دستهٔ **حامی** را باز کنید.
+
+> **از «Code → Download ZIP» استفاده نکنید.** آن فایل کل مخزن است (با `tests/`، `tools/` و `docs/`) و ساختار پوشهٔ نصبی وردپرس را ندارد؛ وردپرس آن را به‌عنوان افزونه نمی‌شناسد.
 
 ## شروع سریع
 
