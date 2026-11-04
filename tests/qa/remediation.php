@@ -34,6 +34,14 @@ class HSW_QA_WPDB {
 	public $link;
 	public $usermeta = 'wp_usermeta';
 
+	/*
+	 * Real $wpdb exposes the connected schema as `$dbname`, and the wallet's
+	 * InnoDB check queries information_schema with it. Without the property the
+	 * query compared TABLE_SCHEMA to NULL, returned nothing, and the "tables are
+	 * InnoDB" assertion passed without ever checking an engine.
+	 */
+	public $dbname = 'hsw_qa';
+
 	public function __construct( $dsn, $user, $pass ) {
 		mysqli_report( MYSQLI_REPORT_OFF );
 		/* Parse host/port out of the DSN so CI can point each leg at its own
@@ -46,13 +54,16 @@ class HSW_QA_WPDB {
 		if ( preg_match( '/port=([^;]+)/', (string) $dsn, $m ) ) {
 			$port = (int) $m[1];
 		}
+		if ( preg_match( '/dbname=([^;]+)/', (string) $dsn, $m ) ) {
+			$this->dbname = trim( $m[1] );
+		}
 		$this->link = mysqli_connect( $host, $user, $pass, null, $port );
 		if ( ! $this->link ) {
 			fwrite( STDERR, 'DB connect failed: ' . mysqli_connect_error() . "\n" );
 			exit( 1 );
 		}
 		mysqli_set_charset( $this->link, 'utf8mb4' );
-		mysqli_select_db( $this->link, 'hsw_qa' );
+		mysqli_select_db( $this->link, $this->dbname );
 	}
 
 	/**
@@ -284,6 +295,21 @@ function current_user_can( $cap, ...$args ) {
 function get_current_user_id() {
 	return (int) $GLOBALS['hsw_qa_user']['id'];
 }
+
+/*
+ * `is_admin()` is a WordPress core function, not something the plugin defines,
+ * so this harness has to supply it the same way it supplies get_option() and
+ * current_user_can(). Without it the wallet's lazy table install — which runs
+ * only for an administrator in wp-admin — hit "Call to undefined function
+ * is_admin()" and took the whole suite down with a fatal.
+ *
+ * false is the honest default here: the harness is a CLI script, not wp-admin.
+ * Tests that need the admin path can set HSW_QA_IS_ADMIN.
+ */
+function is_admin() {
+	return ! empty( $GLOBALS['hsw_qa_is_admin'] );
+}
+
 function is_user_logged_in() {
 	return get_current_user_id() > 0;
 }
