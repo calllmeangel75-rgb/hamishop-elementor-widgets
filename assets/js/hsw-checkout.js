@@ -356,17 +356,32 @@ document.addEventListener( 'click', function ( event ) {
 		if ( place ) { place.click(); return; }
 
 		/*
-		 * Some checkouts are built from our parts only and never render
-		 * WooCommerce's own button, so fall back to the form itself. `submit()`
-		 * is deliberately not used: it skips WooCommerce's validation and the
-		 * payment-method check, which posts a half-filled order.
+		 * Fallback: WooCommerce's own form element. It has to be identified by
+		 * something only the checkout carries — `.woocommerce-checkout` is a
+		 * BODY class on checkout pages, so `.woocommerce-checkout form` matched
+		 * the header search form first and submitted it, sending the customer to
+		 * `/?s=`. Never select a form by a wrapper class again.
+		 *
+		 * `form.checkout` and `form[name="checkout"]` are WooCommerce's own
+		 * markers; the extra guard rejects anything that still looks like a
+		 * search box or carries no checkout fields.
 		 */
-		var checkoutForm = document.querySelector( 'form.checkout, form[name="checkout"], .woocommerce-checkout form' );
-		if ( checkoutForm && checkoutForm.requestSubmit ) { checkoutForm.requestSubmit(); return; }
+		var form = document.querySelector( 'form.checkout, form[name="checkout"]' );
 
-		/* Nothing to submit: stay put rather than reload the page we are on. */
+		if ( ! form || ! form.querySelector ) { form = null; }
+
+		if ( form ) {
+			var looks_like_search = !! form.querySelector( 'input[name="s"]' );
+			var has_checkout_field = !! form.querySelector( '#place_order, .woocommerce-checkout-payment, input[name="billing_email"], input[name="billing_first_name"]' );
+
+			if ( looks_like_search || ! has_checkout_field ) { form = null; }
+		}
+
+		if ( form && form.requestSubmit ) { form.requestSubmit(); return; }
+
+		/* Nothing safe to submit: stay put rather than navigate somewhere wrong. */
 		if ( window.console && console.warn ) {
-			console.warn( '[HamiShop] No checkout form found; the order was not placed.' );
+			console.warn( '[HamiShop] Checkout form not found; the order was not placed. Add the «فرم تسویه» widget to this page.' );
 		}
 	}
 

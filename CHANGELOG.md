@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.235] — 2026-11-04
+
+### Fixed
+
+- Clicking «ادامه و ورود به مرحله پرداخت» submitted the **header search form** and landed on `/?s=`. The 1.11.234 fallback used `.woocommerce-checkout form`, but `woocommerce-checkout` is a class on `<body>`, so that selector matched the first form in the document — the search box. The fallback now uses WooCommerce's own markers (`form.checkout`, `form[name="checkout"]`), rejects any form containing `input[name="s"]` or without a checkout field, and does nothing when nothing safe is found.
+- `tools/ci-checks.php` now fails if the wrapper-class selector or the search-field guard disappears.
+
 ## [1.11.234] — 2026-11-04
 
 ### Fixed

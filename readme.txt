@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.234
+Stable tag: 1.11.235
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.235 =
+* Fix: Clicking «ادامه و ورود به مرحله پرداخت» could submit the header search form and land on `/?s=` — `.woocommerce-checkout` is a body class, so the fallback selector matched the wrong form. The fallback now uses WooCommerce's own form markers only, rejects anything containing a search field, and does nothing when no checkout form is found.
+
 = 1.11.234 =
 * Fix (critical): `HSW_Checkout_Digital::is_digital()` called itself through the `woocommerce_cart_needs_shipping` filter it registers. With an item in the cart that recursed until the request died — the 503 on add-to-cart and checkout, with nothing in error_log. A re-entrancy guard breaks the loop; a regression test runs in CI.
 * Fix: A mixed cart (physical + downloadable) no longer shows «تحویل دیجیتال سفارش». The notice only appears when every item needs no shipping.
@@ -88,10 +91,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.231 =
 * Fix: A real PHP fatal (uncaught Error, memory exhaustion, max_execution_time) now leaves a trace. A shutdown handler writes `[HSW/fatal] … — file.php:line` to the error log and, when the file belongs to this plugin, to the dashboard's «آخرین خطای ثبت‌شده».
 * Why: on a live shop the PHP log held only notices while uncached pages answered 503, so there was no way to tell a plugin fatal from a server-side kill.
-
-= 1.11.230 =
-* Fix: The background job can now be switched off entirely with `define( 'HSW_UPGRADER_OFF', true );` in wp-config.php — for shops whose host enforces tight CPU/entry-process limits and answers 503 on the front end while wp-admin still works.
-* Fix: Pages with more than 1 MB of Elementor data are skipped when rebuilding CSS. Parsing one of those inside a single cron request can exceed a shared host's memory cap and get the process killed.
 
 == Upgrade Notice ==
 

@@ -204,6 +204,26 @@ foreach ( glob( $root . '/tests/_tmp-*' ) ?: array() as $tmp ) {
 hsw_ci( 'repo: no node_modules / package.json / tests/_tmp-*', ! $stray, implode( ', ', $stray ) );
 
 /* -------------------------------------------------------------------------
+ * 6b) The checkout CTA must never select a form by a wrapper class
+ *
+ * `.woocommerce-checkout` is a BODY class on checkout pages, so
+ * `.woocommerce-checkout form` matched the header search form first and
+ * submitted it: clicking «ادامه و ورود به مرحله پرداخت» sent the customer to
+ * `/?s=`. The selector is now WooCommerce's own form markers plus a guard.
+ * ---------------------------------------------------------------------- */
+$checkout_js = (string) file_get_contents( $root . '/assets/js/hsw-checkout.js' );
+hsw_ci(
+	'checkout: no wrapper-class form selector',
+	false === strpos( $checkout_js, "'form.checkout, form[name=\"checkout\"], .woocommerce-checkout form'" ),
+	'the search-form trap is back'
+);
+hsw_ci(
+	'checkout: place-order guarded against search forms',
+	false !== strpos( $checkout_js, "input[name=\"s\"]" ) && false !== strpos( $checkout_js, 'has_checkout_field' ),
+	'missing the search/field guard'
+);
+
+/* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */
 foreach ( array( 'README.md', 'CHANGELOG.md', 'docs/WIDGETS.md', 'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PERFORMANCE.md', 'docs/STAGING-CHECKLIST.md', 'docs/MARKETING.md' ) as $doc ) {
