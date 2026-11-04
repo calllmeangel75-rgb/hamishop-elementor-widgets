@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.225] — 2026-11-04
+
+### Fixed
+
+- Header menus no longer drop their third level. `wp_nav_menu` was called with `depth => 2`, so an item like «لوازم و ابزار قالی‌بافی → ابزار قالی‌بافی و پرداخت فرش → شانه قالی‌بافی» rendered its parent and silently lost the children — with nothing in the panel to explain why. Depth is now unlimited and every level is styled.
+- A nested sub-menu opens beside its parent (left in RTL, right in LTR) instead of landing on top of the list it belongs to, and its caret points at the side the flyout opens on.
+
 ## [1.11.224] — 2026-11-04
 
 ### Fixed

@@ -987,6 +987,42 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	color: var(--hsw-hd-primary);
 }
 
+/*
+ * Third level and deeper. The top-level sub-menu drops below its parent; a
+ * nested one has to open beside it, or it would land on top of the list it
+ * belongs to. `wp_nav_menu` used to be capped at depth 2, so this never had to
+ * exist — a menu with sub-sub-items simply lost them.
+ */
+.hsw-hd__menu .sub-menu .sub-menu {
+	top: -6px;
+	inset-inline-start: calc(100% + 4px);
+	inset-inline-end: auto;
+}
+
+/* Keep the parent item highlighted while its flyout is open. */
+.hsw-hd__menu .sub-menu li:hover > a,
+.hsw-hd__menu .sub-menu li:focus-within > a {
+	background: color-mix(in srgb, var(--hsw-hd-primary) 8%, transparent);
+	color: var(--hsw-hd-primary);
+}
+
+/* A nested row needs room for its caret on the far side. */
+.hsw-hd__menu .sub-menu .menu-item-has-children > a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+/* The caret points at the side the flyout opens on. */
+.hsw-hd__menu .sub-menu .menu-item-has-children > a::after {
+	margin-inline-start: 0;
+	transform: rotate(-45deg) translateY(0);
+}
+:dir(rtl) .hsw-hd__menu .sub-menu .menu-item-has-children > a::after {
+	transform: rotate(135deg) translateY(0);
+}
+
 /* Mega menu */
 .hsw-hd__mega {
 	position: static;

@@ -535,7 +535,14 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 			'menu_id'       => '',
 			'items_wrap'    => '<ul class="%2$s">%3$s</ul>',
 			'echo'          => false,
-			'depth'         => 2,
+			/*
+			 * 0 = every level. This used to be 2, so a menu like
+			 * «لوازم و ابزار قالیبافی → ابزار قالیبافی و پرداخت فرش → …» lost
+			 * its third level silently: the item rendered, its children did not,
+			 * and there was nothing in the panel to explain why. The stylesheet
+			 * positions any nested .sub-menu as a flyout, so depth is unlimited.
+			 */
+			'depth'         => 0,
 			'fallback_cb'   => '__return_empty_string',
 		);
 		if ( $menu_id ) {

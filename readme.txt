@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.224
+Stable tag: 1.11.225
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.225 =
+* Fix: Header menus no longer drop their third level. `wp_nav_menu` was called with `depth => 2`, so a sub-sub-item such as «ابزار قالی‌بافی و پرداخت فرش → …» never rendered and there was nothing in the panel to explain why. Depth is now unlimited.
+* Fix: A nested sub-menu opens beside its parent instead of on top of the list it belongs to, with the caret pointing at the side the flyout opens on.
+
 = 1.11.224 =
 * Fix: The upgrade job no longer deletes Elementor CSS and waits for a visitor to rebuild it. On a live shop that cold window saturated PHP-FPM and nginx answered 503 for several minutes (reported on 1.11.223).
 * Fix: Each affected page's CSS is now rewritten in place, one post per step, inside the background tick — the stylesheet is never missing.
@@ -100,13 +104,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix: Header text on primary fills uses the palette's computed `on-primary` colour, so a light primary no longer yields unreadable white text.
 * Fix: The per-widget font mode «فونت طرح (وزیرمتن لوکال)» was a no-op; it now forces the bundled Vazirmatn.
 * Note: Per-widget header colours are now opt-in (empty = palette). A header coloured by hand before this version must be re-picked once.
-
-= 1.11.220 =
-* Fix: Digital and downloadable products checkout flow reliability — accurately detects downloadable products even when merchant leaves "Virtual" checkbox unticked in WooCommerce, preventing shipping and delivery address fields from showing.
-* Fix: Prevent checkout summary button blocking digital orders with missing address error when only name and phone are needed.
-* Feature: Modernize checkout input fields with crisp leading micro-icons (name, phone, email, state, city, address, postcode).
-* Feature: Modernize digital delivery notice banner and customer credentials card with edit drawer.
-* Feature: Support optional email field in digital checkout for order download links.
 
 == Upgrade Notice ==
 
