@@ -1,0 +1,2306 @@
+# Changelog
+
+همهٔ تغییرات قابل توجه این پروژه در این فایل ثبت می‌شود.
+
+قالب این فایل بر پایهٔ [Keep a Changelog](https://keepachangelog.com/fa/1.1.0/) است و شماره‌گذاری نسخه‌ها از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
+
+> **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
+
+## [Unreleased]
+
+## [1.11.223]
+
+### Added
+
+- The palette font list now also reads the WordPress font library's `custom` and `default` origins and the Elementor kit's `custom_typography`, so fonts added through the Site Editor finally show up.
+- A free-text font field next to the list. A variable font that a theme loads with its own @font-face is registered in no option at all, so no list can enumerate it — typing the exact family name now works.
+
+## [1.11.222]
+
+### Fixed
+
+- Updates no longer take the site down. The Elementor cache flush and the stock migration used to run on `init` — i.e. inside the first visitor's request — and could return HTTP 503 for several minutes on a shared host.
+- The element-cache flush is now a background job with a 2s budget, a lock and a resumable cursor. It runs from WP-Cron, or from an admin page load when cron is unavailable. Never from a customer request.
+- Only pages that actually contain HamiShop widgets have their Elementor CSS rebuilt, one batch at a time, instead of `files_manager->clear_cache()` wiping the whole site.
+- Page caches are purged per affected URL. The site-wide purge is now opt-in (`hsw_upgrader_full_purge`).
+- The stock migration is batched (200 products per query) and resumes after a timeout or a fatal instead of walking 2000 products in one request.
+- A failed step is logged, retried twice, then skipped — the site keeps working and the merchant gets a notice on the HamiShop dashboard.
+
+## [1.11.221]
+
+### Changed
+
+- Note: Per-widget header colours are now opt-in (empty = palette). A header coloured by hand before this version must be re-picked once.
+
+### Fixed
+
+- The header now obeys the site palette. Eleven colour controls carried hard-coded defaults that Elementor printed into the page CSS, so a saved header kept its blue/grey values and the palette never reached it.
+- Header font now follows HamiShop -> palette font (`--hsw-font`) instead of a hard-coded Vazirmatn stack.
+- Top bar, nav row, mega panel and cart drawer surfaces follow the palette instead of literal white/navy values.
+- Header text on primary fills uses the palette's computed `on-primary` colour, so a light primary no longer yields unreadable white text.
+- The per-widget font mode «فونت طرح (وزیرمتن لوکال)» was a no-op; it now forces the bundled Vazirmatn.
+
+## [1.11.220]
+
+### Added
+
+- Modernize checkout input fields with crisp leading micro-icons (name, phone, email, state, city, address, postcode).
+- Modernize digital delivery notice banner and customer credentials card with edit drawer.
+- Support optional email field in digital checkout for order download links.
+
+### Fixed
+
+- Digital and downloadable products checkout flow reliability — accurately detects downloadable products even when merchant leaves "Virtual" checkbox unticked in WooCommerce, preventing shipping and delivery address fields from showing.
+- Prevent checkout summary button blocking digital orders with missing address error when only name and phone are needed.
+
+## [1.11.219]
+
+### Added
+
+- Modernize checkout address fields, select dropdowns, labels, and textarea with sleek elevation, rounded borders, and smooth focus glow.
+- Modernize discount coupon forms in cart, checkout, and pay pages with unified capsule input-groups and chip-styled applied coupon tags.
+- High-specificity Elementor style controls for address submit button normal and hover background/text colors (`fsubmit_bg`, `fsubmit_c`, `fsubmit_bg_hover`, `fsubmit_c_hover`).
+- Add customizable button text control (`fsubmit_label`) for address submit button in both standalone and composite checkout widgets.
+
+### Fixed
+
+- Address submit button (`.hsw-ckaddr__fsubmit`) background transparency override by button reset rule in checkout CSS.
+- Rebuild minified cart and checkout stylesheets.
+
+## [1.11.218]
+
+### Changed
+
+- UI: تغییر آیکن دکمه‌های سبد خرید در گرید آرشیو محصولات (`.hsw-ag__cta.hsw-d` و `.hsw-ag__cta--m.hsw-m`) به آیکن خطی و تمیز اختصاصی `shopping_cart` (همسان با کارت‌های لوپ).
+
+### Fixed
+
+- رفع خطای `403 Forbidden` روی `wp-comments-post.php` هنگام ثبت نظر در مقالات (`.hsw-pp__form`) و ثبت دیدگاه و امتیاز در صفحه محصول (`.hsw-review-form`) برای کاربران مهمان و مشتریان واردشده؛ ارسال نظرات اکنون به‌صورت ایجکسی از طریق `admin-ajax.php` (`hsw_submit_comment`) همراه با پیام وضعیت درجا و پشتیبان `admin-post.php` انجام می‌شود.
+- خنثی‌سازی کامل رنگ صورتی هاور قالب Hello Elementor (`#c36`) روی دکمه‌های ثبت دیدگاه و ثبت نظر (`.hsw-pp__submit`، `.hsw-pp__seclink`، `.hsw-review-submit`).
+
+## [1.11.211]
+
+### Added
+
+- نمایش توضیحات دسته‌بندی نوشته‌ها (`term_description`) در پایین صفحه آرشیو وبلاگ و گرید مقالات (همراه با تشخیص خودکار آرشیو دستهٔ وردپرس و کنترل‌های استایل اختصاصی).
+- افزودن کنترل «لینک صفحه قوانین و مقررات» (`terms_url`) به ویجت خلاصه نهایی پرداخت و صفحه پرداخت با پشتیبانی از دسکتاپ و موبایل.
+
+### Changed
+
+- SEO: حذف تگ‌های `<a href="#...">` از فهرست مطالب سایدبار تک‌نوشته (`.hsw-pp__side` / `.hsw-pp__sidelink`) و تغییر پیش‌فرض فهرست مطالب درون‌متنی به حالت بدون لینک لنگر (`button` + `data-nosnippet`) برای جلوگیری از هدررفت بودجه خزش (Crawl Budget).
+- UI: یکپارچه‌سازی آیکن (`add_shopping_cart`)، ابعاد و استایل دکمه‌های سبد خرید آرشیو محصولات (`.hsw-ag__cta.hsw-d` و `.hsw-ag__cta--m.hsw-m`) بین محصولات ساده و متغیر.
+
+### Fixed
+
+- دریافت آنی پیام‌های ربات تلگرام (`poll_now`) بدون نادیده‌گرفتن اولین آپدیت (`offset = 0`) و بدون حذف پیام‌های در صف هنگام `deleteWebhook`؛ نمایش لینک مستقیم اتصال ربات تلگرام در فرم ورود و ثبت‌نام و پشتیبانی از اتصال توکنی `/start <token>` در تأیید دوعاملی.
+- اعمال مستقیم رنگ عنوان هدر (`.hsw-loop__title`)، زیرعنوان و نام محصول (`.hsw-loop__name`) در کروسل‌های لوپ (شگفت‌انگیز، پرفروش‌ترین‌ها و محبوب‌ترین‌ها) و خنثی‌سازی کامل رنگ صورتی پیش‌فرض قالب Hello Elementor (`rgb(204, 51, 102)` / `#c36`) در تمام ویجت‌ها.
+- تولید خودکار تاریخ‌های واقعی شمسی (`HSW_Jalali`) در ویجت انتخاب زمان تحویل تسویه‌حساب با امکان غیرفعال‌سازی کامل بخش، و خواندن زمان انتخابی واقعی از سشن ووکامرس در صفحه پرداخت.
+
+## [1.11.210]
+
+### Changed
+
+- UI: فلش راهنمای تب‌های بیشتر در موبایل ۳ پیکسل بالاتر قرار گرفت (`-13px`) و انیمیشن ملایم GPU-only (`opacity` + `translate3d`) بدون افت امتیاز Lighthouse به آن اضافه شد.
+
+### Fixed
+
+- اسکرول دقیق به ابتدای هر بخش در استایل دوم تب‌های محصول (`scrollToStackPanel`) بدون تداخل با اسکرول افقی نوار تب‌ها (`scrollIntoView`).
+
+## [1.11.209]
+
+### Added
+
+- استایل دوم برای «۸. تب‌ها (دسکتاپ و موبایل)» در ویجت جامع صفحه کامل محصول و ویجت مستقل تب‌های محصول (`بخش‌های زیرهم + نوار چسبان زیر هدر`).
+
+### Changed
+
+- در این حالت، بخش‌ها به ترتیب (۱. بررسی تخصصی کالا → ۲. گارانتی و خدمات → ۳. مشخصات فنی → ۴. دیدگاه‌ها و نظرات خریداران) زیر هم قرار می‌گیرند، نوار تب‌ها (`data-hsw-tabs-scroll`) هنگام اسکرول با فاصلهٔ قابل تنظیم زیر هدر اصلی چسبان می‌ماند و با رسیدن به هر سکشن، خط ظریف زیر تب مربوطه فعال می‌شود.
+
+## [1.11.208]
+
+### Added
+
+- tables that exist as MyISAM are converted to InnoDB by the plugin itself (authenticated admin path only: the create/repair button, or the admin notice at most once an hour). The SQL hint is shown only if the server refuses the ALTER.
+
+### Fixed
+
+- the wallet notices asked a person to run `ALTER TABLE ... ENGINE=InnoDB` and to press the create-tables button even when the tables existed. The two flags were only cleared by a later install run, so they outlived the problem. The notice now re-checks the real state first and removes itself.
+
+## [1.11.207]
+
+### Fixed
+
+- uploading a new release from the dashboard installed it NEXT TO the old copy (two folders, the duplicate-copy notice, the old code still running) whenever the zip's top-level folder was not named exactly like the running one - e.g. GitHub's `Source code` archive `hamishop-elementor-widgets-1.11.x`. `upgrader_source_selection` now renames a HamiShop package to the folder this copy runs from, so `Replace current with uploaded` overwrites in place.
+- LiteSpeed/WP Rocket exclusions matched only the literal `hamishop-elementor-widgets/assets/...`. A copy living in a versioned folder was merged into the combined CSS, which reordered the cascade and broke the layout as soon as the optimizer was on. The exclusion list now also contains the real install folder, for both CSS and JS.
+
+## [1.11.206]
+
+### Changed
+
+- Tests: with the shop's own LiteSpeed settings enabled (CSS Combine + Ext Inline + JS Combine), CSS links drop 22 -> 4 with our files still separate, the guard stays inline, the header renders 164px fixed, and no console errors.
+
+### Fixed
+
+- a colour term without the `color` meta printed its name as text while the other swatches showed dots («سبز» in the test shop). `HSW_Helpers::color_from_name()` maps the common Persian/English colour names to a hex value as a fallback.
+- cart colour chips required `#hex` while this shop stores `rgb(30,115,190)`, so the same colour had a dot on the product page and none in the cart. `css_color()` accepts `#hex`, `rgb()/rgba()` and CSS colour keywords, and every chip path uses it.
+- LiteSpeed JS Combine and Defer now skip our scripts (`litespeed_optimize_js_excludes`, `litespeed_optm_js_defer_exc`) — CSS was already excluded, JS was not.
+- the inline palette, layout guard and sheet guard carry `data-no-optimize="1"`, so CSS Combine/UCSS leave them where they are instead of moving them into the combined file.
+
+## [1.11.205]
+
+### Changed
+
+- An administrator loading wp-admin now installs them automatically (at most once an hour, so a failing server is not hammered with DDL). Site visitors still never trigger schema changes.
+- The wallet screen shows a «ساخت / ترمیم جدول‌های کیف پول» button while the schema is missing, with the same code path and a success/failure message. The notice links there and mentions both routes.
+- Tests: schema forced stale -> an admin page load rebuilt it and cleared the notice; the button ran the migration and redirected back with `hsw_msg=wallet-migrated`.
+
+### Fixed
+
+- a shop owner without WP-CLI had no way to create the wallet tables. The notice told them to run `wp hsw wallet migrate` and nothing else.
+
+## [1.11.204]
+
+### Changed
+
+- The duplicate notice names both folders («نسخهٔ در حال اجرا در پوشهٔ X … پوشهٔ Y را حذف کنید») and is an error-level notice instead of a warning.
+- Tests: a real second copy was created, activated, and checked — the notice names both folders, and `get_compatible_plugins_for_feature('custom_order_tables')` reports both copies as compatible with none in incompatible/uncertain.
+
+### Fixed
+
+- a second copy of the plugin made WooCommerce report an incompatible plugin. The duplicate guard returns before `FeaturesUtil::declare_compatibility()`, and WooCommerce treats any active plugin without that declaration as incompatible by default — so the inert copy landed in the incompatibility list next to the running one. The guard now declares `custom_order_tables` compatibility before it returns.
+
+## [1.11.203]
+
+### Added
+
+- the digital-checkout behaviour is a switch, not a rule — HamiShop → کنترل ویجت‌ها → تنظیمات فروشگاه → «خرید محصولات دانلودی» → «غیرفعال‌سازی فیلدهای اضافه هنگام خرید محصولات دانلودی» (on by default). Off returns the plain WooCommerce checkout with every address field, the shipping method and the delivery slot.
+
+### Changed
+
+- A mixed cart still keeps every field: the check is `needs_shipping()`, so a single physical item among downloads turns the trimming off for that cart.
+- Tests: switch on/off against a digital-only cart (3 fields vs 8 + shipping), a mixed cart with the switch on (full form), and the settings page rendering the new group inside the options.php form next to the existing switches.
+
+## [1.11.202]
+
+### Added
+
+- a cart of downloads no longer asks for a delivery address. When every item is virtual/downloadable the checkout drops postcode, province, city, street, the shipping method and the delivery time slot; the address block becomes a «تحویل دیجیتال» card with the name, phone and the e-mail the download link goes to. A mixed cart stays physical. The billing address fields are removed from `woocommerce_checkout_fields` for those carts, so WooCommerce's own validation agrees.
+- the phone proven by the SMS login (`_hsw_auth_phone`) is prefilled in the address form and used on the order when `billing_phone` is empty — the customer no longer types a number the site already verified.
+
+### Changed
+
+- Note: the field filter runs at priority 20 on `WC_Checkout::get_checkout_fields()`, so a shop that manages its own fields (WooCommerce Persian and friends) keeps the last word: we only relax what is still there.
+- Tests: digital-only checkout (3 fields, no shipping/schedule), digital order placed without any address, pay-page recall card, mixed cart, and an unchanged physical checkout (8 fields + shipping + schedule).
+
+## [1.11.201]
+
+### Added
+
+- a simple product with a visible colour attribute now gets a real picker. The buy button starts locked (`aria-disabled`) and a click tells the customer which attribute is missing, then scrolls them to it. The pick is stored on the cart line, shown in the cart and the header drawer, and copied to the order line item, so the warehouse knows which colour to ship. Two colours = two cart lines. Variable products are untouched.
+- «تا ۲۵٪ تخفیف» for a variable product whose cheapest variation is not on sale but another one is — `HSW_Helpers::discount_badge()` returns the percentage plus an `up_to` flag, and the archive card, the product gallery badge and the loop badges all use it. `discount_percent()` still returns the number for existing callers.
+- the saving row splits in two — «تخفیف محصول» and «کد تخفیف» — in the cart summary, checkout, payment and the cart items line, so the customer can see where the money came from. A single source keeps the old one-line markup. Labels are editable in Elementor.
+
+### Changed
+
+- Tests: picker lock/unlock/notice, add-to-cart payload, cart line, header drawer, order item meta (رنگ = سبز), the «تا» badge on archive + product page, split savings with a 50% coupon, and the variable-product picker still switching price (798,600 → 66,550).
+
+### Fixed
+
+- `hsw-fonts.css` had one closing brace too many (120 `{` against 121 `}`). A strict minifier silently dropped the global widget font rule after it; the file is balanced now.
+- the simple-product picker reused the variation chip classes, so the variation click handler swallowed the click. That branch now ignores chips inside `[data-hsw-attr-picker]`.
+
+## [1.11.200]
+
+### Changed
+
+- Tests: percentages checked against real product data (0 / 22 / 0 / 29), a variable product with a genuine per-variation sale, the archive card, both product pages and the cart totals.
+
+### Fixed
+
+- a variable product was badged «۹۲٪ تخفیف» in the archive while its own product page showed no discount at all. `discount_percent()` compared the **highest** variation regular price with the **lowest** variation sale price — two different variations. A product with variations at 798,600 and 66,550 and no sale price anywhere produced 92%. Both sides now read the same variation (the cheapest, which is the price the card prints), and no sale means no badge.
+- the loop card drew a struck-through max-regular price above the min price for the same reason (`HSW_Widget_Base::price_html()`), inventing a 92% saving that did not exist. The archive card and the product-search payload had the same split; all four now agree.
+- the percent sign sat before the number in three places («٪۲۲») instead of after it («۲۲٪») — product gallery badge, product sticky bar, and the variation JS.
+
+### Performance
+
+- `hsw-product.min.js` rebuilt, 30,718 -> 24,782 bytes.
+
+## [1.11.199]
+
+### Changed
+
+- Tests: real Chromium at 1440x900 and 390x844 — sticky/placeholder, hide-on-scroll, return-on-scroll-up, mega hover + click, cascade column over REST, cart drawer, mobile drawer + submenu accordion, mobile search panel; zero console errors.
+
+### Fixed
+
+- in hover mode, clicking the category trigger closed the menu the pointer had just opened (`mouseenter` opened it, the same click toggled it shut). A pointer click now keeps it open; it still closes on pointer-leave or Escape, and keyboard activation still toggles.
+- a cascade row never received `is-open`. `itemForNode()` only matched `[data-hsw-hd-mega-item]`, while the cascade renders `.hsw-hd__cascadeitem` — so the CSS highlight, the chevron flip and the sibling collapse all keyed off a class that was never set.
+
+### Performance
+
+- the search box asked for 12 root categories and the mega menu for 5, and the LIMIT sat in the query, so every page ran two identical `wp_terms`/`wp_term_taxonomy` joins. Root categories are now fetched once and sliced in PHP (children keep their LIMIT). Header: 9 -> 8 queries.
+- `hsw-header.min.js` rebuilt with terser, 26.8KB -> 18.7KB.
+
+## [1.11.198]
+
+### Changed
+
+- One source for the field lists: `HSW_Checkout_Rest::address_fields()`, `required_address_fields()` and `address_labels()` read `WC_Checkout::get_checkout_fields()`, so the form, the REST route and the pay guard can never ask for less than the order needs (`last_name` and `postcode` are required for Iran and now show as required).
+- Postcode: Persian/Arabic digits are converted to Latin and spaces stripped in the browser as the customer types; the server normalises again and requires 10 digits for Iran.
+- `guard_pay_address()` now checks every required field instead of only the city and street, and the order error names the missing fields and links back to the form.
+- Tests: the reported error reproduced, partial save, Persian digits, invalid postcode, a fresh customer through to a placed order, and no redirect for a complete address.
+
+### Fixed
+
+- the pay button refused every new customer with «مقدار «نام خانوادگی» را کامل کنید. مقدار «کدپستی (بدون فاصله و با اعداد انگلیسی)» را کامل کنید». Cause: the «ادامه و ورود به مرحله پرداخت» button posted five fields (`first_name`, `phone`, `state`, `city`, `address_1`) and `save_address()` wrote every absent field as an empty string — so the family name and postcode the customer had just typed were erased. The pay step then saw an incomplete address and `validate()` rejected the order. Both save paths now send the whole form, and a partial request only writes the fields it actually carries.
+
+## [1.11.197]
+
+### Changed
+
+- Tests: perf 16 cases.
+
+### Fixed
+
+- the product page reported NO_LCP in Lighthouse. Cause: `scroll-behavior: smooth` on a `scroll-snap-type` track. The browser aligns the snap during layout, and with smooth scrolling that alignment is an animated scroll while the page loads — Chrome then never reports an LCP candidate. Removed from all four snapping tracks (tabs nav, related products, gallery thumbs, loop rail); the JS already passes `behavior: 'smooth'` where it scrolls, so only the load-time snap changed. The product page now reports the gallery image as LCP.
+
+### Performance
+
+- the gallery thumbnails were bare `<img src>` tags loading the 600x600 `woocommerce_single` file into a 64px box (29.4 KiB). They now go through `wp_get_attachment_image()` with `sizes`, like every other image in the plugin.
+
+## [1.11.196]
+
+### Changed
+
+- Tests: perf 14 cases.
+
+### Performance
+
+- the archive card declared `sizes="45vw"` — 185px on a 412px phone for a 136px box — so the browser needed 324 device pixels, the 300w candidate was not enough, and it downloaded the 500x500 original instead: 29,468 bytes for a thumbnail, on the LCP element. `sizes` is now `(max-width: 767px) calc(50vw - 42px), 196px`, built from the card's own gap and padding. Measured on the live archive: 29,468 -> 11,098 bytes, same rendered box, image still sharp at 1.75x.
+
+## [1.11.195]
+
+### Changed
+
+- Compat: LiteSpeed's "CSS Combine" deletes inline <style> blocks, so the layout guard printed in the head vanished from the HTML on every site with it enabled. The mobile archive-sidebar rule now also lives in hsw-composite.css, which LiteSpeed is told to leave alone. Verified with Combine + Minify + JS Delay all on: sidebar hidden, CLS 0.
+- Compat: the `hsw-js` flag script now carries data-no-optimize / data-no-defer / data-no-delay / data-cfasync="false", so LiteSpeed and WP Rocket cannot defer or delay it. Verified against LiteSpeed's own source and with its JS Delay enabled.
+- Compat: WP Rocket gets the CSS exclusion too (rocket_exclude_css), so "Remove Unused CSS" cannot drop the rules that position the header, grid and sheets.
+- Tests: perf 12 cases, optimizer 9 cases.
+
+### Performance
+
+- removed a 21ms forced reflow from the sticky header (align() read the placeholder right after writing is-fixed; pin() now measures first). The font-ready handler only re-syncs when the header height actually changed.
+
+## [1.11.194]
+
+### Changed
+
+- Tests: new `tests/qa/prelive-perf.php` (9 cases).
+
+### Performance
+
+- the mobile filter/sort sheets left the normal flow only after `hsw-archive.js` ran, shrinking the document by 219px after the first paint — one 0.134 layout-shift event, 76% of the page CLS. `hsw-js` is now set in the head, before the first paint, so the no-JS fallback never applies on a JS-capable page. Archive CLS 0.175 -> 0.006.
+- the header logo declared `sizes="38vw"` (156px on a phone) for a box the CSS caps at 34px, so a 300x300 file was downloaded into 60px while a 100w candidate sat unused. `sizes` is computed from the height control and the image ratio now.
+- the logo is `loading="eager"` with `skip-lazy`/`data-no-lazy`, so LiteSpeed and WP Rocket stop replacing the brand mark with a 1x1 GIF.
+
+## [1.11.193]
+
+#### حالت «نوار تک‌خطی» برای بازخورد افزودن به سبد کار نمی‌کرد.
+  - تنظیمات سه حالت دارد (مودال / نوار / غیرفعال) و PHP مقدار `bar` را می‌فرستاد، ولی ماژول جاوااسکریپت فقط `toast` را می‌شناخت؛ پس با انتخاب «نوار» هم مودال کامل سبد باز می‌شد. حالا هر دو نام یک معنا دارند.
+  - بقیهٔ مسیر خرید آزمایش و سالم بود: افزودن از آرشیو و صفحهٔ محصول، استپر آرشیو/سبد/محصول، کشوی سبد هدر، سبد → تسویه → پرداخت → ثبت سفارش → صفحهٔ تکمیل، خاموش‌کردن ویجت در پنل کنترل و صفحهٔ ۴۰۴ اختصاصی.
+
+## [1.11.192]
+
+#### تیکت‌ها: دو ایراد در فلوی پشتیبانی.
+  - **نشان وضعیت کهنه می‌ماند:** بعد از پاسخ مشتری، وضعیت در دیتابیس به «در انتظار پاسخ» برمی‌گشت ولی چیپ بالای ترید تا رفرش «پاسخ داده شده» می‌ماند. پاسخ AJAX حالا وضعیت تازه را برمی‌گرداند و همان لحظه جایگزین می‌شود.
+  - **اولویت فقط خواندنی بود:** ادمین نمی‌توانست اولویت تیکت را عوض کند؛ حالا منوی اولویت در «اطلاعات تیکت» است و با ذخیره ثبت می‌شود.
+  - بقیهٔ فلو آزمایش و سالم بود: ثبت با عکس و کپچا، پاسخ مشتری و ادمین، بستن و بازگشایی، ایمیل با Reply-To امضاشده، خروجی CSV سازگار با اکسل، و پاک‌سازی روزانهٔ تیکت‌های بستهٔ قدیمی.
+
+## [1.11.191]
+
+#### کیف پول و امتیاز: سه ایراد پول و یک متن متناقض.
+  - **شارژ آنلاین کامل نمی‌شد:** صفحهٔ پرداخت جمع‌ها را از سبد خالی می‌خواند (۰ تومان) و دکمهٔ پرداخت سفارش تازه از سبد می‌ساخت و با «سبد خرید خالی است» برمی‌گشت. حالا جمع‌ها از خود سفارش خوانده می‌شوند و سفارشِ در انتظار پرداخت به درگاه می‌رود، نه سفارش دوم.
+  - **شارژ کیف پول امتیاز می‌داد:** ووکامرس سفارش شارژ را «خرید» می‌شمارد، پس هر شارژ ۱۰٪ همان مبلغ را به‌صورت امتیاز قابل تبدیل برمی‌گرداند. حالا سفارش‌های شارژ از مبنای امتیاز کنار گذاشته می‌شوند؛ خرید واقعی همچنان امتیاز دارد.
+  - **کلید «فعال بودن کیف پول» بی‌اثر بود:** گیت واقعی (`hsw_wallet_gateway_on`) را هیچ‌جای پنل نمی‌نوشت. حالا همین کلید آن را می‌نویسد — فقط وقتی واقعاً عوض شود.
+  - **کارت امتیاز** می‌گفت امتیازها به کیف پول تبدیل نمی‌شوند، در حالی که فرم تبدیل کار می‌کرد؛ متن حالا از تنظیم خوانده می‌شود.
+  - تست: `tests/qa/prelive-wallet.php` با ۵ سنجه (۴ موردش روی ۱.۱۱.۱۹۰ قرمز بود).
+
+## [1.11.190]
+
+#### سه ایراد تب «برند و لوگو» رفع شد.
+  - **نام فرستنده:** خالی گذاشتن این فیلد ایمیل‌ها را با نام «WordPress» می‌فرستاد، در حالی که راهنمای خودش می‌گفت نام برند استفاده می‌شود. حالا نام برند می‌رود.
+  - **نام حامی:** «ووکامرس» فقط وقتی کل رشته بود عوض می‌شد، پس «وضعیت ووکامرس» و «راه‌اندازی ووکامرس» در داشبورد دست‌نخورده می‌ماندند؛ حالا زیررشته هم جایگزین می‌شود.
+  - **متن راهنمای خودش:** فیلتر نام حامی جملهٔ توضیحی همان تنظیم را هم بازنویسی می‌کرد و پنل می‌شد ««پنل مدیریت» به «پنل مدیریت»». رشته‌های خود افزونه از فیلتر مستثنا شدند.
+  - **فاکتور چاپی:** ایمیل فروشگاه که فقط در فاکتور داخل پنل چاپ می‌شد، حالا در کادر فرستندهٔ برچسب پستی فاکتور چاپی هم می‌آید.
+  - تست: `tests/qa/prelive-brand.php` با ۱۴ سنجه (۳ موردش روی ۱.۱۱.۱۸۹ قرمز بود).
+
+## [1.11.189]
+
+#### سه ایراد در تست زندهٔ تب امنیت پیدا و رفع شد.
+  - **فهرست کاربران REST:** فیلتر `rest_endpoints` قبل از احراز هویت اجرا می‌شود، پس مسیر `/wp/v2/users` برای خود مدیر هم حذف می‌شد (۴۰۴) و جست‌وجوی کاربر در کنترل لینک المنتور خالی می‌ماند. حالا مسیر فقط برای درخواستِ بدون هیچ نشانهٔ اعتباری حذف می‌شود و `guard_rest_users()` روی `rest_pre_dispatch` تصمیم واقعی را بعد از احراز هویت می‌گیرد: مهمان بدون اعتبار ۴۰۴، کوکی جعلی ۴۰۱، مدیر با `list_users` لیست را می‌گیرد.
+  - **`font-display: swap`:** آدرس‌های Google Fonts که `esc_url()` با `&#038;` چاپ می‌کند (و المنتور با `&amp;`) شناخته نمی‌شدند و پارامتر `display` دو بار اضافه می‌شد؛ حالا هر دو شکل rewrite می‌شوند و جداکنندهٔ خود آدرس دوباره استفاده می‌شود.
+  - **XML-RPC:** این چک‌باکس از ۱.۱۱.۱۷۸ عملاً بی‌اثر بود (چون `HSW_Account_Auth` به‌خاطر ورود دوعاملی همیشه خاموشش می‌کند). حالا وضعیت را نشان می‌دهد و توضیح می‌دهد که روشن‌کردنش فقط از کد و با فیلتر `hsw_disable_xmlrpc` ممکن است.
+  - تست: هفت سنجهٔ جدید در `tests/qa/prelive-routing.php` (۱۵.۱–۱۵.۷) که روی ۱.۱۱.۱۸۸ قرمز بودند.
+
+## [1.11.188]
+
+#### CLS آرشیو موبایل: ۰٫۵۹۶۷ → ۰٫۱۵۸۱ (۷۳٪ کمتر).
+  - علتِ اندازه‌گیری‌شده پیدا شد: ستون کنار آرشیو روی موبایل ستون دسکتاپ است و ویجت‌هایش با `.hsw-d` مخفی می‌شوند، اما آن‌چه واقعاً مخفی می‌کند CSS هرصفحهٔ المنتور است — آخرین استایل‌شیت head — پس روی اتصال کند ستون با ارتفاع کامل (۸۹۲px) رندر می‌شد و با رسیدن آن فایل جمع می‌شد؛ کروم همان جمع‌شدن را یک رویداد CLS ثبت می‌کرد.
+  - `print_layout_guard()` حالا در `≤767.98px` ستون کنارِ کمپوزیت آرشیو را از پیش `display:none` می‌کند. با specificity (`.hsw-cp--archive .hsw-cp__body>.hsw-cp__col--side`) و بدون `!important` نوشته شده تا سایت‌هایی که واقعاً این ستون را روی موبایل می‌خواهند با یک قاعدهٔ مشخص‌تر برنده شوند؛ ستون‌های سبد/تسویه/مجله اصلاً تطبیق نمی‌کنند.
+  - اندازه‌گیری با Playwright (Chrome، ۴۱۱×۷۳۱، Slow 4G): `/shop/` از **۰٫۵۹۶۷** به **۰٫۱۵۸۱** رسید؛ بقیهٔ ۰٫۱۵۸ از رشد کارت‌ها هنگام رسیدن تصاویر است (نه چیدمان). `/` و `/cart/` و `/my-account/` بدون تغییر (۰٫۰۰۸).
+  - `hsw_layout_guard = false` مثل قبل کل گارد را خاموش می‌کند.
+
+## [1.11.187]
+
+#### هندسهٔ بلوک‌های اولین ویوپورت از قبل رزرو می‌شود (CLS).
+  - `HSW_Assets::print_layout_guard()` یک `<style id="hsw-layout-guard">` حدوداً ۷۰۰ بایتی در `wp_head` چاپ می‌کند که فقط هندسهٔ سطر هدر (`.hsw-hd__maininner`, `.hsw-hd__pill`)، بدنهٔ کمپوزیت (`.hsw-cp__body`, `.hsw-cp__col`) و گرید آرشیو (`.hsw-ag__grid`) را با همان fallbackهای متغیرهای خود سوئیت تکرار می‌کند — بدون تکرار رنگ/فونت/بک‌گراند.
+  - با Playwright و Slow 4G اندازه‌گیری شد: شیفت ۰٫۰۵۱۷ سطر هدر (عرض 338px → 411px هنگام رسیدن دیرهنگام `hsw-header.min.css`) **حذف شد**.
+  - با فیلتر `hsw_layout_guard = false` کاملاً خاموش می‌شود.
+  - رویداد بزرگ CLS (≈۰٫۶۰) هنوز باقی است و علتش وزن HTML صفحه گزارش‌شده (۳۲KB اسپرایت SVG + ۱۷KB استایل inline از کل ۲۰۶KB) — در نسخه‌های بعد.
+
+## [1.11.186]
+
+#### شش مورد P1 بسته شد و سیاست اعتبار شارژ قابل انتخاب شد.
+  - **سیاست اعتبار شارژ (هر سایت):** متای `_hsw_wallet_topup_amount` هنگام ساخت سفارش ثبت می‌شود و مبلغ اعتبار از تابع خالص `HSW_Wallet_Topup::credit_amount()` می‌آید. دو انتخاب در تنظیمات کیف پول: `cap` (پیش‌فرض: بیشتر از مبلغ دریافتی اعتبار نده) و `exact` (دقیقاً مبلغ انتخابی مشتری)؛ فیلتر `hsw_wallet_topup_policy`. کارمزد درگاه دیگر اعتبار رایگان تولید نمی‌کند و با `paid = 0` هیچ اعتباری ثبت نمی‌شود.
+  - **نشت تراکنش:** بدنهٔ `apply()` در `try/finally` با بستن همهٔ فریم‌های بازِ همان فراخوان؛ یک exception دیگر عمق را باز نمی‌گذارد. `release_open_transaction()` روی `shutdown` هم هر فریم باز دیگری را می‌بندد.
+  - **InnoDB:** `CREATE TABLE`ها صریحاً `ENGINE=InnoDB` و پس از نصب بررسی `information_schema`؛ جدول MyISAM با اعلان قرمز و `ALTER TABLE … ENGINE=InnoDB;` قابل کپی گزارش می‌شود.
+  - **احراز هویت:** تغییر 2FA فعال حالا رمز عبور می‌خواهد (۵ تلاش / ۱۵ دقیقه)؛ قبلاً یک سشن باز کافی بود تا عامل دوم به کانال یا شمارهٔ مهاجم منتقل شود.
+  - **درگاه:** کیف پول روی سفارش شارژ دیگر پیشنهاد نمی‌شود (پرداخت شارژ با کیف پول دور باطل بود).
+  - **REST:** `topup` / `pay` / `convert` با شمارندۀ اتمیک per-user محدود شدند و ۴۲۹ با پیام فارسی می‌دهند.
+  - **امتیاز به کیف پول:** سوئیچ «تبدیل امتیاز به اعتبار» در تنظیمات کیف پول (پیش‌فرض روشن، فقط `no` صریح خاموش می‌کند) + فیلتر `hsw_wallet_points_convert`؛ با خاموشی فرم تبدیل رندر نمی‌شود و `convert_points()` قبل از هر کوئری رد می‌کند.
+  - تست: `tests/qa/prelive-p1.php` ۱۲ سنجه (۱۲/۱۲ قرمز روی ۱.۱۱.۱۸۵ → ۱۲/۱۲ سبز)؛ روی دیتابیس واقعی `remediation` ۵۵/۰ و `sql-compat` ۱۲/۰.
+
+## [1.11.185]
+
+#### رفع باگ خود HSW_Optimizer — با لایت‌اسپید کار نمی‌کرد و نوتیس PHP می‌داد.
+  - ۱.۱۱.۱۸۴ گزینهٔ `optm-css_exc` را که در لایت‌اسپید **آرایه** است با رشته بازنویسی می‌کرد؛ روی سایت لوکال با لایت‌اسپید ۷.۹.۲ اندازه‌گیری شد: هر صفحه **۶ بار** `PHP Warning: Array to string conversion` و بدون اثر.
+  - حالا از فیلترهای رسمی خود لایت‌اسپید در نقطهٔ مصرف استفاده می‌شود: `litespeed_optimize_css_excludes` (اولویت ۲۰، بعد از `Data::load_css_exc`) و `litespeed_ucss_exc`؛ ورودی/خروجی آرایه، خطوط صاحب سایت حفظ، بدون تکرار.
+  - تشخیص اصلاح شد: `LSCWP_CTRL` ثابت نیست (کلید query در router است)؛ حالا `defined('LSCWP_V') || has_filter('litespeed_conf')`.
+  - تست: `prelive-optimizer.php` با ۸ سنجه (قرمز ۸/۸ بدون کلاس، سبز ۸/۸ با آن) و صفر نوتیس روی سایت واقعی.
+
+## [1.11.184]
+
+#### سازگاری با بهینه‌ساز لایت‌اسپید (کلاس جدید `HSW_Optimizer`).
+  - CSS خودکار از ادغام و از حذف قاعده‌های UCSS خارج می‌شود (`optm-css_exc` / `optm-ucss_exc`) — فقط در حافظه، بدون تغییر تنظیمات صاحب سایت و بدون نوشتن در دیتابیس؛ خطوط موجود حفظ و از تکرار جلوگیری می‌شود.
+  - بعد از تعویض نسخه (همراه پاک‌شدن کش CSS المنتور) و بعد از ذخیرهٔ پالت/حساب/امنیت، `litespeed_purge_all` اجرا می‌شود؛ برای WP Rocket / W3TC / SiteGround هم با تابع رسمی خودشان.
+  - در پیش‌نمایش/ویرایش المنتور بهینه‌ساز برای همان درخواست خاموش می‌شود (`litespeed_disable_all`).
+  - اعلان قابل‌بستن در صفحهٔ HamiShop: وضعیت Combine/UCSS/Font-Display و توصیهٔ خارج‌کردن `elementor/css/post-` از ادغام؛ اگر Font Display روی `optional`/`block` باشد هشدار می‌دهد (همان مقدار روی فونت وزیرمتن نوشته می‌شود).
+  - بدون لایت‌اسپید هیچ کاری انجام نمی‌شود (تشخیص با `LSCWP_CTRL` / `has_filter('litespeed_conf')`). فیلتر `hsw_optimizer_exclude` برای تغییر خطوط.
+  - تست: `tests/qa/prelive-optimizer.php` ۶ سنجه (قرمز ۶/۶ بدون این کلاس، سبز ۶/۶ با آن).
+
+## [1.11.183]
+
+#### فونت وزیرمتن، رنگ صورتی المنتور روی دکمه‌ها و شاین قرمز لوگو.
+  - **فونت:** `font-display: optional` باعث می‌شد اگر فایل وزیرمتن به پنجرهٔ ~۱۰۰ms نرسد، کل صفحه روی Tahoma بماند و هیچ‌وقت swap نشود (با تغییر ریسپانسیو درست می‌شد). حالا `swap` است + فایل فونت با `<link rel="preload" as="font">` پیش‌بارگذاری می‌شود؛ `format('woff2-variations')` (منسوخ) هم به `format('woff2')` تبدیل شد.
+  - **صورتی rgb(204,51,102):** از قاعدهٔ خام تم Hello Elementor روی `button:hover, button:focus` می‌آمد (پس `#c36`)، نه از افزونه. حالت `:focus` به دکمهٔ بستن سبد، بستن درِ پنل و دکمه‌های آیکونی اضافه شد و تب‌های باشگاه مشتریان (`hsw-ac__member-tabs`) قاعدهٔ hover/focus گرفتند.
+  - **شاین لوگو:** استاپ رنگی `color-mix(--hsw-accent, #fc593a)` حذف شد؛ سوییپ حالا شفافِ سفید است و درخشش با blur + drop-shadow ساخته می‌شود.
+
+## [1.11.182]
+
+### Changed
+
+- **فقط هارنس آزمون — کد افزونه بدون تغییر.** هارنس پیش از لایو (`tests/qa/prelive*.php`: ۵۴ سنجهٔ احراز هویت، 2FA، شمارش حساب، خاموشی کیف پول، تأیید ایمیل، مسیریابی تسویه و لیست سفید «نت ملی» + اثبات‌های دیتابیس واقعی) در ریپو ثبت شد. پوشهٔ `tests/` با `export-ignore` از ZIP انتشار بیرون است و در اجرا تغییر ایجاد نمی‌کند.
+
+## [1.11.181]
+
+#### جریان خرید و پاک‌سازی‌های امنیتی.
+  - **خرید مهمان:** ورود اجباری در صفحهٔ تسویه فقط وقتی اعمال می‌شود که خود ووکامرس ثبت‌نام را لازم بداند (`WC()->checkout()->is_registration_required()`)؛ مقصد بازگشت پس از ورود هم با `redirect_to` و هم `redirect` ارسال می‌شود.
+  - **ربودن مسیر پرداخت:** fallback بر اساس slug (`payment` / `complete`) تنها برای برگه‌ای قبول می‌شود که ویجت یا شورت‌کد HamiShop داشته باشد.
+  - **سبد مجازی:** اگر `WC()->cart->needs_shipping()` false باشد، مشتری از صفحهٔ پرداخت به تسویه برنمی‌گردد.
+  - **صفحهٔ خالی:** `rewrite_font_display()` در خطای PCRE همان HTML اولیه را برمی‌گرداند (قبلاً `null` و صفحهٔ سفید).
+  - **مهمان‌سازی:** `/?author=N` با گزینهٔ «پنهان‌کردن لیست کاربرها» برای مهمان ۴۰۴ می‌شود؛ بایگانی `/author/…` دست‌نخورده. `/wp/v2/users` برای ویرایشگرها (`edit_posts`) باقی می‌ماند.
+  - **باگ نت ملی:** دامنه‌های دستی که فروشگاه وارد کرده بود به‌دلیل کست `(string)` روی آرایه هرگز اعمال نمی‌شدند (و نوتیس PHP می‌داد)؛ برطرف شد. دامنهٔ خود سایت، تلگرام/واتس‌اپ/پیامک و درگاه‌های روشن هیچ‌وقت مسدود نمی‌شوند و در صفحهٔ تنظیمات نمایش داده می‌شوند.
+
+## [1.11.180]
+
+### Changed
+
+- **فقط هارنس آزمون:** `remediation.php` سوئیچ کیف پول را روشن می‌کند و استاب درگاه `get_option()` دارد؛ کد افزونه تغییر نکرده است.
+
+## [1.11.179]
+
+#### کیف پول با خاموش‌بودن کاملاً پنهان می‌شود و تأییدیهٔ ایمیل ثبت‌نام تلفنی کامل شد.
+  - **گیت واحد:** `HSW_Wallet::customer_features_on()` (گزینهٔ `hsw_wallet_gateway_on` + ثابت `HSW_DISABLE_WALLET`)؛ `HSW_Account::settings()` در زمان اجرا `wallet.enabled` را خاموش می‌کند، پس منو، اندپوینت `/wallet/`، کارت آمار، تبدیل امتیاز و فیلد پروفایل ادمین همه با هم حذف می‌شوند.
+  - **صفر کوئری:** `wallet_balance()` در حالت خاموش مقدار ۰ برمی‌گرداند و به جدول `hsw_wallet` دست نمی‌زند (اندازه‌گیری شده: ۲۷۰٬۶۰۰/۱ کوئری → ۰/۰).
+  - **تأییدیهٔ ایمیل:** کنترلر مستقل `hsw_email_send`/`hsw_email_verify` با nonce خودش (بدون دستزدن به OTP/پیامک)؛ بنر آدرس تایپ‌شده در ثبت‌نام (`_hsw_pending_email`) را پیشنهاد می‌دهد، ارسال به آدرس جای‌گزین را رد می‌کند، و پس از تأیید ایمیل حساب را به آدرس واقعی تغییر می‌دهد.
+  - **ایمیل حساب جدید** برای آدرس `@noreply.invalid` ارسال نمی‌شود.
+
+## [1.11.178]
+
+#### احراز هویت، 2FA و throttle: یافته‌های بازبینی پیش از لایو بسته شد.
+  - **بایپس 2FA:** fail-open فقط برای خطای واقعی ارسال؛ cooldown/throttle/پیکربندی مسدود می‌کند. پیش‌فرض `hsw_2fa_fail_open_privileged` حالا `false` است.
+  - **نشست بعد از دروازهٔ 2FA:** توکن `set_auth_cookie` با `WP_Session_Tokens::destroy()` نابود می‌شود، نه فقط کوکی مرورگر.
+  - **throttle اتمیک و fail-closed:** شمارش با `LAST_INSERT_ID(...)` در همان اتصال؛ خطای DB یا جدول غایب یعنی `allowed=false` (قبلاً همه مجاز می‌شدند).
+  - **شمارش حساب:** throttle و cooldown قبل از جستجوی کاربر؛ پاسخ موجود/ناموجود/ادمین یکسان؛ همهٔ شکست‌های verify یک پیام.
+  - **غیرفعال‌کردن 2FA:** رمز فعلی یا کد تازه لازم است، با سقف ۵ تلاش / ۱۵ دقیقه.
+  - **XML-RPC و Application Passwords** برای حساب‌های 2FA‌دار و مدیران پیش‌فرض بسته شد.
+  - **OTP:** کلید شمارنده‌ها به خود کد بسته شد؛ توکن‌های hex با پارسر واحد؛ resend سقف ۳ و بدون تمدید؛ 2FA مستقل از `otp_enabled`؛ ثبت‌نام تلفنی ایمیل تأییدنشده را روی حساب نمی‌گذارد.
+  - **کیف پول:** حذف `enabled='yes'` هاردکد (گزینهٔ `hsw_wallet_gateway_on` + ثابت `HSW_DISABLE_WALLET`)؛ ساخت جدول روی `init` فقط با `hsw_wallet_autoinstall=yes`.
+
+## [1.11.177]
+
+#### کیف پول: نوشتن پول تراکنشی و اتمیک شد؛ لغو/ریفاند سفارش شارژ، اعتبار را پس می‌گیرد.
+  - **اتمیسیتی:** `credit`/`debit`/`decide`/`convert_points`/`repair_gaps` داخل یک `START TRANSACTION … COMMIT` (با شمارندهٔ عمق، پس فراخوانی تودرتو تراکنش بیرونی را زودتر commit نمی‌کند).
+  - **هوک پس از COMMIT:** `hsw_wallet_changed` در صف می‌ماند و فقط بعد از commit واقعی اجرا می‌شود؛ تراکنش برگشت‌خورده هیچ اعلانی نمی‌فرستد.
+  - **ابطال شارژ:** لغو یا ریفاند کامل سفارش شارژ با `topup-reverse:<order>:full` و ریفاند جزئی با `topup-reverse:<order>:<refund_id>` برمی‌گردد؛ تکرار no-op است و موجودی هرگز منفی نمی‌شود (در این حالت یادداشت «بررسی دستی» روی سفارش ثبت می‌شود).
+  - **خطای پایگاه‌داده از کمبود موجودی جدا شد:** deadlock یا خطای سرور پیام مستقل می‌گیرد، نه «موجودی کافی نیست».
+  - **`repair_gaps`:** قفل ردیف، بازبینی گپ زیر قفل، و ref بر پایهٔ آخرین ردیف همان کاربر (نه MAX سراسری).
+  - **فرم ادمین:** CAS با `hsw_wallet_balance_orig`؛ اگر مشتری بین باز و بستهٔ فرم تراکنش کرده باشد، ذخیره رد و پیام داده می‌شود (به‌جای پاک‌شدن تراکنش).
+  - **مهاجرت:** ردیف زودهنگام (ساخته‌شده پیش از مهاجرت) به‌صورت idempotent ترمیم می‌شود.
+  - **تست:** `tests/qa/remediation.php` روی MySQL 8 و MariaDB 11 در CI اجرا می‌شود.
+
+## [1.11.176]
+
+#### امنیت و اتمیک‌بودن: یافته‌های بازبینی مستقل بسته شدند؛ اسکریپت‌های فرانت defer شدند.
+  - **شارژ موجودی توسط مشترک بسته شد:** فیلد موجودی پروفایل حالا `manage_woocommerce` هم می‌خواهد.
+  - **کد یکبارمصرف واقعاً یک‌بارمصرف:** claim و شمارندهٔ تلاش‌ها روی جدول اتمیک (برای OTP و 2FA).
+  - **دابل‌کلیک = یک سفارش:** `checkout/complete` پشت قفل اتمیک.
+  - **کیف پول:** DDL سازگار با `NO_ZERO_DATE` + retry نصب شکسته؛ سقف ۱e16 در `set_balance`؛ گپ منفی فقط گزارش می‌شود؛ ریفاند از ردیف `spend:` دفتر.
+  - **Rate limit:** تطبیق پراکسی IPv6؛ بقیه با فیلتر `hsw_trusted_proxies`.
+  - **بهینه‌سازی:** هر ۹ اسکریپت فرانت با `defer` بومی وردپرس.
+
+## [1.11.175]
+
+#### آماده‌سازی لایو: مهاجرت دسته‌ای موجودی، بازگشت وجه، امتیاز اتمیک و تست‌های موازی.
+  - **مهاجرت `usermeta` → `{prefix}hsw_wallet`:** دسته‌ای (۲۰۰ کاربر)، idempotent (`INSERT IGNORE`)، متای قدیمی دست‌نخورده + پشتیبان خام در `{prefix}hsw_wallet_meta_backup`. ردیف‌های تکراری **جمع** می‌شوند و با مقادیر خام در گزارش می‌آیند (خالی/غیرعددی/ارقام فارسی/اعشاری جدا برچسب می‌خورند). ابزار: `wp hsw wallet migrate|report|repair`.
+  - **بازگشت وجه:** لغو یا ریفاند سفارشِ پرداخت‌شده با کیف پول، پول را برمی‌گرداند (`refund:<order>:full` و `refund:<order>:<refund_id>`)، idempotent و با سقف مبلغ پرداخت‌شده.
+  - **TOCTOU شارژ:** درخواست pending با `ref = pending:<user>` یکتا می‌شود؛ ده کلیک هم‌زمان = یک درخواست.
+  - **امتیاز:** شمارنده به ستون `points_used` منتقل و با `UPDATE … WHERE points_used + n <= earned` اتمیک claim می‌شود.
+  - **`VALUES()`:** حذف شد؛ الگوی سازگار با MySQL 8.0.20+ و MariaDB.
+  - **آینهٔ متا:** حذف شد؛ متا فقط snapshot پیش از مهاجرت است و هیچ کدی آن را نمی‌خواند.
+  - **تست‌ها:** `tests/qa/migration-5000.php` (۵۰۰۰ کاربر ساختگی، ۲۱ سنجه)، `wallet-paths.php` (۲۵)، `rest-parallel.php` (۸)، `sql-compat.php` (۱۲)، `hpos.php`؛ کار CI تازهٔ `mysql8`.
+
+## [1.11.174]
+
+#### انتشار دستی ۱.۱۱.۱۷۴ — نتیجهٔ بازبینی همکار: چهار ریسک واقعی بسته شد + اصلاح اعداد مستندات.
+  - **کیف پول (پول واقعی):** `debit()` قبلاً موجودی را می‌خواند و بعد بدون شرط کم می‌کرد؛ دو پرداخت هم‌زمان می‌توانستند موجودی را منفی کنند. حالا شرط `balance >= amount` داخل همان `UPDATE` است (بدون پنجرهٔ race). اگر ثبت دفتر ناموفق باشد، موجودی برمی‌گردد تا کیف پول و صورت‌حساب هرگز اختلاف نداشته باشند.
+  - **شارژ دوباره:** `settle()` با MySQL named lock (`GET_LOCK`) محافظت می‌شود، پرچم داخل قفل دوباره خوانده می‌شود و فقط پس از موفقیت شارژ ست می‌شود. تست: دو بار `settle()` = یک شارژ.
+  - **جدول throttle:** کران روزانهٔ `hsw_throttle_prune` ردیف‌های منقضیِ قدیمی‌تر از یک روز را پاک می‌کند (قبلاً هیچ‌وقت پاک نمی‌شد).
+  - **شمارش معکوس:** تایمر حالا با ساعت **سرور** هم‌تراز است (`data-hsw-now`) نه ساعت دستگاه بازدیدکننده.
+  - **مستندات:** عدد `!important` از ۳۱۴ به **۳۱۶**، جدول حجم دارایی‌ها از ۴۲۷→۳۱۴ / ۱۲۳→۷۶ به **۶۳۲→۴۶۸KB** و **۲۴۸→۱۵۶KB**، و نسخه‌های کهنهٔ ۱٫۱۱٫۱۵۴ در `WIDGETS-REFERENCE` و `STAGING-CHECKLIST` اصلاح شد. تفکیک «۶۲ ویجت کل · ۱۵ ویجت پایه روشن · ۴۷ پارت خاموش» هم صریح شد.
+
+## [1.11.173]
+
+#### انتشار دستی ۱.۱۱.۱۷۳ — هدر مینیمال: شعار قابل نمایش، آیکن‌های انتخابی و کنترل‌های استایل کامل (هر دو هدر).
+  - **رفع باگ «شعار / زیرنویس برند کار نمی‌کند»:** مقدار ذخیره می‌شد و مارک‌آپ هم چاپ می‌شد، ولی CSS پیل آن را با `display:none` پنهان می‌کرد. حالا زیر نام برند نمایش داده می‌شود و کنترل رنگ + تایپوگرافی مستقل دارد.
+  - **آیکن‌ها قابل انتخاب شدند:** چهار کنترل جدید (منوی همبرگری، جستجو، حساب کاربری، سبد خرید) به‌علاوهٔ آیکن دکمهٔ اقدام در هدر مینیمال. لیست از همان اسپرایت افزونه می‌آید، پس هر آیکنی که انتخاب شود قابل رسم است؛ مقدار نامعتبر خودکار به پیش‌فرض برمی‌گردد. هدر فروشگاهی هم همین آیکن‌ها را می‌گیرد.
+  - **فهرست آیکن مشترک گسترش یافت:** ۲۰ آیکن کاربردی (منو، کاربر، جستجو، فروشگاه، پشتیبانی، کیف پول، فاکتور، تخفیف و…) با برچسب فارسی به `HSW_Widget_Base::icon_options()` اضافه شد تا ویجت‌های لوپ هم از آن استفاده کنند.
+  - **استایل‌های تازه در بخش «استایل هدر» (هر دو هدر):** رنگ لینک منو و رنگ هاور، اندازهٔ دکمه‌های آیکنی (ریسپانسیو) و گردی آن‌ها، و استایل کامل دکمهٔ اقدام (پس‌زمینه/متن/هاور/گردی) که قبلاً هیچ کنترلی نداشت.
+  - **بخش «پیل شیشه‌ای» (مینیمال):** پس‌زمینه، رنگ و ضخامت حاشیه، فاصلهٔ آیتم‌ها، کمینهٔ ارتفاع و پدینگ افقی/عمودی — همه به متغیر CSS وصل شدند تا در دسکتاپ و موبایل هر دو اثر کنند (قبلاً موبایل اعداد ثابت خودش را داشت).
+  - پروب‌های تازه: `tests/header-minimal-probe.js` (۱۷ بررسی × دو عرض) + `tests/fixture-minimal-page.php` که یک صفحهٔ واقعی المنتور با هدر مینیمال می‌سازد تا تست بدون ادیتور تکرارپذیر باشد.
+
+## [1.11.172]
+
+#### انتشار دستی ۱.۱۱.۱۷۲ — CI روی GitHub، هارنس کامل‌تر و بررسی‌های ساختاری.
+  - **`.github/workflows/ci.yml`:** چهار gate روی هر push/PR (و روی تگ `v*` ساخت artifact از ZIP): لینت روی **PHP 7.4/8.0/8.1/8.2/8.3**، هارنس روی ۷٫۴ و ۸٫۲، بررسی‌های ساختاری، و تازه‌بودن `.min`/POT.
+  - **هارنس از ۷۵ فایل به ۱۱۷/۱۱۷ فایل رسید:** قبلاً ۴۲ فایل (فاکتور، ورکر تلگرام، هدرها، پنل حساب، امنیت، کیف پول و…) هرگز در هارنس لود نمی‌شدند و «ALL CLEAN» نیمی از افزونه را تست نمی‌کرد. حالا pass دوم با ترتیب وابستگی (trait → base → بقیه) همه را لود می‌کند و اگر فایلی جا بیفتد، خودش `COVERAGE GAP` می‌دهد.
+  - **`tools/ci-checks.php` (جدید، بدون وابستگی):** ۱۶ بررسی — هم‌خوانی نسخه در سه فایل + وجود release note + چنج‌لاگ، دامنهٔ ترجمهٔ غلط، `var_dump`/`print_r`/`console.log` جامانده، وجود `.min` برای هر CSS/JS، ثبت هر ویجت در کاتالوگ و require شدنش، نبود `node_modules`/فایل‌های موقت، و وجود مستندات.
+  - README: نشان CI + بخش «تست خودکار» با جدول چهار مرحله و دستورهای محلی.
+
+## [1.11.171]
+
+#### انتشار دستی ۱.۱۱.۱۷۱ — مستندسازی کامل، پاک‌سازی کد مرده و تکمیل uninstall.
+  - **`TECHNICAL-BRIEF.md` (جدید):** سند مرجع فنی برای هر برنامه‌نویس — قواعد طراحی، نقشهٔ پوشه‌ها، چرخهٔ بوت، موجودی کلاس‌ها، سیستم ویجت، آبشار توکن‌ها، ماتریس دارایی‌ها، مدل داده، شش جریان کلیدی، امنیت، اعداد کارایی، تست‌ها، نقاط توسعه و چک‌لیست انتشار.
+  - **`MARKETING.md` بازنویسی شد:** برای تیم فروش — پرسونا، حرف فروش هر مرحله، مزیت‌های قابل اثبات با عدد، پاسخ اعتراض‌ها، اسکریپت دمو ۱۰ دقیقه‌ای، بسته‌بندی پیشنهادی و فهرست «ادعاهایی که نباید بکنیم».
+  - **uninstall کامل شد:** ۲۲ گزینهٔ جاافتاده (فاکتور، Polling تلگرام، صفحهٔ ۴۰۴، ارسال رایگان، Jalali، `hsw_db_version` و…) و کران `hsw_tg_poll` حالا هنگام حذف افزونه پاک می‌شوند. دفتر کیف پول عمداً حفظ می‌شود (سابقهٔ مالی) و در کد توضیح داده شد.
+  - **حذف کد مرده:** ۷ متد بدون هیچ فراخوان (`order_tone`, `chosen_gateway_id`, `coupons_total`, `demo_wallet_balance(_m)`, `demo_free_note(_m)`, `Telegram_Poller::deactivate`) حذف شدند. متدهایی که از طریق ووکامرس/هوک‌های داینامیک یا به‌عنوان API ویجت‌سازی استفاده می‌شوند (`payment_fields`, `ajax_*`, `style_size_var`) دست‌نخورده ماندند.
+  - **اصلاح متن:** توضیح افزونه در فهرست افزونه‌ها («محصولل»، «سسبک») و دو ادعای نادرست README دربارهٔ فونت و امتیاز Lighthouse.
+  - بازبینی دود (۲۶ سطح عمومی و ادمین): بدون خطای PHP، `debug.log` بدون رکورد جدید.
+
+## [1.11.170]
+
+#### انتشار دستی ۱.۱۱.۱۷۰ — فاکتور چاپی تک‌برگی + برچسب پستی، برای مدیر فروشگاه و مشتری.
+  - **یک سند، دو نقطهٔ ورود:** دکمهٔ «چاپ فاکتور و برچسب پستی» در صفحهٔ ویرایش سفارش (HPOS و حالت قدیمی) و در «سفارش‌های من» پنل کاربری. هر دو یک برگهٔ A4 می‌دهند.
+  - **بدون ذخیره‌سازی روی هاست:** صفحه همان لحظه ساخته می‌شود و در پنجرهٔ چاپ با «Save as PDF» به PDF تبدیل می‌شود؛ نه کتابخانهٔ PDF، نه فایل موقت، نه مصرف حجم. فایل روی دیسک نوشته نمی‌شود (شمارش فایل‌های `uploads` قبل/بعد یکسان ماند).
+  - **تک‌برگ واقعی:** سطوح تراکم خودکار — تا ۱۰ قلم عادی، ۱۱ تا ۱۸ «فشرده»، ۱۹ تا ۳۲ «تنگ» (هر قلم یک خط، نام طولانی با … بریده می‌شود) و بالای ۳۲ «اولترا». تست با Chromium روی سفارش ۲۵ قلمی → **۱ صفحه**.
+  - **لوگو و مشخصات فروشگاه:** از «HamiShop ← برند و لوگو» (لوگو، نشانی، تلفن، مهر، و فیلد تازهٔ «کد پستی فروشگاه» که پیش‌فرض از ووکامرس می‌آید).
+  - **چارت پستی:** بخش «مشخصات مرسولهٔ پستی» با دو ستون فرستنده/گیرنده، کد پستی گیرنده به‌صورت ده خانه (مثل فرم ادارهٔ پست)، تعداد اقلام، وزن (از وزن محصولات) و اگر سفارش پرداخت در محل است، همان مبلغ.
+  - **رنگ:** سیاه‌وسفید با یک لهجهٔ رنگی از پالت سراسری؛ سوییچ «سیاه و سفید خالص» هم اضافه شد.
+  - **دسترسی:** لینک امضاشده با nonce + مالکیت سفارش یا دسترسی `edit_shop_orders`. مهمان، nonce خراب و مشتری دیگر ۴۰۳ می‌گیرند.
+  - **سوییچ فیچر:** «کنترل ویجت‌ها ← فاکتور چاپی و برچسب پستی» (پیش‌فرض روشن). خاموش که باشد هیچ دکمه‌ای اضافه نمی‌شود.
+
+## [1.11.169]
+
+#### انتشار دستی ۱.۱۱.۱۶۹ — ریتم یکسان هدر در موبایل، لوگوی شاینی گرادیانتی، و ورکر Polling تلگرام برای هاست‌هایی که وبهوک نمی‌گیرند.
+  - **هدر موبایل (هر دو هدر):** آیتم‌ها حالا با یک فاصلهٔ یکسان و روی یک خط وسط‌چین می‌نشینند. قبلاً سه عدد مختلف هم‌زمان فاصله می‌دادند (۸px بین برند و برگر، ۴۰px از تنظیم ویجت بین آیکن‌ها) و یک لایهٔ جستجوی صفرعرض فضای آزاد را می‌بلعید. زیر ۹۰۰px خوشهٔ اکشن‌ها `display: contents` می‌شود تا فرزندانش خودشان آیتم ردیف شوند و `space-evenly` یک اندازه فاصله بدهد. اندازه‌گیری: ۳۹۰px → ۱۵px×۴، ۳۶۰px → ۱۲px×۴ (هر دو هدر، اختلاف عمودی صفر).
+  - **شاین گرادیانتی لوگو:** درخشش لوگو از یک نوار سفید به دو تُن (سفید + رنگ تأکید پالت) تغییر کرد تا همان‌جا با پالت هماهنگ بماند. گزینهٔ تازهٔ «گرادیانت روی نام برند» هم اضافه شد (پیش‌فرض خاموش) برای وقتی لوگو متنی است و گرادیانت روی حروف می‌خواهید.
+  - **ورکر تلگرام (Polling):** برای هاست‌هایی که `getWebhookInfo` خطای `Connection timed out` می‌دهد ولی `getUpdates` از همان هاست کار می‌کند. یک کلاس تازه (`HSW_Telegram_Poller`) با آدرس `?hsw_tg_poll=1&secret=…`: هر اجرا یک `getUpdates` کوتاه (`timeout=0`، حد ۱۰ پیام)، `offset` در آپشن غیراوتولود ذخیره می‌شود (پیام تکراری پردازش نمی‌شود)، `deleteWebhook` یک‌بار انجام می‌شود (وگرنه تلگرام ۴۰۹ می‌دهد) و اولین اجرا فقط جدیدترین آپدیت را مبنا می‌گذارد تا صف قدیمی پردازش نشود. قفل ۴۵ ثانیه‌ای از اجرای هم‌زمان جلوگیری می‌کند.
+  - منطق پیام‌ها تکرار نشده: هم وبهوک و هم Polling به یک متد (`handle_telegram_update`) می‌روند؛ بررسی مالکیت شماره هم همان‌جاست.
+  - **هزینهٔ صفر در حالت خاموش:** با یک `isset($_GET)` تمام می‌شود؛ اندازه‌گیری روی `/shop/` تفاوت معناداری در تعداد کوئری نشان نداد (۱۹۷ در هر دو حالت، اختلاف داخل نوسان). زمان‌بندی WP-Cron فقط در حالت روشن ثبت می‌شود و در حالت خاموش فقط در پیشخوان پاک می‌شود؛ با غیرفعال‌کردن افزونه هم `hsw_tg_poll` پاک می‌شود.
+  - پروب‌های تازه: `tests/header-mobile-probe.js` و بررسی قطعی حلقهٔ Polling با API بدل (offset، بدون تکرار، قفل، خطای شبکه).
+
+## [1.11.168]
+
+#### انتشار دستی ۱.۱۱.۱۶۸ — تأیید کامل فلو تیکت پشتیبانی (بدون تغییر در منطق).
+  - کل چرخهٔ تیکت به‌صورت زنده تست شد: ساخت تیکت توسط مشتری (کپچا + دپارتمان + اولویت) → نمایش «در انتظار پاسخ» → پاسخ مشتری → پاسخ پشتیبان از پیشخوان وردپرس → وضعیت «پاسخ داده شده» → دیدن پاسخ + اعلان در حساب کاربری → «بستن» توسط مشتری (با تأیید) → بسته‌شدن گفتگو و حذف فرم پاسخ → بازگشایی از پیشخوان → برگشت فرم پاسخ برای مشتری.
+  - هیچ باگ منطقی پیدا نشد؛ فقط پروب تکرارپذیر `tests/support-flow-probe.js` (۱۷ چک) اضافه شد تا این چرخه در آینده نشکند.
+  - رمز حساب تست ادمین بعد از اجرا به هش قبلی برگشت و داده‌های موقت پاک شدند.
+
+## [1.11.167]
+
+#### انتشار دستی ۱.۱۱.۱۶۷ — فیلترهای آرشیو: حذف تکی، پاک‌سازی کامل و ترکیب با انتخاب دسته.
+  - **رفع باگ مهم:** فیلتر «دسته‌بندی» در سایدبار/شیت یک لینک ناوبری است و آدرسش با `get_term_link()` ساخته می‌شد؛ یعنی اگر «فقط کالاهای موجود» یا یک فیلتر ویژگی روشن بود و بعد روی یک دسته کلیک می‌کردی، **همهٔ فیلترها می‌رفتند**. حالا لینک دسته از `filter_url()` ساخته می‌شود و فیلترهای فعال (موجودی، ویژگی‌ها، بازهٔ قیمت، مرتب‌سازی) را با خود می‌برد: `/product-category/dry-run/?filter_pa_color=black&instock=1`.
+  - «حذف فیلتر» تکی (تگ‌های ردیف بالای آرشیو) تست و تأیید شد: حذف یک تگ فقط همان پارامتر را برمی‌دارد و بقیه می‌مانند.
+  - «پاک‌کردن» / «حذف همه» تست و تأیید شد: URL کاملاً تمیز می‌شود، ردیف تگ‌ها ناپدید می‌شود و شمارش «نمایش ۱ تا ۱۲ از ۲۵ کالا» دقیقاً به حالت قبل از فیلتر برمی‌گردد.
+  - موبایل: خاموش‌کردن یک فیلتر داخل شیت آن را از URL حذف می‌کند، ترکیب دو فیلتر هرکدام یک‌بار ارسال می‌شود و «حذف همه»ی داخل شیت هم پاک‌سازی کامل می‌کند.
+  - پروب تازهٔ `tests/archive-filter-remove-probe.js` این سناریوها را در ۱۴۴۰ و ۳۹۰ تکرارپذیر می‌کند.
+
+## [1.11.166]
+
+#### انتشار دستی ۱.۱۱.۱۶۶ — زنجیرهٔ استایل کامل شد: پالت پیشخوان پیش‌فرض، کنترل ویجت اولویت.
+  - توکن‌هایی که ویجت‌های لوپ مصرف می‌کردند ولی پالت منتشر نمی‌کرد، به پالت اضافه شدند: `--hsw-pal-star` (ستاره/امتیاز از رنگ هشدار)، `--hsw-pal-border-strong`، `--hsw-pal-ink`، `--hsw-pal-ink-soft`، `--hsw-pal-on-accent/on-success/on-warning/on-danger`. حالا تغییر پالت واقعاً روی همهٔ سطوح لوپ اثر می‌گذارد و دیگر به fallback هگز داخل CSS نمی‌افتد.
+  - **متن روی رنگ پرشده:** `--hsw-on-primary` و توکن‌های `on-*` دیگر همیشه سفید نیستند؛ با محاسبهٔ luminance و اگر سفید زیر ۳:۱ شود (مثل رنگ زرد روشن) به `#111827` تغییر می‌کنند تا دکمه/بج ناخوانا نشود. پالت پیش‌فرض بدون تغییر می‌ماند.
+  - زنجیرهٔ اولویت مستند و تست‌شده: **(۱)** پالت پیشخوان → پیش‌فرض همهٔ ویجت‌ها، **(۲)** پریست/کنترل استایل همان ویجت در المنتور → اولویت برای همان ویجت، **(۳)** استایل المنتور روی خود ویجت (typography و رنگ‌های عنصری) → اولویت نهایی.
+  - پروب تازهٔ `tests/palette-cascade-probe.js` این سه لایه را با تغییر واقعی پالت تست می‌کند.
+
+## [1.11.165]
+
+#### انتشار دستی ۱.۱۱.۱۶۵ — سه ویجت لوپ مطابق بریف طراحی: داده‌ی صادق، CLS صفر، دسترس‌پذیری و حالت تاریک.
+  - **نوار موجودی صادق شد:** حالت «فروش‌رفته» دیگر از `total_sales` (فروش کل عمر محصول) درصد نمی‌سازد؛ از متای `_hsw_initial_stock` استفاده می‌کند که با یک migration نسخه‌دار (`hsw_db_version`) و روی هر تغییر موجودی ثبت/به‌روز می‌شود. پیش‌فرض کنترل هم به «درصد باقی‌مانده تا آستانه» تغییر کرد و بدون baseline، نواری ساخته نمی‌شود.
+  - **رویداد ووکامرس:** کارت‌های لوپ حالا `added_to_cart` را با `fragments` و `cart_hash` trigger می‌کنند (قبلاً فقط `wc_fragment_refresh`) تا مینی‌کارت و شمارندهٔ قالب هم هماهنگ شوند.
+  - **تصاویر:** `sizes` از تعداد کارت هر بریک‌پوینت ساخته می‌شود (`calc(100vw / 2.2)` و…) و برای اولین تصویر بالای فولد یک `<link rel="preload" as="image">` با `imagesrcset/imagesizes` چاپ می‌شود؛ در کل صفحه فقط یکی.
+  - **CLS صفر شد:** ریشهٔ ۰.۱۸ شیفت چیدمان، سوآپ دیرهنگام فونت لوکال بود؛ `font-display` به `optional` تغییر کرد. اندازه‌گیری موبایل ۳۹۰px: CLS = ۰ (قبلاً ۰.۱۶۷–۰.۱۸۴).
+  - **پایان تایمر:** کنترل «رفتار پس از پایان زمان» با سه حالت (پنهان‌کردن تایمر، پنهان‌کردن کل ویجت، نمایش متن پایان)؛ هرگز 00:00:00 مرده نمایش داده نمی‌شود.
+  - **حالت تاریک:** کنترل «حالت روشن/تاریک» (روشن/تاریک/خودکار بر اساس سیستم کاربر) که همان توکن‌ها را بازنویسی می‌کند؛ پیش‌فرض روشن است تا ظاهر فعلی سایت تغییر نکند.
+  - **کنتراست AA:** پردهٔ گرادیان «پیشنهاد شگفت‌انگیز» به‌صورت توکن و کنترل اضافه شد (پیش‌فرض ۲۰٪؛ سفید روی `#4d85ff` از ۳.۴۳:۱ به ۵.۰۷:۱) و متن‌های ریز روی گرادیان شفافیت خود را از دست دادند.
+  - **رنگ‌ها:** هگزهای پراکندهٔ `hsw-loop.css` به توکن تبدیل شدند (`--hsw-loop-on-accent`, `--hsw-pal-*`).
+  - پروب تازهٔ `tests/loop-spec-probe.js` این موارد را در هر انتشار بررسی می‌کند (preload، sizes، added_to_cart، سه حالت پایان تایمر، پالت تاریک، CLS).
+
+## [1.11.164]
+
+#### انتشار دستی ۱.۱۱.۱۶۴ — شمارش دسته‌ها هم‌تراز شد و حلقهٔ فوکوس نوتیس‌ها ست‌بندی شد.
+  - **رفع باگ شمارش:** تعداد محصولات دسته‌ها در دراور موبایل و منوی آبشاری فقط محصولات مستقیم همان دسته را می‌شمرد (مثلاً «دستکش و ماسک ۵»)، ولی آرشیو همان دسته ۷ محصول نشان می‌داد (با زیرشاخه‌ها) و کاربر فکر می‌کرد فیلتر خراب است. هِلپر تازهٔ `HSW_Header_Cascade::term_total_count()` مجموع دسته + همهٔ زیرشاخه‌ها را برمی‌گرداند و دراور، منوی آبشاری و سایدبار آرشیو یک عدد نشان می‌دهند.
+  - **رفع ظاهر:** ووکامرس نوتیس «سبد به‌روز شد» را برای اسکرین‌ریدر فوکوس می‌کند و مرورگر حلقهٔ نارنجی پیش‌فرض خود را روی باکس تمام‌عرض سبز می‌کشید؛ حالا حلقهٔ فوکوس با رنگ تأکید همان نوتیس (۲ پیکسل، با فاصله) نمایش داده می‌شود.
+  - پروب تازهٔ `tests/header-counts-probe.js` هم‌ترازی اعداد و رنگ حلقهٔ فوکوس را در هر انتشار بررسی می‌کند.
+
+## [1.11.163]
+
+#### انتشار دستی ۱.۱۱.۱۶۳ — پنل حساب، کیف پول و تیکت پشتیبانی بررسی و اصلاح شد.
+  - همهٔ صفحا‌ت پنل (پیشخوان، سفارش‌ها، جزئیات سفارش، آدرس‌ها، جزئیات حساب، کیف پول، پشتیبانی، اعلان‌ها، علاقه‌مندی‌ها) بدون خطای کنسول و بدون درخواست ناموفق باز می‌شوند و مبلغ‌ها با ارقام فارسی نمایش داده می‌شوند.
+  - **رفع باگ کیف پول:** وقتی هیچ درگاه آنلاین مجازی فعال نبود (COD عمداً برای شارژ مجاز نیست)، فرم شارژ نمایش داده می‌شد و با کلیک فقط خطای «درگاه دیگری انتخاب کنید» برمی‌گشت. حالا فرم شارژ در این حالت اصلاً رندر نمی‌شود و پیام شفاف «هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست» کنار موجودی و دفتر تراکنش‌ها نشان داده می‌شود؛ پاسخ REST هم پیام درست را برمی‌گرداند.
+  - **فلو تیکت پشتیبانی تست زنده شد:** ساخت تیکت (موضوع، دپارتمان، اولویت، سفارش مرتبط، پیام و کپچای جمع اعداد فارسی) و ثبت پاسخ مشتری؛ تیکت‌های ۱۳۶۱۸ و ۱۳۶۱۹ با شمارهٔ فارسی و ترد پیام‌ها ثبت شدند.
+  - تب «ثبت‌نام» صفحهٔ حساب با تنظیمات فعلی فروشگاه (تولید نام کاربری و رمز) فقط ایمیل می‌خواهد و در ۳۹۰ پیکسل سرریز افقی ندارد.
+  - پروب‌های تازهٔ `tests/wallet-topup-probe.js` و `tests/support-ticket-probe.js` این مسیرها را تکرارپذیر می‌کنند.
+
+## [1.11.162]
+
+#### انتشار دستی ۱.۱۱.۱۶۲ — فلو خرید تا ثبت سفارش، تاریخ شمسی و اعداد فارسی در پنل حساب.
+  - **فلو خرید کامل تست زنده شد:** سبد → تسویه (آدرس/ارسال/زمان تحویل) → دکمهٔ «ادامه و ورود به مرحله پرداخت» → صفحهٔ پرداخت حامی → ثبت سفارش از طریق REST → هدایت به «تکمیل خرید» با `order` و `key`. سه سفارش تستی (۱۳۶۱۴ تا ۱۳۶۱۷) در دسکتاپ و موبایل با وضعیت «در حال انجام»، روش پرداخت، آدرس، بازهٔ تحویل و متای `_hsw_placed_via=hamishop-pay` ثبت شدند.
+  - **رفع باگ تاریخ:** صفحهٔ تکمیل خرید تاریخ ثبت سفارش را با تقویم میلادی و ارقام لاتین نشان می‌داد («اکتبر 29, 2026») درحالی‌که بقیهٔ سایت شمسی بود؛ هِلپر مشترک `HSW_Helpers::format_date()` اضافه شد (اول wp-parsidate، بعد شمسی‌کنندهٔ خود افزونه، وگرنه تاریخ وردپرس) و صفحهٔ تکمیل و پنل حساب هر دو از آن استفاده می‌کنند.
+  - **رفع باگ اعداد:** مبلغ سفارش‌ها در «سفارش‌های من»، جزئیات سفارش، فاکتور و علاقه‌مندی‌ها با ارقام لاتین نمایش داده می‌شد؛ حالا همه از `price_html_fa()` عبور می‌کنند.
+  - **سخت‌سازی سفارش:** پس از نتیجهٔ موفق درگاه، سبد خرید مستقل از رفتار درگاه خالی می‌شود و `order_awaiting_payment` پاک می‌شود؛ رفرش صفحه دیگر نمی‌تواند سفارش دوم برای همان اقلام بسازد.
+  - پروب تازهٔ `tests/checkout-flow-probe.js` کل مسیر را با حساب تستی طی می‌کند (دسکتاپ و موبایل: `HSW_MOBILE=1`) و هر خطای کنسول/HTTP یا اختلاف شمارندهٔ سبد را گزارش می‌دهد.
+
+## [1.11.161]
+
+#### انتشار دستی ۱.۱۱.۱۶۱ — اصلاح فیلترهای آرشیو، اعداد فارسی در قیمت‌ها، لایهٔ دراور هدر و لینک‌های نوار پایین.
+  - **رفع باگ فیلتر آرشیو:** هر فیلد دو نسخه در فرم داشت (سایدبار دسکتاپ و شیت موبایل) و مرحلهٔ پایانی ارسال، نسخهٔ مخفی را دوباره فعال می‌کرد؛ نتیجه این بود که هر پارامتر دو بار ارسال می‌شد و مقدار کهنهٔ نسخهٔ مخفی برنده می‌شد (`?instock=1&instock=1`). حالا نسخهٔ مخفی علامت‌گذاری و از همهٔ مراحل بعدی حذف می‌شود.
+  - پاک‌کردن همهٔ فیلترها دیگر آدرس `shop/?` را باقی نمی‌گذارد و به آدرس تمیز آرشیو برمی‌گردد.
+  - **رفع باگ اعداد:** قیمت‌های آمادهٔ ووکامرس (جمع سبد در دراور هدر، محصولات مرتبط، قیمت منوی آبشاری و شیت «کالا اضافه شد») با ارقام لاتین نمایش داده می‌شدند؛ هِلپر تازهٔ `HSW_Helpers::price_html_fa()` فقط متن قیمت را فارسی می‌کند و به لینک‌ها/اتریبیوت‌ها دست نمی‌زند.
+  - **رفع باگ لایه‌بندی:** دراور منوی موبایل داخل کانتکست هدر بود و دکمهٔ شناور چت (z-index 99998) روی دکمهٔ سبد خریدش می‌افتاد؛ هنگام باز بودن منو یا دراور سبد، لایهٔ هدر به 100050 می‌رود و تا پایان انیمیشن بستن حفظ می‌شود.
+  - **رفع باگ لینک:** آیتم‌های نوار پایین موبایل آدرس `#` (یا خالی) ذخیره کرده بودند و هیچ‌کدام کار نمی‌کرد؛ حالا اگر آدرس خالی یا `#` باشد، آدرس پیش‌فرض همان جایگاه (خانه، فروشگاه، سبد، علاقه‌مندی، حساب) استفاده می‌شود.
+  - پروب‌های تازه: `tests/archive-filter-probe.js` و `tests/stage2-probe.js` این چهار مورد را در هر انتشار بررسی می‌کنند.
+
+## [1.11.160]
+
+#### انتشار دستی ۱.۱۱.۱۶۰ — بازسازی سه ویجت لوپ روی یک موتور مشترک کارت، لایهٔ کش محصولات و بازخورد یکپارچهٔ افزودن به سبد.
+  - هر سه ویجت «پیشنهاد شگفت‌انگیز»، «پرفروش‌ترین‌ها» و «محبوب‌ترین‌ها» اکنون از یک رندرکنندهٔ کارت مشترک استفاده می‌کنند (تصویر، دسته، عنوان، امتیاز، نوار موجودی، قیمت، دکمه)؛ ظاهر کارت در هر سه یکسان و از یک CSS مشترک می‌آید.
+  - لایهٔ تازهٔ `HSW_Products` پرس‌وجوها را به فهرست سبک شناسه‌ها تبدیل و در object cache + transient کش می‌کند؛ نسخهٔ کاتالوگ با ذخیرهٔ محصول، تغییر موجودی و شروع/پایان فروش ویژه جلو می‌رود و کش هیچ‌وقت از پایان تخفیف زنده‌تر نمی‌ماند.
+  - مرتب‌سازی «امتیاز/محبوب» و «پرفروش» با جدول‌های lookup ووکامرس انجام می‌شود (بدون مرتب‌سازی postmeta)؛ «بیشترین تخفیف» بر اساس درصد واقعی تخفیف و با احتساب تنوع‌ها.
+  - CSS لوپ به یک شیت مشترک و دو شیت کوچک واریانت (`hsw-loop-box`, `hsw-loop-deal`) تقسیم شد؛ هر صفحه فقط واریانت خودش را دانلود می‌کند و `hsw-loop.js` با `defer` بارگذاری می‌شود.
+  - سایز تصویر اختصاصی `hsw_card` (۴۲۰×۴۲۰ برش‌خورده) اضافه شد؛ برای تصاویر قدیمی که این سایز را ندارند به `woocommerce_thumbnail` برمی‌گردد تا تصویر اصلی سنگین سرو نشود.
+  - بازخورد افزودن به سبد یکپارچه شد (`hsw-feedback.js`): مودال «سبد خرید» یا نوار پیام — هرگز هر دو با هم؛ انتخاب با کنترل «سبک بازخورد» هر ویجت.
+  - مسیر REST لوپ با امضای HMAC محدود به همان پست/ویجت، تطبیق نوع ویجت، ETag/304 و هدرهای کش عمومی محافظت شد؛ تب‌های بعدی فقط با کلیک کاربر واکشی می‌شوند.
+  - **رفع باگ:** لایهٔ کش لوپ شناسه‌های خام را به `update_post_caches()` می‌داد و روی هر بازدید ۳۴ اخطار PHP و یک نوتیس «کلید کش خالی» در `debug.log` می‌نوشت؛ حالا از `_prime_post_caches()` استفاده می‌شود و محصول خارج‌شده از انتشار نمایش داده نمی‌شود.
+  - **رفع باگ موبایل:** در کارت‌های باریک، قیمت زیر دکمهٔ خرید می‌افتاد؛ حالا دکمه به سطر بعد می‌رود و قیمت کامل دیده می‌شود.
+  - **رفع باگ موبایل:** ارتفاع رزروشدهٔ کارت‌های خارج از دید (`content-visibility`) با ارتفاع واقعی هم‌تراز شد تا نوار لوپ در موبایل ~۱۰۰ پیکسل فضای خالی نداشته باشد.
+  - کنترل‌های جدید المنتور: پریست رنگ، پوسته، نوار موجودی، دکمه، تب‌ها و اسکلت بارگذاری؛ منابع محصول شامل انتخاب دستی با جست‌وجوی محصول.
+  - فایل‌های minified، POT، نقشهٔ فنی و نسخهٔ افزونه به‌روزرسانی شدند.
+
+## [1.11.159]
+
+#### انتشار دستی ۱.۱۱.۱۵۹ — ترتیب تب‌ها، فلش موبایل، محصولات هم‌دسته و اصلاح دراور سبد.
+  - ترتیب تب‌ها به **بررسی تخصصی کالا ← گارانتی و خدمات ← مشخصات فنی ← دیدگاه و نظرات خریداران** تغییر کرد و تب اول (بررسی) به‌صورت پیش‌فرض فعال است.
+  - فلش «تب‌های بیشتر» در موبایل ۱۰ پیکسل بالاتر رفت.
+  - منبع پیش‌فرض «محصولات مرتبط» به **هم‌دسته** تغییر کرد: ابتدا محصولات همان دسته‌بندی (بدون محصول جاری)، و اگر خالی بود یک سطح بالاتر به دسته والد می‌رود؛ این پیمایش تا ریشه ادامه دارد.
+  - حداقل تعداد اجباری حذف شد؛ اگر فقط ۱ یا ۲ محصول موجود باشد همان تعداد نمایش داده می‌شود. گزینهٔ «مرتبط ووکامرس» برای حالت قبلی باقی مانده است.
+  - بازگشت خودکار «محصولات مرتبط» در شیت سبد موبایل هم به همان دسته والد گسترش یافت.
+  - رنگ دکمهٔ بستن دراور سبد دیگر از متغیر سطح صفحهٔ محصول ارث نمی‌برد و با توکن متن هدر (`--hsw-hd-text`) نمایش داده می‌شود.
+  - دکمه‌های + و − در استپر سبد خرید جابه‌جا شدند تا در RTL دکمهٔ افزایش سمت راست و کاهش سمت چپ باشد.
+  - دراور سبد در موبایل بالای نوار خرید چسبان قرار گرفت (z-index هدر هنگام باز بودن دراور) و دکمهٔ تسویه حساب دیگر پشت نوار پنهان نمی‌شود؛ این لایه تا پایان انیمیشن بستن حفظ می‌شود.
+  - خطوط «موجود در انبار تهران» و «گارانتی ۱۸ ماهه» زیر دکمهٔ خرید همچنان از Repeater «خطوط اطمینان» ویجت جعبه خرید قابل ویرایش هستند.
+  - فایل‌های minified، POT و نسخهٔ افزونه به‌روزرسانی شدند.
+
+## [1.11.157]
+
+#### انتشار دستی ۱.۱۱.۱۵۷ — منبع قابل انتخاب ویژگی‌ها، جدول کامل توضیح کوتاه، ترتیب جدید تب‌ها و دراور سبد بدون پرش.
+  - منبع «ویژگی‌های شاخص کالا» قابل انتخاب شد: خودکار (ویژگی‌های ووکامرس + توضیح کوتاه)، فقط Attributes، فقط جدول/متن توضیح کوتاه یا فقط فهرست دستی.
+  - محدودیت ۶ ردیف برداشته شد؛ کنترل «حداکثر تعداد ردیف» اضافه شد و مقدار ۰ یعنی نمایش همهٔ ردیف‌ها.
+  - جدول HTML داخل توضیح کوتاه حالا ردیف‌به‌ردیف به «نام: مقدار» تبدیل می‌شود و سرسطر جدول نمایش داده نمی‌شود.
+  - ترتیب تب‌ها به گارانتی و خدمات ← مشخصات فنی (Attributes) ← بررسی تخصصی کالا ← دیدگاه‌ها تغییر کرد و اولین تب قابل‌نمایش فعال است.
+  - پرش دراور سبد خرید برطرف شد: جبران اسکرول‌بار عرض و موقعیت محتوای صفحه را ثابت نگه می‌دارد، scale پنل حذف شده و باز شدن از چپ به راست / بسته شدن از راست به چپ نرم است.
+  - بازیابی فوکوس پس از بستن دراور با preventScroll انجام می‌شود تا صفحه به هدر نپرد.
+  - فایل‌های minified، POT و نسخهٔ افزونه به‌روزرسانی شدند.
+
+## [1.11.156]
+
+#### انتشار دستی ۱.۱۱.۱۵۶ — شاین فقط روی لوگو و نمایش لوگو با نسبت تصویر اصلی.
+  - شاین گرادیانت کل هدر حذف شد؛ فقط لوگو افکت شاین دارد و کنترل‌های رنگ/مدت شاین هدر از تب استایل برداشته شدند.
+  - قالب مربعی ثابت لوگو حذف شد؛ لوگوهای تصویری با نسبت تصویر خودشان نمایش داده می‌شوند و کنترل «حداکثر ارتفاع لوگو» فقط ارتفاع را محدود می‌کند.
+  - عرض لوگوهای افقی به‌صورت واکنش‌گرا تا سقف ۶ برابر ارتفاع و ۳۸٪ عرض دید محدود می‌شود تا در موبایل هم بدون سرریز جا شود.
+  - فایل‌های minified، POT و نسخهٔ افزونه به‌روزرسانی شدند.
+
+## [1.11.155]
+
+#### انتشار دستی ۱.۱۱.۱۵۵ — شاین گرادیانت هدر و ترنزیشن فید دراور سبد خرید.
+  - شاین گرادیانت هدر به نوار اصلی هدر اضافه شد و افکت شاین لوگو به‌صورت پیش‌فرض روشن شد؛ رنگ و مدت دورهٔ هر دو از تب استایل هدر قابل تنظیم است.
+  - دراور سبد خرید از همان لبهٔ خودش (inline-end) باز و بسته می‌شود و حالا یک فید نرم با سرعت متوسط (۴۶۰ میلی‌ثانیه) روی حرکت دارد.
+  - رنگ‌های اصلی سبد خرید (آبی پالت، بج تعداد، دکمهٔ تسویه و کنترل تعداد) دست‌نخورده ماندند.
+  - فایل‌های minified، POT و نسخهٔ افزونه به‌روزرسانی شدند.
+
+## [1.11.154]
+
+#### انتشار دستی ۱.۱۱.۱۵۴ — انتخاب دسته‌بندی‌های سربرگ از المنتور.
+  - کنترل چندتایی «انتخاب دسته‌بندی‌های سربرگ» به ویجت هدر فروشگاهی اضافه شد؛ همهٔ دسته‌ها و زیردسته‌های محصول قابل انتخاب‌اند و ترتیب انتخاب حفظ می‌شود.
+  - اگر هیچ دسته‌ای انتخاب نشود، به‌صورت پیش‌فرض ۵ دستهٔ اول فروشگاه نمایش داده می‌شود؛ تعداد پیش‌فرض با کنترل «تعداد دسته‌بندی پیش‌فرض» (۴/۵/۶/۸/۱۰/۱۲) قابل تغییر است.
+  - دسته‌های خالی هم در صورت انتخاب دستی نمایش داده می‌شوند؛ انتخاب دستی بر تعداد پیش‌فرض اولویت دارد.
+  - همین انتخاب در فهرست دسته‌بندی دراور موبایل هم استفاده می‌شود تا سربرگ دسکتاپ و موبایل یکسان باشند.
+  - عنوان ستون ریشه به «دسته‌بندی‌های فروشگاه» تغییر کرد و هشدار PHP متغیر `$img2_html` در حالت کارت‌های دموی آرشیو برطرف شد؛ فایل POT هم به‌روزرسانی شد.
+
+## [1.11.153]
+
+#### انتشار دستی ۱.۱۱.۱۵۳ — مگامنوی آبشاری هدر فروشگاه و شاین لوگو.
+  - منوی دسته‌بندی هدر فروشگاه حالا در دسکتاپ به‌صورت آبشاری تا سمت چپ باز می‌شود و تا ۳ لایه دسته‌بندی (۱ تا ۳ لایه، قابل تنظیم) را پشتیبانی می‌کند.
+  - پنل محصولات فقط در انتهای مسیر بارگذاری می‌شود؛ با خاموش‌کردن گزینهٔ «نمایش محصولات در انتهای مسیر»، منو روی خود دسته‌بندی تمام می‌شود.
+  - ستون‌های زیرشاخه و محصولات به‌صورت تنبل (AJAX) و با کش سمت سرور/مرورگر بارگذاری می‌شوند؛ رندر اولیه فقط دسته‌های ریشه را می‌سازد و کوئری تکراری/بازگشتی ندارد.
+  - کنترل‌های کامل استایل برای پنل، سرستون‌ها، ردیف دسته‌بندی‌ها (عادی/هاور/باز)، محصولات، قیمت، تصویر و حالت خالی اضافه شد.
+  - گزینهٔ «شاین گرادیانت لوگو» با رنگ و مدت دورهٔ قابل تنظیم اضافه شد؛ انیمیشن سبک است و با `prefers-reduced-motion` غیرفعال می‌شود.
+  - ناوبری با کیبورد (Enter/Space/Escape)، بستن با کلیک بیرون، حالت بارگذاری/خطا و کش ستون‌ها پیاده‌سازی شد.
+  - فایل‌های `.min.css`/`.min.js`، POT و نسخهٔ افزونه به‌روزرسانی شدند.
+
+## [1.11.152]
+
+#### انتشار دستی ۱.۱۱.۱۵۲ — اصلاح رنگ هاور/فوکوس دکمه‌های HamiShop.
+  - ریشهٔ مشکل، فاصلهٔ اضافی در سلکتور سراسری `hsw-fonts.css` بود که به‌جای خود دکمه، عناصر داخلی آن را هدف می‌گرفت؛ در نتیجه رنگ `#cc3366` قالب Hello روی دکمه‌ها باقی می‌ماند.
+  - سلکتور امن‌ساز با `:where()` و specificity برابر `(0,2,0)` بازنویسی شد تا رنگ پیش‌فرض قالب را خنثی کند، ولی استایل‌های اختصاصی هر کامپوننت همچنان اولویت داشته باشند.
+  - حالت‌های هاور/فوکوس روزهای تقویم تسویه (دسکتاپ و موبایل)، «نمایش همه دسته‌ها» در فیلتر آرشیو، دکمه‌های آیکن/جستجوی هدر، بستن منوی موبایل و بستن سبد خرید صریحاً با توکن‌های پالت تنظیم شدند.
+  - فایل‌های `.min.css` بازسازی و تست رگرسیون استایل‌ها انجام شد؛ نسخهٔ POT نیز به‌روزرسانی شد.
+
+## [1.11.151]
+
+#### انتشار دستی ۱.۱۱.۱۵۱ — حذف پالت رنگ تکراری از همهٔ ویجت‌ها.
+  - بخش «پالت رنگ ویجت» از تب Style همهٔ ویجت‌های HamiShop (هدر، محصول، آرشیو، سبد، تسویه، پرداخت، مجله، حساب و فوتر) حذف شد.
+  - رنگ‌های عمومی (برند، تاکید، پس‌زمینه، کارت، متن، حاشیه و وضعیت‌ها) فقط از HamiShop ← پالت رنگی می‌آیند؛ کنترل‌های رنگی عنصربه‌عنصر مثل بج تخفیف و دکمه‌ها دست‌نخورده‌اند.
+  - هوک تزریق پالت و متدهای مشترک آن حذف شدند. مقادیر `pal_*` در قالب‌های قدیمی حذف نمی‌شوند، ولی دیگر CSS تولید نمی‌کنند.
+  - هنگام به‌روزرسانی، کش CSS المنتور یک‌بار پاک می‌شود تا اوررایدهای پالت قدیمی از فایل‌های CSS باقی‌مانده هم حذف شوند.
+
+## [1.11.150]
+
+#### انتشار دستی ۱.۱۱.۱۵۰ — تنظیم فونت تب «بررسی تخصصی» و اسلاید نرم‌تر دراور سبد.
+  - بخش «تب‌ها و بخش‌های توضیحات» حالا کنترل کامل تایپوگرافی برای متن پنل، متن «بررسی تخصصی» و عنوان داخل پنل دارد؛ نوع فونت، اندازه، وزن و ارتفاع خط از این کنترل‌ها قابل تنظیم است.
+  - کنترل اختصاصی «تایپوگرافی متن بررسی تخصصی» روی پاراگراف‌های توضیحات اعمال می‌شود و استایل پیش‌فرض ۱۴px/24px را override می‌کند؛ رنگ متن پنل و متن بررسی هم جداگانه قابل انتخاب است.
+  - دراور سبد خرید با انیمیشن اسلاید نرم‌تر (۰.۵۲ ثانیه، easing ملایم)، محو/حرکت تدریجی هدر و بدنه، و نگه‌داشتن visibility تا پایان انیمیشن بستن، باز و بسته می‌شود.
+  - عرض اسکرول‌بار پیش از قفل اسکرول رزرو می‌شود تا باز شدن دراور باعث تغییر عرض/پرش محتوای صفحه پشت آن نشود.
+  - احترام به `prefers-reduced-motion` برای دراور سبد؛ منطق باز/بسته، فوکوس، Escape و بستن با کلیک بیرون دست‌نخورده مانده است.
+  - تست زندهٔ کنترل‌های تایپوگرافی روی قالب محصول و باز/بسته‌شدن دراور؛ استایل‌های `.min.css` بازسازی شدند.
+
+## [1.11.149]
+
+#### انتشار دستی ۱.۱۱.۱۴۹ — استایل تفصیلی صفحهٔ محصول و اصلاح عرض استپر.
+  - عرض استپر «در سبد» در دسکتاپ به ۳۰٪ کاهش یافت؛ تبلت و موبایل ۱۰۰٪ می‌مانند و با کنترل واکنش‌گرای `--hsw-stepper-w` قابل تغییر است.
+  - تب «استایل» ویجت صفحهٔ محصول حالا بخش‌های تفصیلی گالری، عنوان/امتیاز، قیمت، موجودی و برچسب‌ها، توضیحات، ویژگی‌ها، متغیرها، تعداد/دکمه خرید، پیام‌ها، تب‌ها، محصولات مرتبط و سیگنال اعتماد دارد.
+  - هر بخش فقط وقتی نمایش داده می‌شود که بخش محتوایی مرتبط فعال باشد؛ رنگ/فونت خالی از پالت مدیریت (`hsw_palette`) می‌آید و مقدار پرشدهٔ ویجت بر پالت اولویت دارد.
+  - حالت‌های هاور، فوکوس، انتخاب‌شده، غیرفعال/ناموجود، در حال افزودن، «افزوده شد»، موجود، کم‌موجود و ناموجود برای دکمه خرید، متغیرها، تب‌ها و قرص موجودی اضافه شد.
+  - کنترل‌های واکنش‌گرا برای عرض/ارتفاع استپر و دکمه، عرض کارت محصولات مرتبط، نسبت تصویر، فاصله‌ها، تایپوگرافی و ترتیب ستون‌ها در دسکتاپ/تبلت/موبایل.
+  - تشخیص کم‌موجودی با آستانهٔ ووکامرس و افزودن حالت `is-low-stock` به قرص موجودی، در کنار دو حالت `is-in-stock`/`is-oos`؛ متن کم‌موجودی تعداد باقی‌مانده را نشان می‌دهد.
+  - اعلان‌های ووکامرس داخل ویجت صفحهٔ محصول چاپ و یک‌بار مصرف می‌شوند تا پیام‌های سبد/کوپن گم نشوند.
+  - پالت و CSS مشترک اعلان‌ها با متغیرهای `--hsw-notice-*` هماهنگ شد؛ استایل‌های `.min.css` بازسازی شدند.
+
+## [1.11.148]
+
+#### انتشار دستی ۱.۱۱.۱۴۸ — دراور سبد خرید هدر، هم‌ترازی خرید دسکتاپ و اصلاح ویژگی‌های محصول.
+  - دراور سبد خرید کناری برای هر دو هدر فروشگاهی و مینیمال: اقلام، تعداد، حذف، جمع سبد، «مشاهده سبد خرید» و «صورت‌حساب»، حالت خالی، قفل اسکرول، Escape و مدیریت فوکوس.
+  - همگام‌سازی دراور با فرگمنت‌های ووکامرس و وضعیت جعبه خرید محصول؛ حذف یا تغییر تعداد از دراور، دکمهٔ خرید و استپر صفحهٔ محصول را فوراً هم‌تراز می‌کند.
+  - جعبهٔ خرید دسکتاپ بعد از افزودن به سبد، دکمهٔ «خرید آنلاین» را مخفی و همان استپر +۱/حذف موبایل را جایگزین می‌کند.
+  - ویژگی‌های شاخص محصول حالا ویژگی‌ها و فیلدهای توضیح کوتاه را ادغام می‌کند (تا ۶ ردیف یکتا) و برچسب/مقدار تکراری را حذف می‌کند.
+  - برای محصول ساده، انتخاب‌گر رنگ غیرکاربردی حذف شد؛ رنگ در مشخصات فنی می‌ماند. انتخاب‌گر تنوع فقط برای ویژگی‌هایی ساخته می‌شود که واقعاً در تنوع‌ها استفاده شده‌اند.
+  - تست زندهٔ محصولات ۱۳۱۱۱ (ساده) و ۱۳۱۶۹ (متغیر)، هدر مینیمال، سبد و تسویه؛ بدون خطای کنسول/PHP.
+  - ادعای «Lighthouse 100» در مستندات با توضیح واقع‌بینانه درباره وابستگی امتیاز به قالب، محتوا و میزبانی جایگزین شد.
+
+## [1.11.147]
+
+#### انتشار دستی ۱.۱۱.۱۴۷ — ممیزی نهایی و آماده‌سازی تحویل.
+  - رفع ایراد ذخیره‌نشدن دو گزینهٔ «روش شارژ» و «درگاه شارژ» در تب کیف پول پیشخوان؛ اکنون هر دو با نام استاندارد `hsw_account_settings[wallet][...]` ذخیره می‌شوند.
+  - هم‌ترازسازی تست‌های PHP با ساختار واقعی بارگذاری افزونه (trait استایل، ثابت‌های Elementor و polyfillهای وردپرس) و افزودن کنترل SELECT2/DIMENSIONS/BOX_SHADOW به stub.
+  - غیرفعال‌سازی موقت OTP، 2FA، تأیید ایمیل و اعلان‌های ایمیلی پشتیبانی تا زمان تنظیم و تأیید SMTP؛ ورود با رمز عبور فعال است.
+  - پاک‌سازی اطلاعات آزمایشی تلگرام/بله از تنظیمات و حذف گزینهٔ قدیمی `hsw_account`.
+  - ممیزی امنیتی: مسیر پیشخوان، محدودسازی REST users، مسدودسازی درخواست‌های خارجی با هاست‌های sanitize‌شده، و بررسی عدم خطای HSW در لاگ.
+  - بازبینی پالت و اولویت استایل (global `html:root` و override سطح ویجت)، ۶۲ ویجت، کیف پول و مسیرهای خرید/حساب.
+  - افزودن `LICENSE` (GPL-2.0)، قالب ترجمهٔ POT و یادداشت انتشار؛ مجوز/آپدیتر عمداً به مرحلهٔ بعد موکول شد.
+
+## [1.11.146]
+
+#### هم‌گام‌سازی مستندات با کد (۱.۱۱.۱۴۵).
+  - `WIDGETS-REFERENCE.md` از خود کد بازتولید شد: ۶۲ ویجت، ۹ ویجت با ≥۲ کنترل ریسپانسیو، جدول به‌روز با ستون «تعداد کنترل»، مکانیزم‌های جدید (فیلتر قیمت دو دستگیره، چیدمان دوستونی سبد/تسویه/مجله، امنیت تسویه، تقویم، فهرست مطالب) و ۱۰ الگوی تداخل واقعی.
+  - `README.md` و `ARCHITECTURE-MAP.md` به نسخه و اعداد فعلی به‌روز شدند (`!important`: ۳۵۳ → **۳۱۴**).
+  - `STAGING-CHECKLIST.md` یک بخش تازه گرفت: ۱۹ مورد تست دستی برای تغییرات ۱.۱۱.۱۱۴ تا ۱.۱۱.۱۴۵.
+
+## [1.11.145]
+
+#### صفحهٔ نوشتهٔ تکی: تأیید مکانیزم‌ها + تایپوگرافی محتوا و مطالب مرتبط.
+  - **فهرست مطالب و SEO (تأیید شد):** هر ۴ لینک فهرست فقط `href="#id"` هستند — هیچ آدرس کاملی تولید نمی‌شود، پس گوگل آن‌ها را به‌عنوان صفحهٔ جدا ایندکس نمی‌کند.
+  - **ذخیره‌سازی (تأیید شد):** کلیک بوکمارک → `aria-pressed="true"` و `localStorage["hswPpBookmark:<id>"]`.
+  - **اشتراک‌گذاری:** دو دکمه فعال (Web Share API با فالبک کلیپ‌بورد).
+  - **فهرست مطالب (تأیید شد):** کلیک روی آیتم، صفحه را از ۰ به ۱۷۰۱px برد (هدف `id` موجود است).
+  - **دیدگاه‌ها (تأیید شد):** فرم بومی وردپرس با `action=/wp-comments-post.php` و `comment_post_ID` — همان مسیر استاندارد.
+  - **مطالب مرتبط (تأیید شد):** ۳ کارت رندر می‌شود.
+  - **سکشن جدید «محتوای نوشته»:** تایپوگرافی جدا برای **پاراگراف** و **تیترهای H2–H6**، فاصلهٔ پاراگراف‌ها، فاصلهٔ بالا/پایین تیترها، رنگ لینک و هاور، زیرخط لینک، نقل‌قول (پس‌زمینه/حاشیهٔ کناری/فاصلهٔ داخلی)، گردی و فاصلهٔ تصاویر داخل متن.
+  - **سکشن جدید «مطالب مرتبط»:** تعداد ستون (۱–۴)، فاصله، پس‌زمینه/حاشیه/گردی/ سایهٔ کارت، نسبت تصویر، تایپوگرافی عنوان.
+  - **اندازه‌گیری:** کنترل‌های ویجت ۵۴۸ → **۵۸۱**.
+
+## [1.11.144]
+
+#### آرشیو مجله: رفع کنترل‌های بی‌اثر + حذف پالت تکراری.
+  - **علت «کار نمی‌کند»:** ریشهٔ هیرو کلاس `hsw-blog-hero` دارد، نه `hsw-bhero` (این کلاس فقط روی فرزندان است). کنترل‌های پس‌زمینه/فاصلهٔ داخلی/فاصلهٔ عنوان حالا هر دو کلاس را هدف می‌گیرند و گرید دو ستونی هیرو هم روی ریشهٔ درست اعمال شد.
+  - **پس‌زمینهٔ سربرگ:** به‌جای `background-color` از `background` استفاده می‌شود تا گرادیان قبلی بازنویسی شود (قبلاً رنگ زیر گرادیان پنهان می‌ماند).
+  - **پالت رنگ ویجت** (۶ رنگ) حذف شد؛ همهٔ `--hswb-*` از قبل به پالت پیشخوان fallback دارند و هیچ کدی `pal_*` نمی‌خواند → صفر کنترل پالت.
+  - **سکشن جدید «جستجو و تب‌های دسته»:** رنگ/گردی دکمهٔ جستجو، آیکن و پس‌زمینهٔ فیلد، اندازهٔ آیکن، رنگ/گردی قرص‌های دسته و **قرص فعال** — کلاس فعال واقعی `is-on` است (قبلاً `is-active` هدف گرفته می‌شد و بی‌اثر بود).
+  - **اندازه‌گیری:** کنترل‌ها ۴۲۲ → **۴۲۷** · `pal_*` صفر · آرشیو و فروشگاه ۲۰۰.
+
+## [1.11.143]
+
+#### آرشیو مجله: کنترل‌های کامل استایل و چیدمان (مرحلهٔ ۳).
+  - **چیدمان در تب محتوا** (طبق درخواست): عرض سایدبار، فاصلهٔ ستون‌ها، **تعداد ستون کارت‌ها (۱–۴)**، فاصلهٔ افقی/عمودی کارت‌ها، فاصلهٔ داخلی و پس‌زمینهٔ آرشیو — همه ریسپانسیو.
+  - **سربرگ آرشیو:** پس‌زمینه، تایپوگرافی عنوان، رنگ توضیح، فاصلهٔ داخلی و فاصلهٔ عنوان تا فهرست.
+  - **مطلب شاخص (کنترل جدا):** پس‌زمینه/حاشیه/گردی/سایه، **نسبت تصویر**، تایپوگرافی عنوان و خلاصه، برچسب دسته، فاصلهٔ داخلی بخش متن.
+  - **کارت‌های مطالب (مشترک):** پس‌زمینه/حاشیه/گردی/سایه/سایهٔ هاور، فاصلهٔ داخلی، **نسبت تصویر**، تایپوگرافی عنوان و خلاصه، **تعداد خط عنوان** (line-clamp ۱–۳).
+  - **اطلاعات هر مطلب:** برچسب دسته، تایپوگرافی و رنگ تاریخ/نویسنده/دیدگاه، اندازهٔ آیکن‌ها.
+  - **صفحه‌بندی:** رنگ شماره‌ها، پس‌زمینهٔ دکمه‌ها، صفحهٔ فعال، گردی و فاصله.
+  - **حالت‌های ویژه:** رنگ و اندازهٔ پیام «مطلبی یافت نشد».
+  - **اندازه‌گیری:** کنترل‌های ویجت **۴۲۲** · ۲۵ سکشن · سرریز افقی صفر در ۳۹۰/۷۶۸/۱۲۸۰ · صفحهٔ آرشیو ۲۰۰ بدون Fatal.
+
+## [1.11.142]
+
+#### آرشیو مجله: هیرو و ردیف تب‌ها مطابق طرح (مرحلهٔ ۲).
+  - **جستجوی مقالات** از ردیف جداگانه به داخل بلوک آمار منتقل شد (`.hsw-bhero__aside`) و روی دسکتاپ با آمار **یک ردیف** است: آمار سمت راست، جستجو سمت چپ — همان چیدمان طرح.
+  - **ردیف تب‌ها:** علت دوردیفه شدن، `flex-direction: column` روی `.hsw-btabs` بود؛ حالا روی دسکتاپ `row` است و «مرتب‌سازی» در همان خط سمت چپ می‌نشیند.
+  - **مقالهٔ ویژه:** با `order` قطعی شد (متن چپ، تصویر راست ۵۸٪) تا به `direction` ارثی وابسته نباشد؛ کارت هم تمام‌عرض شد (۱۰۹۲px).
+  - **ریسپانسیو اندازه‌گیری‌شده:** ۳۹۰px تک‌ستون (۳۳۸px) · ۷۶۸px تک‌ستون (۷۰۰px) · ۱۲۸۰px دوستون (۷۶۸+۳۰۰) — سرریز افقی در هیچ‌کدام: **۰**.
+  - **تاریخ‌ها:** همه از `post_date()` → `get_the_date('')` می‌آیند، پس با روشن بودن تقویم شمسی، تاریخ مقالهٔ ویژه و کارت‌ها شمسی و با ارقام فارسی می‌شود.
+
+## [1.11.141]
+
+#### آرشیو مجله: چیدمان دسکتاپ مطابق طرح (مرحلهٔ ۱ — ساختار).
+  - صفحه هیچ قاعدهٔ ستون‌بندی نداشت؛ کارت‌ها و سایدبار **زیر هم** می‌آمدند. حالا از ۱۰۲۴px دو ستون است: `minmax(0,1fr) var(--hsw-cp-side, 340px)` و سایدبار `sticky`.
+  - تب‌های دسته و مقالهٔ ویژه از ستون اصلی **بیرون** آمدند و تمام‌عرض شدند (هیرو → تب‌ها → ویژه → دو ستون) — همان ترتیب طرح.
+  - مقالهٔ ویژه: تصویر سمت راست ۵۸٪ و متن سمت چپ (قبلاً برعکس بود).
+  - **اندازه‌گیری:** ستون‌ها `768px + 300px`، شروع سایدبار و محتوا هم‌تراز.
+  - باقی‌مانده برای مرحلهٔ استایل: هیرو جمع‌وجور شود (آمار و جستجو یک ردیف)، ردیف مرتب‌سازی در همان خط تب‌ها، و استایل کارت‌های سایدبار/صفحه‌بندی.
+
+## [1.11.140]
+
+#### حساب کاربری: سه سکشن باقی‌مانده (۲۰ کنترل) — فهرست کامل شد.
+  - **کارت‌های اطلاعات (آدرس و پروفایل):** فاصلهٔ داخلی، رنگ برچسب کوچک، تایپوگرافی متن اطلاعات، رنگ لینک ویرایش، فاصلهٔ بین ردیف‌ها.
+  - **پیام‌ها و حالت‌های ویژه:** پس‌زمینه/متن پیام (`.hsw-ac__note`)، رنگ آیکن و تایپوگرافی و فاصلهٔ داخلی حالت خالی.
+  - **دکمه‌ها و آواتار:** گردی و فاصلهٔ داخلی دکمه‌ها، رنگ دکمهٔ خروج، اندازه و گردی آواتار — همه ریسپانسیو.
+  - **اندازه‌گیری:** کنترل‌های ویجت ۳۹۳ → **۴۱۳** · ۲۴ سکشن · `/my-account/`، `/orders/`، `/edit-address/` و `/cart/` ۲۰۰ بدون Fatal.
+
+## [1.11.139]
+
+#### حساب کاربری: پنج سکشن استایل جدید (۲۷ کنترل).
+  - **چیدمان داشبورد:** فاصلهٔ محتوا/منو، عرض منوی کناری، تعداد ستون کارت‌های آمار (۲/۳/۴) و فاصلهٔ بین آن‌ها — همه ریسپانسیو (دسکتاپ/تبلت/موبایل).
+  - **کارت‌ها (مشترک):** پس‌زمینه، حاشیه، گردی، فاصلهٔ داخلی، سایه و سایهٔ هاور با **یک مجموعه سلکتور** روی کارت آمار + کارت سفارش + کارت‌های اطلاعات، تا پنل شلوغ و CSS اضافه نشود.
+  - **هدر خوش‌آمد:** پس‌زمینه، تایپوگرافی عنوان/زیرعنوان، فاصلهٔ داخلی و گردی.
+  - **منوی حساب:** پس‌زمینه، متن، آیکن، هاور، **گزینهٔ فعال** (پس‌زمینه و متن)، فاصلهٔ گزینه‌ها، اندازهٔ آیکن و فاصلهٔ داخلی.
+  - **سفارش‌ها و برچسب وضعیت:** حاشیه و فاصلهٔ داخلی آیتم، تایپوگرافی شماره و تاریخ سفارش، پس‌زمینه/متن/گردی برچسب وضعیت.
+  - **اندازه‌گیری:** کنترل‌های ویجت ۳۶۶ → **۳۹۳** · ۲۱ سکشن · `/my-account/` و `/my-account/orders/` ۲۰۰ بدون Fatal.
+
+## [1.11.138]
+
+#### صفحهٔ پرداخت: استایل پنج بخش در پنل.
+  - سکشن‌های استایل زیرمجموعه mirror شد: هدر پرداخت (۴۲ کنترل)، یادآوری سفارش (۲۶)، روش‌های پرداخت (۲۷)، کد تخفیف (۲۰)، خلاصه و پرداخت (۴۷).
+  - پالت تکراری از قبل حذف شده بود (`HSW_Pay_Base` از `HSW_Checkout_Base` ارث می‌برد و `palette_map()` خالی است) → صفر کنترل `pal_*`.
+  - **اندازه‌گیری:** ۵ سکشن mirror · ۴۷۹ کنترل ویجت.
+  - استایل پرداخت در `hsw-checkout.css` است (فایل جدا ندارد) و همان توکن‌های `--hswk-*` را با fallback پالت استفاده می‌کند.
+
+## [1.11.137]
+
+#### حساب کاربری: حذف «پالت رنگ حساب» تکراری + اتصال دو توکن جامانده.
+  - سکشن `sec_palette_account` (۵ رنگ: اصلی، تاکیدی، پس‌زمینه، کارت، متن) حذف شد؛ این‌ها در پالت پیشخوان هستند و همهٔ `--hsw-ac-*` از قبل fallback دارند.
+  - دو توکنی که هاردکد مانده بودند به پالت وصل شدند (هگز قبلی fallback): `--hsw-ac-bg: var(--hsw-pal-surface-alt, #f3f6fa)` و `--hsw-ac-danger: var(--hsw-pal-danger, #d92d3a)`.
+  - **اثر بصری (اندازه‌گیری‌شده):** پس‌زمینه `#f3f6fa → #f3f4f6` و رنگ خطر `#d92d3a → #ba1a1a`؛ بقیه بدون تغییر (`--hsw-ac-primary` = `#4d85ff` پالت).
+  - کنترل‌های پالت: صفر · سکشن‌های ویجت: ۷ (`sec_layout`, `sec_typography` …) · `/my-account/` و `/my-account/orders/` ۲۰۰ بدون Fatal.
+  - **توجه:** با حذف پالت، رنگ‌دهی این ویجت از پنل حساب فعلاً فقط از پالت پیشخوان انجام می‌شود؛ اگر کنترل رنگ عنصربه‌عنصر لازم است، باید مثل سبد ساخته شود.
+
+## [1.11.136]
+
+#### صفحهٔ تسویه حساب: استایل هفت بخش در پنل + حذف پالت تکراری.
+  - هفت سکشن استایل زیرمجموعه mirror شد: هدر و مراحل، آدرس و گیرنده، روش ارسال، زمان تحویل، یادداشت سفارش، اقلام سفارش، خلاصه سفارش.
+  - «پالت رنگ ویجت» (۸ رنگ) حذف شد؛ همان سه شرط ایمنی سبد بررسی و تأیید شد: همهٔ توکن‌های `--hswk-*` در `hsw-checkout.css` به پالت fallback دارند (`--hswk-card: var(--hsw-pal-surface, #fff)` …) و هیچ کدی `pal_*` را نمی‌خواند.
+  - **اندازه‌گیری:** ۷ سکشن mirror · صفر `pal_*` · کنترل‌های ویجت **۵۲۵**؛ شمارش هر بخش: هدر ۳۳ · آدرس ۳۳ · ارسال ۲۴ · زمان ۲۴ · یادداشت ۲۰ · اقلام ۱۹ · خلاصه ۴۶.
+  - `/checkout/` با سبد خالی ۳۰۲ (ریدایرکت عادی)، `/cart/` و `/my-account/` ۲۰۰ بدون Fatal.
+
+## [1.11.135]
+
+#### سبد خرید: حذف «پالت رنگ ویجت» تکراری.
+  - هشت رنگ (رنگ اصلی، تاکید/CTA، متن، حاشیه، کارت، سبز/موفق، قرمز/خطا) از تنظیمات ویجت حذف شد؛ اینها در **پالت پیشخوان** هستند.
+  - بی‌خطر بودنش با کد تأیید شد: همهٔ توکن‌های `--hswc-*` در `hsw-cart.css` از قبل به پالت وصل‌اند (`--hswc-card: var(--hsw-pal-surface, #fff)`، `--hswc-primary: var(--hsw-primary, …)` و …)، پس حذف کنترل‌ها فقط پالت را به‌عنوان پیش‌فرض باقی می‌گذارد.
+  - هیچ کدی مقدار `pal_*` را نمی‌خواند (بررسی شد) → حذف، رفتار یا کوئری‌ای را تغییر نمی‌دهد.
+  - کنترل‌های ریز (ردیف، تصویر، تعداد، جمع‌ها، دکمه‌ها) دست‌نخورده‌اند و همان اولویت روی پالت را دارند.
+  - **اندازه‌گیری:** کنترل‌های ویجت صفحه ۵۳۹ → **۵۳۰** (۹ مورد پالت)، صفر کنترل `pal_*`؛ سبد/تسویه/حساب/فروشگاه ۲۰۰ بدون Fatal و بدون تزریق inline برای `--hswc-*`.
+
+## [1.11.134]
+
+#### سبد خرید: کنترل‌های ردیف کالا، تصویر و تعداد.
+  - سکشن جدید «ردیف کالا، تصویر و تعداد» در ویجت اقلام سبد: پس‌زمینه و خط جداکنندهٔ ردیف، گردی گوشه، فاصله داخلی (ریسپانسیو)، اندازه/گردی/پس‌زمینهٔ تصویر، عرض و گردی فیلد تعداد، رنگ متن، پس‌زمینه/حاشیهٔ فیلد، رنگ و پس‌زمینهٔ دکمه‌های + و − و حالت هاور.
+  - همین سکشن در ویجت «صفحهٔ کامل سبد» هم mirror شد.
+  - **اندازه‌گیری:** کنترل‌های ویجت صفحه از ۵۲۲ به **۵۳۹** رسید؛ ۱۸ کنترل ردیف/تصویر/تعداد در پنل موجود است (`citems_row_*`, `citems_thumb_*`, `citems_qty_*`).
+  - صفحات سبد/فروشگاه/خانه ۲۰۰ بدون Fatal.
+
+## [1.11.133]
+
+#### استایل بخش‌های سبد خرید بالاخره در پنل المنتور ظاهر شد.
+  - ریشه: ویجت‌های زیرمجموعه (`cart-items`, `cart-summary`, `cart-coupon`, `cart-top`, `cart-banner`) با المنتور ثبت نمی‌شوند، پس کلاسشان هم لود نمی‌شد و `HSW_Composite::controls()` همیشه خالی برمی‌گشت. یک `require_once` بر اساس قرارداد نام فایل اضافه شد.
+  - یک `style_section_mirror()` اضافه شد که سکشن استایل فرزند را **بدون** فیلتر نوع کپی می‌کند (پس `dimensions`/`box-shadow` هم منتقل می‌شوند) و `DIMENSIONS`/`BOX_SHADOW` به لیست مجاز `part_controls()` هم اضافه شد.
+  - پنج سکشن استایل به ویجت «صفحه کامل سبد» اضافه شد: هدر و مراحل · بنر ارسال · اقلام سبد · کد تخفیف · خلاصه سفارش.
+  - **اندازه‌گیری:** کنترل‌های ویجت از ۴۱۰ به **۵۲۲** رسید (+۱۱۲ استایل)؛ شمارش به تفکیک پیشوند: `ctop_` ۳۷ · `cbanner_` ۲۳ · `citems_` ۴۹ · `ccoupon_` ۲۹ · `csummary_` ۵۳.
+  - **تلهٔ اندازه‌گیری:** `get_controls()` در حالت پیش‌فرض المنتور کنترل‌های تب استایل را حذف می‌کند و برچسب سکشن‌ها هم خالی برمی‌گردد؛ تست باید با `Performance::set_use_style_controls(true)` و بر اساس **id** انجام شود.
+
+## [1.11.132]
+
+#### صفحهٔ سبد: کنترل‌های چیدمان بالاخره کار می‌کنند.
+  - ویجت «صفحه کامل سبد» از قبل کنترل‌های «عرض ستون خلاصه» و «فاصله» را داشت (`style_columns`)، ولی **هیچ قاعدهٔ CSS‌ای** از `--hsw-cp-side` استفاده نمی‌کرد؛ یعنی ستون‌بندی روی دسکتاپ وجود نداشت و کنترل‌ها مرده بودند.
+  - قاعدهٔ دو ستونی برای `≥1024px` اضافه شد: `grid-template-columns: minmax(0,1fr) var(--hsw-cp-side, 380px)` + `align-items: start`.
+  - سبد خالی همان تک‌ستونی می‌ماند (قاعدهٔ `is-empty` با `!important` دست‌نخورده).
+  - **تأیید:** قاعده در `hsw-cart.min.css` مستقر ✓ · موبایل (۴۳۰px) تک‌ستونی (`375.6px`) ✓ · صفحهٔ سبد ۲۰۰ بدون Fatal ✓. ستون‌بندی دسکتاپ روی نصب لوکال قابل تست نبود چون سبد خالی است.
+
+## [1.11.131]
+
+#### فیلتر قیمت: جهت دستگیره‌ها و ناحیهٔ پرشده در RTL + رفع خرابی سوییچ «فیلتر سریع».
+  - دستگیره‌ها حالا از چیدمان راست‌به‌چپ پیروی می‌کنند: **حداقل سمت راست** (کنار «از») و حداکثر سمت چپ (کنار «تا»). `direction: ltr` که در ۱.۱۱.۱۳۰ اضافه شده بود حذف شد.
+  - ناحیهٔ پرشده با `left`/`right` فیزیکی و آگاهی از `direction` محاسبه می‌شود؛ `inset-inline-*` در این ساختار معکوس عمل می‌کرد و نوار در سمت اشتباه می‌افتاد.
+  - **باگ جانبی:** کلاس ریل قیمت را `.hsw-af__track` گذاشته بودم که همان کلاس ریل **سوییچ** است؛ در نتیجه سوییچ «فیلتر سریع» به یک خط نازک محو تبدیل شده بود. کلاس‌ها به `.hsw-af__pricetrack` / `.hsw-af__pricefill` تغییر کرد.
+  - **تأیید:** اسکرین‌شات کارت قیمت (دستگیره راست = حداقل، چپ = حداکثر، ناحیهٔ پرشدهٔ کامل) و کارت «فیلتر سریع» (سوییچ سالم) — هر دو با Playwright.
+
+## [1.11.130]
+
+#### فیلتر قیمت: دو دستگیره + تایپ آزاد.
+  - قبلاً فقط دستگیرهٔ «حداکثر» وجود داشت و ورودی‌های عددی `step="10000"` و `min/max` داشتند؛ تایپ ۹۵٬۰۰۰ باعث می‌شد مرورگر کل فرم را با پیام «The two nearest valid values are 90000 and 100000» رد کند.
+  - حالا **دو دستگیره** (حداقل و حداکثر) روی یک ریل با ناحیهٔ پرشده، و ورودی‌های عددی `step="any"` بدون `min/max` (سرور خودش در `price_state()` مقادیر را clamp می‌کند).
+  - مقدار تایپ‌شده فقط **همان فیلد** را اصلاح می‌کند (۹۵٬۰۰۰ با حداقل ۲۰۰٬۰۰۰ → ۲۰۰٬۰۰۰) و دستگیرهٔ دیگر را جابه‌جا نمی‌کند.
+  - اسلایدر گام ریزتری (`step/10`) دارد تا عدد تایپ‌شده با دستگیره ناهماهنگ نشود.
+  - منطق JS به **ظرف مرئی** محدود شد (`.hsw-af__side` / `.hsw-asheet--filter`)؛ قبلاً فرم مشترک باعث می‌شد کشیدن دستگیرهٔ موبایل، دستگیرهٔ دسکتاپ را جابه‌جا کند.
+  - **تست:** دو دستگیره ✓ · همگام‌سازی عدد↔دستگیره ✓ · `form.checkValidity()` بدون خطا ✓ · submit نهایی: `?min_price=300000&max_price=900000` ✓
+
+## [1.11.129]
+
+#### فونت: حروف لاتین هم واقعاً وزیرمتن می‌شوند.
+  - `unicode-range` فونت بسته‌بندی‌شده، `A-Z`، `a-z`، `:` و `;` را نداشت؛ در نتیجه هر متن لاتین داخل ویجت‌ها (SKU، برند، «InStock»، عنوان انگلیسی) بی‌صدا به Tahoma می‌افتاد و با متن فارسی کنارش ناهمگون بود.
+  - حالا `U+0000-00FF` (لاتین پایه + Latin-1) به همراه بلوک‌های عربی پوشش داده می‌شود.
+  - **اثبات اندازه‌گیری:** عرض رشتهٔ «ABC abc 123» با `"Vazirmatn HSW"` از **۹۰px به ۹۲px** تغییر کرد (قبلاً دقیقاً برابر Tahoma بود = یعنی از Tahoma استفاده می‌شد).
+
+## [1.11.128]
+
+#### آرشیو کامل از پالت رنگ تغذیه می‌شود؛ کنترل ویجت همیشه اولویت دارد.
+  - چهار متغیری که هاردکد بودند به توکن پالت وصل شدند (مقدار قبلی به‌عنوان fallback حفظ شد): `--hswa-page: var(--hsw-pal-surface-alt)` · `--hswa-body: var(--hsw-pal-muted)` · `--hswa-rose: var(--hsw-pal-danger)` · `--hswa-amber: var(--hsw-pal-warning)`.
+  - زنجیره در CSS مستند شد: **پالت → پیش‌فرض `:root` → کنترل ویجت**. کنترل رنگ ویجت، `--hswa-*` را روی wrapper می‌نویسد (specificity بالاتر از `:root`) و بنابراین برنده است.
+  - **اثبات با مرورگر:** نشان تخفیف پیش‌فرض `rgb(186,26,26)` (پالت) و با override ویجت `rgb(0,255,0)` شد.
+  - تنها تغییر بصری در اسنپ‌شات ۲۸ المان: پس‌زمینهٔ نشان تخفیف `#be123c → #ba1a1a` (همان مقدار پالت).
+  - `--hswa-strong` و `--hswa-faint` هنوز مشتق/هاردکد هستند چون توکن پالتی برایشان وجود ندارد.
+
+## [1.11.127]
+
+#### گزارش وضعیت تأیید ویجت‌ها در `WIDGETS-REFERENCE.md`.
+  - بخش جدید «وضعیت تأیید»: هر ویجتِ فعال با `get_controls()` اجرا شد و تعداد کنترل/سکشن/واریانت ثبت شد — **۱۵ از ۱۵** ویجت فعال بدون خطا.
+  - ۴۷ ویجت دیگر روی این نصب خاموش‌اند (در «کنترل ویجت‌ها») و فقط بازبینی ایستا شده‌اند؛ این تفکیک در سند نوشته شد تا گزارش دقیق باشد.
+
+## [1.11.126]
+
+#### کنترل‌های استایل ریسپانسیو در هلپرهای مشترک.
+  - `a_text()` (اندازهٔ فونت) و `a_align()` (تراز متن) از `add_control` به `add_responsive_control` تغییر کردند؛ شناسهٔ کنترل و مقدار پیش‌فرض دست‌نخورده است، پس صفحات ذخیره‌شده همان مقدار قبلی را نگه می‌دارند و فقط دکمه‌های Tablet/Mobile اضافه می‌شود.
+  - نتیجهٔ اندازه‌گیری: هر ۱۵ ویجتِ ثبت‌شده روی نصب تست، حالا واریانت `_tablet` دارند (قبلاً ۶).
+  - **تأیید:** اسنپ‌شات ۲۸ المان / ۴ صفحه → صفر تفاوت؛ صفحات ۲۰۰ بدون Fatal.
+
+## [1.11.125]
+
+#### صفر ارجاع بدون fallback به توکن‌های سراسری پالت.
+  - ۳۴ توکن سراسری (`--hsw-primary` … `--hsw-btn-hover-bg`) با مقدار واقعی پالت اندازه‌گیری شد و هر ارجاع بدون fallback در ۶ فایل CSS با همان مقدار جانشین شد: **۱۵۲ مورد** (product 102 · loop 41 · fonts 5 · footer 2 · header 1 · account 1).
+  - نتیجه: اگر استایل پالت روی صفحه‌ای چاپ نشود (ادیتور، کش، صفحهٔ سفارشی)، رنگ‌ها همان پیش‌فرض پالت را می‌گیرند، نه رنگ ارثی قالب/المنتور.
+  - **تأیید:** اسنپ‌شات ۲۸ المان روی چهار صفحه قبل/بعد → صفر تفاوت.
+  - باقی‌مانده: ارجاع به متغیرهای کامپوننتی (`--hswc-`, `--hswa-`, …) که در همان فایل روی ریشهٔ کامپوننت تعریف می‌شوند (۲۱۹۴ مورد، امن).
+
+## [1.11.124]
+
+### Changed
+
+- **مستندات هم‌گام با کد:** مکانیزم «تسویه: امنیت و نرخ» به `WIDGETS-REFERENCE.md` اضافه شد (هوک‌های پرداخت، terms، محدودیت نرخ).
+
+## [1.11.123]
+
+#### امنیت تسویه: هوک‌های پرداخت، قوانین و محدودیت نرخ.
+  - `POST /hsw/v1/checkout/complete` قبل از `create_order()` حالا `woocommerce_before_checkout_process` و `woocommerce_checkout_process` را اجرا می‌کند و خطاهای `wc_notice` آن‌ها را به‌صورت خطای REST (۴۰۰) برمی‌گرداند — تا کپچا و افزونه‌های ضدتقلب واقعاً اجرا شوند.
+  - `terms` دیگر `1` ثابت نیست: از ورودی خوانده می‌شود و **فقط** وقتی `wc_terms_and_conditions_checkbox_enabled()` فعال باشد اجباری است.
+  - محدودیت نرخ با `HSW_Throttle`:
+  - `complete`: ۲۰ درخواست/۶۰ ثانیه برای IP+session و شمارندهٔ IP-only با ۵ برابر آستانه (برای CGNAT مشتری‌های واقعی).
+  - `coupon`: ۱۰ درخواست/۶۰ ثانیه + شمارندهٔ کد اشتباه (۱۰ خطا/۱۰ دقیقه → قفل ۱۰ دقیقه).
+  - همه با فیلتر `hsw_checkout_rate_limit`؛ پاسخ ۴۲۹ با پیام فارسی و `retry_after`.
+
+## [1.11.122]
+
+#### مستندات فنی کامل برای توسعه‌دهنده.
+  - فایل جدید `WIDGETS-REFERENCE.md` (تولیدشده از کد): نمای کلی لایه‌ها، قاعده‌های معماری، سیستم رنگ/آیکون/فونت/تقویم، فهرست **۶۲ ویجت** به تفکیک خانواده (slug، فایل، Repeater، سکشن، ریسپانسیو، CSS)، جدول مکانیزم‌ها (سبد، فیلتر، شیت، علاقه‌مندی، سود، ارسال، تقویم، نوار پیشرفت)، شش الگوی تداخل واقعی، پروتکل تأیید تغییر، و چک‌لیست افزودن ویجت.
+  - `README.md` فهرست مستندات گرفت؛ `ARCHITECTURE-MAP.md` به نسخهٔ ۱.۱۱.۱۲۱ به‌روز شد؛ `WIDGET-GUIDE.md` به مرجع فنی لینک شد.
+
+## [1.11.121]
+
+#### تاریخ مقاله با تقویم شمسی + کارت محصول تکراری.
+  - تاریخ هیرو مستقیماً با `HSW_Jalali::format()` ساخته می‌شود (قبلاً به ترتیب فیلترها تکیه داشت). تست با کلید روشن: «فروردین ۱۵, ۱۴۰۱» با ارقام فارسی.
+  - **علت محصول تکراری:** تطبیق خودکار، اسلاگ دستهٔ *نوشته* را با تکسونومی `product_cat` می‌سنجید که تقریباً هیچ‌وقت مطابق نداشت؛ در نتیجه همیشه به «جدیدترین محصول» می‌افتاد. حالا: متای `_hsw_product_id` روی هر نوشته → تطبیق با **نام** دستهٔ محصول → تطبیق با برچسب محصول → و اگر هیچ‌کدام نبود کارت **نمایش داده نمی‌شود** (به‌جای تبلیغ محصول بی‌ربط در همهٔ مقالات).
+
+## [1.11.120]
+
+#### صفحهٔ نوشتهٔ تکی: نوار پیشرفت و دکمهٔ محصول.
+  - نوار پیشرفت وجود داشت ولی چون ارتفاع بدنهٔ مقاله کمتر از ارتفاع صفحه بود، درصد همیشه **۱۰۰** محاسبه می‌شد؛ نتیجه یک خط ۳px پر در بالای صفحه که «نبودن نوار» به نظر می‌رسید. حالا در این حالت به اسکرول کل صفحه فالنمی‌کند: بالای صفحه **۰٪** و در نیمهٔ اسکرول ≈۵۴٪ (اندازه‌گیری‌شده).
+  - دکمهٔ کارت محصول به `add_to_cart_url()` لینک بود؛ برای محصول ساده این آدرس «همین صفحه + ?add-to-cart=ID» است و `data-hsw-add` هیچ هندلری در `hsw-post.js` نداشت → کلیک = ریلود همان صفحه. حالا به **صفحهٔ محصول** لینک می‌شود.
+  - تاریخ: از `get_the_date('', $post)` می‌آید و از ۱.۱۱.۱۱۸ با تقویم شمسی تبدیل می‌شود.
+
+## [1.11.119]
+
+#### «سود شما از خرید» یک تعریف واحد: تخفیف محصول + کد تخفیف.
+  - ویجت خلاصهٔ سبد و خلاصهٔ تسویه فرمول قدیمی `base − (total − shipping)` را داشتند که تخفیف فروش را نمی‌شمرد و کارمزد پرداخت را از سود کم می‌کرد.
+  - حالا هر سه جا از `HSW_Helpers::savings()` استفاده می‌کنند: `Σ(قیمت اصلی − قیمت فروش) × تعداد + تخفیف کوپن`.
+  - «قیمت پایه اقلام» هم درست شد: از `get_regular_price()` استفاده می‌کند (قبلاً قیمت فعال بود، پس با ردیف سود جمع نمی‌خورد).
+  - تست: محصول ۵۷۰٬۹۹۹ با قیمت فروش ۴۱۵٬۲۷۲ و تعداد ۲ → سود **۳۱۱٬۴۵۴** (دقیقاً برابر (۵۷۰٬۹۹۹−۴۱۵٬۲۷۲)×۲).
+
+## [1.11.118]
+
+#### تقویم شمسی در وبلاگ و آرشیو وبلاگ هم اعمال می‌شود.
+  - علت ناهماهنگی: ویجت‌های وبلاگ تاریخ را با `get_the_date( '' )` می‌خوانند (فرمت خالی = فرمت تاریخ سایت). فیلتر ما فرمت خالی را «بدون توکن تاریخ» تشخیص می‌داد و تبدیل را رد می‌کرد؛ ولی حساب کاربری ووکامرس تاریخ را با فرمت صریح می‌دهد و تبدیل می‌شد.
+  - حالا فرمت خالی به `get_option('date_format')` تبدیل می‌شود (هم در `get_the_date` و هم در `date_i18n`).
+  - `get_the_time` هم پوشش داده شد (قالب‌ها و ویجت Post Info المنتور تاریخ را از این مسیر می‌خوانند).
+  - تست: صفحهٔ نوشته و آرشیو وبلاگ هر دو ماه شمسی نشان می‌دهند (فروردین …).
+
+## [1.11.117]
+
+#### کلیدهای تنظیمات: ظاهر سوییچ و جای درست.
+  - «تقویم شمسی» و «ارسال رایگان افزونه» حالا مثل بقیهٔ تنظیمات **سوییچ** هستند (با `hidden` برای مقدار خاموش و `hsw-wm-track`).
+  - «ارسال رایگان افزونه» از بخش ۴۰۴ به **بخش ارسال رایگان** (`#hsw-group-shipping`) منتقل شد، بالای فیلد سقف.
+  - «تقویم شمسی» به بخش **کاتالوگ/فروشگاه** (`#hsw-group-catalog`) منتقل شد.
+
+## [1.11.116]
+
+#### تقویم شمسی (اختیاری، پیش‌فرض خاموش).
+  - کلید در «کنترل ویجت‌ها» → «تقویم شمسی». با فعال شدن، تاریخ‌ها در سایت شمسی نمایش داده می‌شوند.
+  - پیاده‌سازی **بدون کتابخانه**: یک کلاس ~۲۰۰ خطی (`HSW_Jalali`) با ریاضی صحیح برای تبدیل + فرمت‌کننده که توکن‌های `Y y m n d j F M` و ساعت را پشتیبانی می‌کند. هیچ فایل CSS/JS اضافه نمی‌شود.
+  - فقط وقتی کلید روشن است فیلترها ثبت می‌شوند (`date_i18n`، `get_the_date`، `get_the_modified_date`)؛ در حالت خاموش هیچ هزینه‌ای ندارد.
+  - پنل مدیریت (`is_admin`) دست‌نخورده می‌ماند تا تاریخ سفارش‌ها/گزارش‌ها برای مدیر قاطی نشود.
+  - تست: `2026-10-26 → ۴ آبان ۱۴۰۵` · `2024-03-20 → ۱۴۰۳/۰۱/۰۱` · `get_the_date` و `date_i18n` هر دو تبدیل می‌شوند.
+
+## [1.11.115]
+
+#### کارت‌های آرشیو: `sizes` واقعی برای تصاویر.
+  - ووکامرس به‌صورت پیش‌فرض `sizes="300px"` می‌دهد، پس کارت ۱۹۶px هم فایل 300w را دانلود می‌کرد (۲۴.۴KiB اضافه در LCP).
+  - حالا `sizes="(max-width: 480px) 45vw, (max-width: 767px) 30vw, 196px"` روی تصویر کارت ست می‌شود.
+
+## [1.11.114]
+
+#### رفع باگ فیلترهای آرشیو: نام‌های تکراری در یک فرم.
+  - فرم فیلتر **دو نسخه** از هر فیلد دارد: سایدبار دسکتاپ (`.hsw-af__side`) و شیت موبایل (`.hsw-asheet--filter`)، هر دو داخل **یک** `<form>`. اندازه‌گیری: `min_price` ×۲، `max_price` ×۲، `instock` ×۲ در یک فرم.
+  - مرورگر هر نام را دو بار می‌فرستاد و PHP **آخری** را می‌گرفت (همیشه نسخهٔ شیت). پس تغییر در سایدبار دسکتاپ بی‌اثر می‌شد — دقیقاً همان حس «فیلتر قیمت کار نمی‌کند».
+  - حالا قبل از submit، نسخهٔ **نامرئی** غیرفعال (`disabled`) می‌شود تا فقط یک مقدار ارسال شود؛ هم برای submit خودکار و هم دکمهٔ «اعمال فیلترها».
+
+## [1.11.113]
+
+#### گارد شیت‌ها از حالت سراسری به «فقط بخش آرشیو» منتقل شد.
+  - در ۱.۱۱.۱۱۲ این استایل در `<head>` همهٔ صفحات چاپ می‌شد؛ حالا هر ویجتی که خودش شیت دارد (فیلتر، مرتب‌سازی، راهنما) یک‌بار در همان صفحه چاپش می‌کند (`HSW_Assets::sheet_guard()` با فلگ استاتیک).
+  - نتیجهٔ اندازه‌گیری: خانه **۰** · فروشگاه **۱** · محصول **۰** · سبد **۰**.
+
+## [1.11.112]
+
+#### رفع «یک لحظه شیت باز میشود» در آرشیو.
+  - شیت‌های فیلتر/مرتب‌سازی/راهنما (`hsw-asheet`, `hsw-agd__modal`) در HTML هستند و فقط با CSS همان خانواده مخفی می‌شوند؛ وقتی CSS دیر برسد، یک فریم دیده می‌شوند.
+  - یک گارد کوچک در `<head>` (قبل از همهٔ استایل‌ها) چاپ می‌شود: `.hsw-asheet:not(.is-open), .hsw-agd__modal:not(.is-open){visibility:hidden}` — با افزودن `.is-open` خودبه‌خود از کار می‌افتد، پس باز شدن شیت را خراب نمی‌کند.
+  - `.hsw-sheet` (شیت «به سبد اضافه شد») اصلاً در این ماجرا نیست: فقط با JS و هنگام افزودن ساخته می‌شود.
+
+## [1.11.111]
+
+#### پاکسازی `!important` — مرحلهٔ ۲ (header + fonts + archive/cart/checkout).
+  - `hsw-header.css`: ۳ حذف (۱۸→۱۵) · `hsw-fonts.css`: ۵ حذف (۲۱→۱۶، رنگ‌های صفحه‌بندی) · archive/cart/checkout: **۰ مورد واجد شرط** (همه در سلکتورهای ترکیبی یا ویژگی‌های چیدمانی هستند).
+  - جمع کل از ابتدا: **۶۲ مورد** (۳۵۳→۳۰۲).
+  - **تأیید:** اسنپ‌شات ۲۸ المان روی چهار صفحه (خانه/فروشگاه/محصول/سبد) قبل و بعد → **صفر تفاوت**.
+  - موارد باقی‌مانده عمداً دست‌نخورده‌اند: سلکتورهای ترکیبی (`.hsw-c .button`) که برای غلبه بر قالب نوشته شده‌اند و ویژگی‌های `display/position/opacity`.
+
+## [1.11.110]
+
+#### پاکسازی کنترل‌شدهٔ `!important` (مرحلهٔ ۱: account + product).
+  - فقط روی ویژگی‌هایی که کنترل استایل المنتور مالکشان است (رنگ، پس‌زمینه، فونت، فاصله، گردی) و فقط در قواعدی که سلکتورشان **فقط کلاس `.hsw-`** است.
+  - حذف‌شده: ۳۲ مورد در `hsw-account.css` و ۲۲ مورد در `hsw-product.css` (account: ۱۴۴→۱۱۲، product: ۱۱۵→۹۵).
+  - موارد ریسک‌دار (ریست قالب، `input[type]`، `display/position/opacity`) دست نخوردند.
+  - **تأیید:** اسنپ‌شات computed style قبل/بعد روی ۶ المان کلیدی (`.hsw-ptrust__ic`, `.hsw-pfeat__ic`, `.hsw-ag__title`, `.hsw-ag__price`, `.hsw-ag__wish`) → **صفر تفاوت**؛ پنج صفحه ۲۰۰ و بدون Fatal.
+
+## [1.11.109]
+
+### Changed
+
+- **مستند `ARCHITECTURE-MAP.md` اضافه شد** (تولیدشده از خود کد): لایه‌های بارگذاری، ماتریس «خانواده → فایل CSS»، وضعیت استاندارد هر ۶۲ ویجت (Repeater / تعداد سکشن / کنترل ریسپانسیو)، شش الگوی تداخل شناخته‌شده با نمونهٔ واقعی، و اولویت رفع باگ.
+
+## [1.11.108]
+
+#### رفع تداخل اولویت در دکمه‌های پنل حساب.
+  - قاعدهٔ `۱.۱۱.۸۹` به‌صورت `.hsw-ac__btn:not(.hsw-ac__btn--primary)` نوشته شده بود (specificity 0,2,0) و نسخه‌های `--light` و `--ghost-light` را هم می‌گرفت؛ در نتیجه رنگ پالت «دکمه‌های معمولی» روی آن‌ها می‌نشست و متن با پس‌زمینه یکی می‌شد (اصلاح ۱.۱۱.۱۰۷ هم همین‌جا خنثی می‌شد).
+  - حالا قاعده فقط `--ghost` را هدف می‌گیرد؛ `--light` و `--ghost-light` روی هدر رنگی، استایل اختصاصی خودشان را دارند.
+
+## [1.11.107]
+
+#### دکمهٔ «بازگشت به پیشخوان» در صفحات آدرس‌ها/دانلودها/علاقه‌مندی‌ها دیده می‌شود.
+  - کلاس `hsw-ac__btn--ghost-light` پس‌زمینهٔ نیمه‌شفاف **سفید** با متن سفید داشت؛ روی هدر روشن (یا وقتی گرادیان هدر تنظیم نشده) متن با پس‌زمینه یکی می‌شد.
+  - حالا یک پیل تیرهٔ نیمه‌شفاف با بلور است که روی هدر تیره و روشن هر دو خوانا است؛ هاور هم پررنگ‌تر می‌شود.
+
+## [1.11.106]
+
+#### پنل کاربری در موبایل: نوار چسبان + کشوی منو.
+  - نوار `hsw-ac__crumbs` در موبایل فقط **آخرین نقطه** (پیشخوان/سفارش‌ها/ دانلودها/آدرس‌ها) را نشان می‌دهد و مسیر قبلی پنهان می‌شود.
+  - به‌جای مسیر، یک دکمهٔ منو اضافه شد که سایدبار حساب را به‌صورت **کشو** (off-canvas) باز می‌کند: پوشش تاریک، بستن با کلیک بیرون/Esc/انتخاب لینک، و `aria-expanded` برای دسترس‌پذیری.
+  - نوار در موبایل `position: sticky; top: 0` است تا هنگام اسکرول بالا بماند.
+  - دسکتاپ دست‌نخورده: همان breadcrumb کامل.
+
+## [1.11.105]
+
+#### فونت وزیرمتن دیگر با تایپوگرافی سراسری المنتور از کار نمی‌افتد.
+  - همان الگوی باگ رنگ: `font-family: var(--hsw-font, inherit)` و `font_css('') → 'inherit'`. وقتی پالت خالی بود، `inherit` می‌شد و فونت سراسری المنتور (Site Settings) برنده می‌شد.
+  - حالا مقدار جانشین **همیشه** `"Vazirmatn HSW", Tahoma, sans-serif` است؛ «ارث‌بری از قالب» فقط وقتی اعمال می‌شود که خودتان در ویجت انتخابش کنید (`hsw_font_mode = inherit`).
+
+## [1.11.104]
+
+#### بهینه‌سازی Lighthouse (بخش افزونه).
+  - `preconnect` به `secure.gravatar.com` دیگر روی همهٔ صفحات چاپ نمی‌شود؛ فقط جایی که آواتار ممکن است رندر شود (نوشته/دیدگاه). Lighthouse این را «Unused preconnect» علامت زده بود.
+  - لوگوی هدر به‌جای فایل کامل، نسخهٔ ۱۶۰px می‌گیرد + `sizes` واقعی + `fetchpriority="high"`؛ روی سایت مشتری ۲۵KiB برای نمایش ۶۷px دانلود می‌شد.
+
+## [1.11.103]
+
+#### رنگ متن دکمه‌های خرید دیگر از رنگ‌های سراسری المنتور ارث نمی‌برد.
+  - علت باگ «دکمهٔ قرمز که با هیچ تنظیمی عوض نمی‌شد» پیدا شد: در CSS ما `color: var(--hsw-on-cta)` **بدون مقدار جانشین** بود؛ اگر آن متغیر در صفحه تعریف نشده بود، اعلان رنگ نامعتبر می‌شد و متن رنگ ارثی (رنگ دوم/Secondary کیت المنتور) را می‌گرفت.
+  - حالا همهٔ `--hsw-on-cta` / `--hswc-on-cta` / `--hswk-on-cta` / `--hsw-on-btn` با فالبک `#fff` نوشته شده‌اند (۱۷ مورد در دو فایل).
+
+## [1.11.102]
+
+#### شمارندهٔ سبد دیگر روی رفرش از ۳ به ۲ نمی‌پرد.
+  - علت: سرور تعداد کل (۳) را چاپ می‌کرد، ولی `refreshCart()` همان HTML را با `parseMiniCart()` می‌خواند و چون مینی‌کارت ووکامرس تعداد را به‌صورت متن «۳ × نام» می‌نویسد (نه `input.qty`)، هر قلم را ۱ می‌شمرد → **تعداد اقلام (۲)**.
+  - حالا ابتدا `data-count` از fragment خودمان خوانده می‌شود (همان عدد سرور) و فقط اگر نبود، مینی‌کارت پارس می‌شود؛ آن هم با پشتیبانی از ارقام فارسی.
+
+## [1.11.101]
+
+#### فوتر چسبان حالا زیر منوی موبایل می‌نشیند (پیش‌فرض).
+  - `z-index` پیش‌فرض از ۸۰۰۰ به **۹۰** آمد؛ هدر ۱۰۰ است و منوی موبایل داخل همان stacking context رندر می‌شود، پس منو همیشه روی فوتر می‌افتد.
+  - قاعدهٔ `html.hsw-hd-lock .hsw-sf { display:none }` حذف شد؛ حالا فوتر هنگام باز بودن منو حذف نمی‌شود، فقط **زیر** آن می‌ماند (بدون پرش چیدمان).
+
+## [1.11.100]
+
+#### قلب علاقه‌مندی‌ها دیگر محو نمی‌شود و قرمز پر می‌شود.
+  - علت: `hswFill()` آدرس `<use>` را به `#hsw-i-favorite.fill` عوض می‌کرد ولی چنین سمبلی در اسپرایت وجود نداشت → آیکون کاملاً ناپدید می‌شد.
+  - سمبل توپُر `favorite.fill` (با `fill="currentColor"` درون مسیر تا از `<g style="fill:none">` رد نشود) اضافه شد و `print_sprite()` هرجا قلب خطی چاپ شود، نسخهٔ توپُر را هم می‌آورد.
+  - `hswFill()` حالا وجود سمبل را چک می‌کند؛ اگر نبود، آیکون خطی می‌ماند (دیگر هرگز خالی نمی‌شود).
+  - رنگ فعال: `var(--hswa-rose, #e11d48)` — قرمز پیش‌فرض.
+
+## [1.11.99]
+
+#### ارسال رایگان افزونه حالا کلید خاموش/روشن دارد و پیش‌فرض خاموش است.
+  - آپشن جدید `hsw_free_shipping_on` (پیش‌فرض `no`) + فیلتر `hsw_free_shipping_enabled`. تا روشن نشود، فیلتر `woocommerce_package_rates` اصلاً ثبت نمی‌شود؛ یعنی نرخ‌ها، کلاس‌های ارسال، وزن و شرط‌های متدهای ووکامرس دست‌نخورده می‌مانند.
+  - کلید در «کنترل ویجت‌ها» بالای فیلدهای صفحهٔ ۴۰۴ اضافه شد.
+
+## [1.11.98]
+
+#### یکدست‌سازی رویداد سبد در صفحهٔ محصول.
+  - `hsw-product.js` هم بعد از افزودن، `hsw_added_to_cart` را dispatch می‌کند (مثل ویجت لوپ و آرشیو) تا badge هدر از یک مسیر به‌روز شود.
+  - رویداد اشتباه `wc_fragment_refresh` به `wc_fragments_refreshed` (نامی که ووکامرس می‌شنود) اصلاح شد.
+
+## [1.11.97]
+
+#### نوار چسبان: استپر تمام‌عرض و قیمت در لبهٔ چپ.
+  - استپر و دکمهٔ خرید کل ۵۰٪ را پر می‌کنند (`flex:1 1 auto; width:100%`) و محتوای استپر با `space-between` پخش می‌شود؛ دکمه‌ها ۴۲px.
+  - بلوک قیمت/تخفیف با `align-items:flex-end` و `text-align:left` به لبهٔ چپ می‌چسبد (در RTL یعنی انتهای محور).
+
+## [1.11.96]
+
+#### نوار خرید چسبان: تقسیم عرض ۵۰٪ / ۴۵٪.
+  - استپر + دکمهٔ خرید: `flex: 0 0 50%` (سمت راست در RTL).
+  - قیمت و تخفیف: `flex: 0 0 45%` (سمت چپ)، فاصلهٔ بین دو بخش ۵٪.
+
+## [1.11.95]
+
+#### نوار خرید چسبان: bin در تعداد ۱، استپر بزرگ‌تر، جابه‌جایی با قیمت.
+  - در تعداد ۱ دکمهٔ سطل زباله جای «−» می‌آید (طرح اصلی) و با حذف، دکمهٔ «خرید آنلاین» برمی‌گردد. باگ قبلی از کهنه‌ماندن `is-min` بود؛ حالا JS بعد از هر به‌روزرسانی آن را ست می‌کند، پس bin هرگز در تعداد ۶ نمی‌ماند.
+  - استپر بزرگ‌تر: ارتفاع ۴۸px، دکمه‌ها ۳۸px، آیکون ۲۰px، فیلد عدد ۲.۵rem/۱۵px.
+  - جای استپر و قیمت عوض شد: استپر سمت راست (شروع RTL)، قیمت و تخفیف سمت چپ.
+
+## [1.11.94]
+
+#### نوار خرید چسبان موبایل: استپر درست شد.
+  - دکمهٔ «−» همیشه نمایش داده می‌شود و سبد‌خالی‌کن (bin) هرگز جای آن را نمی‌گیرد. علت باگ: کلاس `is-min` بعد از به‌روزرسانی AJAX کهنه می‌ماند و در تعداد ۶ هم bin می‌ماند که کل خط را حذف می‌کرد.
+  - وقتی محصول در سبد است، دکمهٔ «خرید آنلاین» در همان نوار **مخفی** می‌شود و فقط استپر می‌ماند (مثل طرح مرجع).
+  - `font-size` آیکون استپر بدون `!important`.
+
+## [1.11.93]
+
+#### B1 — سقف تعداد سمت سرور.
+  - `ajax_set_qty` حالا `get_max_purchase_quantity()`، موجودی، `sold_individually` و فیلتر `woocommerce_update_cart_validation` را اعمال می‌کند.
+  - پاسخ JSON: `quantity`, `max`, `remaining`, `message` (فارسی) + کد 409 برای ناموجود و 400 برای تعداد غیرمجاز.
+#### B2 — نانس روی صفحات کش‌شده.
+  - مسیر REST جدید `GET /wp-json/hsw/v1/qty-nonce` برای گرفتن نانس تازه.
+  - JS در پاسخ 403 **فقط یک‌بار** نانس را تازه می‌کند و همان درخواست را تکرار می‌کند؛ اگر باز 403 شد پیام «نشست منقضی شده…» می‌دهد (بدون حلقه).
+
+### Changed
+
+- **`STAGING-CHECKLIST.md`** با ۲۰ سناریوی دستی برای پیش از لایو.
+
+## [1.11.92]
+
+#### پایان لود سراسری دارایی‌ها (باگ عملکردی).
+  - چهار `wp_localize_script` دیگر (`hsw-account`, `hsw-checkout`, `hsw-product`, `hsw-archive`) هم handle خودشان را enqueue می‌کردند؛ همه به `wp_add_inline_script( …, 'before' )` تبدیل شدند.
+  - `HSW_Widget_Base::get_style_depends()/get_script_depends()` پیش‌فرض `[]` شد و سه ویجت لوپ (پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محبوب‌ترین‌ها) `hsw-loop` را صریح اعلام می‌کنند.
+
+## [1.11.91]
+
+#### hsw-loop دیگر در همهٔ صفحات لود نمی‌شود.
+  - `wp_localize_script( 'hsw-loop', … )` خودش handle را enqueue می‌کرد؛ به `wp_add_inline_script` تغییر کرد تا داده فقط وقتی ویجت لوپ روی صفحه است چاپ شود. (پس از این تغییر، اگر هنوز hsw-loop دیده می‌شود یعنی ویجت لوپ در قالب هدر/فوتر سایت وجود دارد.)
+
+## [1.11.90]
+
+#### مرحلهٔ A (سه اصلاح کم‌ریسک).
+  - **A1 فوتر:** به‌جای دو صفت `rel`، یک صفت ساخته می‌شود (`noopener` برای تب جدید، `nofollow` در صورت نیاز) — HTML معتبر.
+  - **A2 آیکون‌ها:** `font-size !important` از `.hsw-ptrust__ic`، `.hsw-pfeat__ic` و `.hsw-pacc__title .hsw-ic` برداشته شد؛ اندازهٔ پیش‌فرض همان ۲۶/۱۸/۲۰px ماند (تست computed style: بدون `!important`).
+  - **A3 فوتر:** استایل `.hsw-sf*` از `hsw-fonts.css` به `assets/css/hsw-footer.css` منتقل و در `HSW_Assets` ثبت شد؛ ویجت `get_style_depends()` = `hsw-fonts` + `hsw-footer` گرفت (دیگر `hsw-loop` ارث نمی‌برد). `!important` رنگ لینک برداشته شد و به `var(--hsw-sf-c, …)` / `var(--hsw-sf-c-hover, …)` تبدیل شد تا کنترل‌های `link_c` / `link_hover_c` اثر کنند.
+
+## [1.11.89]
+
+#### پالت: توکن مستقل برای دکمه‌های ووکامرس و دکمه‌های معمولی.
+  - «دکمه‌های ووکامرس»: پس‌زمینه، متن و هاور (`--hsw-woo-btn-*`) برای دکمه‌هایی که خود ووکامرس می‌سازد (اعمال کد، به‌روزرسانی سبد، مشاهده سبد).
+  - «دکمه‌های معمولی»: پس‌زمینه، متن، حاشیه و هاور (`--hsw-btn-*`) برای دکمه‌های ثانویه.
+  - همه با اسکوپ `.hsw-c/.hsw-cp/.hsw-ac` اعمال می‌شوند؛ قالب و بقیهٔ سایت دست‌نخورده می‌ماند.
+
+### Changed
+
+- **مستندات:** بخش «معماری افزونه» در README و «سیستم رنگ دکمه‌ها» در WIDGET-GUIDE اضافه شد.
+
+## [1.11.88]
+
+#### پالت رنگی: توکن «متن روی دکمه‌های خرید».
+  - تا امروز رنگ متن دکمه‌های خرید در کد **سفید ثابت** بود (`--hsw-on-cta`). حالا یک ردیف مستقل در پالت اضافه شده و همان متغیر را می‌نویسد، پس رنگ نوشتهٔ دکمه‌های «ادامه، پرداخت و تکمیل سفارش» از پیشخوان قابل تغییر است.
+  - پیش‌فرض همان سفید است؛ ظاهر فعلی عوض نمی‌شود.
+
+## [1.11.87]
+
+#### سکشن «دکمه‌های سفارش» در ویجت «صفحهٔ کامل سبد خرید» بازسازی شد.
+  - این بار با کنترل‌های سادهٔ `COLOR` (بدون هلپر) و در **انتهای** تب Style قرار گرفت تا حتماً دیده شود.
+  - شش کنترل: پس‌زمینه/متن/هاور دکمهٔ تکمیل سفارش، گردی گوشه‌ها و پس‌زمینه/متن همان دکمه در نوار پایین موبایل — همه با `!important` تا برنده شوند.
+  - کنترل‌ها خالی‌اند: تا رنگی انتخاب نکنید هیچ CSSای تولید نمی‌شود.
+
+## [1.11.86]
+
+#### کنترل رنگ دکمهٔ «تکمیل سفارش» در خود ویجت «صفحهٔ کامل سبد خرید».
+  - بخش استایل جدید «دکمه‌های سفارش»: پس‌زمینه، متن، هاور و گردی گوشه‌های دکمهٔ تکمیل سفارش، به‌همراه پس‌زمینه/متن همان دکمه در نوار پایین موبایل.
+  - چون دکمه در ویجت «خلاصهٔ سبد» رندر می‌شود، از اینجا هم با سلکتور `{{WRAPPER}} .hsw-csummary__cta` قابل تنظیم است؛ کنترل‌ها خالی‌اند و تا رنگی انتخاب نکنید هیچ CSSای تولید نمی‌شود.
+
+## [1.11.85]
+
+#### کنترل رنگ دکمهٔ «ثبت سفارش» (خود ووکامرس) در ویجت صفحهٔ تسویه.
+  - بخش استایل جدید «دکمهٔ ثبت سفارش (ووکامرس)»: پس‌زمینه، متن، پس‌زمینهٔ هاور و گردی گوشه‌ها؛ هدفش `{{WRAPPER}} #place_order` است.
+  - چون این دکمه مال ووکامرس/قالب است، کنترل‌ها **خالی** هستند و تا رنگی انتخاب نکنید هیچ CSSای تولید نمی‌شود → ظاهر فعلی دست‌نخورده.
+
+## [1.11.84]
+
+#### فرم تسویه: رنگ دکمه‌ها تفکیک شد.
+  - «ثبت آدرس» (`hsw-ckaddr__fsubmit`) متغیرهای اختصاصی `--hsw-ck-submit-bg` / `--hsw-ck-submit-tx` گرفت و دو کنترل رنگ در ویجت آدرس اضافه شد.
+  - دکمهٔ «اعمال کد» در صفحهٔ پرداخت (`hsw-pcpn__btn`) هم به متغیرهای اختصاصی `--hsw-pcpn-btn-bg` / `--hsw-pcpn-btn-c` وصل شد.
+  - دکمهٔ نهایی «ثبت سفارش» خود ووکامرس است (`#place_order`) و استایلش دست ما نیست؛ اگر بخواهید می‌توانیم استایل اختصاصی برایش بنویسیم.
+
+## [1.11.83]
+
+#### ویجت کد تخفیف: رنگ دکمهٔ «اعمال کد» تفکیک شد.
+  - پس‌زمینه، متن و پس‌زمینهٔ هاور به متغیرهای اختصاصی (`--hsw-cp-btn-bg` / `--hsw-cp-btn-tx` / `--hsw-cp-btn-h`) وصل شدند با فالبک به توکن CTA پالت؛ کنترل‌های ویجت هم به همین متغیرها می‌نویسند.
+  - بدون تغییر در ساختار یا رفتار.
+
+## [1.11.82]
+
+#### ویجت آیتم‌های سبد: رنگ دکمه‌ها تفکیک شد.
+  - «خالی کردن سبد»: رنگ عادی و رنگ هاور جدا شدند و به متغیرهای اختصاصی (`--hsw-ci-empty-c` / `--hsw-ci-empty-h`) با فالبک پالت وصل شدند.
+  - شمارندهٔ تعداد: علاوه بر رنگ آیکن، کنترل «پس‌زمینه» اضافه شد.
+  - بدون تغییر در ساختار یا رفتار؛ فقط متغیر رنگ.
+
+## [1.11.81]
+
+#### پایلوت «رنگ دکمه‌های مستقل» روی ویجت خلاصهٔ سبد خرید.
+  - دکمهٔ «تکمیل سفارش و ثبت آدرس» حالا متغیر اختصاصی خودش را دارد (`--hsw-cs-cta-bg` / `--hsw-cs-cta-tx`) با فالبک به توکن CTA پالت؛ کنترل‌های ویجت هم به همین متغیرها وصل شدند، پس دیگر رنگ پالت رویش اثر نمی‌گذارد و برعکس.
+  - این اولین ویجت از برنامهٔ «تفکیک رنگ دکمه‌ها، ویجت به ویجت» است.
+
+## [1.11.80]
+
+#### فونت پالت حالا پیش‌فرض همهٔ ویجت‌هاست.
+  - گزینهٔ «فونت پالت (سراسری)» به کنترل «فونت پایه ویجت» اضافه و **پیش‌فرض** شد؛ یعنی هر ویجت فونت پالت را می‌خواند مگر اینکه خودش «فونت طرح» یا «فونت سفارشی» را انتخاب کند.
+  - فونت پیش‌فرض پالت روی «وزیرمتن HSW» تنظیم شد تا ظاهر فعلی حفظ شود.
+
+## [1.11.79]
+
+### Changed
+
+- **لیست فونت‌های المنتور در انتخابگر پالت.** فونت‌های آپلودی المنتور در `elementor_fonts_manager_fonts` ذخیره می‌شوند و جزو font library وردپرس نیستند؛ حالا آن‌ها هم خوانده می‌شوند، به‌همراه تایپوگرافی کیت المنتور.
+- **فوتر چسبان:** در `order-pay` و صفحه‌های سفارشی با اسلاگ payment/checkout/ cart/order-pay هم پنهان می‌شود، و هنگام باز بودن منوی موبایل (`html.hsw-hd-lock`) کاملاً کنار می‌رود تا هیچ‌وقت روی منو نیفتد.
+
+## [1.11.78]
+
+#### رفع ریشه‌ای فونت پیش‌فرض ویجت‌ها.
+  - `HSW_Palette::get()` هر مقدار غیررنگی را دور می‌ریخت (فقط `sanitize_hex_color` قبول می‌شد)؛ به همین دلیل فونت ذخیره می‌شد ولی همیشه خالی برمی‌گشت. حالا `font` جداگانه خوانده می‌شود.
+  - مقدار فونت اگر فاصله داشته باشد با کوتیشن چاپ می‌شود (`--hsw-font:"Vazirmatn HSW"`)، چون بدون کوتیشن CSS نامعتبر است.
+  - فونت روی **ریشهٔ ویجت المنتور** (`elementor-widget-hsw-*`) اعمال می‌شود، پس همهٔ ویجت‌ها را می‌گیرد — نه فقط کلاس‌های داخلی.
+
+### Changed
+
+- **فوتر چسبان:** به‌صورت پیش‌فرض در سبد، پرداخت، تکمیل سفارش و حساب کاربری نمایش داده نمی‌شود (سوییچ برای نمایش) و `z-index` پیش‌فرضش **۸۰۰۰** شد تا منوی موبایل (۱۰۰۰۰) رویش باز شود؛ عدد لایه در تنظیمات ویجت قابل تغییر است.
+
+## [1.11.77]
+
+### Changed
+
+- **هدر: کنترل فاصلهٔ آیکن‌ها/اکشن‌ها** (واکنش‌گرا) زیر «چیدمان افقی هدر».
+- مستندات (README و WIDGET-GUIDE) با فوتر چسبان، فونت سراسری و کنترل‌های جدید هدر به‌روز شد.
+
+## [1.11.76]
+
+#### آیکون خانهٔ Iconsax + حالت شیشه‌ای فوتر + فونت پیش‌فرض همهٔ ویجت‌ها.
+  - کلید `home` با آیکون خطی Iconsax جایگزین شد، پس هر جا آیکون خانه بود (از جمله پنج آیتم پیش‌فرض فوتر چسبان) عوض شد.
+  - ویجت فوتر چسبان: کنترل «حالت شیشه‌ای» + «رنگ پس‌زمینهٔ شیشه» با `backdrop-filter` و رنگ انتخابی.
+  - پالت رنگی: انتخابگر **فونت پیش‌فرض ویجت‌ها**؛ فونت‌های بارگذاری‌شدهٔ قالب (از font library وردپرس) + وزیرمتن افزونه + فیلتر `hsw_font_choices`. مقدار انتخابی به‌صورت `--hsw-font` روی `html:root` چاپ و در همهٔ ویجت‌ها اعمال می‌شود؛ کنترل فونت هر ویجت اولویت دارد.
+
+## [1.11.75]
+
+#### آیکون‌های پیش‌فرض ویجت فوتر چسبان درست شد.
+  - کنترل آیکن از `ICONS` (که فقط کتابخانه‌های ثبت‌شدهٔ المنتور را می‌شناسد و برای اسپرایت خودمان خالی می‌ماند) به **لیست انتخاب آیکون‌های خود افزونه** تغییر کرد؛ حالا هر پنج آیتم پیش‌فرض با آیکن درست رندر می‌شوند.
+  - گزینهٔ «بدون آیکن» اضافه شد و آیکن «سفارش‌ها» به `local_shipping` (آیکن موجود در مجموعه) اصلاح شد.
+
+## [1.11.74]
+
+#### رفع دیده‌نشدن ویجت «فوتر چسبان».
+  - دستهٔ ویجت از `hamishop` (ثبت‌نشده) به `hamishop-header` (دستهٔ واقعی المنتور) تغییر کرد؛ قبلاً ویجت در پنل المنتور نمایش داده نمی‌شد.
+  - ویجت به فهرست «کنترل ویجت‌ها» در پیشخوان اضافه شد (گروه «هدر و ناوبری») تا بتوان روشن/خاموشش کرد.
+
+## [1.11.73]
+
+#### ویجت جدید: «فوتر چسبان» (HamiShop) برای نوار پایین موبایل.
+  - پنج آیتم پیش‌فرض با آیکون‌های خود افزونه: خانه، فروشگاه، سبد خرید، علاقه‌مندی‌ها، حساب کاربری.
+  - همه‌چیز زیر کلاس `.hsw-sf` و با `z-index: 9000` است؛ یعنی زیر شیت خرید (۹۹۹۰) و نوار خرید محصول (۹۹۹۵) می‌نشیند و با هیچ بخشی تداخل نمی‌کند. در دسکتاپ (≥۱۰۲۴px) خودکار مخفی می‌شود و با `body:has(.hsw-sf)` فاصلهٔ پایین صفحه جبران می‌شود.
+  - کنترل‌ها: عنوان (قابل خاموش‌کردن)، ریپیتر لینک/آدرس/آیکن/تب جدید/nofollow، جای آیکن (قبل/بعد/بدون)، تراز واکنش‌گرا، و در تب استایل رنگ‌ها، تایپوگرافی، اندازهٔ آیکن، فاصله‌ها، پس‌زمینه، حاشیه، گردی و سایه.
+
+## [1.11.72]
+
+#### رفع باگ‌های گزارش‌شده (بررسی و تأیید تک‌تک).
+  - **آیکون‌ها:** مسیر `account_balance_wallet` و `settings` بدون `stroke` بود و داخل `<g style="fill:none">` کاملاً نامرئی می‌شد؛ هر دو با نسخهٔ خطی (stroke 1.7) جایگزین شدند. مسیر قلب هم باز بود (سوراخ بالای راست) و با مسیر بستهٔ کامل عوض شد — هم در اسپرایت و هم در نقشهٔ آیکون پنل حساب.
+  - **صفحه‌بندی:** متد `render()` رشته را برمی‌گرداند ولی مستقیم به اکشن ووکامرس وصل بود؛ `output()` اضافه شد و حالا صفحه‌بندی حلقه‌های پیش‌فرض ووکامرس چاپ می‌شود.
+  - **دکمهٔ خرید:** آیکون سبد با `left:16px; right:auto` به لبهٔ چپ فیزیکی رفت و `fill:none` شد تا خطی بماند.
+  - **تب‌ها:** جهت گرادیانت نشانگر «‹‹» برعکس بود (لبهٔ شفاف در سمت غلط) و اصلاح شد؛ کلیدهای تب گارانتی به بخش `ptb_` ویجت صفحه محصول اضافه شد.
+  - **صفحهٔ ورود:** کاشی‌های بی‌عملکرد SSO/Passkey حذف شدند و عنوان/زیرعنوان با اکشن صفحه (بازیابی رمز، تعیین رمز، ثبت‌نام) داینامیک شد.
+  - **امنیت:** فرم تنظیمات `action` گرفت تا با اسلاگ سفارشی پیشخوان، ذخیره خطا نخورد. همهٔ فایل‌های `.min` بازسازی شدند.
+
+## [1.11.71]
+
+#### اصلاح ریشه‌ای فاصله‌های صفحهٔ ورود.
+  - استایل‌ها روی `login_head` (بعد از wp-login.css) چاپ می‌شوند؛ قبلاً قبل از آن بود و قواعد وردپرس برنده می‌شدند — علت «چسبیده بودن» همه‌چیز همین بود.
+  - فاصله‌ها مطابق طرح: کارت ۳۵۲px با پدینگ ۳۴/۳۰، فاصلهٔ فیلدها ۲۲px، برچسب تا کادر ۹px، نوار اطمینان با پدینگ ۱۲px و فاصلهٔ ۲۶px، دکمه و کاشی‌ها ۴۶–۴۸px.
+  - آیکون داخل فیلدها با `background-image` (به‌جای mask که مربع می‌شد) و `background-color` جدا تا آیکون دیده شود.
+
+## [1.11.70]
+
+#### صفحهٔ ورود دقیقاً با ساختار طرح: نوار بالا، کارت باریک و بلند، فونت وزیر.
+  - نوار بالا: نشان و نام فروشگاه + «پنل مدیریت» راست، «بازگشت به سایت» و «فارسی / EN» چپ.
+  - کارت ۳۷۲px با شعاع ۲۸px و پس‌زمینهٔ گرادیانتی تیره؛ نشان گرد لوگو، عنوان «ورود به داشبورد پنل»، شعار فروشگاه و نوار «پروتکل حفاظت امنیتی».
+  - زیر دکمه: جداکنندهٔ «یا ورود از طریق»، دو کاشی «SSO» و «Passkey» و نوار وضعیت؛ لینک‌های پایین کارت.
+  - فونت وزیرمتن با `!important` روی همهٔ عناصر صفحه اعمال می‌شود.
+
+## [1.11.69]
+
+#### بازطراحی صفحهٔ ورود طبق طرح تیرهٔ گلس‌مورفیسم (بدون Tailwind/CDN).
+  - پس‌زمینهٔ #070913 با چهار هالهٔ رنگی (ایندیگو، فیروزه‌ای، بنفش، سرخ) و انیمیشن آرام؛ کارت آکریلیک با blur 28px و حاشیهٔ نورانی.
+  - **لوگوی فروشگاه** (از صفحهٔ برند) داخل نشان دایره‌ای با هالهٔ گرادیانتی جای لوگوی وردپرس نشسته است؛ عنوان «ورود به پنل مدیریت» و شعار فروشگاه زیر آن.
+  - فیلدها ۴۸px شیشه‌ای با فوکوس ایندیگو، دکمهٔ گرادیانتی ایندیگو→فیروزه‌ای، لینک‌های فیروزه‌ای و پیام‌های خطا هم‌سبک. همه با CSS خالص و فونت محلی.
+
+## [1.11.68]
+
+#### هدر: چیدمان موبایل + رنگ‌های منوی کشویی.
+  - کنترل واکنش‌گرای «چیدمان افقی هدر» (راست/وسط/چپ) که در حالت موبایل می‌تواند محتوای هدر را وسط‌چین کند.
+  - بخش استایل «منوی موبایل (رنگ‌ها)»: پس‌زمینهٔ دکمهٔ سبد خرید، رنگ متن/آیکون آن، رنگ آیکون جستجو و رنگ آیکون بستن (×).
+  - متن دکمهٔ سبد خرید در منوی موبایل حالا از تنظیمات ویجت قابل تغییر است.
+
+## [1.11.67]
+
+#### صفحهٔ ورود سفارشی (گلس‌مورفیسم) با کلید روشن/خاموش در تنظیمات امنیت.
+  - لوگوی وردپرس حذف می‌شود و به‌جای آن نام و شعار برند (از صفحهٔ «برند و لوگو») بالای فرم می‌آید.
+  - پس‌زمینهٔ گرادیانت آبی تیره با دو گوی نورانی متحرک، کارت شیشه‌ای با `backdrop-filter`، فیلدهای نیمه‌شفاف خوانا، دکمهٔ گرادیانتی و انیمیشن ورود ملایم؛ در موبایل هم مرتب است.
+  - همهٔ استایل‌ها درون همان صفحه چاپ می‌شوند (بدون فایل/CDN جدید) و فونت وزیرمتن خود افزونه استفاده می‌شود. پیش‌فرض خاموش است.
+
+## [1.11.66]
+
+#### آیکون سبد خرید همه‌جا Iconsax شد + آیکون‌های پنل حساب.
+  - کلید `shopping_cart` (دکمهٔ خرید آنلاین، ویجت‌های هدر، سبد و…) با آیکون جدید جایگزین شد، پس یک‌جا همهٔ نقاط عوض شدند.
+  - پنل حساب کاربری نقشهٔ آیکون محلی خودش را داشت و به همین دلیل «قلب، کیف پول، کاربر و تنظیمات» آنجا عوض نشده بود؛ حالا همان چهار آیکون هم Iconsax شدند.
+  - همه با `stroke="currentColor"` رنگ می‌گیرند، یعنی کنترل رنگ آیکون در ویجت‌های المنتور و رنگ متن پنل (پالت) روی آن‌ها اثر می‌گذارد.
+
+## [1.11.65]
+
+#### آیکون‌های Iconsax به‌صورت محلی (بدون CDN) جایگزین شدند.
+  - پنج آیکون «کاربر، قلب، کیف پول، فروشگاه و تنظیمات» با نسخهٔ خطی Iconsax عوض شدند و آیکون «سبد خرید» هم به مجموعه اضافه شد.
+  - همه داخل همان اسپرایت SVG درون‌صفحه‌ای افزونه قرار می‌گیرند: صفر درخواست شبکه، صفر فونت آیکون، و فقط آیکون‌هایی که همان صفحه استفاده می‌کند چاپ می‌شوند.
+  - رنگشان با `stroke="currentColor"` از رنگ متن/پالت گرفته می‌شود، پس با تنظیمات رنگ المنتور و پالت هماهنگ‌اند.
+  - باگ کوچک: آیکون «تنظیمات» در دکمهٔ ویرایش حساب قبلاً به نقطهٔ جایگزین می‌افتاد؛ حالا آیکون واقعی دارد.
+
+## [1.11.64]
+
+#### بج تخفیف و دکمهٔ خرید طبق طراحی.
+  - مبلغ تخفیف حالا در یک قرص قرمز (`border-radius: 999px`، پدینگ `3px 12px 1px`، متن سفید) بالای قیمت نمایش داده می‌شود و متنش «… تومان تخفیف» شد.
+  - قیمت خط‌خورده کنار قیمت اصلی آمد (نه بالای آن).
+  - آیکون سبد خرید به لبهٔ چپ دکمهٔ «خرید آنلاین» منتقل شد و متن وسط‌چین ماند.
+  - عنوان هدر پنل حساب (`.hsw-ac__hero-title`) همیشه سفید است (با سایهٔ ملایم) تا روی گرادیانت تیره خوانا بماند.
+
+## [1.11.63]
+
+#### اصلاح چیدمان فرم ورود/ثبت‌نام با کد یکبارمصرف.
+  - فیلدها هم‌ارتفاع (۴۶px) شدند، فاصلهٔ برچسب تا فیلد ۶px و فاصلهٔ بین گروه‌ها ۱۶px؛ فیلدهای مخفی (موبایل/ایمیل تکراری) دیگر با `display:flex` نمایش داده نمی‌شوند.
+  - دکمهٔ «دریافت کد تأیید» تمام‌عرض و هم‌ارتفاع فیلدها شد؛ در مرحلهٔ کد، «تأیید و ورود» و «ارسال دوباره» هم‌ارتفاع و مرتب کنار هم قرار گرفتند.
+  - عنوان فرم در موبایل کوچک‌تر شد تا در دو خط جا شود و فضای خالی انتهای کارت حذف شد.
+
+## [1.11.62]
+
+#### شیت «کالا اضافه شد» حالا فقط یک لیست ساده است.
+  - دکمهٔ «افزودن +» از کارت‌ها حذف شد؛ کالاهای مشابه به‌صورت **لیست زیر هم** با تصویر، نام و قیمت (قیمت تمیز، بدون جملهٔ «قیمت اصلی … بود») نمایش داده می‌شوند و هر ردیف به صفحهٔ همان محصول لینک است.
+  - نوار خرید چسبان (قیمت + `🗑 ۱ +`) با `z-index` بالاتر از شیت قرار گرفت، پس کاربر می‌تواند لیست را اسکرول کند و همان‌جا تعداد را کم/زیاد کند؛ شیت هم باز می‌ماند.
+
+## [1.11.61]
+
+#### شیت «کالا اضافه شد» دقیقاً طبق طراحی + صفحهٔ ۴۰۴ قابل ویرایش.
+  - هدر شیت یک ردیف شد: «برو به سبد خرید» سمت چپ و «کالا اضافه شد!» با ضربدر سمت راست (روبه‌روی هم، نه زیر هم).
+  - کالاهای مرتبط در دو ستون کنار هم، هر کارت با تصویر سمت راست، نام، امتیاز، دکمهٔ «افزودن +»، بج تخفیف و قیمت (و قیمت خط‌خورده).
+  - فونت شیت با وزیرمتن خود افزونه یکدست شد.
+  - شیت حالا **بالای نوار خرید چسبان می‌ایستد**، پس دکمهٔ `🗑 ۱ +` دیده و قابل استفاده می‌ماند.
+  - صفحهٔ ۴۰۴: فونت وزیرمتن + ویرایش عنوان، توضیح، متن دو دکمه و متن جستجو از «کنترل ویجت‌ها ← صفحهٔ ۴۰۴».
+
+## [1.11.60]
+
+#### چهار گزینهٔ جدید، همه پیش‌فرض خاموش.
+  - **تنظیمات نام حامی** (برند و لوگو): تغییر «ووکامرس» به «فروشگاه» در متن‌های ترجمه‌شده و «وردپرس» به «پنل مدیریت» در پیشخوان؛ و غیرفعال‌کردن ویرایشگر بلوک (گوتنبرگ) برای نوشته/برگه/محصول بدون اثر روی المنتور.
+  - **امنیت:** حذف لوگوی وردپرس از نوار بالای پیشخوان.
+  - **امنیت — قفل درخواست‌های خارجی («نت ملی»):** مسدودکردن درخواست‌های سمت سرور به سرورهای آپدیت/لایسنس/CDN با فهرست پیش‌فرض ۱۶ دامنه و امکان افزودن دامنهٔ دلخواه (هر خط یکی). تا تیک نخورده هیچ هوکی ثبت نمی‌شود و دامنهٔ خود سایت هرگز مسدود نمی‌گردد.
+
+## [1.11.59]
+
+#### مکانیزم «خرید آنلاین» موبایل: دکمه به استپر تبدیل می‌شود و شیت پایین باز می‌شود.
+  - با اولین کلیک، دکمهٔ خرید جای خود را به `🗑 ۱ +` می‌دهد (همان استپر موجود).
+  - در موبایل هم‌زمان یک **شیت پایین‌کش** با انیمیشن نرم بالا می‌آید: «کالا اضافه شد!»، دکمهٔ «برو به سبد خرید» و بخش «خریدت رو کامل‌تر کن» با ۴ کالای مرتبط که هر کدام با یک دکمهٔ + همان‌جا به سبد اضافه می‌شوند.
+  - در دسکتاپ شیت ساخته نمی‌شود؛ فقط دکمه به استپر تبدیل می‌شود (طبق اسکرین‌شات).
+  - دادهٔ کالاهای مرتبط از مسیر سبک `hsw/v1/related` می‌آید (کش‌پذیر، بدون رندر اضافه در صفحهٔ محصول) و اگر محصول مرتبطی نبود، هم‌دسته‌ها می‌آیند.
+  - بستن با ضربدر، کلیک روی بک‌دراپ یا کلید Escape؛ اسکرول صفحه هنگام باز بودن شیت قفل می‌شود.
+
+## [1.11.58]
+
+#### بازطراحی صفحهٔ «برند و لوگو» با همان پوستهٔ صفحهٔ پالت — بدون CDN.
+  - سه کارت: هویت و نماد بصری (نام، شعار، لوگو، آدرس تصویر)، ایمیل فرستنده، و اطلاعات فروشنده برای فاکتور؛ کنار آن‌ها یک کارت «پیش‌نمایش برند».
+  - همهٔ فیلدها، نام‌ها و مسیر ذخیره‌سازی مثل قبل است؛ فقط چیدمان و استایل عوض شده. انتخابگر رسانهٔ وردپرس و دکمهٔ حذف لوگو دست‌نخورده کار می‌کند.
+  - دکمهٔ «بازنشانی به پیش‌فرض» اضافه شد (حذف آپشن، با همان nonce).
+  - استایل مشترک ادمین به `assets/css/hsw-admin-ui.css` منتقل شد و صفحهٔ پالت هم از همان استفاده می‌کند؛ فونت Vazirmatn و آیکون‌ها Dashicons، بدون هیچ درخواست خارجی.
+  - فرم هر دو صفحه (پالت و برند) با مسیر عمومی پیشخوان ارسال می‌شود تا در حالت «مسیر دلخواه پیشخوان» هم ذخیره بدون خطا انجام شود.
+
+## [1.11.57]
+
+#### تب‌های صفحهٔ محصول برای دسکتاپ و موبایل یکی شد.
+  - دیگر در موبایل آکاردئون جداگانه‌ای با محتوای متفاوت رندر نمی‌شود؛ هر دو نما همان چهار تب را نشان می‌دهند: مشخصات فنی، بررسی تخصصی، گارانتی و خدمات، دیدگاه‌ها.
+  - تب «گارانتی و خدمات» با متن قابل ویرایش (هر خط یک مورد) اضافه شد تا اطلاعاتی که قبلاً فقط در آکاردئون موبایل بود از دست نرود.
+  - در موبایل، نوار تب‌ها کنار هم و افقی اسکرول می‌شود؛ اسکرول‌بار مخفی است و در لبهٔ خواندن یک نشانگر نازک «‹‹» (بدون دکمهٔ گرد) نشان می‌دهد ادامه دارد و در انتها محو می‌شود. کلیک روی تب هم آن را وسط نوار می‌آورد.
+
+## [1.11.56]
+
+#### بازطراحی صفحهٔ «پالت رنگی» با پیش‌نمایش زنده — بدون CDN و بدون فریم‌ورک.
+  - چیدمان دو ستونه: ستون تنظیمات (۱۹ رنگ با فیلد HEX و سواچ) و ستون کنار شامل «هر رنگ کجا دیده می‌شود» و «پیش‌نمایش زنده».
+  - پیش‌نمایش زنده کاملاً محلی است: با تغییر هر رنگ، همان لحظه دکمه‌ها، تب‌ها، بج‌های وضعیت، کارت محصول، آیکون‌های هدر و گرادیان پنل حساب به‌روز می‌شوند؛ هیچ لینکی داخل پیش‌نمایش نیست و تا ذخیره نشدن، فروشگاه تغییری نمی‌کند.
+  - انتخاب رنگ با `input[type=color]` بومی مرورگر انجام می‌شود؛ در نتیجه کتابخانهٔ wp-color-picker (iris) از این صفحه حذف شد.
+  - CSS و فونت کاملاً محلی‌اند (`assets/css/hsw-admin-palette.css` + `vazirmatn.woff2` خود افزونه)، آیکون‌ها Dashicons خود وردپرس؛ صفر درخواست خارجی، صفر CDN.
+  - «آخرین ذخیره‌سازی» با ثبت زمان در همان آپشن پالت نمایش داده می‌شود.
+
+## [1.11.55]
+
+#### صفحه‌بندی مدرن و یکسان برای همهٔ حلقه‌های محصول.
+  - رندرکنندهٔ مشترک `HSW_Pagination` جای صفحه‌بندی سادهٔ ووکامرس را می‌گیرد (هوک `woocommerce_after_shop_loop`) و ویجت «صفحه‌بندی آرشیو» هم از همان استفاده می‌کند؛ پس فروشگاه، دسته‌بندی و آرشیو ویجت‌ها یک ظاهر دارند.
+  - طراحی: نوار قرصی‌شکل با **نشانگر لغزنده** که نرم به شمارهٔ فعال می‌رود (`transform` با easing)، فلش گرد در دو سر (غیرفعال‌ها محو)، نقطه‌چین برای صفحات دور، اعداد فارسی و کنتراست خوانا.
+  - با کلیک روی هر شماره، حلقهٔ محصولات نرم محو/پایین می‌رود و بعد صفحهٔ بعد باز می‌شود؛ لینک‌ها با `get_pagenum_link()` ساخته می‌شوند تا ریدایرکت ۳۰۱ اضافه نداشته باشند.
+  - موبایل: ابعاد جمع‌وجورتر و وسط‌چین؛ با `prefers-reduced-motion` انیمیشن‌ها خاموش می‌شوند.
+
+## [1.11.54]
+
+#### بازگشت ریسپانسیو صفحهٔ محصول + تجربهٔ بستن لایت‌باکس.
+  - **علت خارج شدن از حالت موبایل:** پنل منوی کشویی هدر با `translateX(100%)` بیرون از کادر ثابت می‌نشست و کروم آن را در `scrollWidth` حساب می‌کرد؛ عرض سند روی موبایل ۳۹۰ → ۱۳۷۲ می‌شد و مرورگر کل صفحه را با ویوپورت ۱۱۱۴ رندر می‌کرد (همهٔ بریک‌پوینت‌ها از دست می‌رفت). حالا خود دراور `overflow: hidden` دارد و در سطح سند هم `overflow-x: clip` (با فالبک `hidden`) گذاشته شد. تست: عرض سند ۳۹۰ و ویوپورت ۳۹۰ در حالت موبایل.
+  - **لایت‌باکس:** دکمهٔ بستن از ۳۸ به ۴۶ پیکسل با پس‌زمینهٔ شیشه‌ای و کنتراست بیشتر رسید و کلیک/تپ روی هر جای بیرون تصویر (ناحیهٔ استیج) لایت‌باکس را می‌بندد.
+
+## [1.11.53]
+
+### Changed
+
+- **رفع خطای ویجت «محصولات مرتبط»:** ویجت از `$this->opt()` استفاده می‌کرد که روی `HSW_Product_Base` وجود ندارد (فقط در بیس آرشیو/سبد هست) و همچنین `$this->product()` که متد بیس نیست. حالا تنظیمات از `effective_settings()` و محصول از `product_or_demo()` خوانده می‌شود؛ خطای «Call to undefined method HSW_Widget_Product_Related::opt()» برطرف شد.
+
+## [1.11.52]
+
+#### اصلاح ۵ باگ کاروسل، لایت‌باکس، سبد خالی و ورود.
+  - **RTL:** فیدها و فلش‌ها از `inset-inline-*` به `left/right` فیزیکی منتقل شدند (در RTL جای هر دو برعکس بود و فلش‌های گالری روی هم می‌افتادند)، فلش‌ها بدون هاور دیده می‌شوند و فقط در حالت `disabled` محو می‌شوند.
+  - **آیکون «مشاهده همه»:** `arrow-left` (ناموجود) به `arrow_back` تغییر کرد.
+  - **اجرای کاروسل:** فراخوانی `initCarousel` از داخل `if (window.jQuery)` بیرون آمد و به `init()` منتقل شد؛ بعد از لود تصاویر و ۱۵۰ms هم دوباره اندازه‌گیری می‌شود.
+  - **لایت‌باکس:** پرچم `panMoved` جلوی ریست‌شدن زوم بعد از کشیدن تصویر را می‌گیرد؛ دکمه‌ها SVG شدند؛ تامبنیل فعال هنگام انتخاب وسط ردیف اسکرول می‌شود و نقطه‌های تکراری موبایل حذف شدند.
+  - **سبد خالی:** بنر ارسال رایگان و باکس کد تخفیف در سبد خالی رندر نمی‌شوند و قواعد `:has()` ستون خالی خلاصه را در چیدمان المنتور پنهان و کارت را وسط‌چین می‌کند.
+  - **ورود:** تب فعال در هاور/فوکوس پس‌زمینهٔ سفیدش را از دست نمی‌دهد؛ عنوان ثبت‌نام OTP اصلاح شد؛ فیلد ایمیل ثبت‌نام و فیلد شمارهٔ 2FA فقط در کانال مرتبط نمایش داده می‌شوند.
+
+## [1.11.51]
+
+#### OTP/2FA با ایمیل و پیامک، ورود تک‌فرم، صفحهٔ ۴۰۴ و کاروسل محصولات مرتبط.
+  - **ثبت‌نام با ایمیل:** دیگر ایمیل در `billing_phone` ذخیره نمی‌شود؛ `_hsw_email_verified` ثبت می‌شود و نام کاربری از بخش محلی ایمیل با پسوند یکتا ساخته می‌شود.
+  - **2FA:** کانال‌های ایمیل و پیامک پشتیبانی می‌شوند (کد به ایمیل حساب یا شمارهٔ پروفایل)، متن چالش و پنل امنیت با کانال هماهنگ است و برای ایمیل نیازی به اتصال ربات نیست.
+  - **UI ورود/ثبت‌نام:** عنوان کارت با تب عوض می‌شود، عنوان تکراری حذف شد، هر تب فقط یک فرم نشان می‌دهد (OTP پیش‌فرض، رمز عبور با یک سوییچر)، کانال‌ها به شکل Segmented Control و فیلد کد ۶ رقمی استایل مدرن گرفت.
+  - **تب‌های محصول:** همهٔ حالت‌ها (فعال/هاور/فوکوس/اکتیو) صریحاً تعریف شدند تا رنگ `#c36` قالب دیگر روی تب فعال نیفتد؛ چیپ/سواچ/گالری/ویش‌لیست هم قفل شدند.
+  - **سبد خالی:** گرید دو ستونه در حالت خالی حذف می‌شود و کارت «سبد خالی» تمام‌عرض و وسط‌چین نمایش داده می‌شود.
+  - **گالری:** بندانگشتی‌ها به کاروسل با فید و فلش تبدیل شدند (اسکرول‌بار مخفی) و لایت‌باکس کامل با شمارنده، فلش، کیبورد، سوایپ لمسی، زوم ۲.۵× و کشیدن تصویر اضافه شد.
+  - **صفحهٔ ۴۰۴ اختصاصی:** کارت گلس‌مورفیسم روی گرادیانت نئونی با جستجوی محصول و دکمهٔ «ورود به فروشگاه»، قابل روشن/خاموش از تنظیمات فروشگاه.
+  - **محصولات مرتبط:** ویجت جدید `hsw-product-related` (منبع: مرتبط/هم‌دسته/ تشویقی/پرفروش) با کاروسل ۴ کارت در دسکتاپ، ۲.۵ تبلت و ۱.۵ موبایل، فید و فلش؛ هم به‌عنوان ویجت مستقل و هم بخش ۱۱ صفحهٔ محصول.
+
+## [1.11.50]
+
+#### سیستم OTP تازه: ایمیل + تلگرام، حذف کامل بله، اولویت افزونهٔ پیامکی.
+  - **کانال ایمیل (پیش‌فرض روشن):** کد ۶ رقمی با یک ایمیل HTML راست‌چین ارسال می‌شود. «ایمیل فرستنده» و «نام فرستنده» در تنظیمات قابل تغییر است و فیلترهای `wp_mail_from` فقط برای همان ایمیل اعمال و بلافاصله برداشته می‌شوند. ورود و ثبت‌نام با ایمیل کار می‌کند (کاربر با `get_user_by('email')` پیدا/ساخته می‌شود).
+  - **حذف کامل بله:** تنظیمات، متدها، وبهوک، لینک‌ها و متن‌ها پاک شدند.
+  - **ربات تلگرام:** `telegram_bot` / `telegram_token` / `telegram_secret`، ارسال با `api.telegram.org` (قابل تغییر با فیلتر `hsw_telegram_api_base`)، وبهوک با کلید امنیتی یا هدر `X-Telegram-Bot-Api-Secret-Token` و اتصال با «ارسال شماره» یا `/start <token>`.
+  - **اولویت پیامک:** اگر افزونهٔ شناخته‌شدهٔ پیامک/OTP فعال باشد (Digits، ملی‌پیامک، کاوه‌نگار، WP SMS، WooCommerce فارسی…)، کانال «پیامک» اضافه می‌شود، اولویت اول است و ارسال با فیلتر `hsw_send_sms_otp` یا توابع خود افزونه انجام می‌شود.
+  - **بازگشت به مقصد:** پس از ورود/ثبت‌نام با OTP، `redirect_to` (مثلاً صفحهٔ تسویه) رعایت می‌شود.
+  - **استپر واریاسیون:** با تغییر واریاسیون، عدد داخل استپر و حالت سطل زباله هم همگام می‌شوند.
+  - **آیکون‌های هدر:** `.hsw-hd__iconbtn`، `.hsw-hd__actionicon` و دکمه‌های حساب/سبد در موبایل هم از `--hsw-hd-act-icon` / `--hsw-hd-act-bg` پیروی می‌کنند.
+
+## [1.11.49]
+
+#### آدرس اجباری تسویه، بنر ارسال رایگان، سوییچ‌ها و پالت سراسری.
+  - **آدرس تسویه:** شرط «دارای آدرس» سخت‌گیرانه شد (نام، تلفن، استان، شهر، نشانی — با fallback به billing). فرم آدرس همیشه در یک کشوی مخفی داخل همان ویجت هست و «ویرایش/تغییر آدرس» همان‌جا بازش می‌کند. دکمهٔ ادامه تا آدرس کامل نشود نمی‌رود؛ اگر فرم پر باشد اول ذخیره و بعد به پرداخت می‌رود، وگرنه فرم را اسکرول و فیلدهای خالی را هایلایت می‌کند. ورود مستقیم به برگهٔ پرداخت بدون آدرس به تسویه برمی‌گردد و لینک ویرایش در مرحلهٔ پرداخت همیشه به تسویه می‌رود.
+  - **ورود اجباری:** مهمان با سبد پر به جای تسویه به حساب کاربری با `redirect_to` فرستاده می‌شود.
+  - **ارسال رایگان:** بنر سبد و تولتیپ تسویه فقط از سقف سراسری (`HSW_Free_Shipping::threshold()`) می‌خوانند؛ با صفر بودن آن هیچ بنر و هیچ تولتیپی نمایش داده نمی‌شود.
+  - **بازخورد افزودن به سبد:** به جای دو چک‌باکس، برای آرشیو و صفحهٔ محصول جداگانه سه حالت «مودال / نوار تک‌خطی / غیرفعال» انتخاب می‌شود.
+  - **استپر واریاسیون:** هر واریاسیون تعداد خودش را در سبد می‌داند (`cart_qty`)؛ با تغییر واریاسیون استپر باز/بسته و عددش درست می‌شود و مبلغ «تخفیف ویژه» هم از `save_html` همان واریاسیون می‌آید.
+  - **پالت سراسری:** `surface-lowest/outline/outline-variant/emerald` و `--hswa-*` به `--hsw-pal-*` وصل شدند؛ دو توکن جدید «رنگ/پس‌زمینهٔ دکمه‌های هدر» هم اضافه شد (`--hsw-hd-act-icon` / `--hsw-hd-act-bg`).
+  - **هاور صورتی:** یک شبکهٔ ایمنی سراسری در `hsw-fonts.css` همهٔ دکمه‌های `.hsw-a/.hsw-c/.hsw-k/.hsw-loop/.hsw-h/.hsw-ac/.hsw-p/.hsw-toast/.hsw-modal` را از رنگ `#c36` قالب حفظ می‌کند (CTAها رنگ خودشان را نگه می‌دارند).
+
+## [1.11.48]
+
+#### رفع مشخصات جعلی، سوییچ‌های ذخیره‌نشدنی، آدرس تسویه و رنگ آیکون‌ها.
+  - **مشخصات جعلی محصول:** متن‌های دموی «Galaxy AI / تیتانیوم» پیش‌فرضِ کنترل ویژگی‌ها بودند و روی هر محصولی که صفت نداشت نمایش داده می‌شدند. پیش‌فرض حذف شد و ردیف‌های دموی ذخیره‌شده در قالب‌های قدیمی هم فیلتر می‌شوند؛ اگر محصول ویژگی واقعی نداشته باشد، بخش خالی می‌ماند.
+  - **سوییچ‌های تنظیمات:** «ناموجودها انتهای فهرست» و دو گزینهٔ مودال سبد ظاهر سوییچ نداشتند (ردیف بدون `hsw-wm-track`) و چون چک‌باکسِ خاموش هیچ مقداری ارسال نمی‌کند، خاموش‌کردنشان هرگز ذخیره نمی‌شد. حالا هر سه سوییچ ظاهر و رفتار درست دارند و با یک ورودی مخفی «no» همیشه ذخیره می‌شوند.
+  - **ذخیرهٔ فرم‌های مدیریت:** اکشن فرم `options.php` نسبی بود و در حالت «مسیر دلخواه پیشخوان» به آدرس مسدود می‌رفت (خطای ۴۰۴، بدون ذخیره). حالا اکشن از مسیر عمومی همان صفحه ساخته می‌شود.
+  - **ارسال رایگان:** اگر ووکامرس در روش‌های ارسال خودش «ارسال رایگان از X تومان» داشته باشد، همان عدد زیر تنظیمات نمایش داده می‌شود تا با سقف این افزونه اشتباه گرفته نشود.
+  - **آدرس تسویه:** تا نشانی تحویل کامل نشده، دکمهٔ «ادامه و ورود به مرحله پرداخت» به مرحلهٔ بعد نمی‌رود و به فرم آدرس اسکرول می‌کند؛ ورود مستقیم به برگهٔ پرداخت هم بدون آدرس به تسویه حساب برگردانده می‌شود.
+  - **آیکون‌های هدر:** علاوه بر «رنگ آیکون‌ها»، کنترل «پس‌زمینه آیکون‌ها» هم اضافه شد (منو، حساب کاربری، سبد خرید) و هر دو از المنتور قابل تنظیم‌اند.
+
+## [1.11.47]
+
+#### یک پالت رنگ برای همه‌جا + شفاف‌سازی امتیاز/کیف پول + هماهنگی تعداد سبد.
+  - **پالت واحد:** پنل حساب کاربری دیگر پالت جداگانه ندارد؛ همهٔ رنگ‌های `--hsw-ac-*` از `HSW_Palette` خوانده می‌شوند. دو رنگ گرادیان هدر حساب (`hero_a`/`hero_b`) هم به پالت سراسری اضافه شدند. تب «پالت و ظاهر» حالا فقط راهنما، دکمهٔ رفتن به «پالت رنگی سراسری» و پیش‌نمایش ۱۷ رنگ فعلی است.
+  - **متن امتیاز:** توضیح باشگاه مشتریان اصلاح شد (امتیاز در کیف پول قابل تبدیل است) و برچسب‌ها دقیق شدند: «مبلغ خرید برای دریافت ۱ امتیاز» و «مبلغ شارژ کیف پول به ازای هر ۱ امتیاز» با توضیح نحوهٔ تبدیل.
+  - **تعداد سبد:** اگر محصول از قبل در سبد باشد، کلیک دوباره روی «خرید آنلاین» فقط ۱ عدد اضافه می‌کند و استپر/بج هدر/`data-hsw-in-cart` دقیقاً تعداد واقعی سبد را نشان می‌دهند (قبلاً عدد استپر با سبد اختلاف پیدا می‌کرد).
+
+## [1.11.46]
+
+#### خنثی‌سازی کامل دکمه‌های Hello Elementor + استپر تعداد واقعی.
+  - **هاور صورتی (#c36):** قالب Hello Elementor روی هر `button` رنگ صورتی و متن سفید می‌گذاشت. حالا همهٔ کنترل‌های صفحه محصول با پیشوند `.hsw-p` (وزن بالاتر از قالب) رنگ خودشان را صریح اعلام می‌کنند: `+` و `-` شفاف با آیکون هم‌رنگ دکمهٔ «خرید آنلاین»، سطل زباله قرمز، دکمهٔ خرید بدون تغییر رنگ در هاور/فوکوس، و تب‌ها/چیپ‌ها/سواچ‌ها/آکاردئون بدون صورتی.
+  - **یکپارچگی رنگ:** کنترل رنگ دکمهٔ خرید حالا `--hsw-cart-bg` را روی رَپر ست می‌کند، پس علامت‌های `+`/`-` (دسکتاپ و موبایل و نوار چسبان) خودکار هم‌رنگ دکمه می‌شوند. اگر رنگ هاور خالی باشد، هاور همان رنگ عادی است.
+  - **استپر فقط بعد از افزودن:** تا وقتی محصول در سبد نیست، `+ ۱ -` نمایش داده نمی‌شود و دکمهٔ «خرید آنلاین» تمام‌عرض است. بعد از افزودن، استپر با تعداد واقعی سبد ظاهر می‌شود.
+  - **تعداد واقعی:** `+`/`-` و تایپ عدد، تعداد همان آیتم سبد را از طریق endpoint جدید `wc-ajax=hsw_set_qty` تغییر می‌دهند (قبلاً فقط عدد روی صفحه عوض می‌شد). در تعداد ۱ آیکون سطل زباله (در دسکتاپ هم) نمایش داده می‌شود و حذف، استپر را مخفی و دکمهٔ خرید را برمی‌گرداند.
+
+## [1.11.45]
+
+#### دو سخت‌سازی کوچک برای سایت لایو.
+  - **تشخیص خودکار برگهٔ پرداخت و تکمیل خرید:** اگر `hsw_pay_page_id` یا `hsw_complete_page_id` خالی/صفر باشد، برگهٔ منتشرشده با اسلاگ `payment` یا `complete` پیدا و استفاده می‌شود؛ دیگر ریدایرکت تسویه حساب به خودش برنمی‌گردد. گارد قبلی (سبد/تسویه/برگهٔ نامعتبر) دست‌نخورده است.
+  - **کلید کدشدهٔ فیلتر:** اگر خودِ نام تاکسونومی در URL درصد-کد شده باشد (`filter_pa_%d8%b1%d9%86%da%af`)، هم در `normalize_filter_params()` و هم در ساخت کوئری تاکسونومی دیکد می‌شود تا `taxonomy_exists('pa_رنگ')` همیشه درست باشد؛ کلید `query_type_*` هم به همان شکل منتقل می‌شود.
+
+## [1.11.44]
+
+#### بازطراحی چیدمان صفحهٔ «کنترل ویجت‌ها».
+  - ردیف‌های تنظیمات (رفتار افزودن به سبد، ترتیب محصولات، ارسال رایگان) فقط دو ستون داشتند ولی گرید برای سه ستون ساخته شده بود؛ متن در ستون ۴۴ پیکسلی گیر می‌کرد و کلمه‌به‌کلمه زیر هم می‌شد. حالا ردیف‌های تنظیمات گرید اختصاصی `minmax(0,1fr) auto` دارند و متن/توضیح کامل خوانده می‌شود.
+  - کنترل‌ها (select و input عددی) از جعبهٔ سوییچ ۴۴ پیکسلی جدا شدند و استایل اختصاصی گرفتند؛ در موبایل زیر متن می‌روند.
+  - سه تنظیم سراسری زیر عنوان «تنظیمات فروشگاه» گروه‌بندی شدند، هر سه آیکون و رنگ خودشان را دارند و در نوار کنار هم لینک گرفتند.
+
+## [1.11.43]
+
+#### رفع ۸ مورد گزارش‌شده روی سایت لایو (قالب Hello Elementor).
+  - **گالری:** دکمه‌های قالب، پس‌زمینهٔ تصویر را در هاور صورتی می‌کردند و padding دکمه آیکون ذره‌بین را صفر می‌کرد؛ استایل گالری با `!important` قفل شد و ذره‌بین در موبایل هم دیده می‌شود.
+  - **صفت فارسی (`pa_رنگ`):** کلید صفت در `get_attributes()` به شکل `pa_%d8%b1…` و در `get_variation_attributes()` به شکل `pa_رنگ` است؛ پیدا کردن صفت/تاکسونومی و خواندن ترم‌ها با هر سه شکل انجام می‌شود و ترم‌ها فقط از واریاسیون‌های همان محصول خوانده می‌شوند.
+  - **چند صفت غیررنگی (`pa_ram` + `pa_ssd`):** هر صفت متغیر غیررنگی یک گروه چیپ جدا می‌گیرد و موتور JS انتخاب هم‌زمان چند گروه را مچ می‌کند.
+  - **برچسب‌ها:** پیشوند «محصول » از نام صفت‌ها حذف شد.
+  - **«حذف همه» در دسته‌بندی:** لینک بازنشانی به `/shop/` می‌رود (نه آدرس همان دسته) و مقدارهای `filter_*` پیش از رسیدن به ووکامرس دیکد می‌شوند، چون `wc_clean()` اکتت‌های `%xx` را پاک می‌کند.
+  - **تیکت:** انتخاب دپارتمان حتی با یک دپارتمان نمایش داده می‌شود و نام دپارتمان در فهرست و سربرگ گفتگو بج می‌گیرد.
+  - **آیکون‌ها:** کنترل رنگ آیکون با `!important` اعمال می‌شود، رنگ یکپارچهٔ آیکون/ستاره به ویجت جامع صفحه محصول اضافه شد و رنگ ستارهٔ موبایل از پالت/تنظیمات می‌آید.
+  - **پاک‌سازی:** فایل‌های تکراری ریشهٔ افزونه و JSهای اشتباهی داخل `assets/css` حذف شدند.
+
+## [1.11.42]
+
+#### رفع فیلتر آرشیو، دپارتمان تیکت، CTA خرید، گالری و کارت محصول.
+  - **«حذف همه» فیلترها:** لینک بازنشانی دیگر مقدارها را دو بار کد نمی‌کند (`%25d8…`)؛ پارامترهای `query_type_*` هم پاک می‌شوند و کلیک روی لینک، چک‌باکس‌ها و چیپ‌ها را پیش از رفتن خالی می‌کند.
+  - **فیلتر صفت‌هایی که ووکامرس نمی‌شناسد:** اگر تاکسونومی صفت در جدول صفت‌های ووکامرس نباشد (مثل `pa_رنگ`)، خود ویجت کوئری تاکسونومی را می‌سازد؛ قبلاً چیپ فعال می‌شد ولی فهرست محصولات تغییری نمی‌کرد.
+  - **کش صفحه:** آرشیوهای فیلترشده دیگر از کش صفحه (LiteSpeed و…) سرو نمی‌شوند.
+  - **دپارتمان تیکت:** انتخاب دپارتمان به فرم «تیکت جدید» اضافه شد و در هر دو مسیر (AJAX و فرم معمولی) ذخیره می‌شود.
+  - **دکمه خرید آنلاین:** رنگ عادی/هاور/کلیک از پالت «CTA مراحل خرید» خوانده می‌شود و با سبد خرید، تسویه و پرداخت یکسان است.
+  - **گالری:** هاور بدون زوم/تغییر رنگ؛ کلیک روی تصویر پاپ‌آپ باز می‌کند.
+  - **آیکون‌ها:** رنگ ذره‌بین گالری و آیکون‌های هدر از تنظیمات ویجت با فالبک تیره؛ کنترل «رنگ آیکون‌ها» به هدر اضافه شد.
+  - **انتخاب رنگ/حافظه:** صفت غیررنگی دیگر به‌عنوان رنگ نمایش داده نمی‌شود؛ اگر کد رنگ معلوم نباشد، نام گزینه روی چیپ می‌آید (نه دایره خاکستری).
+  - **ویژگی‌های شاخص:** صفت‌های متغیر/رنگ از فهرست ویژگی‌ها حذف شدند تا «محصول رنگ: قرمز، مشکی» به‌عنوان ویژگی شاخص نمایش داده نشود.
+  - **ستاره‌ها:** کلید نمایش/مخفی و اندازه ستاره به تنظیمات ویجت اضافه شد.
+  - **پاپ‌آپ سبد آرشیو:** به‌جای تزریق مینی‌سبد قالب، یک خلاصهٔ جمع‌وجور (تصویر ۴۸px، نام، تعداد، قیمت) ساخته می‌شود؛ دکمه‌های تکراری حذف شدند.
+
+## [1.11.41]
+
+#### رفع خطای `is_in_stock()` روی null، تصویر دوم هاور، نشان ناموجود و رنگ‌های هدر.
+  - **خطای کارت آرشیو:** در حالت دمو (پیش‌نمایش المنتور) متغیر محصول وجود ندارد و `$product->is_in_stock()` روی null صدا زده می‌شد. حالا مقدار اولیه null دارد و شرط با `instanceof WC_Product` محافظت شده.
+  - **تصویر دوم در هاور:** اگر محصول گالری داشته باشد، عکس دوم با محو شدن و زوم ۱.۱ روی تصویر اول می‌آید (فقط روی دستگاه‌های دارای ماوس، تا روی موبایل گیر نکند).
+  - **نشان «ناموجود»:** در RTL و موبایل از مرکز کارت بیرون می‌زد؛ حالا با `inset:0` و `margin:auto` دقیقاً وسط تصویر است و در کارت باریک به‌درستی می‌شکند.
+  - **ترتیب ناموجودها:** به **HamiShop ← کنترل ویجت‌ها ← ترتیب محصولات** منتقل شد (پیش‌فرض: روشن = ناموجودها انتهای فهرست).
+  - **رنگ‌های هدر:** دکمه‌ها و آیکن‌های هدر حالا مستقیماً از توکن‌های پالت می‌خوانند: رنگ اصلی، رنگ هاور و رنگ اصلی تیره (قبلاً هاور از رنگ اصلی ساخته می‌شد).
+
+## [1.11.40]
+
+#### نوار خرید موبایل، سطل زباله در تعداد ۱، و گزینهٔ font-display: swap.
+  - **نوار خرید پایین صفحهٔ محصول در موبایل** به‌هم‌ریخته بود: قالب سایت `input[type="text"] { width:100% }` داشت و فیلد تعداد را به ۳۱۰px کشیده بود؛ دکمهٔ «خرید آنلاین» به ۱۶px له می‌شد. حالا ردیف درست است: قیمت، شمارنده، دکمه.
+  - **ساختار شمارنده:** در تعداد ۱ به‌جای «منفی» یک **سطل زباله** نمایش داده می‌شود (`+ ۱ 🗑`) و از ۲ به بالا `+ ۲ −`. سطل، محصول را از سبد حذف می‌کند و اگر محصول در سبد نباشد غیرفعال است. همین رفتار در ویجت خرید صفحهٔ محصول هم (در موبایل) فعال شد.
+  - **پیشخوان امنیت:** گزینهٔ تازهٔ **«اجبار font-display: swap»**؛ مقدار auto/block/fallback را در استایل‌های درون‌صفحه و آدرس‌های Google Fonts به swap تغییر می‌دهد تا متن تا رسیدن فونت نامرئی نماند.
+
+## [1.11.39]
+
+#### فاکتور تک‌صفحه‌ای با رنگ برند، آدرس حساب، ارسال رایگان، دو حالت نوتیف و علاقه‌مندی.
+  - **فاکتور** بازچینی شد تا با نمونهٔ ارسالی یکی باشد و **همیشه یک صفحهٔ A4** بماند (تست با ۸ قلم). رنگ‌ها از پالت («HSW primary/accent») می‌آید، مبلغ به حروف هم چاپ می‌شود، و امضا/مهر جای درست خودشان نشستند.
+  - **آدرس حساب:** سفارش‌هایی که از تسویهٔ اختصاصی ثبت می‌شدند، آدرس را روی سفارش می‌نوشتند ولی در حساب کاربری ذخیره نمی‌کردند؛ برای همین دفترچه آدرس «ثبت نشده» می‌گفت. حالا آدرس روی مشتری ذخیره می‌شود و اگر آدرس تحویل جدا نداشته باشد، همان آدرس صورتحساب با برچسب «تحویل به همان آدرس صورتحساب» نمایش داده می‌شود.
+  - **ارسال رایگان:** در **HamiShop ← کنترل ویجت‌ها** یک سقف مشخص می‌کنید؛ بالای آن مبلغ، هزینهٔ ارسال صفر می‌شود و برچسب «ارسال رایگان» می‌گیرد (صفر = خاموش).
+  - **نوتیف افزودن به سبد** دو حالت شد: مودال شیشه‌ای (blur + شفافیت) یا نوار تک‌خطی با نوار سبز ۵ ثانیه‌ای و لینک «مشاهده سبد خرید». انتخاب در همان صفحهٔ کنترل ویجت‌ها.
+  - **علاقه‌مندی:** یک خط کوتاه «… به علاقه‌مندی‌ها اضافه شد» و رفع آیکون نامرئی دکمهٔ حذف در پیشخوان (SVG بدون عرض می‌شد).
+
+## [1.11.38]
+
+#### پرداخت با کیف پول، شارژ آنلاین، و رفع چهار باگ.
+  - **خطای مهم در مرحلهٔ پرداخت:** کد تخفیف اشتباه، صفحهٔ «خطای مهم» وردپرس را نشان می‌داد. علت: فراخوانی `WC_Cart::is_coupon_valid()` که در ووکامرس وجود ندارد (اعتبارسنج روی `WC_Discounts` است). حالا پیام فارسی و همان کدِ واردشده نمایش داده می‌شود.
+  - **«سود شما از خرید»** در خلاصهٔ پیش‌فاکتور، درست **بالای مبلغ قابل پرداخت** آمد (قبلاً زیر لیست اقلام بود) — هم در مرحلهٔ اطلاعات ارسال و هم در پرداخت.
+  - **سبد خرید موبایل:** دکمهٔ منفی اضافه شد؛ تا ۱ کم می‌کند و در ۱ غیرفعال می‌شود، سطل زباله حذف کامل می‌کند.
+  - **مودال سبد** ظریف‌تر شد (۴۸۰→۳۸۴px) و فونتش وزیرمتن است.
+  - **دکمه‌های + و − صفحهٔ محصول** به حالت جمع‌وجور برگشتند (ورودی دیگر کادر نمی‌سازد) و رنگشان همان رنگ دکمهٔ خرید است؛ کنترل «رنگ علامت‌های + و −» هم اضافه شد.
+#### کیف پول:
+  - درگاه پرداخت **«پرداخت از کیف پول»** به ووکامرس اضافه شد؛ در مرحلهٔ پرداخت وقتی موجودی کافی باشد نمایش داده می‌شود و سفارش را از موجودی تسویه می‌کند (با ثبت در دفتر تراکنش).
+  - **شارژ آنلاین:** مبلغ → سفارش شارژ → درگاه فعال سایت (آقای پرداخت، زیبال، زرین‌پال یا هر درگاه دیگری) → موجودی خودکار پس از پرداخت.
+  - **کارت به کارت:** شمارهٔ کارت در صفحهٔ کیف پول نمایش داده می‌شود و فیش با شمارهٔ پیگیری ثبت و در پیشخوان تایید می‌شود.
+  - انتخاب روش شارژ و درگاه، در **HamiShop ← حساب کاربری ← کیف پول**.
+
+## [1.11.37]
+
+#### آیکون‌ها فونت نیستند: SVG sprite — و ممیزی حجم.
+  - فونت آیکون ۹۴KB حذف شد. `HSW_Helpers::icon()` حالا `<svg><use href="#hsw-i-…">` می‌سازد و `print_sprite()` در فوتر فقط نمادهای همان صفحه را چاپ می‌کند (۱۷–۲۲KB، بدون درخواست جدا).
+  - رنگ آیکون با `fill: currentColor` است، پس دیگر خبری از FOUT و «کلمات انگلیسی» قبل از رسیدن فونت نیست.
+  - ۱۶۰ نقطهٔ فراخوانی آیکون (۱۴۳ مارک‌آپ دستی + ۱۷ در جاوااسکریپت) به همان یک تابع منتقل شد.
+  - فونت فارسی به بازه‌های یونیکدی واقعی سایت محدود شد: **۱۰۸KB → ۶۴KB** (متغیر، همهٔ وزن‌ها، فقط woff2).
+  - ۱۰ فایل zip قدیمی (۸.۷MB) از ریشهٔ پروژه حذف شد؛ sourcemap و فایل دمو وجود ندارد.
+
+### Changed
+
+- **مودال سبد خرید فقط در آرشیو.** پیش‌فرض: آرشیو مودال، صفحهٔ محصول فقط پیام کوتاه. در «HamiShop ← کنترل ویجت‌ها» می‌توان مودال صفحهٔ محصول را روشن کرد.
+- **یک باگ CLS:** قاعدهٔ `.hsw-cp__col:empty { display:none }` حین پارس HTML ستون را لحظه‌ای پنهان می‌کرد و بعد نشان می‌داد. حذف شد.
+
+## [1.11.36]
+
+#### تایپوگرافی مجله، مقاله و کارت‌های آرشیو — تکمیل پوشش بخش ۱ درخواست.
+  - ویجت‌های مجله (`hsw-blog-hero`، `blog-featured`، `blog-grid`، `blog-popular`، `blog-tabs`، `blog-tags`، `blog-newsletter`)، صفحهٔ مقاله (`hsw-post-page`) و کارت‌های آرشیو (`hsw-archive-grid`) حالا بخش **تایپوگرافی** با واحد px / em / rem و مقدار جدا برای دسکتاپ/تبلت/موبایل دارند.
+  - اندازه‌ها از CSS Variables خوانده می‌شوند و **مقدار پیش‌فرض همان اندازهٔ فعلی طرح** است، پس هیچ صفحه‌ای تغییر ظاهری نمی‌دهد.
+  - اندازه‌های کوچک‌تر (موبایل/تبلت) به‌جای عدد ثابت، نسبتی از همان متغیر هستند (`calc(var(--…) * .81)`)، بنابراین بزرگ‌کردن عنوان در دسکتاپ، موبایل را خراب نمی‌کند.
+  - کنترل «اندازهٔ متن توضیح» هدر مجله (`sub_size`) هم به سه واحد ارتقا یافت؛ شناسهٔ کنترل عوض نشد.
+
+## [1.11.35]
+
+#### سیستم استایل یکپارچه، «سود شما از خرید»، پیام کوپن و مودال سبد.
+  - **یک منبع کنترل برای همهٔ ویجت‌ها.** `a_color` / `a_box` / `a_text` در دو کلاس پایه کپی شده بودند (۹۳ خط تکراری) و کنترل عرض ستون در شش ویجت تکرار شده بود. حالا یک Trait مشترک (`HSW_Style_Kit`) روی `HSW_Widget_Base` است و همهٔ ویجت‌ها از آن ارث می‌برند.
+  - **واحدهای بیشتر:** اندازهٔ فونت حالا px / em / rem و عرض ستون‌ها px / % — در سبد، تسویه، پرداخت، تکمیل خرید، آرشیو، مجله، صفحهٔ محصول و پنل حساب.
+  - **تایپوگرافی صفحه‌ای:** چهار گروه «عنوان / متن / قیمت / دکمه» برای صفحه‌های خرید، با متغیرهای CSS که به همهٔ ویجت‌های فرزند ارث می‌رسند.
+  - **«سود شما از خرید»** در سبد، اطلاعات ارسال و پرداخت: مجموع تخفیف محصول + کوپن. اگر سودی نباشد ردیف چاپ نمی‌شود. رنگ و اندازه‌اش در تنظیمات همان ویجت است.
+  - **پیام کد تخفیف** فارسی، یک‌دست و با کد واقعی واردشده: «کد تخفیف «offr» قابل استفاده نیست و وجود ندارد.» — همهٔ خطاها (منقضی، حداقل خرید، سقف استفاده…) به همین لحن، روی فیلترهای رسمی ووکامرس.
+  - **مودال سبد خرید** بعد از افزودن: تصویر و نام محصول، جمع سبد، «مشاهده سبد خرید» و «ادامه خرید». با Esc، دکمهٔ بستن و کلیک بیرون بسته می‌شود؛ اسکرول فقط تا وقتی باز است قفل است.
+  - **نوتیف آرشیو** بزرگ‌تر و وسط صفحه، با بستن خودکار، دکمهٔ بستن، Esc و کلیک بیرون. توست و مودال از یک ماژول می‌آیند و **هرگز هم‌زمان** نمایش داده نمی‌شوند.
+  - مستند `MARKETING.md` برای تیم بازاریابی اضافه شد.
+
+## [1.11.34]
+
+#### کیف پول، فاکتور بازطراحی‌شده، فیلدهای تسویه و چند رفع ایراد.
+  - **تعداد در صفحهٔ محصول با کیبورد.** فیلد تعداد یک `<span>` بود و فقط با + و − عوض می‌شد. حالا یک ورودی واقعی است: تایپ عدد (ارقام فارسی هم)، Enter، خروج از فیلد، و هم‌گام‌شدن فوری با نوار چسبان پایین صفحه.
+  - **فیلدهای مرحلهٔ اطلاعات ارسال** هم‌زبان بقیهٔ فرم‌ها شدند: ارتفاع ۵۲، شعاع ۱۳، پس‌زمینهٔ ملایم و حالت فوکوس. فیلدهای ضروری حالا ستارهٔ قرمز و `aria-required` دارند.
+  - **«خواندن همه» در اعلان‌ها.** یک دکمه که همهٔ اعلان‌ها را خوانده می‌کند، شمارندهٔ هدر و نشان منو را صفر می‌کند و صفحه را رفرش نمی‌کند (یک نوشتن روی متای کاربر).
+  - **فاکتور چاپی مطابق نمونهٔ ارسالی:** عنوان و لوگو، شماره/تاریخ/شماره سفارش، دو کادر خریدار و فروشنده، جدول اقلام با شرح زیرین، جمع‌ها با کارمزد، کادر «مبلغ پرداخت‌شده»، روش پرداخت و وضعیت، جای مهر و امضا، و پانویس با آدرس فاکتور. یک صفحهٔ A4.
+  - **کیف پول:** موجودی، درخواست شارژ (تایید دستی ادمین)، تبدیل امتیاز باشگاه به موجودی و صورت‌حساب تراکنش‌ها. موجودی در یک متای کاربر است، پس خواندنش کوئری اضافه ندارد؛ افزایش موجودی با یک `UPDATE` اتمیک انجام می‌شود تا دو شارژ هم‌زمان همدیگر را پاک نکنند.
+  - **پیشخوان ← کیف پول:** تایید/رد درخواست‌های شارژ، و فهرست «مشتریان طلایی» بر اساس مجموع خرید (یک کوئری تجمیعی، نه یک کوئری برای هر مشتری) با شارژ گروهی و پیامک اختیاری.
+  - **پنل امنیت:** سه گزینهٔ اختیاری برای پاکسازی فرانت (ایموجی و تگ‌های هدر، wp-embed و استایل بلاک‌ها، ویجت‌های کم‌کاربرد). هیچ‌کدام کوئری یا فایل اضافه نمی‌کنند و در ویرایشگر المنتور اجرا نمی‌شوند.
+  - اطلاعات فروشنده (نشانی، تلفن، ایمیل، مهر) در **برند و لوگو** قابل تنظیم است و در فاکتور چاپ می‌شود.
+
+## [1.11.33]
+
+#### رفع ایرادهای سبد خرید، تسویه حساب و حساب کاربری + فاکتور چاپی.
+  - **افزودن به سبد در آرشیو هیچ واکنشی نداشت.** پاسخ JSON نادیده گرفته می‌شد: محصول متغیر به صفحهٔ خودش نمی‌رفت، هیچ نوتیفی نمی‌آمد و نشان سبد هم عوض نمی‌شد. حالا پاسخ خوانده می‌شود، محصول متغیر به صفحهٔ محصول می‌رود، نوتیف نمایش داده می‌شود و نشان سبد به‌روز می‌شود (سبک `hsw-toast` هم از استایل لوپ به استایل مشترک منتقل شد تا در آرشیو هم باشد).
+  - **تعداد در سبد خرید با کیبورد.** فیلد تعداد `readonly` بود و فقط با + و − عوض می‌شد. حالا می‌شود عدد را تایپ کرد (ارقام فارسی هم پذیرفته می‌شود)؛ Enter ارسال می‌کند و خروج از فیلد هم به‌روزرسانی می‌کند.
+  - **نوتیف کد تخفیف.** صفحهٔ سبد خرید هرگز `wc_print_notices()` را صدا نمی‌زد؛ نه پیام «کد نامعتبر» دیده می‌شد و نه «سبد به‌روز شد» — و همین نوتیف‌ها در نشست انبار می‌شدند تا یک‌جا در صفحهٔ آدرس‌ها سرریز کنند. حالا در سبد، تسویه و پرداخت چاپ و پاک می‌شوند.
+  - **آدرس در مرحلهٔ ارسال.** اگر مشتری آدرسی نداشت، کارت آدرس فقط به صفحهٔ حساب لینک می‌داد و مرحلهٔ پرداخت بعدش می‌گفت «آدرسی ثبت نشده». حالا همان‌جا فرم آدرس (نام، تماس، استان، شهر، نشانی، کدپستی) باز می‌شود و با یک درخواست REST ذخیره می‌شود.
+  - **فیلدهای آدرس حساب کاربری** به همان زبان بقیهٔ فرم‌ها درآمد: ارتفاع ۵۲، شعاع ۱۳، پس‌زمینهٔ ملایم، حالت فوکوس و چیدمان دوستونی؛ فلش سلکت‌ها هم دیگر روی حاشیه نمی‌افتد.
+  - **دکمه‌های CTA مراحل خرید** یک‌دست شدند: متن همیشه سفید، هاور کمی تیره‌تر. رنگشان از **پالت رنگی ← «CTA مراحل خرید»** تنظیم می‌شود (قبلاً سبد نارنجی و موبایل سرمه‌ای بود و رنگ متن هاور را قالب انتخاب می‌کرد).
+  - **مشاهدهٔ سفارش = فاکتور چاپی.** صفحهٔ سفارش حالا یک فاکتور با لوگو و نام فروشگاه، شماره و تاریخ، آدرس صورتحساب و تحویل، جدول اقلام و جمع‌ها است، با دکمهٔ «چاپ فاکتور» که فقط خود فاکتور را روی یک صفحه چاپ می‌کند.
+  - آیکن `print` به فونت آیکن اضافه شد (۱۰۱ گلیف).
+
+## [1.11.32]
+
+#### پشتیبانی: ایمیل دوطرفه، فونت پیشخوان و رابط تیکت.
+  - **مشتری هم ایمیل می‌گیرد.** تا حالا با ثبت تیکت فقط مدیر ایمیل می‌گرفت و مشتری هیچ چیزی در صندوق ورودی‌اش نمی‌دید. حالا یک ایمیل تأیید با شمارهٔ پیگیری و لینک گفتگو برای مشتری ارسال می‌شود — هم از مسیر جدید (پاپ‌آپ چت) و هم از مسیر قدیمی فرم.
+  - **پاسخ از داخل ایمیل خودِ پشتیبان.** هر ایمیل تیکت با یک `Reply-To` امضاشده (`support+t<شناسه>.<امضا>@دامنه`) فرستاده می‌شود؛ با زدن «پاسخ» در جیمیل/اوت‌لوک، متن مستقیماً به همان گفتگو اضافه می‌شود، وضعیت تیکت عوض می‌شود و به مشتری اطلاع می‌رود. امضا با `wp_salt('auth')` ساخته می‌شود تا کسی نتواند آدرس بسازد و در تیکت دیگران پیام بگذارد. تاریخچهٔ نقل‌قول‌شدهٔ کلاینت ایمیل (خطوط `>`، «On … wrote»، «Original Message») پیش از ثبت حذف می‌شود.
+  - **وب‌هوک ورودی.** اندپوینت `POST /wp-json/hsw/v1/ticket-inbound` با کلید محرمانه؛ بدون وابستگی به `ext-imap` (که روی بسیاری از هاست‌ها نیست و در PHP 8.4 منسوخ شده). فقط ایمیل پشتیبانی، مدیر فروشگاه یا خودِ مشتری پذیرفته می‌شود و درخواست‌ها سقف ساعتی بر اساس IP دارند.
+  - **فونت وزیرمتن در پیشخوان.** صفحهٔ تنظیمات HamiShop و صفحات تیکت هم فونت لوکال افزونه را استفاده می‌کنند. قاعدهٔ سادهٔ `body` کار نمی‌کرد چون وردپرس برای فارسی `.locale-fa-ir body{font-family:Tahoma,…}` دارد که خاص‌تر است؛ حالا با همان ویژگی و `!important` بازنویسی می‌شود.
+  - **رابط تیکت در پیشخوان بازطراحی شد.** نشان وضعیت (که کلاسی بدون هیچ CSS داشت و به‌صورت متن خالی دیده می‌شد) حالا قرص رنگی است؛ گفتگو حباب‌های مجزا با تفکیک پیام پشتیبان دارد و نوار ابزار بالای گفتگو وضعیت، سفارش مرتبط و دکمهٔ بستن/بازگشایی را یک‌جا نشان می‌دهد.
+  - **دکمهٔ «کنترل ویجت‌ها»** در هدر تیرهٔ پیشخوان خوانا شد (سفید روی شیشه‌ای) و دکمهٔ بی‌ربط «مشاهده صفحه حساب» از همان هدر حذف شد.
+  - **کلید وب‌هوک خودکار ساخته می‌شود** — دیگر لازم نیست برای دیدنش یک‌بار صفحه را ذخیره کنید.
+  - رفع دو ایراد در همان مسیر: الگوی حذف نقل‌قول به‌خاطر `From://s` اصلاً کامپایل نمی‌شد، و پیام خالیِ ساخته‌شده فقط از نقل‌قول، به‌جای رد شدن ثبت می‌شد.
+
+## [1.11.31]
+
+#### بخش پشتیبانی: رفع ایرادهای گزارش‌شده + خروجی اکسل و حذف خودکار.
+  - **عکس تیکت در پیشخوان دیده می‌شد؟ نه.** عکس آپلود و ذخیره می‌شد و سمت مشتری هم نمایش داده می‌شد، ولی متاباکس «گفتگوی تیکت» فقط متن را رندر می‌کرد. حالا تصویر با پیش‌نمایش و لینک بازکردن در همان رشته نمایش داده می‌شود.
+  - **اولویت انتخابی شد.** قبلاً همیشه «معمولی» ذخیره می‌شد بی‌آنکه مشتری ببیند. حالا در پاپ‌آپ تیکت جدید یک فیلد اولویت هست و همان مقدار ذخیره می‌شود (مقادیر ناشناس به پیش‌فرض برمی‌گردند).
+  - **استایل فیلدهای پاپ‌آپ.** بدنهٔ مودال کلاس `hsw-ac-form` ندارد، پس قاعده‌های مشترک فیلدها به آن اعمال نمی‌شد و موضوع/متن/اولویت ظاهر پیش‌فرض مرورگر را می‌گرفتند. حالا هم‌شکل بقیهٔ فرم‌اند.
+  - **دکمهٔ بستن تیکت واضح شد.** سمت مشتری رنگ خطر گرفت (قرمز) تا به‌عنوان اقدام دیده شود، و در پیشخوان هم کنار خودِ گفتگو یک دکمهٔ «بستن/بازگشایی تیکت» اضافه شد (قبلاً فقط در باکس کناری بود).
+  - **آیکن بستن پاپ‌آپ نامرئی بود.** قاعدهٔ عمومی `max-width: 100%` روی آیکن‌ها، داخل دکمهٔ flex، به ۲ پیکسل حل می‌شد و آیکن به یک تیغه تبدیل می‌شد؛ با `max-width: none` رفع شد.
+  - **خروجی CSV (اکسل)** در فهرست تیکت‌ها: با BOM یونیکد تا اکسل فارسی را درست نشان دهد، سازگار با فیلتر وضعیت، و به‌صورت جریانی (بدون ساخت کل فایل در حافظه).
+  - **حذف خودکار تیکت‌های قدیمی:** تنظیم «نگهداری تیکت بسته‌شده (روز)» با پیش‌فرض ۳۶۵ و گزینهٔ ۰ = هرگز؛ یک رویداد روزانه فقط تیکت‌های **بسته** را حذف می‌کند تا گفتگوی بی‌پاسخ پاک نشود.
+
+## [1.11.30]
+
+#### رفع دو ایراد در نسخهٔ ۱.۱۱.۲۹.
+  - **نشان سبد در صفحهٔ کش‌شده پاک نمی‌شد.** منطق جدید `data-count` را از نشان می‌خواند تا بداند عدد نمایش‌داده‌شده از بازدیدکنندهٔ قبلی مانده است، ولی مارک‌آپ سمت سرور این ویژگی را چاپ نمی‌کرد؛ نتیجه اینکه شرط هرگز برقرار نمی‌شد و نشانِ کهنه (مثلاً «۳») برای بازدیدکنندهٔ بدون سبد باقی می‌ماند. حالا `data-count` روی هر دو نشان (هدر و دراور) چاپ می‌شود و پس از هر به‌روزرسانی هم هم‌گام می‌ماند.
+  - **پاکسازی کش المنتور ممکن بود هیچ‌وقت تمام نشود.** حذف تکه‌ای به این شکل بود که «اگر چیزی حذف شد، نشانگر نسخه را به‌روز نکن»، ولی المنتور بعد از هر رندر دوباره کش می‌سازد؛ یعنی درخواست بعدی باز چیزی برای حذف پیدا می‌کرد و نشانگر هرگز جابه‌جا نمی‌شد. نتیجه: حذف کش در هر درخواست، برای همیشه. حالا کل پاکسازی در یک درخواست (با سقف ۵۰ تکه و ۵ ثانیه) انجام می‌شود و نشانگر همیشه جابه‌جا می‌شود.
+
+## [1.11.29]
+
+#### سازگاری با کش صفحه و بهینه‌سازی.
+  - شمارندهٔ سبد هدر هنگام بارگذاری با کوکی `woocommerce_items_in_cart` هم‌گام می‌شود (جلوگیری از نمایش سبد دیگران در صفحهٔ کش‌شده).
+  - مسیر عمومی `/account/wishlist` محصولات پنهان و دارای رمز را برنمی‌گرداند.
+  - تایمر شمارش معکوس فقط وقتی تب دیده می‌شود اجرا می‌شود.
+  - پاکسازی کش المنتور بعد از به‌روزرسانی به‌صورت تکه‌ای (۱۰۰۰تایی) انجام می‌شود.
+  - شمارش تیکت‌های باز سقف ۲۰۰ دارد.
+
+## [1.11.28]
+
+#### سخت‌سازی ورود با کد یکبارمصرف (بحرانی).
+  - **وبهوک بله:** شمارهٔ ارسالی فقط وقتی پذیرفته می‌شود که در گفتگوی خصوصی و از طرف خودِ فرستنده باشد (`contact.user_id === from.id`). قبلاً هر پیامی که یک شیء `contact` داشت پذیرفته می‌شد — یعنی در گروه یا با فوروارد کردن مخاطبِ کس دیگر، می‌شد شمارهٔ او را به چت خودت چسباند و کدهای ورودش را گرفتی. اتصالِ موجود هم دیگر بی‌اجازه بازنویسی نمی‌شود.
+  - **هویت شماره:** ورود فقط با `_hsw_auth_phone` (شمارهٔ تأییدشده) تطبیق می‌شود، نه `billing_phone`. هر شماره فقط به یک حساب تعلق دارد. ورود دوعاملی شماره را فقط از `_hsw_2fa_phone` می‌خواند. کاربری که شماره‌اش تأیید نشده، از پنل حساب شماره را با کد تأیید می‌کند و همان لحظه به‌عنوان شمارهٔ ورود ثبت می‌شود.
+  - **حساب‌های مدیریتی:** ورود بدون رمز برای کسانی که `manage_options`، `manage_woocommerce` یا `edit_others_posts` دارند غیرفعال است (فیلتر `hsw_otp_allowed_roles`، پیش‌فرض `customer` و `subscriber`).
+  - **محدودیت‌ها:** جدول کوچک شمارنده‌ها با `INSERT … ON DUPLICATE KEY UPDATE` (اتمیک، بدون وابستگی به object cache). ده کد اشتباه روی یک شماره در ساعت → قفل یک‌ساعته (فراتر از سقف هر کد، پس با ارسال دوباره دور زده نمی‌شود)؛ سقف ارسال به‌ازای IP در ساعت؛ سقف روزانهٔ هر شماره؛ سقف ارسال واتساپ در دقیقه. IP پشت CDN فقط وقتی از هدر خوانده می‌شود که اتصال از رنج معتبر CDN آمده باشد، وگرنه `REMOTE_ADDR`.
+
+### Changed
+
+- **رفع باگ `uninstall.php`:** نام گزینهٔ تنظیمات حساب اشتباه بود (`hsw_account` در حالی که نام واقعی `hsw_account_settings` است) و جدول شمارنده‌ها هم پاک نمی‌شد.
+
+## [1.11.27]
+
+#### سخت‌سازی ماژول امنیت بر اساس بازبینی کد.
+  - مرز آدرس سفارشی دقیق شد: فقط `/slug` یا `/slug/...` تطبیق می‌دهد. قبلاً `/manage-guide` هم به‌عنوان `/manage` شناخته می‌شد و می‌توانست صفحه‌ای بی‌ربط را ببلعد.
+  - آدرس دلخواه حالا با صفحه‌های موجود، صفحه‌های ووکامرس (فروشگاه/سبد/تسویه/حساب) و پایهٔ post typeها و taxonomyها مقایسه می‌شود و پیام خطای دقیق می‌دهد، نه یک پیام کلی.
+  - روی HTTPS کوکی `SECURE_AUTH_COOKIE` با scheme درست ساخته می‌شود؛ قبلاً کوکی `auth` ساخته می‌شد و `auth_redirect()` آن را رد می‌کرد.
+  - کوکی `logged_in` قبل از استفاده با `wp_validate_auth_cookie()` کامل اعتبارسنجی می‌شود (HMAC + توکن نشست)، نه فقط پارس شدن.
+  - ثابت `HSW_DISABLE_ADMIN_URL` حالا کل مکانیزم را خاموش می‌کند، نه فقط گارد ۴۰۴ را.
+  - خواندن `.htaccess` یک‌بار در هر درخواست کش می‌شود و فقط وقتی مسیر تطبیق بدهد انجام می‌شود؛ قبلاً هر بازدید یک خواندن فایل داشت. مسیر فایل با `get_home_path()` ساخته می‌شود و قبل از اولین ویرایش یک نسخهٔ پشتیبان در دیتابیس نگه داشته می‌شود.
+  - متن صفحهٔ امنیت صادق شد: صریحاً می‌گوید `wp-login.php` مخفی نمی‌شود و این ماژول جایگزین محدودکردن تلاش ورود نیست.
+#### REST: اعتبارسنجی، کش و حفظ تنظیمات ویجت.
+  - همهٔ پارامترها schema دارند (`enum`، `minimum`، `maximum`، `required`) و واقعاً اعمال می‌شوند.
+  - `term_id` با `term_exists(..., 'product_cat')` بررسی می‌شود.
+  - خروجی `/loop` و `/header-products` با transient کش می‌شود (کلید شامل نسخهٔ محصولات ووکامرس) و هدر `Cache-Control: public, max-age=300` می‌فرستد.
+  - **رفع باگ:** تعویض تب، تنظیمات ویجت را از دست می‌داد و کارت‌ها با متن‌ها و برچسب‌های پیش‌فرض رندر می‌شدند. حالا کلاینت `post_id` و `widget_id` می‌فرستد، امضا با `hash_hmac('sha256', post_id|widget_id)` ساخته می‌شود و سرور تنظیمات را از دیتای المنتور می‌خواند.
+  - پیش‌نمایش مگامنو محصولات مخفی و رمزدار را نشان نمی‌دهد و شمارندهٔ دسته از `product_count_product_cat` می‌آید.
+
+## [1.11.26]
+
+### Changed
+
+- **صفحه‌های شخصی‌سازی‌شده از کش صفحه کنار گذاشته شدند.** صفحهٔ پرداخت، تسویه‌حساب، سبد و پنل حساب از سشن ووکامرس می‌خوانند، ولی افزونه‌های کش فقط صفحه‌های رسمی ووکامرس را خودکار کنار می‌گذارند — یک صفحهٔ `/payment/` ساخته‌شده با ویجت‌ها در آن فهرست نیست و می‌توانست HTML یک مشتری را به مشتری بعدی نشان دهد. حالا `DONOTCACHEPAGE` روی `template_redirect` ست می‌شود (نه هنگام رندر ویجت، چون کش‌ها زودتر می‌خوانند) و هدر `X-HSW-Private: 1` هم اضافه شده است. صفحه‌های عادی مثل فروشگاه و نوشته‌ها دست‌نخورده و قابل کش می‌مانند.
+- **`uninstall.php` اضافه شد.** با حذف افزونه، گزینه‌ها، ترنزینت‌ها (کدهای OTP، کپچا، کش‌ها)، متاهای `_hsw_*` کاربران، تیکت‌ها و بلوک `.htaccess` پاک می‌شوند. قبلاً فقط غیرفعال‌سازی تمیز می‌کرد و با حذف، قاعدهٔ بازنویسی آدرس پیشخوان باقی می‌ماند.
+- **سازگاری HPOS اعلام شد.** همهٔ سفارش‌ها با `wc_get_order()` و getterها خوانده می‌شوند و هیچ دسترسی مستقیم به postmeta سفارش وجود ندارد؛ بدون این اعلام، ووکامرس افزونه را «نامعلوم» نشان می‌داد و می‌توانست فعال‌سازی جدول‌های سفارش سریع را محدود کند.
+
+### Fixed
+
+- رفع تناقض متن README دربارهٔ فونت وزیرمتن (حالت پیش‌فرض «ارث‌بری از قالب» است، نه بارگذاری).
+
+## [1.11.25]
+
+### Changed
+
+- **پیام «آخرین خطای ثبت‌شده» دیگر کهنه نمی‌ماند.** هر خطایی که هنگام بوت شدن افزونه ثبت می‌شود، حالا مسیر و زمانِ تغییر فایل مقصر را هم ذخیره می‌کند. اگر آن فایل بعداً ویرایش شود، یعنی خطا برطرف شده و پیام خودکار پاک می‌شود. قبلاً فقط با تغییر شمارهٔ نسخه پاک می‌شد، پس یک خطای لحظه‌ای (مثلاً هنگام ویرایش کد) تا نسخهٔ بعدی روی پیشخوان می‌ماند.
+- دکمهٔ «پاک کردن این پیام» سر جایش هست.
+
+## [1.11.24]
+
+### Changed
+
+- **بخش پشتیبانی به گفتگوی چت تبدیل شد.** به‌جای سه صفحهٔ جدا (فهرست، تیکت جدید، جزئیات)، حالا یک صفحهٔ دوستونه دارید: فهرست گفتگوها کنار و رشتهٔ پیام‌ها وسط. کلیک روی هر گفتگو بدون رفرش باز می‌شود و پاسخ را همان‌جا، پایین رشته، می‌نویسید.
+- **دکمهٔ «+» و پاپ‌آپ ثبت تیکت** با همان فیلدهایی که خواسته بودید: موضوع، سفارش/سرویس مرتبط (جستجوی سفارش با نمایش «#شماره - قیمت»)، متن پیام، عکس اختیاری و یک سؤال حساب کوچک.
+  - **عکس در مرورگر فشرده می‌شود** (حداکثر ۱۶۰۰px، JPEG کیفیت ۰٫۸۲) و بعد آپلود می‌شود؛ یک عکس ۴ مگابایتی گوشی معمولاً به ~۲۰۰ کیلوبایت می‌رسد.
+  - **سؤال امنیتی** سمت سرور ساخته و بررسی می‌شود؛ ارقام فارسی هم پذیرفته می‌شود. با هر تلاش ناموفق یک سؤال تازه داده می‌شود.
+- **ایمیل دوطرفه.** تیکت جدید → ایمیل به مدیر (شامل سفارش مرتبط و لینک عکس). پاسخ پشتیبانی → ایمیل به مشتری با متن پاسخ و لینک گفتگو. هر دو با تنظیم «اعلان ایمیلی» در تنظیمات پشتیبانی روشن/خاموش می‌شوند.
+- کدهای مردهٔ سه صفحهٔ قبلی حذف شدند؛ حجم CSS کمی کمتر شد.
+
+## [1.11.23]
+
+### Changed
+
+- **تأیید ایمیل برای کاربران پیامکی.** کاربری که با کد پیامکی ثبت‌نام کرده، ایمیل دارد ولی هیچ‌وقت تأیید نشده است. حالا در پیشخوان، سفارش‌ها و اطلاعات حساب یک نوار ملایم می‌بیند: «ایمیل شما هنوز تأیید نشده است». با زدن دکمه، ایمیلش را وارد (یا عوض) می‌کند، یک کد ۶ رقمی به همان صندوق می‌رود و بعد از وارد کردن کد، ایمیل تأیید و به حسابش وصل می‌شود (`user_email` و `billing_email`).
+  - فقط کاربران پیامکی این پیام را می‌بینند؛ کسی که با رمز ثبت‌نام کرده، همان تأییدیهٔ خود ووکامرس را دارد. نوار بعد از تأیید برای همیشه محو می‌شود.
+  - محافظت‌ها: کد ۱۵ دقیقه اعتبار دارد، حداکثر ۵ تلاش، فاصلهٔ ۶۰ ثانیه بین دو ارسال، و ایمیل متعلق به حساب دیگر قابل تصاحب نیست.
+  - سوئیچ روشن/خاموش در **HamiShop ← پنل حساب کاربری ← فعال‌سازی و چیدمان**.
+- **آدرس و نام ایمیل فرستنده در تنظیمات.** همان کاری که قبلاً با `wp_mail_from` و `wp_mail_from_name` در فانکشن قالب انجام می‌دادید، حالا در **HamiShop ← برند و لوگو ← ایمیل فرستنده**. خالی گذاشتن هر فیلد یعنی همان رفتار پیش‌فرض وردپرس؛ نام فرستنده به‌صورت خودکار نام برند می‌شود.
+- هزینهٔ این نسخه روی فرانت صفر است: هیچ کوئری اضافه‌ای در صفحه‌ها اجرا نمی‌شود، دو متای کاربر ذخیره می‌شود و اسکریپت فقط وقتی نوار روی صفحه باشد کاری می‌کند.
+
+## [1.11.22]
+
+### Changed
+
+- **فرم‌های حساب کاربری مدرن شدند.** فیلدهای «اطلاعات حساب» ووکامرس و فرم ورود/ثبت‌نام پنل حالا یک زبان بصری مشترک دارند: ارتفاع ۵۲px، گوشهٔ ۱۳px، پس‌زمینهٔ ملایم `#f7f9fc`، و در حالت فوکوس سطح سفید + حلقهٔ رنگی برند. فرم بومی ووکامرس **جایگزین نشده**، فقط بازطراحی شده تا هیچ افزونه‌ای که به هوک‌های آن وصل است نشکند. بخش «تغییر گذرواژه» به شکل یک کارت جدا درآمده و نام/نام‌خانوادگی در دو ستون کنار هم می‌نشینند (با `@container`، پس در کارت باریک هم به‌هم فشرده نمی‌شوند).
+- **برند و لوگو قابل تنظیم شد (پیشخوان ← HamiShop ← برند و لوگو).** جاهایی که «HamiShop» هاردکد بود (لوگوی پنل ورود، ابراز خوش‌آمد، امضای پشتیبانی) حالا از نام و لوگوی خود فروشگاه می‌خوانند. پیش‌فرض: نام سایت و لوگوی سفارشی قالب — یعنی بدون تنظیم هم درست نمایش داده می‌شود.
+- **بخش امنیت اضافه شد (پیشخوان ← HamiShop ← امنیت).** سبک، بدون وابستگی و بدون کوئری اضافه:
+  - **آدرس دلخواه پیشخوان:** `wp-admin` برای کاربر مهمان ۴۰۴ می‌شود و پیشخوان از آدرس دلخواه (مثلاً `/manage/`) سرو می‌شود. قاعده در `.htaccess` نوشته می‌شود و قبل از ذخیره با یک درخواست واقعی به همان آدرس تست می‌شود؛ اگر وب‌سرور اجرا نکند، تنظیم فعال نمی‌شود تا کسی قفل نشود. `admin-ajax.php` و `admin-post.php` باز می‌مانند.
+  - **بستن `/wp-json/wp/v2/users`** برای هر کسی که دسترسی `list_users` ندارد (همان کدی که قبلاً در فانکشن قالب داشتید، این‌بار بدون دست‌زدن به قالب).
+  - **غیرفعال‌سازی XML-RPC** (اختیاری) + حذف هدر `X-Pingback`.
+- هیچ‌کدام از این تنظیمات روی فرانت هزینهٔ محسوسی ندارد: بررسی مسیر یک مقایسهٔ رشته‌ای است و فیلتر REST فقط در درخواست‌های REST اجرا می‌شود.
+
+## [1.11.21]
+
+### Changed
+
+- **هدر چسبان حالا واقعاً می‌چسبد.** تا امروز `position: sticky` بود، ولی در المنتور ویجت هدر داخل یک رَپر هم‌قد خودش قرار می‌گیرد و sticky هیچ مسافتی برای حرکت ندارد — یعنی هدر با صفحه بالا می‌رفت و هیچ‌وقت برنمی‌گشت. حالا جاوااسکریپت ارتفاع هدر را می‌خواند، در یک placeholder هم‌اندازه نگه می‌دارد (تا صفحه نپرد) و هدر را `position: fixed` می‌کند.
+- **مخفی شدن هوشمند (جدید).** کنترل «مخفی شدن هوشمند هنگام اسکرول» زیر «هدر چسبان» اضافه شد و پیش‌فرض روشن است: با اسکرول به پایین هدر کنار می‌رود، با کوچک‌ترین اسکرول به بالا برمی‌گردد. موبایل و دسکتاپ یکسان. اگر خاموشش کنید، هدر همیشه چسبان می‌ماند.
+- کنترل «آستانهٔ شروع (پیکسل)» — تا این ارتفاع اسکرول، هدر همیشه می‌ماند (پیش‌فرض ۸۰px).
+- هدر هرگز وقتی منوی مگا، پنل جستجو یا دراور موبایل باز است مخفی نمی‌شود، و با فوکوس کیبورد یا اولین لمس/کلیک فوراً برمی‌گردد تا کاربر پشت هدر نامرئی گیر نکند.
+- `prefers-reduced-motion` رعایت می‌شود (بدون انیمیشن).
+- حالت «ارث‌بری فونت» و عرض جعبه‌ای هدر هم حفظ می‌شود: عرض هدر چسبان از روی placeholder محاسبه می‌شود، پس در قالب‌های با کانتینر محدود هم درست می‌نشیند.
+
+## [1.11.20]
+
+#### دو نگهبان تازه تا این باگ دیگر تکرار نشود:
+  - `HSW_Helpers::icon()` هر نامی را قبل از چاپ با لیست گلیف‌های واقعی فونت (`includes/class-hsw-icon-set.php`، ساختهٔ `tools/build-icons.py`) مقایسه می‌کند. نام ناشناس به‌جای متن انگلیسی یک نقطهٔ بی‌طرف (`circle`) نشان می‌دهد و زیر `WP_DEBUG` در لاگ ثبت می‌شود.
+  - فیلتر `elementor/widget/render_content` همان بررسی را روی خروجی نهایی هر ویجت انجام می‌دهد، چون حدود ۱۲۰ نقطه مارک‌آپ را دستی نوشته‌اند (`<i class="hsw-ic">delete_sweep</i>`) و از تابع کمکی رد نمی‌شوند.
+
+### Changed
+
+- **ریشهٔ نمایش نام انگلیسی آیکن‌ها پیدا و برای همیشه بسته شد.** سه علت جدا داشت:
+  - **فونت کش‌شده بود.** آدرس فایل فونت `?ver=1.11.19` ثابت مانده بود، پس مرورگر نسخهٔ قدیمی ساب‌ست را از کش می‌خواند؛ هر بار که گلیف جدید اضافه می‌کردیم کاربر همان فونت قبلی را می‌دید. حالا `@font-face` از PHP چاپ می‌شود و نسخه‌اش `filemtime()` خود فایل woff2 است — هر بازسازی فونت، کش همهٔ مرورگرها را می‌شکند.
+  - **۸ گلیف در ساب‌ست نبود:** `delete_sweep` (سبد خرید)، `edit_note` (یادداشت سفارش)، `done` (پرداخت)، `local_activity` (کارت هدیه)، `savings` (سود)، `flight_takeoff` (ارسال هوایی)، `phone_iphone` و `location_on` (این دو در این نسخهٔ فونت وجود ندارند و به `devices` و `place` نگاشت شدند). ساب‌ست از نو با ۹۶ نام و ۱۹۹ گلیف ساخته شد — ۹۲ کیلوبایت، هم‌اندازهٔ قبل.
+  - **قاعدهٔ پایهٔ `.hsw-ic` تک‌نسخه نبود.** در ۸ فایل CSS کپی شده بود و هر نسخه به کلاس ریشهٔ خانوادهٔ خودش محدود شده بود (`.hsw-c .hsw-ic`، `.hsw-k .hsw-ic`، …). حالا یک قاعدهٔ سراسری در `hsw-fonts.css` است که همهٔ ویجت‌ها (و ویجت‌های بعدی) از آن ارث می‌برند؛ ۵.۸ کیلوبایت CSS تکراری هم حذف شد.
+- `tools/audit-icons.py` اضافه شد: همهٔ نام‌های آیکن را از PHP استخراج می‌کند (مارک‌آپ خام، فراخوانی تابع، آرایهٔ `icon`، و لیست‌های انتخابی المنتور) و با ساب‌ست مقایسه می‌کند. خروجی فعلی: ۸۵ نام در حال استفاده، ۰ نام بدون گلیف.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۲۰.
+
+## [1.11.19]
+
+### Changed
+
+- **رفع نبود فیدبک بعد از «خرید آنلاین»:** محصول به سبد اضافه می‌شد ولی هیچ پیامی نمی‌آمد و شمارندهٔ سبد هدر صفر می‌ماند. دو علت داشت:
+  - **هیچ fragment ای برای سبد ثبت نشده بود.** ووکامرس فقط fragmentهایی را برمی‌گرداند که پلاگین ثبت کرده باشد؛ حالا `[data-hsw-cart-count]` و `[data-hsw-cart-total]` ثبت شده‌اند و شمارنده و مبلغ سبد بعد از هر افزودن (از صفحه محصول، آرشیو یا لوپ) به‌روز می‌شوند.
+  - **پیام موفقیت فقط در نوار خرید چسبان بود** و آن نوار در دسکتاپ مخفی است. حالا یک toast سراسری پایین صفحه نمایش داده می‌شود: «محصول به سبد خرید اضافه شد» + لینک «مشاهده سبد خرید».
+- استایل toast را خودِ جاوااسکریپت یک‌بار تزریق می‌کند، چون toast بیرون از محدودهٔ ویجت است و نمی‌تواند به CSS یک خانوادهٔ خاص تکیه کند (افزودن از آرشیو، CSS آرشیو را لود می‌کند نه محصول).
+- حالت کم‌رنگ «سبد خالی» روی آیکون سبد هم بعد از افزودن همگام می‌شود.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۹.
+
+## [1.11.18]
+
+### Changed
+
+- **رفع نمایش نام آیکون‌ها به‌صورت متن انگلیسی (مثل ASSIGNMENT_RETURN):** دو علت داشت و هر دو رفع شد:
+  - فونت آیکون تعدادی از گلیف‌های استفاده‌شده را نداشت. ساب‌ست از نو ساخته شد و حالا **۱۲۲ آیکون** (۱۹۵ گلیف، ۹۱KB) با حفظ محورهای FILL/GRAD/opsz/wght داخل پلاگین است.
+  - چند نام در کد اصلاً نامعتبر بودند (`bell`, `trash`, `user`, `heart`, `phone`, `location`, `plus`, `grid`, `gift`, `eye`, `calendar`, `alert`, `spark`, `ticket`, `truck`, `arrow-left`). یک نقشهٔ معادل در `HSW_Helpers::icon()` اضافه شد تا به گلیف درست وصل شوند؛ لازم نبود ۱۰۰ نقطهٔ فراخوانی دستی عوض شود.
+- **رنگ هاور در پالت رنگی:** توکن جدید «رنگ هاور» با متغیر `--hsw-hover` اضافه شد و روی تب‌های صفحه محصول و تب‌های مجله اعمال شد. رنگ هاور تک‌تک دکمه‌ها هم در تنظیمات همان دکمه (تب هاور) قابل تغییر است.
+- **امتیاز دیدگاه ستاره‌ای شد:** منوی کشویی «انتخاب امتیاز…» حذف و جایش ۵ ستاره گذاشته شد (عالی، خوب، متوسط، ضعیف، خیلی ضعیف). مقدار `rating` همان است که ووکامرس اعتبارسنجی می‌کند، پس ثبت دیدگاه بدون تغییر کار می‌کند. ستاره‌ها از راست پر می‌شوند و با کیبورد هم انتخاب می‌شوند.
+- اسکریپت بازسازی فونت: `tools/build-icons.py` (خارج از بستهٔ نصبی).
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۸.
+
+## [1.11.17]
+
+### Changed
+
+- **رفع «ماسک‌شدن» پنل اعلان حساب کاربری:** هدر پنل (`hsw-ac__hero`) برای گردکردن گوشه‌ها `overflow: hidden` داشت، ولی پنل کشویی زنگ اعلان داخل همان هدر و پایین‌تر از آن باز می‌شد؛ نتیجه این بود که پنل بریده و نصفه دیده می‌شد. حالا خودِ هدر `overflow: visible` است و تزئیناتش (هاله و حلقه) در یک لایهٔ جدا (`.hsw-ac__hero-deco`) با کلیپ مخصوص خودشان قرار گرفته‌اند.
+- هنگام باز بودن پنل، هدر یک پله بالاتر می‌آید (`z-index: 40`) تا روی بخش‌های بعدی نیفتد.
+- برای مرورگرهای قدیمی که `:has()` ندارند، جاوااسکریپت کلاس `is-bell-open` را روی هدر می‌گذارد.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۷.
+
+## [1.11.16]
+
+### Changed
+
+- **رفع نمایش‌نشدن توضیحات آرشیو:** اگر «محل نمایش توضیحات» به‌صورت رشتهٔ خالی ذخیره شده بود (حالتی که در کنترل‌های آینه‌ای ویجت جامع پیش می‌آید)، توضیحات کلاً رندر نمی‌شد. حالا مقدار خالی مثل «بالا — داخل سربرگ» رفتار می‌کند.
+- **«منبع توضیحات» در ویجت جامع آرشیو هم قابل انتخاب شد:** کنترل `desc_source` به فهرست کنترل‌های منتقل‌شدهٔ بخش «۲. سربرگ آرشیو» اضافه شد (قبلاً فقط در ویجت سربرگ مستقل بود).
+- **سازگاری با LiteSpeed Cache و WP Rocket:** تصویر شاخص (کارت اول آرشیو و شبکهٔ مقالات، تصویر اصلی گالری محصول و تصویر شاخص مقاله) حالا `skip-lazy` و `data-no-lazy="1"` هم دارد تا این افزونه‌های کش، آن را lazy نکنند و LCP خراب نشود.
+- **اعلان حساب کاربری روی بقیهٔ اجزا می‌آید:** پیام‌های ووکامرس (`woocommerce-message/info/error`) با `position: relative` و `z-index: 20` بالاتر از تزئینات پنل قرار گرفتند تا «ماسک‌شده» دیده نشوند.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۶.
+
+## [1.11.15]
+
+### Changed
+
+- **توضیحات آرشیو ترکیبی شد:** حالت پیش‌فرض حالا «متن خودکار + توضیحات دسته‌بندی» است — یک جملهٔ ثابت برای همهٔ آرشیوها، و بعد توضیحات واقعی همان دسته زیرش. حالت‌های «فقط دسته»، «برگهٔ فروشگاه»، «فقط خودکار» و «متن ثابت» هم باقی مانده‌اند.
+- **بهینه‌سازی LCP (تصویر اول):** تصویر کارت اول در آرشیو محصولات و شبکهٔ مقالات دیگر `lazy` نیست و با `fetchpriority="high"` می‌آید؛ بقیهٔ کارت‌ها lazy می‌مانند. تصویر شاخص مقاله و تصویر اصلی گالری محصول هم از قبل eager بودند.
+- **preconnect به `secure.gravatar.com`** اضافه شد (آواتار نویسنده و دیدگاه‌ها).
+- دو مورد باقی‌ماندهٔ Lighthouse سمت هاست است و در پلاگین قابل انجام نیست: «No compression applied» (gzip/Brotli) و «Cache TTL = None» (هدر `Cache-Control`). نمونهٔ تنظیم در README آمده.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۵.
+
+## [1.11.14]
+
+### Changed
+
+- **بخش «رنگ‌ها و فونت (یکپارچه)» در ویجت صفحهٔ کامل محصول:** یک‌جا و بدون رفتن به ده بخش جدا.
+  - **رنگ‌ها:** عنوان محصول، قیمت اصلی، قیمت قبل از تخفیف، متن توضیحات/ویژگی‌ها/اعتماد، تب فعال و غیرفعال، برچسب رنگ و حافظه، مسیر راهنما.
+  - **تایپوگرافی:** عنوان محصول، قیمت، متن توضیحات و تب‌ها، ویژگی‌های کلیدی، برچسب رنگ/حافظه، تب‌ها (اندازه، وزن، ارتفاع خط، رنگ).
+  - **دکمه‌ها:** دکمهٔ خرید جعبهٔ خرید و دکمهٔ نوار خرید چسبان — پس‌زمینه، رنگ متن، هاور، حاشیه، گردی گوشه، فاصله داخلی و سایه.
+- بخش‌های ۱ تا ۱۰ در تب «محتوا» دست‌نخورده مانده‌اند؛ برای تنظیم دقیق‌تر همان‌ها را باز کنید.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۴.
+
+## [1.11.13]
+
+### Changed
+
+- **دارایی‌ها حالا مینیفای‌شده سرو می‌شوند:** کنار هر فایل CSS/JS یک نسخهٔ `.min` ساخته شد و وردپرس تا وقتی `SCRIPT_DEBUG` روشن نباشد همان را لود می‌کند. نتیجه: **CSS از ۴۲۷KB به ۳۱۴KB (۲۶٪ کمتر)** و **JS از ۱۲۳KB به ۷۶KB (۳۸٪ کمتر)**.
+- اسکریپت بازسازی: `tools/build-assets.py` (خارج از بستهٔ نصبی) — بعد از هر تغییر CSS/JS یک‌بار اجرا شود.
+- بدون تغییر در رفتار: استایل‌ها و اسکریپت‌ها بعد از مینیفای‌شدن هم تست شدند (هدر چسبان، کارت‌ها، دکمه‌ها، فونت آیکون، بدون خطای کنسول).
+- یادآوری بهینه‌سازی سمت هاست: اگر gzip/Brotli روی سرور روشن باشد همین حجم به ~۵۵KB می‌رسد؛ این تنظیم روی هاست انجام می‌شود نه در پلاگین.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۳.
+
+## [1.11.12]
+
+### Changed
+
+- **توضیحات آرشیو حالا داینامیک است:** کنترل جدید «منبع توضیحات» با چهار حالت — توضیحات خود دسته‌بندی (پیش‌فرض، هر دسته متن خودش)، توضیحات برگهٔ فروشگاه، متن خودکار، یا متن ثابت. فیلد متن ثابت فقط وقتی دیده می‌شود که همان حالت را انتخاب کنید.
+- **کالاهای ناموجود به انتهای آرشیو می‌روند:** مرتب‌سازی با یک `LEFT JOIN` روی `_stock_status` و `CASE` در ابتدای `ORDER BY` انجام می‌شود، پس بقیهٔ ترتیب‌ها (قیمت، جدیدترین، تخفیف) دست‌نخورده می‌مانند و فقط ردیف‌های ناموجود پایین می‌افتند. با فیلتر `hsw_archive_oos_last` قابل خاموش‌کردن است.
+- **ظاهر ناموجود در آرشیو:** کارت کم‌رنگ می‌شود، تصویر خاکستری (grayscale) و نشان «ناموجود» روی تصویر می‌آید.
+- **متن دکمهٔ کارت‌های لوپ قابل ویرایش شد:** «متن دکمه خرید» در پیشنهاد شگفت‌انگیز هم اضافه شد (تا وقتی خالی باشد کارت فقط آیکون نشان می‌دهد) و «متن دکمه افزودن به سبد» از حالت هاردکد درآمد.
+- **استپر تعداد کنار دکمهٔ خرید آنلاین:** از ردیف قیمت به کنار دکمه منتقل شد؛ در موبایل بالای دکمه و در دسکتاپ چسبیده به آن.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۲.
+
+## [1.11.11]
+
+### Changed
+
+- **دکمه‌ها حالا کنترل کامل دارند** (پس‌زمینه، رنگ متن، هاور، حاشیه، گردی گوشه، فاصله داخلی، سایه و تایپوگرافی دکمه) — دیگر هیچ دکمه‌ای رنگ ثابت و غیرقابل‌تغییر ندارد.
+  - صفحهٔ نوشته: دکمهٔ خرید کارت محصول (`.hsw-pp__prodbtn`)، دکمهٔ نوار پایین موبایل و دکمهٔ ارسال دیدگاه.
+  - ویجت‌های لوپ (پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محبوب): دکمهٔ افزودن به سبد.
+  - هدر فروشگاهی و مینیمال: دکمهٔ دسته‌بندی محصولات و دکمهٔ جستجو.
+  - آرشیو: دکمهٔ اعمال فیلتر (در ویجت فیلترها و ویجت جامع آرشیو).
+- **اندازهٔ فونت در صفحهٔ نوشته:** عنوان مقاله، تاریخ و آمار، نام نویسنده، فهرست مطالب، فهرست سایدبار، برچسب‌ها، عنوان مقالات مرتبط، پربازدیدترین‌ها، متن باکس نویسنده و متن/نام دیدگاه‌ها حالا تایپوگرافی کامل (اندازه، وزن، ارتفاع خط، رنگ) دارند.
+- دو هلپر استاندارد به `HSW_Widget_Base` اضافه شد: `a_typo()` برای متن و `a_button()` برای دکمه، تا همهٔ ویجت‌ها از یک الگوی یکسان پیروی کنند.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۱.
+
+## [1.11.10]
+
+### Changed
+
+- **لنگر سرفصل‌ها در فهرست مطالب قابل انتخاب شد** (ویجت صفحه کامل نوشته → تنظیمات → «لنگر سرفصل‌ها»):
+  - **از متن تیتر (پیش‌فرض):** آدرس خوانا و باثبات مثل `#فناوری-حذف-نویز-فعال` — برای اشتراک‌گذاری لینک بخش و سئو بهتر. تیترهای تکراری پسوند `-2` می‌گیرند.
+  - **شماره‌ای:** `hsw-h-1`، `hsw-h-2` … (رفتار قبلی).
+  - **بدون لینک لنگر:** فهرست با دکمه کار می‌کند و اسکرول می‌کند، ولی **هیچ آدرس `…/#heading` تولید نمی‌شود**؛ بنابراین چیزی برای ایندکس‌شدن در گوگل وجود ندارد.
+- توضیح: گوگل می‌تواند آدرس‌های لنگر را جداگانه در نتایج نشان دهد (همان مشکلی که با فهرست المنتور پیش آمد). اگر لینک‌شدن بخش‌ها را نمی‌خواهید، حالت سوم را انتخاب کنید.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۱۰.
+
+## [1.11.9]
+
+### Changed
+
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۹.
+
+### Fixed
+
+- رفع اعلان گیرکردهٔ «آخرین خطای ثبت‌شده»: خطای ویجت پیشنهاد شگفت‌انگیز در ۱.۱۱.۶ رفع شد، ولی متن آن در گزینهٔ `hsw_last_error` می‌ماند و بعد از آپدیت هم به مدیر نشان داده می‌شد. حالا نسخهٔ پلاگین همراه خطا ذخیره می‌شود و اگر با نسخهٔ فعلی یکی نباشد، خطا خودکار پاک می‌شود (خطاهای قدیمی بدون فیلد نسخه هم پاک می‌شوند).
+- رفع نمایش تکراری اعلان: وقتی خطا در همان درخواست ثبت می‌شد، هم اعلان فوری و هم اعلان ذخیره‌شده چاپ می‌شدند و متن دو بار دیده می‌شد؛ حالا فقط یک‌بار نمایش داده می‌شود.
+
+## [1.11.8]
+
+### Changed
+
+- **شخصی‌سازی متن در همه‌جا:** هر متن توضیحی حالا کنترل کامل تراز و جهت دارد — «شروع سطر» (راست در RTL / چپ در LTR)، وسط‌چین، «پایان سطر» و **هم‌تراز دو طرف (justify)** — به‌همراه انتخاب صریح **RTL / LTR / مطابق قالب** و اسلایدر **ارتفاع خط**؛ همه پاسخ‌گو (دسکتاپ/تبلت/موبایل).
+- اعمال‌شده روی: توضیحات آرشیو فروشگاه و آرشیو دسته‌بندی (دسکتاپ و موبایل)، جعبه توضیحات پایین محصولات، متن توضیح سربرگ مجله، **بدنهٔ نوشتهٔ تکی** و **توضیحات محصول** در تب‌های صفحه محصول.
+- اندازهٔ فونت همهٔ این متن‌ها هم جداگانه قابل تغییر است.
+- `text-align: start/end` استفاده می‌شود تا تراز در سایت‌های RTL و LTR درست بماند.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۸.
+
+## [1.11.7]
+
+### Changed
+
+- **ویجت جدید: صفحه کامل نوشته (`hsw-post-page`)** — قالب تکی مقاله با دادهٔ واقعی وردپرس/ووکامرس: نوار پیشرفت مطالعه، نوار بالای چسبان، مسیر راهنما، سربرگ و متادیتا (نویسنده، تاریخ، زمان مطالعه، بازدید، دیدگاه)، تصویر شاخص با کپشن، فهرست مطالب خودکار از هدینگ‌های h2/h3، بدنهٔ مقاله، کارت محصول داخل مقاله (با تشخیص «تماس برای قیمت»)، برچسب‌ها، باکس نویسنده، دیدگاه‌های واقعی وردپرس با پاسخ تودرتو و فرم ثبت نظر، مقالات مرتبط، نوشتهٔ قبلی/بعدی، سایدبار چسبان دسکتاپ (فهرست، نویسنده، پربازدیدها) و نوار چسبان پایین موبایل.
+- موبایل‌اول: چیدمان پایه همان طرح موبایل است و از ۱۰۲۴ پیکسل به دو ستون با سایدبار چسبان تبدیل می‌شود.
+- شمارندهٔ بازدید: هر نوشته یک متای `hsw_post_views` می‌گیرد (یک‌بار در هر نشست).
+- **فونت آیکون‌ها بازسازی شد:** ساب‌ست از ۱۱۰KB به ۷۸KB رسید و آیکون‌های تازهٔ این طرح (bookmark، chat_bubble، forum، format_size، format_list_numbered، arrow_left، visibility و …) اضافه شدند؛ محورهای FILL/GRAD/opsz/wght و همهٔ گلیف‌های قبلی حفظ شده‌اند.
+- ویجت جدید به‌طور خودکار برای سایت‌هایی که قبلاً تنظیم «کنترل ویجت‌ها» را ذخیره کرده‌اند فعال می‌شود (مهاجرت یک‌بارهٔ `hsw_post_widget_migrated`).
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۷.
+
+### Fixed
+
+- رفع باگ ساختاری دیدگاه‌ها: کالبک کامنت، `</div>` پایانی را دوباره می‌بست و `Walker_Comment` هم همان را اضافه می‌کرد؛ نتیجه دو `</div>` اضافه در هر دیدگاه بود که `.hsw-pp` را زودتر می‌بست و نوار پایین موبایل را از ویجت بیرون می‌انداخت.
+
+## [1.11.6]
+
+### Changed
+
+- **پالت رنگی سراسری (جدید):** منوی «HamiShop → پالت رنگی» با ۱۱ رنگ (اصلی، اصلی تیره، تاکید، متن، متن کم‌رنگ، حاشیه، پس‌زمینه کارت، پس‌زمینه ملایم، موفق، هشدار، خطا). رنگ‌ها به‌صورت متغیرهای CSS روی `html:root` چاپ می‌شوند و همهٔ خانواده‌های ویجت (هدر، لوپ، صفحه محصول، آرشیو، مجله، سبد، تسویه، حساب) توکن‌های محلی خود را از همین پالت می‌گیرند؛ رنگ‌های دستیِ داخل تنظیمات هر ویجت همچنان اولویت دارد.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۶.
+
+### Fixed
+
+- رفع باگ مرتب‌سازی بلاگ: لینک‌های فیلتر از `get_permalink()` بدون آرگومان ساخته می‌شدند، بنابراین روی آرشیو و صفحهٔ نوشته‌ها به پرمالینک **اولین نوشتهٔ حلقه** اشاره می‌کردند و انتخاب «پربحث‌ترین» یک مقاله را باز می‌کرد. حالا آدرس از مسیر درخواست جاری ساخته می‌شود و برای صفحه، آرشیو دسته و جستجو درست است.
+- رفع خطای «۲۸ arguments are required» در ویجت پیشنهاد شگفت‌انگیز: قالب دکمهٔ افزودن به سبد با `sprintf` پر می‌شد و چون لینک محصول فارسی به‌صورت `%d8%af…` کدگذاری شده، هر `%XX` یک مشخصهٔ فرمت شمرده می‌شد. جایگزینی با `str_replace` انجام شد.
+
+## [1.11.5]
+
+### Changed
+
+- **رفع خطای ویرایش قالب‌های المنتور (ERR_CONNECTION_RESET / خطای ۵۰۳).** در `HSW_Archive_Query` تابع ذخیرهٔ `express_slug` داخل قلاب `elementor/document/after_save` دوباره `get_elements_data()` را صدا می‌زد؛ این فراخوانی خودش چرخهٔ ذخیره را دوباره اجرا می‌کرد و بازگشت بی‌نهایت باعث می‌شد پروسهٔ PHP کرش کند (Apache child با کد ۲۵۵ می‌مرد و ادیتور المنتور قطع می‌شد). حالا از همان `$data`ی استفاده می‌شود که خود المنتور به قلاب می‌دهد، به‌همراه گارد ضد ورود دوباره.
+- مگامنو حالا **حالت باز شدن** دارد: «با هاور (مشابه دیجی‌کالا)» یا «با کلیک»؛ پیش‌فرض هاور است و با یک مکث کوتاه ۱۶۰ میلی‌ثانیه‌ای بین دکمه و پنل، منو وسط حرکت موس بسته نمی‌شود.
+- استایل مگامنو ساده‌تر شد: بدون کارت و حاشیه و سایهٔ اضافه، ردیف‌های تخت با هایلایت ملایم، شمارندهٔ دسته بدون حباب، و ستون محصولات فقط با یک خط جداکننده.
+- خالی‌کردن «نام برند» حالا واقعاً نام را حذف می‌کند (حالت فقط-لوگو)؛ دیگر به نام سایت برنمی‌گردد.
+- خالی‌کردن «برچسب حساب» و «برچسب سبد خرید» هم متن را کامل حذف می‌کند و فقط آیکون می‌ماند؛ `aria-label` برای دسترس‌پذیری حفظ می‌شود.
+- اندازهٔ فونت دسته‌بندی‌های سایدبار فیلتر آرشیو حالا اعمال می‌شود: کنترل فونت به `.hsw-af__catlink` و `.hsw-af__catname` هم وصل شد (قبلاً فقط `.hsw-af__link` را می‌گرفت و درخت دسته‌بندی دست‌نخورده می‌ماند).
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۵.
+
+## [1.11.4]
+
+### Changed
+
+- بازطراحی مگامنوی هدر فروشگاهی: دسته‌بندی‌ها به‌صورت عمودی و آکاردئونی (تو در تو) باز می‌شوند، فقط یک دسته هم‌زمان باز است و زیردسته‌ها با شمارنده داخل همان ردیف نمایش داده می‌شوند.
+- پیش‌نمایش محصولات هر دسته در ستون کنار مگامنو، با تصویر کوچک ۴۶ پیکسلی، نام و قیمت؛ محصولات «تماس برای قیمت» به‌جای قیمت، متن تماس نشان می‌دهند.
+- بارگذاری تنبل (lazy): تصاویر و محصولات فقط بار اولی که یک دسته باز می‌شود از مسیر `hsw/v1/header-products` خوانده و برای بارهای بعدی کش می‌شوند؛ هدرِ بسته هیچ کوئری محصولی اجرا نمی‌کند.
+- جستجو حالا فقط **یک** ذره‌بین دارد: در فرم دسکتاپ آیکون داخل فیلد می‌ماند و دکمه فقط متن دارد؛ در فرم فشرده (موبایل و دراور) فقط دکمه آیکون دارد.
+- اسکرول‌بار مدرن و نازک (۶ پیکسل، گوشه‌گرد، هم‌رنگ پالت) برای ستون دسته‌ها، پیش‌نمایش محصولات و بدنهٔ دراور موبایل؛ در فایرفاکس با `scrollbar-width`/`scrollbar-color`.
+- تنظیم «تعداد ستون‌های مگامنو» با «تعداد محصول در پیش‌نمایش مگامنو» (۳/۴/۶) جایگزین شد.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۴.
+
+### Fixed
+
+- رفع پرش مگامنو: باز/بستن با `opacity`/`transform` انجام می‌شود (نه `display`) و ارتفاع پنل با ارتفاع ثابت ستون‌ها قفل شده، بنابراین جابه‌جایی دسته‌ها باعث تغییر ارتفاع یا پرش نمی‌شود.
+- رفع تداخل رنگ دکمهٔ «مشاهده سبد خرید» در دراور: رزروهای `:where()` جای رزروهای پرویژگی را گرفتند تا استایل کامپوننت‌ها (رنگ سفید، گرادیان و سایه) دیگر توسط `.hsw-h a` و `.elementor a` خنثی نشود؛ دکمه حالا کاملاً از لیست منو جدا دیده می‌شود.
+
+## [1.11.3]
+
+### Changed
+
+- تکمیل فونت آیکون‌ها: `menu`، `language`، `grid_view`، `arrow_left_alt`، `login` و `inventory_2` به زیرمجموعهٔ Material Symbols اضافه شدند. قبلاً این آیکون‌ها به‌صورت متن خام (مثل MENU یا GRID_VIEW) دیده می‌شدند. هیچ گلیف قبلی حذف نشد و محورهای FILL/GRAD/opsz/wght بدون تغییر ماندند.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۳ برای دورزدن کش قبلی فونت و CSS.
+
+### Fixed
+
+- رفع تداخل کنترل «هدر چسبان» با کنترل Sticky خود المنتور پرو: المنتور پرو روی هر المنت کنترلی به نام `sticky` تزریق می‌کند و پیش‌فرض کنترل ما را خالی می‌کرد، به همین دلیل کلاس `hsw-hd--sticky` هیچ‌وقت رندر نمی‌شد و هدر چسبان بی‌اثر بود. نام کنترل به `hd_sticky` تغییر کرد و حالت چسبان حالا درست کار می‌کند.
+
+## [1.11.2]
+
+### Changed
+
+- دو ویجت **هدر** جدید در دستهٔ «حامی — هدر و ناوبری»: «هدر فروشگاهی» (نوار اعلان، مگامنوی دسته‌بندی، جستجوی محصول، حساب و سبد) و «هدر مینیمال شیشه‌ای» (پیل شیشه‌ای شناور، منوی واقعی، پنل جستجوی سبک). هر دو روی کلاس پایهٔ مشترک `HSW_Header_Base` ساخته شده‌اند و `hsw-header.css` / `hsw-header.js` مشترک دارند.
+- هدرها منوی واقعی وردپرس (`wp_nav_menu`)، فرم بومی جستجوی محصول و آدرس‌های بومی ووکامرس (`wc_get_cart_url`، `wc_get_page_permalink`) را استفاده می‌کنند؛ شمارنده و جمع سبد از فرگمنت‌های خود ووکامرس رفرش می‌شود. هدر چسبان، دراور موبایل، مگامنو و اورلی جستجو بدون jQuery و با دارایی‌های لوکال پیاده شده‌اند.
+- مهاجرت یک‌بارهٔ `hsw_header_widgets_migrated`: سایت‌هایی که از قبل `hsw_enabled_widgets` را ذخیره کرده‌اند، هر دو ویجت هدر را خودکار دریافت می‌کنند.
+- جستجوی آرشیو/دستهٔ فروشگاه ساده‌تر شد: آیکون جستجو داخل خود فیلد قرار گرفت، حاشیه حذف و استایل فقط با پس‌زمینه اعمال می‌شود (گردی ۱۰px و حالت فوکوس)؛ در دسکتاپ و موبایل بدون سرریز افقی بررسی شد.
+- سازگاری کامل با **Hami Call for Price**: در لوپ‌های محصول، آرشیو فروشگاه، جعبه خرید، نوار خرید چسبان و انتخاب تنوع، به‌جای قیمت/تخفیف/تعداد/دکمهٔ خرید، متن و اکشن تماسِ خود افزونه نمایش داده می‌شود؛ بدون تکرار منطق CFP و بدون تغییر هندلرهای بومی ووکامرس.
+- صفحهٔ جدید «HamiShop → کنترل ویجت‌ها» برای فعال/غیرفعال‌کردن ویجت‌ها در پنل المنتور؛ ویجت‌های اصلی پیش‌فرض فعال و ۴۶ بخش مستقل پیش‌فرض خاموش‌اند.
+- حذف کامل گزینهٔ «خرید فوری» از ویجت جعبه خرید، کنترل‌های ویجت جامع صفحه محصول، مارک‌آپ، CSS، JS و داده‌های اسکریپت؛ دکمهٔ افزودن به سبد و رفتار بومی ووکامرس بدون تغییر باقی ماند.
+- بازچینش منوی HamiShop: «پنل حساب کاربری» → «تیکت‌های پشتیبانی» → «کنترل ویجت‌ها» و اتصال لینک اصلی منو به پنل حساب.
+- جلوگیری از بسته‌شدن یا هم‌پوشانی عنوان آکاردئون‌ها در موبایل پس از اصلاح آیکون‌ها.
+- بازبینی چیدمان موبایل صفحهٔ محصول دوم (دستکش ۲۰۰ عددی ایران‌ماسک) و حفظ فاصله‌ها و نوار خرید چسبان.
+- به‌روزرسانی نسخهٔ دارایی‌ها به ۱.۱۱.۲ برای دورزدن کش فونت و CSS قبلی.
+
+### Fixed
+
+- رفع نمایش نام آیکون‌ها به‌جای خود آیکون در حالت موبایل؛ فونت لوکال Material Symbols با آیکون‌های `description`، `rate_review`، `security` و سایر آیکون‌های پرکاربرد تکمیل شد.
+
+## [1.11.1]
+
+### Changed
+
+- سواچ رنگ محصول حالا رنگ واقعی ترم‌های ووکامرس را می‌خواند: متای رنگ افزونه‌های سواچ (`color`، `product_attribute_color`، `swatch_color` و…) اولویت دارد و در نبود آن، رنگ‌های رایج انگلیسی/فارسی (blue، red، آبی، قرمز و…) به‌صورت خودکار تشخیص داده می‌شود؛ دیگر همهٔ رنگ‌ها خاکستری نیستند.
+- نام رنگ‌های انگلیسی در جزئیات محصول و زیر سواچ به فارسی نمایش داده می‌شود (با فیلتر `hsw_attribute_value_label` برای تغییر).
+- بخش دیدگاه‌ها حالا فرم واقعی ثبت نظر و امتیاز دارد؛ فرم از `comment_form` بومی ووکامرس با نانس و اعتبارسنجی استاندارد استفاده می‌کند، دیدگاه‌های تأییدشده را نشان می‌دهد و در دسکتاپ و موبایل کار می‌کند.
+- لینک امتیاز در عنوان محصول و دکمهٔ «ثبت دیدگاه جدید» حالا تب/آکاردئون دیدگاه‌ها را باز می‌کند و به فرم می‌رود.
+- متن دکمهٔ خرید از «افزودن به سبد خرید» به «خرید آنلاین» تغییر کرد (در جعبه خرید و نوار چسبان موبایل)؛ متن از تنظیمات ویجت هم قابل ویرایش است.
+- عنوان تب‌های بومی ووکامرس (Description / Additional information / Reviews) در صورت نمایش توسط قالب یا ویجت‌های دیگر به فارسی تبدیل می‌شود.
+- نسخهٔ دارایی‌ها به ۱.۱۱.۱ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+
+### Fixed
+
+- اصلاح افزودن محصول متغیر به سبد خرید: شناسهٔ Variation برای اندپوینت بومی `wc-ajax=add_to_cart` در فیلد `product_id` ارسال می‌شود تا خرید رنگ انتخاب‌شده بدون خطای «گزینه‌های محصول را انتخاب کنید» انجام شود.
+
+## [1.11.0]
+
+### Added
+
+- افزودن لینک‌های دلخواه به منوی حساب (مثل SpotPlayer) با قالب `عنوان | آدرس | آیکون | ترتیب | new` و پشتیبانی از باز شدن در تب جدید.
+
+### Changed
+
+- ورود، ثبت‌نام و ورود دوعاملی با کد یکبارمصرف از طریق بله (رایگان) و واتساپ (Cloud API یا پل self-hosted)؛ تنظیمات در تب جدید «ورود و امنیت».
+- کدهای OTP به‌صورت هش در ترنزینت ذخیره می‌شوند، نانس AJAX اجباری است، تعداد تلاش و فاصلهٔ ارسال مجدد محدود شده و کد پس از استفاده یا خطای ارسال حذف می‌شود.
+- وبهوک امن ربات بله برای دریافت شماره با دکمهٔ «ارسال شماره موبایل»؛ امکان اتصال شماره به کاربر با لینک شروع اختصاصی و اتصال خودکار شماره به حساب.
+- ورود دوعاملی اختیاری: بعد از ورود با رمز، کد به بله/واتساپ ارسال می‌شود و نشست پس از تأیید بازیابی می‌گردد؛ امکان فعال/غیرفعال‌سازی از بخش امنیت حساب.
+- پشتیبانی از اندپوینت‌های سفارشی و افزونه‌های دوره‌ساز (مانند نیاس): آیتم منو و محتوای اندپوینت‌های شخص ثالث در پوستهٔ HamiShop رندر می‌شود و آیتم فعال نیز درست مشخص می‌شود.
+- باشگاه مشتریان: نمایش فرمول امتیاز، مبلغ هر امتیاز، سطح فعلی و امتیاز تا سطح بعد؛ توضیح صریح اینکه امتیازها فعلاً قابل تبدیل به کیف پول نیستند.
+- بازطراحی مدرن سفارش‌ها (کارت‌های سفارش با روند تحویل)، لیست آدرس‌ها و صفحهٔ اطلاعات حساب؛ فرم‌های ویرایش آدرس و اطلاعات حساب همچنان فرم‌های بومی ووکامرس با نانس و هندلر اصلی هستند.
+- بازطراحی فرم بازیابی رمز عبور با حفظ کامل نانس و هندلر ووکامرس و پیام‌های بومی.
+- ساده‌سازی پالت رنگ ویجت حساب به پنج رنگ (اصلی، تاکیدی، پس‌زمینه، کارت، متن) و محاسبهٔ خودکار رنگ‌های تیره، خط، متن ثانویه و گرادیان هدر.
+- حفظ دارایی‌های محلی، بدون jQuery/فریم‌ورک و بدون درخواست خارجی در صفحات حساب و ورود؛ نسخهٔ دارایی‌ها به ۱.۱۱.۰ ارتقا یافت.
+
+## [1.10.1]
+
+### Added
+
+- افزودن بخش «آیتم‌های منوی حساب» به ویجت المنتور برای فعال/غیرفعال‌کردن مستقل سفارش‌ها، دانلودها، آدرس‌ها، علاقه‌مندی‌ها، کیف پول، پشتیبانی، اعلان‌ها، روش‌های پرداخت و اطلاعات حساب.
+- افزودن پارامتر `hide` به شورت‌کد `[hamishop_account]` برای مخفی‌کردن سریع بخش‌ها؛ مثال: `[hamishop_account hide="downloads,wallet"]`.
+
+### Changed
+
+- سازگاری با افزونه‌های ورود پیامکی/OTP: در صورت فعال بودن Digits، OTP Login، SMS Login، Mobile Login و افزونه‌های مشابه، فرم ورود و ثبت‌نام اختصاصی پنل نمایش داده نمی‌شود و احراز هویت به‌طور کامل به افزونهٔ پیامکی واگذار می‌شود. تشخیص خودکار + امکان بازنویسی با فیلتر `hsw_sms_login_active`.
+- غیرفعال‌کردن هر آیتم منو، باز کردن مستقیم اندپوینت همان بخش را نیز غیرفعال می‌کند و کارت «بخش غیرفعال است» نمایش می‌دهد.
+- تغییر نام دستهٔ ویجت به «حامی — پنل حساب کاربری» و بهبود راهنمای تنظیمات و وضعیت ورود پیامکی در پیشخوان.
+- نسخهٔ دارایی‌ها به ۱.۱۰.۱ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+
+## [1.10.0]
+
+### Changed
+
+- پنل حساب کاربری کامل و راست‌به‌چپ برای ووکامرس: داشبورد، سفارش‌ها، دانلودها، آدرس‌ها، اطلاعات حساب، علاقه‌مندی‌ها، کیف پول، پشتیبانی و اعلان‌ها.
+- شورت‌کد `[hamishop_account]` و ویجت «پنل حساب کاربری HamiShop» در المنتور با کنترل پیش‌نمایش، انتخاب بخش‌ها، پالت رنگ و چیدمان؛ تنظیمات سراسری هم در «HamiShop > پنل حساب کاربری» مدیریت می‌شود.
+- فرم ورود، ثبت‌نام و بازیابی رمز با ظاهر یکپارچه و حفظ کامل هندلرها و نانس‌های بومی ووکامرس؛ مسیرهای بومی سفارش‌ها، دانلودها، آدرس‌ها، روش‌های پرداخت و ویرایش حساب نیز حفظ شده‌اند.
+- سیستم تیکت پشتیبانی با CPT اختصاصی، پاسخ مشتری و ادمین، وضعیت/اولویت/دپارتمان، مدیریت در پیشخوان و اعلان ایمیلی؛ تاریخ‌ها در صورت فعال بودن WP Parsidate شمسی نمایش داده می‌شوند.
+- اعلان‌های داخلی با شمارندهٔ خوانده‌نشده، کیف پول با موجودی و تاریخچهٔ خرید، و علاقه‌مندی‌ها با همگام‌سازی `localStorage` و پاک‌سازی شناسه‌های نامعتبر از طریق REST.
+- منو و بخش‌های داشبورد از تنظیمات قابل فعال/غیرفعال‌سازی هستند و اندپوینت غیرفعال‌شده به‌جای نمایش محتوا، پیام «بخش غیرفعال است» را نشان می‌دهد.
+- نسخهٔ دارایی‌ها به ۱.۱۰.۰ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+
+### Fixed
+
+- اصلاح کنتراست متن‌های ثانویه و بج آدرس، بهبود `aria-pressed` دکمهٔ نمایش رمز، حذف درخواست‌های خارجی (از جمله اسکریپت ایموجی) و بارگذاری شرطی دارایی‌ها در شورت‌کد و ویجت المنتور.
+
+## [1.9.4]
+
+### Changed
+
+- فیلتر دسته‌بندی به درخت کامل چندسطحی تبدیل شد: زیرشاخه‌ها در هر عمق، باز/بستن هر شاخه، جستجوی زنده، دکمهٔ «نمایش همه دسته‌ها» برای فروشگاه‌های با ۱۰۰+ دسته، و شمارش تعداد محصولات (شامل زیرشاخه‌ها یا فقط محصولات مستقیم).
+- گزینه‌های تازهٔ هر باکس دسته: نمایش تعداد، شمارش شامل زیرشاخه‌ها، نمایش دسته‌های خالی، جستجو، وضعیت باز بودن شاخه‌ها (مسیر دستهٔ فعلی / همه بسته / همه باز)، حداکثر شاخه‌های اصلی و حداکثر عمق.
+- «پالت رنگ ویجت» به همهٔ ویجت‌های حامی تعمیم داده شد (لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب، پرداخت، تکمیل خرید، وبلاگ و آرشیو). رنگ‌ها در تب Style هر ویجت هستند و پالت ویجت جامع به همهٔ بخش‌های تودرتو ارث می‌رسد.
+- پالت بعد از بخش‌های محتوا ثبت می‌شود تا در ویرایشگر المنتور تب «محتوا» اول باز شود و ترتیب محتوا → استایل → پیشرفته طبیعی بماند.
+- توکن‌های رنگ خانواده‌های دیگر از ریشهٔ ویجت به `:root` منتقل شدند تا تنظیم پالت روی ویجت جامع روی بخش‌های داخلی هم اثر بگذارد.
+- مسیر دستهٔ فعال حتی وقتی بیرون از محدودهٔ «حداکثر شاخه‌های اصلی» باشد باز و قابل مشاهده می‌ماند و از شمارندهٔ «نمایش همه دسته‌ها» کم می‌شود.
+- نسخهٔ دارایی‌ها به ۱.۹.۴ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+
+### Fixed
+
+- اصلاح لینک «پرش به محتوا» و افزودن نشانهٔ `main` در صفحهٔ آرشیو المنتور (دسترس‌پذیری ۱۰۰ در Lighthouse).
+
+## [1.9.3]
+
+### Changed
+
+- «راهنمای خرید» حالا آخرین بخش صفحهٔ آرشیو است؛ بلوک تکراری «توضیحات آرشیو» از پایین صفحه حذف شد و توضیحات فقط یک بار رندر می‌شود.
+- تنظیم جدید «محل نمایش توضیحات آرشیو» در ویجت سربرگ (و ویجت جامع): بالا داخل سربرگ، پایین محصولات (بالای راهنمای خرید) یا مخفی. عنوان، تعداد خطوط کلمپ، متن دکمهٔ «مشاهده بیشتر» و متن حالت باز قابل ویرایش‌اند.
+- توضیحات در حالت «پایین محصولات» با باکس کارت + عنوان «دربارهٔ {name}» نمایش داده می‌شود و دیگر با نسخهٔ داخل سربرگ تکرار نمی‌شود.
+- استایل کامل اجزای آرشیو از تب Style ویجت جامع: رنگ گرادیانت سربرگ و زاویهٔ آن، قرص‌ها، کارت محصول، فیلترها، نوار ابزار، صفحه‌بندی، راهنما و مسیر راهنما — بدون نیاز به ویرایش تک‌تک ویجت‌ها.
+- کنترل‌های دکمهٔ «مشاهده بیشتر»: رنگ متن/پس‌زمینه/حاشیه، گردی گوشه، اندازه فونت، فاصله داخلی و حالت‌های هاور/فوکوس/باز (فعال).
+- «پالت رنگ ویجت» به همهٔ ویجت‌های آرشیو اضافه شد: رنگ اصلی، عنوان‌ها، متن‌ها، خطوط، کارت‌ها، پس‌زمینه و رنگ‌های وضعیت (موجود/امتیاز/تخفیف) با مشتقات خودکار.
+- ارتفاع خط و چینش متن توضیحات و استایل باکس توضیحات پایین (پس‌زمینه/حاشیه/گردی/فاصله داخلی/عنوان) قابل تنظیم شد.
+- نسخهٔ دارایی‌ها به ۱.۹.۳ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+
+### Fixed
+
+- رفع جهت سربرگ: عنوان در سمت راست (شروع RTL) و قرص‌ها در سمت چپ قرار گرفتند.
+
+## [1.9.2]
+
+### Changed
+
+- ویجت جامع «صفحه کامل آرشیو» حالا کلید دستگاه‌ها (دسکتاپ/تبلت/موبایل) را برای کنترل‌های واکنش‌گرا نگه می‌دارد: «تعداد ستون» شبکه محصولات در هر دستگاه جداگانه قابل انتخاب است (مثلاً دسکتاپ ۳ / تبلت ۳ / موبایل ۲ = پیش‌فرض طرح) و کنترل‌های واکنش‌گرای سایدبار/فاصله‌ها هم مثل قبل کار می‌کنند.
+- کنترل واکنش‌گرای کپی‌شده در ویجت جامع، در هر دو حالت المنتور (کنترل تک‌ریسپانسیو و حالت چندکنترلی قدیمی) به‌درستی به CSS هر دستگاه تبدیل می‌شود.
+- نسخهٔ دارایی‌ها به ۱.۹.۲ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+- سازگاری بیشتر با قالب‌های غیر‌Woodmart: صفر شدن حاشیهٔ صفحهٔ آرشیو در موبایل/تبلت فقط داخل قالب Woodmart اعمال می‌شود و در بقیهٔ قالب‌ها حاشیهٔ امن پیش‌فرض حفظ می‌شود.
+
+### Fixed
+
+- رفع باگ «نمای لیستی»: انتخاب تعداد ستون دیگر روی نمای لیست اثر نمی‌گذارد و لیست همان یک‌ستونهٔ افقی می‌ماند.
+- رفع باگ ذخیره‌شده در قالب آرشیو سایت: مقدار «نمایش در = فقط موبایل» برای شبکه محصولات (که باعث پنهان‌شدن کل گرید در دسکتاپ می‌شد) حذف شد.
+
+## [1.9.1]
+
+### Changed
+
+- دسترس‌پذیری آرشیو: کنتراست متن‌های ثانویه و بج تخفیف اصلاح شد، لینک‌های قبلی/بعدی صفحه‌بندی نام دسترس‌پذیر گرفتند و در صفحه‌های آرشیو، viewport مقیاس‌پذیر، skip-link معتبر، ترتیب صحیح سرتیترهای فوتر و رنگ خوانا برای متن فوتر اعمال می‌شود (بدون تغییر در سایر صفحات).
+- صفر درخواست خارجی در آرشیو: فونت‌های Google Fonts قالب (Roboto/Roboto Slab) فقط در صفحات آرشیو حذف می‌شوند؛ وزیرمتن و آیکون‌ها همان‌طور لوکال بارگذاری می‌شوند.
+- تقویت no-JS: چک‌باکس‌های هم‌نام به‌صورت آرایه ارسال می‌شوند و سرور آن‌ها را به CSV تبدیل می‌کند؛ برای چیپ/سواچ یک لیست چک‌باکس جایگزین و نمایش درون‌خطی شیت‌های فیلتر/مرتب‌سازی در موبایل اضافه شد.
+- «بدون دسته‌بندی» دیگر به‌عنوان برچسب/دستهٔ کارت محصول نمایش داده نمی‌شود.
+- باکس قیمت: بازهٔ اسلایدر و ورودی‌ها به گام‌های تمیز (مضرب ۱۰٬۰۰۰ تومان در فروشگاه فعلی) تراز می‌شوند، مقدارهای اعشاری/ناهم‌تراز حذف شد، فیلدها تا زمانی که کاربر بازه را محدود نکرده خالی می‌مانند (placeholder قالب‌بندی‌شده) و پارامتر قیمتِ برابر با مرزها دیگر در آدرس ساخته نمی‌شود.
+- سواچ رنگ: attributeهای رنگ‌مانند حتی وقتی نوعشان «select» است به‌صورت دایرهٔ رنگ نمایش داده می‌شوند؛ دیکشنری رنگ انگلیسی/فارسی (قابل توسعه با فیلتر `hsw_archive_color_dict`) و اولویت متای ترم اضافه شد. استایل دکمه‌های قالب (Woodmart) دیگر سواچ‌ها را به قرص خاکستری تبدیل نمی‌کند.
+- استایل‌های قالب روی سرتیتر باکس‌های فیلتر (پس‌زمینه/پدینگ دکمه) و ورودی‌های قیمت ریست شد.
+- پارامترهای فیلتر با کلیدهای یونیکد (مثل `filter_pa_جنس`) و اسلاگ‌های percent-encoded سالم می‌مانند؛ چک‌باکس‌های هم‌نام قبل از ارسال به یک فیلد CSV تبدیل می‌شوند و تعداد «فیلتر فعال» فقط پارامترهای واقعی را می‌شمارد (نه `preview`/`paged`/`view`).
+- دستهٔ پیش‌فرض «بدون دسته‌بندی» از قرص‌ها و درخت دسته‌بندی حذف شد.
+- نسخهٔ دارایی‌ها به ۱.۹.۱ ارتقا یافت تا CSS/JS جدید بدون کش قبلی دریافت شود.
+
+### Fixed
+
+- رفع باگ مارک‌آپ «توضیحات آرشیو»: محتوای چندپاراگرافی دیگر داخل `<p>` تودرتو قرار نمی‌گیرد؛ در نتیجه «مشاهده بیشتر» و کلمپ دو خطی دسکتاپ/موبایل درست کار می‌کند.
+
+## [1.9.0]
+
+### Changed
+
+- بازسازی کامل مجموعهٔ «آرشیو فروشگاه» مطابق ماکت جدید دسکتاپ/موبایل: هدر گرادیانی با قرص تعداد و توضیحات سئو، سایدبار فیلتر (دسته‌بندی، موجودی/ارسال فوری، اسلایدر قیمت، برند با جستجو، چیپ حافظه، سواچ رنگ)، تولبار مرتب‌سازی و نمای شبکه/لیست، تگ‌های فیلتر فعال، گرید کارت، صفحه‌بندی و جعبهٔ «راهنمای خرید و سوالات متداول».
+- فیلترها کاملاً داینامیک‌اند: هیچ صفت یا taxonomyای هاردکد نشده؛ فیلترها از ریپیتر قابل‌تنظیم «باکس‌ها» ساخته می‌شوند و در حالت خالی به‌صورت خودکار از دسته‌بندی، موجودی/ارسال فوری، قیمت و صفات قابل‌فیلتر واقعیِ فروشگاه پر می‌شوند.
+- «توضیحات آرشیو» پایین هر آرشیو (و در هدر) به‌صورت داینامیک از دسته‌بندی/آرشیو فعلی تولید می‌شود: توضیح دسته یا برگه، و در نبود آن متن سئوی خودکار بر پایهٔ نام آرشیو، تعداد واقعی محصولات، صفات و بازهٔ قیمت.
+- نسخهٔ دارایی‌ها به ۱.۹.۰ ارتقا یافت تا مرورگرها CSS/JS جدید را دریافت کنند.
+
+## [1.8.2]
+
+### Changed
+
+- «روز/زمان تحویل» حالا در یادداشت سفارش ثبت می‌شود: انتخاب مشتری (روز + بازهٔ ساعت) بلافاصله در نشست ذخیره می‌شود و هنگام ثبت سفارش، خط «زمان تحویل: …» به یادداشت سفارش (همان یادداشت مشتری که در پیشخوان سفارش و ایمیل‌ها دیده می‌شود) اضافه می‌گردد؛ روز و بازه در متای سفارش (`_hsw_delivery_day` / `_hsw_delivery_slot`) هم نگه داشته می‌شوند و پس از ثبت سفارش موفق، انتخاب برای سفارش بعدی پاک می‌شود. انتخاب با دکمهٔ «پرداخت و تکمیل سفارش» هم دوباره به سرور فرستاده می‌شود تا اگر ارسال لحظهٔ رفتن به صفحهٔ پرداخت از دست برود، مقدار نهایی از دست نرود.
+- کلید «خاموش» برای بخش زمان تحویل: در ویجت «زمان و روز تحویل (HamiShop)» گزینهٔ «خاموش (بدون نمایش)» به کنترل «نمایش در» اضافه شد؛ همین کنترل در «صفحه کامل تسویه حساب» (پارت «۴. زمان تحویل») هم منعکس می‌شود. وقتی بخش خاموش باشد، هیچ خط زمانی به یادداشت سفارش اضافه نمی‌شود (به‌جای جدا کردن ویجت، فقط خاموشش کنید).
+
+## [1.8.1]
+
+### Changed
+
+- تنظیم تازهٔ «صفحهٔ پرداخت (مرحلهٔ ۳)» در ووکامرس → تنظیمات → تسویه حساب (کنار «صفحهٔ تکمیل خرید»): یک صفحه بسازید و ویجت «صفحه کامل پرداخت — حامی» را داخلش بگذارید و همان را اینجا انتخاب کنید تا زنجیرهٔ سبد → تسویه (اطلاعات ارسال) → پرداخت → تکمیل خرید کامل شود.
+- بخش تنظیمات به «مسیر خرید (حامی)» تغییر نام داد و توضیح هر دو فیلد (مرحلهٔ ۳ پرداخت و مرحلهٔ ۴ تکمیل خرید) شفاف‌تر شد. اگر «لینک مرحله بعد» در تنظیمات خود ویجت پر شده باشد، همان اولویت دارد (سازگاری کامل با صفحات قبلی).
+
+### Fixed
+
+- رفع باگ اصلی «دکمهٔ پرداخت و تکمیل سفارش هیچ کاری نمی‌کرد»: ووکامرس در درخواست‌های REST، سبد خرید و نشست را خودکار لود نمی‌کند؛ حالا همهٔ مسیرهای REST افزونه (روش ارسال، یادداشت سفارش، روش پرداخت، کد تخفیف و ثبت سفارش نهایی) قبل از هر کار، سبد/نشست را با wc_load_cart() بارگذاری می‌کنند — دقیقاً هم‌الگوی خود Store API ووکامرس. با این اصلاح، ماندن در صفحه و پیام «سبد خرید یافت نشد» از بین رفت.
+- رفع باگ مقدار رادیوی «روش ارسال»: مقدار هر گزینه حالا کلید واقعی نرخ ووکامرس است (مثلاً flat_rate:1) — پیش‌تر ایندکس آرایه بود و با بیش از یک روش ارسال، انتخاب مشتری در نشست/سفارش اعمال نمی‌شد.
+- رفع مشکل «دکمهٔ ادامه و ورود به مرحله پرداخت فقط صفحه را ریلود می‌کرد»: اگر در ویجت جامع «صفحه کامل تسویه حساب» لینک «مرحله بعد» خالی باشد، دکمهٔ ادامه حالا به «صفحهٔ پرداخت» انتخاب‌شده می‌رود — نه به خود صفحهٔ تسویه.
+
+## [1.8.0]
+
+### Changed
+
+- مجموعهٔ «تکمیل خرید»: ویجت جامع «صفحه کامل تکمیل خرید — حامی» + پنج ویجت تک‌بخشی (سربرگ موفقیت، جزئیات سفارش، اطلاعات تحویل، مراحل بعدی سفارش، دکمه‌های پایانی و پشتیبانی) — صفحه‌ای کاملاً قابل تنظیم که مشتری بعد از پرداخت می‌بیند و از همان دادهٔ واقعی سفارش پر می‌شود.
+- تنظیم «صفحهٔ تکمیل خرید» داخل خود ووکامرس (تنظیمات → تسویه حساب): با فیلتر رسمی `woocommerce_get_checkout_order_received_url` همهٔ درگاه‌های پرداخت، سفارش‌های بدون درگاه (کارت‌به‌کارت/پرداخت در محل) و لینک‌های پرداخت ایمیل‌ها به صفحهٔ شما هدایت می‌شوند — همراه شمارهٔ سفارش و کلید امن؛ آدرس‌های قدیمی `/checkout/order-received/` هم خودکار ریدایرکت می‌شوند.
+- کارت تأیید سفارش داخل صفحهٔ تسویه (v1.7.7) به‌عنوان جایگزین حفظ شده است: اگر «صفحهٔ تکمیل خرید» انتخاب نشده باشد، رفتار قبلی دقیقاً سر جایش می‌ماند.
+- کارت جزئیات سفارش: اقلام و تصاویر واقعی، جمع سبد، تخفیف/کوپن، هزینهٔ ارسال (یا «رایگان»)، مالیات، مبلغ کل، روش پرداخت + نشان «پرداخت شده / در انتظار پرداخت»، یادداشت مشتری و خروجی اختصاصی درگاه (دستورهای کارت‌به‌کارت و کد پیگیری — مثل صفحهٔ تشکر خود ووکامرس).
+- دکمه‌های پایانی هوشمند: برای سفارش پرداخت‌نشده «پرداخت سفارش» (مناسب پرداخت ناموفق و کارت‌به‌کارت)، برای کاربر واردشده «مشاهدهٔ سفارش در حساب من» و در غیر این‌صورت هدایت به حساب کاربری؛ به‌همراه یادآوری ایمیل تأییدیه (ناشناس‌شده) و جعبهٔ پشتیبانی.
+- حالت «سفارش یافت نشد» برای لینک‌های ناقص/منقضی + دادهٔ نمونه کامل در پیش‌نمایش ویرایشگر (روی سایت زنده هرگز دادهٔ نمونه نمایش داده نمی‌شود).
+
+## [1.7.7]
+
+### Changed
+
+- دکمهٔ «پرداخت و تکمیل سفارش» در ویجت‌های پرداخت حالا سفارش را واقعاً ثبت می‌کند: سفارش با همان روش ارسال، درگاه، کد تخفیف، یادداشت و فاکتور رسمیِ انتخاب‌شده ساخته می‌شود و مشتری به درگاه (یا صفحهٔ «سفارش دریافت شد») هدایت می‌شود — دیگر به صفحهٔ تسویه برنمی‌گردد.
+- اگر دکمه چند بار زده شود یا پرداخت نیمه‌کاره بماند، سفارش تکراری ساخته نمی‌شود؛ ووکامرس همان سفارش معلق را ادامه می‌دهد.
+- خطاهای احتمالی (آدرس ناقص، سبد خالی، در دسترس نبودن درگاه یا روش ارسال) زیر همان دکمه و به فارسی نشان داده می‌شود؛ برای مهمان‌ها/حساب‌های بدون آدرس، لینک «ورود / تکمیل آدرس» نمایش داده می‌شود.
+- در صفحهٔ «سفارش دریافت شد» (بعد از پرداخت موفق) به جای فرم پرداخت، کارت تأیید سفارش با شماره، وضعیت، مبلغ و دستورهای درگاه دیده می‌شود.
+- در آدرس «پرداخت سفارش» (order-pay — لینک‌های پرداخت ایمیل‌ها و حساب کاربری) فرم پرداخت استاندارد ووکامرس نمایش داده می‌شود تا پرداخت قابل انجام بماند.
+
+## [1.7.6]
+
+### Changed
+
+- کنترل جدید «لینک مرحله بعد» در خلاصهٔ سبد خرید و خلاصهٔ تسویه حساب: حالا می‌توانید مرحله‌ها را به هم وصل کنید (سبد خرید → اطلاعات ارسال → پرداخت نهایی). اگر خالی بماند، مثل قبل به صفحهٔ تسویه ووکامرس می‌رود.
+- این کنترل هم روی خود ویجت «خلاصه فاکتور سبد خرید»/«خلاصه سفارش تسویه» و هم داخل ویجت‌های جامع «صفحه کامل سبد خرید» و «صفحه کامل تسویه حساب» در دسترس است.
+
+## [1.7.5]
+
+### Changed
+
+- روش‌های پرداخت حالا همیشه دقیقاً همان چیزی است که در ووکامرس فعال کرده‌اید — هم در پیش‌نمایش ویرایشگر و هم در سایت زنده. درگاه‌ها/بانک‌های نمونهٔ طرح («به‌پرداخت ملت»، «سامان کیش»، «بانک پاسارگاد»، «زرین‌پال» و ردیف‌های BNPL/کارت‌به‌کارت) فقط زمانی دیده می‌شوند که خودتان «منبع درگاه‌ها = نمایش پیش‌فرض طرح» را انتخاب کنید.
+- ردیف «کسر از کیف پول» روی سایت زنده فقط وقتی نمایش داده می‌شود که کیف پول واقعی (فیلتر `hsw_wallet_balance`) موجود باشد؛ در پیش‌نمایش ویرایشگر برای کامل‌بودن طراحی دیده می‌شود.
+- پیش‌نمایش ویرایشگر: وقتی مشتری مهمان آدرسی ندارد، کارت آدرس و یادآوری سفارش با دادهٔ نمونهٔ طرح پر می‌شود تا طراحی کامل دیده شود؛ روی سایت زنده فقط دادهٔ واقعی مشتری نمایش داده می‌شود.
+
+### Fixed
+
+- رفع خطای «Call to undefined method WC_Countries::get_state()» در ویجت‌های تسویه/پرداخت (آدرس گیرنده و یادآوری سفارش): ووکامرس متد get_state ندارد؛ نام استان اکنون از نقشهٔ `get_states()` خوانده می‌شود.
+- رفع رندر نشدن درگاه‌های دوم به بعد: اگر چند درگاه فعال داشته باشید، همه به‌صورت ردیف‌های تکی (عنوان + توضیح خود ووکامرس) نمایش داده می‌شوند؛ قبلاً فقط درگاه اول دیده می‌شد و زیرش کارت‌های بانکی نمونه می‌آمد.
+
+## [1.7.4]
+
+### Changed
+
+- سبد خرید: نوار برند «سام‌فروش» و بردکرامب «فروشگاه» دیگر پیش‌فرض نیستند (هر دو سوئیچ پیش‌فرض خاموش؛ مراحل خرید ۱-۲-۳ باقی می‌مانند). نام فروشگاه پیش‌فرض = نام خود سایت.
+- صفحه پرداخت: نوار برند «فروشگاه آنلاین» پیش‌فرض پنهان است (فیلد نام فروشگاه خالی = بدون نوار). مقدار دموی ذخیره‌شده در صفحات ساخته‌شدهٔ قبلی هم هنگام رندر نادیده گرفته می‌شود تا طراحی درست شود.
+- شمارهٔ پشتیبانی دمو (۰۲۱-۹۱۰۰۰۰۰۰ / ۰۲۱-۹۱۰۰۸۸۷۷) دیگر روی سایت زنده نمایش داده نمی‌شود؛ فقط در پیش‌نمایش ادیتور دیده می‌شود و فیلد خالی یعنی «بدون شماره».
+
+### Fixed
+
+- رفع خطای «Call to undefined function wc_get_price_decimal_sep()» در ویجت‌های سبد خرید/تسویه/پرداخت: ووکامرس فقط توابع `*_separator()` را دارد؛ قالب‌بندی قیمت (money) در همهٔ این ویجت‌ها و REST انتخاب روش ارسال اصلاح شد (`wc_get_price_decimal_separator` + `wc_get_price_thousand_separator` با محافظ).
+
+## [1.7.3]
+
+### Changed
+
+- مسیر راهنما (بردکرامب) واقعاً ساخته می‌شود: تابع `wc_get_breadcrumb` در ووکامرس وجود ندارد؛ مسیر اکنون از دادهٔ واقعی «خانه → فروشگاه → عمیق‌ترین دستهٔ محصول → نام محصول» ساخته می‌شود (قبلاً بیرون از حالت نمایشی لیست خالی و ویجت نامرئی بود).
+- تست استاب‌های المنتور حالا قرارداد ۴.x را هم اعمال می‌کنند + تست جدید برای تضمین پاس‌شدن `$args` در بخش‌ها.
+
+### Fixed
+
+- رفع ریشه‌ای خالی ماندن ویجت‌های جامع در بوم ویرایشگر روی Elementor 4.x: در نسل ۴، هر دادهٔ غیرخالی در سازنده یعنی «نمونهٔ کامل» و ویجت بدون آرگومان (`$args`) غیرnull خطای «An `$args` argument is required when initializing a full widget instance» می‌داد؛ بخش‌ها حالا هم آرایهٔ تنظیمات و هم آرگومان خالی می‌گیرند — سازگار با ۳.x و ۴.x با هم (قبلاً به‌خاطر شبکهٔ ایمنی ضدفتال، بخش‌ها بی‌صدا حذف می‌شدند و بوم خالی می‌ماند).
+
+## [1.7.2]
+
+### Changed
+
+- داینامیک واقعی در ویرایشگر: هر ویجت صفحه محصول، به‌جای دادهٔ نمایشی، از محصول واقعیِ در دسترس و در نبود آن از آخرین محصول منتشرشدهٔ سایت برای پیش‌نمایش استفاده می‌کند — دادهٔ نمایشی سامسونگ فقط در سایتِ فاقد هرگونه محصول دیده می‌شود.
+- «انتخاب رنگ و حافظه»: اگر محصول صفت pa_color / pa_memory نداشته باشد، دو صفت متغیرِ خودِ محصول به‌صورت خودکار تشخیص داده می‌شوند؛ دادهٔ جعلی هرگز روی محصول واقعی نمایش داده نمی‌شود و گروهِ بدون گزینه پنهان می‌گردد. نگاشت مقدار صفت‌های سفارشی (غیرتکسونومی) هم برای سینک قیمت اصلاح شد.
+- «ویژگی‌های شاخص»: پیش‌فرض از مشخصات همان محصول خوانده می‌شود؛ در نبود مشخصه از بولت‌های توضیح کوتاه محصول و در نبود آن از فهرست دستی استفاده می‌کند (هر دو سوئیچ «از مشخصات محصول» پیش‌فرض روشن‌اند).
+- تست رفتاری جدید: تضمین اینکه بخش‌های composite با آرایهٔ تنظیمات اولیه ساخته می‌شوند.
+
+### Fixed
+
+- رفع خطای «Elementor\Controls_Stack::sanitize_settings(): Argument #1 ($settings) must be of type array, null given» در ویجت‌های جامع: بخش‌ها (پارت‌ها) اکنون با آرایهٔ تنظیمات اولیه ساخته می‌شوند (همان قرارداد المنتور واقعی) تا اولین get_settings داخلیِ المنتور (مثل `_skin`) به null نخورد.
+
+## [1.7.1]
+
+### Fixed
+
+- رفع خطای «Undefined constant Elementor\Controls_Manager::CHOOSER» در ویجت‌های جامع: ثابت CHOOSER در همهٔ نسخه‌های المنتور وجود ندارد و از فهرست انواع مجاز موتور آینه‌سازی حذف شد. (استاب‌های تست هم اصلاح شدند تا این کلاس از خطا دیگر تکرار نشود.)
+
+## [1.7.0]
+
+### Changed
+
+- ویجت‌های جامع (Composite) — کل هر صفحه با یک ویجت: صفحه محصول، آرشیو، سبد خرید، تسویه حساب، پرداخت و مجله. همهٔ ویجت‌های تکی داخل صفحهٔ جامع به‌صورت بخش («پارت») رندر می‌شوند و تک‌تک از پنل جامع قابل روشن/خاموش و شخصی‌سازی‌اند؛ ویجت‌های تکی هم مستقل و مثل قبل کار می‌کنند (بدون تغییر شناسه‌های کنترل).
+- خانوادهٔ جدید «حامی — ویجت‌های مجله و وبلاگ»: سربرگ مجله (آمار زنده + جستجو + برچسب‌های داغ)، تب دسته‌ها و مرتب‌سازی (سرور‌ساید و سئو‌پسند)، مقاله ویژه، شبکهٔ مقالات + صفحه‌بندی، پربازدیدترین‌ها، خبرنامه و برچسب‌های داغ — کاملاً داینامیک از مطالب/دسته‌ها/برچسب‌های خود سایت.
+- موتور composite: HSW_Composite (تزریق تنظیمات + رندر ایمن)، آیین‌سازی کنترل‌های پارنت با پیشوند (part_section/part_controls)، تنظیمات مؤثر effective_settings در همهٔ ویجت‌ها.
+- تست رفتاری جدید tests/behavior-composite.php (آینه‌کردن کنترل‌ها، شرط‌ها، پیش‌فرض‌ها و رندر ایمن پارت).
+- assetهای جدید: hsw-composite.css (چیدمان صفحات جامع) و hsw-blog.css (استایل مجله).
+
+## [1.6.4]
+
+### Changed
+
+- همهٔ ویجت‌ها ۱۰۰٪ داینامیک‌اند و داده را از خود سایت (ووکامرس) می‌خوانند — اما سه ویجت صفحه‌محصول (گالری، جعبهٔ خرید، مسیر راهنما) اگر بیرون از صفحهٔ محصول قرار می‌گرفتند، به‌جای دادهٔ واقعی، دادهٔ نمایشی «طرح» (Samsung mock) را در سایت زنده نشان می‌دادند. اصلاح شد: دادهٔ نمایشی فقط داخل ادیتور المنتور دیده می‌شود و در سایت زنده هیچ‌وقت رندر نمی‌شود.
+- دادهٔ واقعی ویجت‌ها: آرشیو از کوئری اصلی فروشگاه (wp_query) و ترم فعلی؛ حلقه‌های محصول (پرفروش/محبوب/شگفت‌انگیز) از wc_get_products با ۷ منبع (تخفیف‌دار، پرفروش، امتیاز، ویژه، جدیدترین، دسته/IDs دستی)؛ صفحه محصول از WC_Product واقعی؛ سبد/تسویه/پرداخت از WC()->cart و نرخ‌های واقعی ارسال.
+
+## [1.6.3]
+
+### Added
+
+- افزودن هارنس تست کامپایل (tests/) — همهٔ فایل‌ها دقیقاً به ترتیب وردپرس با امضای واقعی المنتور ۳.۲۵ لود و با PHP 8.2 تأیید می‌شوند؛ ۵۰ کلاس HSW بدون فتال.
+
+### Fixed
+
+- رفع فتال «Cannot make static method HSW_Widget_Base::price_html() non static in HSW_Widget_Checkout_Shipping»: متد رندر قیمت گزینه‌های ارسال در ویجت اطلاعات-ارسال همنام متد static بیس بود؛ به shipping_price_html() تغییر نام داد.
+
+## [1.6.2]
+
+### Fixed
+
+- رفع ریشه‌ای همان خطای مرگ: class-hsw-archive-base.php (که به HSW_Widget_Base وابسته به المنتور است) اشتباهاً در includes() — یعنی زمان plugins_loaded — لود می‌شد در حالی که HSW_Widget_Base هنوز تعریف نشده بود → Fatal: Class "HSW_Widget_Base" not found. اکنون فقط داخل register_widgets() و پس از تعریف HSW_Widget_Base لود می‌شود.
+
+## [1.6.1]
+
+### Changed
+
+- هات‌فیکس ضد خطای مرگ وردپرس (WSOD):
+- سپر نسخهٔ تکراری — اگر دو کپی از افزونه همزمان فعال باشد، کپی دوم بدون خطا غیرفعال می‌ماند (خطای Cannot declare class رخ نمی‌دهد).
+- شبکهٔ ایمنی Throwable در بوت، لود و ثبت ویجت‌ها و رندر — هیچ خطای داخلی دیگر کل سایت را نمی‌کشد.
+- نمایش «آخرین خطای ثبت‌شده» در پیشخوان با دکمهٔ پاک‌سازی — بدون نیاز به WP_DEBUG.
+
+### Fixed
+
+- رفع فتال بالقوه chosen_shipping_cost() در کانتکست‌های بدون سبد (REST/cron).
+
+## [1.0.0]
+
+### Changed
+
+- انتشار اولیه: سه ویجت لوپ محصولات.
