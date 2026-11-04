@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+## [1.11.229] — 2026-11-04
+
+### Fixed
+
+- **CLS.** The subcategory pill row wrapped when the theme font finished loading: measured on the live shop, `.hsw-ahd__pills` grew from 33px to 74px and pushed everything below it down 40px — one shift, `0.2327`, which was the entire CLS of the page. The row now scrolls sideways and keeps its height whatever the font does.
+- **ARIA tree.** `<ul role="tree">` had `<li>` children with no role, so the tree announced nothing. Items now carry `role="treeitem"`, `aria-level` and `aria-expanded`.
+- **ARIA drawer.** The closed mobile drawer kept its links in the tab order inside `aria-hidden="true"`. It now ships `inert` and the open/close handlers toggle it.
+- **Contrast.** Small text now uses AA-safe palette variants: `HSW_Palette::readable_on()` darkens the merchant's own colour until it clears 4.5:1 on their surface, and only where the text is small. Measured failures fixed: `.hsw-af__plabel` and `.hsw-agd__a` at 4.39:1, `.hsw-ag__note` at 3.38:1, `.hsw-hd__searchselect` at 4.39:1.
+
 ## [1.11.228] — 2026-11-04
 
 ### Added

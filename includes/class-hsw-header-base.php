@@ -683,7 +683,14 @@ abstract class HSW_Header_Base extends HSW_Widget_Base {
 		$show_acct = ! isset( $s['show_account'] ) || 'yes' === $s['show_account'];
 		$cats      = ! isset( $s['drawer_cats'] ) || 'yes' === $s['drawer_cats'];
 
-		$out  = '<div class="hsw-hd__drawer" id="' . esc_attr( $id ) . '" data-hsw-hd-drawer aria-hidden="true">';
+		/*
+		 * `inert` while closed: aria-hidden alone hides the drawer from screen
+		 * readers but leaves its links in the tab order, which is exactly what
+		 * Lighthouse reports as "[aria-hidden=true] elements contain focusable
+		 * descendents". Browsers that do not know `inert` ignore the attribute;
+		 * the drawer is hidden by CSS in that case anyway.
+		 */
+		$out  = '<div class="hsw-hd__drawer" id="' . esc_attr( $id ) . '" data-hsw-hd-drawer aria-hidden="true" inert>';
 		$out .= '<div class="hsw-hd__draweroverlay" data-hsw-hd-drawer-close></div>';
 		$out .= '<aside class="hsw-hd__drawerpanel" role="dialog" aria-modal="true" aria-label="' . esc_attr__( 'منوی موبایل', 'hamishop-elementor-widgets' ) . '">';
 		$out .= '<div class="hsw-hd__drawerhead">' . $this->brand_html( $s );

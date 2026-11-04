@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.228
+Stable tag: 1.11.229
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,12 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.229 =
+* Fix (CLS): the subcategory pill row no longer wraps. When the theme font finished loading the row grew from 33px to 74px and pushed the page down — a single 0.2327 layout shift, which was the entire CLS of the shop page.
+* Fix (a11y): the category tree's items now carry `role="treeitem"` and `aria-level`, so `role="tree"` finally has the children it requires.
+* Fix (a11y): the closed mobile drawer is `inert`, so its links are no longer focusable inside an `aria-hidden` container.
+* Fix (a11y): small text (price labels, search select, guide answers, stock notes) uses AA-safe palette variants derived at render time, so a muted colour that lands at 4.39:1 on the merchant's surface is darkened to 4.5:1 instead of failing.
+
 = 1.11.228 =
 * Feature: Empty product categories get a real empty state — icon, title, description and a «بازگشت به فروشگاه» button — instead of one grey line, and it is now visible on mobile too. Every string and colour is a control in the archive grid widget.
 * Feature: A second title is used automatically when the page is empty because of filters or search, so the message never claims the category has nothing when it was a filter that hid it.
@@ -91,14 +97,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.225 =
 * Fix: Header menus no longer drop their third level. `wp_nav_menu` was called with `depth => 2`, so a sub-sub-item such as «ابزار قالی‌بافی و پرداخت فرش → …» never rendered and there was nothing in the panel to explain why. Depth is now unlimited.
 * Fix: A nested sub-menu opens beside its parent instead of on top of the list it belongs to, with the caret pointing at the side the flyout opens on.
-
-= 1.11.224 =
-* Fix: The upgrade job no longer deletes Elementor CSS and waits for a visitor to rebuild it. On a live shop that cold window saturated PHP-FPM and nginx answered 503 for several minutes (reported on 1.11.223).
-* Fix: Each affected page's CSS is now rewritten in place, one post per step, inside the background tick — the stylesheet is never missing.
-* Fix: The per-tick time budget is enforced per post, not per query, so a batch of 40 pages can no longer run for ten seconds in one request.
-* Fix: WP Rocket's per-post cache is purged for the pages that were rebuilt.
-
-نسخه‌های جدیدتر در این فایل؛ تاریخچهٔ کامل ۲۴۰ نسخه در `CHANGELOG.md` مخزن.
 
 == Upgrade Notice ==
 

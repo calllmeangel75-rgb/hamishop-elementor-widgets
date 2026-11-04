@@ -52,6 +52,8 @@
 	--hsw-hd-bg: var(--hsw-hd-bg-user, var(--hsw-pal-surface, #fff)) !important;
 	--hsw-hd-text: var(--hsw-hd-text-user, var(--hsw-on-surface, #0f172a)) !important;
 	--hsw-hd-muted: var(--hsw-hd-muted-user, var(--hsw-pal-muted, #64748b)) !important;
+	/* Same AA guarantee as the archive: small labels, not fills. */
+	--hsw-hd-muted-aa: var(--hsw-pal-muted-aa, #57534e) !important;
 	--hsw-hd-border: var(--hsw-hd-border-user, var(--hsw-pal-border, #e2e8f0)) !important;
 	--hsw-hd-search: var(--hsw-hd-search-user, var(--hsw-pal-surface-alt, #f1f5f9)) !important;
 	--hsw-hd-topbar: var(--hsw-hd-topbar-user, var(--hsw-primary-dark, #0f172a)) !important;
@@ -545,7 +547,7 @@ body.admin-bar .hsw-hd--minimal.hsw-hd--sticky { --hsw-hd-top: 48px; }
 	border-radius: 0;
 	background: transparent;
 	box-shadow: none !important;
-	color: var(--hsw-hd-muted);
+	color: var(--hsw-hd-muted-aa);
 	font-size: 11px;
 	font-weight: 600;
 	cursor: pointer;

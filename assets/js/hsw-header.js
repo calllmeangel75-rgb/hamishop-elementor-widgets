@@ -756,6 +756,10 @@
 			lastFocus = document.activeElement;
 			drawer.classList.add('is-open');
 			drawer.setAttribute('aria-hidden', 'false');
+			/* Mirror the attribute the markup ships with, so a closed drawer never
+			   keeps its links in the tab order. */
+			drawer.removeAttribute('inert');
+			drawer.inert = false;
 			if (drawerHost) {
 				/* Cancels a pending un-layer from a fast close/open. */
 				if (drawerLayerTimer) {
@@ -783,6 +787,8 @@
 			}
 			drawer.classList.remove('is-open');
 			drawer.setAttribute('aria-hidden', 'true');
+			drawer.setAttribute('inert', '');
+			drawer.inert = true;
 			if (drawerHost) {
 				/* Stay raised until the slide/fade transition has finished. */
 				if (drawerLayerTimer) {

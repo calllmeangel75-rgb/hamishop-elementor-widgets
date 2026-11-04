@@ -967,7 +967,13 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                                 $classes[] = 'is-extra';
                         }
 
-                        $html .= '<li class="' . esc_attr( implode( ' ', $classes ) ) . '"' . ( $is_extra ? ' hidden' : '' ) . '>';
+                        /*
+                         * `role="tree"` on the list obliges every child to be a
+                         * treeitem; without it axe/Lighthouse report "required
+                         * children missing" and screen readers announce a tree
+                         * with nothing in it.
+                         */
+                        $html .= '<li class="' . esc_attr( implode( ' ', $classes ) ) . '" role="treeitem" aria-level="' . esc_attr( (string) ( $depth + 1 ) ) . '"' . ( $has_children ? ' aria-expanded="' . ( $is_open ? 'true' : 'false' ) . '"' : '' ) . ( $is_extra ? ' hidden' : '' ) . '>';
 
                         $html .= '<div class="hsw-af__catrow">';
                         if ( $has_children ) {
@@ -1061,7 +1067,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 }
 
                 $body .= '<ul class="hsw-af__tree hsw-af__cattree" data-hsw-cattree role="tree">';
-                $body .= '<li class="hsw-af__catnode is-open">';
+                $body .= '<li class="hsw-af__catnode is-open" role="treeitem" aria-level="1" aria-expanded="true">';
                 $body .= '<div class="hsw-af__catrow">';
                 $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'expand_more' ) . '</button>';
                 $body .= '<a class="hsw-af__catlink" href="#" data-hsw-catname="' . esc_attr( mb_strtolower( $root['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $root['name'] ) . '</span></a>';
@@ -1070,7 +1076,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 }
                 $body .= '</div>';
                 $body .= '<ul class="hsw-af__catbranch" data-hsw-catbranch>';
-                $body .= '<li class="hsw-af__catnode is-open is-current">';
+                $body .= '<li class="hsw-af__catnode is-open is-current" role="treeitem" aria-level="2" aria-expanded="true">';
                 $body .= '<div class="hsw-af__catrow">';
                 $body .= '<button type="button" class="hsw-af__cattoggle" data-hsw-cattoggle aria-expanded="true" aria-label="' . esc_attr__( 'باز و بستن زیرشاخه‌ها', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'expand_more' ) . '</button>';
                 $body .= '<a class="hsw-af__catlink is-active" href="#" aria-current="page" data-hsw-catname="' . esc_attr( mb_strtolower( $mid['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $mid['name'] ) . '</span></a>';
@@ -1080,7 +1086,7 @@ class HSW_Widget_Archive_Filters extends HSW_Archive_Base {
                 $body .= '</div>';
                 $body .= '<ul class="hsw-af__catbranch" data-hsw-catbranch>';
                 foreach ( $leafs as $leaf ) {
-                        $body .= '<li class="hsw-af__catnode">';
+                        $body .= '<li class="hsw-af__catnode" role="treeitem" aria-level="3">';
                         $body .= '<div class="hsw-af__catrow"><span class="hsw-af__catspacer" aria-hidden="true"></span>';
                         $body .= '<a class="hsw-af__catlink" href="#" data-hsw-catname="' . esc_attr( mb_strtolower( $leaf['name'] ) ) . '"><span class="hsw-af__catname">' . esc_html( $leaf['name'] ) . '</span></a>';
                         if ( $counts ) {

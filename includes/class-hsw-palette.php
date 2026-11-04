@@ -313,6 +313,15 @@ class HSW_Palette {
 			'--hsw-pal-border'         => $p['border'],
 			'--hsw-pal-muted'          => $p['muted'],
 			'--hsw-pal-success'        => $p['success'],
+
+			/*
+			 * AA-safe variants for small text. Derived from the same palette, so
+			 * a merchant who picks a muted grey that sits at 4.39:1 on their
+			 * surface still gets readable labels — without the plugin overriding
+			 * their brand colour anywhere it is used as a fill.
+			 */
+			'--hsw-pal-muted-aa'       => self::readable_on( $p['muted'], $p['surface'] ),
+			'--hsw-pal-success-aa'     => self::readable_on( $p['success'], $p['surface'] ),
 			'--hsw-pal-warning'        => $p['warning'],
 			'--hsw-pal-danger'         => $p['danger'],
 
@@ -374,6 +383,77 @@ class HSW_Palette {
 	 * @param string $hex Background colour.
 	 * @return string `#ffffff` or `#111827`.
 	 */
+	/**
+	 * Darken a colour until it clears WCAG AA (4.5:1) on a given background.
+	 *
+	 * The merchant picks the palette, and a muted grey that looks right on a
+	 * white mock can land at 4.39:1 on the cream surface they actually chose —
+	 * enough for Lighthouse to fail every small label on the page. Rather than
+	 * second-guess the design, the plugin derives a readable variant and uses it
+	 * only where the text is small: labels, counters and status notes.
+	 *
+	 * @param string $hex  Foreground.
+	 * @param string $bg   Background it sits on.
+	 * @param float  $min  Target ratio (4.5 = AA for normal text).
+	 * @return string
+	 */
+	public static function readable_on( $hex, $bg, $min = 4.5 ) {
+		$parse = static function ( $value ) {
+			$value = ltrim( (string) $value, '#' );
+			if ( 3 === strlen( $value ) ) {
+				$value = $value[0] . $value[0] . $value[1] . $value[1] . $value[2] . $value[2];
+			}
+			if ( 6 !== strlen( $value ) || ! ctype_xdigit( $value ) ) {
+				return null;
+			}
+			return array(
+				'r' => hexdec( substr( $value, 0, 2 ) ),
+				'g' => hexdec( substr( $value, 2, 2 ) ),
+				'b' => hexdec( substr( $value, 4, 2 ) ),
+			);
+		};
+
+		$lum = static function ( array $c ) {
+			$ch = static function ( $v ) {
+				$v = $v / 255;
+				return $v <= 0.03928 ? $v / 12.92 : pow( ( $v + 0.055 ) / 1.055, 2.4 );
+			};
+			return 0.2126 * $ch( $c['r'] ) + 0.7152 * $ch( $c['g'] ) + 0.0722 * $ch( $c['b'] );
+		};
+
+		$fg = $parse( $hex );
+		$b  = $parse( $bg );
+
+		if ( ! $fg || ! $b ) {
+			return is_string( $hex ) && '' !== $hex ? $hex : '#111827';
+		}
+
+		$ratio = static function ( array $a, array $bb ) use ( $lum ) {
+			$l1 = $lum( $a );
+			$l2 = $lum( $bb );
+			return ( max( $l1, $l2 ) + 0.05 ) / ( min( $l1, $l2 ) + 0.05 );
+		};
+
+		if ( $ratio( $fg, $b ) >= $min ) {
+			return '#' . ltrim( (string) $hex, '#' );
+		}
+
+		/* Walk toward black in small steps; black always wins eventually. */
+		for ( $step = 5; $step <= 100; $step += 5 ) {
+			$mix = array(
+				'r' => (int) round( $fg['r'] * ( 100 - $step ) / 100 ),
+				'g' => (int) round( $fg['g'] * ( 100 - $step ) / 100 ),
+				'b' => (int) round( $fg['b'] * ( 100 - $step ) / 100 ),
+			);
+
+			if ( $ratio( $mix, $b ) >= $min ) {
+				return sprintf( '#%02x%02x%02x', $mix['r'], $mix['g'], $mix['b'] );
+			}
+		}
+
+		return '#111827';
+	}
+
 	public static function contrast_text( $hex ) {
 		$hex = ltrim( (string) $hex, '#' );
 		if ( 3 === strlen( $hex ) ) {
