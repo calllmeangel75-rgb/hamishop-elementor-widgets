@@ -8,6 +8,12 @@
 
 ## [Unreleased]
 
+## [1.11.236] — 2026-11-04
+
+### Fixed
+
+- The widget's own «لینک مرحله بعد» now counts as a next step. 1.11.233 decided `data-hsw-pay-step` from «صفحهٔ پرداخت» alone, so a shop that set the link on the summary widget had it ignored: the order was placed instead of navigating to the configured page.
+
 ## [1.11.235] — 2026-11-04
 
 ### Fixed

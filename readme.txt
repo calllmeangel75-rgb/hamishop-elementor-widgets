@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.235
+Stable tag: 1.11.236
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.236 =
+* Fix: The widget's own «لینک مرحله بعد» now counts as a next step. 1.11.233 only looked at «صفحهٔ پرداخت», so a shop that set the link on the summary widget had it ignored and the order was placed instead of navigating to the pay step.
+
 = 1.11.235 =
 * Fix: Clicking «ادامه و ورود به مرحله پرداخت» could submit the header search form and land on `/?s=` — `.woocommerce-checkout` is a body class, so the fallback selector matched the wrong form. The fallback now uses WooCommerce's own form markers only, rejects anything containing a search field, and does nothing when no checkout form is found.
 
@@ -87,10 +90,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 = 1.11.232 =
 * Fix: The upgrade job no longer queues a cron event. WP-Cron is spawned by front-end visits, so a tick ran while a customer was waiting; on a small host one heavy Elementor page could hold a PHP worker long enough for the pool to answer 503. The work now runs only on an admin page load, throttled to one tick every 30 seconds.
-
-= 1.11.231 =
-* Fix: A real PHP fatal (uncaught Error, memory exhaustion, max_execution_time) now leaves a trace. A shutdown handler writes `[HSW/fatal] … — file.php:line` to the error log and, when the file belongs to this plugin, to the dashboard's «آخرین خطای ثبت‌شده».
-* Why: on a live shop the PHP log held only notices while uncached pages answered 503, so there was no way to tell a plugin fatal from a server-side kill.
 
 == Upgrade Notice ==
 

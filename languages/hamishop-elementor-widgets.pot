@@ -163,7 +163,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-items.php:58
 #: widgets/class-hsw-widget-cart-items.php:354
 #: widgets/class-hsw-widget-checkout-summary.php:97
-#: widgets/class-hsw-widget-checkout-summary.php:437
+#: widgets/class-hsw-widget-checkout-summary.php:446
 msgid "{count} کالا"
 msgstr ""
 
@@ -640,7 +640,7 @@ msgid "ادامه مطلب"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:204
-#: widgets/class-hsw-widget-checkout-summary.php:523
+#: widgets/class-hsw-widget-checkout-summary.php:532
 msgid "ادامه و ورود به مرحله پرداخت"
 msgstr ""
 
@@ -695,7 +695,7 @@ msgstr ""
 msgid "ارسال ایمیل ناموفق بود. لطفاً بعداً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: widgets/class-hsw-widget-checkout-summary.php:485
+#: widgets/class-hsw-widget-checkout-summary.php:494
 msgid "ارسال بالای %s تومان رایگان است"
 msgstr ""
 
@@ -2004,6 +2004,19 @@ msgstr ""
 msgid "بازه ساعت"
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:97
+#: includes/class-hsw-checkout-fields.php:300
+msgid "بازهٔ زمانی تحویل"
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:241
+msgid "بازهٔ زمانی تحویل انتخاب‌شده معتبر نیست. لطفاً دوباره انتخاب کنید."
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:206
+msgid "بازهٔ زمانی را انتخاب کنید"
+msgstr ""
+
 #: includes/class-hsw-widget-base.php:1331
 msgid "بازهٔ زمانی فروش"
 msgstr ""
@@ -2229,7 +2242,7 @@ msgstr ""
 msgid "برای ادامه خرید می‌توانید از فروشگاه شروع کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-checkout-summary.php:528
+#: widgets/class-hsw-widget-checkout-summary.php:537
 msgid "برای ادامه، ابتدا نشانی تحویل را در فرم بالا کامل کنید."
 msgstr ""
 
@@ -2255,6 +2268,10 @@ msgstr ""
 
 #: includes/class-hsw-account-auth.php:1578
 msgid "برای این حساب ایمیل معتبری ثبت نشده است."
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:107
+msgid "برای این سفارش فاکتور قانونی صادر شود."
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-address.php:561
@@ -2938,7 +2955,7 @@ msgid "تأیید و ورود"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:342
-#: widgets/class-hsw-widget-checkout-summary.php:595
+#: widgets/class-hsw-widget-checkout-summary.php:604
 msgid "تأیید و پرداخت نهایی"
 msgstr ""
 
@@ -3326,12 +3343,12 @@ msgid "تخفیف محصول"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:306
-#: widgets/class-hsw-widget-checkout-summary.php:568
+#: widgets/class-hsw-widget-checkout-summary.php:577
 msgid "تخفیف کالاها"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:139
-#: widgets/class-hsw-widget-checkout-summary.php:467
+#: widgets/class-hsw-widget-checkout-summary.php:476
 msgid "تخفیف کالاها:"
 msgstr ""
 
@@ -4203,7 +4220,7 @@ msgid "جزئیات و پیگیری"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:288
-#: widgets/class-hsw-widget-checkout-summary.php:556
+#: widgets/class-hsw-widget-checkout-summary.php:565
 msgid "جزئیات پرداخت"
 msgstr ""
 
@@ -4341,7 +4358,7 @@ msgid "جمع فاکتور و اطلاعات نهایی ارسال."
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:130
-#: widgets/class-hsw-widget-checkout-summary.php:461
+#: widgets/class-hsw-widget-checkout-summary.php:470
 msgid "جمع قیمت اقلام ({count}):"
 msgstr ""
 
@@ -4358,6 +4375,7 @@ msgstr ""
 msgid "جمع، ارسال و دکمه ادامه خرید."
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:166
 #: widgets/class-hsw-widget-checkout-schedule.php:271
 msgid "جمعه"
 msgstr ""
@@ -5115,7 +5133,7 @@ msgid "خلاصه پرداخت اطلاعات ارسال (HamiShop)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:88
-#: widgets/class-hsw-widget-checkout-summary.php:436
+#: widgets/class-hsw-widget-checkout-summary.php:445
 msgid "خلاصه پیش‌فاکتور"
 msgstr ""
 
@@ -5315,6 +5333,10 @@ msgstr ""
 
 #: includes/class-hsw-wallet.php:352
 msgid "درخواست شارژ ثبت شد. پس از تایید، موجودی اضافه می‌شود."
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:308
+msgid "درخواست شده"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-note.php:115
@@ -5543,6 +5565,7 @@ msgstr ""
 msgid "دو هدر کامل المنتور با منوی واقعی وردپرس، جستجوی محصول ووکامرس، سبد خرید و حساب کاربری. هر دو پیش‌فرض فعال‌اند."
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:162
 #: widgets/class-hsw-widget-checkout-schedule.php:267
 msgid "دوشنبه"
 msgstr ""
@@ -7085,6 +7108,19 @@ msgstr ""
 msgid "روز انتخاب‌شده (متن)"
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:88
+#: includes/class-hsw-checkout-fields.php:292
+msgid "روز تحویل"
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:233
+msgid "روز تحویل انتخاب‌شده معتبر نیست. صفحه را دوباره باز کنید و روز را انتخاب کنید."
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:143
+msgid "روز تحویل را انتخاب کنید"
+msgstr ""
+
 #: widgets/class-hsw-widget-checkout-schedule.php:91
 #: widgets/class-hsw-widget-checkout-schedule.php:349
 msgid "روز تحویل سفارش:"
@@ -7194,6 +7230,11 @@ msgstr ""
 msgid "زمان باقی‌مانده:"
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:347
+#: includes/class-hsw-checkout-fields.php:367
+msgid "زمان تحویل و فاکتور"
+msgstr ""
+
 #: includes/class-hsw-checkout-complete.php:635
 msgid "زمان تحویل: %s"
 msgstr ""
@@ -7300,6 +7341,18 @@ msgstr ""
 
 #: includes/class-hsw-assets.php:450
 msgid "سازگاری با قالب (فونت)"
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:192
+msgid "ساعت ۱۳ تا ۱۷"
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:193
+msgid "ساعت ۱۷ تا ۲۱"
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:191
+msgid "ساعت ۹ تا ۱۳"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:628
@@ -7605,6 +7658,7 @@ msgstr ""
 msgid "سه تنظیم سراسری که روی همهٔ ویجت‌ها اثر می‌گذارد."
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:163
 #: widgets/class-hsw-widget-checkout-schedule.php:268
 msgid "سه‌شنبه"
 msgstr ""
@@ -7894,6 +7948,7 @@ msgstr ""
 msgid "شناسهٔ تراکنش بیش از حد مجاز طولانی است."
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:167
 #: widgets/class-hsw-widget-checkout-schedule.php:272
 msgid "شنبه"
 msgstr ""
@@ -8967,6 +9022,10 @@ msgstr ""
 msgid "فاکتور فروش"
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:307
+msgid "فاکتور قانونی"
+msgstr ""
+
 #: includes/class-hsw-widget-manager.php:1152
 msgid "فاکتور چاپی و برچسب پستی"
 msgstr ""
@@ -8989,6 +9048,10 @@ msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:217
 msgid "فردا — ساعت ۱۴ الی ۱۸"
+msgstr ""
+
+#: includes/class-hsw-checkout-fields.php:176
+msgid "فردا، %s"
 msgstr ""
 
 #: includes/class-hsw-invoice.php:261
@@ -9502,7 +9565,7 @@ msgid "قیمت کالاها ({count} عدد)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:297
-#: widgets/class-hsw-widget-checkout-summary.php:560
+#: widgets/class-hsw-widget-checkout-summary.php:569
 msgid "قیمت کالاها ({count} قلم)"
 msgstr ""
 
@@ -9727,7 +9790,7 @@ msgid "مالیات بر ارزش افزوده (۱۰٪ محاسبه‌شده)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:167
-#: widgets/class-hsw-widget-checkout-summary.php:503
+#: widgets/class-hsw-widget-checkout-summary.php:512
 msgid "مالیات بر ارزش افزوده:"
 msgstr ""
 
@@ -9771,13 +9834,13 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-summary.php:642
 #: widgets/class-hsw-widget-checkout-summary.php:184
 #: widgets/class-hsw-widget-checkout-summary.php:333
-#: widgets/class-hsw-widget-checkout-summary.php:591
+#: widgets/class-hsw-widget-checkout-summary.php:600
 #: widgets/class-hsw-widget-pay-summary.php:306
 msgid "مبلغ قابل پرداخت"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:186
-#: widgets/class-hsw-widget-checkout-summary.php:517
+#: widgets/class-hsw-widget-checkout-summary.php:526
 #: widgets/class-hsw-widget-pay-summary.php:324
 msgid "مبلغ قابل پرداخت:"
 msgstr ""
@@ -9799,7 +9862,7 @@ msgid "مبلغ نهایی (کارت)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:324
-#: widgets/class-hsw-widget-checkout-summary.php:580
+#: widgets/class-hsw-widget-checkout-summary.php:589
 msgid "مبلغ نهایی سفارش"
 msgstr ""
 
@@ -10520,7 +10583,7 @@ msgid "مجموع خرید"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:176
-#: widgets/class-hsw-widget-checkout-summary.php:504
+#: widgets/class-hsw-widget-checkout-summary.php:513
 msgid "محاسبه در قیمت"
 msgstr ""
 
@@ -12128,7 +12191,7 @@ msgid "هزینه ارسال اکسپرس"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:315
-#: widgets/class-hsw-widget-checkout-summary.php:575
+#: widgets/class-hsw-widget-checkout-summary.php:584
 msgid "هزینه ارسال با پیک اختصاصی"
 msgstr ""
 
@@ -12143,7 +12206,7 @@ msgid "هزینه ارسال چقدر است و چند روزه به دستم م
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:148
-#: widgets/class-hsw-widget-checkout-summary.php:494
+#: widgets/class-hsw-widget-checkout-summary.php:503
 msgid "هزینه ارسال:"
 msgstr ""
 
@@ -13436,6 +13499,10 @@ msgstr ""
 msgid "پنج لینک سریع: خانه، فروشگاه، سبد خرید، علاقه‌مندی‌ها و حساب کاربری. فقط در موبایل/تبلت نمایش داده می‌شود."
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:165
+msgid "پنجشنبه"
+msgstr ""
+
 #: widgets/class-hsw-widget-checkout-schedule.php:270
 msgid "پنج‌شنبه"
 msgstr ""
@@ -13748,6 +13815,7 @@ msgstr ""
 msgid "چه چیزی محافظت نمی‌شود؟"
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:164
 #: widgets/class-hsw-widget-checkout-schedule.php:269
 msgid "چهارشنبه"
 msgstr ""
@@ -14760,6 +14828,7 @@ msgstr ""
 msgid "یک گفتگو انتخاب کنید"
 msgstr ""
 
+#: includes/class-hsw-checkout-fields.php:161
 #: widgets/class-hsw-widget-checkout-schedule.php:266
 msgid "یکشنبه"
 msgstr ""
