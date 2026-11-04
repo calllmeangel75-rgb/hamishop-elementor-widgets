@@ -110,9 +110,19 @@ class HSW_Checkout_Digital {
 		if ( WC()->cart->is_empty() ) {
 			return false;
 		}
-		if ( ! WC()->cart->needs_shipping() ) {
-			return true;
-		}
+
+		/*
+		 * Decide from the ITEMS, never from `needs_shipping()`.
+		 *
+		 * WooCommerce returns false from `needs_shipping()` before any filter
+		 * when the shop has no shipping method configured (`wc_shipping_enabled()`),
+		 * so the old `if ( ! needs_shipping() ) return true;` called every cart
+		 * "digital" on such a shop — a cart holding a physical product got the
+		 * «تحویل دیجیتال سفارش» notice and lost its address fields.
+		 *
+		 * It was also the call that made this method re-enter itself through the
+		 * `woocommerce_cart_needs_shipping` filter it registers.
+		 */
 		return self::cart_items_all_digital();
 	}
 

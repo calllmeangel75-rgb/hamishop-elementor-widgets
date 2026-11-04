@@ -385,15 +385,36 @@ document.addEventListener( 'click', function ( event ) {
 		}
 	}
 
+	/*
+	 * Never navigate to the page we are already on. A «لینک مرحله بعد» that
+	 * points at the checkout itself (an easy mistake: the field is called
+	 * "next step", and the payment section may live further down the same page)
+	 * used to reload the form and look like the button was dead.
+	 */
+	function isCurrentPage( url ) {
+		try {
+			var a = document.createElement( 'a' );
+			a.href = url;
+			var strip = function ( path ) { return path.replace( /\/+$/, '' ) || '/'; };
+			return a.origin === window.location.origin && strip( a.pathname ) === strip( window.location.pathname );
+		} catch ( e ) {
+			return false;
+		}
+	}
+
 	function continueToPayment() {
-		if ( hasPay && payUrl ) { window.location.href = payUrl; return; }
+		if ( hasPay && payUrl && ! isCurrentPage( payUrl ) ) { window.location.href = payUrl; return; }
 		placeOrder();
 	}
 
 	if ( has && ! open ) {
-		/* Address already saved: straight to the next step — or place the order
-		   when this shop has no separate pay page. */
-		if ( hasPay ) { return; }
+		/*
+		 * Address already saved: follow the link straight away — but only when it
+		 * actually goes somewhere else. A «لینک مرحله بعد» pointing at this same
+		 * page used to return here and let the browser reload the checkout, which
+		 * is exactly the "button goes back to itself" report.
+		 */
+		if ( hasPay && ! isCurrentPage( payUrl ) ) { return; }
 		event.preventDefault();
 		continueToPayment();
 		return;

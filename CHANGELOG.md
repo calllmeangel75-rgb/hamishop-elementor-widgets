@@ -8,6 +8,14 @@
 
 ## [Unreleased]
 
+## [1.11.237] — 2026-11-04
+
+### Fixed
+
+- «تحویل دیجیتال سفارش» appeared on a cart holding a physical product. `is_digital()` returned true whenever `WC()->cart->needs_shipping()` was false — and WooCommerce returns false *before any filter* on a shop with no shipping method configured, so every cart looked digital and the address form was trimmed to name + phone. It now decides from the cart items only.
+- The checkout CTA could still reload the page it was on: the self-navigation guard only ran in `continueToPayment()`, not in the early branch taken when the customer already has a saved address and the «next step» link points at the checkout itself.
+- The digital-checkout test now models `wc_shipping_enabled() = false` and uses a stub that extends `WC_Product` (the previous stub was rejected by `is_a()`, so the test passed for the wrong reason).
+
 ## [1.11.236] — 2026-11-04
 
 ### Fixed

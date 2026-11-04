@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.236
+Stable tag: 1.11.237
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.237 =
+* Fix: «تحویل دیجیتال سفارش» no longer appears on a cart that holds a physical product. `is_digital()` returned true whenever `WC()->cart->needs_shipping()` was false — which WooCommerce reports for every cart on a shop with no shipping method configured. It now decides from the cart items only.
+* Fix: The checkout CTA could still reload the page it was on when the customer already had a saved address and the «next step» link pointed at the checkout itself. The self-navigation guard now runs on every path.
+* The digital-checkout regression test now covers the shipping-disabled shop and uses a real `WC_Product` stub.
+
 = 1.11.236 =
 * Fix: The widget's own «لینک مرحله بعد» now counts as a next step. 1.11.233 only looked at «صفحهٔ پرداخت», so a shop that set the link on the summary widget had it ignored and the order was placed instead of navigating to the pay step.
 
@@ -87,9 +92,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.233 =
 * Fix: On a checkout with no separate payment page, «ادامه و ورود به مرحله پرداخت» linked to the checkout page itself, so the form reloaded and no order was ever placed. The button now submits the WooCommerce checkout in that case.
 * The same button still navigates to «صفحهٔ پرداخت» (or the widget's «لینک مرحله بعد») when one is configured.
-
-= 1.11.232 =
-* Fix: The upgrade job no longer queues a cron event. WP-Cron is spawned by front-end visits, so a tick ran while a customer was waiting; on a small host one heavy Elementor page could hold a PHP worker long enough for the pool to answer 503. The work now runs only on an admin page load, throttled to one tick every 30 seconds.
 
 == Upgrade Notice ==
 
