@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک با دارایی‌های لوکال و بارگذاری شرطی.
- * Version:     1.11.221
+ * Version:     1.11.222
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -77,7 +77,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.221' );
+define( 'HSW_VERSION', '1.11.222' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
@@ -254,6 +254,10 @@ if ( ! function_exists( 'hsw_deactivation_cleanup' ) ) {
                 /* Never leave a polling schedule behind once the plugin is off. */
                 wp_clear_scheduled_hook( 'hsw_tg_poll' );
                 wp_clear_scheduled_hook( 'hsw_throttle_prune' );
+                /* Background upgrade ticks must not outlive the plugin. */
+                if ( class_exists( 'HSW_Upgrader' ) ) {
+                        HSW_Upgrader::unschedule();
+                }
         }
         register_deactivation_hook( __FILE__, 'hsw_deactivation_cleanup' );
 }

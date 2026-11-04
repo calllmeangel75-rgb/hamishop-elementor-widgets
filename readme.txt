@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.11.221
+Stable tag: 1.11.222
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 4. در المنتور دستهٔ «حامی» را باز کنید و ویجت موردنظر (مثلاً «پنل حساب کاربری HamiShop») را بکشید.
 
 == Changelog ==
+
+= 1.11.222 =
+* Fix: Updates no longer take the site down. The Elementor cache flush and the stock migration used to run on `init` — i.e. inside the first visitor's request — and could return HTTP 503 for several minutes on a shared host.
+* Fix: The element-cache flush is now a background job with a 2s budget, a lock and a resumable cursor. It runs from WP-Cron, or from an admin page load when cron is unavailable. Never from a customer request.
+* Fix: Only pages that actually contain HamiShop widgets have their Elementor CSS rebuilt, one batch at a time, instead of `files_manager->clear_cache()` wiping the whole site.
+* Fix: Page caches are purged per affected URL. The site-wide purge is now opt-in (`hsw_upgrader_full_purge`).
+* Fix: The stock migration is batched (200 products per query) and resumes after a timeout or a fatal instead of walking 2000 products in one request.
+* Fix: A failed step is logged, retried twice, then skipped — the site keeps working and the merchant gets a notice on the HamiShop dashboard.
 
 = 1.11.221 =
 * Fix: The header now obeys the site palette. Eleven colour controls carried hard-coded defaults that Elementor printed into the page CSS, so a saved header kept its blue/grey values and the palette never reached it.

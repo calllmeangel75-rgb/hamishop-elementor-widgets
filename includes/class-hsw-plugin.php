@@ -77,7 +77,8 @@ final class HSW_Plugin {
                  * registers, and ours was never registered.
                  */
                 add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'cart_fragments' ) );
-                add_action( 'init', array( $this, 'maybe_flush_element_cache' ) );
+                /* Versioned background work (Elementor caches + data migrations). */
+                HSW_Upgrader::instance();
 
                 /*
                  * Tell WooCommerce this plugin is HPOS-safe. Every order is read
@@ -90,9 +91,6 @@ final class HSW_Plugin {
 
                 /* Loop cards use one dedicated, cropped size instead of `full`. */
                 add_action( 'after_setup_theme', array( __CLASS__, 'register_image_sizes' ), 20 );
-
-                /* Versioned, one-time data work (see migrate()). */
-                add_action( 'init', array( __CLASS__, 'migrate' ), 5 );
 
                 /*
                  * The "sold" stock bar needs a baseline; record it the first
@@ -263,32 +261,72 @@ final class HSW_Plugin {
                 exit;
         }
 
-        public static function migrate() {
-                $target  = '1';
-                $current = (string) get_option( 'hsw_db_version', '0' );
+        /**
+         * One batch of the v1 data migration.
+         *
+         * v1 — seed `_hsw_initial_stock` for managed products that predate the
+         *      "sold" stock bar, so the bar has an honest baseline instead of a
+         *      percentage invented from `total_sales`; and drop the loop query
+         *      transients once, because their shape changed with the baseline.
+         *
+         * Called only by HSW_Upgrader, in bounded batches, from a background
+         * tick. It used to run from `init` and walked up to 2000 products on the
+         * first visitor's request after an update — a single slow query plus
+         * 2000 meta writes on a shared host.
+         *
+         * @param int $after_id Return products with an ID greater than this.
+         * @param int $limit    Products per call.
+         * @return array{cursor:int,done:bool}
+         */
+        public static function migrate_batch( $after_id = 0, $limit = 200 ) {
+                $target = '1';
 
-                if ( version_compare( $current, $target, '>=' ) ) {
-                        return;
+                if ( version_compare( (string) get_option( 'hsw_db_version', '0' ), $target, '>=' ) ) {
+                        return array(
+                                'cursor' => (int) $after_id,
+                                'done'   => true,
+                        );
                 }
 
                 global $wpdb;
 
+                $limit = max( 1, min( 500, (int) $limit ) );
+
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
                 $ids = $wpdb->get_col(
-                        "SELECT p.ID FROM {$wpdb->posts} p
-                         INNER JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = '_manage_stock' AND s.meta_value = 'yes'
-                         LEFT JOIN {$wpdb->postmeta} i ON i.post_id = p.ID AND i.meta_key = '_hsw_initial_stock'
-                         WHERE p.post_type IN ('product','product_variation') AND p.post_status = 'publish' AND i.meta_id IS NULL
-                         LIMIT 2000"
+                        $wpdb->prepare(
+                                "SELECT p.ID FROM {$wpdb->posts} p
+                                 INNER JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = '_manage_stock' AND s.meta_value = 'yes'
+                                 LEFT JOIN {$wpdb->postmeta} i ON i.post_id = p.ID AND i.meta_key = '_hsw_initial_stock'
+                                 WHERE p.post_type IN ('product','product_variation') AND p.post_status = 'publish'
+                                   AND p.ID > %d AND i.meta_id IS NULL
+                                 ORDER BY p.ID ASC
+                                 LIMIT %d",
+                                (int) $after_id,
+                                $limit
+                        )
                 );
 
-                foreach ( (array) $ids as $id ) {
+                $ids = is_array( $ids ) ? $ids : array();
+
+                foreach ( $ids as $id ) {
                         HSW_Helpers::remember_initial_stock( (int) $id );
+                        $after_id = (int) $id;
                 }
 
-                /* Loop ID lists and HTML fragments are rebuilt on next render. */
-                $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_hsw_lp_%' OR option_name LIKE '_transient_timeout_hsw_lp_%' OR option_name LIKE '_transient_hsw_loop_%' OR option_name LIKE '_transient_timeout_hsw_loop_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+                $done = count( $ids ) < $limit;
 
-                update_option( 'hsw_db_version', $target, false );
+                if ( $done ) {
+                        /* Loop ID lists and HTML fragments are rebuilt on next render. */
+                        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_hsw_lp_%' OR option_name LIKE '_transient_timeout_hsw_lp_%' OR option_name LIKE '_transient_hsw_loop_%' OR option_name LIKE '_transient_timeout_hsw_loop_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+                        update_option( 'hsw_db_version', $target, false );
+                }
+
+                return array(
+                        'cursor' => (int) $after_id,
+                        'done'   => $done,
+                );
         }
 
         /**
@@ -307,79 +345,6 @@ final class HSW_Plugin {
                         return;
                 }
                 \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', HSW_FILE, true );
-        }
-
-        /**
-         * Drop Elementor's cached element HTML and generated CSS whenever the
-         * plugin version moves.
-         *
-         * Elementor stores the finished HTML of every element in
-         * `_elementor_element_cache` and, on a cache hit, skips the render pass
-         * entirely — including `elementor/widget/render_content`, which is where
-         * the icon-name guard lives. Without this flush an updated plugin keeps
-         * serving yesterday's markup, so a fixed icon (or any other template
-         * change) would never appear on an existing page.
-         *
-         * Runs once per version. The work is sliced so a huge postmeta table is
-         * never locked by one long DELETE, but the flush completes inside a single
-         * request and the marker always moves afterwards.
-         *
-         * Spreading the slices across requests does NOT work: Elementor re-caches
-         * every element it renders, so the next request finds a freshly populated
-         * table, deletes it again, and the marker never reaches the current
-         * version — the element cache would stay permanently disabled.
-         *
-         * The generated post CSS is cleared in the same pass. Removing a control
-         * (as with the 1.11.151 palette cleanup) does not rewrite CSS that was
-         * already generated from its saved value, so without this flush an old
-         * per-widget palette could keep overriding the dashboard palette.
-         */
-        public function maybe_flush_element_cache() {
-                if ( HSW_VERSION === get_option( 'hsw_asset_version' ) ) {
-                        return;
-                }
-
-                global $wpdb;
-
-                $started = microtime( true );
-                $slices  = 0;
-                $deleted = 0;
-
-                do {
-                        $deleted = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = '_elementor_element_cache' LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-                        $slices++;
-                } while (
-                        is_int( $deleted ) && $deleted > 0
-                        && $slices < 50
-                        && ( microtime( true ) - $started ) < 5
-                );
-
-                /*
-                 * 1.11.151 removed the per-widget palette controls. Their saved
-                 * `pal_*` values can still be present in old templates, and
-                 * Elementor may keep the generated post CSS (including those
-                 * wrapper-level variables) until its files are regenerated.
-                 * Clear Elementor's CSS cache once per plugin version so those
-                 * stale overrides stop applying and every widget falls back to
-                 * HamiShop → پالت رنگی.
-                 */
-                $css_cleared = true;
-                if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->files_manager ) ) {
-                        try {
-                                \Elementor\Plugin::$instance->files_manager->clear_cache();
-                        } catch ( \Throwable $e ) {
-                                $css_cleared = false;
-                                hsw_report_fatal( $e, 'elementor-css-clear' );
-                        }
-                }
-
-                /* A failed query leaves the marker alone so the next request retries. */
-                if ( false !== $deleted && $css_cleared ) {
-                        update_option( 'hsw_asset_version', HSW_VERSION, false );
-                        /* Elementor's CSS was regenerated; an optimizer holding the old
-                        * combined/UCSS copy must not keep serving it. */
-                        HSW_Optimizer::purge( 'HamiShop: assets regenerated for ' . HSW_VERSION );
-                }
         }
 
         /**
@@ -495,6 +460,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-account-admin.php';
                 require_once HSW_DIR . 'includes/class-hsw-widget-manager.php';
                 require_once HSW_DIR . 'includes/class-hsw-palette.php';
+                require_once HSW_DIR . 'includes/class-hsw-upgrader.php';
 
                 /* Archive filter/sort query wiring (real WooCommerce params). */
                 new HSW_Archive_Query();
