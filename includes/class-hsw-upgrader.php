@@ -56,6 +56,10 @@ final class HSW_Upgrader {
 	/** Seconds between two admin-triggered ticks. */
 	const THROTTLE_GAP = 30;
 
+	/** Seconds between two ticks. Long enough that a rebuild burst never overlaps
+	 *  with the next one on a small PHP-FPM pool. */
+	const RESCHEDULE_GAP = 45;
+
 	/** Seconds of work one tick may spend. */
 	const BUDGET = 2.0;
 
@@ -69,7 +73,7 @@ final class HSW_Upgrader {
 	const DELETE_ROWS = 1500;
 
 	/** Posts inspected per query. */
-	const POSTS_PER_QUERY = 150;
+	const POSTS_PER_QUERY = 40;
 
 	/** Products seeded per query. */
 	const PRODUCTS_PER_QUERY = 200;
@@ -165,7 +169,7 @@ final class HSW_Upgrader {
 		if ( wp_next_scheduled( self::CRON_HOOK ) ) {
 			return;
 		}
-		wp_schedule_single_event( time() + 30, self::CRON_HOOK );
+		wp_schedule_single_event( time() + self::RESCHEDULE_GAP, self::CRON_HOOK );
 	}
 
 	/**
@@ -409,11 +413,18 @@ final class HSW_Upgrader {
 	/**
 	 * Step 2 — rebuild Elementor CSS for the pages that use HamiShop widgets.
 	 *
-	 * The old code called `files_manager->clear_cache()`, which deletes the
-	 * generated CSS of EVERY Elementor page on the site. Every one of those pages
-	 * then had to regenerate its CSS on the next view — all at once, on a cold
-	 * page cache. Only pages that actually contain an `hsw-` widget need that
-	 * work, and they are handled a few at a time.
+	 * Two earlier designs both failed in production:
+	 *
+	 *   1. `files_manager->clear_cache()` deleted the CSS of EVERY Elementor page
+	 *      and purged every URL — the 1.11.220 outage.
+	 *   2. Deleting the CSS of the affected pages only, and letting the next
+	 *      visitor rebuild it, still opened a cold window: on 1.11.223 a live shop
+	 *      answered nginx 503 for a few minutes while PHP workers regenerated
+	 *      dozens of files at once (the rebuilt files are stamped 04:27–04:30).
+	 *
+	 * So the CSS is not deleted at all. `update()` parses the page and rewrites
+	 * the file in this same background tick, one post at a time. There is never a
+	 * moment when a page has no stylesheet, and no visitor ever pays for the work.
 	 *
 	 * @param array $state    Job state, by reference.
 	 * @param float $deadline Absolute microtime.
@@ -450,10 +461,22 @@ final class HSW_Upgrader {
 
 				/* Cheap substring test: a false positive only costs one rebuild. */
 				if ( false === strpos( (string) $row->meta_value, 'hsw-' ) ) {
+					$state['cursor'] = $cursor;
 					continue;
 				}
 
-				self::drop_post_css( $post_id );
+				self::rebuild_post_css( $post_id );
+
+				/*
+				 * Rebuilding is far heavier than deleting was, so the budget has
+				 * to be enforced per post, not per query: one query of 40 posts
+				 * could otherwise run for ten seconds in a single tick.
+				 */
+				$state['cursor'] = $cursor;
+
+				if ( microtime( true ) >= $deadline ) {
+					return false; // Resume after this post on the next tick.
+				}
 			}
 
 			$state['cursor'] = $cursor;
@@ -510,16 +533,27 @@ final class HSW_Upgrader {
 	}
 
 	/**
-	 * Delete one post's generated CSS and refresh its page cache.
+	 * Rewrite one post's generated CSS in place, then refresh its page caches.
+	 *
+	 * `update()` runs Elementor's own parser and writes the file immediately, so
+	 * the stylesheet is never missing. If it throws (corrupt data, a plugin
+	 * conflict), the file is deleted instead and Elementor rebuilds it on the next
+	 * view — a small cold window is still better than leaving stale CSS forever.
 	 *
 	 * @param int $post_id Post id.
 	 * @return void
 	 */
-	private static function drop_post_css( $post_id ) {
+	private static function rebuild_post_css( $post_id ) {
+		$rebuilt = false;
+
 		try {
 			if ( self::can_rebuild_css() && method_exists( '\Elementor\Core\Files\CSS\Post', 'create' ) ) {
 				$file = \Elementor\Core\Files\CSS\Post::create( $post_id );
-				if ( $file && method_exists( $file, 'delete' ) ) {
+
+				if ( $file && method_exists( $file, 'update' ) ) {
+					$file->update();
+					$rebuilt = true;
+				} elseif ( $file && method_exists( $file, 'delete' ) ) {
 					$file->delete();
 				}
 			}
@@ -529,13 +563,25 @@ final class HSW_Upgrader {
 			}
 		}
 
-		/* Elementor also keeps a meta flag; without this it may serve the old file. */
-		delete_post_meta( $post_id, '_elementor_css' );
+		/*
+		 * Only when the in-place rebuild did not happen: Elementor caches a
+		 * "this file is current" flag in post meta, and leaving it would serve the
+		 * old stylesheet forever.
+		 */
+		if ( ! $rebuilt ) {
+			delete_post_meta( $post_id, '_elementor_css' );
+		}
 
 		/* Purge this URL only — never the whole site. */
 		$url = get_permalink( $post_id );
+
 		if ( $url ) {
 			do_action( 'litespeed_purge_url', $url );
+		}
+
+		/* WP Rocket keeps its own per-post cache. */
+		if ( function_exists( 'rocket_clean_post' ) ) {
+			rocket_clean_post( $post_id );
 		}
 	}
 

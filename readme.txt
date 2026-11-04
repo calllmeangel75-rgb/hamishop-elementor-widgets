@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.223
+Stable tag: 1.11.224
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,12 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.224 =
+* Fix: The upgrade job no longer deletes Elementor CSS and waits for a visitor to rebuild it. On a live shop that cold window saturated PHP-FPM and nginx answered 503 for several minutes (reported on 1.11.223).
+* Fix: Each affected page's CSS is now rewritten in place, one post per step, inside the background tick — the stylesheet is never missing.
+* Fix: The per-tick time budget is enforced per post, not per query, so a batch of 40 pages can no longer run for ten seconds in one request.
+* Fix: WP Rocket's per-post cache is purged for the pages that were rebuilt.
+
 نسخه‌های جدیدتر در این فایل؛ تاریخچهٔ کامل ۲۴۰ نسخه در `CHANGELOG.md` مخزن.
 
 = 1.11.223 =
@@ -101,27 +107,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Feature: Modernize checkout input fields with crisp leading micro-icons (name, phone, email, state, city, address, postcode).
 * Feature: Modernize digital delivery notice banner and customer credentials card with edit drawer.
 * Feature: Support optional email field in digital checkout for order download links.
-
-= 1.11.219 =
-* Feature: Modernize checkout address fields, select dropdowns, labels, and textarea with sleek elevation, rounded borders, and smooth focus glow.
-* Feature: Modernize discount coupon forms in cart, checkout, and pay pages with unified capsule input-groups and chip-styled applied coupon tags.
-* Fix: Address submit button (`.hsw-ckaddr__fsubmit`) background transparency override by button reset rule in checkout CSS.
-* Feature: High-specificity Elementor style controls for address submit button normal and hover background/text colors (`fsubmit_bg`, `fsubmit_c`, `fsubmit_bg_hover`, `fsubmit_c_hover`).
-* Feature: Add customizable button text control (`fsubmit_label`) for address submit button in both standalone and composite checkout widgets.
-* Fix: Rebuild minified cart and checkout stylesheets.
-
-= 1.11.218 =
-* Fix: رفع خطای `403 Forbidden` روی `wp-comments-post.php` هنگام ثبت نظر در مقالات (`.hsw-pp__form`) و ثبت دیدگاه و امتیاز در صفحه محصول (`.hsw-review-form`) برای کاربران مهمان و مشتریان واردشده؛ ارسال نظرات اکنون به‌صورت ایجکسی از طریق `admin-ajax.php` (`hsw_submit_comment`) همراه با پیام وضعیت درجا و پشتیبان `admin-post.php` انجام می‌شود.
-* Fix: خنثی‌سازی کامل رنگ صورتی هاور قالب Hello Elementor (`#c36`) روی دکمه‌های ثبت دیدگاه و ثبت نظر (`.hsw-pp__submit`، `.hsw-pp__seclink`، `.hsw-review-submit`).
-* UI: تغییر آیکن دکمه‌های سبد خرید در گرید آرشیو محصولات (`.hsw-ag__cta.hsw-d` و `.hsw-ag__cta--m.hsw-m`) به آیکن خطی و تمیز اختصاصی `shopping_cart` (همسان با کارت‌های لوپ).
-
-= 1.11.211 =
-* Fix: دریافت آنی پیام‌های ربات تلگرام (`poll_now`) بدون نادیده‌گرفتن اولین آپدیت (`offset = 0`) و بدون حذف پیام‌های در صف هنگام `deleteWebhook`؛ نمایش لینک مستقیم اتصال ربات تلگرام در فرم ورود و ثبت‌نام و پشتیبانی از اتصال توکنی `/start <token>` در تأیید دوعاملی.
-* Fix: اعمال مستقیم رنگ عنوان هدر (`.hsw-loop__title`)، زیرعنوان و نام محصول (`.hsw-loop__name`) در کروسل‌های لوپ (شگفت‌انگیز، پرفروش‌ترین‌ها و محبوب‌ترین‌ها) و خنثی‌سازی کامل رنگ صورتی پیش‌فرض قالب Hello Elementor (`rgb(204, 51, 102)` / `#c36`) در تمام ویجت‌ها.
-* New: نمایش توضیحات دسته‌بندی نوشته‌ها (`term_description`) در پایین صفحه آرشیو وبلاگ و گرید مقالات (همراه با تشخیص خودکار آرشیو دستهٔ وردپرس و کنترل‌های استایل اختصاصی).
-* SEO: حذف تگ‌های `<a href="#...">` از فهرست مطالب سایدبار تک‌نوشته (`.hsw-pp__side` / `.hsw-pp__sidelink`) و تغییر پیش‌فرض فهرست مطالب درون‌متنی به حالت بدون لینک لنگر (`button` + `data-nosnippet`) برای جلوگیری از هدررفت بودجه خزش (Crawl Budget).
-* Fix: تولید خودکار تاریخ‌های واقعی شمسی (`HSW_Jalali`) در ویجت انتخاب زمان تحویل تسویه‌حساب با امکان غیرفعال‌سازی کامل بخش، و خواندن زمان انتخابی واقعی از سشن ووکامرس در صفحه پرداخت.
-* UI: یکپارچه‌سازی آیکن (`add_shopping_cart`)، ابعاد و استایل دکمه‌های سبد خرید آرشیو محصولات (`.hsw-ag__cta.hsw-d` و `.hsw-ag__cta--m.hsw-m`) بین محصولات ساده و متغیر.
 
 == Upgrade Notice ==
 

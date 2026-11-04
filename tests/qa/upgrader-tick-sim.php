@@ -123,8 +123,36 @@ class HSW_Fake_WPDB {
 		return null;
 	}
 
+	/** post_id => _elementor_data, for the CSS step. */
+	public $elementor_rows = array();
+
 	public function get_results( $sql ) {
 		$this->queries++;
+
+		if ( false !== strpos( $sql, '_elementor_data' ) ) {
+			if ( preg_match( '/post_id > (\d+)/', $sql, $m ) ) {
+				$after = (int) $m[1];
+			} else {
+				$after = 0;
+			}
+			if ( preg_match( '/LIMIT (\d+)/', $sql, $m ) ) {
+				$limit = (int) $m[1];
+			} else {
+				$limit = 100;
+			}
+
+			$out = array();
+			foreach ( $this->elementor_rows as $id => $data ) {
+				if ( $id > $after ) {
+					$out[] = (object) array( 'post_id' => $id, 'meta_value' => $data );
+				}
+				if ( count( $out ) >= $limit ) {
+					break;
+				}
+			}
+			return $out;
+		}
+
 		return array();
 	}
 
@@ -269,6 +297,50 @@ while ( HSW_VERSION !== get_option( 'hsw_asset_version' ) && $guard < 40 ) {
 
 check( 'fresh rows written after the start survive', isset( $GLOBALS['wpdb']->cache_rows[ 999999 ] ) );
 check( 'stale rows are gone', 1 === count( $GLOBALS['wpdb']->cache_rows ), count( $GLOBALS['wpdb']->cache_rows ) . ' rows left' );
+
+
+/* --- 6. the CSS step must rebuild in place, never delete -------------------
+ *
+ * 1.11.223 deleted each page's Elementor CSS and let the next visitor rebuild
+ * it; on a live shop that cold window exhausted PHP-FPM and nginx answered 503.
+ * This locks the replacement in: update() only, delete() never.
+ */
+eval( 'namespace Elementor\Core\Files\CSS; class Post {
+	public static $updates = 0;
+	public static $deletes = 0;
+	public static $ids = array();
+	private $id;
+	private function __construct( $post_id ) { $this->id = $post_id; }
+	public static function create( $post_id = 0 ) { return new self( $post_id ); }
+	public function update() { self::$updates++; self::$ids[] = $this->id; }
+	public function delete() { self::$deletes++; }
+}' );
+
+delete_option( 'hsw_asset_version' );
+delete_option( 'hsw_upgrader_state' );
+$GLOBALS['wpdb']->cache_rows = array();
+$GLOBALS['wpdb']->query_delay_ms = 0;
+$GLOBALS['wpdb']->fail_next = 0;
+$GLOBALS['wpdb']->elementor_rows = array(
+	11 => '{"widgetType":"hsw-header-store"}',
+	12 => '{"widgetType":"heading"}',
+	13 => '{"widgetType":"hsw-product-page"}',
+	14 => '{"widgetType":"text-editor"}',
+	15 => '{"widgetType":"hsw-cart-page"}',
+);
+
+$upgrader->run();
+$guard = 0;
+while ( HSW_VERSION !== get_option( 'hsw_asset_version' ) && $guard < 40 ) {
+	unset( $GLOBALS['hsw_scheduled']['hsw_upgrader_tick'] );
+	$upgrader->run();
+	$guard++;
+}
+
+$css = '\Elementor\Core\Files\CSS\Post';
+check( 'CSS rebuilt in place, never deleted', 0 === $css::$deletes, $css::$deletes . ' delete() calls' );
+check( 'one rebuild per HamiShop page', 3 === $css::$updates, $css::$updates . ' update() calls' );
+check( 'pages without hsw- widgets are skipped', ! in_array( 12, $css::$ids, true ) && ! in_array( 14, $css::$ids, true ) );
 
 echo "\n=== " . ( $fails ? $fails . ' check(s) failed' : 'all checks passed' ) . " ===\n";
 exit( $fails ? 1 : 0 );

@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+## [1.11.224] — 2026-11-04
+
+### Fixed
+
+- The upgrade job no longer deletes Elementor CSS and leaves the rebuild to the next visitor. On a live shop that cold window saturated PHP-FPM and nginx answered `503 Service Unavailable` for several minutes after the 1.11.223 update; the rebuilt files were stamped 04:27–04:30 UTC, exactly inside the outage.
+- Each affected page's CSS is rewritten in place, one post at a time, inside the background tick (`Post::update()`), so the stylesheet is never missing and no visitor pays for the work.
+- The per-tick time budget is now enforced per post instead of per query. A batch of 40 pages could previously run for ten seconds inside a single request.
+- WP Rocket's per-post cache is purged for the pages that were rebuilt.
+
 ## [1.11.223] — 2026-11-04
 
 ### Added
