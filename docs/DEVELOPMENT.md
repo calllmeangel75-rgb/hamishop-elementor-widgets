@@ -115,22 +115,52 @@ class HSW_Widget_My_Thing extends HSW_Product_Base {
 
 ## فرآیند ریلیز
 
+ترتیب مهم است: **اول تست و CI سبز، بعد فایل‌های تولیدشده، بعد کامیت، بعد تگ، بعد ZIP، بعد Release.** اگر تگ را قبل از کامیت نهایی بزنید، تگ عقب می‌ماند و باید جابه‌جا شود.
+
 ```
-[ ] نسخه در hamishop-elementor-widgets.php (هدر + HSW_VERSION)
-[ ] Stable tag در readme.txt
-[ ] ورودی جدید در CHANGELOG.md (و ۵ نسخهٔ آخر readme.txt)
-[ ] RELEASE-NOTES-<ver>.md (اگر تغییر بزرگ است)
-[ ] python tools/build-assets.py
-[ ] python tools/build-pot.py
-[ ] php tools/ci-checks.php      → 16 checks, all passed
-[ ] php tests/harness.php        → ALL CLEAN
-[ ] پروب‌های مرتبط روی سایت تست
-[ ] git commit + tag v<ver> + push
-[ ] python tools/build-release.py → ZIP
-[ ] GitHub Release با متن CHANGELOG و ZIP به‌عنوان asset
+۱) نسخه را بالا ببرید
+   [ ] hamishop-elementor-widgets.php  (هدر Version + define HSW_VERSION)
+   [ ] readme.txt                       (Stable tag)
+   [ ] CHANGELOG.md                     (بخش نسخهٔ جدید، جدیدترین بالا)
+   [ ] readme.txt                       (۵ نسخهٔ آخر خلاصه)
+   [ ] docs/archive/release-notes/RELEASE-NOTES-<ver>.md  (اگر تغییر بزرگ است)
+
+۲) تست و CI — دروازهٔ عبور
+   [ ] php tools/ci-checks.php                 → all checks passed
+   [ ] php tests/harness.php                   → ALL CLEAN
+   [ ] php tests/qa/upgrader-tick-sim.php      → all checks passed
+   [ ] تست‌های DB (نیازمند MySQL/MariaDB):
+       export HSW_QA_DSN="mysql:host=127.0.0.1;dbname=hsw_qa"
+       export HSW_QA_USER=… HSW_QA_PASS=…
+       php tests/qa/sql-compat.php             → PASS=N FAIL=0
+       HSW_QA_DSN=… php tests/qa/remediation.php → 0 failed
+   [ ] پروب‌های مرورگری مرتبط روی سایت تست
+   [ ] CI روی شاخه سبز است — تا سبز نشود، جلو نروید
+
+۳) فایل‌های تولیدشده
+   [ ] python tools/build-assets.py            (min تازه)
+   [ ] python tools/build-pot.py               (POT تازه)
+   [ ] python tools/gen-widget-docs.py         (اگر ویجتی اضافه/حذف شد)
+   [ ] git status باید فقط همان فایل‌های مورد انتظار را نشان بدهد
+
+۴) کامیت
+   [ ] git add -A && git commit                (کامیت آخر قبل از تگ)
+
+۵) تگ — روی همان کامیت نهایی
+   [ ] git tag -a v<ver> -m "…"
+   [ ] git rev-parse main  ==  git rev-parse v<ver>^{commit}   ← باید برابر باشند
+
+۶) ZIP
+   [ ] python tools/build-release.py           → ../hamishop-elementor-widgets-<ver>.zip
+   [ ] بررسی محتوا: بدون docs/ ، tests/ ، tools/
+
+۷) انتشار
+   [ ] git push origin main && git push origin v<ver>
+   [ ] gh release create v<ver> <zip> --title "…" --notes-file <body>
+   [ ] مقایسهٔ sha256 فایل محلی با digest داراییِ Release
 ```
 
-`tools/build-release.py` با **لیست سفید** کار می‌کند: فقط `hamishop-elementor-widgets.php`، `uninstall.php`، `readme.txt`، `README.md`، `LICENSE`، یادداشت همان نسخه و پوشه‌های `assets/`، `includes/`، `widgets/`، `templates/`، `languages/` وارد ZIP می‌شوند. `docs/`، `tests/` و `tools/` هرگز داخل بستهٔ نصبی نمی‌روند.
+> **اگر بعد از تگ کامیت جدیدی زدید، تگ عقب می‌ماند.** آن را جابه‌جا کنید (`git tag -f`)، ZIP را بازبسازید و با `gh release upload --clobber` دوباره بفرستید — وگرنه داراییِ Release با `main` یکی نیست.
 
 ## گیت
 
