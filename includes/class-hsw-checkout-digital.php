@@ -26,6 +26,9 @@ class HSW_Checkout_Digital {
 	 *
 	 * @var string[]
 	 */
+	/** Guards `is_digital()` against its own filter. */
+	private static $resolving = false;
+
 	const ADDRESS_FIELDS = array(
 		'billing_company',
 		'billing_country',
@@ -67,6 +70,37 @@ class HSW_Checkout_Digital {
 	 * @return bool
 	 */
 	public static function is_digital() {
+		/*
+		 * Re-entrancy guard. This method asks `WC()->cart->needs_shipping()`,
+		 * which applies `woocommerce_cart_needs_shipping` — and that filter is
+		 * this class's own `filter_cart_needs_shipping()`, which calls
+		 * `is_digital()` again. Unbounded recursion: the request died with a
+		 * stack overflow, which PHP cannot log, and LiteSpeed answered 503 with
+		 * no trace in error_log. It only happened once the cart had an item in
+		 * it, so an empty cart (every crawler, every page view) looked fine.
+		 *
+		 * A nested call answers "not digital" and lets the real filter value
+		 * through; the outer call then decides with a complete answer.
+		 */
+		if ( self::$resolving ) {
+			return false;
+		}
+
+		self::$resolving = true;
+
+		try {
+			return self::resolve_digital();
+		} finally {
+			self::$resolving = false;
+		}
+	}
+
+	/**
+	 * The actual test, kept separate so the guard above stays readable.
+	 *
+	 * @return bool
+	 */
+	private static function resolve_digital() {
 		if ( ! self::enabled() ) {
 			return false;
 		}

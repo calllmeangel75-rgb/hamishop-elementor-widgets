@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+## [1.11.234] — 2026-11-04
+
+### Fixed
+
+- **Critical.** `HSW_Checkout_Digital::is_digital()` asks `WC()->cart->needs_shipping()`, which applies `woocommerce_cart_needs_shipping` — the very filter this class registers, whose callback calls `is_digital()` again. Unbounded recursion. With an item in the cart the request died (stack/memory) and LiteSpeed answered `503` with nothing in `error_log`; with an empty cart — every crawler, every page view — everything looked fine. That is why it only broke on add-to-cart and checkout, and only for a session with a cart.
+- A re-entrancy guard breaks the loop; `tests/qa/digital-checkout-sim.php` reproduces the original crash and now runs in CI.
+- A mixed cart (physical + downloadable) no longer shows «تحویل دیجیتال سفارش»: the notice now appears only when no item needs shipping.
+- «ادامه و ورود به مرحله پرداخت» falls back to `form.checkout` / `form[name="checkout"]` when `#place_order` is absent, and stays put instead of reloading the checkout.
+
 ## [1.11.233] — 2026-11-04
 
 ### Fixed

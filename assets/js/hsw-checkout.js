@@ -354,8 +354,20 @@ document.addEventListener( 'click', function ( event ) {
 	function placeOrder() {
 		var place = document.getElementById( 'place_order' );
 		if ( place ) { place.click(); return; }
-		var checkoutForm = document.querySelector( 'form.checkout' );
-		if ( checkoutForm && checkoutForm.requestSubmit ) { checkoutForm.requestSubmit(); }
+
+		/*
+		 * Some checkouts are built from our parts only and never render
+		 * WooCommerce's own button, so fall back to the form itself. `submit()`
+		 * is deliberately not used: it skips WooCommerce's validation and the
+		 * payment-method check, which posts a half-filled order.
+		 */
+		var checkoutForm = document.querySelector( 'form.checkout, form[name="checkout"], .woocommerce-checkout form' );
+		if ( checkoutForm && checkoutForm.requestSubmit ) { checkoutForm.requestSubmit(); return; }
+
+		/* Nothing to submit: stay put rather than reload the page we are on. */
+		if ( window.console && console.warn ) {
+			console.warn( '[HamiShop] No checkout form found; the order was not placed.' );
+		}
 	}
 
 	function continueToPayment() {

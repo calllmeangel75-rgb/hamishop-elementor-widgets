@@ -100,6 +100,12 @@ jobs:
       - name: Jalali + number_words
         run: php tests/unit/run.php
 
+      # The digital-checkout filter used to call itself through
+      # woocommerce_cart_needs_shipping: an unbounded recursion that killed the
+      # request once the cart had an item in it. This guard needs no database.
+      - name: digital checkout recursion guard
+        run: php tests/qa/digital-checkout-sim.php
+
   sqlengines:
     name: SQL compatibility (MySQL 8 + MariaDB, strict)
     runs-on: ubuntu-latest

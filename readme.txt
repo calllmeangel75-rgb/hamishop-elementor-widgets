@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.233
+Stable tag: 1.11.234
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.234 =
+* Fix (critical): `HSW_Checkout_Digital::is_digital()` called itself through the `woocommerce_cart_needs_shipping` filter it registers. With an item in the cart that recursed until the request died — the 503 on add-to-cart and checkout, with nothing in error_log. A re-entrancy guard breaks the loop; a regression test runs in CI.
+* Fix: A mixed cart (physical + downloadable) no longer shows «تحویل دیجیتال سفارش». The notice only appears when every item needs no shipping.
+* Fix: «ادامه و ورود به مرحله پرداخت» falls back to the checkout form when WooCommerce's `#place_order` is not on the page, and never reloads the page it is on.
+
 = 1.11.233 =
 * Fix: On a checkout with no separate payment page, «ادامه و ورود به مرحله پرداخت» linked to the checkout page itself, so the form reloaded and no order was ever placed. The button now submits the WooCommerce checkout in that case.
 * The same button still navigates to «صفحهٔ پرداخت» (or the widget's «لینک مرحله بعد») when one is configured.
@@ -87,12 +92,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.230 =
 * Fix: The background job can now be switched off entirely with `define( 'HSW_UPGRADER_OFF', true );` in wp-config.php — for shops whose host enforces tight CPU/entry-process limits and answers 503 on the front end while wp-admin still works.
 * Fix: Pages with more than 1 MB of Elementor data are skipped when rebuilding CSS. Parsing one of those inside a single cron request can exceed a shared host's memory cap and get the process killed.
-
-= 1.11.229 =
-* Fix (CLS): the subcategory pill row no longer wraps. When the theme font finished loading the row grew from 33px to 74px and pushed the page down — a single 0.2327 layout shift, which was the entire CLS of the shop page.
-* Fix (a11y): the category tree's items now carry `role="treeitem"` and `aria-level`, so `role="tree"` finally has the children it requires.
-* Fix (a11y): the closed mobile drawer is `inert`, so its links are no longer focusable inside an `aria-hidden` container.
-* Fix (a11y): small text (price labels, search select, guide answers, stock notes) uses AA-safe palette variants derived at render time, so a muted colour that lands at 4.39:1 on the merchant's surface is darkened to 4.5:1 instead of failing.
 
 == Upgrade Notice ==
 
