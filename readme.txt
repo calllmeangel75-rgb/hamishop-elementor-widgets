@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.230
+Stable tag: 1.11.231
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.231 =
+* Fix: A real PHP fatal (uncaught Error, memory exhaustion, max_execution_time) now leaves a trace. A shutdown handler writes `[HSW/fatal] … — file.php:line` to the error log and, when the file belongs to this plugin, to the dashboard's «آخرین خطای ثبت‌شده».
+* Why: on a live shop the PHP log held only notices while uncached pages answered 503, so there was no way to tell a plugin fatal from a server-side kill.
+
 = 1.11.230 =
 * Fix: The background job can now be switched off entirely with `define( 'HSW_UPGRADER_OFF', true );` in wp-config.php — for shops whose host enforces tight CPU/entry-process limits and answers 503 on the front end while wp-admin still works.
 * Fix: Pages with more than 1 MB of Elementor data are skipped when rebuilding CSS. Parsing one of those inside a single cron request can exceed a shared host's memory cap and get the process killed.
@@ -92,11 +96,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.227 =
 * Fix: The mobile «فیلتر پیشرفته» sheet never appeared on the archive composite. The column that holds the filters widget was hidden with `display: none` below 768px — and the bottom sheet lives inside that column, so it opened at 0×0. The desktop sidebar boxes are hidden instead; the column still collapses to zero height, so the layout-shift fix is unchanged.
 * Note: 1.11.226 fixed a different, real problem (LiteSpeed delaying our scripts). Both were needed.
-
-= 1.11.226 =
-* Fix: The mobile «فیلتر پیشرفته» button did nothing on sites where LiteSpeed's Delay JS rewrites scripts to `type="litespeed/javascript"`. The first tap was spent loading the script instead of opening the sheet.
-* Fix: Our script tags now carry `data-no-optimize` / `data-no-delay`, so LiteSpeed and WP Rocket leave them out of JS delay.
-* Fix: A small inline handler opens and closes the bottom sheets before the main bundle arrives, so the button works even when a page optimizer still delays it.
 
 == Upgrade Notice ==
 

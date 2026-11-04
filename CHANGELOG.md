@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.231] — 2026-11-04
+
+### Added
+
+- A shutdown handler reports real fatals: uncaught `Error`, memory exhaustion and `max_execution_time` kills all end the request before any of our `catch` blocks run, so the log stayed empty and a 503 was indistinguishable from a server-side kill. It now writes `[HSW/fatal] message — file.php:line` to the error log, and stores it in «آخرین خطای ثبت‌شده» when the file belongs to this plugin.
+- Cost is one `error_get_last()` at shutdown; only fatal types are written, and the response is never touched.
+
 ## [1.11.230] — 2026-11-04
 
 ### Added

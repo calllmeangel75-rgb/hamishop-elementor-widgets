@@ -3,7 +3,7 @@
  * Plugin Name: HamiShop Elementor Widgets
  * Plugin URI:  https://hamisys.ir/
  * Description: ویجت‌های فروشگاهی المنتور برای ووکامرس — لوپ محصولات، صفحه محصول، سبد خرید، تسویه حساب و پنل حساب کاربری با شخصی‌سازی کامل فونت، رنگ و استایل؛ سبک با دارایی‌های لوکال و بارگذاری شرطی.
- * Version:     1.11.230
+ * Version:     1.11.231
  * Author:      HamiSys
  * Author URI:  https://hamisys.ir/
  * License:     GPL-2.0-or-later
@@ -77,7 +77,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.230' );
+define( 'HSW_VERSION', '1.11.231' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
@@ -185,6 +185,73 @@ if ( ! function_exists( 'hsw_report_fatal' ) ) {
                         } );
                 }
         }
+}
+
+/**
+ * Last-chance reporter for a REAL fatal.
+ *
+ * `hsw_report_fatal()` only sees exceptions we caught ourselves. A fatal error
+ * — an Error we never reached, an exhausted memory limit, a max_execution_time
+ * kill — ends the request before any of that runs, and the visitor gets a blank
+ * page or a 503 with nothing in the log that names the file.
+ *
+ * On a live shop that turned a 503 into hours of guessing: the PHP log held only
+ * notices, so there was no way to tell a plugin fatal from a server-side kill.
+ * This handler makes the next occurrence say where it happened.
+ *
+ * Cheap by design: one `error_get_last()` at shutdown, and only fatal types are
+ * written. It never throws and never changes the response.
+ */
+if ( ! function_exists( 'hsw_shutdown_report' ) ) {
+	function hsw_shutdown_report() {
+		$err = error_get_last();
+
+		if ( ! is_array( $err ) || ! isset( $err['type'] ) ) {
+			return;
+		}
+
+		$fatal = array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR );
+
+		if ( ! in_array( (int) $err['type'], $fatal, true ) ) {
+			return;
+		}
+
+		$file = (string) ( $err['file'] ?? '' );
+		$msg  = sprintf(
+			'[HSW/fatal] %s — %s:%d',
+			(string) ( $err['message'] ?? '' ),
+			basename( $file ),
+			(int) ( $err['line'] ?? 0 )
+		);
+
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( $msg );
+
+		/*
+		 * Only our own files belong in the dashboard notice. A fatal inside
+		 * another plugin is still worth the log line above, but it is not ours
+		 * to surface.
+		 */
+		$ours = defined( 'HSW_DIR' ) && '' !== $file && 0 === strpos( wp_normalize_path( $file ), wp_normalize_path( HSW_DIR ) );
+
+		if ( ! $ours ) {
+			return;
+		}
+
+		update_option(
+			'hsw_last_error',
+			array(
+				'msg'     => $msg,
+				'time'    => time(),
+				'version' => defined( 'HSW_VERSION' ) ? HSW_VERSION : '',
+				'file'    => $file,
+				'mtime'   => is_file( $file ) ? (int) filemtime( $file ) : 0,
+			),
+			false
+		);
+	}
+
+	register_shutdown_function( 'hsw_shutdown_report' );
 }
 
 /**
