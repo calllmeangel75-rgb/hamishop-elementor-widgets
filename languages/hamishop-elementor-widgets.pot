@@ -2004,19 +2004,6 @@ msgstr ""
 msgid "بازه ساعت"
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:97
-#: includes/class-hsw-checkout-fields.php:300
-msgid "بازهٔ زمانی تحویل"
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:241
-msgid "بازهٔ زمانی تحویل انتخاب‌شده معتبر نیست. لطفاً دوباره انتخاب کنید."
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:206
-msgid "بازهٔ زمانی را انتخاب کنید"
-msgstr ""
-
 #: includes/class-hsw-widget-base.php:1331
 msgid "بازهٔ زمانی فروش"
 msgstr ""
@@ -2268,10 +2255,6 @@ msgstr ""
 
 #: includes/class-hsw-account-auth.php:1578
 msgid "برای این حساب ایمیل معتبری ثبت نشده است."
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:107
-msgid "برای این سفارش فاکتور قانونی صادر شود."
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-address.php:561
@@ -4375,7 +4358,6 @@ msgstr ""
 msgid "جمع، ارسال و دکمه ادامه خرید."
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:166
 #: widgets/class-hsw-widget-checkout-schedule.php:271
 msgid "جمعه"
 msgstr ""
@@ -5335,10 +5317,6 @@ msgstr ""
 msgid "درخواست شارژ ثبت شد. پس از تایید، موجودی اضافه می‌شود."
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:308
-msgid "درخواست شده"
-msgstr ""
-
 #: widgets/class-hsw-widget-checkout-note.php:115
 #: widgets/class-hsw-widget-checkout-note.php:161
 msgid "درخواست صدور فاکتور رسمی حقوقی (ویژه شرکت‌ها و اشخاص حقوقی)"
@@ -5565,7 +5543,6 @@ msgstr ""
 msgid "دو هدر کامل المنتور با منوی واقعی وردپرس، جستجوی محصول ووکامرس، سبد خرید و حساب کاربری. هر دو پیش‌فرض فعال‌اند."
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:162
 #: widgets/class-hsw-widget-checkout-schedule.php:267
 msgid "دوشنبه"
 msgstr ""
@@ -7108,19 +7085,6 @@ msgstr ""
 msgid "روز انتخاب‌شده (متن)"
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:88
-#: includes/class-hsw-checkout-fields.php:292
-msgid "روز تحویل"
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:233
-msgid "روز تحویل انتخاب‌شده معتبر نیست. صفحه را دوباره باز کنید و روز را انتخاب کنید."
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:143
-msgid "روز تحویل را انتخاب کنید"
-msgstr ""
-
 #: widgets/class-hsw-widget-checkout-schedule.php:91
 #: widgets/class-hsw-widget-checkout-schedule.php:349
 msgid "روز تحویل سفارش:"
@@ -7230,11 +7194,6 @@ msgstr ""
 msgid "زمان باقی‌مانده:"
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:347
-#: includes/class-hsw-checkout-fields.php:367
-msgid "زمان تحویل و فاکتور"
-msgstr ""
-
 #: includes/class-hsw-checkout-complete.php:635
 msgid "زمان تحویل: %s"
 msgstr ""
@@ -7341,18 +7300,6 @@ msgstr ""
 
 #: includes/class-hsw-assets.php:450
 msgid "سازگاری با قالب (فونت)"
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:192
-msgid "ساعت ۱۳ تا ۱۷"
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:193
-msgid "ساعت ۱۷ تا ۲۱"
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:191
-msgid "ساعت ۹ تا ۱۳"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:628
@@ -7658,7 +7605,6 @@ msgstr ""
 msgid "سه تنظیم سراسری که روی همهٔ ویجت‌ها اثر می‌گذارد."
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:163
 #: widgets/class-hsw-widget-checkout-schedule.php:268
 msgid "سه‌شنبه"
 msgstr ""
@@ -7948,7 +7894,6 @@ msgstr ""
 msgid "شناسهٔ تراکنش بیش از حد مجاز طولانی است."
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:167
 #: widgets/class-hsw-widget-checkout-schedule.php:272
 msgid "شنبه"
 msgstr ""
@@ -9022,10 +8967,6 @@ msgstr ""
 msgid "فاکتور فروش"
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:307
-msgid "فاکتور قانونی"
-msgstr ""
-
 #: includes/class-hsw-widget-manager.php:1152
 msgid "فاکتور چاپی و برچسب پستی"
 msgstr ""
@@ -9048,10 +8989,6 @@ msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:217
 msgid "فردا — ساعت ۱۴ الی ۱۸"
-msgstr ""
-
-#: includes/class-hsw-checkout-fields.php:176
-msgid "فردا، %s"
 msgstr ""
 
 #: includes/class-hsw-invoice.php:261
@@ -13499,10 +13436,6 @@ msgstr ""
 msgid "پنج لینک سریع: خانه، فروشگاه، سبد خرید، علاقه‌مندی‌ها و حساب کاربری. فقط در موبایل/تبلت نمایش داده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:165
-msgid "پنجشنبه"
-msgstr ""
-
 #: widgets/class-hsw-widget-checkout-schedule.php:270
 msgid "پنج‌شنبه"
 msgstr ""
@@ -13815,7 +13748,6 @@ msgstr ""
 msgid "چه چیزی محافظت نمی‌شود؟"
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:164
 #: widgets/class-hsw-widget-checkout-schedule.php:269
 msgid "چهارشنبه"
 msgstr ""
@@ -14828,7 +14760,6 @@ msgstr ""
 msgid "یک گفتگو انتخاب کنید"
 msgstr ""
 
-#: includes/class-hsw-checkout-fields.php:161
 #: widgets/class-hsw-widget-checkout-schedule.php:266
 msgid "یکشنبه"
 msgstr ""
