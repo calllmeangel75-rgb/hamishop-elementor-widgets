@@ -8,6 +8,14 @@
 
 ## [Unreleased]
 
+## [1.11.226] — 2026-11-04
+
+### Fixed
+
+- The mobile «فیلتر پیشرفته» button did nothing on shops where LiteSpeed's Delay JS rewrites scripts to `type="litespeed/javascript" data-src=…`. Nothing was fetched until the visitor interacted, and that first tap was spent loading the bundle instead of opening the sheet — so on a phone the sheet never appeared.
+- Our script tags now carry `data-no-optimize` and `data-no-delay`, so LiteSpeed and WP Rocket skip them for JS delay. `data-no-defer` is deliberately not added: the scripts are meant to stay deferred.
+- A 620-byte inline handler in the footer opens and closes the bottom sheets before the main bundle arrives. It carries the same opt-out attributes, only toggles classes the sheet already uses, and is printed only when the archive bundle is enqueued. If the bundle does load, its handlers run too and the result is identical.
+
 ## [1.11.225] — 2026-11-04
 
 ### Fixed

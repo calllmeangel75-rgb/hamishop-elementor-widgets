@@ -18,12 +18,58 @@ class HSW_Assets {
                 add_action( 'wp_head', array( $this, 'preload_font' ), 4 );
                 add_action( 'wp_head', array( $this, 'print_layout_guard' ), 2 );
                 add_action( 'wp_head', array( $this, 'print_js_flag' ), 2 );
+                add_action( 'wp_footer', array( $this, 'print_sheet_boot' ), 5 );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
                 add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
                 add_filter( 'elementor/widget/render_content', array( $this, 'guard_icon_markup' ), 20, 2 );
                 add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
+                add_filter( 'script_loader_tag', array( $this, 'guard_script_tag' ), 20, 3 );
+        }
+
+        /**
+         * Tell page optimizers to leave our scripts alone.
+         *
+         * LiteSpeed's "Delay JS" rewrites a script to
+         * `type="litespeed/javascript" data-src=…`: the file is not fetched
+         * until the visitor interacts, and that first tap is spent loading the
+         * script instead of doing what the button says. On a phone the mobile
+         * filter sheet then simply never opens — the reported symptom.
+         *
+         * The exclude lists in HSW_Optimizer stop combining and deferring, but
+         * delay is decided per tag, so the tag itself has to say no:
+         *
+         *   data-no-optimize  LiteSpeed: skip this element entirely (combine,
+         *                     UCSS and delay all hang off the same check)
+         *   data-no-delay     WP Rocket: skip "Delay JavaScript execution"
+         *
+         * `data-no-defer` is deliberately NOT added: our scripts are meant to be
+         * deferred, and that attribute would make LiteSpeed strip the defer.
+         *
+         * Only our own handles are touched (`hsw-*`), and a tag that already
+         * carries the attribute is left exactly as it is.
+         *
+         * @param string $tag    Script tag.
+         * @param string $handle Script handle.
+         * @param string $src    Script source.
+         * @return string
+         */
+        public function guard_script_tag( $tag, $handle, $src = '' ) {
+                if ( 0 !== strpos( (string) $handle, 'hsw-' ) ) {
+                        return $tag;
+                }
+
+                if ( false !== strpos( (string) $tag, 'data-no-optimize' ) ) {
+                        return $tag;
+                }
+
+                return (string) preg_replace(
+                        '/<script\b/',
+                        '<script data-no-optimize="1" data-no-delay="1"',
+                        (string) $tag,
+                        1
+                );
         }
 
         /**
@@ -241,6 +287,51 @@ class HSW_Assets {
                  * both. A browser ignores all four.
                  */
                 echo '<script id="hsw-js-flag" data-no-optimize="1" data-no-defer="1" data-no-delay="1" data-cfasync="false">document.documentElement.classList.add("hsw-js")</script>' . "\n";
+        }
+
+        /**
+         * Open and close the bottom sheets before the main bundle arrives.
+         *
+         * LiteSpeed's "Delay JS" rewrites our scripts to
+         * `type="litespeed/javascript" data-src=…`, so nothing is fetched until
+         * the visitor interacts — and that first tap is spent loading the file
+         * instead of doing what the button says. On a phone the «فیلتر پیشرفته»
+         * button therefore looked dead: the sheet never opened.
+         *
+         * `guard_script_tag()` asks the optimizer to leave the bundle alone, but
+         * that depends on a third-party setting. This tiny inline handler is the
+         * guarantee: it is printed in the footer BEFORE the bundle, carries the
+         * same four opt-out attributes, and only toggles the classes the sheet
+         * already uses. When the bundle does load, its own handlers run too and
+         * the result is identical (both operations are idempotent).
+         *
+         * Printed only when the archive bundle is actually enqueued, so pages
+         * without a sheet do not pay for it.
+         *
+         * @return void
+         */
+        public function print_sheet_boot() {
+                if ( is_admin() ) {
+                        return;
+                }
+
+                if ( ! wp_script_is( 'hsw-archive', 'enqueued' ) ) {
+                        return;
+                }
+
+                $js = 'document.addEventListener("click",function(e){'
+                        . 'var t=e.target;if(!t||!t.closest)return;'
+                        . 'var o=t.closest("[data-hsw-open]");'
+                        . 'if(o){var n=o.getAttribute("data-hsw-open"),el=document.querySelector(\'[data-hsw-sheet="\'+n+\'"]\');'
+                        . 'if(el&&!el.classList.contains("is-open")){e.preventDefault();el.classList.add("is-open");'
+                        . 'el.setAttribute("aria-hidden","false");document.body.classList.add("hsw-noscroll");}return;}'
+                        . 'var c=t.closest("[data-hsw-close]");'
+                        . 'if(c){var s=c.closest(".hsw-asheet, .hsw-agd__modal");'
+                        . 'if(s){s.classList.remove("is-open");s.setAttribute("aria-hidden","true");'
+                        . 'document.body.classList.remove("hsw-noscroll");}}'
+                        . '},true);';
+
+                echo '<script id="hsw-sheet-boot" data-no-optimize="1" data-no-defer="1" data-no-delay="1" data-cfasync="false">' . $js . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- literal script, no user input.
         }
 
         /**
