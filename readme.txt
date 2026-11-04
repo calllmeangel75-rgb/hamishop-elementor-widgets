@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.226
+Stable tag: 1.11.227
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.227 =
+* Fix: The mobile «فیلتر پیشرفته» sheet never appeared on the archive composite. The column that holds the filters widget was hidden with `display: none` below 768px — and the bottom sheet lives inside that column, so it opened at 0×0. The desktop sidebar boxes are hidden instead; the column still collapses to zero height, so the layout-shift fix is unchanged.
+* Note: 1.11.226 fixed a different, real problem (LiteSpeed delaying our scripts). Both were needed.
+
 = 1.11.226 =
 * Fix: The mobile «فیلتر پیشرفته» button did nothing on sites where LiteSpeed's Delay JS rewrites scripts to `type="litespeed/javascript"`. The first tap was spent loading the script instead of opening the sheet.
 * Fix: Our script tags now carry `data-no-optimize` / `data-no-delay`, so LiteSpeed and WP Rocket leave them out of JS delay.
@@ -93,14 +97,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.223 =
 * Feature: The palette font list now also reads the WordPress font library's `custom` and `default` origins and the Elementor kit's `custom_typography`, so fonts added through the Site Editor finally show up.
 * Feature: A free-text font field next to the list. A variable font that a theme loads with its own @font-face is registered in no option at all, so no list can enumerate it — typing the exact family name now works.
-
-= 1.11.222 =
-* Fix: Updates no longer take the site down. The Elementor cache flush and the stock migration used to run on `init` — i.e. inside the first visitor's request — and could return HTTP 503 for several minutes on a shared host.
-* Fix: The element-cache flush is now a background job with a 2s budget, a lock and a resumable cursor. It runs from WP-Cron, or from an admin page load when cron is unavailable. Never from a customer request.
-* Fix: Only pages that actually contain HamiShop widgets have their Elementor CSS rebuilt, one batch at a time, instead of `files_manager->clear_cache()` wiping the whole site.
-* Fix: Page caches are purged per affected URL. The site-wide purge is now opt-in (`hsw_upgrader_full_purge`).
-* Fix: The stock migration is batched (200 products per query) and resumes after a timeout or a fatal instead of walking 2000 products in one request.
-* Fix: A failed step is logged, retried twice, then skipped — the site keeps working and the merchant gets a notice on the HamiShop dashboard.
 
 == Upgrade Notice ==
 

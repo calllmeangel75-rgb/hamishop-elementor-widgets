@@ -244,7 +244,7 @@ class HSW_Assets {
                      * rule. Scoped to the archive composite so the cart, checkout
                      * and blog sidebars (which ARE used on mobile) never match.
                      */
-                    . '@media(max-width:767.98px){.hsw-cp--archive .hsw-cp__body>.hsw-cp__col--side{display:none}}'
+                    . '@media(max-width:767.98px){.hsw-cp--archive .hsw-cp__body>.hsw-cp__col--side .hsw-d{display:none}}'
                     . '</style>' . "\n";
         }
 

@@ -8,6 +8,14 @@
 
 ## [Unreleased]
 
+## [1.11.227] — 2026-11-04
+
+### Fixed
+
+- The mobile «فیلتر پیشرفته» sheet never appeared on the archive composite. Below 768px the column that holds the filters widget was hidden with `display: none` — and the bottom sheet is rendered inside that column, inside the same `<form>`, so it opened at **0×0**. Measured on the local shop: the sheet had `is-open`, `aria-hidden="false"` and a locked body, but `getBoundingClientRect()` returned `[0, 0, 0, 0]`. The sort sheet kept working because it lives in the toolbar widget, outside that column.
+- The rule now hides the desktop sidebar boxes (`.hsw-d`) instead of the column. The column still collapses to zero height, so the 0.5967 layout shift it was written for is unchanged; measured after the fix, the column is `height: 0` and the sheet is `390×844`.
+- The same selector is updated in the inline `print_layout_guard()` copy, which LiteSpeed's CSS combine otherwise deletes.
+
 ## [1.11.226] — 2026-11-04
 
 ### Fixed
