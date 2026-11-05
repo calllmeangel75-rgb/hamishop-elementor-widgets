@@ -11,7 +11,7 @@
 ```
 مسیر مخزن   : D:\work-webs\0 Build\hamishop-repo
 مخزن        : github.com/calllmeangel75-rgb/hamishop-elementor-widgets
-نسخهٔ فعلی  : 1.11.245
+نسخهٔ فعلی  : 1.11.246
 فایل اصلی   : hamishop-elementor-widgets.php  (هدر نسخه + HSW_VERSION)
 تست لوکال   : http://localhost/sks/   (XAMPP، افزونه در wp-content/plugins/hamishop-elementor-widgets)
 سایت‌های زنده: gilaclick.ir · new.mrdastbaaf.com

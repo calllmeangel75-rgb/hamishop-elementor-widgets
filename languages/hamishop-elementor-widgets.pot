@@ -540,7 +540,7 @@ msgstr ""
 #: widgets/class-hsw-widget-header-gc.php:249
 #: widgets/class-hsw-widget-product-accordions.php:127
 #: widgets/class-hsw-widget-product-features.php:182
-#: widgets/class-hsw-widget-product-purchase.php:111
+#: widgets/class-hsw-widget-product-purchase.php:125
 #: widgets/class-hsw-widget-product-trust.php:89
 msgid "آیکون"
 msgstr ""
@@ -922,7 +922,7 @@ msgstr ""
 #: widgets/class-hsw-widget-product-breadcrumb.php:77
 #: widgets/class-hsw-widget-product-features.php:221
 #: widgets/class-hsw-widget-product-gallery.php:126
-#: widgets/class-hsw-widget-product-purchase.php:154
+#: widgets/class-hsw-widget-product-purchase.php:168
 #: widgets/class-hsw-widget-product-sticky.php:80
 #: widgets/class-hsw-widget-product-tabs.php:201
 #: widgets/class-hsw-widget-product-title.php:156
@@ -1075,6 +1075,10 @@ msgstr ""
 msgid "استفاده از صفحهٔ ۴۰۴ اختصاصی"
 msgstr ""
 
+#: widgets/class-hsw-widget-product-purchase.php:102
+msgid "استپر (فعلی) — بعد از افزودن ظاهر می‌شود و سبد را به‌روز می‌کند"
+msgstr ""
+
 #: widgets/class-hsw-widget-product-variants.php:73
 msgid "اسلاگ صفت حافظه"
 msgstr ""
@@ -1220,7 +1224,7 @@ msgstr ""
 #: includes/class-hsw-cart-drawer.php:38
 #: widgets/class-hsw-widget-cart-items.php:458
 #: widgets/class-hsw-widget-cart-items.php:543
-#: widgets/class-hsw-widget-product-purchase.php:397
+#: widgets/class-hsw-widget-product-purchase.php:422
 #: widgets/class-hsw-widget-product-sticky.php:249
 msgid "افزایش تعداد"
 msgstr ""
@@ -2978,7 +2982,7 @@ msgstr ""
 msgid "به‌روزرسانی قیمت‌ها: امروز، ساعت ۱۴:۳۰"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:99
+#: widgets/class-hsw-widget-product-purchase.php:113
 msgid "به‌صورت data-hsw-max روی جعبه چاپ می‌شود (موتور JS فعلاً سقف ۹۹ را دارد)."
 msgstr ""
 
@@ -3573,7 +3577,7 @@ msgstr ""
 #: includes/class-hsw-invoice.php:326
 #: includes/trait-hsw-product-page-style-parts-3.php:26
 #: widgets/class-hsw-widget-cart-items.php:467
-#: widgets/class-hsw-widget-product-purchase.php:404
+#: widgets/class-hsw-widget-product-purchase.php:429
 #: widgets/class-hsw-widget-product-sticky.php:252
 msgid "تعداد"
 msgstr ""
@@ -4009,13 +4013,13 @@ msgstr ""
 #: includes/class-hsw-widget-base.php:862
 #: includes/class-hsw-widget-base.php:3104
 #: widgets/class-hsw-widget-archive-grid.php:87
-#: widgets/class-hsw-widget-product-purchase.php:379
+#: widgets/class-hsw-widget-product-purchase.php:404
 #: widgets/class-hsw-widget-product-sticky.php:236
 msgid "تومان"
 msgstr ""
 
 #: includes/class-hsw-product-base.php:343
-#: widgets/class-hsw-widget-product-purchase.php:376
+#: widgets/class-hsw-widget-product-purchase.php:401
 msgid "تومان تخفیف"
 msgstr ""
 
@@ -4722,7 +4726,7 @@ msgstr ""
 msgid "حداکثر ارتفاع لوگو"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:98
+#: widgets/class-hsw-widget-product-purchase.php:112
 msgid "حداکثر تعداد"
 msgstr ""
 
@@ -4779,7 +4783,7 @@ msgstr ""
 msgid "حذف از سبد"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:406
+#: widgets/class-hsw-widget-product-purchase.php:433
 #: widgets/class-hsw-widget-product-sticky.php:256
 msgid "حذف از سبد خرید"
 msgstr ""
@@ -4967,7 +4971,7 @@ msgstr ""
 msgid "خالی = همان برچسب دسکتاپ."
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:215
+#: widgets/class-hsw-widget-product-purchase.php:229
 msgid "خالی = همان رنگ «CTA مراحل خرید» از پالت. اگر رنگ جدا انتخاب کنید، حالت‌های هاور و کلیک هم از همان رنگ ساخته می‌شوند."
 msgstr ""
 
@@ -5035,7 +5039,7 @@ msgstr ""
 msgid "خالی بگذارید تا نام برند بالا استفاده شود."
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:234
+#: widgets/class-hsw-widget-product-purchase.php:248
 msgid "خالی بگذارید تا همان رنگ دکمهٔ خرید استفاده شود."
 msgstr ""
 
@@ -5108,7 +5112,7 @@ msgid "خرید"
 msgstr ""
 
 #: widgets/class-hsw-widget-product-purchase.php:91
-#: widgets/class-hsw-widget-product-purchase.php:309
+#: widgets/class-hsw-widget-product-purchase.php:323
 #: widgets/class-hsw-widget-product-sticky.php:61
 #: widgets/class-hsw-widget-product-sticky.php:178
 msgid "خرید آنلاین"
@@ -5198,8 +5202,8 @@ msgstr ""
 msgid "خطای پایگاه‌داده در ثبت تراکنش کیف پول؛ مبلغی جابه‌جا نشد."
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:141
-#: widgets/class-hsw-widget-product-purchase.php:251
+#: widgets/class-hsw-widget-product-purchase.php:155
+#: widgets/class-hsw-widget-product-purchase.php:265
 msgid "خطوط اطمینان"
 msgstr ""
 
@@ -5379,6 +5383,10 @@ msgstr ""
 
 #: includes/class-hsw-wallet-pay.php:500
 msgid "در حال حاضر هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید."
+msgstr ""
+
+#: widgets/class-hsw-widget-product-purchase.php:105
+msgid "در حالت «کنار دکمهٔ خرید»، + و − همیشه دیده می‌شوند و هیچ درخواستی به سرور نمی‌فرستند؛ تعداد انتخابی فقط وقتی «خرید آنلاین» زده شود به سبد اضافه می‌شود. حالت «استپر» رفتار قبلی است و برای سایت‌های موجود چیزی را عوض نمی‌کند."
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-filters.php:259
@@ -5969,7 +5977,7 @@ msgstr ""
 #: widgets/class-hsw-widget-checkout-page.php:119
 #: widgets/class-hsw-widget-complete-page.php:80
 #: widgets/class-hsw-widget-pay-page.php:88
-#: widgets/class-hsw-widget-product-purchase.php:203
+#: widgets/class-hsw-widget-product-purchase.php:217
 msgid "دکمه‌ها"
 msgstr ""
 
@@ -6357,6 +6365,10 @@ msgstr ""
 
 #: widgets/class-hsw-widget-header-gc.php:395
 msgid "رفتار با اسکرول"
+msgstr ""
+
+#: widgets/class-hsw-widget-product-purchase.php:98
+msgid "رفتار خرید"
 msgstr ""
 
 #: widgets/class-hsw-widget-header-gc.php:387
@@ -6781,7 +6793,7 @@ msgstr ""
 msgid "رنگ عدد و آیکون‌ها"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:232
+#: widgets/class-hsw-widget-product-purchase.php:246
 msgid "رنگ علامت‌های + و −"
 msgstr ""
 
@@ -6846,7 +6858,7 @@ msgstr ""
 msgid "رنگ قیمت"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:166
+#: widgets/class-hsw-widget-product-purchase.php:180
 #: widgets/class-hsw-widget-product-sticky.php:100
 msgid "رنگ قیمت اصلی"
 msgstr ""
@@ -7017,7 +7029,7 @@ msgstr ""
 msgid "رنگ متن دکمه (هاور)"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:224
+#: widgets/class-hsw-widget-product-purchase.php:238
 msgid "رنگ متن دکمه سبد"
 msgstr ""
 
@@ -7077,7 +7089,7 @@ msgstr ""
 msgid "رنگ متن چیپ"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:187
+#: widgets/class-hsw-widget-product-purchase.php:201
 msgid "رنگ متن چیپ تخفیف"
 msgstr ""
 
@@ -7175,7 +7187,7 @@ msgstr ""
 msgid "رنگ واحد"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:176
+#: widgets/class-hsw-widget-product-purchase.php:190
 msgid "رنگ واحد (تومان)"
 msgstr ""
 
@@ -7840,7 +7852,7 @@ msgstr ""
 msgid "سوییچ فقط موجود"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:133
+#: widgets/class-hsw-widget-product-purchase.php:147
 msgid "سپر (گارانتی)"
 msgstr ""
 
@@ -9318,7 +9330,7 @@ msgid "فعال‌سازی ورود دوعاملی"
 msgstr ""
 
 #: widgets/class-hsw-widget-product-purchase.php:59
-#: widgets/class-hsw-widget-product-purchase.php:320
+#: widgets/class-hsw-widget-product-purchase.php:341
 msgid "فعلاً ناموجود"
 msgstr ""
 
@@ -9709,8 +9721,8 @@ msgstr ""
 #: includes/trait-hsw-product-page-style-parts-4.php:163
 #: widgets/class-hsw-widget-archive-grid.php:292
 #: widgets/class-hsw-widget-product-page.php:271
-#: widgets/class-hsw-widget-product-purchase.php:161
-#: widgets/class-hsw-widget-product-purchase.php:362
+#: widgets/class-hsw-widget-product-purchase.php:175
+#: widgets/class-hsw-widget-product-purchase.php:387
 #: widgets/class-hsw-widget-product-sticky.php:94
 msgid "قیمت"
 msgstr ""
@@ -10140,7 +10152,7 @@ msgstr ""
 #: widgets/class-hsw-widget-complete-hero.php:191
 #: widgets/class-hsw-widget-pay-summary.php:346
 #: widgets/class-hsw-widget-product-accordions.php:137
-#: widgets/class-hsw-widget-product-purchase.php:120
+#: widgets/class-hsw-widget-product-purchase.php:134
 msgid "متن"
 msgstr ""
 
@@ -11495,7 +11507,7 @@ msgid "موجود در انبار تهران - آماده پردازش و ارس
 msgstr ""
 
 #: includes/class-hsw-account.php:2853
-#: widgets/class-hsw-widget-product-purchase.php:134
+#: widgets/class-hsw-widget-product-purchase.php:148
 msgid "موجودی"
 msgstr ""
 
@@ -12304,7 +12316,7 @@ msgstr ""
 msgid "نوع انتخاب"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:129
+#: widgets/class-hsw-widget-product-purchase.php:143
 msgid "نوع خط (رنگ آیکون)"
 msgstr ""
 
@@ -13465,7 +13477,7 @@ msgstr ""
 msgid "پس‌زمینه دکمه خرید"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:213
+#: widgets/class-hsw-widget-product-purchase.php:227
 msgid "پس‌زمینه دکمه سبد"
 msgstr ""
 
@@ -13646,7 +13658,7 @@ msgstr ""
 msgid "پس‌زمینه چیپ"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:195
+#: widgets/class-hsw-widget-product-purchase.php:209
 msgid "پس‌زمینه چیپ تخفیف"
 msgstr ""
 
@@ -14405,7 +14417,7 @@ msgstr ""
 #: includes/class-hsw-cart-drawer.php:37
 #: widgets/class-hsw-widget-cart-items.php:468
 #: widgets/class-hsw-widget-cart-items.php:546
-#: widgets/class-hsw-widget-product-purchase.php:405
+#: widgets/class-hsw-widget-product-purchase.php:430
 #: widgets/class-hsw-widget-product-sticky.php:253
 msgid "کاهش تعداد"
 msgstr ""
@@ -14732,6 +14744,10 @@ msgstr ""
 msgid "کمینهٔ ارتفاع پیل"
 msgstr ""
 
+#: widgets/class-hsw-widget-product-purchase.php:103
+msgid "کنار دکمهٔ خرید — تعداد را انتخاب می‌کنید، بدون درخواست"
+msgstr ""
+
 #: widgets/class-hsw-widget-cart-items.php:299
 msgid "کنترل تعداد"
 msgstr ""
@@ -14885,7 +14901,7 @@ msgstr ""
 msgid "گردی دکمه"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:242
+#: widgets/class-hsw-widget-product-purchase.php:256
 msgid "گردی دکمه سبد"
 msgstr ""
 

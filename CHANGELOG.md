@@ -8,6 +8,21 @@
 
 ## [Unreleased]
 
+## [1.11.246] — 2026-11-05
+
+### Added
+
+- **`buy_mode` on «جعبه خرید و قیمت» — two ways to choose a quantity.** The default (`stepper`) is the behaviour every existing site already has: the stepper appears once the product is in the cart and each click updates the cart through `hsw_set_qty`. The new `inline` mode puts the stepper and «خرید آنلاین» on one row in both cart states, and the stepper never talks to the server — it is a quantity picker, not a cart editor.
+- In `inline` mode the stepper starts at 1 regardless of what is already in the cart (it means "how many do I want to add"), the bin is not rendered (there is nothing to remove), and at 1 the minus stays in place and refuses the click instead of turning into the bin.
+- The buy button sends the chosen number: `quantity=3` for a stepper at 3, whether or not the product is already in the cart. In the default mode nothing changed — one more per click while in the cart.
+
+### Measured
+
+- Two clicks on `+` in `inline` mode: input `۱ → ۳`, **zero** requests to `wc-ajax`.
+- The following «خرید آنلاین» click: one request, `product_id=13192&quantity=3`.
+- Product already in the cart with 2: default mode renders `qty=۲` with the bin and no `is-not-in-cart`; inline mode renders `qty=۱`, no bin, `hsw-ppurch--buy-inline`.
+- 360px viewport: no horizontal overflow (`scrollWidth - clientWidth = 0`), button 134px and stepper 104px on one 48px row, label on a single line.
+
 ## [1.11.245] — 2026-11-05
 
 ### Added

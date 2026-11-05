@@ -93,6 +93,20 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 );
 
                 $this->add_control(
+                        'buy_mode',
+                        array(
+                                'label'       => __( 'رفتار خرید', 'hamishop-elementor-widgets' ),
+                                'type'        => Controls_Manager::SELECT,
+                                'default'     => 'stepper',
+                                'options'     => array(
+                                        'stepper' => __( 'استپر (فعلی) — بعد از افزودن ظاهر می‌شود و سبد را به‌روز می‌کند', 'hamishop-elementor-widgets' ),
+                                        'inline'  => __( 'کنار دکمهٔ خرید — تعداد را انتخاب می‌کنید، بدون درخواست', 'hamishop-elementor-widgets' ),
+                                ),
+                                'description' => __( 'در حالت «کنار دکمهٔ خرید»، + و − همیشه دیده می‌شوند و هیچ درخواستی به سرور نمی‌فرستند؛ تعداد انتخابی فقط وقتی «خرید آنلاین» زده شود به سبد اضافه می‌شود. حالت «استپر» رفتار قبلی است و برای سایت‌های موجود چیزی را عوض نمی‌کند.', 'hamishop-elementor-widgets' ),
+                        )
+                );
+
+                $this->add_control(
                         'qty_max',
                         array(
                                 'label'       => __( 'حداکثر تعداد', 'hamishop-elementor-widgets' ),
@@ -309,6 +323,13 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                 $cart_text = ( isset( $s['cart_text'] ) && '' !== trim( (string) $s['cart_text'] ) ) ? $s['cart_text'] : __( 'خرید آنلاین', 'hamishop-elementor-widgets' );
                 $qty_max   = isset( $s['qty_max'] ) ? max( 1, (int) $s['qty_max'] ) : 99;
 
+                /*
+                 * «کنار دکمهٔ خرید»: the stepper is a quantity picker, not a cart
+                 * editor. It is always visible, it never sends a request, and the
+                 * chosen number is what the buy button adds.
+                 */
+                $buy_inline = ( isset( $s['buy_mode'] ) && 'inline' === $s['buy_mode'] );
+
                 /* Assurance rows: repeater (type stock follows live stock status). */
                 $assure = array();
                 $raw    = ( isset( $s['assure_items'] ) && is_array( $s['assure_items'] ) ) ? $s['assure_items'] : array();
@@ -345,11 +366,15 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                 }
                         }
                 }
-                $stepper_qty = max( 1, $in_cart_qty );
+                /* An "add N" control starts at 1; a cart editor shows the cart. */
+                $stepper_qty = $buy_inline ? 1 : max( 1, $in_cart_qty );
 
                 $root_extra = ( $in_stock || $cfp ) ? '' : 'is-oos';
                 if ( $cfp ) {
                         $root_extra .= ' hsw-ppurch--cfp';
+                }
+                if ( $buy_inline ) {
+                        $root_extra .= ' hsw-ppurch--buy-inline';
                 }
                 if ( 0 === $in_cart_qty ) {
                         $root_extra .= ' is-not-in-cart';
@@ -403,7 +428,10 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                                         ?>
                                                         <input type="text" class="hsw-ppurch__qval" data-hsw-qval inputmode="numeric" autocomplete="off" value="<?php echo esc_attr( HSW_Helpers::fa_num( $stepper_qty ) ); ?>" aria-label="<?php esc_attr_e( 'تعداد', 'hamishop-elementor-widgets' ); ?>">
                                                         <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--minus" data-hsw-qty="-1" aria-label="<?php esc_attr_e( 'کاهش تعداد', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'remove' ); ?></button>
-                                                        <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></button>
+                                                        <?php if ( ! $buy_inline ) : ?>
+                                                                <?php /* The bin is a cart action; an "add N" stepper has nothing to remove. */ ?>
+                                                                <button type="button" class="hsw-ppurch__qbtn hsw-ppurch__qbtn--del" data-hsw-del="<?php echo esc_url( $hsw_remove ); ?>" aria-label="<?php esc_attr_e( 'حذف از سبد خرید', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></button>
+                                                        <?php endif; ?>
                                                 </div>
                                         </div>
                                         <button type="button" class="hsw-ppurch__cart<?php echo esc_attr( $lock_class ); ?>" data-hsw-add<?php echo $lock_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr above. ?>>

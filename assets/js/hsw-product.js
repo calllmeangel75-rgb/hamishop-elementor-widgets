@@ -508,7 +508,11 @@
 			var st3 = state(pid3);
 			var delta = parseInt(qb.getAttribute('data-hsw-qty'), 10) || 0;
 			var next = setQty(pid3, st3.qty + delta);
-			if (!scope2.classList.contains('is-not-in-cart')) {
+			/*
+			 * «کنار دکمهٔ خرید» is a local picker: the number travels with the
+			 * add, never on its own. The default stepper still edits the cart.
+			 */
+			if (!scope2.classList.contains('hsw-ppurch--buy-inline') && !scope2.classList.contains('is-not-in-cart')) {
 				pushQty(pid3, next);
 			}
 			return;
@@ -814,9 +818,14 @@
 
 		var scope     = btn.closest('.hsw-p');
 		var inCart    = !!(scope && !scope.classList.contains('is-not-in-cart'));
+		var inline    = !!(scope && scope.classList.contains('hsw-ppurch--buy-inline'));
 		var beforeQty = scope ? (parseInt(scope.getAttribute('data-hsw-in-cart') || '0', 10) || 0) : 0;
-		/* Already in the cart? «خرید آنلاین» adds one more, not the whole stepper. */
-		var addQty    = inCart ? 1 : (st.qty || 1);
+		/*
+		 * Already in the cart? The default stepper is a cart editor, so «خرید
+		 * آنلاین» adds one more. In the inline mode the stepper is the quantity
+		 * the customer picked, in or out of the cart.
+		 */
+		var addQty    = inline ? (st.qty || 1) : (inCart ? 1 : (st.qty || 1));
 
 		var body = new URLSearchParams();
 		body.set('action', 'hsw_add_to_cart'); /* unused; wc-ajax endpoint ignores action */
