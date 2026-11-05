@@ -24,6 +24,7 @@
 
 ### Fixed
 
+- **The cart page broke after a payment was abandoned at the gateway.** With an empty cart and `order_awaiting_payment` still pointing at the pending order, `HSW_Widget_Cart_Page` asked the cart whether it was empty — yes — chose the one-column empty-state grid and returned before the summary. The items widget then asked a different question, found the order through `paying_order()` and drew its line inside that empty state. The customer saw a narrow centred card with a product and no totals, no coupon and no button. Cart widgets now answer "no" to the order fallback (`uses_order_fallback()`), so the page cannot disagree with itself: empty cart → empty state. The pay and checkout steps keep the fallback — verified in the same state: `paying_order()` returns the order for the pay widget and `null` for the cart widget. Measured before: `empty layout YES · summary NO · item rows YES · empty block NO`. After: `empty layout YES · summary NO · item rows no · empty block yes`. A normal two-item cart still renders both columns, 2 rows and the summary (48,972 bytes).
 - `hsw_pay_page_id` was never deleted on uninstall — only its completion-page twin was in the option list.
 
 ### Measured

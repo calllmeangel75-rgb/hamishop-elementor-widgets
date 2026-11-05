@@ -16,6 +16,17 @@ use Elementor\Repeater;
 
 class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
 
+        /**
+         * Totals on the cart page come from the cart, never from a pending
+         * order — otherwise the summary could price an order the items column
+         * is not showing.
+         *
+         * @return bool
+         */
+        protected function uses_order_fallback() {
+                return false;
+        }
+
         public function get_name() {
                 return 'hsw-cart-summary';
         }

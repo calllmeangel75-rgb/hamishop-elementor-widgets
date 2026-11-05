@@ -16,6 +16,16 @@ use Elementor\Controls_Manager;
 
 class HSW_Widget_Cart_Items extends HSW_Cart_Base {
 
+        /**
+         * The cart page renders the cart. A pending order belongs to the pay
+         * step, where this widget is not used — see the method it overrides.
+         *
+         * @return bool
+         */
+        protected function uses_order_fallback() {
+                return false;
+        }
+
         public function get_name() {
                 return 'hsw-cart-items';
         }

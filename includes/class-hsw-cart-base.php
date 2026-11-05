@@ -64,7 +64,7 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                  * the cart stays the source of truth, so a customer who comes back
                  * to edit quantities never sees a stale order total.
                  */
-                if ( ! $id && function_exists( 'WC' ) && WC()->session ) {
+                if ( ! $id && $this->uses_order_fallback() && function_exists( 'WC' ) && WC()->session ) {
                         $empty_cart = ! WC()->cart || 0 === (int) WC()->cart->get_cart_contents_count();
                         if ( $empty_cart ) {
                                 $id = absint( WC()->session->get( 'order_awaiting_payment' ) );
@@ -78,6 +78,31 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                 $order = wc_get_order( $id );
 
                 return $order instanceof WC_Order ? $order : null;
+        }
+
+        /**
+         * May this widget render the order awaiting payment instead of the cart?
+         *
+         * The pay and checkout steps need it: their cart is empty by design and
+         * the order is the only thing left to show. Cart widgets must not.
+         *
+         * A cart page that renders an order is a cart page that lies — and it
+         * produced a broken layout. After a payment was abandoned at the
+         * gateway, the cart was empty while `order_awaiting_payment` still
+         * pointed at the pending order. `HSW_Widget_Cart_Page` asked the cart
+         * whether it was empty (yes), chose the one-column empty-state grid and
+         * returned before the summary; the items widget then asked a different
+         * question, found the order, and drew its line inside that empty state.
+         * The customer saw a narrow centred card with a product and no totals,
+         * no coupon and no button. Two parts, two answers, one broken page.
+         *
+         * Cart widgets now answer "no" and the page stays coherent: empty cart,
+         * empty state, and the pending order is left where it belongs.
+         *
+         * @return bool
+         */
+        protected function uses_order_fallback() {
+                return true;
         }
 
         /**
