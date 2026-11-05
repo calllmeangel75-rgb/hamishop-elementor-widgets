@@ -21,7 +21,7 @@ use Elementor\Controls_Manager;
 class HSW_Widget_Header_GC extends HSW_Header_Base {
 
 	/** Panel slots a menu item may open. */
-	const PANELS = array( 'p1', 'p2', 'p3', 'p4', 'p5', 'p6' );
+	const PANELS = array( 'p1', 'p2', 'p3', 'p4' );
 
 	public function get_name() {
 		return 'hsw-header-gc';
@@ -220,17 +220,15 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 			)
 		);
 
+		/*
+		 * One list per panel instead of one list with a slot picker.
+		 *
+		 * The slot model was correct but asked the owner to hold two lists in
+		 * their head and keep a number in sync between them. Four lists, each
+		 * named after the panel it fills, remove the bookkeeping: the row you
+		 * add under «پنل ۲» is the row that appears under «پنل ۲».
+		 */
 		$panel = new \Elementor\Repeater();
-
-		$panel->add_control(
-			'gc_panel',
-			array(
-				'label'   => __( 'کدام پنل؟', 'hamishop-elementor-widgets' ),
-				'type'    => Controls_Manager::SELECT,
-				'default' => 'p1',
-				'options' => $this->panel_options( false ),
-			)
-		);
 
 		$panel->add_control(
 			'gc_kind',
@@ -239,7 +237,7 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'type'    => Controls_Manager::SELECT,
 				'default' => 'link',
 				'options' => array(
-					'link'   => __( 'ردیف لینک', 'hamishop-elementor-widgets' ),
+					'link'   => __( 'ردیف با آیکون و توضیح', 'hamishop-elementor-widgets' ),
 					'footer' => __( 'لینک پایین پنل', 'hamishop-elementor-widgets' ),
 				),
 			)
@@ -283,18 +281,21 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 			)
 		);
 
-		$this->add_control(
-			'gc_panel_links',
-			array(
-				'label'       => __( 'ردیف‌های پنل‌ها', 'hamishop-elementor-widgets' ),
-				'type'        => Controls_Manager::REPEATER,
-				'fields'      => $panel->get_controls(),
-				'default'     => $this->default_panel_links(),
-				'title_field' => '{{{ gc_title }}}',
-				'separator'   => 'before',
-				'description' => __( 'هر ردیف به یکی از شش پنل وصل می‌شود. آیتم منویی که «پنل ۱» را انتخاب کرده، همین ردیف‌های «پنل ۱» را نشان می‌دهد. ردیف نوع «لینک پایین پنل» به‌صورت لینک تأکیدشده زیر فهرست می‌آید.', 'hamishop-elementor-widgets' ),
-			)
-		);
+		foreach ( self::PANELS as $index => $key ) {
+			$this->add_control(
+				$this->panel_control_id( $key ),
+				array(
+					/* translators: %s: panel number. */
+					'label'       => sprintf( __( 'پنل %s', 'hamishop-elementor-widgets' ), $this->fa_digit( $index + 1 ) ),
+					'type'        => Controls_Manager::REPEATER,
+					'fields'      => $panel->get_controls(),
+					'default'     => $this->default_panel_rows( $index + 1 ),
+					'title_field' => '{{{ gc_title }}}',
+					'separator'   => 'before',
+					'description' => __( 'هر ردیفی که اینجا اضافه کنی، داخل همین پنل دیده می‌شود. برای اینکه یک آیتم منو این پنل را باز کند، در «آیتم‌های منو» همین شمارهٔ پنل را انتخاب کن.', 'hamishop-elementor-widgets' ),
+				)
+			);
+		}
 
 		$this->end_controls_section();
 	}
@@ -568,17 +569,22 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 	}
 
 	/**
-	 * Panel slot choices.
+	 * Elementor control id that holds one panel's rows.
 	 *
-	 * @param bool $with_none Include the «بدون پنل» row.
+	 * @param string $key Panel key (`p1`).
+	 * @return string
+	 */
+	protected function panel_control_id( $key ) {
+		return 'gc_panel_' . substr( (string) $key, 1 );
+	}
+
+	/**
+	 * Panel slot choices for a menu row.
+	 *
 	 * @return array<string,string>
 	 */
-	protected function panel_options( $with_none = true ) {
-		$options = array();
-
-		if ( $with_none ) {
-			$options[''] = __( 'بدون پنل', 'hamishop-elementor-widgets' );
-		}
+	protected function panel_options() {
+		$options = array( '' => __( 'بدون پنل', 'hamishop-elementor-widgets' ) );
 
 		foreach ( self::PANELS as $index => $key ) {
 			/* translators: %s: panel number. */
@@ -636,15 +642,17 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 	}
 
 	/**
-	 * Default panel rows: four shop shortcuts, three service shortcuts and one
-	 * footer link per panel.
+	 * Default rows for one panel.
 	 *
+	 * Panel 1 gets the shop shortcuts, panel 2 the service ones; 3 and 4 start
+	 * empty so a fresh widget is not four identical menus.
+	 *
+	 * @param int $index 1-based panel number.
 	 * @return array
 	 */
-	protected function default_panel_links() {
-		return array(
+	protected function default_panel_rows( $index ) {
+		$one = array(
 			array(
-				'gc_panel' => 'p1',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'storefront',
 				'gc_title' => __( 'همه محصولات', 'hamishop-elementor-widgets' ),
@@ -652,7 +660,6 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => $this->shop_url() ),
 			),
 			array(
-				'gc_panel' => 'p1',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'grid_view',
 				'gc_title' => __( 'دسته‌بندی‌ها', 'hamishop-elementor-widgets' ),
@@ -660,7 +667,6 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => $this->shop_url() ),
 			),
 			array(
-				'gc_panel' => 'p1',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'shopping_cart',
 				'gc_title' => __( 'سبد خرید', 'hamishop-elementor-widgets' ),
@@ -668,7 +674,6 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => $this->cart_url() ),
 			),
 			array(
-				'gc_panel' => 'p1',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'person',
 				'gc_title' => __( 'حساب کاربری', 'hamishop-elementor-widgets' ),
@@ -676,15 +681,16 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => $this->account_url() ),
 			),
 			array(
-				'gc_panel' => 'p1',
 				'gc_kind'  => 'footer',
 				'gc_icon'  => '',
 				'gc_title' => __( 'مشاهدهٔ فروشگاه', 'hamishop-elementor-widgets' ),
 				'gc_desc'  => '',
 				'gc_url'   => array( 'url' => $this->shop_url() ),
 			),
+		);
+
+		$two = array(
 			array(
-				'gc_panel' => 'p2',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'support_agent',
 				'gc_title' => __( 'پشتیبانی', 'hamishop-elementor-widgets' ),
@@ -692,7 +698,6 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => $this->account_url() ),
 			),
 			array(
-				'gc_panel' => 'p2',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'receipt_long',
 				'gc_title' => __( 'پیگیری سفارش', 'hamishop-elementor-widgets' ),
@@ -700,7 +705,6 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => $this->orders_url() ),
 			),
 			array(
-				'gc_panel' => 'p2',
 				'gc_kind'  => 'link',
 				'gc_icon'  => 'call',
 				'gc_title' => __( 'تماس با ما', 'hamishop-elementor-widgets' ),
@@ -708,7 +712,6 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => home_url( '/contact/' ) ),
 			),
 			array(
-				'gc_panel' => 'p2',
 				'gc_kind'  => 'footer',
 				'gc_icon'  => '',
 				'gc_title' => __( 'همهٔ خدمات', 'hamishop-elementor-widgets' ),
@@ -716,6 +719,15 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'gc_url'   => array( 'url' => home_url( '/contact/' ) ),
 			),
 		);
+
+		$map = array(
+			1 => $one,
+			2 => $two,
+			3 => array(),
+			4 => array(),
+		);
+
+		return isset( $map[ $index ] ) ? $map[ $index ] : array();
 	}
 
 	/* =====================================================================
@@ -943,26 +955,25 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 	 */
 	protected function gc_panel_groups( $s ) {
 		$groups = array();
-		$rows   = isset( $s['gc_panel_links'] ) && is_array( $s['gc_panel_links'] ) ? $s['gc_panel_links'] : array();
 
-		foreach ( $rows as $row ) {
-			if ( ! is_array( $row ) ) {
-				continue;
-			}
-			$key = isset( $row['gc_panel'] ) ? (string) $row['gc_panel'] : '';
-			if ( ! in_array( $key, self::PANELS, true ) ) {
-				continue;
-			}
-			if ( ! isset( $groups[ $key ] ) ) {
-				$groups[ $key ] = array(
-					'links' => array(),
-					'foot'  => null,
-				);
-			}
-			if ( isset( $row['gc_kind'] ) && 'footer' === $row['gc_kind'] ) {
-				$groups[ $key ]['foot'] = $row;
-			} else {
-				$groups[ $key ]['links'][] = $row;
+		foreach ( self::PANELS as $key ) {
+			$control = $this->panel_control_id( $key );
+			$rows    = isset( $s[ $control ] ) && is_array( $s[ $control ] ) ? $s[ $control ] : array();
+
+			$groups[ $key ] = array(
+				'links' => array(),
+				'foot'  => null,
+			);
+
+			foreach ( $rows as $row ) {
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				if ( isset( $row['gc_kind'] ) && 'footer' === $row['gc_kind'] ) {
+					$groups[ $key ]['foot'] = $row;
+				} else {
+					$groups[ $key ]['links'][] = $row;
+				}
 			}
 		}
 

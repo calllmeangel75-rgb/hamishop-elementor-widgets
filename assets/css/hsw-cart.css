@@ -340,7 +340,6 @@
         color: var(--hswc-text2); transition: all .15s;
 }
 .hsw-citems__acts .hsw-ic { font-size: 1.25rem; }
-.hsw-citems__fav:hover { color: var(--hswc-accent); background: var(--hswc-card3); }
 .hsw-citems__del:hover { color: var(--hswc-error); background: var(--hswc-error-bg); }
 
 /* --- mobile cards --- */

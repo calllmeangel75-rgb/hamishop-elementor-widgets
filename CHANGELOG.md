@@ -21,8 +21,16 @@
 - Its own stylesheet and script (`hsw-header-gc.css` / `.js`, 19.2 KB and 9.2 KB minified). A page that uses another header never downloads them.
 - Colour follows the documented order — widget control, then `--hsw-pal-*`, then the GC signature value. Verified by measurement: with no palette the mark trace is `#19c58b` and the CTA `#06271f`; with a palette those tokens win; with a colour control the control wins.
 
+### Changed
+
+- **«هدر GC» panels are four lists, not one list with a slot picker.** The old model asked the owner to keep a number in sync between two repeaters — add a row here, remember to pick «پنل ۲» there. Now there is «پنل ۱», «پنل ۲», «پنل ۳», «پنل ۴», each holding exactly the rows that appear inside it; the menu row still names the panel it opens, but there is nothing else to remember. Panels 3 and 4 start empty, so a fresh widget is not four identical menus.
+- **The favourite button is gone from the cart items.** It was a `<button>` with no handler — it looked interactive and did nothing — and a cart is not a wishlist. The control, the markup, the variable and the stylesheet rule are all removed; the delete button and its wrapper are untouched.
+- **The checkout schedule heading is optional.** New `show_hd` switch, and the default text is now «روز انتخاب تحویل به پست» for both desktop and mobile. The mobile head still prints when only the hint is left, so nothing becomes an empty box.
+
 ### Fixed
 
+- The schedule heading could not be turned off even after the switch was added: `opt()` treats an empty string as "unset" and returns the default — which is exactly the value a switcher stores when it is off. The render reads the settings array directly now.
+- The schedule's calendar icon carried `class="hsw-ic 1"` — `HSW_Helpers::icon( 'calendar_month', true )` passed `true` into the `$class` parameter, not `$fill`. No visual change, one less meaningless class in the markup.
 - **«هدر GC» never appeared in the Elementor panel.** `register_widgets()` loads the widget file, then walks a second, hand-written list of class names and skips anything missing from it with a silent `continue`. The file was added to the first list and not the second, so the widget was loaded, never registered, and produced no error at all. `ci-checks.php` now verifies that every widget class appears in that list.
 - `Call to undefined method HSW_Widget_Blog_Page::is_demo()` — the blog base has called `is_demo()` since the SEO box shipped, but the method only ever existed on the archive, cart and product bases. Rendering the blog page widget threw, `hsw_report_fatal()` turned it into an admin banner instead of a white screen, and everything after that call — the whole description box — never rendered. `HSW_Blog_Base` now has its own copy with the blog's archive checks.
 - `Call to undefined method HSW_Composite::is_active()` in the blog grid. Same family, different shape: a static call to a method that was never written. It now uses the existing `is_composite_part()` helper, exactly like the archive header does.

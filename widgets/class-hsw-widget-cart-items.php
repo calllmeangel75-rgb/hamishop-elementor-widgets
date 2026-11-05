@@ -3,7 +3,7 @@
  * Widget: Cart items — faithful conversion of the supplied design.
  * Desktop: box with header (title + count + empty-cart) and item rows
  * (thumb, brand eyebrow, title, variation chips, warranty/warehouse meta,
- * price cluster with discount badge, quantity stepper, favorite/delete).
+ * price cluster with discount badge, quantity stepper, delete).
  * Mobile: card list with absolute discount badge, chips, warranty row and
  * add/delete stepper. Real WooCommerce forms: update_cart, remove, empty.
  *
@@ -147,15 +147,6 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                 'default'     => __( '{percent}٪-', 'hamishop-elementor-widgets' ),
                                 'condition'   => array( 'show_disc' => 'yes' ),
                                 'description' => __( 'موبایل: «{percent}٪ تخفیف» به‌صورت خودکار نشان داده می‌شود.', 'hamishop-elementor-widgets' ),
-                        )
-                );
-
-                $this->add_control(
-                        'show_favorite',
-                        array(
-                                'label'   => __( 'دکمه علاقه‌مندی (دسکتاپ)', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::SWITCHER,
-                                'default' => 'yes',
                         )
                 );
 
@@ -396,7 +387,6 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                 $warehouse    = trim( (string) ( $s['warehouse_text'] ?? '' ) );
                 $show_old     = ( 'yes' === ( $s['show_old'] ?? 'yes' ) );
                 $show_disc    = ( 'yes' === ( $s['show_disc'] ?? 'yes' ) );
-                $show_fav     = ( 'yes' === ( $s['show_favorite'] ?? 'yes' ) );
                 $show_del     = ( 'yes' === ( $s['show_del'] ?? 'yes' ) );
                 $disc_tpl     = $this->opt( 'disc_tpl', __( '{percent}٪-', 'hamishop-elementor-widgets' ) );
                 ?>
@@ -470,14 +460,9 @@ class HSW_Widget_Cart_Items extends HSW_Cart_Base {
                                                 <button type="submit" name="update_cart" value="1" class="hsw-citems__update" tabindex="-1" aria-hidden="true"><?php esc_html_e( 'به‌روزرسانی سبد', 'hamishop-elementor-widgets' ); ?></button>
                                         </form>
 
-                                        <?php if ( $show_fav || $show_del ) : ?>
+                                        <?php if ( $show_del && '' !== $item['remove'] ) : ?>
                                                 <div class="hsw-citems__acts">
-                                                        <?php if ( $show_fav ) : ?>
-                                                                <button type="button" class="hsw-citems__fav" title="<?php esc_attr_e( 'ذخیره در علاقه‌مندی‌ها', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'favorite' ); ?></button>
-                                                        <?php endif; ?>
-                                                        <?php if ( $show_del && '' !== $item['remove'] ) : ?>
-                                                                <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__del" title="<?php esc_attr_e( 'حذف کالا', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></a>
-                                                        <?php endif; ?>
+                                                        <a href="<?php echo esc_url( $item['remove'] ); ?>" class="hsw-citems__del" title="<?php esc_attr_e( 'حذف کالا', 'hamishop-elementor-widgets' ); ?>"><?php echo HSW_Helpers::icon( 'delete' ); ?></a>
                                                 </div>
                                         <?php endif; ?>
                                 </div>

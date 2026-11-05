@@ -56,21 +56,38 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
                         );
                 }
 
+                /*
+                 * The heading is optional: on a checkout page that already says
+                 * «زمان تحویل» in its own step header it is a second title for
+                 * the same thing, and the owner asked for a way to drop it.
+                 */
+                $this->add_control(
+                        'show_hd',
+                        array(
+                                'label'        => __( 'نمایش عنوان بالای کارت', 'hamishop-elementor-widgets' ),
+                                'type'         => Controls_Manager::SWITCHER,
+                                'default'      => 'yes',
+                                'return_value' => 'yes',
+                        )
+                );
+
                 $this->add_control(
                         'title',
                         array(
-                                'label'   => __( 'عنوان (دسکتاپ)', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'انتخاب زمان و روز تحویل', 'hamishop-elementor-widgets' ),
+                                'label'     => __( 'عنوان (دسکتاپ)', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::TEXT,
+                                'default'   => __( 'روز انتخاب تحویل به پست', 'hamishop-elementor-widgets' ),
+                                'condition' => array( 'show_hd' => 'yes' ),
                         )
                 );
 
                 $this->add_control(
                         'title_m',
                         array(
-                                'label'   => __( 'عنوان (موبایل)', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'زمان‌بندی تحویل مرسوله', 'hamishop-elementor-widgets' ),
+                                'label'     => __( 'عنوان (موبایل)', 'hamishop-elementor-widgets' ),
+                                'type'      => Controls_Manager::TEXT,
+                                'default'   => __( 'روز انتخاب تحویل به پست', 'hamishop-elementor-widgets' ),
+                                'condition' => array( 'show_hd' => 'yes' ),
                         )
                 );
 
@@ -314,8 +331,15 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
                         return;
                 }
 
-                $title   = $this->opt( 'title', __( 'انتخاب زمان و روز تحویل', 'hamishop-elementor-widgets' ) );
-                $title_m = $this->opt( 'title_m', __( 'زمان‌بندی تحویل مرسوله', 'hamishop-elementor-widgets' ) );
+                $title   = $this->opt( 'title', __( 'روز انتخاب تحویل به پست', 'hamishop-elementor-widgets' ) );
+                $title_m = $this->opt( 'title_m', __( 'روز انتخاب تحویل به پست', 'hamishop-elementor-widgets' ) );
+                /*
+                 * Not `opt()`: it treats an empty string as "unset" and hands
+                 * back the default, which is exactly the value a switcher
+                 * stores when it is off — the switch could never turn the
+                 * heading off.
+                 */
+                $show_hd = ! isset( $s['show_hd'] ) || 'yes' === $s['show_hd'];
 
                 $raw_days    = ( isset( $s['days'] ) && is_array( $s['days'] ) && ! empty( $s['days'] ) ) ? $s['days'] : array();
                 $is_mock_day = isset( $raw_days[0]['day'] ) && '۲۴ دی' === trim( (string) $raw_days[0]['day'] );
@@ -340,10 +364,12 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
 
                         <!-- =================== DESKTOP =================== -->
                         <article class="hsw-cksched__card hsw-d">
-                                <div class="hsw-cksched__hd">
-                                        <?php echo HSW_Helpers::icon( 'calendar_month', true ); ?>
-                                        <h2 class="hsw-cksched__hd-t"><?php echo esc_html( $title ); ?></h2>
-                                </div>
+                                <?php if ( $show_hd ) : ?>
+                                        <div class="hsw-cksched__hd">
+                                                <?php echo HSW_Helpers::icon( 'calendar_month' ); ?>
+                                                <h2 class="hsw-cksched__hd-t"><?php echo esc_html( $title ); ?></h2>
+                                        </div>
+                                <?php endif; ?>
 
                                 <div class="hsw-cksched__grp">
                                         <span class="hsw-cksched__grp-lbl"><?php echo esc_html( $this->opt( 'days_label', __( 'روز تحویل سفارش:', 'hamishop-elementor-widgets' ) ) ); ?></span>
@@ -389,15 +415,23 @@ class HSW_Widget_Checkout_Schedule extends HSW_Checkout_Base {
 
                         <!-- =================== MOBILE =================== -->
                         <section class="hsw-cksched__mcard hsw-m">
-                                <div class="hsw-cksched__mhd">
-                                        <h2 class="hsw-cksched__hd-t hsw-cksched__hd-t--m">
-                                                <?php echo HSW_Helpers::icon( 'calendar_month' ); ?>
-                                                <?php echo esc_html( $title_m ); ?>
-                                        </h2>
-                                        <?php if ( '' !== trim( $this->opt( 'hint_m', '' ) ) ) : ?>
-                                                <span class="hsw-cksched__hint"><?php echo esc_html( $this->opt( 'hint_m', '' ) ); ?></span>
-                                        <?php endif; ?>
-                                </div>
+                                <?php
+                                $hint_m = trim( (string) $this->opt( 'hint_m', '' ) );
+                                /* The head is only printed when it would hold something. */
+                                ?>
+                                <?php if ( $show_hd || '' !== $hint_m ) : ?>
+                                        <div class="hsw-cksched__mhd">
+                                                <?php if ( $show_hd ) : ?>
+                                                        <h2 class="hsw-cksched__hd-t hsw-cksched__hd-t--m">
+                                                                <?php echo HSW_Helpers::icon( 'calendar_month' ); ?>
+                                                                <?php echo esc_html( $title_m ); ?>
+                                                        </h2>
+                                                <?php endif; ?>
+                                                <?php if ( '' !== $hint_m ) : ?>
+                                                        <span class="hsw-cksched__hint"><?php echo esc_html( $hint_m ); ?></span>
+                                                <?php endif; ?>
+                                        </div>
+                                <?php endif; ?>
 
                                 <div class="hsw-cksched__mdays" data-hswk-days>
                                         <?php foreach ( $days as $i => $d ) : ?>
