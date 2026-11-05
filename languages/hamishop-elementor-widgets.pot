@@ -2332,7 +2332,7 @@ msgstr ""
 msgid "برای انتخاب دقیق‌تر می‌توانید با فیلترهای همین صفحه، نتایج را بر اساس ویژگی‌های واقعی محصولات محدود کنید:"
 msgstr ""
 
-#: includes/class-hsw-setup-pages.php:208
+#: includes/class-hsw-setup-pages.php:237
 msgid "برای انجام این کار دسترسی مدیریت لازم است."
 msgstr ""
 
@@ -2900,7 +2900,7 @@ msgstr ""
 msgid "بعد از متن"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:439
+#: includes/class-hsw-complete-route.php:463
 msgid "بعد از پرداخت (و بازگشت از درگاه)، مشتری به این صفحه هدایت می‌شود و شماره و جزئیات سفارش را می‌بیند. خالی = رفتار پیش‌فرض ووکامرس."
 msgstr ""
 
@@ -5430,7 +5430,7 @@ msgid "در صفحهٔ ورود و پنل حساب کاربری همین نام 
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-summary.php:166
-msgid "در صورت خالی بودن، به‌طور خودکار از برگهٔ شرایط و ضوابط ووکامرس یا حریم خصوصی وردپرس خوانده می‌شود."
+msgid "در صورت خالی بودن، به‌طور خودکار از برگهٔ شرایط و ضوابط ووکامرس یا حریم خصوصی وردپرس خوانده می‌شود.<br><strong>توجه:</strong> این لینک فقط نمایش می‌دهد؛ الزام پذیرش از تنظیمات فروشگاه می‌آید. برای اجباری‌شدن تیک، برگهٔ شرایط و ضوابط را در ووکامرس ← تنظیمات ← پیشرفته انتخاب کنید یا فیلتر <code>hsw_terms_required</code> را true کنید."
 msgstr ""
 
 #: includes/class-hsw-branding.php:599
@@ -8275,7 +8275,7 @@ msgstr ""
 msgid "صفحهٔ تکمیل خرید"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:438
+#: includes/class-hsw-complete-route.php:462
 msgid "صفحهٔ تکمیل خرید (مرحلهٔ ۴)"
 msgstr ""
 
@@ -8303,7 +8303,7 @@ msgstr ""
 msgid "صفحهٔ پرداخت"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:428
+#: includes/class-hsw-complete-route.php:452
 msgid "صفحهٔ پرداخت (مرحلهٔ ۳)"
 msgstr ""
 
@@ -8324,7 +8324,7 @@ msgstr ""
 msgid "صفحه‌ای که دنبالش بودید پیدا نشد!"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:429
+#: includes/class-hsw-complete-route.php:453
 msgid "صفحه‌ای که ویجت «صفحه کامل پرداخت — حامی» دارد. دکمهٔ «ادامه و ورود به مرحله پرداخت» در صفحهٔ تسویه به این صفحه می‌رود. خالی = همان صفحهٔ تسویه ووکامرس."
 msgstr ""
 
@@ -11127,11 +11127,11 @@ msgstr ""
 msgid "مسیر خانه، فروشگاه و دسته‌بندی محصول."
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:422
+#: includes/class-hsw-complete-route.php:446
 msgid "مسیر خرید (حامی)"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:425
+#: includes/class-hsw-complete-route.php:449
 msgid "مسیر خرید با ویجت‌های جامع حامی: سبد خرید → تسویه حساب (اطلاعات ارسال) → پرداخت → تکمیل خرید. برای هر مرحله یک صفحه بسازید و ویجت جامع همان مرحله را داخل آن قرار دهید."
 msgstr ""
 

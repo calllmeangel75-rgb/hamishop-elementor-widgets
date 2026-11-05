@@ -81,6 +81,12 @@ final class HSW_Complete_Route {
      * @param string $slug 'payment' or 'complete'.
      * @return bool
      */
+    /**
+     * Meta key written on every page this plugin creates. Lives here so the
+     * router and the setup screen agree on one string.
+     */
+    const META = '_hsw_route_page';
+
     public static function page_is_ours( $id, $slug ) {
         $widgets = array(
             'payment'  => array( 'hsw-pay-page', 'hsw-payment-page' ),
@@ -93,6 +99,24 @@ final class HSW_Complete_Route {
 
         $want_widgets   = isset( $widgets[ $slug ] ) ? $widgets[ $slug ] : array();
         $want_shortcode = isset( $shortcodes[ $slug ] ) ? $shortcodes[ $slug ] : array();
+
+        /*
+         * Fast path for the pages this plugin created: the marker says who made
+         * it, and the shortcode says it still renders the step. The marker
+         * alone is not enough — a page emptied after it was created keeps its
+         * marker, and the route would then point at a page that shows nothing.
+         * Reading the content is cheap (already in the post cache) and keeps the
+         * hot path — every singular view runs current_route() for robots — off
+         * the Elementor JSON.
+         */
+        if ( $slug === (string) get_post_meta( (int) $id, self::META, true ) ) {
+            $marked_content = (string) get_post_field( 'post_content', (int) $id );
+            foreach ( $want_shortcode as $shortcode ) {
+                if ( false !== strpos( $marked_content, $shortcode ) ) {
+                    return true;
+                }
+            }
+        }
 
         $data = get_post_meta( (int) $id, '_elementor_data', true );
         if ( is_string( $data ) && '' !== $data ) {

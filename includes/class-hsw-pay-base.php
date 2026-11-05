@@ -135,22 +135,30 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
          */
         protected function terms_required() {
                 /*
-                 * The same policy the server enforces, plus the widget's own
-                 * link.
+                 * One policy, the same one the server enforces.
                  *
-                 * The server only sees site configuration, so a custom URL on
-                 * the widget can make the client ask for a tick the server does
-                 * not check — harmless. The dangerous direction was the other
-                 * one: a terms page (or the `hsw_terms_required` filter) made the
-                 * server require a tick while the widget rendered no checkbox,
-                 * and the order could never be placed. Asking the route first
-                 * closes that.
+                 * The widget's own `terms_url` used to create a client-side
+                 * requirement the server knew nothing about: the customer had to
+                 * tick a box that no server check cared about, and a custom link
+                 * alone could never make the server ask. Enforcement now has a
+                 * single source; a custom link only changes what is shown.
                  */
-                if ( class_exists( 'HSW_Complete_Route' ) && HSW_Complete_Route::terms_required() ) {
-                        return true;
-                }
+                return class_exists( 'HSW_Complete_Route' )
+                        ? HSW_Complete_Route::terms_required()
+                        : ( '' !== (string) $this->terms_url() );
+        }
 
-                return '' !== (string) $this->terms_url();
+        /**
+         * Is there something to show?
+         *
+         * A custom link is worth rendering even when the shop does not enforce
+         * acceptance — the customer can read the terms — but it must not become
+         * a requirement the server does not know about.
+         *
+         * @return bool
+         */
+        protected function terms_shown() {
+                return $this->terms_required() || '' !== (string) $this->terms_url();
         }
 
         /* =========================================================================

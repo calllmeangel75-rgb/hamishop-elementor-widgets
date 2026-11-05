@@ -54,6 +54,9 @@
         var shipPending = '';
         var shipPromise = null;
         var shipWait = false;
+        /* Did the last save actually land? A failed save must not let the
+           continue click through with the previous rate. */
+        var shipFailed = false;
 
         function shippingCheckedValue() {
                 var checked = document.querySelector( 'input[name^="hsw_shipping_method"]:checked' );
@@ -263,6 +266,7 @@
                         };
 
                         shipBusy    = true;
+                        shipFailed  = false;
                         shipPending = input.value;
                         for ( var g = 0; g < groups.length; g++ ) {
                                 groups[ g ].classList.add( 'is-loading' );
@@ -273,6 +277,7 @@
                                 .then( function ( json ) {
                                         shipConfirmed = shipPending || input.value;
                                         shipPending   = '';
+                                        shipFailed    = false;
                                         patchTotals( json && json.totals );
                                 } )
                                 .catch( function () {
@@ -282,6 +287,7 @@
                                            held the old rate, so the order shipped
                                            with a method the customer had replaced. */
                                         shipPending = '';
+                                        shipFailed  = true;
                                         if ( shipConfirmed ) {
                                                 syncShippingUI( shipConfirmed );
                                         }
@@ -425,6 +431,16 @@ document.addEventListener( 'click', function ( event ) {
 			shipWaitMsg( CFG.shipSaving || 'در حال ذخیره روش ارسال…' );
 			Promise.resolve( shipPromise ).catch( function () {} ).then( function () {
 				shipWait = false;
+				/* The rate did not save: the error is already on screen and the
+				   radio is back on the old choice. Continuing here would place
+				   the order with a rate the customer had replaced. */
+				if ( shipFailed ) {
+					/* Replace the "saving…" note with the error: the request is
+					   over, and leaving it on screen would keep saying it is
+					   still saving. */
+					shipWaitMsg( CFG.errorText || 'خطا در بروزرسانی روش ارسال' );
+					return;
+				}
 				shipWaitMsg( '' );
 				cta.click();
 			} );

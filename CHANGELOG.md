@@ -8,6 +8,22 @@
 
 ## [Unreleased]
 
+## [1.11.247] — 2026-11-05
+
+### Fixed — third audit round
+
+Four scenarios, all reproduced against 1.11.246 before changing anything.
+
+- **A failed rate save still let «ادامه» through.** `shipPromise` resolved on both success and failure (the chain ended in `.then(clear, clear)`), so the deferred click was re-dispatched after an error and the order went on with the previous rate. `shipFailed` now stops the continuation, and the "saving…" note is replaced by the error instead of staying on screen. Measured: failed save → address note «خطا در بروزرسانی روش ارسال», radio back on `flat_rate:1`, no re-dispatch, URL unchanged; successful save → the click continues and the address gate runs.
+- **The terms requirement had two policies.** A custom link on the widget created a client-side requirement the server knew nothing about. Enforcement is now `HSW_Complete_Route::terms_required()` only — site configuration or the `hsw_terms_required` filter — and the custom link only decides what is shown (`terms_shown()`). The control's description says so. Measured: custom link only → server `false`, widget `false`.
+- **A foreign page selected in the setting was de-indexed through `wp_robots`.** `current_route()` claimed any page whose id matched the option, so the route's noindex was applied to an unrelated page while its own SEO meta stayed empty — invisible to whoever looked at it in Yoast. It now requires `page_is_ours()`. Measured: foreign page → `current_route() ''`, robots `index:true, follow:true`.
+- **A stale marker was enough to link a page.** A page that once carried `_hsw_route_page` but no longer renders the step was reported `unwired`. The marker now has to still carry the shortcode, and the marker check moved into `page_is_ours()` so the router and the setup screen agree. Measured: emptied marker page → `missing`, `page_is_ours false`.
+- **A proper page under another slug is now found without manual selection.** When the option, the canonical slug and the marker all fail, the setup screen searches published pages for the shortcode (one or two queries, admin only). Measured: `[hamishop_payment]` on `/pay-now/` → `unwired`, linked by the button instead of creating a duplicate.
+
+### Changed
+
+- `_hsw_route_page` is one constant, `HSW_Complete_Route::META`, shared by the router and the setup screen.
+
 ## [1.11.246] — 2026-11-05
 
 ### Added

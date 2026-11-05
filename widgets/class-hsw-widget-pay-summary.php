@@ -163,7 +163,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                 'type'        => Controls_Manager::URL,
                                 'placeholder' => home_url( '/terms/' ),
                                 'default'     => array( 'url' => '' ),
-                                'description' => __( 'در صورت خالی بودن، به‌طور خودکار از برگهٔ شرایط و ضوابط ووکامرس یا حریم خصوصی وردپرس خوانده می‌شود.', 'hamishop-elementor-widgets' ),
+                                'description' => __( 'در صورت خالی بودن، به‌طور خودکار از برگهٔ شرایط و ضوابط ووکامرس یا حریم خصوصی وردپرس خوانده می‌شود.<br><strong>توجه:</strong> این لینک فقط نمایش می‌دهد؛ الزام پذیرش از تنظیمات فروشگاه می‌آید. برای اجباری‌شدن تیک، برگهٔ شرایط و ضوابط را در ووکامرس ← تنظیمات ← پیشرفته انتخاب کنید یا فیلتر <code>hsw_terms_required</code> را true کنید.', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -524,7 +524,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 </div>
                                         </div>
 
-                                        <?php if ( $this->terms_required() ) : ?>
+                                        <?php if ( $this->terms_shown() ) : ?>
                                         <div class="hsw-psum__terms">
                                                 <label class="hsw-psum__terms-l">
                                                         <input type="checkbox" class="hsw-k-terms" />
@@ -632,7 +632,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                         </span>
                                 </div>
 
-                                <?php if ( $this->terms_required() ) : ?>
+                                <?php if ( $this->terms_shown() ) : ?>
                                 <label class="hsw-psum__terms-l is-m">
                                         <input type="checkbox" class="hsw-k-terms" />
                                         <span class="hsw-psum__terms-tx">

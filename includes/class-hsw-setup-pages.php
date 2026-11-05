@@ -36,7 +36,7 @@ final class HSW_Setup_Pages {
 	const NONCE = 'hsw_setup_pages';
 
 	/** Post meta marking a page this plugin created. */
-	const META = '_hsw_route_page';
+	const META = HSW_Complete_Route::META;
 
 	public function __construct() {
 		add_action( 'admin_post_' . self::ACTION, array( __CLASS__, 'handle' ) );
@@ -154,8 +154,37 @@ final class HSW_Setup_Pages {
 				'meta_value'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery -- see above.
 			)
 		);
-		if ( $marked ) {
+		/*
+		 * A marker alone is not enough: the page may have been emptied since it
+		 * was created. Linking it would point the route at a page that no longer
+		 * renders the step.
+		 */
+		if ( $marked && HSW_Complete_Route::page_is_ours( (int) $marked[0], $key ) ) {
 			return self::row( 'unwired', (int) $marked[0], $page );
+		}
+
+		/*
+		 * A hand-built page carrying the shortcode under another slug. Found by
+		 * a content search — one or two queries on an admin screen, and only
+		 * when everything cheaper has already failed.
+		 */
+		$shortcodes = ( 'payment' === $key )
+			? array( 'hamishop_payment', 'hamishop_pay' )
+			: array( 'hamishop_complete' );
+
+		foreach ( $shortcodes as $shortcode ) {
+			$found = get_posts(
+				array(
+					'post_type'      => 'page',
+					'post_status'    => 'publish',
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+					's'              => '[' . $shortcode,
+				)
+			);
+			if ( $found && HSW_Complete_Route::page_is_ours( (int) $found[0], $key ) ) {
+				return self::row( 'unwired', (int) $found[0], $page );
+			}
 		}
 
 		/*
@@ -376,10 +405,17 @@ final class HSW_Setup_Pages {
 		$id = (int) $post->ID;
 
 		foreach ( self::pages() as $key => $page ) {
-			if ( (int) get_option( $page['option'], 0 ) === $id ) {
+			/*
+			 * Being selected in the setting is not enough. A page that does not
+			 * render the step is not this route, and treating it as one marked
+			 * an unrelated page noindex through wp_robots while its own SEO meta
+			 * stayed empty — the de-indexing was invisible to whoever looked at
+			 * the page in Yoast.
+			 */
+			if ( (int) get_option( $page['option'], 0 ) === $id && HSW_Complete_Route::page_is_ours( $id, $key ) ) {
 				return $key;
 			}
-			if ( (string) get_post_meta( $id, self::META, true ) === $key ) {
+			if ( (string) get_post_meta( $id, self::META, true ) === $key && HSW_Complete_Route::page_is_ours( $id, $key ) ) {
 				return $key;
 			}
 		}
