@@ -853,7 +853,15 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		$views    = $this->views( $post->ID );
 		$comments = (int) get_comments_number( $post );
 
-		$classes = 'hsw-pp hsw-vis-' . ( isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto' ) . $this->hsw_font_class();
+		/*
+		 * The 62px bottom padding that keeps the fixed dock off the last block
+		 * of the article used to be unconditional, so a widget with the dock
+		 * switched off still carried a band of empty space on mobile. The class
+		 * is present exactly when the dock is.
+		 */
+		$classes = 'hsw-pp hsw-vis-' . ( isset( $s['vis'] ) ? sanitize_html_class( $s['vis'] ) : 'auto' )
+			. $this->hsw_font_class()
+			. ( $on( 'show_dock' ) ? ' hsw-pp--dock' : '' );
 		?>
 		<div class="<?php echo esc_attr( $classes ); ?>" data-hsw-pp data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
 
@@ -1506,7 +1514,8 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 						<?php HSW_Helpers::the_icon( 'shopping_bag' ); ?>
 						<span><?php esc_html_e( 'خرید این کالا', 'hamishop-elementor-widgets' ); ?></span>
 					</a>
-				<?php else : ?>
+				<?php elseif ( $link_comments ) : ?>
+					<?php /* Same anchor as the «نظر» button above: only when it exists. */ ?>
 					<a class="hsw-pp__dockcta" href="#hsw-comments">
 						<?php HSW_Helpers::the_icon( 'chat_bubble' ); ?>
 						<span><?php esc_html_e( 'ثبت دیدگاه', 'hamishop-elementor-widgets' ); ?></span>

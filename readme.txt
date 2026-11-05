@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.242
+Stable tag: 1.11.243
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.243 =
+* Fix: The article page scrolled sideways on a phone (+52px at 390px). The prev/next grid used `1fr`, which cannot shrink below its content, so a long neighbouring title pushed the column to 492px inside a 342px box. Now `minmax(0, 1fr)` plus `min-width: 0` on the item — measured at 320/360/390/768/1024/1280.
+* Fix: The 62px bottom padding that clears the fixed dock was unconditional, so a widget with the dock switched off still had dead space on mobile. It is scoped to `hsw-pp--dock`, which is only printed when the dock renders.
+* Fix: With no product in the article, the dock's «ثبت دیدگاه» button still linked to `#hsw-comments` even when that section was not printed. Same guard as the «نظر» button.
+
 = 1.11.242 =
 * Fix (security): The post widget rendered a draft or private post when its numeric «شناسه نوشته» field pointed at one, and a password-protected post rendered in full because the body bypassed `get_the_content()`. Non-published posts now require `edit_post` capability, and `post_password_required()` prints WordPress's own password form instead.
 * Fix: On a single post, «مجله», «بازگشت به مجله», «مشاهده همه» and the breadcrumb category all linked back to the article being read — `blog_base_url()` took the current request path as the base. It uses the posts page there now, and the category link goes to the real category archive.
@@ -94,14 +99,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix: The ticket CSV counted only approved replies, while `get_comments()` — used by the ticket list — defaults to `status => all`, which WordPress turns into `comment_approved = '0' OR comment_approved = '1'`. A ticket with a reply waiting for moderation therefore showed a lower number in the CSV than in the admin list. The query now matches `IN ('0', '1')`; spam and trash are excluded by both.
 * Verified against a ticket holding one approved, one pending, one spam and one trash reply: `get_comments()` = 4, `reply_counts()` = 4.
 * Two checks in `tools/ci-checks.php` fail if the approved-only filter comes back.
-
-= 1.11.238 =
-* Fix: The transient cleanup used `LIKE '_transient_hsw_lp_%'` with an unescaped `_`. In SQL that is a single-character wildcard, so the pattern matched more option names than intended — and because it started with a wildcard, MySQL could not use the `option_name` index and scanned the whole table. It is built with `$wpdb->esc_like()` now.
-* Fix: «مشتریان طلایی» checked that `wc_order_stats` exists but then joined `wc_customer_lookup` anyway. A site missing the second table got a SQL error instead of an empty list. Both are checked.
-* Fix: Best sellers decided HPOS from the existence of the `wc_orders` table. A shop that switched HPOS off keeps that table, and the list came back empty. It now asks WooCommerce (`OrderUtil::custom_orders_table_usage_is_enabled()`), with the table check kept as a fallback.
-* Fix: The ticket CSV export ran one `get_comments( count => true )` per ticket. It is one grouped query in chunks of 500 now; the file is byte-for-byte the same.
-* Fix: The price-slider bounds stayed cached for 12 hours after a product changed, so a product priced above the old maximum could not be reached. The transient is cleared on product save.
-* Perf: The wallet top-up sum is memoised per request — the wallet screen asked for it twice and walked every order of the customer both times.
 
 == Upgrade Notice ==
 

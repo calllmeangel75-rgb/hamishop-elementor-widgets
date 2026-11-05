@@ -1167,7 +1167,7 @@
 
 .hsw-pp__relgrid {
 	display: grid;
-	grid-template-columns: 1fr;
+	grid-template-columns: minmax(0, 1fr);
 	gap: 12px;
 }
 
@@ -1242,7 +1242,14 @@
 
 .hsw-pp__pn {
 	display: grid;
-	grid-template-columns: 1fr;
+	/*
+	 * `minmax(0, 1fr)`, not `1fr`: a plain `1fr` track has an automatic
+	 * minimum, so it refuses to shrink below its content. A long neighbouring
+	 * title pushed this column to 492px inside a 342px box and the entire page
+	 * scrolled sideways on a phone — measured, +52px at a 390px viewport.
+	 * Same pattern the desktop grid above already uses.
+	 */
+	grid-template-columns: minmax(0, 1fr);
 	gap: 10px;
 	margin-top: 24px;
 	padding-top: 18px;
@@ -1253,6 +1260,7 @@
 	display: flex;
 	align-items: center;
 	gap: 10px;
+	min-width: 0;
 	padding: 10px;
 	border-radius: 12px;
 	transition: background-color .15s;
@@ -1490,8 +1498,9 @@
 	box-shadow: 0 -6px 18px rgba(15, 23, 42, .06);
 }
 
-/* Keep the fixed dock from covering the last block of the article. */
-.hsw-pp {
+/* Keep the fixed dock from covering the last block of the article. Only when
+   the dock is actually rendered — it used to apply to every widget. */
+.hsw-pp--dock {
 	padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -1592,7 +1601,7 @@
 		display: none;
 	}
 
-	.hsw-pp {
+	.hsw-pp--dock {
 		padding-bottom: 0;
 	}
 
@@ -1626,7 +1635,7 @@
 	}
 
 	.hsw-pp__pn {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.hsw-pp__form {

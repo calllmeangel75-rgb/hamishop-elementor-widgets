@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+## [1.11.243] — 2026-11-05
+
+### Fixed
+
+- The article page scrolled sideways on a phone: `document.scrollWidth` was 442 at a 390px viewport. Ablating the widget's parts one at a time put it on the prev/next navigation — `.hsw-pp__pn` used `grid-template-columns: 1fr`, and a `1fr` track has an automatic minimum, so a long neighbouring title forced the column to 492px inside a 342px box. Now `minmax(0, 1fr)` with `min-width: 0` on the item; the desktop two-column rule and `.hsw-pp__relgrid` (same pattern, card titles) got the same treatment.
+- Measured with the built stylesheet swapped in on the live page: 320 → 338 (the 18px left is `.screen-reader-text` from the theme, not this plugin), 360 → 360, 390 → 390, and 768/1024/1280 unchanged.
+- `.hsw-pp` carried `padding-bottom: 62px` unconditionally to clear the fixed dock, so a widget with `show_dock` off still had a band of empty space on mobile. The padding is scoped to `hsw-pp--dock`, a class printed only when the dock renders. Verified: without the class 0px, with it 62px, and 0px on desktop in both cases.
+- With no product in the article, the dock's «ثبت دیدگاه» button linked to `#hsw-comments` regardless of whether that section existed. It now shares the `$link_comments` guard. Verified by rendering the method directly: two anchors with the flag, none without.
+
 ## [1.11.242] — 2026-11-05
 
 ### Fixed
