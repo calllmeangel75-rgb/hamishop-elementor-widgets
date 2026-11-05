@@ -244,8 +244,14 @@ body.admin-bar .hsw-gc__drawer {
 	}
 }
 
+/*
+ * `backwards`, not `both`: with `both` the final keyframe keeps
+ * `transform: none` on the bar forever, and an animation always beats a plain
+ * declaration — the auto-hide slide-out below would silently do nothing.
+ * The last keyframe already matches the resting state, so nothing jumps.
+ */
 .hsw-gc[data-hsw-gc-ready] .hsw-gc__bar {
-	animation: hsw-gc-in 0.9s var(--hsw-gc-ease-out) 0.05s both;
+	animation: hsw-gc-in 0.9s var(--hsw-gc-ease-out) 0.05s backwards;
 }
 
 .hsw-gc__bg {
@@ -291,6 +297,23 @@ body.admin-bar .hsw-gc__drawer {
 	.hsw-gc__bar.is-docked .hsw-gc__bg {
 		background: var(--hsw-gc-bg);
 	}
+}
+
+/*
+ * Auto-hide: the bar keeps its floating pill and simply leaves the way it
+ * came. Scrolling down hides it, any upward scroll brings it straight back —
+ * the script decides when, this only owns the movement.
+ */
+.hsw-gc--autohide .hsw-gc__bar {
+	transition:
+		transform 0.42s var(--hsw-gc-ease-out),
+		padding var(--hsw-gc-dur-3) var(--hsw-gc-ease-out);
+	will-change: transform;
+}
+
+.hsw-gc--autohide .hsw-gc__bar.is-hidden {
+	transform: translate3d(0, calc(-100% - 12px), 0);
+	pointer-events: none;
 }
 
 .hsw-gc__inner {
@@ -1070,8 +1093,13 @@ body .hsw-gc button.hsw-gc__btn.hsw-gc__btn {
 	color: var(--hsw-gc-glow);
 }
 
-.hsw-gc__drawer .hsw-gc__mark {
+/* The drawer head is smaller than the bar, but an image mark keeps its ratio. */
+.hsw-gc__drawer .hsw-gc__mark:not(.hsw-gc__mark--image) {
 	width: 2rem;
+	height: 2rem;
+}
+
+.hsw-gc__drawer .hsw-gc__mark--image img {
 	height: 2rem;
 }
 

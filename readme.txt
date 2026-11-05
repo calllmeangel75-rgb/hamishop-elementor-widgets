@@ -75,7 +75,8 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 = 1.11.244 =
 * New: «هدر GC» — a third header widget. A rounded bar floats over the page and docks into a full-width blurred bar on scroll; the brand mark is a «G» drawn as a circuit trace that draws itself; a gradient underline follows the pointer; dropdown panels stagger their rows in. The mark, brand text, every menu row, six panel slots (icon + title + description + footer), the cart badge, the account button and the mobile drawer are all controls.
-* New: `hd_mode` keeps the bar fixed (default) or in the flow, for a template whose own section is already sticky.
+* New: «رفتار با اسکرول» — سه حالت: چسبان (پیش‌فرض)، پنهان‌شدن با اسکرول پایین و بازگشت فوری با اسکرول بالا، یا درون جریان صفحه.
+* New: نشان برند به‌صورت خودکار همان لوگوی سایت است؛ لازم نیست دوباره آپلود شود. نشان مدار GC گزینه و جایگزین است.
 * Fix: «هدر GC» never reached the Elementor panel — the file was required by `register_widgets()` but missing from the class list that follows it, and that list skips unknown names silently. A new check now fails the build when a widget class is not in it.
 * Fix: the blog page widget threw `Call to undefined method HSW_Widget_Blog_Page::is_demo()`; the method existed on the archive, cart and product bases but not on the blog base, so the description box never rendered. The blog grid threw the same way over `HSW_Composite::is_active()`, which was never written — it now uses `is_composite_part()`.
 * Fix: the harness now audits method resolution (`$this->x()` and `HSW_*::x()`), so an undefined method fails the build instead of surfacing as an admin banner on a customer's site.

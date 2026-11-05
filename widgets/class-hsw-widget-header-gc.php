@@ -76,24 +76,24 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 			array(
 				'label'       => __( 'نشان برند', 'hamishop-elementor-widgets' ),
 				'type'        => Controls_Manager::SELECT,
-				'default'     => 'circuit',
+				'default'     => 'logo',
 				'options'     => array(
+					'logo'    => __( 'لوگوی سایت (خودکار)', 'hamishop-elementor-widgets' ),
 					'circuit' => __( 'نشان مدار GC (انیمیشن خط)', 'hamishop-elementor-widgets' ),
-					'logo'    => __( 'لوگوی سایت / تصویر انتخابی', 'hamishop-elementor-widgets' ),
 					'icon'    => __( 'آیکون از مجموعهٔ HamiShop', 'hamishop-elementor-widgets' ),
 					'none'    => __( 'بدون نشان (فقط متن)', 'hamishop-elementor-widgets' ),
 				),
-				'description' => __( 'نشان مدار همان علامت اختصاصی این هدر است و با ورود صفحه، خط آن کشیده می‌شود. اگر لوگوی خودتان را دارید، «لوگوی سایت» را انتخاب کنید.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'به‌صورت پیش‌فرض همان لوگویی می‌آید که در «سفارشی‌سازی ← هویت سایت ← لوگو» گذاشته‌ای؛ لازم نیست دوباره انتخابش کنی. اگر سایت لوگو نداشته باشد، نشان مدار GC جای آن را می‌گیرد.', 'hamishop-elementor-widgets' ),
 			)
 		);
 
 		$this->add_control(
 			'logo',
 			array(
-				'label'     => __( 'تصویر لوگو', 'hamishop-elementor-widgets' ),
-				'type'      => Controls_Manager::MEDIA,
-				'condition' => array( 'mark_style' => 'logo' ),
-				'description' => __( 'اگر خالی بماند، لوگوی سایت (سفارشی‌سازی ← لوگو) استفاده می‌شود.', 'hamishop-elementor-widgets' ),
+				'label'       => __( 'لوگوی جایگزین (اختیاری)', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::MEDIA,
+				'condition'   => array( 'mark_style' => 'logo' ),
+				'description' => __( 'خالی بگذار تا لوگوی سایت استفاده شود. فقط اگر برای این هدر لوگوی دیگری می‌خواهی، اینجا تصویر بگذار.', 'hamishop-elementor-widgets' ),
 			)
 		);
 
@@ -185,10 +185,11 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 		$repeater->add_control(
 			'gc_panel',
 			array(
-				'label'   => __( 'پنل کشویی', 'hamishop-elementor-widgets' ),
-				'type'    => Controls_Manager::SELECT,
-				'default' => '',
-				'options' => $this->panel_options(),
+				'label'       => __( 'پنل کشویی', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => '',
+				'options'     => $this->panel_options(),
+				'description' => __( 'اگر این آیتم باید زیرمنو باز کند، یک شمارهٔ پنل انتخاب کن و همان شماره را در «ردیف‌های پنل‌ها» پایین‌تر پر کن.', 'hamishop-elementor-widgets' ),
 			)
 		);
 
@@ -373,16 +374,17 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 		);
 
 		$this->add_control(
-			'hd_mode',
+			'hd_scroll',
 			array(
-				'label'   => __( 'جایگاه هدر', 'hamishop-elementor-widgets' ),
+				'label'   => __( 'رفتار با اسکرول', 'hamishop-elementor-widgets' ),
 				'type'    => Controls_Manager::SELECT,
-				'default' => 'floating',
+				'default' => 'dock',
 				'options' => array(
-					'floating' => __( 'شناور — روی صفحه می‌ماند و هنگام اسکرول می‌چسبد', 'hamishop-elementor-widgets' ),
-					'static'   => __( 'درون جریان صفحه (اگر سکشن خودش چسبان است)', 'hamishop-elementor-widgets' ),
+					'dock'     => __( 'شناور و چسبان — همیشه دیده می‌شود و به نوار تمام‌عرض تبدیل می‌شود', 'hamishop-elementor-widgets' ),
+					'autohide' => __( 'پنهان با اسکرول پایین — با اسکرول به بالا فوراً برمی‌گردد', 'hamishop-elementor-widgets' ),
+					'static'   => __( 'درون جریان صفحه — اگر خودِ سکشن چسبان است', 'hamishop-elementor-widgets' ),
 				),
-				'description' => __( 'اگر در تنظیمات همان سکشن المنتور «چسبان» را روشن کرده‌اید، اینجا «درون جریان» را انتخاب کنید تا دو چسبندگی روی هم نیفتد.', 'hamishop-elementor-widgets' ),
+				'description' => __( '«پنهان با اسکرول پایین» برای صفحه‌هایی است که می‌خواهی محتوا کامل دیده شود: نوار با رفتن به پایین کنار می‌رود و با کوچک‌ترین اسکرول به بالا برمی‌گردد. «درون جریان» را وقتی انتخاب کن که در تنظیمات همان سکشن المنتور «چسبان» را روشن کرده‌ای.', 'hamishop-elementor-widgets' ),
 			)
 		);
 
@@ -403,7 +405,7 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 					'size' => 24,
 					'unit' => 'px',
 				),
-				'condition'  => array( 'hd_mode' => 'floating' ),
+				'condition'  => array( 'hd_scroll' => 'dock' ),
 				'description' => __( 'بعد از این مقدار اسکرول، نوار شناور به نوار تمام‌عرض مات تبدیل می‌شود.', 'hamishop-elementor-widgets' ),
 			)
 		);
@@ -529,7 +531,7 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 				'selectors'  => array(
 					'{{WRAPPER}} .hsw-gc' => '--hsw-gc-r-lg: {{SIZE}}{{UNIT}};',
 				),
-				'condition'  => array( 'hd_mode' => 'floating' ),
+				'condition'  => array( 'hd_scroll!' => 'static' ),
 			)
 		);
 
@@ -709,7 +711,10 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 		$s   = $this->effective_settings();
 		$uid = $this->uid();
 
-		$mode = isset( $s['hd_mode'] ) && 'static' === $s['hd_mode'] ? 'static' : 'floating';
+		$mode = isset( $s['hd_scroll'] ) ? (string) $s['hd_scroll'] : 'dock';
+		if ( ! in_array( $mode, array( 'dock', 'autohide', 'static' ), true ) ) {
+			$mode = 'dock';
+		}
 		$dock = isset( $s['dock_after']['size'] ) ? max( 0, (int) $s['dock_after']['size'] ) : 24;
 
 		$classes = 'hsw-h hsw-gc hsw-gc--' . $mode . $this->hsw_font_class();
@@ -778,37 +783,15 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 	 * @return string
 	 */
 	protected function gc_mark_html( $s ) {
-		$style = isset( $s['mark_style'] ) ? (string) $s['mark_style'] : 'circuit';
+		$style = isset( $s['mark_style'] ) ? (string) $s['mark_style'] : 'logo';
 
 		if ( 'none' === $style ) {
 			return '';
 		}
 
 		if ( 'logo' === $style ) {
-			$logo_id = isset( $s['logo']['id'] ) ? absint( $s['logo']['id'] ) : 0;
-			if ( ! $logo_id ) {
-				$logo_id = (int) get_theme_mod( 'custom_logo' );
-			}
-
-			$img = '';
-			if ( $logo_id ) {
-				$img = wp_get_attachment_image(
-					$logo_id,
-					'full',
-					false,
-					array(
-						'class'        => 'hsw-gc__logoimg skip-lazy',
-						'alt'          => '',
-						'loading'      => 'eager',
-						'decoding'     => 'async',
-						'data-no-lazy' => '1',
-					)
-				);
-			}
-			if ( ! $img && ! empty( $s['logo']['url'] ) ) {
-				$img = '<img class="hsw-gc__logoimg skip-lazy" src="' . esc_url( $s['logo']['url'] ) . '" alt="" loading="eager" decoding="async" data-no-lazy="1">';
-			}
-			if ( $img ) {
+			$img = $this->gc_logo_html( $s );
+			if ( '' !== $img ) {
 				return '<span class="hsw-gc__mark hsw-gc__mark--image">' . $img . '</span>';
 			}
 			/* No image anywhere: fall through to the signature mark. */
@@ -820,6 +803,57 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 		}
 
 		return $this->gc_circuit_svg();
+	}
+
+	/**
+	 * The site's own logo, without asking the shop owner for it twice.
+	 *
+	 * Order: the image picked on this widget, then the theme's custom logo
+	 * (سفارشی‌سازی ← هویت سایت ← لوگو), then the `site_logo` option that the
+	 * block themes use. Asking for a size instead of `full` keeps a 2000px
+	 * upload from being downloaded into a 38px box.
+	 *
+	 * @param array $s Settings.
+	 * @return string Image markup, or '' when the site has no logo at all.
+	 */
+	protected function gc_logo_html( $s ) {
+		$logo_id = isset( $s['logo']['id'] ) ? absint( $s['logo']['id'] ) : 0;
+
+		if ( ! $logo_id ) {
+			$logo_id = (int) get_theme_mod( 'custom_logo' );
+		}
+		if ( ! $logo_id && function_exists( 'get_option' ) ) {
+			$logo_id = (int) get_option( 'site_logo' );
+		}
+
+		$attrs = array(
+			'class'         => 'hsw-gc__logoimg skip-lazy',
+			'alt'           => '',
+			'loading'       => 'eager',
+			'decoding'      => 'async',
+			'data-no-lazy'  => '1',
+			'fetchpriority' => 'high',
+		);
+
+		$img = $logo_id ? wp_get_attachment_image( $logo_id, array( 320, 320 ), false, $attrs ) : '';
+
+		/*
+		 * An SVG logo has no intermediate sizes, so `wp_get_attachment_image`
+		 * can come back empty even though the file exists. Fall back to the
+		 * raw URL rather than dropping the mark.
+		 */
+		if ( ! $img && $logo_id ) {
+			$url = wp_get_attachment_url( $logo_id );
+			if ( $url ) {
+				$img = '<img src="' . esc_url( $url ) . '" alt="" loading="eager" decoding="async" data-no-lazy="1" class="hsw-gc__logoimg skip-lazy">';
+			}
+		}
+
+		if ( ! $img && ! empty( $s['logo']['url'] ) ) {
+			$img = '<img src="' . esc_url( $s['logo']['url'] ) . '" alt="" loading="eager" decoding="async" data-no-lazy="1" class="hsw-gc__logoimg skip-lazy">';
+		}
+
+		return $img;
 	}
 
 	/**

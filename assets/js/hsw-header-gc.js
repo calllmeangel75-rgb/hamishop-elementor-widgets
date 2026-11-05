@@ -27,7 +27,7 @@
 			return;
 		}
 
-		var floating = root.classList.contains('hsw-gc--floating');
+		var floating = root.classList.contains('hsw-gc--dock');
 		var dockAt = parseInt(root.getAttribute('data-hsw-gc-dock'), 10);
 		if (isNaN(dockAt)) {
 			dockAt = DOCK_AT;
@@ -365,6 +365,86 @@
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Auto-hide: leave on the way down, come back on the way up.
+	 * ------------------------------------------------------------------ */
+
+	function initAutoHide(root) {
+		if (!root.classList.contains('hsw-gc--autohide')) {
+			return;
+		}
+
+		var bar = root.querySelector('[data-hsw-gc-bar]');
+		var drawer = root.querySelector('[data-hsw-gc-drawer]');
+		if (!bar) {
+			return;
+		}
+
+		var last = window.scrollY;
+		var hidden = false;
+		var busy = false;
+
+		function blocked() {
+			/* A dropdown or the drawer is open: the bar must not walk away. */
+			if (root.querySelector('.hsw-gc__item.is-open')) {
+				return true;
+			}
+			return !!(drawer && drawer.classList.contains('is-open'));
+		}
+
+		function setHidden(value) {
+			if (hidden === value) {
+				return;
+			}
+			hidden = value;
+			bar.classList.toggle('is-hidden', value);
+		}
+
+		function update() {
+			busy = false;
+
+			var y = window.scrollY;
+			var delta = y - last;
+			last = y;
+
+			/* Never hide at the very top, where there is nothing to hide from. */
+			if (y <= 8) {
+				setHidden(false);
+				return;
+			}
+			if (blocked()) {
+				setHidden(false);
+				return;
+			}
+
+			if (delta > 4) {
+				setHidden(true);
+			} else if (delta < 0) {
+				/* Any upward movement brings it straight back. */
+				setHidden(false);
+			}
+		}
+
+		function schedule() {
+			if (busy) {
+				return;
+			}
+			busy = true;
+			requestAnimationFrame(update);
+		}
+
+		window.addEventListener('scroll', schedule, { passive: true });
+		window.addEventListener('resize', schedule, { passive: true });
+		window.addEventListener('load', schedule);
+
+		/* A keyboard user must never be tabbing into an invisible bar. */
+		bar.addEventListener('focusin', function () {
+			setHidden(false);
+		});
+
+		update();
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Current page marker
 	 * ------------------------------------------------------------------ */
 
@@ -449,6 +529,7 @@
 		}
 
 		initDocking(root);
+		initAutoHide(root);
 		initLine(root);
 		initPanels(root);
 		initDrawer(root);
