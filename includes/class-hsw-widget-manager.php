@@ -1137,6 +1137,11 @@ final class HSW_Widget_Manager {
 											$route_text = __( 'وصل نشده', 'hamishop-elementor-widgets' );
 											/* translators: %s: page title. */
 											$route_note = sprintf( __( 'صفحهٔ «%s» وجود دارد ولی در تنظیمات مسیر خرید انتخاب نشده؛ با دکمهٔ پایین وصل می‌شود و صفحهٔ تازه‌ای ساخته نمی‌شود.', 'hamishop-elementor-widgets' ), $route_row['title'] );
+										} elseif ( 'foreign' === $route_row['state'] ) {
+											$route_tone = 'is-missing';
+											$route_text = __( 'صفحهٔ نامرتبط', 'hamishop-elementor-widgets' );
+											/* translators: %s: page title. */
+											$route_note = sprintf( __( 'در تنظیمات مسیر خرید صفحهٔ «%s» انتخاب شده، ولی ویجت این مرحله را ندارد. با دکمهٔ پایین یک صفحهٔ تازه ساخته و جایگزین می‌شود؛ خودِ آن صفحه دست نمی‌خورد و noindex نمی‌شود.', 'hamishop-elementor-widgets' ), $route_row['title'] );
 										} else {
 											$route_tone = 'is-missing';
 											$route_text = __( 'ساخته نشده', 'hamishop-elementor-widgets' );

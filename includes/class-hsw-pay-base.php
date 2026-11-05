@@ -134,6 +134,22 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
          * @return bool
          */
         protected function terms_required() {
+                /*
+                 * The same policy the server enforces, plus the widget's own
+                 * link.
+                 *
+                 * The server only sees site configuration, so a custom URL on
+                 * the widget can make the client ask for a tick the server does
+                 * not check — harmless. The dangerous direction was the other
+                 * one: a terms page (or the `hsw_terms_required` filter) made the
+                 * server require a tick while the widget rendered no checkbox,
+                 * and the order could never be placed. Asking the route first
+                 * closes that.
+                 */
+                if ( class_exists( 'HSW_Complete_Route' ) && HSW_Complete_Route::terms_required() ) {
+                        return true;
+                }
+
                 return '' !== (string) $this->terms_url();
         }
 

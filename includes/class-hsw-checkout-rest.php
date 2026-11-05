@@ -699,14 +699,25 @@ class HSW_Checkout_Rest {
                         $discount = 0;
                 }
 
-                $shipping_cost = (float) $cart->get_shipping_total();
+                /*
+                 * The live patch used to answer this itself: any zero total
+                 * became «رایگان». After a rate change that overwrote the
+                 * correct label the server had rendered, so a destination with
+                 * no rate and a digital cart both read as free delivery the
+                 * moment the customer touched the shipping list.
+                 */
+                list( $ship_state, $shipping_cost ) = HSW_Shipping_State::for_cart();
+
+                $shipping_html = ( HSW_Shipping_State::AMOUNT === $ship_state )
+                        ? $this->money( $shipping_cost, true )
+                        : '<span class="' . ( HSW_Shipping_State::FREE === $ship_state ? 'is-free' : 'is-note' ) . '">' . esc_html( HSW_Shipping_State::label( $ship_state ) ) . '</span>';
 
                 return array(
                         'count'          => (int) $cart->get_cart_contents_count(),
                         'subtotal_html'  => $this->money( $subtotal, true ),
                         'discount_html'  => $this->money( -1 * $discount, true, true ),
-                        'shipping_html'  => ( $shipping_cost > 0 ) ? $this->money( $shipping_cost, true ) : '<span>' . esc_html__( 'رایگان', 'hamishop-elementor-widgets' ) . '</span>',
-                        'shipping_free'  => ( $shipping_cost <= 0 ),
+                        'shipping_html'  => $shipping_html,
+                        'shipping_free'  => ( HSW_Shipping_State::FREE === $ship_state ),
                         'taxes_html'     => wc_tax_enabled() ? $this->money( (float) $cart->get_taxes_total(), true ) : '',
                         'total_html'     => $this->money( (float) $cart->get_total( 'edit' ), true ),
                 );

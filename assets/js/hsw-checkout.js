@@ -50,6 +50,10 @@
         /* Last rate the server accepted; '' until the first save returns. */
         var shipConfirmed = '';
         var shipBusy = false;
+        /* The rate being saved right now, and the request doing it. */
+        var shipPending = '';
+        var shipPromise = null;
+        var shipWait = false;
 
         function shippingCheckedValue() {
                 var checked = document.querySelector( 'input[name^="hsw_shipping_method"]:checked' );
@@ -235,10 +239,11 @@
                         }
 
                         if ( shipBusy ) {
-                                /* One request at a time: showing the new choice
-                                   while an older one is still in flight would be
-                                   a guess about which one the server keeps. */
-                                syncShippingUI( shipConfirmed );
+                                /* One request at a time. Show the rate that is
+                                   actually being saved — reverting to the
+                                   confirmed one would leave the UI on a value
+                                   the in-flight request is about to replace. */
+                                syncShippingUI( shipPending || shipConfirmed );
                                 return;
                         }
 
@@ -250,21 +255,24 @@
 
                         var groups = document.querySelectorAll( '[data-hswk-ship]' );
                         var clear = function () {
-                                shipBusy = false;
+                                shipBusy    = false;
+                                shipPromise = null;
                                 for ( var g2 = 0; g2 < groups.length; g2++ ) {
                                         groups[ g2 ].classList.remove( 'is-loading' );
                                 }
                         };
 
-                        shipBusy = true;
+                        shipBusy    = true;
+                        shipPending = input.value;
                         for ( var g = 0; g < groups.length; g++ ) {
                                 groups[ g ].classList.add( 'is-loading' );
                         }
                         shipMsg( '' );
 
-                        post( '/checkout/shipping', { rate: input.value } )
+                        shipPromise = post( '/checkout/shipping', { rate: input.value } )
                                 .then( function ( json ) {
-                                        shipConfirmed = input.value;
+                                        shipConfirmed = shipPending || input.value;
+                                        shipPending   = '';
                                         patchTotals( json && json.totals );
                                 } )
                                 .catch( function () {
@@ -273,6 +281,7 @@
                                            radio selected while the session still
                                            held the old rate, so the order shipped
                                            with a method the customer had replaced. */
+                                        shipPending = '';
                                         if ( shipConfirmed ) {
                                                 syncShippingUI( shipConfirmed );
                                         }
@@ -402,6 +411,26 @@ document.addEventListener( 'click', function ( event ) {
 	var cta = event.target.closest( '.hsw-k-cta' );
 	if ( ! cta ) { return; }
 	if ( document.body.classList.contains( 'elementor-editor-active' ) ) { return; }
+
+	/*
+	 * A rate change is still being saved. Navigating now lands on a page the
+	 * server renders from the previous rate, and the order would carry a
+	 * shipping method the customer had already replaced. Wait for the request,
+	 * then run the click again.
+	 */
+	if ( shipPromise ) {
+		event.preventDefault();
+		if ( ! shipWait ) {
+			shipWait = true;
+			shipWaitMsg( CFG.shipSaving || 'در حال ذخیره روش ارسال…' );
+			Promise.resolve( shipPromise ).catch( function () {} ).then( function () {
+				shipWait = false;
+				shipWaitMsg( '' );
+				cta.click();
+			} );
+		}
+		return;
+	}
 
 	var has    = cta.getAttribute( 'data-has-address' ) === '1';
 	var form   = addressForm();
@@ -565,6 +594,13 @@ document.addEventListener( 'click', function ( event ) {
 document.addEventListener( 'click', function ( event ) {
 	var link = event.target.closest( '[data-hsw-need-address]' );
 	if ( ! link ) { return; }
+	/*
+	 * The checkout CTA handler already owns this click and called
+	 * preventDefault — it may be waiting for a shipping rate to be saved. Two
+	 * handlers writing the same status line meant the "saving the rate" note
+	 * was replaced by the address nudge one millisecond later.
+	 */
+	if ( event.defaultPrevented ) { return; }
 	var field = document.querySelector( '[data-hsw-address-form] [name="first_name"]' );
 	if ( ! field ) { return; }
 	event.preventDefault();
@@ -932,6 +968,23 @@ document.addEventListener( 'click', function ( event ) {
          * widget into silent consent, and the server had no way to tell the
          * difference between a customer who agreed and a page that never asked.
          */
+        /*
+         * The checkout page has no [data-hswk-paymsg] — that lives in the pay
+         * summary. Its own status line is the address form's. A "saving the
+         * rate" note has to reach whichever one this page actually renders.
+         */
+        function shipWaitMsg( text ) {
+                payMsg( text, false );
+
+                var box = document.querySelector( '[data-hsw-address-msg]' );
+                if ( ! box ) {
+                        return;
+                }
+                box.hidden = ! text;
+                box.textContent = text || '';
+                box.classList.toggle( 'is-busy-note', !! text );
+        }
+
         function termsRequired( cta ) {
                 return !!( cta && '1' === cta.getAttribute( 'data-hsw-terms' ) );
         }

@@ -446,6 +446,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-wallet.php';
                 require_once HSW_DIR . 'includes/class-hsw-wallet-pay.php';
                 require_once HSW_DIR . 'includes/class-hsw-free-shipping.php';
+                require_once HSW_DIR . 'includes/class-hsw-shipping-state.php';
 
                 /*
                  * Jalali output is opt-in: the file is tiny, but the filter is

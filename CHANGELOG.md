@@ -20,6 +20,20 @@
 
 - **`buy_mode` was invisible on a product page built with the composite widget.** `hsw-product-page` mirrors a fixed list of its child controls (`part_section( 'ppu_', …, array( 'vis', 'type', 'cart_text', 'qty_max', 'assure_items' ) )`), and the new control was not in it — the standalone «جعبه خرید» showed it, the product page did not. Added to the list; the composite now renders `hsw-ppurch--buy-inline` for `ppu_buy_mode=inline` (verified through `part()`, 4,018 bytes of part markup, stepper at ۱).
 
+### Fixed — second audit round
+
+Five scenarios were re-checked against the code. Four reproduced, one did not.
+
+- **The live totals patch still called a zero shipping total «رایگان».** `totals_payload()` had its own `( $cost > 0 ) ? money : 'رایگان'`, so touching the rate list overwrote the correct label the server had rendered. Reproduced: a destination with no rates returned `free=true, "رایگان"`, and so did a digital cart. Now it asks `HSW_Shipping_State::for_cart()` — the same answer the page renders — and returns «روش ارسال در دسترس نیست» / «نیازی به ارسال ندارد».
+- **An existing order's zero shipping total was still «free».** A digital order at re-payment read as free delivery. Reproduced: `["free",0]`. `HSW_Shipping_State::for_order()` now checks whether any line actually ships: a digital order is `none`, an order with a free rate is `free`.
+- **The shipping row lived in four places.** The new `HSW_Shipping_State` class is the single source; `HSW_Cart_Base` and the REST controller both delegate, and the old `chosen_shipping_cost()` is gone. It is loaded unconditionally because the REST patch runs where Elementor never registers a widget.
+- **Two quick rate changes left the UI and the server disagreeing.** Reproduced on the old code: the second change reverted the radio to the *confirmed* value while the first request was still in flight; when that request succeeded the confirmed value became the first choice and the radio still showed the old one. `shipPending` now keeps the UI on the rate being saved, and a success promotes exactly that value.
+- **Clicking «ادامه» during a rate request moved on with the previous rate.** The click is now deferred until the request settles and then re-run. Testing this surfaced a second defect: the `[data-hsw-need-address]` handler on the same button wrote the address nudge one millisecond after the "saving the rate" note, so the wait was invisible. It now stands down when another handler already called `preventDefault()`.
+- **Terms requirement diverged between the widget and the server.** Reproduced: with `hsw_terms_required` returning true and no terms page, the server required a tick while the widget rendered no checkbox — an order that could never be placed. The widget now asks `HSW_Complete_Route::terms_required()` first and only adds its own link on top. A custom URL can still make the client ask for a tick the server does not check; that direction is harmless.
+- **The setup screen could put `noindex` on an unrelated page.** Reproduced: with a foreign page selected in `hsw_pay_page_id`, the state was `unwired` and pressing the button wrote Yoast's noindex meta onto that page (`'1'`). `resolve_page_id()` trusts the option on purpose (routing must follow the admin's choice), so the fix is in the setup screen: a published page that is not ours is now `foreign`, the button creates a replacement instead of touching it, and the old page keeps its content and its indexing. Verified: noindex `''`, content unchanged.
+
+Not reproduced: a proper page at a different slug, once selected in the WooCommerce setting, is `wired` and works. Without that selection the setup cannot guess — the panel says so, and it now also finds pages this plugin created earlier under another slug through the `_hsw_route_page` marker.
+
 ### Measured
 
 - Two clicks on `+` in `inline` mode: input `۱ → ۳`, **zero** requests to `wc-ajax`.

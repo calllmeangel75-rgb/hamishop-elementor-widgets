@@ -126,21 +126,51 @@ final class HSW_Setup_Pages {
 	 * @return array{state:string,id:int,slug_taken:bool,title:string,edit_url:string}
 	 */
 	protected static function status_one( $key, $page ) {
-		$option_id = (int) get_option( $page['option'], 0 );
+		$option_id   = (int) get_option( $page['option'], 0 );
+		$option_live = ( $option_id > 0 && 'publish' === get_post_status( $option_id ) );
 
-		if ( $option_id > 0 && 'publish' === get_post_status( $option_id ) && HSW_Complete_Route::page_is_ours( $option_id, $key ) ) {
+		if ( $option_live && HSW_Complete_Route::page_is_ours( $option_id, $key ) ) {
 			return self::row( 'wired', $option_id, $page );
 		}
 
-		/* The resolver also accepts a slug match, which is how most stores
-		   already have a working page without ever opening the setting. */
-		$found = (int) HSW_Complete_Route::resolve_page_id( $page['option'], $page['slug'] );
-		if ( $found > 0 ) {
-			return self::row( 'unwired', $found, $page );
+		/*
+		 * A page at the canonical slug that carries the widget, even when the
+		 * option points somewhere else. Checked before the option so a wrong
+		 * choice in WooCommerce does not hide a correct page that exists.
+		 */
+		$slug_page = get_page_by_path( $page['slug'], OBJECT, 'page' );
+		if ( $slug_page instanceof WP_Post && 'publish' === $slug_page->post_status && HSW_Complete_Route::page_is_ours( $slug_page->ID, $key ) ) {
+			return self::row( 'unwired', (int) $slug_page->ID, $page );
 		}
 
-		$row                = self::row( 'missing', 0, $page );
-		$row['slug_taken']  = (bool) get_page_by_path( $page['slug'], OBJECT, 'page' );
+		/* A page this plugin created earlier under a different slug. */
+		$marked = get_posts(
+			array(
+				'post_type'      => 'page',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => self::META, // phpcs:ignore WordPress.DB.SlowDBQuery -- one row, admin screen only.
+				'meta_value'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery -- see above.
+			)
+		);
+		if ( $marked ) {
+			return self::row( 'unwired', (int) $marked[0], $page );
+		}
+
+		/*
+		 * Something published is selected in the setting but it is not ours.
+		 * This is a real conflict, not "missing": the router will happily send
+		 * customers there, and the page does not render the step. It must never
+		 * be marked noindex or otherwise touched — the owner picked it for a
+		 * reason we cannot see.
+		 */
+		if ( $option_live ) {
+			return self::row( 'foreign', $option_id, $page );
+		}
+
+		$row               = self::row( 'missing', 0, $page );
+		$row['slug_taken'] = (bool) $slug_page;
 
 		return $row;
 	}
