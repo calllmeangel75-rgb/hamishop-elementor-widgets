@@ -16,6 +16,10 @@
 - In `inline` mode the stepper starts at 1 regardless of what is already in the cart (it means "how many do I want to add"), the bin is not rendered (there is nothing to remove), and at 1 the minus stays in place and refuses the click instead of turning into the bin.
 - The buy button sends the chosen number: `quantity=3` for a stepper at 3, whether or not the product is already in the cart. In the default mode nothing changed — one more per click while in the cart.
 
+### Fixed
+
+- **`buy_mode` was invisible on a product page built with the composite widget.** `hsw-product-page` mirrors a fixed list of its child controls (`part_section( 'ppu_', …, array( 'vis', 'type', 'cart_text', 'qty_max', 'assure_items' ) )`), and the new control was not in it — the standalone «جعبه خرید» showed it, the product page did not. Added to the list; the composite now renders `hsw-ppurch--buy-inline` for `ppu_buy_mode=inline` (verified through `part()`, 4,018 bytes of part markup, stepper at ۱).
+
 ### Measured
 
 - Two clicks on `+` in `inline` mode: input `۱ → ۳`, **zero** requests to `wc-ajax`.
