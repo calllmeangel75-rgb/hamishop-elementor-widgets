@@ -652,6 +652,37 @@ class HSW_Assets {
                         'before'
                 );
 
+                /*
+                 * «هدر GC» — its own sheet and script. It shares the font layer
+                 * but nothing else: the bar, the circuit mark and the panel
+                 * motion are specific to this header, so a page that uses the
+                 * store header never downloads them.
+                 */
+                wp_register_style(
+                        'hsw-header-gc',
+                        $this->asset( 'assets/css/hsw-header-gc.css' ),
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-header-gc',
+                        $this->asset( 'assets/js/hsw-header-gc.js' ),
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+
+                wp_add_inline_script(
+                        'hsw-header-gc',
+                        'window.hswHeaderGcData=' . wp_json_encode(
+                                array(
+                                        'cartEndpoint' => rest_url( 'wc/store/v1/cart' ),
+                                )
+                        ) . ';',
+                        'before'
+                );
+
                 wp_register_style(
                         'hsw-composite',
                         $this->asset( 'assets/css/hsw-composite.css' ),

@@ -8,6 +8,22 @@
 
 ## [Unreleased]
 
+## [1.11.244] — 2026-11-05
+
+### Added
+
+- **«هدر GC» (`hsw-header-gc`)** — a third header widget. It started life as a hand-coded Elementor export (four HTML widgets plus a 30 KB bridge script) and is now a native widget with real controls: a rounded bar floats over the page and docks into a full-width blurred bar past the scroll threshold, the brand mark is a «G» drawn as a circuit trace that draws itself on load, a gradient underline follows the pointer and returns to the current page, and dropdown panels stagger their rows in.
+- Every editable thing is a control: the mark (circuit signature / site or uploaded logo / sprite icon / none), brand name and latin line, five top-level rows, six panel slots each with icon + title + description + footer link, cart button with badge, account CTA and the mobile drawer.
+- Panels are addressed by slot (`پنل ۱…۶`). A menu row names a slot, the panel rows name the same slot, so the two repeaters never depend on a shared row index.
+- `hd_mode` switches the bar between fixed (floating, the default) and in-flow, for a template whose own section is already sticky — otherwise the two stickinesses fight.
+- Its own stylesheet and script (`hsw-header-gc.css` / `.js`, 19.2 KB and 9.2 KB minified). A page that uses another header never downloads them.
+- Colour follows the documented order — widget control, then `--hsw-pal-*`, then the GC signature value. Verified by measurement: with no palette the mark trace is `#19c58b` and the CTA `#06271f`; with a palette those tokens win; with a colour control the control wins.
+
+### Fixed
+
+- The dark drawer button rendered `#172b25` on `#06271f` — dark on dark. `.hsw-gc a { color: inherit }` is specificity (0,1,1) and outranked `.hsw-gc__drawer-btn--dark` (0,1,0). Every rule that colours an anchor now carries the `.hsw-gc` prefix. Measured after the fix: `rgb(255,255,255)` on `rgb(6,39,31)`.
+- The bar pushed the document 172px sideways at a 320px viewport and 102px at 390px. `.hsw-gc__brand` was `flex-shrink: 0`, so a long store name plus three action buttons had nowhere to go. The brand now shrinks and truncates with an ellipsis. `document.scrollWidth - document.clientWidth` measured 0 at 320 / 360 / 390 / 414 / 768 / 1024 / 1100 / 1280 / 1440.
+
 ## [1.11.243] — 2026-11-05
 
 ### Fixed

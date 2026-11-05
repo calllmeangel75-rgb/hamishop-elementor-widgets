@@ -6,12 +6,12 @@
 
 ## ۱. این پروژه چیست
 
-`HamiShop Elementor Widgets` — یک بستهٔ ویجت المنتور برای فروشگاه‌های ووکامرس فارسی‌زبان. شامل آرشیو محصول، هدر/فوتر سفارشی، سبد و تسویه، پنل حساب، کیف پول، تیکت پشتیبانی، بلاگ و صفحهٔ نوشته.
+`HamiShop Elementor Widgets` — یک بستهٔ ویجت المنتور برای فروشگاه‌های ووکامرس فارسی‌زبان. شامل آرشیو محصول، سه هدر/فوتر سفارشی، سبد و تسویه، پنل حساب، کیف پول، تیکت پشتیبانی، بلاگ و صفحهٔ نوشته.
 
 ```
 مسیر مخزن   : D:\work-webs\0 Build\hamishop-repo
 مخزن        : github.com/calllmeangel75-rgb/hamishop-elementor-widgets
-نسخهٔ فعلی  : 1.11.243
+نسخهٔ فعلی  : 1.11.244
 فایل اصلی   : hamishop-elementor-widgets.php  (هدر نسخه + HSW_VERSION)
 تست لوکال   : http://localhost/sks/   (XAMPP، افزونه در wp-content/plugins/hamishop-elementor-widgets)
 سایت‌های زنده: gilaclick.ir · new.mrdastbaaf.com

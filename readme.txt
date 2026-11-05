@@ -4,19 +4,19 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.243
+Stable tag: 1.11.244
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-۶۲ ویجت فروشگاهی فارسی و راست‌به‌چپ برای المنتور و ووکامرس: لوپ محصول، صفحه محصول، هدر، سبد، تسویه، آرشیو، مجله و پنل حساب کاربری — با پالت رنگی سراسری، فونت لوکال و بارگذاری شرطی.
+۶۳ ویجت فروشگاهی فارسی و راست‌به‌چپ برای المنتور و ووکامرس: لوپ محصول، صفحه محصول، هدر، سبد، تسویه، آرشیو، مجله و پنل حساب کاربری — با پالت رنگی سراسری، فونت لوکال و بارگذاری شرطی.
 
 == Description ==
 
 HamiShop مجموعه‌ای از ویجت‌های المنتور است که صفحه‌های یک فروشگاه ووکامرس را بدون کدنویسی می‌سازد. هر ویجت یک بخش واقعی از فروشگاه است، نه یک بلوک تزئینی: داده را از خود ووکامرس می‌خواند، با هندلرهای بومی کار می‌کند و در نبود ووکامرس یا المنتور خطا نمی‌دهد.
 
-= هفت خانواده، ۶۲ ویجت =
+= هفت خانواده، ۶۳ ویجت =
 
-* **هدر و ناوبری (۳)** — هدر فروشگاهی با نوار اعلان، جستجوی محصول و مگامنو؛ هدر مینیمال شیشه‌ای؛ فوتر چسبان موبایل.
+* **هدر و ناوبری (۴)** — هدر فروشگاهی با نوار اعلان، جستجوی محصول و مگامنو؛ هدر مینیمال شیشه‌ای؛ **هدر GC** با نوار شناور، نشان مدار و پنل‌های کشویی؛ فوتر چسبان موبایل.
 * **لوپ محصولات (۳)** — پیشنهاد شگفت‌انگیز با شمارش معکوس، پرفروش‌ترین‌ها، محبوب‌ترین‌ها/منتخب با تب.
 * **صفحه محصول (۱۲)** — گالری، بردکرامب، عنوان و متا، نوار اعتماد، ویژگی‌ها، انتخاب تنوع، جعبه خرید، تب‌ها، آکاردئون، نوار چسبان، محصولات مرتبط و صفحهٔ کامل محصول.
 * **سبد خرید و پرداخت (۲۶)** — سبد، تسویه‌حساب، روش‌های پرداخت، فاکتور، تکمیل سفارش و صفحه‌های کامل هر مرحله.
@@ -72,6 +72,12 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.244 =
+* New: «هدر GC» — a third header widget. A rounded bar floats over the page and docks into a full-width blurred bar on scroll; the brand mark is a «G» drawn as a circuit trace that draws itself; a gradient underline follows the pointer; dropdown panels stagger their rows in. The mark, brand text, every menu row, six panel slots (icon + title + description + footer), the cart badge, the account button and the mobile drawer are all controls.
+* New: `hd_mode` keeps the bar fixed (default) or in the flow, for a template whose own section is already sticky.
+* Fix: the drawer's dark button was dark-on-dark (`#172b25` on `#06271f`); `.hsw-gc a { color: inherit }` outranked the button rule. Every anchor colour rule now carries the `.hsw-gc` prefix — measured white on `#06271f` after.
+* Fix: a long store name pushed the page 172px sideways at 320px and 102px at 390px (`flex-shrink: 0` on the brand). It now truncates with an ellipsis — overflow measured 0 at 320/360/390/414/768/1024/1100/1280/1440.
 
 = 1.11.243 =
 * Fix: The article page scrolled sideways on a phone (+52px at 390px). The prev/next grid used `1fr`, which cannot shrink below its content, so a long neighbouring title pushed the column to 492px inside a 342px box. Now `minmax(0, 1fr)` plus `min-width: 0` on the item — measured at 320/360/390/768/1024/1280.

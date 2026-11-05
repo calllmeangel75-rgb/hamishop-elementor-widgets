@@ -556,6 +556,7 @@ final class HSW_Plugin {
                 $widget_files = array(
                         HSW_DIR . 'widgets/class-hsw-widget-header-store.php',
                         HSW_DIR . 'widgets/class-hsw-widget-header-minimal.php',
+                        HSW_DIR . 'widgets/class-hsw-widget-header-gc.php',
                         HSW_DIR . 'widgets/class-hsw-widget-footer-sticky.php',
 
                         HSW_DIR . 'widgets/class-hsw-wonder-deals.php',

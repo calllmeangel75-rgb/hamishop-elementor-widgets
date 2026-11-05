@@ -1,0 +1,482 @@
+/**
+ * HamiShop Elementor Widgets — «هدر GC» behaviour.
+ *
+ * Five independent pieces, each bound to its own root so two headers on one
+ * page never fight: docking, the sliding nav underline, the dropdown panels,
+ * the mobile drawer, and the cart badge.
+ *
+ * No framework, no dependency, no request on a page without a cart cookie.
+ */
+(function () {
+	'use strict';
+
+	var DOCK_AT = 24;
+
+	function all(scope, selector) {
+		return Array.prototype.slice.call(scope.querySelectorAll(selector));
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Docking: the floating bar becomes a full-width blurred bar.
+	 * ------------------------------------------------------------------ */
+
+	function initDocking(root) {
+		var bar = root.querySelector('[data-hsw-gc-bar]');
+		var spacer = root.querySelector('.hsw-gc__ph');
+		if (!bar || !spacer) {
+			return;
+		}
+
+		var floating = root.classList.contains('hsw-gc--floating');
+		var dockAt = parseInt(root.getAttribute('data-hsw-gc-dock'), 10);
+		if (isNaN(dockAt)) {
+			dockAt = DOCK_AT;
+		}
+
+		var busy = false;
+
+		function update() {
+			busy = false;
+
+			/* The toolbar height changes between breakpoints, so read it back. */
+			var adminbar = document.getElementById('wpadminbar');
+			var offset = adminbar ? Math.max(0, Math.round(adminbar.getBoundingClientRect().bottom)) : 0;
+			bar.style.setProperty('--hsw-gc-admin-offset', offset + 'px');
+
+			var height = bar.offsetHeight;
+			if (height > 0) {
+				spacer.style.height = height + 'px';
+			}
+
+			if (floating) {
+				bar.classList.toggle('is-docked', window.scrollY > dockAt);
+			}
+		}
+
+		function schedule() {
+			if (busy) {
+				return;
+			}
+			busy = true;
+			requestAnimationFrame(update);
+		}
+
+		window.addEventListener('scroll', schedule, { passive: true });
+		window.addEventListener('resize', schedule, { passive: true });
+		window.addEventListener('load', schedule);
+
+		/* The brand font can arrive after first paint and change the height. */
+		if (document.fonts && document.fonts.addEventListener) {
+			document.fonts.addEventListener('loadingdone', schedule);
+		}
+
+		update();
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Sliding underline under the current / hovered nav item.
+	 * ------------------------------------------------------------------ */
+
+	function initLine(root) {
+		var list = root.querySelector('[data-hsw-gc-list]');
+		var line = root.querySelector('[data-hsw-gc-line]');
+		if (!list || !line) {
+			return;
+		}
+
+		var nav = list.parentNode;
+
+		function move(link) {
+			if (!link || !nav.offsetWidth) {
+				line.classList.remove('is-ready');
+				return;
+			}
+			var box = nav.getBoundingClientRect();
+			var item = link.getBoundingClientRect();
+			line.style.setProperty('--hsw-gc-x', (item.left - box.left + 12).toFixed(1) + 'px');
+			line.style.setProperty('--hsw-gc-w', Math.max(0, item.width - 24).toFixed(1) + 'px');
+			line.classList.add('is-ready');
+		}
+
+		function place() {
+			move(list.querySelector('.hsw-gc__link[aria-current="page"]'));
+		}
+
+		all(list, '.hsw-gc__link').forEach(function (link) {
+			link.addEventListener('pointerenter', function () {
+				move(link);
+			});
+			link.addEventListener('focus', function () {
+				move(link);
+			});
+		});
+
+		list.addEventListener('pointerleave', place);
+		list.addEventListener('focusout', function (event) {
+			if (!list.contains(event.relatedTarget)) {
+				place();
+			}
+		});
+
+		if (document.fonts && document.fonts.addEventListener) {
+			document.fonts.addEventListener('loadingdone', place);
+		}
+		window.addEventListener('load', place);
+		window.addEventListener('resize', place, { passive: true });
+		window.addEventListener('popstate', place);
+		requestAnimationFrame(place);
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Dropdown panels: hover on a mouse, click on touch, Escape to close.
+	 * ------------------------------------------------------------------ */
+
+	function initPanels(root) {
+		var items = all(root, '[data-hsw-gc-panel]');
+		if (!items.length) {
+			return;
+		}
+
+		var closeTimer = 0;
+		var hoverOpenedAt = 0;
+
+		function setOpen(item, open) {
+			item.classList.toggle('is-open', open);
+			var toggle = item.querySelector('[data-hsw-gc-toggle]');
+			if (toggle) {
+				toggle.setAttribute('aria-expanded', String(open));
+			}
+		}
+
+		function closeAll(except) {
+			items.forEach(function (item) {
+				if (item !== except) {
+					setOpen(item, false);
+				}
+			});
+		}
+
+		items.forEach(function (item) {
+			var toggle = item.querySelector('[data-hsw-gc-toggle]');
+			if (!toggle) {
+				return;
+			}
+
+			toggle.addEventListener('click', function () {
+				var open = item.classList.contains('is-open');
+				/* A click that follows a hover-open must not close it again. */
+				if (open && performance.now() - hoverOpenedAt < 450) {
+					return;
+				}
+				closeAll(item);
+				setOpen(item, !open);
+			});
+
+			item.addEventListener('pointerenter', function (event) {
+				if (event.pointerType !== 'mouse') {
+					return;
+				}
+				clearTimeout(closeTimer);
+				if (!item.classList.contains('is-open')) {
+					hoverOpenedAt = performance.now();
+				}
+				closeAll(item);
+				setOpen(item, true);
+			});
+
+			item.addEventListener('pointerleave', function (event) {
+				if (event.pointerType === 'mouse') {
+					closeTimer = setTimeout(function () {
+						setOpen(item, false);
+					}, 200);
+				}
+			});
+
+			item.addEventListener('focusout', function (event) {
+				if (!item.contains(event.relatedTarget)) {
+					setOpen(item, false);
+				}
+			});
+
+			item.addEventListener('keydown', function (event) {
+				if (event.key === 'Escape' && item.classList.contains('is-open')) {
+					setOpen(item, false);
+					toggle.focus();
+				}
+			});
+		});
+
+		document.addEventListener('click', function (event) {
+			var inside = items.some(function (item) {
+				return item.contains(event.target);
+			});
+			if (!inside) {
+				closeAll();
+			}
+		});
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Mobile drawer
+	 * ------------------------------------------------------------------ */
+
+	function initDrawer(root) {
+		var opener = root.querySelector('[data-hsw-gc-open]');
+		var drawer = document.querySelector('[data-hsw-gc-drawer][data-hsw-gc-for="' + root.getAttribute('data-hsw-gc') + '"]');
+		if (!opener || !drawer) {
+			return;
+		}
+
+		var panel = drawer.querySelector('[data-hsw-gc-sheet]');
+		if (!panel) {
+			return;
+		}
+
+		var opened = false;
+		var hideTimer = 0;
+		var previousFocus = null;
+		var inerted = [];
+		var hadLock = false;
+		var focusable = 'a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+
+		function visible(el) {
+			return !!el.getClientRects().length && !el.closest('[inert]');
+		}
+
+		function trap(event) {
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				close(true);
+				return;
+			}
+			if (event.key !== 'Tab') {
+				return;
+			}
+			var items = Array.prototype.filter.call(panel.querySelectorAll(focusable), visible);
+			if (!items.length) {
+				event.preventDefault();
+				return;
+			}
+			var first = items[0];
+			var last = items[items.length - 1];
+			if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+				event.preventDefault();
+				first.focus();
+			}
+		}
+
+		/*
+		 * Inert every sibling at each ancestor level, not just <main>: a theme
+		 * may wrap the header in arbitrary containers and the template may
+		 * render before the page content.
+		 */
+		function inertBackground() {
+			inerted = [];
+			for (var node = drawer; node && node !== document.body; node = node.parentElement) {
+				var parent = node.parentElement;
+				if (!parent) {
+					break;
+				}
+				Array.prototype.forEach.call(parent.children, function (sibling) {
+					if (sibling === node || /^(SCRIPT|STYLE|LINK|META)$/.test(sibling.tagName) || sibling.hasAttribute('inert')) {
+						return;
+					}
+					sibling.setAttribute('inert', '');
+					inerted.push(sibling);
+				});
+			}
+		}
+
+		function open() {
+			if (opened) {
+				return;
+			}
+			opened = true;
+			clearTimeout(hideTimer);
+			previousFocus = document.activeElement && document.activeElement !== document.body ? document.activeElement : opener;
+			drawer.hidden = false;
+			/* Force a reflow so the slide-in transition runs on the first open. */
+			void drawer.offsetWidth;
+			drawer.classList.add('is-open');
+			opener.setAttribute('aria-expanded', 'true');
+			hadLock = document.documentElement.classList.contains('hsw-gc-lock');
+			document.documentElement.classList.add('hsw-gc-lock');
+			inertBackground();
+			document.addEventListener('keydown', trap);
+			var closeButton = panel.querySelector('button[data-hsw-gc-close]');
+			if (closeButton) {
+				closeButton.focus({ preventScroll: true });
+			}
+		}
+
+		function close(restoreFocus) {
+			if (!opened) {
+				return;
+			}
+			opened = false;
+			drawer.classList.remove('is-open');
+			opener.setAttribute('aria-expanded', 'false');
+			if (!hadLock) {
+				document.documentElement.classList.remove('hsw-gc-lock');
+			}
+			inerted.forEach(function (el) {
+				el.removeAttribute('inert');
+			});
+			inerted = [];
+			document.removeEventListener('keydown', trap);
+
+			var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			hideTimer = setTimeout(function () {
+				if (!opened) {
+					drawer.hidden = true;
+				}
+			}, reduced ? 0 : 560);
+
+			if (restoreFocus !== false && previousFocus && previousFocus.focus && visible(previousFocus)) {
+				previousFocus.focus({ preventScroll: true });
+			}
+		}
+
+		opener.addEventListener('click', open);
+
+		drawer.addEventListener('click', function (event) {
+			if (event.target.closest('[data-hsw-gc-close]')) {
+				close(true);
+			} else if (event.target.closest('a[href]')) {
+				close(false);
+			}
+		});
+
+		/* A resize into desktop must not leave the page locked. */
+		var desktop = window.matchMedia('(min-width: 1100px)');
+		var onDesktop = function (event) {
+			if (event.matches) {
+				close(false);
+			}
+		};
+		if (desktop.addEventListener) {
+			desktop.addEventListener('change', onDesktop);
+		} else if (desktop.addListener) {
+			desktop.addListener(onDesktop);
+		}
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Current page marker
+	 * ------------------------------------------------------------------ */
+
+	function markCurrent(root, drawer) {
+		function normalized(path) {
+			return path.replace(/\/+$/, '') || '/';
+		}
+
+		[root, drawer].forEach(function (scope) {
+			if (!scope) {
+				return;
+			}
+			all(scope, 'a[href]').forEach(function (a) {
+				if (!a.closest('.hsw-gc__item, .hsw-gc__drawer-item')) {
+					return;
+				}
+				a.removeAttribute('aria-current');
+				try {
+					var url = new URL(a.getAttribute('href'), location.href);
+					if (url.origin === location.origin && normalized(url.pathname) === normalized(location.pathname) && !url.hash) {
+						a.setAttribute('aria-current', 'page');
+					}
+				} catch (error) {
+					/* An invalid URL cannot represent the current page. */
+				}
+			});
+		});
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Cart badge — one request, only when WooCommerce says a cart exists.
+	 * ------------------------------------------------------------------ */
+
+	function cartBadge(root) {
+		var badge = root.querySelector('[data-hsw-gc-count]');
+		var link = root.querySelector('[data-hsw-gc-cart]');
+		if (!badge || !link || !/(?:^|;\s*)woocommerce_items_in_cart=1(?:;|$)/.test(document.cookie)) {
+			return;
+		}
+
+		var endpoint = (window.hswHeaderGcData && window.hswHeaderGcData.cartEndpoint) || '/wp-json/wc/store/v1/cart';
+		var label = link.getAttribute('aria-label') || '';
+
+		fetch(endpoint, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+			.then(function (res) {
+				return res.ok ? res.json() : null;
+			})
+			.then(function (cart) {
+				var count = Number(cart && cart.items_count) || 0;
+				if (count <= 0) {
+					return;
+				}
+				var text = String(count).replace(/\d/g, function (digit) {
+					return '۰۱۲۳۴۵۶۷۸۹'[Number(digit)];
+				});
+				badge.textContent = text;
+				badge.hidden = false;
+				if (label) {
+					link.setAttribute('aria-label', label + ' — ' + text);
+				}
+			})
+			.catch(function () {
+				/* The badge is optional; a failed request changes nothing. */
+			});
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Boot
+	 * ------------------------------------------------------------------ */
+
+	function initRoot(root) {
+		if (!root || root.hasAttribute('data-hsw-gc-ready')) {
+			return;
+		}
+
+		var drawer = document.querySelector('[data-hsw-gc-drawer][data-hsw-gc-for="' + root.getAttribute('data-hsw-gc') + '"]');
+
+		markCurrent(root, drawer);
+		root.setAttribute('data-hsw-gc-ready', '');
+		if (drawer) {
+			drawer.setAttribute('data-hsw-gc-ready', '');
+		}
+
+		initDocking(root);
+		initLine(root);
+		initPanels(root);
+		initDrawer(root);
+		cartBadge(root);
+	}
+
+	function boot() {
+		all(document, '[data-hsw-gc]').forEach(initRoot);
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', boot);
+	} else {
+		boot();
+	}
+
+	/* Elementor editor / live preview re-renders the widget from scratch. */
+	if (window.jQuery) {
+		window.jQuery(window).on('elementor/frontend/init', function () {
+			if (!window.elementorFrontend || !window.elementorFrontend.hooks) {
+				return;
+			}
+			window.elementorFrontend.hooks.addAction('frontend/element_ready/hsw-header-gc.default', function ($scope) {
+				all($scope[0], '[data-hsw-gc]').forEach(function (root) {
+					root.removeAttribute('data-hsw-gc-ready');
+					initRoot(root);
+				});
+			});
+		});
+	}
+})();

@@ -15,3 +15,6 @@ tests/qa/out/
 
 # local assistant workspace (not part of the plugin)
 .workbuddy-ai/
+
+# playwright-cli snapshots from local visual checks
+.playwright-cli/

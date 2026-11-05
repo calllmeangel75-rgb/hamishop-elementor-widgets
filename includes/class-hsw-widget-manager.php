@@ -37,7 +37,35 @@ final class HSW_Widget_Manager {
 		add_action( 'admin_post_hsw_widgets_reset', array( $this, 'handle_reset' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( HSW_FILE ), array( $this, 'plugin_action_links' ) );
 		$this->maybe_add_header_widgets();
+		$this->maybe_add_gc_header();
 		$this->maybe_add_post_widget();
+	}
+
+	/**
+	 * Enable «هدر GC» on sites that already saved the widget option.
+	 *
+	 * Same one-shot guard idea as the two migrations below: it runs once, so a
+	 * shop owner who later switches the widget off keeps it off. Without this
+	 * the widget would exist only on fresh installs — every existing site has
+	 * a saved array that predates it.
+	 */
+	private function maybe_add_gc_header() {
+		if ( get_option( 'hsw_gc_header_migrated' ) ) {
+			return;
+		}
+
+		$saved = get_option( self::OPTION, null );
+		if ( is_array( $saved ) ) {
+			$valid = array_keys( self::all_widgets() );
+			$saved = array_values( array_unique( array_intersect( array_map( 'sanitize_key', $saved ), $valid ) ) );
+			if ( isset( self::all_widgets()['hsw-header-gc'] ) && ! in_array( 'hsw-header-gc', $saved, true ) ) {
+				$saved[] = 'hsw-header-gc';
+			}
+			update_option( self::OPTION, $saved );
+			self::$enabled_cache = null;
+		}
+
+		update_option( 'hsw_gc_header_migrated', 1, false );
 	}
 
 	/**
@@ -117,7 +145,7 @@ final class HSW_Widget_Manager {
 				'category'    => 'hamishop-header',
 				'icon'        => 'dashicons-menu-alt3',
 				'accent'      => '#0f766e',
-				'description' => __( 'دو هدر کامل المنتور با منوی واقعی وردپرس، جستجوی محصول ووکامرس، سبد خرید و حساب کاربری. هر دو پیش‌فرض فعال‌اند.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'سه هدر کامل المنتور با منوی واقعی وردپرس، جستجوی محصول ووکامرس، سبد خرید و حساب کاربری. هر سه پیش‌فرض فعال‌اند.', 'hamishop-elementor-widgets' ),
 				'general'     => array(
 					'hsw-header-store'   => array(
 						'label' => __( 'هدر فروشگاهی', 'hamishop-elementor-widgets' ),
@@ -126,6 +154,10 @@ final class HSW_Widget_Manager {
 					'hsw-header-minimal' => array(
 						'label' => __( 'هدر مینیمال شیشه‌ای', 'hamishop-elementor-widgets' ),
 						'desc'  => __( 'پیل شیشه‌ای شناور، منوی واقعی و پنل جستجوی سبک.', 'hamishop-elementor-widgets' ),
+					),
+					'hsw-header-gc'      => array(
+						'label' => __( 'هدر GC', 'hamishop-elementor-widgets' ),
+						'desc'  => __( 'نوار شناور با نشان مدار، پنل‌های کشویی آیکون‌دار و منوی موبایل کشویی.', 'hamishop-elementor-widgets' ),
 					),
 					'hsw-footer-sticky'  => array(
 						'label' => __( 'فوتر چسبان (نوار پایین موبایل)', 'hamishop-elementor-widgets' ),

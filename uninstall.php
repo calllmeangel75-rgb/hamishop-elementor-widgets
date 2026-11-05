@@ -42,6 +42,7 @@ function hsw_uninstall_site() {
 		'hsw_express_slug',
 		'hsw_free_shipping_min',
 		'hsw_free_shipping_on',
+		'hsw_gc_header_migrated',
 		'hsw_header_widgets_migrated',
 		'hsw_htaccess_backup',
 		'hsw_invoice_enabled',
