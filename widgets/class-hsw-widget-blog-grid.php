@@ -235,7 +235,7 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                         }
                 }
 
-                if ( ! HSW_Composite::is_active() && 'yes' === ( $s['show_cat_desc'] ?? 'yes' ) ) {
+                if ( ! $this->is_composite_part() && 'yes' === ( $s['show_cat_desc'] ?? 'yes' ) ) {
                         $this->render_blog_archive_description( (string) ( $s['cat_desc_title'] ?? __( 'دربارهٔ {name}', 'hamishop-elementor-widgets' ) ) );
                 }
 

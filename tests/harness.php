@@ -227,6 +227,123 @@ foreach ( $declared as $class ) {
 	}
 }
 
+/*
+ * Method-resolution audit.
+ *
+ * A base class that calls `$this->something()` it never declared only fails
+ * when that line finally runs — and hsw_report_fatal() turns it into an admin
+ * banner, not a white screen, so nothing in this harness noticed. That is how
+ * `Call to undefined method HSW_Widget_Blog_Page::is_demo()` shipped and
+ * silently truncated the blog page's description box.
+ *
+ * Every `$this->name(` in a class's own file must resolve on that class. A
+ * file that declares more than one class (class-hsw-wallet-pay.php) is checked
+ * against the union of its classes' methods, so a sibling's method is not
+ * reported as missing.
+ */
+$by_file = array();
+foreach ( $declared as $class ) {
+	$ref  = new ReflectionClass( $class );
+	$file = $ref->getFileName();
+	if ( ! $file || ! is_readable( $file ) ) {
+		continue;
+	}
+	$by_file[ $file ][] = $class;
+}
+
+$unresolved = array();
+
+/*
+ * Every class the plugin declares *somewhere*, including the ones declared
+ * inside a conditional (the WC gateway) that this harness never loads. A
+ * static call to one of those is fine; a call to a name that exists nowhere
+ * is a typo.
+ */
+$declared_anywhere = array();
+foreach ( array_merge( glob( $base . '/includes/*.php' ), glob( $base . '/widgets/*.php' ) ) as $probe ) {
+	$probe_src = (string) file_get_contents( $probe );
+	if ( preg_match_all( '/^\s*(?:abstract\s+|final\s+)?class\s+([A-Za-z_][A-Za-z0-9_]*)/m', $probe_src, $names ) ) {
+		foreach ( $names[1] as $name ) {
+			$declared_anywhere[ $name ] = true;
+		}
+	}
+}
+
+foreach ( $by_file as $file => $classes ) {
+	$src = (string) file_get_contents( $file );
+
+	/*
+	 * A class declared inside a conditional block (class-hsw-wallet-pay.php
+	 * builds its WC gateway that way) is not loaded here, so its `$this->`
+	 * calls resolve against WC_Payment_Gateway — a parent this harness does
+	 * not stub. Auditing that file would report the gateway's inherited
+	 * methods as undefined, so it is skipped by name rather than by guess.
+	 */
+	if ( preg_match( '/^[ \t]+class\s+[A-Za-z_]/m', $src ) ) {
+		echo "SKIP METHOD AUDIT (nested class): " . basename( $file ) . "\n";
+		continue;
+	}
+
+	if ( ! preg_match_all( '/\$this->([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $src, $matches ) ) {
+		$matches = array( 1 => array() );
+	}
+
+	$known = array();
+	foreach ( $classes as $class ) {
+		$ref = new ReflectionClass( $class );
+		foreach ( $ref->getMethods() as $method ) {
+			$known[ $method->getName() ] = true;
+		}
+	}
+
+	foreach ( array_unique( $matches[1] ) as $called ) {
+		if ( isset( $known[ $called ] ) ) {
+			continue;
+		}
+		/*
+		 * A second class in the same file (class-hsw-wallet-pay.php builds its
+		 * gateway as an anonymous class) declares its methods inline. The
+		 * regex cannot tell which body a call came from, so anything the file
+		 * declares at all is treated as resolved.
+		 */
+		if ( preg_match( '/function\s+' . preg_quote( $called, '/' ) . '\s*\(/', $src ) ) {
+			continue;
+		}
+		$unresolved[] = $classes[0] . '::' . $called . '() — ' . basename( $file );
+	}
+
+	/*
+	 * Static calls are just as fatal and just as invisible: `HSW_Composite::
+	 * is_active()` sat in the blog grid for a whole release. A `HSW_*::name(`
+	 * that is not `self`/`static`/`parent` must exist on that class.
+	 */
+	if ( preg_match_all( '/\b(HSW_[A-Za-z0-9_]+)::([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $src, $statics, PREG_SET_ORDER ) ) {
+		foreach ( $statics as $static ) {
+			$target = $static[1];
+			$method = $static[2];
+			if ( ! class_exists( $target ) ) {
+				/* Declared behind a runtime guard → not loaded here, not a bug. */
+				if ( isset( $declared_anywhere[ $target ] ) ) {
+					continue;
+				}
+				$unresolved[] = $target . '::' . $method . '() — ' . basename( $file ) . ' (unknown class)';
+				continue;
+			}
+			if ( ! method_exists( $target, $method ) ) {
+				$unresolved[] = $target . '::' . $method . '() — ' . basename( $file );
+			}
+		}
+	}
+}
+
+if ( $unresolved ) {
+	echo "\n-- unresolved \$this-> calls --\n";
+	foreach ( $unresolved as $line ) {
+		echo "UNDEFINED METHOD: $line\n";
+		$failed++;
+	}
+}
+
 echo "\n=== " . count( $declared ) . " HSW classes declared ===\n";
 echo $failed ? "HARNESS RESULT: $failed FAILURE(S)\n" : "HARNESS RESULT: ALL CLEAN\n";
 exit( $failed ? 1 : 0 );

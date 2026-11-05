@@ -21,6 +21,10 @@
 
 ### Fixed
 
+- **«هدر GC» never appeared in the Elementor panel.** `register_widgets()` loads the widget file, then walks a second, hand-written list of class names and skips anything missing from it with a silent `continue`. The file was added to the first list and not the second, so the widget was loaded, never registered, and produced no error at all. `ci-checks.php` now verifies that every widget class appears in that list.
+- `Call to undefined method HSW_Widget_Blog_Page::is_demo()` — the blog base has called `is_demo()` since the SEO box shipped, but the method only ever existed on the archive, cart and product bases. Rendering the blog page widget threw, `hsw_report_fatal()` turned it into an admin banner instead of a white screen, and everything after that call — the whole description box — never rendered. `HSW_Blog_Base` now has its own copy with the blog's archive checks.
+- `Call to undefined method HSW_Composite::is_active()` in the blog grid. Same family, different shape: a static call to a method that was never written. It now uses the existing `is_composite_part()` helper, exactly like the archive header does.
+- `tests/harness.php` now audits method resolution: every `$this->name(` and every `HSW_*::name(` in a class's own file must resolve. Both defects above were found by it and are pinned by it — verified by removing each fix and watching the harness fail.
 - The dark drawer button rendered `#172b25` on `#06271f` — dark on dark. `.hsw-gc a { color: inherit }` is specificity (0,1,1) and outranked `.hsw-gc__drawer-btn--dark` (0,1,0). Every rule that colours an anchor now carries the `.hsw-gc` prefix. Measured after the fix: `rgb(255,255,255)` on `rgb(6,39,31)`.
 - The bar pushed the document 172px sideways at a 320px viewport and 102px at 390px. `.hsw-gc__brand` was `flex-shrink: 0`, so a long store name plus three action buttons had nowhere to go. The brand now shrinks and truncates with an ellipsis. `document.scrollWidth - document.clientWidth` measured 0 at 320 / 360 / 390 / 414 / 768 / 1024 / 1100 / 1280 / 1440.
 

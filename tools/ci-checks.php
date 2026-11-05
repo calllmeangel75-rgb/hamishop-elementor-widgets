@@ -189,6 +189,38 @@ foreach ( glob( $root . '/widgets/*.php' ) ?: array() as $widget ) {
 hsw_ci( 'widgets: every file has a catalog entry', ! $not_in_catalog, implode( ', ', $not_in_catalog ) );
 hsw_ci( 'widgets: every file is required by the plugin', ! $not_required, implode( ', ', array_slice( $not_required, 0, 5 ) ) );
 
+/*
+ * Being required is not the same as being registered. `register_widgets()`
+ * loads the file, then walks a second, hand-written list of class names —
+ * and skips anything that is not in it with a silent `continue`. A widget
+ * that is required but missing from that list never appears in Elementor and
+ * produces no error at all, which is how «هدر GC» shipped invisible.
+ */
+$register_start = strpos( $plugin, 'foreach ( array(' );
+$register_block = '';
+if ( false !== $register_start ) {
+	$register_end   = strpos( $plugin, ') as $widget_class )', $register_start );
+	$register_block = false !== $register_end
+		? substr( $plugin, $register_start, $register_end - $register_start )
+		: '';
+}
+
+$not_registered = array();
+foreach ( glob( $root . '/widgets/*.php' ) ?: array() as $widget ) {
+	$src = (string) file_get_contents( $widget );
+	if ( ! preg_match( '/^\s*class\s+([A-Za-z_][A-Za-z0-9_]*)/m', $src, $class_match ) ) {
+		continue;
+	}
+	if ( false === strpos( $register_block, "'\\" . $class_match[1] . "'" ) ) {
+		$not_registered[] = $class_match[1];
+	}
+}
+hsw_ci(
+	'widgets: every widget class is in the register_widgets() list',
+	'' !== $register_block && ! $not_registered,
+	'' === $register_block ? 'could not locate the class list' : implode( ', ', $not_registered )
+);
+
 /* -------------------------------------------------------------------------
  * 6) Repository hygiene: no local build output or scratch files
  * ---------------------------------------------------------------------- */

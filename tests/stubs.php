@@ -71,6 +71,23 @@ abstract class Widget_Base {
 
         public function end_controls_section() {}
 
+        /*
+         * Tab controls and `update_control()` live on Element_Base /
+         * Controls_Stack in real Elementor. They were missing here, so the
+         * harness's method-resolution audit reported them as undefined.
+         */
+        public function start_controls_tabs( $tabs_id, array $args = array() ) {}
+
+        public function end_controls_tabs() {}
+
+        public function start_controls_tab( $tab_id, array $args = array() ) {}
+
+        public function end_controls_tab() {}
+
+        public function update_control( $id, array $args, $options = array() ) {}
+
+        public function get_id() { return isset( $this->stub_data['id'] ) ? (string) $this->stub_data['id'] : ''; }
+
         public function add_control( $id, array $args = array(), $options = array() ) {}
 
         public function add_group_control( $group_name, array $args = array() ) {}

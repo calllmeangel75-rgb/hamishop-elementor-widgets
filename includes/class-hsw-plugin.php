@@ -649,6 +649,7 @@ final class HSW_Plugin {
                 foreach ( array(
                         '\HSW_Widget_Header_Store',
                         '\HSW_Widget_Header_Minimal',
+                        '\HSW_Widget_Header_GC',
                         '\HSW_Widget_Footer_Sticky',
                         '\HSW_Widget_Wonder_Deals',
                         '\HSW_Widget_Best_Sellers',

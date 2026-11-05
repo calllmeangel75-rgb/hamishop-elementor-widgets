@@ -76,6 +76,9 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 = 1.11.244 =
 * New: «هدر GC» — a third header widget. A rounded bar floats over the page and docks into a full-width blurred bar on scroll; the brand mark is a «G» drawn as a circuit trace that draws itself; a gradient underline follows the pointer; dropdown panels stagger their rows in. The mark, brand text, every menu row, six panel slots (icon + title + description + footer), the cart badge, the account button and the mobile drawer are all controls.
 * New: `hd_mode` keeps the bar fixed (default) or in the flow, for a template whose own section is already sticky.
+* Fix: «هدر GC» never reached the Elementor panel — the file was required by `register_widgets()` but missing from the class list that follows it, and that list skips unknown names silently. A new check now fails the build when a widget class is not in it.
+* Fix: the blog page widget threw `Call to undefined method HSW_Widget_Blog_Page::is_demo()`; the method existed on the archive, cart and product bases but not on the blog base, so the description box never rendered. The blog grid threw the same way over `HSW_Composite::is_active()`, which was never written — it now uses `is_composite_part()`.
+* Fix: the harness now audits method resolution (`$this->x()` and `HSW_*::x()`), so an undefined method fails the build instead of surfacing as an admin banner on a customer's site.
 * Fix: the drawer's dark button was dark-on-dark (`#172b25` on `#06271f`); `.hsw-gc a { color: inherit }` outranked the button rule. Every anchor colour rule now carries the `.hsw-gc` prefix — measured white on `#06271f` after.
 * Fix: a long store name pushed the page 172px sideways at 320px and 102px at 390px (`flex-shrink: 0` on the brand). It now truncates with an ellipsis — overflow measured 0 at 320/360/390/414/768/1024/1100/1280/1440.
 

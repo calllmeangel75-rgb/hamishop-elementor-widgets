@@ -393,6 +393,35 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
         }
 
         /**
+         * Editor preview without a real blog archive → render the design demo.
+         *
+         * `blog_archive_description_data()` has called this since the SEO box
+         * shipped, but the method only ever existed on the archive, cart and
+         * product bases. Rendering the blog page widget threw
+         * `Call to undefined method HSW_Widget_Blog_Page::is_demo()`, the
+         * error handler caught it, and everything after that call — the whole
+         * description box — never rendered.
+         *
+         * The guard is the same shape as the other bases: a real archive means
+         * real data, the editor without one means the sample text.
+         */
+        protected function is_demo() {
+                if ( is_home() || is_category() || is_tag() || is_date() || is_author() || is_tax() ) {
+                        return false;
+                }
+                if ( ! class_exists( '\Elementor\Plugin' ) ) {
+                        return false;
+                }
+
+                $el      = \Elementor\Plugin::$instance;
+                $editing = ( isset( $el->editor ) && $el->editor->is_edit_mode() )
+                        || ( isset( $el->preview ) && $el->preview->is_preview_mode() )
+                        || ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() && isset( $_POST['action'] ) && 'elementor_ajax' === $_POST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+                return $editing;
+        }
+
+        /**
          * Resolve the active post category / archive description for the bottom SEO box.
          *
          * Works both on native WordPress category/tag archives (`is_category()`,

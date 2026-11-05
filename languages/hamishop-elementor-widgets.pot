@@ -3947,7 +3947,7 @@ msgstr ""
 msgid "توضیحات برگهٔ فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-blog-base.php:470
+#: includes/class-hsw-blog-base.php:499
 msgid "توضیحات دسته‌بندی"
 msgstr ""
 
@@ -4016,7 +4016,7 @@ msgstr ""
 msgid "تکمیل نشانی تحویل"
 msgstr ""
 
-#: includes/class-hsw-blog-base.php:406
+#: includes/class-hsw-blog-base.php:435
 msgid "تکنولوژی و گجت"
 msgstr ""
 
@@ -5311,7 +5311,7 @@ msgstr ""
 msgid "در انتظار پرداخت شارژ کیف پول"
 msgstr ""
 
-#: includes/class-hsw-blog-base.php:407
+#: includes/class-hsw-blog-base.php:436
 msgid "در این بخش جدیدترین مقالات تخصصی، راهنمای خرید، بررسی عمیق محصولات و اخبار روز دنیای فناوری را مطالعه می‌کنید. برای نمایش این کادر در سایت، کافی است در پیشخوان وردپرس (نوشته‌ها ← دسته‌ها) متن «توضیح» دسته‌بندی مورد نظر را تکمیل کنید."
 msgstr ""
 
@@ -5400,7 +5400,7 @@ msgstr ""
 msgid "درباره ما"
 msgstr ""
 
-#: includes/class-hsw-blog-base.php:467
+#: includes/class-hsw-blog-base.php:496
 msgid "دربارهٔ %s"
 msgstr ""
 
