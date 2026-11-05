@@ -1716,22 +1716,27 @@ body.admin-bar .hsw-ptabs--stack { --hsw-stk-top: 32px; }
         outline-offset: 2px;
 }
 
-/* Buy button: never pink, and it keeps its own colour when no hover colour
-   was picked (--hsw-cart-bg-hover falls back to --hsw-cart-bg). */
+/* Buy button: never pink.
+ *
+ * The chain now reaches the palette's own hover token. It used to fall from
+ * --hsw-cart-bg-hover straight to --hsw-cart-bg, so a shop that never picked a
+ * per-widget colour had no hover change at all: the palette defines cta_hover
+ * and the button ignored it. A widget that sets its base colour also emits a
+ * derived --hsw-cart-bg-hover, so that case still wins before the palette. */
 .hsw-p .hsw-ppurch__cart:hover,
 .hsw-p .hsw-ppurch__cart:focus,
 .hsw-p .hsw-ppurch__cart:focus-visible,
 .hsw-p .hsw-psticky__cart:hover,
 .hsw-p .hsw-psticky__cart:focus,
 .hsw-p .hsw-psticky__cart:focus-visible {
-        background-color: var(--hsw-cart-bg-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container, #1d4ed8)))) !important;
+        background-color: var(--hsw-cart-bg-hover, var(--hsw-cta-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container, #1d4ed8))))) !important;
         background-image: none !important;
         color: var(--hsw-cart-c-hover, var(--hsw-cart-c, #fff)) !important;
 }
 
 .hsw-p .hsw-ppurch__cart:active,
 .hsw-p .hsw-psticky__cart:active {
-        background-color: var(--hsw-cart-bg-active, var(--hsw-cart-bg-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container, #1d4ed8))))) !important;
+        background-color: var(--hsw-cart-bg-active, var(--hsw-cta-active, var(--hsw-cart-bg-hover, var(--hsw-cta-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container, #1d4ed8))))))) !important;
 }
 
 .hsw-p .hsw-ppurch__cart.is-added,

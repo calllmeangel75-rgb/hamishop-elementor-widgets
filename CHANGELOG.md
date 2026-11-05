@@ -24,6 +24,24 @@ Six claims from the palette/Elementor review were verified against the code. Fiv
 
 Not fixed, with reasons: the archive footer rule (deliberate contrast fix for Woodmart's 4.23:1 grey, archive screens only); the fixed success/error/brand colours (semantic, not palette roles); the hover/active CTA states (the product CTA already derives them from the control with `color-mix`; the cart and checkout CTAs have no per-widget colour control by design).
 
+- **The buy button had no hover colour unless a widget colour was picked.** The hover rule chained `--hsw-cart-bg-hover` straight to `--hsw-cart-bg`, skipping the palette's own `--hsw-cta-hover`: a shop that never opened a widget control got the same colour on hover as at rest, and the palette's hover token was dead for that button. The chain now reaches `--hsw-cta-hover` / `--hsw-cta-active` before the base colour, and the sticky bar derives its own hover/active from the picked colour the same way the purchase box already did.
+
+  ```
+  product CTA, palette only   before  base #0f2042  hover #0f2042 (no change)
+                              after   base #0f2042  hover #1c3566
+  ```
+
+### Verified in a browser (real Elementor page, real generated CSS)
+
+Two `hsw-account` widgets on one Elementor page, one with `ac_hero_title_c=#ff0000` and `ac_hero_bg=#123456`:
+
+```
+widget A (override)   title rgb(255,0,0)   bg rgb(18,52,86)
+widget B (no override) title rgb(255,255,255)  bg linear-gradient(…)
+clear A's controls    title rgb(255,255,255)  bg gradient
+font mode design      a rule at Elementor's specificity wins → "Courier New"
+```
+
 ### Measured
 
 ```

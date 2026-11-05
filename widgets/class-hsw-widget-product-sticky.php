@@ -129,7 +129,9 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                         array(
                                 'label'     => __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::COLOR,
-                                'selectors' => array( '{{WRAPPER}}' => '--hsw-cart-bg: {{VALUE}};' ),
+                                'selectors' => array(
+                                        '{{WRAPPER}}' => '--hsw-cart-bg: {{VALUE}}; --hsw-cart-bg-hover: color-mix(in srgb, {{VALUE}} 86%, #000); --hsw-cart-bg-active: color-mix(in srgb, {{VALUE}} 74%, #000);',
+                                ),
                         )
                 );
                 $this->add_control(

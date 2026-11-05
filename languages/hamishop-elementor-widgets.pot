@@ -1225,7 +1225,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-items.php:458
 #: widgets/class-hsw-widget-cart-items.php:543
 #: widgets/class-hsw-widget-product-purchase.php:422
-#: widgets/class-hsw-widget-product-sticky.php:249
+#: widgets/class-hsw-widget-product-sticky.php:251
 msgid "افزایش تعداد"
 msgstr ""
 
@@ -3582,7 +3582,7 @@ msgstr ""
 #: includes/trait-hsw-product-page-style-parts-3.php:26
 #: widgets/class-hsw-widget-cart-items.php:467
 #: widgets/class-hsw-widget-product-purchase.php:429
-#: widgets/class-hsw-widget-product-sticky.php:252
+#: widgets/class-hsw-widget-product-sticky.php:254
 msgid "تعداد"
 msgstr ""
 
@@ -4018,7 +4018,7 @@ msgstr ""
 #: includes/class-hsw-widget-base.php:3104
 #: widgets/class-hsw-widget-archive-grid.php:87
 #: widgets/class-hsw-widget-product-purchase.php:404
-#: widgets/class-hsw-widget-product-sticky.php:236
+#: widgets/class-hsw-widget-product-sticky.php:238
 msgid "تومان"
 msgstr ""
 
@@ -4788,7 +4788,7 @@ msgid "حذف از سبد"
 msgstr ""
 
 #: widgets/class-hsw-widget-product-purchase.php:433
-#: widgets/class-hsw-widget-product-sticky.php:256
+#: widgets/class-hsw-widget-product-sticky.php:258
 msgid "حذف از سبد خرید"
 msgstr ""
 
@@ -5118,7 +5118,7 @@ msgstr ""
 #: widgets/class-hsw-widget-product-purchase.php:91
 #: widgets/class-hsw-widget-product-purchase.php:323
 #: widgets/class-hsw-widget-product-sticky.php:61
-#: widgets/class-hsw-widget-product-sticky.php:178
+#: widgets/class-hsw-widget-product-sticky.php:180
 msgid "خرید آنلاین"
 msgstr ""
 
@@ -7032,7 +7032,7 @@ msgstr ""
 #: includes/trait-hsw-product-page-style-parts-1.php:273
 #: includes/trait-hsw-product-page-style-parts-4.php:169
 #: widgets/class-hsw-widget-archive-grid.php:278
-#: widgets/class-hsw-widget-product-sticky.php:138
+#: widgets/class-hsw-widget-product-sticky.php:140
 msgid "رنگ متن دکمه"
 msgstr ""
 
@@ -10885,7 +10885,7 @@ msgstr ""
 msgid "محدوده قیمت کالاهای این آرشیو از %1$s تا %2$s %3$s است؛ با اسلایدر قیمت می‌توانید بودجه خود را دقیق‌تر تعیین کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-product-sticky.php:271
+#: widgets/class-hsw-widget-product-sticky.php:273
 msgid "محصول با موفقیت به سبد خرید اضافه شد"
 msgstr ""
 
@@ -11193,7 +11193,7 @@ msgstr ""
 msgid "مشاهده سایر مقالات نویسنده"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-sticky.php:273
+#: widgets/class-hsw-widget-product-sticky.php:275
 msgid "مشاهده سبد"
 msgstr ""
 
@@ -14433,7 +14433,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-items.php:468
 #: widgets/class-hsw-widget-cart-items.php:546
 #: widgets/class-hsw-widget-product-purchase.php:430
-#: widgets/class-hsw-widget-product-sticky.php:253
+#: widgets/class-hsw-widget-product-sticky.php:255
 msgid "کاهش تعداد"
 msgstr ""
 
