@@ -8,6 +8,29 @@
 
 ## [Unreleased]
 
+## [1.11.248] — 2026-11-06
+
+### Fixed — palette review
+
+Six claims from the palette/Elementor review were verified against the code. Five were true and are fixed here; one was not.
+
+- **The account hero title ignored its own colour control.** `a_text()` already registers «رنگ متن» for `.hsw-ac__hero-title`, and the stylesheet pinned the colour with `color:#fff !important` — the control existed and did nothing. Without `!important` the Elementor rule (0,2,0) beats the stylesheet (0,1,0), and an unset control still leaves white.
+- **The hero background control was invisible.** It wrote `background-color` while the element paints `background: linear-gradient(...)`; a colour under a gradient cannot be seen. It now writes the `background` shorthand, so a chosen colour replaces the gradient and an empty control leaves it alone.
+- **The font modes outranked Elementor typography.** `.hsw-font-design *` and `.hsw-font-inherit *` forced `font-family` with `!important` on every descendant, so a heading with an explicit family in Elementor kept the widget's font. `!important` now stays on the root only; children get a normal declaration that still beats theme element selectors but loses to Elementor's typography rule.
+- **`readable_on()` only walked toward black.** On a dark surface it darkened the text until it disappeared: `readable_on('#1d4ed8', '#0b1f3a')` returned `#111827`. It now walks toward whichever end actually contrasts — the same call returns `#6183e4`. Light palettes are unchanged.
+- **`contrast_text()` picked white from 3:1.** 3:1 is the large-text floor; normal button text needs 4.5, and a mid-tone surface got white at 3.5 when black offered 5.9. It now returns the better of the two, which never drops below 4.58. `#888888` → `#111827` (was `#ffffff`).
+- **An invalid colour silently reset to the default.** The screen said «ذخیره شد» and the palette jumped to a colour nobody chose. The previous value is kept now and the rejected fields are named in a settings error.
+- **A font family could break out of the inline stylesheet.** `sanitize_text_field` keeps quotes, braces and semicolons, and the family is printed inside `<style>`. The family is now filtered to letters, digits, spaces, commas, quotes, hyphen, dot and underscore before it is quoted.
+
+Not fixed, with reasons: the archive footer rule (deliberate contrast fix for Woodmart's 4.23:1 grey, archive screens only); the fixed success/error/brand colours (semantic, not palette roles); the hover/active CTA states (the product CTA already derives them from the control with `color-mix`; the cart and checkout CTAs have no per-widget colour control by design).
+
+### Measured
+
+```
+palette css inline  1,469 bytes  (63 widget files, 1.33 MB, loaded before the enabled check)
+font injection      X"; } body { display:none } .a{  →  "X"  body  displaynone  .a"
+```
+
 ## [1.11.247] — 2026-11-05
 
 ### Fixed — third audit round

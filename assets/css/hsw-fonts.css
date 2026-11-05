@@ -64,14 +64,24 @@
         pointer-events: none;
 }
 
-/* «ارث‌بری فونت از قالب» — per-widget switch (hsw_font_mode = inherit).
-   Icons are SVG sprites; everything else follows the theme font. */
-.hsw-font-inherit, .hsw-font-inherit *:not(.hsw-ic) { font-family: inherit !important; }
+/*
+ * «ارث‌بری فونت از قالب» — per-widget switch (hsw_font_mode = inherit).
+ * Icons are SVG sprites; everything else follows the theme font.
+ *
+ * `!important` stays on the root only. On every descendant it outranked the
+ * Elementor typography control for that element, so a heading with an explicit
+ * family kept the widget's font — the admin's choice was silently dropped. On
+ * the root it still wins over the theme's own font-family; on children a normal
+ * declaration is enough to beat theme element selectors, while Elementor's
+ * (0,2,0)+ typography rule takes precedence.
+ */
+.hsw-font-inherit { font-family: inherit !important; }
+.hsw-font-inherit *:not(.hsw-ic) { font-family: inherit; }
 
-/* «فونت طرح» mode: force the bundled Vazirmatn even when the site palette
-   points at another family. Without this the option was a no-op. */
-.hsw-font-design,
-.hsw-font-design *:not(.hsw-ic) { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important; }
+/* «فونت طرح» mode: the bundled Vazirmatn, even when the site palette points at
+   another family. Same specificity rule as above. */
+.hsw-font-design { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important; }
+.hsw-font-design *:not(.hsw-ic) { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif; }
 
 /* -------------------------------------------------------------------------
  * WooCommerce session notices (shared by cart / checkout / pay)

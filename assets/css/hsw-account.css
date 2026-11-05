@@ -525,9 +525,14 @@
 	font-weight: 800;
 	line-height: 1.5;
 	letter-spacing: -.2px;
-	/* Always white: the hero is a dark gradient and the theme/palette text
-	   colour would otherwise make it unreadable. */
-	color: #fff !important;
+	/*
+	 * White is the default, not a law. This used to be `!important`, which
+	 * outranked the «رنگ متن» control the widget already exposes for this
+	 * element — the admin picked a colour and nothing happened. Without it the
+	 * Elementor rule (0,2,0) beats this one (0,1,0), and an unset control still
+	 * leaves white.
+	 */
+	color: #fff;
 	text-shadow: 0 1px 2px rgba(15, 23, 42, .25);
 }
 

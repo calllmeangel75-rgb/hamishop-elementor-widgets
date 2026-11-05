@@ -122,6 +122,19 @@ class HSW_Palette {
 	 */
 	public static function font_css( $font ) {
 		$font = trim( (string) $font );
+
+		/*
+		 * The family is printed inside an inline <style>. `sanitize_text_field`
+		 * strips tags but keeps quotes, braces and semicolons, so a paste like
+		 * `X"; } body { display:none } .a{` closed the declaration and injected
+		 * rules. Keep what a family name actually uses: letters (Latin and the
+		 * Persian block), digits, spaces, commas, quotes, hyphen, dot, underscore.
+		 */
+		$clean = preg_replace( '/[^A-Za-z0-9\x{0600}-\x{06FF}\s,\'"\-_.]/u', '', $font );
+		if ( null !== $clean ) {
+			$font = trim( $clean );
+		}
+
 		if ( '' === $font ) {
 			/*
 			 * Never 'inherit': an empty value used to fall back to the theme, and
@@ -438,12 +451,20 @@ class HSW_Palette {
 			return '#' . ltrim( (string) $hex, '#' );
 		}
 
-		/* Walk toward black in small steps; black always wins eventually. */
+		/*
+		 * Walk toward whichever end actually contrasts with the background.
+		 * This used to walk toward black only, so a colour on a dark surface got
+		 * darker until it vanished — black on navy is not "readable on".
+		 */
+		$white = array( 'r' => 255, 'g' => 255, 'b' => 255 );
+		$black = array( 'r' => 0, 'g' => 0, 'b' => 0 );
+		$end   = $ratio( $white, $b ) >= $ratio( $black, $b ) ? $white : $black;
+
 		for ( $step = 5; $step <= 100; $step += 5 ) {
 			$mix = array(
-				'r' => (int) round( $fg['r'] * ( 100 - $step ) / 100 ),
-				'g' => (int) round( $fg['g'] * ( 100 - $step ) / 100 ),
-				'b' => (int) round( $fg['b'] * ( 100 - $step ) / 100 ),
+				'r' => (int) round( $fg['r'] + ( $end['r'] - $fg['r'] ) * $step / 100 ),
+				'g' => (int) round( $fg['g'] + ( $end['g'] - $fg['g'] ) * $step / 100 ),
+				'b' => (int) round( $fg['b'] + ( $end['b'] - $fg['b'] ) * $step / 100 ),
 			);
 
 			if ( $ratio( $mix, $b ) >= $min ) {
@@ -451,7 +472,7 @@ class HSW_Palette {
 			}
 		}
 
-		return '#111827';
+		return $end === $white ? '#ffffff' : '#111827';
 	}
 
 	public static function contrast_text( $hex ) {
@@ -474,8 +495,15 @@ class HSW_Palette {
 
 		/* WCAG contrast = (L1 + 0.05) / (L2 + 0.05). */
 		$with_white = 1.05 / ( $luminance + 0.05 );
+		$with_black = ( $luminance + 0.05 ) / 0.05;
 
-		return $with_white >= 3.0 ? '#ffffff' : '#111827';
+		/*
+		 * Whichever is actually better, not "white if it scrapes past 3:1".
+		 * 3:1 is the large-text floor; normal button text needs 4.5, and a
+		 * mid-tone surface (#888) got white at 3.5 while black offers 5.9.
+		 * Picking the larger of the two never returns less than 4.58.
+		 */
+		return $with_white >= $with_black ? '#ffffff' : '#111827';
 	}
 
 	/**
@@ -646,9 +674,42 @@ class HSW_Palette {
 
 		$incoming = isset( $_POST['hsw_palette'] ) && is_array( $_POST['hsw_palette'] ) ? wp_unslash( $_POST['hsw_palette'] ) : array();
 
+		/*
+		 * An invalid value used to fall back to the *default* colour without a
+		 * word: the admin typed something, the screen said «ذخیره شد», and the
+		 * palette silently jumped to a colour they never chose. Keep what was
+		 * there and say which fields were rejected.
+		 */
+		$current = self::get();
+		$tokens  = self::tokens();
+		$bad     = array();
+
 		foreach ( self::defaults() as $key => $default ) {
-			$value = isset( $incoming[ $key ] ) ? sanitize_hex_color( (string) $incoming[ $key ] ) : '';
-			$clean[ $key ] = $value ? $value : $default;
+			$raw   = isset( $incoming[ $key ] ) ? trim( (string) $incoming[ $key ] ) : '';
+			$value = '' !== $raw ? sanitize_hex_color( $raw ) : '';
+
+			if ( '' === $raw ) {
+				/* Cleared on purpose: back to the default. */
+				$clean[ $key ] = $default;
+			} elseif ( $value ) {
+				$clean[ $key ] = $value;
+			} else {
+				$clean[ $key ] = isset( $current[ $key ] ) ? $current[ $key ] : $default;
+				$bad[]         = isset( $tokens[ $key ][0] ) ? $tokens[ $key ][0] : $key;
+			}
+		}
+
+		if ( $bad ) {
+			add_settings_error(
+				'hsw_palette',
+				'hsw_bad_hex',
+				sprintf(
+					/* translators: %s: comma separated field labels. */
+					__( 'این مقدارها رنگ معتبر نبودند و ذخیره نشدند؛ مقدار قبلی حفظ شد: %s', 'hamishop-elementor-widgets' ),
+					implode( '، ', $bad )
+				),
+				'error'
+			);
 		}
 
 		/*

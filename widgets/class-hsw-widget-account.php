@@ -352,7 +352,13 @@ class HSW_Widget_Account extends HSW_Widget_Base {
 			array( 'label' => __( 'هدر خوش‌آمدگویی', 'hamishop-elementor-widgets' ), 'tab' => Controls_Manager::TAB_STYLE )
 		);
 
-		$this->a_color( 'ac_hero_bg', __( 'پس‌زمینهٔ هدر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__hero', 'background-color' );
+		/*
+		 * `background`, not `background-color`: the hero paints a gradient
+		 * (background-image), and a colour underneath it is invisible. The
+		 * shorthand replaces the gradient when the admin picks a colour, and an
+		 * empty control leaves the gradient exactly as it was.
+		 */
+		$this->a_color( 'ac_hero_bg', __( 'پس‌زمینهٔ هدر', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ac__hero', 'background' );
 		$this->a_text( 'ac_hero_title', '{{WRAPPER}} .hsw-ac__hero-title', array( 'default' => 24 ) );
 		$this->a_text( 'ac_hero_sub', '{{WRAPPER}} .hsw-ac__hero-sub', array( 'default' => 14 ) );
 
