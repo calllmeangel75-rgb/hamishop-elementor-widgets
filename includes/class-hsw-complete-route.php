@@ -47,11 +47,15 @@ final class HSW_Complete_Route {
      * resort: it must be a published page, and the caller still runs the
      * cart/checkout guard afterwards.
      *
+     * Public because the setup screen reports the same state the router acts
+     * on: a screen that re-implemented this check would eventually disagree
+     * with it.
+     *
      * @param string $option Option name holding the page id.
      * @param string $slug   Fallback page slug.
      * @return int Page id or 0.
      */
-    private static function resolve_page_id( $option, $slug ) {
+    public static function resolve_page_id( $option, $slug ) {
         $id = (int) get_option( $option, 0 );
         if ( $id > 0 && 'publish' === get_post_status( $id ) ) {
             return $id;
@@ -77,7 +81,7 @@ final class HSW_Complete_Route {
      * @param string $slug 'payment' or 'complete'.
      * @return bool
      */
-    private static function page_is_ours( $id, $slug ) {
+    public static function page_is_ours( $id, $slug ) {
         $widgets = array(
             'payment'  => array( 'hsw-pay-page', 'hsw-payment-page' ),
             'complete' => array( 'hsw-complete-page' ),

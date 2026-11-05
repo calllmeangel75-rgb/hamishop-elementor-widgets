@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.244
+Stable tag: 1.11.245
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,13 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.245 =
+* New: «راه‌اندازی مسیر خرید» در پنل «کنترل ویجت‌ها» — وضعیت واقعی صفحهٔ پرداخت و صفحهٔ تکمیل خرید را نشان می‌دهد و با یک دکمه، فقط صفحه‌هایی را می‌سازد که وجود ندارند.
+* New: صفحه‌ای که از قبل وجود دارد فقط «وصل» می‌شود، نه بازسازی؛ و صفحه‌ای که نشانی /payment/ یا /complete/ را در اختیار دارد ولی مال حامیشاپ نیست، هرگز دست نمی‌خورد (صفحه با نشانی /hamishop-payment/ ساخته می‌شود).
+* New: شورت‌کدهای `[hamishop_payment]` و `[hamishop_complete]` — صفحه در هر قالبی رندر می‌شود و با ذخیرهٔ مجدد المنتور از بین نمی‌رود.
+* New: هر دو صفحهٔ مسیر خرید `noindex, nofollow` می‌شوند، مثل صفحهٔ سبد و تسویهٔ خود ووکامرس.
+* Fix: `hsw_pay_page_id` هنگام حذف افزونه پاک نمی‌شد.
 
 = 1.11.244 =
 * New: «هدر GC» — a third header widget. A rounded bar floats over the page and docks into a full-width blurred bar on scroll; the brand mark is a «G» drawn as a circuit trace that draws itself; a gradient underline follows the pointer; dropdown panels stagger their rows in. The mark, brand text, every menu row, six panel slots (icon + title + description + footer), the cart badge, the account button and the mobile drawer are all controls.

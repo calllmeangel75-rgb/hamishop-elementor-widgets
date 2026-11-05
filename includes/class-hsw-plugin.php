@@ -475,6 +475,7 @@ final class HSW_Plugin {
                 require_once HSW_DIR . 'includes/class-hsw-checkout-rest.php';
                 require_once HSW_DIR . 'includes/class-hsw-checkout-complete.php';
                 require_once HSW_DIR . 'includes/class-hsw-complete-route.php';
+                require_once HSW_DIR . 'includes/class-hsw-setup-pages.php';
                 require_once HSW_DIR . 'includes/class-hsw-account.php';
                 require_once HSW_DIR . 'includes/class-hsw-email-verify.php';
                 require_once HSW_DIR . 'includes/class-hsw-account-auth.php';
@@ -498,6 +499,9 @@ final class HSW_Plugin {
 
                 /* Completion (thank-you) page routing + WooCommerce setting. */
                 new HSW_Complete_Route();
+
+                /* The two route pages: status, one-click creation, noindex. */
+                new HSW_Setup_Pages();
         }
 
         /**

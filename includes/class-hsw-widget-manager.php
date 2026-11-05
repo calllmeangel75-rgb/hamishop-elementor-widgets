@@ -933,6 +933,19 @@ final class HSW_Widget_Manager {
 			'hsw_widgets_reset'
 		);
 
+		/* Checkout route: what exists, what is wired, what is missing. */
+		$route       = class_exists( 'HSW_Setup_Pages' ) ? HSW_Setup_Pages::status() : array();
+		$route_need  = false;
+		foreach ( $route as $route_row ) {
+			if ( 'wired' !== $route_row['state'] ) {
+				$route_need = true;
+			}
+		}
+		$route_url = wp_nonce_url(
+			add_query_arg( array( 'action' => HSW_Setup_Pages::ACTION ), admin_url( 'admin-post.php' ) ),
+			HSW_Setup_Pages::NONCE
+		);
+
 		$this->page_styles();
 		?>
 		<div class="wrap hsw-wm" dir="rtl">
@@ -956,6 +969,34 @@ final class HSW_Widget_Manager {
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'ویجت‌ها به حالت پیش‌فرض برگشتند: ویجت‌های اصلی فعال و بخش‌های ریز غیرفعال شدند.', 'hamishop-elementor-widgets' ); ?></p></div>
 			<?php endif; ?>
 
+			<?php
+			if ( isset( $_GET['hsw-setup'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only flag after a nonce-protected action.
+				$hsw_created = isset( $_GET['created'] ) ? absint( $_GET['created'] ) : 0;
+				$hsw_linked  = isset( $_GET['linked'] ) ? absint( $_GET['linked'] ) : 0;
+				$hsw_failed  = isset( $_GET['failed'] ) ? absint( $_GET['failed'] ) : 0;
+				$hsw_lines   = array();
+
+				if ( $hsw_created > 0 ) {
+					/* translators: %s: number of pages. */
+					$hsw_lines[] = sprintf( __( '%s صفحه ساخته و به مسیر خرید وصل شد.', 'hamishop-elementor-widgets' ), self::fa_num( $hsw_created ) );
+				}
+				if ( $hsw_linked > 0 ) {
+					/* translators: %s: number of pages. */
+					$hsw_lines[] = sprintf( __( '%s صفحهٔ موجود به مسیر خرید وصل شد.', 'hamishop-elementor-widgets' ), self::fa_num( $hsw_linked ) );
+				}
+				if ( $hsw_failed > 0 ) {
+					/* translators: %s: number of pages. */
+					$hsw_lines[] = sprintf( __( '%s صفحه ساخته نشد؛ دسترسی نوشتن را بررسی کنید.', 'hamishop-elementor-widgets' ), self::fa_num( $hsw_failed ) );
+				}
+				if ( ! $hsw_lines ) {
+					$hsw_lines[] = __( 'هر دو صفحه از قبل آماده و متصل بودند.', 'hamishop-elementor-widgets' );
+				}
+				?>
+				<div class="notice <?php echo $hsw_failed > 0 ? 'notice-warning' : 'notice-success'; ?> is-dismissible">
+					<p><?php echo esc_html( implode( ' ', $hsw_lines ) ); ?></p>
+				</div>
+			<?php endif; ?>
+
 			<div class="hsw-wm-layout">
 				<aside class="hsw-wm-side">
 					<nav class="hsw-wm-nav" aria-label="<?php esc_attr_e( 'گروه‌های ویجت', 'hamishop-elementor-widgets' ); ?>">
@@ -972,6 +1013,7 @@ final class HSW_Widget_Manager {
 
 					<nav class="hsw-wm-nav hsw-wm-nav--settings" aria-label="<?php esc_attr_e( 'تنظیمات فروشگاه', 'hamishop-elementor-widgets' ); ?>">
 						<span class="hsw-wm-navtitle"><?php esc_html_e( 'تنظیمات فروشگاه', 'hamishop-elementor-widgets' ); ?></span>
+						<a href="#hsw-setup"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span><span><?php esc_html_e( 'راه‌اندازی مسیر خرید', 'hamishop-elementor-widgets' ); ?></span><?php if ( $route_need ) : ?><em>!</em><?php endif; ?></a>
 						<a href="#hsw-group-feedback"><span class="dashicons dashicons-cart" aria-hidden="true"></span><span><?php esc_html_e( 'رفتار افزودن به سبد', 'hamishop-elementor-widgets' ); ?></span></a>
 						<a href="#hsw-group-catalog"><span class="dashicons dashicons-sort" aria-hidden="true"></span><span><?php esc_html_e( 'ترتیب محصولات', 'hamishop-elementor-widgets' ); ?></span></a>
 						<a href="#hsw-group-shipping"><span class="dashicons dashicons-car" aria-hidden="true"></span><span><?php esc_html_e( 'ارسال رایگان', 'hamishop-elementor-widgets' ); ?></span></a>
@@ -1060,6 +1102,90 @@ final class HSW_Widget_Manager {
 								</div>
 							</section>
 						<?php endforeach; ?>
+
+						<?php if ( $route ) : ?>
+							<div class="hsw-wm-sectiontitle" id="hsw-setup">
+								<span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>
+								<div>
+									<h2><?php esc_html_e( 'راه‌اندازی مسیر خرید', 'hamishop-elementor-widgets' ); ?></h2>
+									<p><?php esc_html_e( 'مسیر چهارمرحله‌ای حامی به دو صفحهٔ مستقل نیاز دارد: پرداخت و تکمیل خرید. اگر نباشند، دکمهٔ «ادامه و ورود به مرحله پرداخت» جایی برای رفتن ندارد.', 'hamishop-elementor-widgets' ); ?></p>
+								</div>
+							</div>
+
+							<section class="hsw-wm-group" id="hsw-group-setup" style="--hsw-wm-accent:#0f766e">
+								<header class="hsw-wm-grouphead">
+									<span class="hsw-wm-groupicon dashicons dashicons-admin-page" aria-hidden="true"></span>
+									<div class="hsw-wm-grouptitle">
+										<h2><?php esc_html_e( 'صفحه‌های مسیر خرید', 'hamishop-elementor-widgets' ); ?></h2>
+										<p><?php esc_html_e( 'افزونه هیچ صفحه‌ای را خودش نمی‌سازد. دکمهٔ پایین فقط صفحه‌هایی را می‌سازد که وجود ندارند؛ صفحهٔ ساخته‌شدهٔ شما دست‌نخورده می‌ماند و هر دو صفحه noindex می‌شوند.', 'hamishop-elementor-widgets' ); ?></p>
+									</div>
+								</header>
+
+								<div class="hsw-wm-rows">
+									<?php foreach ( $route as $route_key => $route_row ) : ?>
+										<?php
+										$route_page = HSW_Setup_Pages::pages()[ $route_key ];
+										$route_tone = 'is-ok';
+										$route_note = '';
+
+										if ( 'wired' === $route_row['state'] ) {
+											$route_text = __( 'متصل', 'hamishop-elementor-widgets' );
+											/* translators: %s: page title. */
+											$route_note = sprintf( __( 'صفحهٔ «%s» ساخته شده و در مسیر خرید انتخاب شده است.', 'hamishop-elementor-widgets' ), $route_row['title'] );
+										} elseif ( 'unwired' === $route_row['state'] ) {
+											$route_tone = 'is-warn';
+											$route_text = __( 'وصل نشده', 'hamishop-elementor-widgets' );
+											/* translators: %s: page title. */
+											$route_note = sprintf( __( 'صفحهٔ «%s» وجود دارد ولی در تنظیمات مسیر خرید انتخاب نشده؛ با دکمهٔ پایین وصل می‌شود و صفحهٔ تازه‌ای ساخته نمی‌شود.', 'hamishop-elementor-widgets' ), $route_row['title'] );
+										} else {
+											$route_tone = 'is-missing';
+											$route_text = __( 'ساخته نشده', 'hamishop-elementor-widgets' );
+											$route_note = __( 'با دکمهٔ پایین ساخته می‌شود و ویجت کامل همین مرحله در آن قرار می‌گیرد.', 'hamishop-elementor-widgets' );
+
+											if ( $route_row['slug_taken'] ) {
+												/* translators: 1: taken slug, 2: fallback slug. */
+												$route_note = sprintf( __( 'نشانی /%1$s/ در اختیار صفحهٔ دیگری است؛ صفحه با نشانی /%2$s/ ساخته می‌شود تا آن صفحه دست‌نخورده بماند.', 'hamishop-elementor-widgets' ), $route_page['slug'], $route_page['fallback'] );
+											}
+										}
+										?>
+										<div class="hsw-wm-row hsw-wm-row--field">
+											<span class="hsw-wm-rowtext">
+												<strong>
+													<?php echo esc_html( $route_page['label'] ); ?>
+													<span class="hsw-wm-badge <?php echo esc_attr( $route_tone ); ?>"><?php echo esc_html( $route_text ); ?></span>
+												</strong>
+												<small><?php echo esc_html( $route_note ); ?></small>
+											</span>
+											<span class="hsw-wm-field">
+												<?php if ( '' !== (string) $route_row['edit_url'] ) : ?>
+													<a class="button" href="<?php echo esc_url( $route_row['edit_url'] ); ?>"><?php esc_html_e( 'ویرایش', 'hamishop-elementor-widgets' ); ?></a>
+												<?php endif; ?>
+											</span>
+										</div>
+									<?php endforeach; ?>
+
+									<div class="hsw-wm-row hsw-wm-row--field">
+										<span class="hsw-wm-rowtext">
+											<strong><?php esc_html_e( 'ساخت و اتصال', 'hamishop-elementor-widgets' ); ?></strong>
+											<small>
+												<?php if ( $route_need ) : ?>
+													<?php esc_html_e( 'فقط صفحه‌های نبود را می‌سازد. اگر صفحه‌ای با نام دیگری دارید، از تنظیمات ووکامرس ← تسویه حساب ← «مسیر خرید (حامی)» انتخابش کنید.', 'hamishop-elementor-widgets' ); ?>
+												<?php else : ?>
+													<?php esc_html_e( 'هر دو صفحه آماده‌اند؛ کار دیگری لازم نیست.', 'hamishop-elementor-widgets' ); ?>
+												<?php endif; ?>
+											</small>
+										</span>
+										<span class="hsw-wm-field">
+											<?php if ( $route_need ) : ?>
+												<a class="button button-primary" href="<?php echo esc_url( $route_url ); ?>" data-hsw-confirm="<?php esc_attr_e( 'صفحه‌های نبود ساخته و به مسیر خرید وصل شوند؟ صفحه‌های موجود دست نمی‌خورند.', 'hamishop-elementor-widgets' ); ?>"><?php esc_html_e( 'ساخت صفحه‌های لازم', 'hamishop-elementor-widgets' ); ?></a>
+											<?php else : ?>
+												<span class="hsw-wm-badge is-ok"><?php esc_html_e( 'آماده', 'hamishop-elementor-widgets' ); ?></span>
+											<?php endif; ?>
+										</span>
+									</div>
+								</div>
+							</section>
+						<?php endif; ?>
 
 						<div class="hsw-wm-sectiontitle" id="hsw-settings">
 							<span class="dashicons dashicons-admin-generic" aria-hidden="true"></span>
@@ -1456,6 +1582,10 @@ final class HSW_Widget_Manager {
 			.hsw-wm-groupmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:0 0 auto}
 			.hsw-wm-groupcount{font-size:11px;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:4px 9px;white-space:nowrap}
 			.hsw-wm-groupcount b{color:var(--hsw-wm-accent);font-size:12px}
+			.hsw-wm-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:800;line-height:1.6;border-radius:999px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle;letter-spacing:0}
+			.hsw-wm-badge.is-ok{background:#dcfce7;color:#166534}
+			.hsw-wm-badge.is-warn{background:#fef3c7;color:#92400e}
+			.hsw-wm-badge.is-missing{background:#fee2e2;color:#991b1b}
 			.hsw-wm-groupmeta .button-link{font-size:10.5px;color:#0e7490;text-decoration:none}
 			.hsw-wm-rows{padding:5px 10px 12px}
 			.hsw-wm-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 11px;border-radius:11px;border:1px solid transparent;transition:background .15s,border-color .15s}

@@ -46,6 +46,7 @@ function hsw_uninstall_site() {
 		'hsw_header_widgets_migrated',
 		'hsw_htaccess_backup',
 		'hsw_invoice_enabled',
+		'hsw_pay_page_id',
 		'hsw_invoice_mono',
 		'hsw_jalali_on',
 		'hsw_last_error',

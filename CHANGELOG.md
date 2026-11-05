@@ -8,6 +8,31 @@
 
 ## [Unreleased]
 
+## [1.11.245] — 2026-11-05
+
+### Added
+
+- **راه‌اندازی مسیر خرید** — a setup section on the widget screen that reports the real state of the two pages the four-step flow needs (payment, completion) and creates only what is missing. The button is explicit: nothing is created on activation, and the screen says which of the three states each page is in — wired, exists-but-not-wired, or missing.
+- Creating is conditional in the narrow sense. A page that already carries the widget is **linked**, not duplicated: its id and title are kept and only the option is written. A page that owns the `/payment/` or `/complete/` slug but is not ours is never touched — the new page takes `/hamishop-payment/` or `/hamishop-complete/` instead.
+- `[hamishop_payment]`, `[hamishop_pay]` and `[hamishop_complete]` shortcodes. A created page renders the same widget in any theme, survives an Elementor re-save, and needs no `_elementor_data` blob that a future Elementor version could reject.
+- Both route pages are `noindex, nofollow` — the same directive WooCommerce prints for its own cart, checkout and account pages. `wp_robots` covers WordPress itself; the Yoast, Rank Math and AIOSEO post-meta keys are written on creation for the plugins that replace that output.
+- Shortcode pages enqueue the widget's own `get_style_depends()` / `get_script_depends()`. Elementor only does that for widgets it renders itself, so without this the page rendered unstyled.
+
+### Changed
+
+- `HSW_Complete_Route::resolve_page_id()` and `page_is_ours()` are public. The setup screen has to report exactly what the router acts on; a screen that re-implemented the check would eventually disagree with it.
+
+### Fixed
+
+- `hsw_pay_page_id` was never deleted on uninstall — only its completion-page twin was in the option list.
+
+### Measured
+
+- Fresh state: both pages `missing`. One press: `{"created":2,"linked":0,"failed":0}`. Second press: `{"created":0,"linked":0,"failed":0}`.
+- A hand-made page on `/payment/` carrying the shortcode: state `unwired` → `wired`, same id, title «صفحهٔ دست‌ساز من» kept, noindex meta added, `linked: 1`.
+- A foreign page on `/payment/`: left byte-identical, new page created at `/hamishop-payment/`.
+- The generated payment page in a browser: 317 `hsw-` nodes, `hsw-fonts` + `hsw-checkout` + `hsw-composite` styles and the `hsw-checkout` script all loaded, CTA computed `rgb(15,32,66)` with a 12px radius, `<meta name="robots" content="noindex, nofollow">` present.
+
 ## [1.11.244] — 2026-11-05
 
 ### Added
