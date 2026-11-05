@@ -493,17 +493,32 @@ class HSW_Palette {
 			+ 0.7152 * $channel( substr( $hex, 2, 2 ) )
 			+ 0.0722 * $channel( substr( $hex, 4, 2 ) );
 
-		/* WCAG contrast = (L1 + 0.05) / (L2 + 0.05). */
-		$with_white = 1.05 / ( $luminance + 0.05 );
-		$with_black = ( $luminance + 0.05 ) / 0.05;
-
 		/*
-		 * Whichever is actually better, not "white if it scrapes past 3:1".
-		 * 3:1 is the large-text floor; normal button text needs 4.5, and a
-		 * mid-tone surface (#888) got white at 3.5 while black offers 5.9.
-		 * Picking the larger of the two never returns less than 4.58.
+		 * Compare the colours this function can actually return, not an ideal
+		 * white/black pair. The old code compared pure black and then returned
+		 * #111827: on #777777 that is 3.96:1 while it claimed to have cleared
+		 * 4.5. #111827 stays in the list because it is the design's ink, but it
+		 * only wins when it is genuinely the most readable of the three.
 		 */
-		return $with_white >= $with_black ? '#ffffff' : '#111827';
+		$lum_of = static function ( $cand ) use ( $channel ) {
+			return 0.2126 * $channel( substr( $cand, 0, 2 ) )
+				+ 0.7152 * $channel( substr( $cand, 2, 2 ) )
+				+ 0.0722 * $channel( substr( $cand, 4, 2 ) );
+		};
+
+		$best       = '#ffffff';
+		$best_ratio = 0.0;
+
+		foreach ( array( '#ffffff', '#111827', '#000000' ) as $cand ) {
+			$l_cand = $lum_of( ltrim( $cand, '#' ) );
+			$ratio  = ( max( $l_cand, $luminance ) + 0.05 ) / ( min( $l_cand, $luminance ) + 0.05 );
+			if ( $ratio > $best_ratio ) {
+				$best       = $cand;
+				$best_ratio = $ratio;
+			}
+		}
+
+		return $best;
 	}
 
 	/**
@@ -684,7 +699,14 @@ class HSW_Palette {
 		$tokens  = self::tokens();
 		$bad     = array();
 
-		foreach ( self::defaults() as $key => $default ) {
+		/*
+		 * `tokens()` — the colour roles — not `defaults()`, which also carries
+		 * `font`. The loop used to validate the font family as a hex colour, so
+		 * every save with a perfectly good font reported «این مقدارها رنگ معتبر
+		 * نبودند … : font» while saving the font correctly two lines later.
+		 */
+		foreach ( $tokens as $key => $token ) {
+			$default = isset( $token[1] ) ? $token[1] : '';
 			$raw   = isset( $incoming[ $key ] ) ? trim( (string) $incoming[ $key ] ) : '';
 			$value = '' !== $raw ? sanitize_hex_color( $raw ) : '';
 

@@ -64,24 +64,7 @@
         pointer-events: none;
 }
 
-/*
- * «ارث‌بری فونت از قالب» — per-widget switch (hsw_font_mode = inherit).
- * Icons are SVG sprites; everything else follows the theme font.
- *
- * `!important` stays on the root only. On every descendant it outranked the
- * Elementor typography control for that element, so a heading with an explicit
- * family kept the widget's font — the admin's choice was silently dropped. On
- * the root it still wins over the theme's own font-family; on children a normal
- * declaration is enough to beat theme element selectors, while Elementor's
- * (0,2,0)+ typography rule takes precedence.
- */
-.hsw-font-inherit { font-family: inherit !important; }
-.hsw-font-inherit *:not(.hsw-ic) { font-family: inherit; }
 
-/* «فونت طرح» mode: the bundled Vazirmatn, even when the site palette points at
-   another family. Same specificity rule as above. */
-.hsw-font-design { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important; }
-.hsw-font-design *:not(.hsw-ic) { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif; }
 
 /* -------------------------------------------------------------------------
  * WooCommerce session notices (shared by cart / checkout / pay)
@@ -904,6 +887,34 @@ ul.products.is-pg-leaving,
 	/* Concrete fallback: 'inherit' let Elementor's global typography win. */
 	font-family: var(--hsw-font, "Vazirmatn HSW"), Tahoma, sans-serif;
 }
+
+/*
+ * The per-widget modes come AFTER the global palette font on purpose.
+ *
+ * Both rules land on the same descendants with the same specificity
+ * (`.elementor-widget[…] :where(p, span, …)` is 0,2,0 because :where() counts
+ * as zero), so source order decides the tie — and the global rule used to come
+ * last, quietly replacing «فونت طرح» and «ارث‌بری از قالب» on every plain p or
+ * span. Elementor's own typography is (0,3,0) and still wins over both.
+ */
+/*
+ * «ارث‌بری فونت از قالب» — per-widget switch (hsw_font_mode = inherit).
+ * Icons are SVG sprites; everything else follows the theme font.
+ *
+ * `!important` stays on the root only. On every descendant it outranked the
+ * Elementor typography control for that element, so a heading with an explicit
+ * family kept the widget's font — the admin's choice was silently dropped. On
+ * the root it still wins over the theme's own font-family; on children a normal
+ * declaration is enough to beat theme element selectors, while Elementor's
+ * (0,2,0)+ typography rule takes precedence.
+ */
+.hsw-font-inherit { font-family: inherit !important; }
+.hsw-font-inherit *:not(.hsw-ic) { font-family: inherit; }
+
+/* «فونت طرح» mode: the bundled Vazirmatn, even when the site palette points at
+   another family. Same specificity rule as above. */
+.hsw-font-design { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif !important; }
+.hsw-font-design *:not(.hsw-ic) { font-family: 'Vazirmatn HSW', Vazirmatn, Tahoma, sans-serif; }
 .hsw-h, .hsw-p, .hsw-ac, .hsw-loop, .hsw-sf, .hsw-ptabs, .hsw-ap,
 .hsw-sheet, .hsw-pg, .hsw-404 { font-family: var(--hsw-font, "Vazirmatn HSW"), Tahoma, sans-serif; }
 

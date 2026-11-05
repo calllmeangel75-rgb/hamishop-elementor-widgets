@@ -8,6 +8,49 @@
 
 ## [Unreleased]
 
+## [1.11.249] — 2026-11-06
+
+### Fixed — fourth audit round
+
+Four claims, all reproduced against 1.11.248 before changing anything, plus one found while checking them.
+
+- **Saving the palette with a valid font reported a colour error.** The validation loop ran over `defaults()`, which carries `font` as well as the colours, so `Vazirmatn HSW` was fed to `sanitize_hex_color()` and listed as an invalid colour — while the font itself was saved correctly two lines later. The loop runs over `tokens()` now.
+
+  ```
+  before  [error] این مقدارها رنگ معتبر نبودند و ذخیره نشدند؛ مقدار قبلی حفظ شد: font
+          [updated] پالت رنگی ذخیره شد.
+  after   [updated] پالت رنگی ذخیره شد.
+  ```
+
+- **`contrast_text()` compared colours it did not return.** It weighed pure black against white, then returned `#111827`, whose real ratio is lower.
+
+  ```
+  #777777  before #111827 (3.96:1)   after #000000 (4.69:1)
+  #808080  before #111827 (4.49:1)   after #000000 (5.32:1)
+  ```
+
+  The claim "never below 4.58" in the previous release note was wrong; the function now picks the best of the three colours it can return.
+
+- **The per-widget font modes lost to the global palette font.** `.hsw-font-design *` and `.hsw-font-inherit *` are (0,2,0), and the global rule `.elementor-widget[…] :where(p, span, …)` is also (0,2,0) — `:where()` counts as zero — but came later in the file, so it won every tie. The mode rules now come after it. Elementor's own typography is (0,3,0) and still wins over both.
+
+  ```
+  design mode, plain <p>   before "Courier New" (palette)   after "Vazirmatn HSW"
+  inherit mode, plain <p>  before "Courier New" (palette)   after "-apple-system" (theme)
+  Elementor typography     wins in both                    "Georgia"
+  ```
+
+- **The buy button's hover label ignored the palette text colour.** The resting rule read `--hsw-on-cta`; the hover rule hard-coded `#fff`. With a light CTA and dark text, the label turned white on hover.
+
+  ```
+  cta #f5f5f5, cta_text #101010   rest rgb(16,16,16)   hover before rgb(255,255,255) → after rgb(16,16,16)
+  ```
+
+- **The cart and checkout CTAs had the same hover problem, in reverse.** Their hover rules read the palette token directly, so a colour picked in the widget was replaced by the palette's hover shade — a red button turned blue. Both controls now emit a derived hover shade and the label colour travels through a variable.
+
+### Corrected
+
+The 1.11.248 note said the cart and checkout summaries have no per-widget colour control. They do — `cta_bg` / `cta_tx` on the cart summary and `cta_bg` / `cta_c` on the checkout summary. The controls existed; the hover state ignored them.
+
 ## [1.11.248] — 2026-11-06
 
 ### Fixed — palette review

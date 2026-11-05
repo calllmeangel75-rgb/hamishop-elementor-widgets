@@ -647,8 +647,10 @@
         transition: all .15s;
 }
 /* Darker fill, label stays white — `color` is spelled out so a theme `a:hover` cannot repaint it. */
+/* The widget's own colour wins in every state: the hover shade is derived from
+   it, and the label follows the label colour the admin picked. */
 .hsw-csummary__cta:hover,
-.hsw-csummary__cta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta, #fff); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
+.hsw-csummary__cta:focus-visible { background: var(--hsw-cs-cta-bg-hover, var(--hswc-cta-hover)); color: var(--hsw-cs-cta-tx, var(--hswc-on-cta, #fff)); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
 .hsw-csummary__cta:active { transform: scale(.98); }
 .hsw-csummary__cta .hsw-ic { font-size: 1.25rem; }
 

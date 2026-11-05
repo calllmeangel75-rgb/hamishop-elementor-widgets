@@ -422,7 +422,9 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 $this->a_color( 'sm_mfree', __( 'متن برچسب رایگان (موبایل)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mbadge' );
                 $this->a_color( 'sm_final', __( 'مبلغ نهایی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__final-v, {{WRAPPER}} .hsw-csummary__mtotal-v' );
 
-                $this->a_color( 'cta_bg', __( 'پس‌زمینهٔ دکمهٔ «تکمیل سفارش» (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-bg' );
+                /* The hover rule used the palette colour, so a red button turned blue on
+                   hover. Emit the hover shade from the picked colour instead. */
+                $this->a_color( 'cta_bg', __( 'پس‌زمینهٔ دکمهٔ «تکمیل سفارش» (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-bg: {{VALUE}}; --hsw-cs-cta-bg-hover: color-mix(in srgb, {{VALUE}} 86%, #000)' );
                 $this->a_color( 'cta_tx', __( 'متن دکمهٔ «تکمیل سفارش»', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-tx' );
                 $this->add_responsive_control(
                         'cta_br',

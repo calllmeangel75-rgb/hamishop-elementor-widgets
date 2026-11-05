@@ -1731,7 +1731,9 @@ body.admin-bar .hsw-ptabs--stack { --hsw-stk-top: 32px; }
 .hsw-p .hsw-psticky__cart:focus-visible {
         background-color: var(--hsw-cart-bg-hover, var(--hsw-cta-hover, var(--hsw-cart-bg, var(--hsw-cta, var(--hsw-primary-container, #1d4ed8))))) !important;
         background-image: none !important;
-        color: var(--hsw-cart-c-hover, var(--hsw-cart-c, #fff)) !important;
+        /* Same chain as the resting rule: a shop that set a dark CTA text
+           colour got white on hover, because #fff was hard-coded here. */
+        color: var(--hsw-cart-c-hover, var(--hsw-cart-c, var(--hsw-on-cta, var(--hsw-on-primary, #fff)))) !important;
 }
 
 .hsw-p .hsw-ppurch__cart:active,
