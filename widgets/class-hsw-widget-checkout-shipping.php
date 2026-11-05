@@ -325,6 +325,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                                                 </label>
                                         <?php endforeach; ?>
                                 </div>
+                                <p class="hsw-ckship__msg" data-hswk-shipmsg role="status" aria-live="polite" hidden></p>
                         </article>
 
                         <!-- =================== MOBILE =================== -->
@@ -359,6 +360,7 @@ class HSW_Widget_Checkout_Shipping extends HSW_Checkout_Base {
                                                 </label>
                                         <?php endforeach; ?>
                                 </div>
+                                <p class="hsw-ckship__msg hsw-ckship__msg--m" data-hswk-shipmsg role="status" aria-live="polite" hidden></p>
                         </div>
 
                 </section>

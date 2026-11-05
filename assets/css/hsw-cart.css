@@ -624,6 +624,8 @@
 .hsw-csummary__row.is-save { color: var(--hswc-accent2); }
 .hsw-csummary__row.is-save .hsw-csummary__val { font-weight: 700; color: var(--hswc-accent2); }
 .hsw-csummary__free { color: var(--hswc-accent2); font-weight: 700; font-size: .875rem; line-height: 1.375rem; font-weight: 600; }
+/* A shipping state that is neither a price nor «رایگان» — muted, not green. */
+.hsw-csummary__note { color: var(--hswc-muted); font-weight: 600; font-size: .8125rem; line-height: 1.375rem; }
 .hsw-csummary__row.is-tax { font-size: .75rem; line-height: 1.25rem; color: var(--hswc-text2); }
 .hsw-csummary__tax-v { color: var(--hswc-muted); }
 .hsw-csummary__divider { padding-top: .375rem; border-top: 1px solid var(--hswc-border); }
@@ -695,6 +697,7 @@
 .hsw-csummary__mrow.is-save { color: var(--hswc-accent2); }
 .hsw-csummary__mrow.is-save .hsw-csummary__mval { font-weight: 700; color: var(--hswc-accent2); }
 .hsw-csummary__mbadge { font-size: .8125rem; line-height: 1.25rem; font-weight: 500; color: var(--hswc-ok); background: var(--hswc-ok-bg); padding: .125rem .5rem; border-radius: .25rem; }
+.hsw-csummary__mnote { font-size: .75rem; line-height: 1.25rem; color: var(--hswc-muted); }
 .hsw-csummary__mtotal { border-top: 1px dashed var(--hswc-border); padding-top: .5rem; display: flex; justify-content: space-between; align-items: center; }
 .hsw-csummary__mtotal-t { font-size: .875rem; line-height: 1.375rem; font-weight: 600; color: var(--hswc-primary); }
 .hsw-csummary__mtotal-r { display: flex; align-items: baseline; gap: .25rem; }

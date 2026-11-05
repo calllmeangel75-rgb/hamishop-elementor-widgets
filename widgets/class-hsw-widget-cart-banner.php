@@ -141,8 +141,13 @@ class HSW_Widget_Cart_Banner extends HSW_Cart_Base {
                  * The widget's own control is only a demo/fallback value: a
                  * banner that promises free shipping at 1,000,000 while the
                  * global threshold is 0 (off) is a lie the customer acts on.
+                 *
+                 * `promise_threshold()` returns 0 unless the master switch is
+                 * on: the number stays in the settings when the feature is
+                 * turned off, so reading `threshold()` alone promised free
+                 * shipping the plugin was not applying.
                  */
-                $global = class_exists( 'HSW_Free_Shipping' ) ? (float) HSW_Free_Shipping::threshold() : 0.0;
+                $global = class_exists( 'HSW_Free_Shipping' ) ? (float) HSW_Free_Shipping::promise_threshold() : 0.0;
 
                 if ( $this->is_demo() ) {
                         $threshold = $global > 0 ? $global : (float) $this->opt( 'threshold', 1000000 );

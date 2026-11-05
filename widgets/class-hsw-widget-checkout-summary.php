@@ -373,7 +373,8 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 }
                 $subtotal = $this->base_subtotal();
                 $total    = $this->cart_total();
-                $ship     = $this->chosen_shipping_cost();
+                /* Same source as the cart page: one definition of "free". */
+                $shipping = $this->shipping_state();
                 /* Same definition as the cart page: product discount + coupons. */
                 $saving   = class_exists( 'HSW_Helpers' ) ? HSW_Helpers::savings() : array( 'total' => 0 );
                 $discount = (float) ( $saving['total'] ?? 0 );
@@ -381,7 +382,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                         'count'    => $this->cart_count(),
                         'subtotal' => $subtotal,
                         'discount' => ( 0 < $discount ) ? $discount : 0,
-                        'shipping' => array( ( $ship > 0 ) ? 'amount' : 'free', $ship ),
+                        'shipping' => $shipping,
                         'taxes'    => $this->taxes_total(),
                         'total'    => $total,
                 );
@@ -431,9 +432,10 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                         . ( $need_address ? ' data-hsw-need-address="1"' : '' );
                 $taxes_on = ( ! $this->is_demo() ) && $this->taxes_total() > 0;
 
-                $shipping_html = ( 'free' === $t['shipping'][0] )
-                        ? '<span class="is-free">' . esc_html( $free ) . '</span>'
-                        : $this->money( (float) $t['shipping'][1], true );
+                $ship_state    = (string) $t['shipping'][0];
+                $shipping_html = ( 'amount' === $ship_state )
+                        ? $this->money( (float) $t['shipping'][1], true )
+                        : '<span class="' . ( 'free' === $ship_state ? 'is-free' : 'is-note' ) . '">' . esc_html( $this->shipping_state_label( $ship_state, $free ) ) . '</span>';
                 ?>
                 <section class="<?php echo esc_attr( $this->root_class( 'cksum' ) ); ?>">
 
@@ -484,9 +486,11 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                                                          * The tip only exists when free shipping is actually
                                                          * on. A template saved with the old default text
                                                          * («ارسال بالای ۱ میلیون رایگان است») must not keep
-                                                         * promising it after the threshold is set to 0.
+                                                         * promising it after the threshold is set to 0 —
+                                                         * and `promise_threshold()` also covers the master
+                                                         * switch being off with the number still filled in.
                                                          */
-                                                        $free_min = class_exists( 'HSW_Free_Shipping' ) ? (float) HSW_Free_Shipping::threshold() : 0.0;
+                                                        $free_min = class_exists( 'HSW_Free_Shipping' ) ? (float) HSW_Free_Shipping::promise_threshold() : 0.0;
                                                         $tip_text = trim( (string) $this->opt( 'shipping_tip', '' ) );
                                                         if ( '' === $tip_text && $free_min > 0 ) {
                                                                 $tip_text = sprintf(

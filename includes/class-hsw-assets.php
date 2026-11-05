@@ -888,6 +888,7 @@ class HSW_Assets {
                                 'rest'        => esc_url_raw( rest_url( 'hsw/v1' ) ),
                                 'nonce'       => wp_create_nonce( 'wp_rest' ),
                                 'errorText'   => __( 'خطا در بروزرسانی روش ارسال', 'hamishop-elementor-widgets' ),
+                                'termsMissing' => __( 'چک‌باکس قوانین روی این صفحه نمایش داده نشده؛ با مدیر فروشگاه تماس بگیرید.', 'hamishop-elementor-widgets' ),
                                 'addressRequired' => __( 'نام، شماره تماس، استان، شهر و نشانی را کامل کنید.', 'hamishop-elementor-widgets' ),
                                 /* Same lists the REST route validates against, so the
                                    form can never ask for less than the order needs. */

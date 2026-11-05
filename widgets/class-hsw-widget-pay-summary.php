@@ -116,7 +116,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                         array(
                                 'label'   => __( 'متن ارسال رایگان (دسکتاپ)', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'رایگان (خرید بالای ۵۰۰ هزار)', 'hamishop-elementor-widgets' ),
+                                'default' => __( 'رایگان', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -285,16 +285,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                         array(
                                 'label'   => __( 'متن ارسال رایگان (موبایل)', 'hamishop-elementor-widgets' ),
                                 'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'رایگان (خرید بالای ۵۰۰ تومان)', 'hamishop-elementor-widgets' ),
-                        )
-                );
-
-                $this->add_control(
-                        'wallet_label_m',
-                        array(
-                                'label'   => __( 'ردیف کسر کیف پول (موبایل)', 'hamishop-elementor-widgets' ),
-                                'type'    => Controls_Manager::TEXT,
-                                'default' => __( 'کسر از موجودی کیف پول', 'hamishop-elementor-widgets' ),
+                                'default' => __( 'رایگان', 'hamishop-elementor-widgets' ),
                         )
                 );
 
@@ -404,23 +395,22 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                 }
                 $subtotal = $this->base_subtotal();
                 $total    = $this->cart_total();
-                $ship     = $this->chosen_shipping_cost();
+                /* One definition of "free" for the whole checkout flow. */
+                $shipping = $this->shipping_state();
                 $taxes    = $this->taxes_total();
                 $coupons  = $this->applied_coupons();
                 $c_total  = 0;
                 foreach ( $coupons as $c ) {
                         $c_total += (float) $c['amount'];
                 }
-                $discount = $subtotal - ( $total - $ship - $taxes ) - $c_total;
-                $wallet   = (float) apply_filters( 'hsw_wallet_balance', 0 );
+                $discount = $subtotal - ( $total - $shipping[1] - $taxes ) - $c_total;
                 return array(
                         'count'    => $this->cart_count(),
                         'subtotal' => $subtotal,
                         'discount' => ( 0 < $discount ) ? $discount : 0,
                         'coupons'  => $coupons,
-                        'shipping' => array( ( $ship > 0 ) ? 'amount' : 'free', $ship ),
+                        'shipping' => $shipping,
                         'taxes'    => $taxes,
-                        'wallet'   => ( $this->wallet_enabled() && $wallet > 0 ) ? $wallet : 0,
                         'total'    => $total,
                 );
         }
@@ -430,6 +420,34 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                         return $this->demo_totals_m();
                 }
                 return $this->totals(); // live totals are the same for both layouts.
+        }
+
+        /**
+         * The «رایگان» note, without the two thresholds that shipped as defaults.
+         *
+         * 1.11.x defaulted this field to «رایگان (خرید بالای ۵۰۰ هزار)» on
+         * desktop and «رایگان (خرید بالای ۵۰۰ تومان)» on mobile — a number no
+         * shop configured, printed on every install. Elementor saves the panel
+         * value with the widget, so changing the default alone leaves the old
+         * sentence in templates that were already saved. Nobody typed that
+         * string on purpose, so it is treated as "not set" and the neutral word
+         * is used instead. A value the owner really wrote is returned as is.
+         *
+         * @param string $key Control id (`free_note` / `free_note_m`).
+         * @return string
+         */
+        protected function free_note_text( $key ) {
+                $value  = trim( (string) $this->opt( $key, '' ) );
+                $legacy = array(
+                        'رایگان (خرید بالای ۵۰۰ هزار)',
+                        'رایگان (خرید بالای ۵۰۰ تومان)',
+                );
+
+                if ( '' === $value || in_array( $value, $legacy, true ) ) {
+                        return __( 'رایگان', 'hamishop-elementor-widgets' );
+                }
+
+                return $value;
         }
 
         /**
@@ -484,10 +502,11 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 <div class="hsw-psum__row">
                                                         <span><?php echo esc_html( $this->opt( 'shipping_label', '' ) ); ?></span>
                                                         <span class="hsw-psum__v" data-hswk="shipping">
-                                                                <?php if ( 'free' === $t['shipping'][0] ) : ?>
-                                                                        <span class="hsw-psum__freenote"><?php echo esc_html( $this->opt( 'free_note', '' ) ); ?></span>
-                                                                <?php else : ?>
+                                                                <?php $ship_state = (string) $t['shipping'][0]; ?>
+                                                                <?php if ( 'amount' === $ship_state ) : ?>
                                                                         <?php echo $this->money( (float) $t['shipping'][1], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                                <?php else : ?>
+                                                                        <span class="<?php echo 'free' === $ship_state ? 'hsw-psum__freenote' : 'hsw-psum__note'; ?>"><?php echo esc_html( $this->shipping_state_label( $ship_state, $this->free_note_text( 'free_note' ) ) ); ?></span>
                                                                 <?php endif; ?>
                                                         </span>
                                                 </div>
@@ -505,6 +524,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 </div>
                                         </div>
 
+                                        <?php if ( $this->terms_required() ) : ?>
                                         <div class="hsw-psum__terms">
                                                 <label class="hsw-psum__terms-l">
                                                         <input type="checkbox" class="hsw-k-terms" />
@@ -518,8 +538,9 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                         </span>
                                                 </label>
                                         </div>
+                                        <?php endif; ?>
 
-                                        <button class="hsw-psum__cta hsw-k-pay" type="button">
+                                        <button class="hsw-psum__cta hsw-k-pay" type="button" data-hsw-terms="<?php echo $this->terms_required() ? '1' : '0'; ?>">
                                                 <?php echo HSW_Helpers::icon( 'lock', true ); ?>
                                                 <span><?php echo esc_html( $this->opt( 'cta_label', '' ) ); ?></span>
                                         </button>
@@ -577,20 +598,28 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                         <div class="hsw-psum__row">
                                                 <span><?php echo esc_html( $this->opt( 'shipping_label_m', '' ) ); ?></span>
                                                 <span class="hsw-psum__v" data-hswk="shipping">
-                                                        <?php if ( 'free' === $tm['shipping'][0] ) : ?>
-                                                                <span class="hsw-psum__freenote is-m"><?php echo esc_html( $this->opt( 'free_note_m', '' ) ); ?></span>
-                                                        <?php else : ?>
+                                                        <?php $ship_state_m = (string) $tm['shipping'][0]; ?>
+                                                        <?php if ( 'amount' === $ship_state_m ) : ?>
                                                                 <?php echo $this->money( (float) $tm['shipping'][1], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                                        <?php else : ?>
+                                                                <span class="<?php echo 'free' === $ship_state_m ? 'hsw-psum__freenote is-m' : 'hsw-psum__note'; ?>"><?php echo esc_html( $this->shipping_state_label( $ship_state_m, $this->free_note_text( 'free_note_m' ) ) ); ?></span>
                                                         <?php endif; ?>
                                                 </span>
                                         </div>
 
-                                        <?php if ( 0 < (float) $tm['wallet'] ) : ?>
-                                                <div class="hsw-psum__row is-wallet" data-hswk-wallet-row>
-                                                        <span><?php echo esc_html( $this->opt( 'wallet_label_m', '' ) ); ?></span>
-                                                        <span class="hsw-psum__v"><?php echo $this->discount_html( $tm['wallet'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-                                                </div>
-                                        <?php endif; ?>
+                                        <?php
+                                        /*
+                                         * There used to be a «کسر از موجودی کیف پول» row
+                                         * here, drawn whenever the session flag was on.
+                                         * The total below never moved: the order is priced
+                                         * by WooCommerce and the wallet gateway pays in full
+                                         * or refuses. The customer was told part of the money
+                                         * was covered, then charged the whole amount.
+                                         *
+                                         * Paying with the wallet is the gateway radio on the
+                                         * payment-methods widget, and it is all-or-nothing.
+                                         */
+                                        ?>
                                 </div>
 
                                 <div class="hsw-psum__final">
@@ -603,6 +632,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                         </span>
                                 </div>
 
+                                <?php if ( $this->terms_required() ) : ?>
                                 <label class="hsw-psum__terms-l is-m">
                                         <input type="checkbox" class="hsw-k-terms" />
                                         <span class="hsw-psum__terms-tx">
@@ -613,6 +643,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 <?php endif; ?>
                                         </span>
                                 </label>
+                                <?php endif; ?>
                         </section>
 
                         <div class="hsw-psum__mbpad hsw-m" aria-hidden="true"></div>
@@ -623,7 +654,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                 <span class="hsw-psum__mbar-lbl"><?php echo esc_html( $this->opt( 'bar_pay_lbl', '' ) ); ?></span>
                                                 <span class="hsw-psum__mbar-v" data-hswk="total"><?php echo $this->money( (float) $tm['total'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                         </div>
-                                        <button class="hsw-psum__cta hsw-psum__cta--m hsw-k-pay" type="button">
+                                        <button class="hsw-psum__cta hsw-psum__cta--m hsw-k-pay" type="button" data-hsw-terms="<?php echo $this->terms_required() ? '1' : '0'; ?>">
                                                 <?php echo HSW_Helpers::icon( 'lock' ); ?>
                                                 <span><?php echo esc_html( $this->opt( 'bar_cta', '' ) ); ?></span>
                                         </button>

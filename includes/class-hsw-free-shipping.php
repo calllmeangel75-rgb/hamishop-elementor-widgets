@@ -58,6 +58,22 @@ class HSW_Free_Shipping {
 	}
 
 	/**
+	 * Threshold a customer-facing promise may quote, or 0 when it must not.
+	 *
+	 * `threshold()` is the number the owner typed and it stays on the settings
+	 * screen after the switch is turned off — re-enabling should not require
+	 * typing it again. But the cart banner and the checkout tip read that
+	 * number directly, so with the switch off they promised free shipping this
+	 * plugin was never going to apply. A promise needs both halves: the switch
+	 * and the amount.
+	 *
+	 * @return float
+	 */
+	public static function promise_threshold() {
+		return self::is_enabled() ? self::threshold() : 0.0;
+	}
+
+	/**
 	 * Free-shipping minimum configured in WooCommerce's own shipping zones.
 	 *
 	 * Stores often have both: a zone method («ارسال رایگان از ۵۰۰٬۰۰۰ تومان»)

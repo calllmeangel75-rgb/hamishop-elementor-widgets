@@ -85,7 +85,7 @@ msgstr ""
 msgid "CTA مراحل خرید (کلیک)"
 msgstr ""
 
-#: includes/class-hsw-assets.php:1040
+#: includes/class-hsw-assets.php:1041
 msgid "HamiShop (لوکال)"
 msgstr ""
 
@@ -175,7 +175,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-items.php:68
 #: widgets/class-hsw-widget-cart-items.php:355
 #: widgets/class-hsw-widget-checkout-summary.php:97
-#: widgets/class-hsw-widget-checkout-summary.php:446
+#: widgets/class-hsw-widget-checkout-summary.php:448
 msgid "{count} کالا"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgid "{percent} = درصد پیشرفت."
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-banner.php:107
-#: widgets/class-hsw-widget-cart-banner.php:181
+#: widgets/class-hsw-widget-cart-banner.php:186
 msgid "{percent}٪ تکمیل"
 msgstr ""
 
@@ -359,11 +359,11 @@ msgid "آدرس پیش‌فرض صورتحساب و تحویل سفارش را �
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:90
-#: widgets/class-hsw-widget-pay-recall.php:330
+#: widgets/class-hsw-widget-pay-recall.php:332
 msgid "آدرس:"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:181
+#: includes/class-hsw-checkout-complete.php:183
 msgid "آدرسی برای تحویل ثبت نشده است؛ ابتدا در حساب کاربری آدرس را کامل کنید."
 msgstr ""
 
@@ -459,7 +459,7 @@ msgstr ""
 #: widgets/class-hsw-widget-footer-sticky.php:118
 #: widgets/class-hsw-widget-pay-methods.php:131
 #: widgets/class-hsw-widget-pay-summary.php:188
-#: widgets/class-hsw-widget-pay-summary.php:346
+#: widgets/class-hsw-widget-pay-summary.php:337
 msgid "آیکن"
 msgstr ""
 
@@ -627,7 +627,7 @@ msgstr ""
 msgid "ابطال شارژ سفارش #%s (سفارش لغو/ریفاند شد)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:368
+#: widgets/class-hsw-widget-pay-summary.php:359
 msgid "اتصال امن شاپرک SSL"
 msgstr ""
 
@@ -667,9 +667,9 @@ msgstr ""
 msgid "اختیاری. اگر خالی باشد، جای مهر در فاکتور خالی می‌ماند."
 msgstr ""
 
-#: includes/class-hsw-assets.php:921
-#: includes/class-hsw-assets.php:942
-#: includes/class-hsw-assets.php:970
+#: includes/class-hsw-assets.php:922
+#: includes/class-hsw-assets.php:943
+#: includes/class-hsw-assets.php:971
 #: includes/class-hsw-checkout-base.php:158
 #: widgets/class-hsw-widget-complete-actions.php:95
 #: widgets/class-hsw-widget-complete-actions.php:260
@@ -687,7 +687,7 @@ msgid "ادامه مطلب"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:204
-#: widgets/class-hsw-widget-checkout-summary.php:532
+#: widgets/class-hsw-widget-checkout-summary.php:536
 msgid "ادامه و ورود به مرحله پرداخت"
 msgstr ""
 
@@ -746,7 +746,7 @@ msgstr ""
 msgid "ارسال ایمیل ناموفق بود. لطفاً بعداً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: widgets/class-hsw-widget-checkout-summary.php:494
+#: widgets/class-hsw-widget-checkout-summary.php:498
 msgid "ارسال بالای %s تومان رایگان است"
 msgstr ""
 
@@ -765,7 +765,7 @@ msgstr ""
 msgid "ارسال دیدگاه یا پرسش درباره این مقاله"
 msgstr ""
 
-#: includes/class-hsw-free-shipping.php:128
+#: includes/class-hsw-free-shipping.php:144
 #: includes/class-hsw-widget-base.php:865
 #: includes/class-hsw-widget-base.php:3107
 #: includes/class-hsw-widget-manager.php:1019
@@ -778,7 +778,7 @@ msgid "ارسال رایگان افزونه"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-banner.php:57
-#: widgets/class-hsw-widget-cart-banner.php:166
+#: widgets/class-hsw-widget-cart-banner.php:171
 msgid "ارسال رایگان سفارش شما فعال شد!"
 msgstr ""
 
@@ -913,9 +913,9 @@ msgstr ""
 #: widgets/class-hsw-widget-complete-order.php:236
 #: widgets/class-hsw-widget-complete-steps.php:109
 #: widgets/class-hsw-widget-pay-coupon.php:131
-#: widgets/class-hsw-widget-pay-methods.php:266
+#: widgets/class-hsw-widget-pay-methods.php:256
 #: widgets/class-hsw-widget-pay-recall.php:168
-#: widgets/class-hsw-widget-pay-summary.php:379
+#: widgets/class-hsw-widget-pay-summary.php:370
 #: widgets/class-hsw-widget-pay-top.php:266
 #: widgets/class-hsw-widget-post-page.php:262
 #: widgets/class-hsw-widget-product-accordions.php:175
@@ -1075,10 +1075,6 @@ msgstr ""
 msgid "استفاده از صفحهٔ ۴۰۴ اختصاصی"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:256
-msgid "استفاده از موجودی"
-msgstr ""
-
 #: widgets/class-hsw-widget-product-variants.php:73
 msgid "اسلاگ صفت حافظه"
 msgstr ""
@@ -1146,7 +1142,7 @@ msgid "اطلاعات فروشنده (فاکتور)"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:132
-#: widgets/class-hsw-widget-pay-recall.php:363
+#: widgets/class-hsw-widget-pay-recall.php:365
 msgid "اطلاعات مرسوله"
 msgstr ""
 
@@ -1229,7 +1225,7 @@ msgstr ""
 msgid "افزایش تعداد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:954
+#: includes/class-hsw-assets.php:955
 msgid "افزودن"
 msgstr ""
 
@@ -1251,8 +1247,8 @@ msgstr ""
 msgid "افزودن به سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-assets.php:918
-#: includes/class-hsw-assets.php:965
+#: includes/class-hsw-assets.php:919
+#: includes/class-hsw-assets.php:966
 msgid "افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید."
 msgstr ""
 
@@ -1260,7 +1256,7 @@ msgstr ""
 msgid "افزودن به علاقه‌مندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:955
+#: includes/class-hsw-assets.php:956
 msgid "افزوده شد"
 msgstr ""
 
@@ -1435,7 +1431,7 @@ msgid "انتخاب روش ارسال و هزینه آن."
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-methods.php:66
-#: widgets/class-hsw-widget-pay-methods.php:395
+#: widgets/class-hsw-widget-pay-methods.php:394
 msgid "انتخاب روش پرداخت"
 msgstr ""
 
@@ -1530,7 +1526,7 @@ msgstr ""
 
 #: widgets/class-hsw-widget-cart-items.php:217
 #: widgets/class-hsw-widget-checkout-items.php:71
-#: widgets/class-hsw-widget-pay-summary.php:384
+#: widgets/class-hsw-widget-pay-summary.php:375
 msgid "اندازه فونت «سود شما از خرید»"
 msgstr ""
 
@@ -1718,7 +1714,7 @@ msgstr ""
 msgid "ایمیل (ارسال لینک دانلود)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-recall.php:330
+#: widgets/class-hsw-widget-pay-recall.php:332
 msgid "ایمیل دریافت لینک:"
 msgstr ""
 
@@ -1752,7 +1748,7 @@ msgstr ""
 msgid "ایمیل معتبر وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:700
+#: includes/class-hsw-checkout-complete.php:702
 msgid "ایمیل وارد شده معتبر نیست."
 msgstr ""
 
@@ -1899,7 +1895,7 @@ msgstr ""
 msgid "این کد تا %s دقیقه معتبر است. اگر شما درخواست نداده‌اید، این ایمیل را نادیده بگیرید."
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:546
+#: includes/class-hsw-checkout-rest.php:549
 msgid "این کد روی سبد اعمال نشده است."
 msgstr ""
 
@@ -2071,7 +2067,7 @@ msgid "بازه زمانی ساعت تحویل:"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:108
-#: widgets/class-hsw-widget-pay-recall.php:348
+#: widgets/class-hsw-widget-pay-recall.php:350
 msgid "بازه زمانی منتخب:"
 msgstr ""
 
@@ -2312,11 +2308,11 @@ msgstr ""
 msgid "برای ادامه خرید می‌توانید از فروشگاه شروع کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-checkout-summary.php:537
+#: widgets/class-hsw-widget-checkout-summary.php:541
 msgid "برای ادامه، ابتدا نشانی تحویل را در فرم بالا کامل کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:897
+#: includes/class-hsw-assets.php:898
 msgid "برای ادامه، این موارد را کامل کنید: %s"
 msgstr ""
 
@@ -2336,7 +2332,7 @@ msgstr ""
 msgid "برای انجام این کار دسترسی مدیریت لازم است."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:713
+#: includes/class-hsw-checkout-complete.php:715
 msgid "برای این آدرس روش ارسال در دسترس نیست؛ آدرس را بررسی کنید."
 msgstr ""
 
@@ -2376,12 +2372,12 @@ msgstr ""
 msgid "برای ثبت دیدگاه باید %1$sوارد حساب کاربری شوید%2$s."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:169
-#: includes/class-hsw-checkout-complete.php:372
+#: includes/class-hsw-checkout-complete.php:171
+#: includes/class-hsw-checkout-complete.php:374
 msgid "برای ثبت سفارش باید قوانین و شرایط فروشگاه را بپذیرید."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:182
+#: includes/class-hsw-checkout-complete.php:184
 msgid "برای ثبت سفارش، وارد حساب کاربری شوید و آدرس تحویل را ذخیره کنید."
 msgstr ""
 
@@ -2443,6 +2439,11 @@ msgstr ""
 msgid "برای وسط‌چین کردن هدر در موبایل، آیکون «وسط» را در حالت موبایل (آیکون گوشی) انتخاب کنید."
 msgstr ""
 
+#: widgets/class-hsw-widget-pay-methods.php:216
+#: widgets/class-hsw-widget-pay-methods.php:246
+msgid "برای پرداخت کامل با کیف پول، روش پرداخت «کیف پول» را انتخاب کنید."
+msgstr ""
+
 #: widgets/class-hsw-widget-post-page.php:77
 msgid "برای پیش‌نمایش در ادیتور. در قالب تکی، «نوشتهٔ جاری» را انتخاب کنید."
 msgstr ""
@@ -2501,7 +2502,7 @@ msgstr ""
 msgid "برند/دسته بالای عنوان"
 msgstr ""
 
-#: includes/class-hsw-assets.php:953
+#: includes/class-hsw-assets.php:954
 msgid "برو به سبد خرید"
 msgstr ""
 
@@ -2770,7 +2771,7 @@ msgstr ""
 msgid "برچسب نوار پرداخت"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:322
+#: widgets/class-hsw-widget-pay-summary.php:313
 msgid "برچسب نوار پرداخت (موبایل)"
 msgstr ""
 
@@ -2855,9 +2856,9 @@ msgstr ""
 #: includes/class-hsw-account-support.php:830
 #: includes/class-hsw-account-support.php:921
 #: includes/class-hsw-archive-base.php:690
-#: includes/class-hsw-assets.php:922
-#: includes/class-hsw-assets.php:943
-#: includes/class-hsw-assets.php:971
+#: includes/class-hsw-assets.php:923
+#: includes/class-hsw-assets.php:944
+#: includes/class-hsw-assets.php:972
 #: includes/class-hsw-invoice.php:181
 #: widgets/class-hsw-widget-archive-filters.php:1431
 #: widgets/class-hsw-widget-archive-guide.php:188
@@ -2895,7 +2896,7 @@ msgstr ""
 msgid "بعد از متن"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:411
+#: includes/class-hsw-complete-route.php:439
 msgid "بعد از پرداخت (و بازگشت از درگاه)، مشتری به این صفحه هدایت می‌شود و شماره و جزئیات سفارش را می‌بیند. خالی = رفتار پیش‌فرض ووکامرس."
 msgstr ""
 
@@ -2940,14 +2941,14 @@ msgstr ""
 msgid "به دلیل تلاش‌های ناموفق، ورود دوعاملی تا %s دقیقه قفل است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:917
-#: includes/class-hsw-assets.php:923
-#: includes/class-hsw-assets.php:944
-#: includes/class-hsw-assets.php:972
+#: includes/class-hsw-assets.php:918
+#: includes/class-hsw-assets.php:924
+#: includes/class-hsw-assets.php:945
+#: includes/class-hsw-assets.php:973
 msgid "به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:964
+#: includes/class-hsw-assets.php:965
 msgid "به سبد خرید اضافه شد ✓"
 msgstr ""
 
@@ -3039,7 +3040,7 @@ msgid "تأیید و ورود"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:342
-#: widgets/class-hsw-widget-checkout-summary.php:604
+#: widgets/class-hsw-widget-checkout-summary.php:608
 msgid "تأیید و پرداخت نهایی"
 msgstr ""
 
@@ -3397,7 +3398,7 @@ msgid "تحویل‌گیرنده اصلی"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:81
-#: widgets/class-hsw-widget-pay-recall.php:325
+#: widgets/class-hsw-widget-pay-recall.php:327
 msgid "تحویل‌گیرنده:"
 msgstr ""
 
@@ -3426,17 +3427,17 @@ msgstr ""
 #: includes/class-hsw-helpers.php:198
 #: widgets/class-hsw-widget-cart-summary.php:153
 #: widgets/class-hsw-widget-cart-summary.php:513
-#: widgets/class-hsw-widget-cart-summary.php:624
+#: widgets/class-hsw-widget-cart-summary.php:622
 msgid "تخفیف محصول"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:306
-#: widgets/class-hsw-widget-checkout-summary.php:577
+#: widgets/class-hsw-widget-checkout-summary.php:581
 msgid "تخفیف کالاها"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:139
-#: widgets/class-hsw-widget-checkout-summary.php:476
+#: widgets/class-hsw-widget-checkout-summary.php:478
 msgid "تخفیف کالاها:"
 msgstr ""
 
@@ -3726,7 +3727,7 @@ msgid "تغییر آدرس"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:62
-#: widgets/class-hsw-widget-pay-recall.php:316
+#: widgets/class-hsw-widget-pay-recall.php:318
 msgid "تغییر اطلاعات یا آدرس"
 msgstr ""
 
@@ -3762,7 +3763,7 @@ msgstr ""
 msgid "تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را غیرفعال کنید."
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:655
+#: includes/class-hsw-checkout-rest.php:658
 msgid "تلاش‌های ناموفق زیاد بود؛ چند دقیقه بعد دوباره امتحان کنید."
 msgstr ""
 
@@ -3909,7 +3910,7 @@ msgid "تنها %s عدد باقی مانده"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-banner.php:78
-#: widgets/class-hsw-widget-cart-banner.php:167
+#: widgets/class-hsw-widget-cart-banner.php:172
 msgid "تنها {remaining} تومان تا ارسال رایگان!"
 msgstr ""
 
@@ -3922,7 +3923,7 @@ msgid "توست نوار خرید چسبان"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-methods.php:93
-#: widgets/class-hsw-widget-pay-methods.php:385
+#: widgets/class-hsw-widget-pay-methods.php:384
 msgid "توصیه شده"
 msgstr ""
 
@@ -4030,7 +4031,7 @@ msgstr ""
 msgid "تکسانومی صفت رنگ محصول (پیش‌فرض ووکامرس: pa_color). اگر محصول چنین صفتی نداشته باشد، اولین صفت متغیر مناسب به‌صورت خودکار انتخاب می‌شود."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:187
+#: includes/class-hsw-checkout-complete.php:189
 msgid "تکمیل آدرس در حساب کاربری"
 msgstr ""
 
@@ -4040,11 +4041,11 @@ msgid "تکمیل خرید"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:248
-#: widgets/class-hsw-widget-cart-summary.php:572
+#: widgets/class-hsw-widget-cart-summary.php:570
 msgid "تکمیل سفارش و ثبت آدرس"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:211
+#: includes/class-hsw-checkout-complete.php:213
 msgid "تکمیل نشانی تحویل"
 msgstr ""
 
@@ -4155,12 +4156,12 @@ msgstr ""
 msgid "ثبت رسید درخواست ناموفق بود؛ مبلغی جابه‌جا نشد."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:251
+#: includes/class-hsw-checkout-complete.php:253
 msgid "ثبت سفارش انجام نشد؛ دوباره تلاش کنید."
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:401
-#: widgets/class-hsw-widget-cart-summary.php:676
+#: widgets/class-hsw-widget-cart-summary.php:674
 msgid "ثبت سفارش و ادامه"
 msgstr ""
 
@@ -4312,7 +4313,7 @@ msgid "جزئیات و پیگیری"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:288
-#: widgets/class-hsw-widget-checkout-summary.php:565
+#: widgets/class-hsw-widget-checkout-summary.php:569
 msgid "جزئیات پرداخت"
 msgstr ""
 
@@ -4450,7 +4451,7 @@ msgid "جمع فاکتور و اطلاعات نهایی ارسال."
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:130
-#: widgets/class-hsw-widget-checkout-summary.php:470
+#: widgets/class-hsw-widget-checkout-summary.php:472
 msgid "جمع قیمت اقلام ({count}):"
 msgstr ""
 
@@ -4500,7 +4501,7 @@ msgstr ""
 msgid "حاشیه (هاور)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:273
+#: widgets/class-hsw-widget-pay-methods.php:263
 msgid "حاشیه بانک انتخاب‌شده"
 msgstr ""
 
@@ -4541,7 +4542,7 @@ msgstr ""
 msgid "حاشیه کانتینر"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:272
+#: widgets/class-hsw-widget-pay-methods.php:262
 msgid "حاشیه گزینه انتخاب‌شده"
 msgstr ""
 
@@ -5147,7 +5148,7 @@ msgstr ""
 msgid "خریداران پیشنهاد کرده‌اند"
 msgstr ""
 
-#: includes/class-hsw-assets.php:951
+#: includes/class-hsw-assets.php:952
 msgid "خریدت رو کامل‌تر کن"
 msgstr ""
 
@@ -5214,7 +5215,7 @@ msgstr ""
 msgid "خلاصه حساب"
 msgstr ""
 
-#: widgets/class-hsw-widget-cart-summary.php:609
+#: widgets/class-hsw-widget-cart-summary.php:607
 msgid "خلاصه فاکتور"
 msgstr ""
 
@@ -5227,9 +5228,9 @@ msgid "خلاصه فاکتور سبد خرید (HamiShop)"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:498
-#: widgets/class-hsw-widget-cart-summary.php:612
+#: widgets/class-hsw-widget-cart-summary.php:610
 #: widgets/class-hsw-widget-pay-summary.php:65
-#: widgets/class-hsw-widget-pay-summary.php:456
+#: widgets/class-hsw-widget-pay-summary.php:474
 msgid "خلاصه فاکتور سفارش"
 msgstr ""
 
@@ -5254,7 +5255,7 @@ msgid "خلاصه پرداخت اطلاعات ارسال (HamiShop)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:88
-#: widgets/class-hsw-widget-checkout-summary.php:445
+#: widgets/class-hsw-widget-checkout-summary.php:447
 msgid "خلاصه پیش‌فاکتور"
 msgstr ""
 
@@ -5332,6 +5333,10 @@ msgstr ""
 
 #: includes/class-hsw-widget-manager.php:1218
 msgid "در آرشیو و فهرست محصولات"
+msgstr ""
+
+#: includes/class-hsw-cart-base.php:611
+msgid "در انتظار انتخاب روش ارسال"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-order.php:187
@@ -5465,7 +5470,7 @@ msgstr ""
 msgid "درخواست صدور فاکتور رسمی حقوقی (ویژه شرکت‌ها و اشخاص حقوقی)"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:769
+#: includes/class-hsw-checkout-complete.php:771
 msgid "درخواست فاکتور رسمی از سوی مشتری ثبت شد."
 msgstr ""
 
@@ -6202,26 +6207,22 @@ msgid "راه‌های ارتباطی فروشگاه"
 msgstr ""
 
 #: includes/class-hsw-account.php:2262
-#: includes/class-hsw-checkout-rest.php:705
+#: includes/class-hsw-cart-base.php:609
+#: includes/class-hsw-checkout-rest.php:708
 #: widgets/class-hsw-widget-cart-summary.php:191
 #: widgets/class-hsw-widget-cart-summary.php:489
 #: widgets/class-hsw-widget-checkout-shipping.php:91
 #: widgets/class-hsw-widget-checkout-shipping.php:276
 #: widgets/class-hsw-widget-checkout-summary.php:195
-#: widgets/class-hsw-widget-checkout-summary.php:404
+#: widgets/class-hsw-widget-checkout-summary.php:405
 #: widgets/class-hsw-widget-complete-order.php:120
 #: widgets/class-hsw-widget-complete-order.php:319
 #: widgets/class-hsw-widget-pay-recall.php:159
 #: widgets/class-hsw-widget-pay-recall.php:287
-msgid "رایگان"
-msgstr ""
-
-#: widgets/class-hsw-widget-pay-summary.php:288
-msgid "رایگان (خرید بالای ۵۰۰ تومان)"
-msgstr ""
-
 #: widgets/class-hsw-widget-pay-summary.php:119
-msgid "رایگان (خرید بالای ۵۰۰ هزار)"
+#: widgets/class-hsw-widget-pay-summary.php:288
+#: widgets/class-hsw-widget-pay-summary.php:447
+msgid "رایگان"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:2085
@@ -6265,7 +6266,7 @@ msgstr ""
 #: widgets/class-hsw-widget-checkout-summary.php:304
 #: widgets/class-hsw-widget-checkout-summary.php:357
 #: widgets/class-hsw-widget-complete-order.php:244
-#: widgets/class-hsw-widget-pay-summary.php:388
+#: widgets/class-hsw-widget-pay-summary.php:379
 msgid "ردیف تخفیف"
 msgstr ""
 
@@ -6327,10 +6328,6 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-items.php:242
 #: widgets/class-hsw-widget-cart-page.php:87
 msgid "ردیف کالا، تصویر و تعداد"
-msgstr ""
-
-#: widgets/class-hsw-widget-pay-summary.php:295
-msgid "ردیف کسر کیف پول (موبایل)"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:142
@@ -6410,7 +6407,7 @@ msgstr ""
 
 #: widgets/class-hsw-widget-cart-items.php:216
 #: widgets/class-hsw-widget-checkout-items.php:70
-#: widgets/class-hsw-widget-pay-summary.php:383
+#: widgets/class-hsw-widget-pay-summary.php:374
 msgid "رنگ «سود شما از خرید»"
 msgstr ""
 
@@ -7291,6 +7288,10 @@ msgstr ""
 msgid "روش ارسال"
 msgstr ""
 
+#: includes/class-hsw-cart-base.php:615
+msgid "روش ارسال در دسترس نیست"
+msgstr ""
+
 #: includes/class-hsw-checkout-rest.php:439
 msgid "روش ارسال در دسترس نیست."
 msgstr ""
@@ -7317,13 +7318,13 @@ msgstr ""
 msgid "روش پرداخت"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:264
-#: includes/class-hsw-checkout-complete.php:384
-#: includes/class-hsw-checkout-complete.php:723
+#: includes/class-hsw-checkout-complete.php:266
+#: includes/class-hsw-checkout-complete.php:386
+#: includes/class-hsw-checkout-complete.php:725
 msgid "روش پرداخت انتخاب‌شده در دسترس نیست؛ روش دیگری را انتخاب کنید."
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:511
+#: includes/class-hsw-checkout-rest.php:510
 msgid "روش پرداخت نامعتبر است."
 msgstr ""
 
@@ -7381,7 +7382,7 @@ msgstr ""
 msgid "زمان باقی‌مانده:"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:635
+#: includes/class-hsw-checkout-complete.php:637
 msgid "زمان تحویل: %s"
 msgstr ""
 
@@ -7618,7 +7619,7 @@ msgstr ""
 
 #: includes/class-hsw-checkout-complete.php:59
 #: includes/class-hsw-checkout-rest.php:421
-#: includes/class-hsw-checkout-rest.php:528
+#: includes/class-hsw-checkout-rest.php:531
 msgid "سبد خرید یافت نشد."
 msgstr ""
 
@@ -7740,7 +7741,7 @@ msgstr ""
 msgid "سفارش شما ثبت شد و برای بررسی و تأیید نهایی در صف پردازش قرار گرفت."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:448
+#: includes/class-hsw-checkout-complete.php:450
 msgid "سفارش شما در حال ثبت است؛ چند ثانیه صبر کنید و صفحه را دوباره بارگذاری نکنید."
 msgstr ""
 
@@ -8126,12 +8127,12 @@ msgid "شکل نمایش"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-recall.php:99
-#: widgets/class-hsw-widget-pay-recall.php:340
+#: widgets/class-hsw-widget-pay-recall.php:342
 msgid "شیوه ارسال:"
 msgstr ""
 
 #: widgets/class-hsw-widget-pay-methods.php:84
-#: widgets/class-hsw-widget-pay-methods.php:537
+#: widgets/class-hsw-widget-pay-methods.php:527
 msgid "شیوه پرداخت"
 msgstr ""
 
@@ -8255,7 +8256,7 @@ msgstr ""
 msgid "صفحهٔ تکمیل خرید"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:410
+#: includes/class-hsw-complete-route.php:438
 msgid "صفحهٔ تکمیل خرید (مرحلهٔ ۴)"
 msgstr ""
 
@@ -8279,7 +8280,7 @@ msgstr ""
 msgid "صفحهٔ پرداخت"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:400
+#: includes/class-hsw-complete-route.php:428
 msgid "صفحهٔ پرداخت (مرحلهٔ ۳)"
 msgstr ""
 
@@ -8300,7 +8301,7 @@ msgstr ""
 msgid "صفحه‌ای که دنبالش بودید پیدا نشد!"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:401
+#: includes/class-hsw-complete-route.php:429
 msgid "صفحه‌ای که ویجت «صفحه کامل پرداخت — حامی» دارد. دکمهٔ «ادامه و ورود به مرحله پرداخت» در صفحهٔ تسویه به این صفحه می‌رود. خالی = همان صفحهٔ تسویه ووکامرس."
 msgstr ""
 
@@ -8437,7 +8438,7 @@ msgstr ""
 msgid "ضمانت اصالت کالا"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:369
+#: widgets/class-hsw-widget-pay-summary.php:360
 msgid "ضمانت بازگشت ۷ روزه"
 msgstr ""
 
@@ -9361,7 +9362,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:917
 #: includes/class-hsw-blog-base.php:53
-#: includes/class-hsw-cart-base.php:675
+#: includes/class-hsw-cart-base.php:740
 #: includes/class-hsw-header-base.php:779
 #: includes/class-hsw-product-base.php:1517
 #: widgets/class-hsw-widget-checkout-schedule.php:51
@@ -9390,7 +9391,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:918
 #: includes/class-hsw-blog-base.php:54
-#: includes/class-hsw-cart-base.php:676
+#: includes/class-hsw-cart-base.php:741
 #: includes/class-hsw-header-base.php:780
 #: includes/class-hsw-product-base.php:1518
 #: widgets/class-hsw-widget-checkout-schedule.php:52
@@ -9700,7 +9701,7 @@ msgstr ""
 msgid "قوانین و مقررات خرید اینترنتی"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:315
+#: widgets/class-hsw-widget-pay-summary.php:306
 msgid "قوانین، مقررات خرید و حریم خصوصی فروشگاه را مطالعه کرده و می‌پذیرم."
 msgstr ""
 
@@ -9764,7 +9765,7 @@ msgid "قیمت کالاها ({count} عدد)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:297
-#: widgets/class-hsw-widget-checkout-summary.php:569
+#: widgets/class-hsw-widget-checkout-summary.php:573
 msgid "قیمت کالاها ({count} قلم)"
 msgstr ""
 
@@ -9788,7 +9789,7 @@ msgid "لایه (z-index)"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:220
-#: widgets/class-hsw-widget-cart-summary.php:549
+#: widgets/class-hsw-widget-cart-summary.php:547
 msgid "لحاظ شده در مبالغ"
 msgstr ""
 
@@ -10003,12 +10004,12 @@ msgid "مالیات"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:210
-#: widgets/class-hsw-widget-cart-summary.php:544
+#: widgets/class-hsw-widget-cart-summary.php:542
 msgid "مالیات بر ارزش افزوده (۱۰٪ محاسبه‌شده)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:167
-#: widgets/class-hsw-widget-checkout-summary.php:512
+#: widgets/class-hsw-widget-checkout-summary.php:516
 msgid "مالیات بر ارزش افزوده:"
 msgstr ""
 
@@ -10049,17 +10050,17 @@ msgstr ""
 msgid "مبلغ شارژ هر نفر"
 msgstr ""
 
-#: widgets/class-hsw-widget-cart-summary.php:653
+#: widgets/class-hsw-widget-cart-summary.php:651
 #: widgets/class-hsw-widget-checkout-summary.php:184
 #: widgets/class-hsw-widget-checkout-summary.php:333
-#: widgets/class-hsw-widget-checkout-summary.php:600
-#: widgets/class-hsw-widget-pay-summary.php:306
+#: widgets/class-hsw-widget-checkout-summary.php:604
+#: widgets/class-hsw-widget-pay-summary.php:297
 msgid "مبلغ قابل پرداخت"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:186
-#: widgets/class-hsw-widget-checkout-summary.php:526
-#: widgets/class-hsw-widget-pay-summary.php:324
+#: widgets/class-hsw-widget-checkout-summary.php:530
+#: widgets/class-hsw-widget-pay-summary.php:315
 msgid "مبلغ قابل پرداخت:"
 msgstr ""
 
@@ -10071,7 +10072,7 @@ msgstr ""
 msgid "مبلغ نهایی (دسکتاپ)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:304
+#: widgets/class-hsw-widget-pay-summary.php:295
 msgid "مبلغ نهایی (موبایل)"
 msgstr ""
 
@@ -10080,12 +10081,12 @@ msgid "مبلغ نهایی (کارت)"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:324
-#: widgets/class-hsw-widget-checkout-summary.php:589
+#: widgets/class-hsw-widget-checkout-summary.php:593
 msgid "مبلغ نهایی سفارش"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:230
-#: widgets/class-hsw-widget-cart-summary.php:559
+#: widgets/class-hsw-widget-cart-summary.php:557
 #: widgets/class-hsw-widget-pay-summary.php:128
 msgid "مبلغ نهایی پرداخت"
 msgstr ""
@@ -10122,7 +10123,7 @@ msgid "مبلغ کل پرداختی"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:391
-#: widgets/class-hsw-widget-cart-summary.php:672
+#: widgets/class-hsw-widget-cart-summary.php:670
 msgid "مبلغ کل پرداختی:"
 msgstr ""
 
@@ -10137,7 +10138,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-summary.php:334
 #: widgets/class-hsw-widget-checkout-page.php:82
 #: widgets/class-hsw-widget-complete-hero.php:191
-#: widgets/class-hsw-widget-pay-summary.php:355
+#: widgets/class-hsw-widget-pay-summary.php:346
 #: widgets/class-hsw-widget-product-accordions.php:137
 #: widgets/class-hsw-widget-product-purchase.php:120
 msgid "متن"
@@ -10230,7 +10231,7 @@ msgstr ""
 msgid "متن برچسب اصالت"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:275
+#: widgets/class-hsw-widget-pay-methods.php:265
 msgid "متن برچسب توصیه"
 msgstr ""
 
@@ -10389,7 +10390,7 @@ msgstr ""
 msgid "متن دکمه نوار پرداخت"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:331
+#: widgets/class-hsw-widget-pay-summary.php:322
 msgid "متن دکمه نوار پرداخت (موبایل)"
 msgstr ""
 
@@ -10397,7 +10398,7 @@ msgstr ""
 msgid "متن دکمه ویرایش"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:391
+#: widgets/class-hsw-widget-pay-summary.php:382
 msgid "متن دکمه پرداخت"
 msgstr ""
 
@@ -10513,7 +10514,7 @@ msgstr ""
 msgid "متن قرص فعال"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:313
+#: widgets/class-hsw-widget-pay-summary.php:304
 msgid "متن قوانین (موبایل)"
 msgstr ""
 
@@ -10716,10 +10717,6 @@ msgstr ""
 msgid "متن کنار تایمر"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:254
-msgid "متن کنار کلید (دسکتاپ)"
-msgstr ""
-
 #: widgets/class-hsw-widget-product-tabs.php:140
 msgid "متن گارانتی (هر خط یک مورد)"
 msgstr ""
@@ -10810,7 +10807,7 @@ msgid "مجموع خرید"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:176
-#: widgets/class-hsw-widget-checkout-summary.php:513
+#: widgets/class-hsw-widget-checkout-summary.php:517
 msgid "محاسبه در قیمت"
 msgstr ""
 
@@ -10865,7 +10862,7 @@ msgstr ""
 msgid "محصول با موفقیت به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:940
+#: includes/class-hsw-assets.php:941
 msgid "محصول به سبد خرید اضافه شد"
 msgstr ""
 
@@ -11107,11 +11104,11 @@ msgstr ""
 msgid "مسیر خانه، فروشگاه و دسته‌بندی محصول."
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:394
+#: includes/class-hsw-complete-route.php:422
 msgid "مسیر خرید (حامی)"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:397
+#: includes/class-hsw-complete-route.php:425
 msgid "مسیر خرید با ویجت‌های جامع حامی: سبد خرید → تسویه حساب (اطلاعات ارسال) → پرداخت → تکمیل خرید. برای هر مرحله یک صفحه بسازید و ویجت جامع همان مرحله را داخل آن قرار دهید."
 msgstr ""
 
@@ -11173,9 +11170,9 @@ msgstr ""
 msgid "مشاهده سبد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:920
-#: includes/class-hsw-assets.php:941
-#: includes/class-hsw-assets.php:969
+#: includes/class-hsw-assets.php:921
+#: includes/class-hsw-assets.php:942
+#: includes/class-hsw-assets.php:970
 #: includes/class-hsw-cart-drawer.php:31
 #: includes/class-hsw-header-base.php:732
 #: includes/class-hsw-header-base.php:910
@@ -11252,7 +11249,7 @@ msgstr ""
 
 #: includes/class-hsw-widget-manager.php:346
 #: widgets/class-hsw-widget-pay-recall.php:53
-#: widgets/class-hsw-widget-pay-recall.php:313
+#: widgets/class-hsw-widget-pay-recall.php:315
 msgid "مشخصات تحویل سفارش"
 msgstr ""
 
@@ -11341,7 +11338,7 @@ msgstr ""
 msgid "مقدار"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:693
+#: includes/class-hsw-checkout-complete.php:695
 msgid "مقدار «%s» را کامل کنید."
 msgstr ""
 
@@ -11517,10 +11514,6 @@ msgstr ""
 
 #: widgets/class-hsw-widget-pay-methods.php:226
 msgid "موجودی کیف پول"
-msgstr ""
-
-#: widgets/class-hsw-widget-pay-methods.php:216
-msgid "موجودی کیف پول از فاکتور نهایی به صورت خودکار کسر می‌گردد."
 msgstr ""
 
 #: includes/class-hsw-wallet-pay.php:884
@@ -11740,7 +11733,7 @@ msgstr ""
 msgid "نام، ایمیل و اطلاعات ورود خود را به‌روز کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:891
+#: includes/class-hsw-assets.php:892
 msgid "نام، شماره تماس، استان، شهر و نشانی را کامل کنید."
 msgstr ""
 
@@ -11849,7 +11842,7 @@ msgstr ""
 msgid "نشانی تحویل سفارش"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:204
+#: includes/class-hsw-checkout-complete.php:206
 msgid "نشانی تحویل کامل نیست؛ این موارد را تکمیل کنید: %s"
 msgstr ""
 
@@ -11880,11 +11873,11 @@ msgstr ""
 msgid "نشان‌های اعتماد (دسکتاپ)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:339
+#: widgets/class-hsw-widget-pay-summary.php:330
 msgid "نشان‌های زیر نوار (موبایل)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:363
+#: widgets/class-hsw-widget-pay-summary.php:354
 msgid "نشان‌های نوار پرداخت"
 msgstr ""
 
@@ -12024,7 +12017,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:912
 #: includes/class-hsw-blog-base.php:48
-#: includes/class-hsw-cart-base.php:670
+#: includes/class-hsw-cart-base.php:735
 #: includes/class-hsw-header-base.php:774
 #: includes/class-hsw-product-base.php:1512
 msgid "نمایش در"
@@ -12351,6 +12344,10 @@ msgstr ""
 msgid "نیاز به راهنمایی در پرداخت دارید؟"
 msgstr ""
 
+#: includes/class-hsw-cart-base.php:613
+msgid "نیازی به ارسال ندارد"
+msgstr ""
+
 #: includes/class-hsw-header-base.php:1913
 #: includes/class-hsw-header-base.php:2150
 #: includes/class-hsw-widget-base.php:3454
@@ -12490,18 +12487,17 @@ msgid "هزینه ارسال"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:182
-#: widgets/class-hsw-widget-cart-summary.php:643
+#: widgets/class-hsw-widget-cart-summary.php:641
 msgid "هزینه ارسال اکسپرس"
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:315
-#: widgets/class-hsw-widget-checkout-summary.php:584
+#: widgets/class-hsw-widget-checkout-summary.php:588
 msgid "هزینه ارسال با پیک اختصاصی"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-summary.php:173
 #: widgets/class-hsw-widget-cart-summary.php:532
-#: widgets/class-hsw-widget-cart-summary.php:537
 msgid "هزینه ارسال پستی"
 msgstr ""
 
@@ -12510,7 +12506,7 @@ msgid "هزینه ارسال چقدر است و چند روزه به دستم م
 msgstr ""
 
 #: widgets/class-hsw-widget-checkout-summary.php:148
-#: widgets/class-hsw-widget-checkout-summary.php:503
+#: widgets/class-hsw-widget-checkout-summary.php:507
 msgid "هزینه ارسال:"
 msgstr ""
 
@@ -12733,7 +12729,7 @@ msgstr ""
 msgid "ورود"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:187
+#: includes/class-hsw-checkout-complete.php:189
 #: includes/class-hsw-header-base.php:390
 #: includes/class-hsw-header-base.php:739
 msgid "ورود / ثبت‌نام"
@@ -12981,7 +12977,7 @@ msgstr ""
 #: widgets/class-hsw-widget-checkout-address.php:238
 #: widgets/class-hsw-widget-checkout-address.php:405
 #: widgets/class-hsw-widget-pay-recall.php:141
-#: widgets/class-hsw-widget-pay-recall.php:366
+#: widgets/class-hsw-widget-pay-recall.php:368
 msgid "ویرایش"
 msgstr ""
 
@@ -13186,8 +13182,8 @@ msgstr ""
 msgid "پرداخت امن و رمزنگاری‌شده"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:284
-#: includes/class-hsw-checkout-complete.php:405
+#: includes/class-hsw-checkout-complete.php:286
+#: includes/class-hsw-checkout-complete.php:407
 msgid "پرداخت انجام نشد؛ دوباره تلاش کنید یا روش پرداخت دیگری انتخاب کنید."
 msgstr ""
 
@@ -13196,7 +13192,7 @@ msgid "پرداخت در محل"
 msgstr ""
 
 #: includes/class-hsw-setup-pages.php:70
-#: widgets/class-hsw-widget-cart-summary.php:669
+#: widgets/class-hsw-widget-cart-summary.php:667
 #: widgets/class-hsw-widget-complete-actions.php:85
 #: widgets/class-hsw-widget-complete-actions.php:227
 msgid "پرداخت سفارش"
@@ -13245,7 +13241,7 @@ msgstr ""
 msgid "پرداخت و تکمیل سفارش"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:333
+#: widgets/class-hsw-widget-pay-summary.php:324
 msgid "پرداخت و ثبت نهایی"
 msgstr ""
 
@@ -13379,7 +13375,7 @@ msgstr ""
 msgid "پس‌زمینه برچسب"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:274
+#: widgets/class-hsw-widget-pay-methods.php:264
 msgid "پس‌زمینه برچسب توصیه"
 msgstr ""
 
@@ -13477,7 +13473,7 @@ msgstr ""
 msgid "پس‌زمینه دکمه نوار پایین"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:390
+#: widgets/class-hsw-widget-pay-summary.php:381
 msgid "پس‌زمینه دکمه پرداخت"
 msgstr ""
 
@@ -13980,7 +13976,7 @@ msgstr ""
 #: widgets/class-hsw-widget-checkout-shipping.php:100
 #: widgets/class-hsw-widget-checkout-shipping.php:223
 #: widgets/class-hsw-widget-pay-methods.php:102
-#: widgets/class-hsw-widget-pay-methods.php:386
+#: widgets/class-hsw-widget-pay-methods.php:385
 msgid "پیشنهادی"
 msgstr ""
 
@@ -14041,7 +14037,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:916
 #: includes/class-hsw-blog-base.php:52
-#: includes/class-hsw-cart-base.php:674
+#: includes/class-hsw-cart-base.php:739
 #: includes/class-hsw-header-base.php:778
 #: includes/class-hsw-product-base.php:1516
 #: widgets/class-hsw-widget-checkout-schedule.php:50
@@ -14191,6 +14187,10 @@ msgstr ""
 
 #: widgets/class-hsw-widget-checkout-note.php:104
 msgid "چک‌باکس فاکتور رسمی (دسکتاپ)"
+msgstr ""
+
+#: includes/class-hsw-assets.php:891
+msgid "چک‌باکس قوانین روی این صفحه نمایش داده نشده؛ با مدیر فروشگاه تماس بگیرید."
 msgstr ""
 
 #: widgets/class-hsw-widget-account.php:151
@@ -14368,7 +14368,7 @@ msgstr ""
 msgid "کالا"
 msgstr ""
 
-#: includes/class-hsw-assets.php:952
+#: includes/class-hsw-assets.php:953
 msgid "کالا اضافه شد!"
 msgstr ""
 
@@ -14460,7 +14460,7 @@ msgstr ""
 #: widgets/class-hsw-widget-cart-coupon.php:230
 #: widgets/class-hsw-widget-cart-summary.php:163
 #: widgets/class-hsw-widget-cart-summary.php:523
-#: widgets/class-hsw-widget-cart-summary.php:634
+#: widgets/class-hsw-widget-cart-summary.php:632
 msgid "کد تخفیف"
 msgstr ""
 
@@ -14537,7 +14537,7 @@ msgstr ""
 msgid "کد تخفیف را وارد کنید"
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:575
+#: includes/class-hsw-checkout-rest.php:578
 #: includes/class-hsw-coupon-messages.php:112
 msgid "کد تخفیف را وارد کنید."
 msgstr ""
@@ -14558,7 +14558,7 @@ msgstr ""
 msgid "کد تخفیف و کارت هدیه پرداخت (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:572
+#: includes/class-hsw-checkout-rest.php:575
 #: widgets/class-hsw-widget-pay-coupon.php:122
 msgid "کد تخفیف وارد شده معتبر نیست."
 msgstr ""
@@ -14687,16 +14687,8 @@ msgstr ""
 msgid "کدی برای تأیید وجود ندارد. دوباره درخواست کد بدهید."
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-summary.php:297
-msgid "کسر از موجودی کیف پول"
-msgstr ""
-
 #: widgets/class-hsw-widget-pay-methods.php:196
 msgid "کسر از کیف پول اختصاصی"
-msgstr ""
-
-#: widgets/class-hsw-widget-pay-methods.php:246
-msgid "کسر خودکار موجودی از فاکتور نهایی"
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:2233
@@ -14724,7 +14716,7 @@ msgstr ""
 msgid "کلاس ویژگی برند (مثال: pa_brand)"
 msgstr ""
 
-#: widgets/class-hsw-widget-pay-methods.php:276
+#: widgets/class-hsw-widget-pay-methods.php:266
 msgid "کلید روشن"
 msgstr ""
 

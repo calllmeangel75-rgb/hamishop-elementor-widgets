@@ -102,16 +102,6 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
         }
 
         /**
-         * Wallet flag saved in the WC session (switch state).
-         */
-        protected function wallet_enabled() {
-                if ( $this->has_cart() && WC()->session ) {
-                        return 'yes' === WC()->session->get( 'hsw_use_wallet' );
-                }
-                return true; // demo/editor default mirrors the mock.
-        }
-
-        /**
          * Terms & conditions page URL (empty when not configured).
          *
          * Prefers the widget's custom terms_url setting when provided, then falls
@@ -132,6 +122,19 @@ abstract class HSW_Pay_Base extends HSW_Checkout_Base {
                         return get_privacy_policy_url();
                 }
                 return '';
+        }
+
+        /**
+         * Should the checkbox be shown — and enforced — at all?
+         *
+         * The widget asks the same question the server does: something to
+         * accept exists. A checkbox with no document behind it is a tick the
+         * customer cannot read, so it is not rendered.
+         *
+         * @return bool
+         */
+        protected function terms_required() {
+                return '' !== (string) $this->terms_url();
         }
 
         /* =========================================================================

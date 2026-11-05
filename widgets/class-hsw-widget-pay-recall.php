@@ -285,7 +285,9 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
                 }
                 $slot      = $this->slot_text();
                 $free      = $this->opt( 'free_text', __( 'رایگان', 'hamishop-elementor-widgets' ) );
-                $ship_free = $is_demo ? $this->demo_pay_shipping()['free'] : ( (float) $this->chosen_shipping_cost() <= 0 );
+                $ship_free = $is_demo
+                        ? $this->demo_pay_shipping()['free']
+                        : ( 'free' === $this->shipping_state()[0] );
 
                 /*
                  * A download has no address, no courier and no time slot; the

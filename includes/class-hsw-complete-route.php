@@ -202,6 +202,34 @@ final class HSW_Complete_Route {
     }
 
     /**
+     * Does this shop require the customer to accept terms?
+     *
+     * Mirrors WooCommerce's own rule: a published terms page means the
+     * checkbox is required. No page means there is nothing to accept, and
+     * demanding a tick for a document that does not exist is worse than not
+     * asking — the customer had no way to read it.
+     *
+     * The privacy policy counts because the widget's `terms_url()` falls back
+     * to it; a link that leads somewhere is still a link.
+     *
+     * @return bool
+     */
+    public static function terms_required() {
+        if ( function_exists( 'wc_get_page_id' ) ) {
+            $id = (int) wc_get_page_id( 'terms' );
+            if ( $id > 0 && 'publish' === get_post_status( $id ) ) {
+                return true;
+            }
+        }
+
+        if ( function_exists( 'get_privacy_policy_url' ) && '' !== (string) get_privacy_policy_url() ) {
+            return true;
+        }
+
+        return (bool) apply_filters( 'hsw_terms_required', false );
+    }
+
+    /**
      * Checkout needs an account.
      *
      * A guest could fill the address form, reach the pay step and only then

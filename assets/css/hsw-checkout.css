@@ -116,6 +116,20 @@
 /* Shipping group while the rate request is in flight */
 .hsw-k [data-hswk-ship].is-loading { opacity: .65; pointer-events: none; }
 
+/*
+ * A rate that failed to save. The radio goes back to the confirmed choice and
+ * this says why — the old code left the new choice on screen while the session
+ * still held the old one, so the order shipped with a rate the customer had
+ * already replaced.
+ */
+.hsw-k .hsw-ckship__msg {
+	margin: .55rem 0 0;
+	font-size: .78rem;
+	font-weight: 700;
+	line-height: 1.9;
+	color: var(--hswk-error);
+}
+
 /* ============================================================
    TOP — app bar + steps (desktop) / header + icon stepper (mobile)
    ============================================================ */
@@ -754,6 +768,7 @@
 .hsw-cksum__row.is-discount .hsw-cksum__v { font-weight: 700; }
 .hsw-cksum__v { color: var(--hswk-text); font-weight: 600; text-align: left; }
 .hsw-cksum__v .is-free { color: var(--hswk-accent2); font-weight: 700; }
+.hsw-cksum__v .is-note { color: var(--hswk-muted); font-weight: 600; font-size: .78rem; }
 .hsw-cksum__tip { display: inline-flex; align-items: center; gap: .25rem; }
 .hsw-cksum__tip .hsw-ic { font-size: 1rem; color: var(--hswk-muted); }
 .hsw-cksum__final {
@@ -1575,6 +1590,11 @@ a.hsw-ptop__step .hsw-ptop__dot { transition: transform .15s; }
 .hsw-psum__freenote.is-m {
         font-size: .75rem; line-height: 1.25rem; font-weight: 500;
         color: var(--hswk-text); background: var(--hswk-card3);
+}
+/* Waiting for a rate, or no rate at all — not a free-shipping badge. */
+.hsw-psum__note {
+        font-size: .6875rem; line-height: 1.4; font-weight: 600;
+        color: var(--hswk-muted);
 }
 .hsw-psum__final {
         display: flex; align-items: baseline; justify-content: space-between; gap: .5rem;

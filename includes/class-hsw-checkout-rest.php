@@ -494,7 +494,7 @@ class HSW_Checkout_Rest {
         }
 
         /**
-         * Choose a payment method (+ wallet flag) — WooCommerce itself reads
+         * Choose a payment method — WooCommerce itself reads
          * chosen_payment_method from the session when the checkout is posted.
          */
         public function choose_payment( $request ) {
@@ -503,7 +503,6 @@ class HSW_Checkout_Rest {
                 }
 
                 $method = sanitize_text_field( (string) $request->get_param( 'method' ) );
-                $wallet = ( ! empty( $request->get_param( 'wallet' ) ) ) ? 'yes' : 'no';
 
                 if ( '' !== $method ) {
                         $gateways = WC()->payment_gateways()->get_available_payment_gateways();
@@ -512,11 +511,15 @@ class HSW_Checkout_Rest {
                         }
                         WC()->session->set( 'chosen_payment_method', $method );
                 }
-                WC()->session->set( 'hsw_use_wallet', $wallet );
 
-                do_action( 'hsw_checkout_payment_saved', $method, 'yes' === $wallet );
+                /*
+                 * `hsw_use_wallet` used to be stored here. Nothing read it
+                 * except the pay summary's deduction row, which never touched
+                 * the amount — the flag and the row are both gone.
+                 */
+                do_action( 'hsw_checkout_payment_saved', $method );
 
-                return rest_ensure_response( array( 'ok' => true, 'method' => $method, 'wallet' => $wallet ) );
+                return rest_ensure_response( array( 'ok' => true, 'method' => $method ) );
         }
 
         /**

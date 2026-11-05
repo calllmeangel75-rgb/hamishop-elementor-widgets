@@ -46,6 +46,39 @@
         /* =====================================================
          * Shipping method radios — visual sync + live totals
          * ===================================================== */
+
+        /* Last rate the server accepted; '' until the first save returns. */
+        var shipConfirmed = '';
+        var shipBusy = false;
+
+        function shippingCheckedValue() {
+                var checked = document.querySelector( 'input[name^="hsw_shipping_method"]:checked' );
+                return checked ? checked.value : '';
+        }
+
+        /*
+         * Seeded once, at parse time, while the server-rendered radio is still
+         * the checked one. Reading it inside the change handler was the first
+         * version of this fix and it read the *new* value: the browser has
+         * already moved the check by the time `change` fires, so the "revert"
+         * reverted to the failed choice. The script is enqueued in the footer,
+         * so the radios exist here.
+         */
+        shipConfirmed = shippingCheckedValue();
+
+        /* One message slot per layout (desktop + mobile). */
+        function shipMsg( text ) {
+                var nodes = document.querySelectorAll( '[data-hswk-shipmsg]' );
+                for ( var i = 0; i < nodes.length; i++ ) {
+                        if ( text ) {
+                                nodes[ i ].textContent = text;
+                                nodes[ i ].hidden = false;
+                        } else {
+                                nodes[ i ].textContent = '';
+                                nodes[ i ].hidden = true;
+                        }
+                }
+        }
         function syncShippingUI( selected ) {
                 var inputs = document.querySelectorAll( 'input[name^="hsw_shipping_method"]' );
                 for ( var i = 0; i < inputs.length; i++ ) {
@@ -192,26 +225,60 @@
 
                 /* Shipping method */
                 if ( 0 === input.name.indexOf( 'hsw_shipping_method' ) ) {
+                        var scope = input.closest( '[data-hswk-ship]' );
+                        var live  = !!( scope && '1' === scope.getAttribute( 'data-live' ) );
+
+                        /* The browser has already checked the new radio, so the
+                           confirmed value has to come from outside the DOM. */
+                        if ( ! shipConfirmed ) {
+                                shipConfirmed = shippingCheckedValue();
+                        }
+
+                        if ( shipBusy ) {
+                                /* One request at a time: showing the new choice
+                                   while an older one is still in flight would be
+                                   a guess about which one the server keeps. */
+                                syncShippingUI( shipConfirmed );
+                                return;
+                        }
+
                         syncShippingUI( input.value );
 
-                        var scope = input.closest( '[data-hswk-ship]' );
-                        if ( scope && '1' === scope.getAttribute( 'data-live' ) ) {
-                                var groups = document.querySelectorAll( '[data-hswk-ship]' );
-                                for ( var g = 0; g < groups.length; g++ ) {
-                                        groups[ g ].classList.add( 'is-loading' );
-                                }
-                                var clear = function () {
-                                        for ( var g2 = 0; g2 < groups.length; g2++ ) {
-                                                groups[ g2 ].classList.remove( 'is-loading' );
-                                        }
-                                };
-                                post( '/checkout/shipping', { rate: input.value } )
-                                        .then( function ( json ) {
-                                                patchTotals( json && json.totals );
-                                        } )
-                                        .catch( function () {} )
-                                        .then( clear, clear );
+                        if ( ! live ) {
+                                return;
                         }
+
+                        var groups = document.querySelectorAll( '[data-hswk-ship]' );
+                        var clear = function () {
+                                shipBusy = false;
+                                for ( var g2 = 0; g2 < groups.length; g2++ ) {
+                                        groups[ g2 ].classList.remove( 'is-loading' );
+                                }
+                        };
+
+                        shipBusy = true;
+                        for ( var g = 0; g < groups.length; g++ ) {
+                                groups[ g ].classList.add( 'is-loading' );
+                        }
+                        shipMsg( '' );
+
+                        post( '/checkout/shipping', { rate: input.value } )
+                                .then( function ( json ) {
+                                        shipConfirmed = input.value;
+                                        patchTotals( json && json.totals );
+                                } )
+                                .catch( function () {
+                                        /* Not saved: put the confirmed rate back
+                                           and say so. The old code kept the new
+                                           radio selected while the session still
+                                           held the old rate, so the order shipped
+                                           with a method the customer had replaced. */
+                                        if ( shipConfirmed ) {
+                                                syncShippingUI( shipConfirmed );
+                                        }
+                                        shipMsg( CFG.errorText || 'خطا در بروزرسانی روش ارسال' );
+                                } )
+                                .then( clear, clear );
                         return;
                 }
 
@@ -578,18 +645,13 @@ document.addEventListener( 'click', function ( event ) {
                 var checked = document.querySelector( 'input[name="hsw_pay_method_d"]:checked, input[name="hsw_pay_method_m"]:checked' );
                 return checked ? checked.value : '';
         }
-        function walletOn() {
-                var cb = document.querySelector( '.hsw-pm__wallet-cb' );
-                return !!( cb && cb.checked );
-        }
         function savePayment( keepalive ) {
                 if ( isEditor || ! CFG.rest ) {
                         return;
                 }
                 try {
                         post( '/checkout/payment', {
-                                method: currentMethod(),
-                                wallet: walletOn() ? 1 : 0
+                                method: currentMethod()
                         }, !! keepalive ).catch( function () {} );
                 } catch ( e ) {}
         }
@@ -737,15 +799,6 @@ document.addEventListener( 'click', function ( event ) {
                         return;
                 }
 
-                /* Wallet toggle (desktop + mobile share one state) */
-                if ( input.classList && input.classList.contains( 'hsw-pm__wallet-cb' ) ) {
-                        var all = document.querySelectorAll( '.hsw-pm__wallet-cb' );
-                        for ( var i = 0; i < all.length; i++ ) {
-                                all[ i ].checked = input.checked;
-                        }
-                        savePayment( false );
-                        return;
-                }
         } );
 
         /* Mobile bank chips → mirror onto the desktop radios. */
@@ -873,12 +926,18 @@ document.addEventListener( 'click', function ( event ) {
                 }
         }
 
-        /* Terms must be accepted wherever the design renders the checkbox. */
+        /*
+         * Terms are enforced when the shop has something to accept, and only
+         * then. An absent checkbox is never "accepted" — that turned a missing
+         * widget into silent consent, and the server had no way to tell the
+         * difference between a customer who agreed and a page that never asked.
+         */
+        function termsRequired( cta ) {
+                return !!( cta && '1' === cta.getAttribute( 'data-hsw-terms' ) );
+        }
+
         function termsAccepted() {
                 var boxes = document.querySelectorAll( '.hsw-k-terms' );
-                if ( ! boxes.length ) {
-                        return true;
-                }
                 for ( var i = 0; i < boxes.length; i++ ) {
                         if ( boxes[ i ].checked ) {
                                 return true;
@@ -912,17 +971,28 @@ document.addEventListener( 'click', function ( event ) {
                 /* Design flow: the server creates the order and hands the customer
                  * over to the gateway (or straight to order-received). */
                 event.preventDefault();
-                if ( ! termsAccepted() ) {
-                        payMsg( 'برای ادامه، قوانین و مقررات را بپذیرید.', true );
-                        return;
+                if ( termsRequired( cta ) ) {
+                        var termsBoxes = document.querySelectorAll( '.hsw-k-terms' );
+                        if ( ! termsBoxes.length ) {
+                                /* Required by the shop, absent from the page: a
+                                   configuration error, never a silent pass. */
+                                payMsg( CFG.termsMissing || 'چک‌باکس قوانین روی این صفحه نیست؛ با مدیر فروشگاه تماس بگیرید.', true );
+                                return;
+                        }
+                        if ( ! termsAccepted() ) {
+                                payMsg( 'برای ادامه، قوانین و مقررات را بپذیرید.', true );
+                                if ( termsBoxes[0].focus ) {
+                                        termsBoxes[0].focus();
+                                }
+                                return;
+                        }
                 }
 
                 payMsg( '', false );
                 payBusy( cta, true );
 
                 post( '/checkout/payment', {
-                        method: currentMethod(),
-                        wallet: walletOn() ? 1 : 0
+                        method: currentMethod()
                 } )
                         .catch( function () { /* keep the session default */ } )
                         .then( function () {

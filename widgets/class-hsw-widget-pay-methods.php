@@ -213,7 +213,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                         array(
                                 'label'     => __( 'توضیح (دسکتاپ)', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::TEXTAREA,
-                                'default'   => __( 'موجودی کیف پول از فاکتور نهایی به صورت خودکار کسر می‌گردد.', 'hamishop-elementor-widgets' ),
+                                'default'   => __( 'برای پرداخت کامل با کیف پول، روش پرداخت «کیف پول» را انتخاب کنید.', 'hamishop-elementor-widgets' ),
                                 'condition' => array( 'show_wallet' => 'yes' ),
                         )
                 );
@@ -243,17 +243,7 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                         array(
                                 'label'     => __( 'توضیح (موبایل)', 'hamishop-elementor-widgets' ),
                                 'type'      => Controls_Manager::TEXTAREA,
-                                'default'   => __( 'کسر خودکار موجودی از فاکتور نهایی', 'hamishop-elementor-widgets' ),
-                                'condition' => array( 'show_wallet' => 'yes' ),
-                        )
-                );
-
-                $this->add_control(
-                        'wallet_switch',
-                        array(
-                                'label'     => __( 'متن کنار کلید (دسکتاپ)', 'hamishop-elementor-widgets' ),
-                                'type'      => Controls_Manager::TEXT,
-                                'default'   => __( 'استفاده از موجودی', 'hamishop-elementor-widgets' ),
+                                'default'   => __( 'برای پرداخت کامل با کیف پول، روش پرداخت «کیف پول» را انتخاب کنید.', 'hamishop-elementor-widgets' ),
                                 'condition' => array( 'show_wallet' => 'yes' ),
                         )
                 );
@@ -373,15 +363,24 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                 $ribbon  = $this->ribbon_index( $options );
                 $wallet_bal = (float) apply_filters( 'hsw_wallet_balance', 0 );
                 /*
-                 * The deduction switch must follow the gateway, not the design:
-                 * with wallet payments switched off (or the emergency constant
-                 * set) the row would promise a deduction that can never happen.
+                 * The wallet card shows the balance; it does not offer a
+                 * deduction.
+                 *
+                 * The switch that used to sit here wrote `hsw_use_wallet` to
+                 * the session, and the only thing that ever read it was the pay
+                 * summary's «کسر از موجودی کیف پول» row — a negative line above
+                 * a total that never moved, because the order is priced by
+                 * WooCommerce and the wallet gateway pays in full or refuses.
+                 * The customer was told part of the money was covered and then
+                 * charged the whole amount at the gateway.
+                 *
+                 * Paying with the wallet is the gateway radio above, which is
+                 * all-or-nothing on purpose. The card stays as information.
                  */
                 $wallet_live = ! class_exists( 'HSW_Wallet_Gateway' ) || HSW_Wallet_Gateway::is_globally_enabled();
                 $show_w      = ( 'yes' === ( $s['show_wallet'] ?? 'yes' )
                         && $wallet_live
                         && ( $this->is_demo() || $this->is_editing() || 0 < $wallet_bal ) );
-                $wallet_on = $this->wallet_enabled();
                 $ribbon_t  = $this->opt( 'ribbon_text', __( 'توصیه شده', 'hamishop-elementor-widgets' ) );
                 $m_badge_t = $this->opt( 'm_badge_text', __( 'پیشنهادی', 'hamishop-elementor-widgets' ) );
                 ?>
@@ -499,11 +498,6 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                                         <span class="hsw-pm__opt-d"><?php echo esc_html( $this->opt( 'wallet_desc', '' ) ); ?></span>
                                                                 </span>
                                                         </span>
-                                                        <label class="hsw-pm__switch">
-                                                                <input type="checkbox" class="hsw-pm__wallet-cb hsw-pm__wallet-cb--d" name="hsw_wallet_d"<?php checked( $wallet_on, true ); ?> />
-                                                                <span class="hsw-pm__knob" aria-hidden="true"></span>
-                                                                <span class="hsw-pm__switch-tx"><?php echo esc_html( $this->opt( 'wallet_switch', '' ) ); ?></span>
-                                                        </label>
                                                 </div>
                                         <?php endif; ?>
                                 </div>
@@ -524,10 +518,6 @@ class HSW_Widget_Pay_Methods extends HSW_Pay_Base {
                                                         <span class="hsw-pm__opt-d"><?php echo esc_html( $this->opt( 'wallet_desc_m', '' ) ); ?></span>
                                                 </span>
                                         </span>
-                                        <label class="hsw-pm__switch">
-                                                <input type="checkbox" class="hsw-pm__wallet-cb hsw-pm__wallet-cb--m" name="hsw_wallet_m"<?php checked( $wallet_on, true ); ?> />
-                                                <span class="hsw-pm__knob" aria-hidden="true"></span>
-                                        </label>
                                 </section>
                         <?php endif; ?>
 

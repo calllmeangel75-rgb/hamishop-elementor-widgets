@@ -361,21 +361,13 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 return $out;
         }
 
-        /**
-         * Chosen shipping cost (0 = free) for the summary rows.
+        /*
+         * `chosen_shipping_cost()` used to live here and answered "0 means
+         * free". Three widgets read it and each added its own `> 0` test, so a
+         * zero for "no rate for this address" became «رایگان» in all three.
+         * `HSW_Cart_Base::shipping_state()` is the single answer now; this
+         * method is gone on purpose, not by accident.
          */
-        protected function chosen_shipping_cost() {
-                if ( ! $this->has_cart() ) {
-                        return 0.0; // no cart context (REST/cron/editor) — never fatal.
-                }
-                $rates = $this->shipping_rates();
-                foreach ( $rates as $rate ) {
-                        if ( ! empty( $rate['chosen'] ) ) {
-                                return (float) $rate['cost'];
-                        }
-                }
-                return (float) WC()->cart->get_shipping_total();
-        }
 
         /**
          * Pick an icon for a shipping rate by keyword (پیک/پست/تیپاکس/…).

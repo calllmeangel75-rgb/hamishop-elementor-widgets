@@ -527,17 +527,15 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                                         </div>
                                                 <?php endif; ?>
 
-                                                <?php if ( 'amount' === $t['shipping'][0] ) : ?>
-                                                        <div class="hsw-csummary__row">
-                                                                <span class="hsw-csummary__lbl"><?php echo esc_html( $this->opt( 'ship_label_d', __( 'هزینه ارسال پستی', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                <?php $ship_state = (string) $t['shipping'][0]; ?>
+                                                <div class="hsw-csummary__row">
+                                                        <span class="hsw-csummary__lbl"><?php echo esc_html( $this->opt( 'ship_label_d', __( 'هزینه ارسال پستی', 'hamishop-elementor-widgets' ) ) ); ?></span>
+                                                        <?php if ( 'amount' === $ship_state ) : ?>
                                                                 <span class="hsw-csummary__val"><?php echo esc_html( $this->money( $t['shipping'][1] ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
-                                                        </div>
-                                                <?php else : ?>
-                                                        <div class="hsw-csummary__row">
-                                                                <span class="hsw-csummary__lbl"><?php echo esc_html( $this->opt( 'ship_label_d', __( 'هزینه ارسال پستی', 'hamishop-elementor-widgets' ) ) ); ?></span>
-                                                                <span class="hsw-csummary__free"><?php echo esc_html( $free_lbl ); ?></span>
-                                                        </div>
-                                                <?php endif; ?>
+                                                        <?php else : ?>
+                                                                <span class="<?php echo 'free' === $ship_state ? 'hsw-csummary__free' : 'hsw-csummary__note'; ?>"><?php echo esc_html( $this->shipping_state_label( $ship_state, $free_lbl ) ); ?></span>
+                                                        <?php endif; ?>
+                                                </div>
 
                                                 <?php if ( 'yes' === ( $s['show_taxes'] ?? 'yes' ) ) : ?>
                                                         <div class="hsw-csummary__row is-tax">
@@ -645,7 +643,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                                         <?php if ( 'amount' === $t['shipping'][0] ) : ?>
                                                 <span class="hsw-csummary__mval"><?php echo esc_html( $this->money( $t['shipping'][1] ) ); ?> <span class="hsw-c-cur"><?php echo esc_html( $cur ); ?></span></span>
                                         <?php else : ?>
-                                                <span class="hsw-csummary__mbadge"><?php echo esc_html( $free_lbl ); ?></span>
+                                                <span class="<?php echo 'free' === $t['shipping'][0] ? 'hsw-csummary__mbadge' : 'hsw-csummary__mnote'; ?>"><?php echo esc_html( $this->shipping_state_label( $t['shipping'][0], $free_lbl ) ); ?></span>
                                         <?php endif; ?>
                                 </div>
 

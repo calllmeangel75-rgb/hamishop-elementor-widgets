@@ -162,8 +162,10 @@ class HSW_Checkout_Complete {
 
 		$data = $this->order_data( $request );
 
-		/* The pay page's own terms checkbox must be accepted server-side too. */
-		if ( empty( $data['terms'] ) ) {
+		/* The pay page's own terms checkbox must be accepted server-side too —
+		 * but only when the shop has terms to accept. Demanding a tick for a
+		 * document that does not exist is not consent, it is a dead end. */
+		if ( HSW_Complete_Route::terms_required() && empty( $data['terms'] ) ) {
 			return new WP_Error(
 				'hsw_terms',
 				__( 'برای ثبت سفارش باید قوانین و شرایط فروشگاه را بپذیرید.', 'hamishop-elementor-widgets' ),
@@ -366,7 +368,7 @@ class HSW_Checkout_Complete {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	protected function pay_awaiting_order( $order, $request ) {
-		if ( ! rest_sanitize_boolean( $request->get_param( 'terms' ) ) ) {
+		if ( HSW_Complete_Route::terms_required() && ! rest_sanitize_boolean( $request->get_param( 'terms' ) ) ) {
 			return new WP_Error(
 				'hsw_terms',
 				__( 'برای ثبت سفارش باید قوانین و شرایط فروشگاه را بپذیرید.', 'hamishop-elementor-widgets' ),

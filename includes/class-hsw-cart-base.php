@@ -535,22 +535,87 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
         }
 
         /**
-         * Shipping row state: [ 'amount', float ] | [ 'free', 0 ].
+         * Shipping row state: [ state, cost ].
+         *
+         * `free`        — a rate is chosen and it really costs nothing.
+         * `amount`      — a rate is chosen and has a price.
+         * `pending`     — shipping is needed but nothing is chosen yet.
+         * `none`        — the cart does not need shipping (digital only).
+         * `unavailable` — no rate exists for this destination.
+         *
+         * The old version answered `( $ship > 0 ) ? 'amount' : 'free'`, so a
+         * zero total meant "free". Zero also means "not calculated yet", "no
+         * rate for this address" and "nothing to ship" — and the summary told
+         * the customer «رایگان» in all four cases. With a destination outside
+         * every zone that is a promise the shop cannot keep.
+         *
+         * @return array{0:string,1:float}
          */
-        protected function shipping_row() {
+        protected function shipping_state() {
                 if ( $order = $this->paying_order() ) {
                         $ship = (float) $order->get_shipping_total();
-                        return array( ( $ship > 0 ) ? 'amount' : 'free', $ship );
+                        return array( $ship > 0 ? 'amount' : 'free', $ship );
                 }
 
                 if ( ! $this->has_cart() ) {
-                        return array( 'free', 0 );
+                        return array( 'pending', 0.0 );
                 }
-                $ship = (float) WC()->cart->get_shipping_total();
-                if ( $ship > 0 ) {
-                        return array( 'amount', $ship );
+
+                if ( ! WC()->cart->needs_shipping() ) {
+                        return array( 'none', 0.0 );
                 }
-                return array( 'free', 0 );
+
+                $total = (float) WC()->cart->get_shipping_total();
+                if ( $total > 0 ) {
+                        return array( 'amount', $total );
+                }
+
+                /* Zero so far: find out *why* before calling it free. */
+                $packages = WC()->shipping() ? WC()->shipping()->get_packages() : array();
+                if ( empty( $packages ) ) {
+                        return array( 'pending', 0.0 );
+                }
+                if ( empty( $packages[0]['rates'] ) ) {
+                        return array( 'unavailable', 0.0 );
+                }
+
+                $chosen = WC()->session ? (array) WC()->session->get( 'chosen_shipping_methods' ) : array();
+                if ( empty( $chosen[0] ) || ! isset( $packages[0]['rates'][ $chosen[0] ] ) ) {
+                        return array( 'pending', 0.0 );
+                }
+
+                return array( 'free', 0.0 );
+        }
+
+        /**
+         * Shipping row state (kept as the name the callers already use).
+         *
+         * @return array{0:string,1:float}
+         */
+        protected function shipping_row() {
+                return $this->shipping_state();
+        }
+
+        /**
+         * Customer-facing label for a shipping state that has no amount.
+         *
+         * @param string $state     State from shipping_state().
+         * @param string $free_text Editable «رایگان» text ('' = default).
+         * @return string
+         */
+        protected function shipping_state_label( $state, $free_text = '' ) {
+                switch ( $state ) {
+                        case 'free':
+                                return '' !== trim( (string) $free_text ) ? (string) $free_text : __( 'رایگان', 'hamishop-elementor-widgets' );
+                        case 'pending':
+                                return __( 'در انتظار انتخاب روش ارسال', 'hamishop-elementor-widgets' );
+                        case 'none':
+                                return __( 'نیازی به ارسال ندارد', 'hamishop-elementor-widgets' );
+                        case 'unavailable':
+                                return __( 'روش ارسال در دسترس نیست', 'hamishop-elementor-widgets' );
+                }
+
+                return '';
         }
 
         /**
