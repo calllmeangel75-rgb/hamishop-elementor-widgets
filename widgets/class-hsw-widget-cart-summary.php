@@ -424,7 +424,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
 
                 /* The hover rule used the palette colour, so a red button turned blue on
                    hover. Emit the hover shade from the picked colour instead. */
-                $this->a_color( 'cta_bg', __( 'پس‌زمینهٔ دکمهٔ «تکمیل سفارش» (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-bg: {{VALUE}}; --hsw-cs-cta-bg-hover: color-mix(in srgb, {{VALUE}} 86%, #000)' );
+                $this->a_color( 'cta_bg', __( 'پس‌زمینهٔ دکمهٔ «تکمیل سفارش» (دسکتاپ)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-bg: {{VALUE}}; --hsw-cs-cta-bg-hover: color-mix(in srgb, {{VALUE}} 86%, #000); --hsw-cs-cta-bg-active: color-mix(in srgb, {{VALUE}} 74%, #000)' );
                 $this->a_color( 'cta_tx', __( 'متن دکمهٔ «تکمیل سفارش»', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__cta', '--hsw-cs-cta-tx' );
                 $this->add_responsive_control(
                         'cta_br',
@@ -438,8 +438,8 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 );
 
                 $this->a_color( 'mbar_bg', __( 'پس‌زمینه نوار پایین (موبایل)', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mbar', 'background-color' );
-                $this->a_color( 'mcta_bg', __( 'پس‌زمینه دکمه نوار پایین', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta', 'background-color' );
-                $this->a_color( 'mcta_tx', __( 'متن دکمه نوار پایین', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta' );
+                $this->a_color( 'mcta_bg', __( 'پس‌زمینه دکمه نوار پایین', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta', '--hsw-cs-mcta-bg: {{VALUE}}; --hsw-cs-mcta-bg-hover: color-mix(in srgb, {{VALUE}} 86%, #000); --hsw-cs-mcta-bg-active: color-mix(in srgb, {{VALUE}} 74%, #000)' );
+                $this->a_color( 'mcta_tx', __( 'متن دکمه نوار پایین', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-csummary__mcta', '--hsw-cs-mcta-tx' );
 
                 $this->end_controls_section();
         }

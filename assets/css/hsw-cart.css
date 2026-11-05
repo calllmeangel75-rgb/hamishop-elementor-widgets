@@ -651,7 +651,7 @@
    it, and the label follows the label colour the admin picked. */
 .hsw-csummary__cta:hover,
 .hsw-csummary__cta:focus-visible { background: var(--hsw-cs-cta-bg-hover, var(--hswc-cta-hover)); color: var(--hsw-cs-cta-tx, var(--hswc-on-cta, #fff)); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -2px rgba(0, 0, 0, .1); }
-.hsw-csummary__cta:active { transform: scale(.98); }
+.hsw-csummary__cta:active { background: var(--hsw-cs-cta-bg-active, var(--hswc-cta-active, var(--hsw-cs-cta-bg-hover, var(--hswc-cta-hover)))); transform: scale(.98); }
 .hsw-csummary__cta .hsw-ic { font-size: 1.25rem; }
 
 .hsw-csummary__trust { padding-top: .75rem; border-top: 1px solid var(--hswc-border); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .375rem; text-align: center; }
@@ -733,7 +733,9 @@
 .hsw-csummary__mbar-v .hsw-c-cur { color: var(--hswc-text2); }
 .hsw-csummary__mcta {
         flex: 1 1 0; max-width: 13.125rem; height: 3rem;
-        background: var(--hswc-cta); color: var(--hswc-on-cta, #fff);
+        /* The mobile CTA has its own control; without this the base rule read
+           only the palette and the picked colour never showed. */
+        background: var(--hsw-cs-mcta-bg, var(--hswc-cta)); color: var(--hsw-cs-mcta-tx, var(--hswc-on-cta, #fff));
         border-radius: var(--hswc-r);
         display: flex; align-items: center; justify-content: center; gap: .5rem;
         font-size: .875rem; line-height: 1.375rem; font-weight: 600;
@@ -741,8 +743,8 @@
         transition: all .15s;
 }
 .hsw-csummary__mcta:hover,
-.hsw-csummary__mcta:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta, #fff); }
-.hsw-csummary__mcta:active { transform: scale(.95); }
+.hsw-csummary__mcta:focus-visible { background: var(--hsw-cs-mcta-bg-hover, var(--hswc-cta-hover)); color: var(--hsw-cs-mcta-tx, var(--hswc-on-cta, #fff)); }
+.hsw-csummary__mcta:active { background: var(--hsw-cs-mcta-bg-active, var(--hswc-cta-active, var(--hsw-cs-mcta-bg-hover, var(--hswc-cta-hover)))); transform: scale(.95); }
 .hsw-csummary__mcta .hsw-ic { font-size: 1rem; line-height: 1.625rem; font-weight: 600; }
 
 /* ============================================================
@@ -777,15 +779,38 @@
 .hsw-c-empty__btn:focus-visible { background: var(--hswc-cta-hover); color: var(--hswc-on-cta, #fff); }
 .hsw-c-empty__btn .hsw-ic { font-size: 1.25rem; }
 
-/* Purchase CTA states (see the checkout stylesheet for the palette chain). */
+/*
+ * Purchase CTA states.
+ *
+ * This block is (0,3,0) and sits after the base rules, so whatever it says wins
+ * inside `.hsw-c` — which is every cart page. It used to point straight at the
+ * palette, which silently undid the widget colour on hover and active. Each
+ * button now carries the same chain as the unscoped rules, and only the empty
+ * cart button (which has no colour control) reads the palette directly.
+ */
 .hsw-c .hsw-csummary__cta:hover,
+.hsw-c .hsw-csummary__cta:focus-visible {
+        background: var(--hsw-cs-cta-bg-hover, var(--hswc-cta-hover));
+}
+
 .hsw-c .hsw-csummary__mcta:hover,
-.hsw-c .hsw-c-empty__btn:hover {
+.hsw-c .hsw-csummary__mcta:focus-visible {
+        background: var(--hsw-cs-mcta-bg-hover, var(--hswc-cta-hover));
+}
+
+.hsw-c .hsw-c-empty__btn:hover,
+.hsw-c .hsw-c-empty__btn:focus-visible {
         background: var(--hswc-cta-hover);
 }
 
-.hsw-c .hsw-csummary__cta:active,
-.hsw-c .hsw-csummary__mcta:active,
+.hsw-c .hsw-csummary__cta:active {
+        background: var(--hsw-cs-cta-bg-active, var(--hswc-cta-active, var(--hsw-cs-cta-bg-hover, var(--hswc-cta-hover))));
+}
+
+.hsw-c .hsw-csummary__mcta:active {
+        background: var(--hsw-cs-mcta-bg-active, var(--hswc-cta-active, var(--hsw-cs-mcta-bg-hover, var(--hswc-cta-hover))));
+}
+
 .hsw-c .hsw-c-empty__btn:active {
         background: var(--hswc-cta-active);
 }

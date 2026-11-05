@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.249
+Stable tag: 1.11.250
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.250 =
+* Fix: قانون `.hsw-c .hsw-csummary__cta:hover` (specificity بیشتر) رنگ hover پالت را دوباره بر رنگ انتخابی ویجت غالب می‌کرد؛ حالا همان زنجیرهٔ متغیرها را دارد.
+* Fix: حالت `:active` دکمهٔ سبد و نوار پایین و CTA تسویه هم از رنگ انتخابی مشتق می‌شود.
+* Fix: دکمهٔ موبایل سبد پایهٔ خود را از `--hswc-cta` می‌خواند و کنترل رنگش هیچ اثری نداشت.
 
 = 1.11.249 =
 * Fix: ذخیرهٔ پالت با فونت معتبر دیگر خطای «رنگ معتبر نبود» نمی‌دهد (حلقه فقط روی نقش‌های رنگی می‌گردد).

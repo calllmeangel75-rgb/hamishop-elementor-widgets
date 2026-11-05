@@ -792,7 +792,7 @@
 }
 .hsw-cksum__cta:hover,
 .hsw-cksum__cta:focus-visible { background: var(--hswk-cta-hover); color: var(--hswk-on-cta, #fff); }
-.hsw-cksum__cta:active { transform: scale(.95); }
+.hsw-cksum__cta:active { background: var(--hswk-cta-active, var(--hswk-cta-hover)); transform: scale(.95); }
 .hsw-cksum__cta .hsw-ic { font-size: 1.25rem; transition: transform .15s; }
 .hsw-cksum__cta:hover .hsw-ic { transform: translateX(-4px); }
 .hsw-cksum__note { font-size: .6875rem; line-height: 1rem; text-align: center; color: var(--hswk-text2); margin-top: .75rem; }
@@ -850,7 +850,7 @@
 }
 .hsw-cksum__cta--m:hover,
 .hsw-cksum__cta--m:focus-visible { background: var(--hswk-cta-hover); color: var(--hswk-on-cta, #fff); }
-.hsw-cksum__cta--m:active { transform: scale(.98); }
+.hsw-cksum__cta--m:active { background: var(--hswk-cta-active, var(--hswk-cta-hover)); transform: scale(.98); }
 
 /* ============================================================
    PAYMENT STEP (پرداخت و تایید نهایی)

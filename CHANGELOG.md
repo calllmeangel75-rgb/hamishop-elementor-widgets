@@ -8,6 +8,52 @@
 
 ## [Unreleased]
 
+## [1.11.250] — 2026-11-06
+
+### Fixed — the cart CTA override the previous fix could not beat
+
+`.hsw-c .hsw-csummary__cta:hover` (0,3,0, later in the file) outranked the new
+`.hsw-csummary__cta:hover` (0,2,0), so on a real cart page — every cart page
+sits inside `.hsw-c` — the widget colour was still replaced by the palette's
+hover shade. Measured with the cart-page composite and `csummary_cta_bg=#cc0000`:
+
+```
+                    before (old scoped rule)      after
+base                #cc0000                       #cc0000
+hover               #1c3566 (palette blue)        srgb(0.688,0,0) ≈ #af0000
+active              #0a1730 (palette)             srgb(0.592,0,0) ≈ #970000
+mobile CTA base     #0f2042 (palette)             #cc0000
+```
+
+- The scoped block now carries the same chains as the unscoped rules; only the
+  empty-cart button, which has no colour control, still reads the palette.
+- `:active` was palette-only for both the desktop and the mobile CTA. Both
+  controls now emit a derived active shade (`74%` of the picked colour).
+- The mobile CTA's base rule read `var(--hswc-cta)` and never the widget's own
+  variable, so `mcta_bg` did nothing at all once it started writing a variable.
+  It reads `var(--hsw-cs-mcta-bg, …)` now, and the label colour travels through
+  `--hsw-cs-mcta-tx`.
+- The checkout CTA got the same active shade; its hover already read the token
+  the control overrides.
+
+### Verified in a browser
+
+Real Elementor page with the cart-page composite, real generated CSS, one item
+in the cart, palette hover `#1c3566`:
+
+```
+base   rgb(204,0,0)
+hover  color(srgb 0.688 0 0)
+active color(srgb 0.592 0 0)
+old rule re-injected → rgb(28,53,102)   ← reproduces the reported conflict
+```
+
+### Not covered
+
+The checkout CTA was not opened in a browser this round. It uses the same
+chain and the control emits the same variables; the cart measurement proves the
+mechanism, not the checkout page itself.
+
 ## [1.11.249] — 2026-11-06
 
 ### Fixed — fourth audit round

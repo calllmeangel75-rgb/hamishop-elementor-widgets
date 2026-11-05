@@ -356,7 +356,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 $this->a_text( 'row', '{{WRAPPER}} .hsw-cksum__row', array( 'default' => 14 ) );
                 $this->a_color( 'discount_c', __( 'ردیف تخفیف', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-cksum__row.is-discount' );
                 $this->a_text( 'total', '{{WRAPPER}} .hsw-cksum__total-v', array( 'default' => 20 ) );
-                $this->a_color( 'cta_bg', __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-cksum__cta', '--hswk-cta: {{VALUE}}; --hswk-cta-hover: color-mix(in srgb, {{VALUE}} 86%, #000)' );
+                $this->a_color( 'cta_bg', __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-cksum__cta', '--hswk-cta: {{VALUE}}; --hswk-cta-hover: color-mix(in srgb, {{VALUE}} 86%, #000); --hswk-cta-active: color-mix(in srgb, {{VALUE}} 74%, #000)' );
                 $this->a_color( 'cta_c', __( 'متن دکمه', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-cksum__cta', '--hswk-on-cta' );
                 $this->a_text( 'trust_t', '{{WRAPPER}} .hsw-cksum__trust-t', array( 'default' => 14 ) );
 
