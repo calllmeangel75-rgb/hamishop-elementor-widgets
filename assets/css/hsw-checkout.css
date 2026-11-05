@@ -78,10 +78,19 @@
 }
 .hsw-k *, .hsw-k *::before, .hsw-k *::after { box-sizing: border-box; }
 .hsw-k :where(h1, h2, h3, h4, p) { margin: 0; padding: 0; }
-.hsw-k a,
-.hsw-k a:hover,
-.hsw-k a:focus,
-.hsw-k a:active { text-decoration: none; color: inherit; }
+/*
+ * `:where()`, like the form reset two lines below, so this stays at (0,1,0).
+ *
+ * It used to be `.hsw-k a` — (0,1,1) — which outranked every component's own
+ * `color` at (0,1,0). The checkout CTA declared `color: var(--hswk-on-cta)`
+ * (white) and still rendered `rgb(25,28,30)` on a `rgb(15,32,66)` fill: 1.1:1,
+ * effectively invisible. A reset may normalise the default; it must not beat
+ * the component that says what it wants.
+ */
+.hsw-k :where(a),
+.hsw-k :where(a):hover,
+.hsw-k :where(a):focus,
+.hsw-k :where(a):active { text-decoration: none; color: inherit; }
 .hsw-k :where(button, input, select, textarea) { font: inherit; color: inherit; }
 .hsw-k :where(button, [type="button"], [type="submit"]) { font-family: inherit; cursor: pointer; background: none; border: 0; padding: 0; }
 .hsw-k :where(img) { max-width: 100%; }

@@ -29,6 +29,9 @@
 
 ### Fixed
 
+- **The checkout CTA was unreadable: near-black text on a dark navy fill.** `.hsw-k a { color: inherit }` is specificity (0,1,1); the button's own `.hsw-cksum__cta { color: var(--hswk-on-cta) }` is (0,1,0). The reset won, so the button inherited `--hswk-text` instead of its own token. Measured on the checkout page: `rgb(25,28,30)` on `rgb(15,32,66)` — 1.1:1. The reset is now `.hsw-k :where(a)`, which is (0,1,0) and loses to the component that declares a colour — the same shape `.hsw-c`, `.hsw-h` and `.hsw-ac` already used. After: `rgb(199,194,194)` on `rgb(15,32,66)`, 9.13:1 on this palette; the live palette sets `#ffffff`.
+- The same reset was suppressing two other declared colours, which now apply: the desktop back arrow takes `--hswk-primary` instead of inheriting, and the mobile support button takes `--hswk-text2`.
+- The same fix repairs `.hsw-psum__cta` on the payment page, which carried the identical defect and had not been reported yet.
 - The schedule heading could not be turned off even after the switch was added: `opt()` treats an empty string as "unset" and returns the default — which is exactly the value a switcher stores when it is off. The render reads the settings array directly now.
 - The schedule's calendar icon carried `class="hsw-ic 1"` — `HSW_Helpers::icon( 'calendar_month', true )` passed `true` into the `$class` parameter, not `$fill`. No visual change, one less meaningless class in the markup.
 - **«هدر GC» never appeared in the Elementor panel.** `register_widgets()` loads the widget file, then walks a second, hand-written list of class names and skips anything missing from it with a silent `continue`. The file was added to the first list and not the second, so the widget was loaded, never registered, and produced no error at all. `ci-checks.php` now verifies that every widget class appears in that list.

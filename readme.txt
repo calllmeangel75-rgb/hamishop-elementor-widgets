@@ -80,6 +80,7 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Changed: پنل‌های هدر GC حالا چهار فهرست جدا هستند («پنل ۱» تا «پنل ۴») — هر ردیف همان‌جایی است که دیده می‌شود، بدون همگام نگه‌داشتن شمارهٔ پنل در دو فهرست.
 * Changed: دکمهٔ علاقه‌مندی از آیتم‌های سبد خرید حذف شد؛ کاری انجام نمی‌داد و در سبد خرید معنا ندارد.
 * New: کلید «نمایش عنوان بالای کارت» در زمان‌بندی تحویل، و متن پیش‌فرض «روز انتخاب تحویل به پست».
+* Fix: متن دکمهٔ «ادامه و پرداخت» در تسویه حساب سیاه روی زمینهٔ سرمه‌ای بود (کنتراست ۱٫۱:۱). قاعدهٔ `.hsw-k a { color: inherit }` با specificity (0,1,1) از رنگ خودِ دکمه (0,1,0) قوی‌تر بود؛ حالا `:where()` شده و دکمه رنگ پالت را می‌گیرد (۹٫۱:۱).
 * Fix: کلید عنوان زمان‌بندی خاموش نمی‌شد — `opt()` رشتهٔ خالی را «تنظیم‌نشده» می‌گیرد و پیش‌فرض را برمی‌گرداند، که همان مقدار حالت خاموش سوئیچ است.
 * Fix: «هدر GC» never reached the Elementor panel — the file was required by `register_widgets()` but missing from the class list that follows it, and that list skips unknown names silently. A new check now fails the build when a widget class is not in it.
 * Fix: the blog page widget threw `Call to undefined method HSW_Widget_Blog_Page::is_demo()`; the method existed on the archive, cart and product bases but not on the blog base, so the description box never rendered. The blog grid threw the same way over `HSW_Composite::is_active()`, which was never written — it now uses `is_composite_part()`.
