@@ -8,6 +8,22 @@
 
 ## [Unreleased]
 
+## [1.11.242] — 2026-11-05
+
+### Fixed
+
+- **Security.** The post widget's «شناسه نوشته» is a free number and `current_post()` only checked `post_type`, so a draft, pending or private post rendered on a public page when its ID was entered. Non-published posts now require `current_user_can( 'edit_post', … )` — editors keep their preview, visitors get the empty state.
+- **Security.** The body was read as `$post->post_content` and fed straight to `the_content`, so `get_the_content()` never ran and WordPress never swapped in its password form: a password-protected article rendered in full. `post_password_required()` now prints the standard form inside `.hsw-pp--locked`.
+- On a single post, `blog_base_url()` used `$_SERVER['REQUEST_URI']` — the article itself — as the base, so «مجله», «بازگشت به مجله», «مشاهده همه» and the breadcrumb category all pointed at the page the visitor was already on. The posts page (or the site home when none is set) is the base there now, and the category link uses `get_category_link()`.
+- Turning «فهرست مطالب» off hid the in-article list only; `render_sidebar()` built its own list from the same data regardless. Both follow the option.
+- The mobile dock linked «نظر» to `#hsw-comments` unconditionally, but that section is printed only when it is switched on and has something to show. The link is now conditional.
+- The sidebar heading said «پربازدیدترین مقالات» while `popular_posts()` sorts by `comment_count`. Renamed to «پربحث‌ترین مقالات» so the label matches the data.
+
+### Verified
+
+- Guest requests against a page pointing at a draft, and against a password-protected post: the body marker appears with the old code and does not appear with the new one; the password form is present instead.
+- Breadcrumb on a published article: old code sent «مجله» and the category to the article URL; new code sends them to the site home and `/category/blog/`.
+
 ## [1.11.241] — 2026-11-04
 
 ### Fixed

@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.241
+Stable tag: 1.11.242
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,13 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 
 == Changelog ==
 
+= 1.11.242 =
+* Fix (security): The post widget rendered a draft or private post when its numeric «شناسه نوشته» field pointed at one, and a password-protected post rendered in full because the body bypassed `get_the_content()`. Non-published posts now require `edit_post` capability, and `post_password_required()` prints WordPress's own password form instead.
+* Fix: On a single post, «مجله», «بازگشت به مجله», «مشاهده همه» and the breadcrumb category all linked back to the article being read — `blog_base_url()` took the current request path as the base. It uses the posts page there now, and the category link goes to the real category archive.
+* Fix: Turning «فهرست مطالب» off hid the in-article list but not the sidebar one. Both follow the option now.
+* Fix: The mobile dock's «نظر» button linked to `#hsw-comments` even when that section was not printed. It is only a link when the anchor exists.
+* Fix: The sidebar heading said «پربازدیدترین مقالات» while the query sorts by comment count. Renamed to «پربحث‌ترین مقالات».
+
 = 1.11.241 =
 * Fix: The account panel, the blog post panel and the product sheet hard-coded the bundled Vazirmatn instead of reading `--hsw-font`, so on a shop whose palette font is something else those three screens rendered in a different face from the rest of the site. They use the palette font now, like every other stylesheet.
 * No change when the palette font is the default: measured in Chrome, `.hsw-ac` computes to the same font before and after. With the palette set to another family, all three follow it.
@@ -95,11 +102,6 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 * Fix: The ticket CSV export ran one `get_comments( count => true )` per ticket. It is one grouped query in chunks of 500 now; the file is byte-for-byte the same.
 * Fix: The price-slider bounds stayed cached for 12 hours after a product changed, so a product priced above the old maximum could not be reached. The transient is cleared on product save.
 * Perf: The wallet top-up sum is memoised per request — the wallet screen asked for it twice and walked every order of the customer both times.
-
-= 1.11.237 =
-* Fix: «تحویل دیجیتال سفارش» no longer appears on a cart that holds a physical product. `is_digital()` returned true whenever `WC()->cart->needs_shipping()` was false — which WooCommerce reports for every cart on a shop with no shipping method configured. It now decides from the cart items only.
-* Fix: The checkout CTA could still reload the page it was on when the customer already had a saved address and the «next step» link pointed at the checkout itself. The self-navigation guard now runs on every path.
-* The digital-checkout regression test now covers the shipping-disabled shop and uses a real `WC_Product` stub.
 
 == Upgrade Notice ==
 

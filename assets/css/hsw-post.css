@@ -1676,3 +1676,20 @@
 	outline: 2px solid var(--hsw-pp-brand);
 	outline-offset: 2px;
 }
+
+/* Locked article: the widget prints WordPress's own password form instead of
+   the body, so it needs the same frame the article would have had. */
+.hsw-pp--locked {
+	padding: 40px 20px;
+}
+
+.hsw-pp--locked .post-password-form {
+	max-width: 440px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.hsw-pp--locked .post-password-form input[type="password"] {
+	width: 100%;
+	margin-bottom: 10px;
+}

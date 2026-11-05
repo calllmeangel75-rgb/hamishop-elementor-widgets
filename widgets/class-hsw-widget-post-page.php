@@ -554,6 +554,15 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			$id = isset( $s['post_id'] ) ? absint( $s['post_id'] ) : 0;
 			$p  = $id ? get_post( $id ) : null;
 			if ( $p && 'post' === $p->post_type ) {
+				/*
+				 * The field is a free number, so it can name a draft, a pending
+				 * or a private post. Rendering one of those on a public page
+				 * publishes something nobody published. Editors keep their
+				 * preview; everyone else gets nothing.
+				 */
+				if ( 'publish' !== $p->post_status && ! current_user_can( 'edit_post', $p->ID ) ) {
+					return null;
+				}
 				return $p;
 			}
 		}
@@ -821,6 +830,17 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			return;
 		}
 
+		/*
+		 * `the_content` is not used to read the body — the widget feeds
+		 * `$post->post_content` straight into the filter — so WordPress never
+		 * gets the chance to swap in its password form. Without this, a
+		 * password-protected article renders in full to anyone.
+		 */
+		if ( post_password_required( $post ) ) {
+			echo '<div class="hsw-pp hsw-pp--locked">' . get_the_password_form( $post ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core-generated form.
+			return;
+		}
+
 		$s        = $this->effective_settings();
 		$on       = static function ( $key, $default = 'yes' ) use ( $s ) {
 			return ! isset( $s[ $key ] ) ? ( 'yes' === $default ) : ( 'yes' === $s[ $key ] );
@@ -1033,13 +1053,29 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 					</article>
 
 					<aside class="hsw-pp__side">
-						<?php $this->render_sidebar( $post, $author, $content['toc'], $toc_mode ); ?>
+						<?php
+						/*
+						 * The in-article list and the sidebar list are the same
+						 * list. Turning «فهرست مطالب» off used to hide only the
+						 * first one, so the sidebar kept showing it.
+						 */
+						$this->render_sidebar( $post, $author, $on( 'show_toc' ) ? $content['toc'] : array(), $toc_mode );
+						?>
 					</aside>
 				</div>
 			</div>
 
 			<?php if ( $on( 'show_dock' ) ) : ?>
-				<?php $this->render_dock( $post, $product, $comments ); ?>
+				<?php
+				/*
+				 * render_comments() prints `#hsw-comments` only when the section
+				 * is switched on AND there is something to show. The dock linked
+				 * to that anchor unconditionally, so the «نظر» button did nothing
+				 * whenever comments were closed or empty.
+				 */
+				$has_comments_anchor = $on( 'show_comments' ) && ( comments_open( $post ) || (int) get_comments_number( $post ) > 0 );
+				$this->render_dock( $post, $product, $comments, $has_comments_anchor );
+				?>
 			<?php endif; ?>
 
 		</div>
@@ -1426,7 +1462,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			<div class="hsw-pp__sidebox hsw-pp__sidebox--popular">
 				<div class="hsw-pp__sidehead">
 					<?php HSW_Helpers::the_icon( 'trending_up' ); ?>
-					<span><?php esc_html_e( 'پربازدیدترین مقالات', 'hamishop-elementor-widgets' ); ?></span>
+					<span><?php esc_html_e( 'پربحث‌ترین مقالات', 'hamishop-elementor-widgets' ); ?></span>
 				</div>
 				<div class="hsw-pp__poplist">
 					<?php foreach ( $popular as $item ) : ?>
@@ -1451,7 +1487,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 	 * @param WC_Product|null $product  Article product.
 	 * @param int             $comments Comment count.
 	 */
-	protected function render_dock( $post, $product, $comments ) {
+	protected function render_dock( $post, $product, $comments, $link_comments = true ) {
 		?>
 		<aside class="hsw-pp__dock">
 			<div class="hsw-pp__dockinner">
@@ -1459,10 +1495,12 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 					<?php HSW_Helpers::the_icon( 'favorite' ); ?>
 					<span class="hsw-pp__docklabel"><?php echo esc_html( HSW_Helpers::fa_num( $comments ) ); ?></span>
 				</button>
-				<a class="hsw-pp__dockbtn" href="#hsw-comments">
-					<?php HSW_Helpers::the_icon( 'chat_bubble_outline' ); ?>
-					<span class="hsw-pp__docklabel"><?php esc_html_e( 'نظر', 'hamishop-elementor-widgets' ); ?></span>
-				</a>
+				<?php if ( $link_comments ) : ?>
+					<a class="hsw-pp__dockbtn" href="#hsw-comments">
+						<?php HSW_Helpers::the_icon( 'chat_bubble_outline' ); ?>
+						<span class="hsw-pp__docklabel"><?php esc_html_e( 'نظر', 'hamishop-elementor-widgets' ); ?></span>
+					</a>
+				<?php endif; ?>
 				<?php if ( $product ) : ?>
 					<a class="hsw-pp__dockcta" href="<?php echo esc_url( $product->get_permalink() ); ?>">
 						<?php HSW_Helpers::the_icon( 'shopping_bag' ); ?>

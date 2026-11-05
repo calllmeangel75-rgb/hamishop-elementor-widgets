@@ -76,6 +76,20 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
          * @return string
          */
         protected function blog_base_url() {
+                /*
+                 * On a single post the current path IS the article, so every
+                 * link built from it — «مجله», «بازگشت به مجله», «مشاهده همه»
+                 * and the breadcrumb category — pointed back at the article the
+                 * visitor was already reading. The posts page is the right base
+                 * there; the rest of the method is for archive and page views.
+                 */
+                if ( function_exists( 'is_singular' ) && is_singular( 'post' ) ) {
+                        $posts_page = (int) get_option( 'page_for_posts' );
+                        $target     = $posts_page ? (string) get_permalink( $posts_page ) : '';
+
+                        return '' !== $target ? $target : home_url( '/' );
+                }
+
                 $base = '';
 
                 $request = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed below, never echoed raw.
@@ -248,6 +262,21 @@ abstract class HSW_Blog_Base extends HSW_Widget_Base {
                 if ( empty( $cats ) ) {
                         return null;
                 }
+                /*
+                 * On a single post the breadcrumb should reach the category
+                 * archive itself. `blog_url()` there points at the posts page,
+                 * so `?blog_cat=` on top of it is a filter, not the archive.
+                 */
+                if ( function_exists( 'is_singular' ) && is_singular( 'post' ) ) {
+                        $link = get_category_link( $cats[0] );
+                        if ( ! is_wp_error( $link ) && '' !== (string) $link ) {
+                                return array(
+                                        'name' => $cats[0]->name,
+                                        'url'  => (string) $link,
+                                );
+                        }
+                }
+
                 return array(
                         'name' => $cats[0]->name,
                         'url'  => $this->blog_url( array( 'cat' => $cats[0]->slug, 'page' => 1 ) ),
