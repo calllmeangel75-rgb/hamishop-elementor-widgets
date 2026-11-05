@@ -97,6 +97,21 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 			)
 		);
 
+		/*
+		 * Say out loud which logo the automatic path found. Without it the
+		 * owner has to guess whether the widget is showing the theme logo, a
+		 * stale one, or falling back to the signature mark.
+		 */
+		$this->add_control(
+			'logo_status',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => $this->logo_status_html(),
+				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
+				'condition'       => array( 'mark_style' => 'logo' ),
+			)
+		);
+
 		$this->add_control(
 			'mark_icon',
 			array(
@@ -803,6 +818,56 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 		}
 
 		return $this->gc_circuit_svg();
+	}
+
+	/**
+	 * Panel notice: which logo the automatic path will use on this site.
+	 *
+	 * Without it the chain is invisible — the owner cannot tell a theme logo
+	 * from the signature fallback without opening the page. Built only in the
+	 * editor, so a front-end render pays nothing for a control nobody sees.
+	 *
+	 * @return string
+	 */
+	protected function logo_status_html() {
+		if ( ! $this->is_editor_preview() ) {
+			return '';
+		}
+
+		return $this->logo_status_message();
+	}
+
+	/**
+	 * The notice itself, without the editor guard, so it can be asserted.
+	 *
+	 * @return string
+	 */
+	protected function logo_status_message() {
+		$id = (int) get_theme_mod( 'custom_logo' );
+		if ( ! $id ) {
+			$id = (int) get_option( 'site_logo' );
+		}
+
+		if ( ! $id ) {
+			return '<strong>' . esc_html__( 'این سایت لوگویی ندارد.', 'hamishop-elementor-widgets' ) . '</strong><br>'
+				. esc_html__( 'تا وقتی در «سفارشی‌سازی ← هویت سایت ← لوگو» تصویری انتخاب نشود، نشان مدار GC نمایش داده می‌شود. می‌توانی همین‌جا در «لوگوی جایگزین» تصویر بگذاری.', 'hamishop-elementor-widgets' );
+		}
+
+		$thumb = wp_get_attachment_image_url( $id, array( 40, 40 ) );
+		if ( ! $thumb ) {
+			$thumb = wp_get_attachment_url( $id );
+		}
+		$title = get_the_title( $id );
+		$title = '' !== $title ? $title : '#' . $id;
+
+		$out  = '<span style="display:flex;align-items:center;gap:8px;">';
+		if ( $thumb ) {
+			$out .= '<img src="' . esc_url( $thumb ) . '" alt="" style="width:32px;height:32px;object-fit:contain;background:#fff;border-radius:4px;flex:0 0 auto;">';
+		}
+		$out .= '<span><strong>' . esc_html__( 'لوگوی سایت شناسایی شد:', 'hamishop-elementor-widgets' ) . '</strong> ' . esc_html( $title );
+		$out .= '<br><span style="opacity:.75">' . esc_html__( 'همین تصویر در هدر می‌آید. برای عوض کردنش، لوگوی سایت را در سفارشی‌ساز تغییر بده.', 'hamishop-elementor-widgets' ) . '</span></span></span>';
+
+		return $out;
 	}
 
 	/**
