@@ -74,13 +74,16 @@ $version = static function () {
 };
 
 /**
- * The session key WooCommerce uses for a package's cached rates.
+ * A *derived* cache key, not WooCommerce's own.
  *
- * `WC_Shipping::calculate_shipping_for_package()` keys the session on
- * `'wc_ship_' . md5( wp_json_encode( $package ) . WC_Cache_Helper::get_transient_version( 'shipping' ) )`.
- * The method is private, so this repeats the same inputs and the same formula.
+ * `WC_Shipping::calculate_shipping_for_package()` builds its session key with a
+ * private method: `'wc_ship_' . md5( wp_json_encode( $package ) . version )`.
+ * That method cannot be called from a test, and a CLI session does not persist
+ * the entry at all, so this repeats the same formula on the same inputs. It
+ * proves the version is part of the key; it does not prove WooCommerce wrote
+ * the entry. The real write is exercised in the browser session test, not here.
  */
-$session_key = static function ( array $package ) use ( $version ) {
+$derived_cache_key = static function ( array $package ) use ( $version ) {
 	return 'shipping_for_package_wc_ship_' . md5( wp_json_encode( $package ) . $version() );
 };
 
@@ -141,20 +144,20 @@ update_option( $on_option, 'yes', false );
 $check( 'unchanged save does not bump the version', false, $before !== $version() );
 
 /* ---------------------------------------------------------------
- * 4. The cached entry is orphaned, not rewritten
+ * 4. The derived key changes, so the old entry is orphaned
  * --------------------------------------------------------------- */
-$key_before = $session_key( $package );
+$key_before = $derived_cache_key( $package );
 update_option( $min_option, 900000, false );
-$key_after = $session_key( $package );
+$key_after = $derived_cache_key( $package );
 
-$check( 'the session cache key changes for the same package', true, $key_before !== $key_after );
+$check( 'the derived cache key changes for the same package', true, $key_before !== $key_after );
 
 /* ---------------------------------------------------------------
  * 5. A different package keeps its own key shape
  * --------------------------------------------------------------- */
 $other = $package;
 $other['contents_cost'] = 1000;
-$check( 'a different package has a different key', true, $session_key( $other ) !== $session_key( $package ) );
+$check( 'a different package derives a different key', true, $derived_cache_key( $other ) !== $derived_cache_key( $package ) );
 
 $failed = count( array_filter( $results, static function ( $ok ) { return ! $ok; } ) );
 

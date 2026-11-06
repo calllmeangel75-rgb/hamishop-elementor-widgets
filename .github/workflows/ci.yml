@@ -1,13 +1,18 @@
 name: CI
 
-# Four gates, no services, no database:
-#   lint      — every PHP file compiles on 7.4 … 8.3 (the range we claim)
-#   harness   — every plugin file loads in WordPress order (compile-level fatals)
-#   checks    — version/text-domain/debug/asset/catalog consistency
-#   generated — .min and .pot are up to date with their sources
+# Gates:
+#   lint           — every PHP file compiles on 7.4 … 8.3 (the range we claim)
+#   harness        — every plugin file loads in WordPress order (compile fatals)
+#   unit           — pure logic, no WordPress
+#   sqlengines     — the wallet DDL on MySQL 8 and MariaDB 11 (services)
+#   wp-integration — a real WordPress + WooCommerce install (services), running
+#                    the QA scripts that need both; currently the free-shipping
+#                    cache invalidation
+#   checks         — version/text-domain/debug/asset/catalog consistency
+#   generated      — .min and .pot are up to date with their sources
 #
-# The browser probes in tests/*.js need a live WordPress + WooCommerce site and
-# are therefore NOT part of this workflow; they are run locally against XAMPP.
+# The browser probes in tests/*.js still need a live site and a customer
+# session; they are run locally against XAMPP, not here.
 
 on:
   push:
@@ -175,6 +180,54 @@ jobs:
           HSW_QA_USER=root \
           HSW_QA_PASS=root \
           php tests/qa/remediation.php
+
+  wp-integration:
+    name: WordPress + WooCommerce (integration)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wp
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli, mbstring, zip, gd, curl, exif, intl
+          coverage: none
+          tools: none
+
+      # A real install, because these scripts drive update_option()/delete_option()
+      # and read what WooCommerce writes back. Stubs cannot prove that.
+      - name: Install WordPress, WooCommerce and the plugin
+        run: |
+          curl -sS -o /tmp/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /tmp/wp-cli.phar
+          mkdir -p /tmp/wp
+          cd /tmp/wp
+          php /tmp/wp-cli.phar core download --allow-root
+          php /tmp/wp-cli.phar config create --dbname=wp --dbuser=root --dbpass=root --dbhost=127.0.0.1 --allow-root
+          php /tmp/wp-cli.phar core install --url=http://localhost --title=HSW-CI --admin_user=admin --admin_password=admin --admin_email=ci@example.com --skip-email --allow-root
+          php /tmp/wp-cli.phar plugin install woocommerce elementor --activate --allow-root
+          ln -s "$GITHUB_WORKSPACE" /tmp/wp/wp-content/plugins/hamishop-elementor-widgets
+          php /tmp/wp-cli.phar plugin activate hamishop-elementor-widgets --allow-root
+          php /tmp/wp-cli.phar plugin list --allow-root
+
+      - name: Free-shipping cache invalidation
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+        run: php tests/qa/free-shipping-cache.php
 
   checks:
     name: structural checks
