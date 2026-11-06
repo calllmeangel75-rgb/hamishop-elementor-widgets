@@ -9389,7 +9389,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:917
 #: includes/class-hsw-blog-base.php:53
-#: includes/class-hsw-cart-base.php:719
+#: includes/class-hsw-cart-base.php:744
 #: includes/class-hsw-header-base.php:779
 #: includes/class-hsw-product-base.php:1517
 #: widgets/class-hsw-widget-checkout-schedule.php:51
@@ -9418,7 +9418,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:918
 #: includes/class-hsw-blog-base.php:54
-#: includes/class-hsw-cart-base.php:720
+#: includes/class-hsw-cart-base.php:745
 #: includes/class-hsw-header-base.php:780
 #: includes/class-hsw-product-base.php:1518
 #: widgets/class-hsw-widget-checkout-schedule.php:52
@@ -12052,7 +12052,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:912
 #: includes/class-hsw-blog-base.php:48
-#: includes/class-hsw-cart-base.php:714
+#: includes/class-hsw-cart-base.php:739
 #: includes/class-hsw-header-base.php:774
 #: includes/class-hsw-product-base.php:1512
 msgid "نمایش در"
@@ -14072,7 +14072,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:916
 #: includes/class-hsw-blog-base.php:52
-#: includes/class-hsw-cart-base.php:718
+#: includes/class-hsw-cart-base.php:743
 #: includes/class-hsw-header-base.php:778
 #: includes/class-hsw-product-base.php:1516
 #: widgets/class-hsw-widget-checkout-schedule.php:50

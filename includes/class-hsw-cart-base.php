@@ -425,9 +425,34 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
                         $tax     = ( 0 === strpos( $attr, 'attribute_pa_' ) ) ? substr( $attr, strlen( 'attribute_' ) ) : '';
                         $display = $value;
                         $hex     = '';
-                        if ( $tax && taxonomy_exists( $tax ) ) {
-                                $term = get_term_by( 'slug', $value, $tax );
-                                if ( $term ) {
+                        /* Variation keys may encode a Persian taxonomy while WP
+                         * registers its decoded spelling. Resolve the real name
+                         * just as the product picker does; do not change the cart. */
+                        $real_tax = '';
+                        if ( $tax ) {
+                                $decoded_tax = rawurldecode( $tax );
+                                foreach ( array_unique( array( $tax, $decoded_tax, sanitize_title( $decoded_tax ) ) ) as $candidate ) {
+                                        if ( taxonomy_exists( $candidate ) ) {
+                                                $real_tax = $candidate;
+                                                break;
+                                        }
+                                }
+                        }
+                        if ( $real_tax ) {
+                                $term = get_term_by( 'slug', $value, $real_tax );
+                                if ( ! $term instanceof WP_Term ) {
+                                        $decoded_value = rawurldecode( $value );
+                                        foreach ( array_unique( array( $decoded_value, sanitize_title( $decoded_value ) ) ) as $candidate ) {
+                                                if ( $candidate === $value ) {
+                                                        continue;
+                                                }
+                                                $term = get_term_by( 'slug', $candidate, $real_tax );
+                                                if ( $term instanceof WP_Term ) {
+                                                        break;
+                                                }
+                                        }
+                                }
+                                if ( $term instanceof WP_Term ) {
                                         $display = $term->name;
                                         foreach ( array( 'color', 'hex', 'color_hex', 'wpcsw_color' ) as $meta_key ) {
                                                 $meta = get_term_meta( $term->term_id, $meta_key, true );
