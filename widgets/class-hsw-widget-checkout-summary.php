@@ -371,6 +371,7 @@ class HSW_Widget_Checkout_Summary extends HSW_Checkout_Base {
                 if ( $this->is_demo() ) {
                         return $this->demo_totals();
                 }
+                $this->refresh_display_cart();
                 $subtotal = $this->base_subtotal();
                 $total    = $this->cart_total();
                 /* Same source as the cart page: one definition of "free". */

@@ -452,6 +452,7 @@ class HSW_Widget_Cart_Summary extends HSW_Cart_Base {
                 if ( $this->is_demo() ) {
                         return $this->demo_totals();
                 }
+                $this->refresh_display_cart();
 
                 /*
                  * The customer has to be able to tell where the saving comes

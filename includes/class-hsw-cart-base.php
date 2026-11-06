@@ -37,6 +37,20 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
         }
 
         /**
+         * Refresh a live cart immediately before displaying prices or rates.
+         * WooCommerce can restore old cart_totals from the session even after
+         * a shipping cache version change invalidates the package rates. Do not
+         * touch an order being paid, an empty cart, or an editor demo. This is
+         * deliberately scoped to price-bearing widgets, not every page load.
+         */
+        protected function refresh_display_cart() {
+                if ( ! $this->has_cart() || $this->is_demo() || WC()->cart->is_empty() || $this->paying_order() ) {
+                        return;
+                }
+                WC()->cart->calculate_totals();
+        }
+
+        /**
          * The order being paid on an order-pay screen, or null.
          *
          * `?pay_for_order=true` empties the cart: everything the summary needs is
