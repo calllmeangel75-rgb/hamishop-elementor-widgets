@@ -21,6 +21,26 @@
  * Nothing here calls WC()->cart->calculate_totals() to make a step pass. The
  * only recalculations are the ones the code under test performs.
  *
+ * What the numbers mean (measured on WordPress 7.1.4 with WooCommerce 11.2.1
+ * locally and 11.2.2 in CI):
+ *
+ *   - WC_Shipping serves the rate cached in the session until the shipping
+ *     cache version changes. The plugin's option hook bumps it; a plain cost
+ *     change does not, and then even the rate list is stale.
+ *   - WC_Cart_Session::get_cart_from_session() restores `cart_totals` and only
+ *     recalculates when the cart changed or the stored totals are missing, so
+ *     the summary can show the previous shipping total for one render.
+ *   - The order is not affected: HSW_Checkout_Complete::complete() calls
+ *     calculate_totals() before create_order().
+ *
+ * WooCommerce's own pages recalculate once per render —
+ * class-wc-shortcode-cart.php:96 and class-wc-shortcode-checkout.php:364 both
+ * say `// Calc totals.` — while the composite widgets do not, which is why the
+ * stale number is visible there and not on a shortcode cart. Closing that gap
+ * means one calculate_totals() at the top of the composite render, not on
+ * wp_loaded: a per-request recalculation would run on every page view and
+ * re-run every shipping plugin's rate filter for a number nobody reads.
+ *
  * Run:
  *   HSW_WP_LOAD=/path/to/wp-load.php php tests/qa/shipping-session.php
  *
