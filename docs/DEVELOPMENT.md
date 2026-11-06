@@ -22,7 +22,7 @@
 | `python tools/build-sprite.py` | ساخت اسپرایت SVG از `tools/_icons.txt` |
 | `python tools/build-font.py` | زیرمجموعه‌سازی فونت وزیرمتن (نیازمند فایل کامل) |
 | `python tools/build-release.py` | ساخت ZIP نصبی با نسخهٔ هدر |
-| `php tools/ci-checks.php` | ۲۲ بررسی ساختاری (نسخه، دامنهٔ ترجمه، دیباگ، دارایی، کاتالوگ، گاردهای رگرسیون) |
+| `php tools/ci-checks.php` | بررسی‌های ساختاری (نسخه، دامنهٔ ترجمه، دیباگ، دارایی، کاتالوگ، گاردهای رگرسیون) |
 | `php tools/dump-catalog.php` | چاپ کاتالوگ ویجت‌ها به JSON |
 | `python tools/gen-widget-docs.py` | بازتولید `docs/WIDGETS.md` از کد |
 
@@ -44,16 +44,29 @@ php tools/ci-checks.php
 php tests/qa/upgrader-tick-sim.php
 ```
 
+### تست‌های ارسال روی وردپرس ایزوله
+
+```bash
+php tests/qa/display-cart-refresh.php
+HSW_WP_LOAD=/path/to/wp-load.php php tests/qa/free-shipping-cache.php
+HSW_WP_LOAD=/path/to/wp-load.php php tests/qa/shipping-session.php
+```
+
+دو دستور آخر فقط روی نصب دورریختنی اجرا شوند، نه سایت زنده: اولی optionها را حذف/تغییر می‌دهد؛ دومی نرخ ارسال، درگاه، محصول، سفارش و کش را تغییر می‌دهد. cleanup و محافظ production تضمین کامل نیستند. تست نشست از فراخوانی مستقیم PHP استفاده می‌کند، نه HTTP یا مرورگر. شرح دامنه و سناریوهای باز در `docs/PROJECT-REVIEW-CHECKLIST.md` است.
+
 **پروب‌های مرورگری** (`tests/*.js`) به یک وردپرس زنده با ووکامرس و المنتور نیاز دارند و در CI اجرا نمی‌شوند. هر پروب یک قابلیت را با عدد اثبات می‌کند (فیلتر آرشیو، مسیر تسویه، فاکتور، کیف پول، هدر موبایل، آبشار پالت).
 
 ### CI
 
-`.github/workflows/ci.yml` روی هر push به `main` و هر PR چهار گیت را اجرا می‌کند:
+`.github/workflows/ci.yml` روی push به `main` و PR گیت‌های زیر را اجرا می‌کند (بسته‌بندی جداگانه برای تگ نسخه یا اجرای دستی است):
 
 | Job | چه می‌سنجد | چرا |
 |---|---|---|
 | `lint` | `php -l` روی PHP ۷.۴ تا ۸.۳ | ما «PHP ≥ ۷.۴» ادعا می‌کنیم؛ `str_contains` یا `match` در ۷.۴ می‌شکند |
 | `harness` | لود همهٔ فایل‌ها به ترتیب وردپرس | fatalهای سطح declaration که lint نمی‌بیند |
+| `unit` | تست منطق، سبد دیجیتال و محافظ تازه‌سازی نمایش سبد | مستقل از وردپرس؛ اثبات رفتار واقعی ووکامرس نیست |
+| `sqlengines` | SQL کیف پول روی MySQL 8 و MariaDB | سازگاری SQL، نه همهٔ مسیرهای مالی |
+| `wp-integration` | نصب واقعی WordPress/WooCommerce/Elementor و تست‌های کش و نشست ارسال | نسخه‌های دانلودشده pin نشده‌اند؛ مرورگر و dispatch HTTP واقعی نیست |
 | `checks` | `ci-checks.php` | نسخه‌ها هم‌خوان، دامنهٔ ترجمه درست، بدون `var_dump`، هر ویجت در کاتالوگ |
 | `generated` | `build-assets.py` + `build-pot.py` و `git status` خالی | `.min` و POT کهنه نباید merge شوند |
 
@@ -162,7 +175,7 @@ class HSW_Widget_My_Thing extends HSW_Product_Base {
    [ ] مقایسهٔ sha256 فایل محلی با digest داراییِ Release
 ```
 
-> **اگر بعد از تگ کامیت جدیدی زدید، تگ عقب می‌ماند.** آن را جابه‌جا کنید (`git tag -f`)، ZIP را بازبسازید و با `gh release upload --clobber` دوباره بفرستید — وگرنه داراییِ Release با `main` یکی نیست.
+> **اگر بعد از تگ کامیت جدیدی زدید، تگ همچنان نسخهٔ قدیمی را نشان می‌دهد.** بدون بازنویسی تاریخ یا جابه‌جایی تگ منتشرشده، برای تغییرات بعدی نسخه و تگ جدید بسازید. ZIP باید با کامیت و تگ همان انتشار تطبیق داشته باشد؛ جلوتر بودن `main` پس از انتشار طبیعی است.
 
 ## گیت
 
