@@ -35,8 +35,11 @@
  * Safety: this edits a live shipping rate, switches the COD gateway and guest
  * checkout on, and flushes the object cache. It refuses to run when
  * wp_get_environment_type() is 'production' unless HSW_QA_ALLOW=1, and restores
- * in a shutdown handler so a fatal still puts the store back. A killed process
- * is not recoverable — run it on an isolated install, never on a live shop.
+ * in a shutdown handler so a fatal still puts the store back. The original rate
+ * settings are recorded *before* the write, not returned from the helper, so a
+ * fatal inside the write window is still recoverable; a rate the fixture
+ * created is found again by its title. A killed process is not recoverable —
+ * run it on an isolated install, never on a live shop.
  *
  * What the numbers mean (measured on WordPress 7.1.4 with WooCommerce 11.2.1
  * locally and 11.2.2 in CI):
@@ -186,33 +189,58 @@ function hsw_sc_product() {
 }
 
 /**
+ * Record a rate's settings before anything writes to them.
+ *
+ * The restore must not depend on a function returning: the write happens
+ * inside hsw_sc_set_cost(), and a fatal between that write and the caller's
+ * assignment would leave the store changed with nothing to put back. So the
+ * pre-write value is stored here, keyed by instance id, the moment it is first
+ * seen. `null` means the fixture created the method and must delete it again.
+ *
+ * @param int        $instance_id Instance id.
+ * @param array|null $settings    Original settings, or null when created here.
+ */
+function hsw_sc_remember_rate( $instance_id, $settings ) {
+	global $hsw_originals;
+
+	$instance_id = (int) $instance_id;
+	if ( ! isset( $hsw_originals['flat_rate'] ) || ! is_array( $hsw_originals['flat_rate'] ) ) {
+		$hsw_originals['flat_rate'] = array();
+	}
+
+	if ( ! array_key_exists( $instance_id, $hsw_originals['flat_rate'] ) ) {
+		$hsw_originals['flat_rate'][ $instance_id ] = $settings;
+	}
+}
+
+/**
  * The flat rate the fixture uses.
  *
  * It has to live in the zone WooCommerce actually matches for this customer: a
  * new zone loses to a catch-all zone that already matches, and a CI store may
  * have no zone at all. So — find the matching zone, take its flat_rate, add one
- * if it has none, and remember the original settings so they can be put back.
+ * if it has none.
  *
  * @param float $cost Cost in store currency.
- * @return array{zone_id:int,instance_id:int,original:array|null}
+ * @return array{zone_id:int,instance_id:int}
  */
 function hsw_sc_flat_rate( $cost ) {
 	$packages = WC()->cart->get_shipping_packages();
 	$zone     = $packages ? WC_Shipping_Zones::get_zone_matching_package( $packages[0] ) : new WC_Shipping_Zone( 0 );
 
 	$instance_id = 0;
-	$original    = null;
 
 	foreach ( $zone->get_shipping_methods( false ) as $method ) {
 		if ( 'flat_rate' === $method->id ) {
 			$instance_id = (int) $method->instance_id;
-			$original    = get_option( 'woocommerce_flat_rate_' . $instance_id . '_settings', array() );
 			break;
 		}
 	}
 
 	if ( ! $instance_id ) {
 		$instance_id = (int) $zone->add_shipping_method( 'flat_rate' );
+		/* Registered as "created here" the line after the id exists. */
+		hsw_sc_remember_rate( $instance_id, null );
 	}
 
 	hsw_sc_set_cost( $instance_id, $cost );
@@ -220,7 +248,6 @@ function hsw_sc_flat_rate( $cost ) {
 	return array(
 		'zone_id'     => (int) $zone->get_id(),
 		'instance_id' => $instance_id,
-		'original'    => $original,
 	);
 }
 
@@ -231,16 +258,51 @@ function hsw_sc_flat_rate( $cost ) {
  * @param float $cost        Cost in store currency.
  */
 function hsw_sc_set_cost( $instance_id, $cost ) {
-	$settings               = get_option( 'woocommerce_flat_rate_' . $instance_id . '_settings', array() );
-	$settings               = is_array( $settings ) ? $settings : array();
+	$settings = get_option( 'woocommerce_flat_rate_' . (int) $instance_id . '_settings', array() );
+	$settings = is_array( $settings ) ? $settings : array();
+
+	/* Before the write, never after it. */
+	hsw_sc_remember_rate( $instance_id, $settings );
+
 	$settings['title']      = 'HSW QA flat';
 	$settings['tax_status'] = 'taxable';
 	$settings['cost']       = (string) $cost;
 
-	update_option( 'woocommerce_flat_rate_' . $instance_id . '_settings', $settings );
+	update_option( 'woocommerce_flat_rate_' . (int) $instance_id . '_settings', $settings );
 
 	WC()->shipping()->shipping_methods = null;
 	wp_cache_flush();
+}
+
+/**
+ * Delete any flat rate the fixture created but never got to register.
+ *
+ * The window between add_shipping_method() and the remember call is one line,
+ * but a fatal there would leave an orphan. The fixture's title is the marker;
+ * a method that is already registered is restored instead, never deleted.
+ *
+ * @return void
+ */
+function hsw_sc_sweep_orphans() {
+	global $hsw_originals;
+
+	$known = isset( $hsw_originals['flat_rate'] ) ? (array) $hsw_originals['flat_rate'] : array();
+
+	foreach ( WC_Shipping_Zones::get_zones() as $zone_data ) {
+		$zone = WC_Shipping_Zones::get_zone( (int) $zone_data['zone_id'] );
+		if ( ! $zone instanceof WC_Shipping_Zone ) {
+			continue;
+		}
+		foreach ( $zone->get_shipping_methods( false ) as $method ) {
+			if ( 'flat_rate' !== $method->id || 'HSW QA flat' !== (string) $method->get_title() ) {
+				continue;
+			}
+			if ( array_key_exists( (int) $method->instance_id, $known ) ) {
+				continue;
+			}
+			$zone->delete_shipping_method( (int) $method->instance_id );
+		}
+	}
 }
 
 /**
@@ -250,7 +312,7 @@ function hsw_sc_set_cost( $instance_id, $cost ) {
  * @return string
  */
 function hsw_sc_rate_key( $instance_id ) {
-	return 'flat_rate:' . $instance_id;
+	return 'flat_rate:' . (int) $instance_id;
 }
 
 /* -------------------------------------------------------------------------
@@ -875,22 +937,34 @@ if ( is_wp_error( $hsw_placed ) ) {
 			);
 		}
 
-		/* Internal consistency, read-only: the stored total against its lines. */
+		/*
+		 * Internal consistency, read-only: the stored total against its lines.
+		 *
+		 * `WC_Order_Item_Product::get_total()` is already net of the line's
+		 * discount (`line_total`, not `line_subtotal`), so subtracting the
+		 * order discount again would count it twice. Skipped when a discount
+		 * is present because no coupon scenario covers this yet — a green tick
+		 * there would be a guess, not a measurement.
+		 */
 		if ( ! wc_tax_enabled() ) {
-			$hsw_rebuilt = 0.0;
-			foreach ( $hsw_order->get_items() as $hsw_item ) {
-				$hsw_rebuilt += (float) $hsw_item->get_total();
-			}
-			foreach ( $hsw_order->get_items( 'shipping' ) as $hsw_ship_line ) {
-				$hsw_rebuilt += (float) $hsw_ship_line->get_total();
-			}
-			$hsw_rebuilt += (float) $hsw_order->get_total_fees() - (float) $hsw_order->get_total_discount();
+			if ( (float) $hsw_order->get_total_discount() > 0 ) {
+				hsw_say( '  totals check skipped: the order carries a discount, and no coupon scenario covers it yet' );
+			} else {
+				$hsw_rebuilt = 0.0;
+				foreach ( $hsw_order->get_items() as $hsw_item ) {
+					$hsw_rebuilt += (float) $hsw_item->get_total();
+				}
+				foreach ( $hsw_order->get_items( 'shipping' ) as $hsw_ship_line ) {
+					$hsw_rebuilt += (float) $hsw_ship_line->get_total();
+				}
+				$hsw_rebuilt += (float) $hsw_order->get_total_fees();
 
-			hsw_check(
-				'the stored total equals its own line items',
-				abs( $hsw_rebuilt - (float) $hsw_order->get_total() ) < 0.01,
-				'lines ' . hsw_money( $hsw_rebuilt ) . ' vs total ' . hsw_money( $hsw_order->get_total() )
-			);
+				hsw_check(
+					'the stored total equals its own line items',
+					abs( $hsw_rebuilt - (float) $hsw_order->get_total() ) < 0.01,
+					'lines ' . hsw_money( $hsw_rebuilt ) . ' vs total ' . hsw_money( $hsw_order->get_total() )
+				);
+			}
 		}
 
 		hsw_check(
@@ -918,7 +992,7 @@ if ( is_wp_error( $hsw_placed ) ) {
  * @return void
  */
 function hsw_sc_restore() {
-	global $hsw_originals, $hsw_zone, $hsw_instance_id, $hsw_product_id, $hsw_keep, $hsw_restored;
+	global $hsw_originals, $hsw_product_id, $hsw_keep, $hsw_restored;
 
 	if ( $hsw_restored || $hsw_keep ) {
 		$hsw_restored = true;
@@ -933,16 +1007,28 @@ function hsw_sc_restore() {
 		}
 	}
 
-	if ( $hsw_zone && ! empty( $hsw_zone['instance_id'] ) ) {
-		if ( null === $hsw_zone['original'] ) {
-			/* The fixture created this method; take it away again. */
-			$hsw_zone_obj = new WC_Shipping_Zone( (int) $hsw_zone['zone_id'] );
-			$hsw_zone_obj->delete_shipping_method( (int) $hsw_instance_id );
+	/*
+	 * The rate registry, not a value returned by the fixture function: the
+	 * write happens before that return, so the registry is the only record
+	 * that survives a fatal in between.
+	 */
+	$hsw_rates = isset( $hsw_originals['flat_rate'] ) ? (array) $hsw_originals['flat_rate'] : array();
+	foreach ( $hsw_rates as $hsw_rate_instance => $hsw_rate_original ) {
+		if ( null === $hsw_rate_original ) {
+			$hsw_rate_zone = WC_Shipping_Zones::get_zone_by( 'instance_id', (int) $hsw_rate_instance );
+			if ( $hsw_rate_zone instanceof WC_Shipping_Zone ) {
+				$hsw_rate_zone->delete_shipping_method( (int) $hsw_rate_instance );
+			}
 		} else {
-			update_option( 'woocommerce_flat_rate_' . $hsw_instance_id . '_settings', $hsw_zone['original'] );
+			update_option( 'woocommerce_flat_rate_' . (int) $hsw_rate_instance . '_settings', $hsw_rate_original );
 		}
 	}
 
+	/* Anything the fixture created but did not get to register. */
+	hsw_sc_sweep_orphans();
+
+	/* The option is written right after save(), so it outlives a fatal there. */
+	$hsw_product_id = $hsw_product_id ? $hsw_product_id : (int) get_option( 'hsw_qa_shipping_product', 0 );
 	if ( $hsw_product_id ) {
 		$hsw_product_obj = wc_get_product( $hsw_product_id );
 		/* Only the fixture's own product: the SKU is the proof. */
