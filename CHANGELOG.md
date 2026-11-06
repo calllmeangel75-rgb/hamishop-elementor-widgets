@@ -8,6 +8,57 @@
 
 ## [Unreleased]
 
+## [1.11.252] — 2026-11-06
+
+### Fixed — the cache purge fix in 1.11.251 did not work
+
+- **`add_action()` was never told to pass the option name.** `purge_on_style_change()`
+  gained a third parameter in 1.11.251, but the hooks still used the default
+  one accepted argument, so `$option` was always `''` and every security change
+  purged the whole cache exactly as before. The 1.11.251 test called the method
+  directly with three arguments, which is why it passed — the bug was in the
+  wiring, not the method.
+
+  ```
+  update_option( 'hsw_security', … ) with only block_rest_users changed
+    before this release   1 purge
+    after                 0 purges
+  clean_assets changed    1 purge
+  ```
+
+- **Two of the five settings screens still posted to the raw slug.**
+  `HSW_Security::form_action()` and `HSW_Widget_Manager::options_form_action()`
+  were not moved onto `admin_form_action()`. All five now agree:
+
+  ```
+                          slug + rewrite   slug, no rewrite   emergency constant
+  account                 /2226/options    admin_url          admin_url
+  branding                /2226/admin.php  ''                 ''
+  palette                 /2226/admin.php  ''                 ''
+  security                /2226/admin.php  ''                 ''
+  widgets                 /2226/options    admin_url          admin_url
+  ```
+
+- **The XML-RPC row now names what it shows.** «فیلتر HamiShop: …» instead of a
+  bare «خاموش است»: the checkbox reflects the plugin's own filter, not the
+  final state after other plugins and the legacy `disable_xmlrpc` option.
+
+### Tested
+
+```
+REST, rest_do_request with real roles
+  role        /users   /users/5074   /users/me
+  anonymous   404      404           404
+  admin       200      200           200
+  editor      200      403           200
+  author      200      403           200
+  customer    404      404           200
+```
+
+`/users/{id}` is 403 for editors and authors — that is WordPress core's own
+`get_item` permission, not this guard; the list and `/users/me` are the routes
+the editor UIs use.
+
 ## [1.11.251] — 2026-11-06
 
 ### Fixed — security review, first pass

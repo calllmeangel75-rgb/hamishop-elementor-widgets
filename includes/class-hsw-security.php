@@ -1270,14 +1270,7 @@ class HSW_Security {
 	 * @return string
 	 */
 	protected static function form_action( $page ) {
-		if ( class_exists( 'HSW_Security' ) ) {
-			$security = self::get();
-			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
-			if ( '' !== $slug ) {
-				return home_url( '/' . $slug . '/admin.php?page=' . $page );
-			}
-		}
-		return '';
+		return self::admin_form_action( 'admin.php?page=' . $page );
 	}
 
 	public function menu() {
@@ -1485,8 +1478,8 @@ class HSW_Security {
 								<?php
 								echo esc_html(
 									$hsw_xmlrpc_off
-										? __( 'ورود از مسیر XML-RPC بسته است', 'hamishop-elementor-widgets' )
-										: __( 'ورود از مسیر XML-RPC باز است (با فیلتر)', 'hamishop-elementor-widgets' )
+										? __( 'فیلتر HamiShop: ورود از مسیر XML-RPC بسته است', 'hamishop-elementor-widgets' )
+										: __( 'فیلتر HamiShop: ورود از مسیر XML-RPC باز است', 'hamishop-elementor-widgets' )
 								);
 								?>
 							</label>

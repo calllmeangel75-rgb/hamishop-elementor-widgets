@@ -90,9 +90,14 @@ class HSW_Optimizer {
 
 		/* Style choices live in these three options; a saved change must reach
 		 * the cached HTML and the generated UCSS immediately. */
-		add_action( 'update_option_hsw_palette', array( $this, 'purge_on_style_change' ) );
-		add_action( 'update_option_hsw_account_settings', array( $this, 'purge_on_style_change' ) );
-		add_action( 'update_option_hsw_security', array( $this, 'purge_on_style_change' ) );
+		/*
+		 * Four arguments, not the default one: `purge_on_style_change()` needs
+		 * the option name to tell a style change from a security switch, and
+		 * WordPress only passes what `add_action()` declares.
+		 */
+		add_action( 'update_option_hsw_palette', array( $this, 'purge_on_style_change' ), 10, 3 );
+		add_action( 'update_option_hsw_account_settings', array( $this, 'purge_on_style_change' ), 10, 3 );
+		add_action( 'update_option_hsw_security', array( $this, 'purge_on_style_change' ), 10, 3 );
 
 		add_action( 'admin_notices', array( $this, 'notice' ) );
 		add_action( 'admin_init', array( $this, 'handle_dismiss' ) );

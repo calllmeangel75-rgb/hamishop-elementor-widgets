@@ -703,14 +703,9 @@ final class HSW_Widget_Manager {
 		 * rewrites REQUEST_URI to /wp-admin/… before the page renders, and a POST
 		 * there is answered with 404, so the form has to use the public path.
 		 */
-		if ( class_exists( 'HSW_Security' ) ) {
-			$security = HSW_Security::get();
-			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
-			if ( '' !== $slug ) {
-				return home_url( '/' . $slug . '/options.php' );
-			}
-		}
-		return admin_url( 'options.php' );
+		$action = class_exists( 'HSW_Security' ) ? HSW_Security::admin_form_action( 'options.php' ) : '';
+
+		return '' !== $action ? $action : admin_url( 'options.php' );
 	}
 
 
