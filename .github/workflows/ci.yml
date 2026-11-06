@@ -234,6 +234,9 @@ jobs:
       - name: Shipping session scenario
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
+          # The script refuses to run when wp_get_environment_type() says
+          # production; this install is disposable and lives for the job.
+          HSW_QA_ALLOW: '1'
         run: php tests/qa/shipping-session.php
 
   checks:

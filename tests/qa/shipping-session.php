@@ -19,7 +19,24 @@
  *      handler behind POST /hsw/v1/checkout/complete.
  *
  * Nothing here calls WC()->cart->calculate_totals() to make a step pass. The
- * only recalculations are the ones the code under test performs.
+ * only recalculations are the ones the code under test performs, and the order
+ * is read back from storage without touching its totals.
+ *
+ * What this is NOT — the browser probe is still the evidence for these:
+ *
+ *   - not an HTTP test. `choose_shipping()` and `complete()` are called on the
+ *     objects, not dispatched through rest_api_loaded, so a route-level defect
+ *     (permissions, nonce plumbing, JSON parsing) would not show up here;
+ *   - not a browser test. It reads the numbers the summary prints, not the
+ *     rendered HTML; a template that ignored them would still pass;
+ *   - "a new request" is get_cart_from_session() inside this process, not a
+ *     second PHP process carrying a cookie.
+ *
+ * Safety: this edits a live shipping rate, switches the COD gateway and guest
+ * checkout on, and flushes the object cache. It refuses to run when
+ * wp_get_environment_type() is 'production' unless HSW_QA_ALLOW=1, and restores
+ * in a shutdown handler so a fatal still puts the store back. A killed process
+ * is not recoverable — run it on an isolated install, never on a live shop.
  *
  * What the numbers mean (measured on WordPress 7.1.4 with WooCommerce 11.2.1
  * locally and 11.2.2 in CI):
@@ -66,9 +83,26 @@ if ( ! function_exists( 'WC' ) || ! class_exists( 'HSW_Free_Shipping' ) ) {
 	exit( 2 );
 }
 
-$hsw_keep    = (bool) getenv( 'HSW_KEEP' );
-$hsw_failed  = 0;
-$hsw_rows    = 0;
+/*
+ * This script edits a live shipping rate, switches the COD gateway and guest
+ * checkout on, and flushes the object cache. Restoring happens at the end and
+ * in a shutdown handler, but an isolated install is the only safe place to run
+ * it — a timeout or a killed process leaves the store changed.
+ */
+$hsw_env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
+if ( 'production' === $hsw_env && ! getenv( 'HSW_QA_ALLOW' ) ) {
+	fwrite( STDERR, "Refusing to run: this is a production site.\n" );
+	fwrite( STDERR, "The script changes a shipping rate, the COD gateway and guest checkout, and flushes the object cache.\n" );
+	fwrite( STDERR, "Run it on an isolated install, or set HSW_QA_ALLOW=1 for a disposable site.\n" );
+	exit( 3 );
+}
+
+/* The fixture's own marker; nothing is adopted or deleted without it. */
+define( 'HSW_SC_SKU', 'HSW-QA-SHIPPING' );
+
+$hsw_keep   = (bool) getenv( 'HSW_KEEP' );
+$hsw_failed = 0;
+$hsw_rows   = 0;
 
 /* -------------------------------------------------------------------------
  * Output helpers
@@ -117,16 +151,26 @@ function hsw_row( array $cells, array $widths ) {
 /**
  * A dedicated simple product with a known price, created once and reused.
  *
+ * It is only ever reused when it still carries the fixture SKU, so a product
+ * that merely happens to sit behind the same option is never adopted — and
+ * never deleted at the end.
+ *
  * @return int
  */
 function hsw_sc_product() {
 	$id = (int) get_option( 'hsw_qa_shipping_product', 0 );
-	if ( $id && 'product' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) {
+	if (
+		$id
+		&& 'product' === get_post_type( $id )
+		&& 'publish' === get_post_status( $id )
+		&& HSW_SC_SKU === (string) get_post_meta( $id, '_sku', true )
+	) {
 		return $id;
 	}
 
 	$product = new WC_Product_Simple();
 	$product->set_name( 'HSW QA shipping product' );
+	$product->set_sku( HSW_SC_SKU );
 	$product->set_status( 'publish' );
 	$product->set_catalog_visibility( 'hidden' );
 	$product->set_regular_price( '120000' );
@@ -317,6 +361,54 @@ function hsw_sc_totals() {
 }
 
 /**
+ * Read an order back from storage, not from the object the handler returned.
+ *
+ * Every cache the order could be served from is dropped first, then a fresh
+ * `WC_Order` is constructed so the data store reads the row again. Nothing here
+ * recalculates anything: the point is to see what was written, not to make it
+ * right afterwards.
+ *
+ * @param int $order_id Order id.
+ * @return WC_Order|null
+ */
+function hsw_sc_order_from_storage( $order_id ) {
+	$order_id = (int) $order_id;
+
+	wp_cache_delete( $order_id, 'posts' );
+	wp_cache_delete( $order_id, 'post_meta' );
+	wp_cache_delete( $order_id, 'orders' );
+	clean_post_cache( $order_id );
+
+	$order = new WC_Order( $order_id );
+
+	return $order->get_id() ? $order : null;
+}
+
+/**
+ * The totals exactly as the order row stores them.
+ *
+ * `get_total()` reads the object, which was just loaded from the row, so the
+ * two agree — but the raw meta is what survives a page reload and what an
+ * accountant reads. Only meaningful on the posts table; HPOS keeps the same
+ * values in its own tables and the object is the source there.
+ *
+ * @param int $order_id Order id.
+ * @return array<string,string>
+ */
+function hsw_sc_order_raw( $order_id ) {
+	if ( 'yes' === get_option( 'woocommerce_custom_orders_table_enabled', 'no' ) ) {
+		return array();
+	}
+
+	$out = array();
+	foreach ( array( '_order_shipping', '_order_shipping_tax', '_order_tax', '_order_total' ) as $key ) {
+		$out[ $key ] = (string) get_post_meta( (int) $order_id, $key, true );
+	}
+
+	return $out;
+}
+
+/**
  * Flip the feature through the real option API.
  *
  * @param string $action reset|first-on|off|on-high|on-low|same.
@@ -382,6 +474,15 @@ $hsw_originals = array(
 	'cod'     => get_option( 'woocommerce_cod_settings', array() ),
 	'created' => array(),
 );
+
+/* Defaults first: the shutdown handler may run before the fixture exists. */
+$hsw_zone        = null;
+$hsw_instance_id = 0;
+$hsw_product_id  = 0;
+$hsw_restored    = false;
+
+/* A fatal or an early exit still puts the store back. */
+register_shutdown_function( 'hsw_sc_restore' );
 
 $hsw_product_id = hsw_sc_product();
 $hsw_product    = wc_get_product( $hsw_product_id );
@@ -700,25 +801,52 @@ $hsw_placed   = $hsw_complete->complete( $hsw_order_request );
 if ( is_wp_error( $hsw_placed ) ) {
 	hsw_check( 'the order was placed', false, $hsw_placed->get_error_message() );
 } else {
-	$hsw_payload = $hsw_placed->get_data();
-	$hsw_order   = wc_get_order( (int) $hsw_payload['order_id'] );
+	$hsw_payload  = $hsw_placed->get_data();
+	$hsw_order_id = (int) $hsw_payload['order_id'];
+
+	/*
+	 * Read the row back. No `calculate_totals()` on the order, no save: the
+	 * numbers below are what the handler wrote, which is the only thing this
+	 * assertion is allowed to measure.
+	 */
+	$hsw_order = hsw_sc_order_from_storage( $hsw_order_id );
 
 	if ( ! $hsw_order ) {
-		hsw_check( 'the order exists', false, 'id ' . (int) $hsw_payload['order_id'] );
+		hsw_check( 'the order exists', false, 'id ' . $hsw_order_id );
 	} else {
-		$hsw_order->calculate_totals( false );
-
 		$hsw_lines  = $hsw_order->get_items( 'shipping' );
 		$hsw_line   = $hsw_lines ? reset( $hsw_lines ) : null;
 		$hsw_method = $hsw_line ? $hsw_line->get_name() : $hsw_order->get_shipping_method();
+		$hsw_raw    = hsw_sc_order_raw( $hsw_order_id );
 
 		hsw_say( sprintf(
-			'  order #%d            : shipping %s · total %s · method «%s»',
+			'  order #%d            : shipping %s · shipping_tax %s · tax %s · total %s · method «%s»',
 			$hsw_order->get_id(),
 			hsw_money( $hsw_order->get_shipping_total() ),
+			hsw_money( $hsw_order->get_shipping_tax() ),
+			hsw_money( $hsw_order->get_total_tax() ),
 			hsw_money( $hsw_order->get_total() ),
 			$hsw_method
 		) );
+
+		if ( $hsw_raw ) {
+			hsw_say( sprintf(
+				'  stored meta          : _order_shipping %s · _order_shipping_tax %s · _order_tax %s · _order_total %s',
+				$hsw_raw['_order_shipping'],
+				$hsw_raw['_order_shipping_tax'],
+				$hsw_raw['_order_tax'],
+				$hsw_raw['_order_total']
+			) );
+		}
+
+		if ( $hsw_line ) {
+			hsw_say( sprintf(
+				'  shipping line        : %s · total %s · tax %s',
+				$hsw_line->get_name(),
+				hsw_money( $hsw_line->get_total() ),
+				hsw_money( $hsw_line->get_total_tax() )
+			) );
+		}
 
 		$hsw_expected = $hsw_price + $hsw_stale_cost;
 
@@ -733,6 +861,39 @@ if ( is_wp_error( $hsw_placed ) ) {
 			'order ' . hsw_money( $hsw_order->get_total() ) . ' vs expected ' . hsw_money( $hsw_expected )
 		);
 		hsw_check(
+			'the shipping line carries the same amount as the order',
+			$hsw_line && abs( (float) $hsw_line->get_total() - (float) $hsw_order->get_shipping_total() ) < 0.01,
+			$hsw_line ? 'line ' . hsw_money( $hsw_line->get_total() ) : 'no shipping line'
+		);
+
+		if ( $hsw_raw ) {
+			hsw_check(
+				'the stored meta agrees with the order object',
+				abs( (float) $hsw_raw['_order_shipping'] - (float) $hsw_order->get_shipping_total() ) < 0.01
+					&& abs( (float) $hsw_raw['_order_total'] - (float) $hsw_order->get_total() ) < 0.01,
+				'meta ' . $hsw_raw['_order_shipping'] . ' / ' . $hsw_raw['_order_total']
+			);
+		}
+
+		/* Internal consistency, read-only: the stored total against its lines. */
+		if ( ! wc_tax_enabled() ) {
+			$hsw_rebuilt = 0.0;
+			foreach ( $hsw_order->get_items() as $hsw_item ) {
+				$hsw_rebuilt += (float) $hsw_item->get_total();
+			}
+			foreach ( $hsw_order->get_items( 'shipping' ) as $hsw_ship_line ) {
+				$hsw_rebuilt += (float) $hsw_ship_line->get_total();
+			}
+			$hsw_rebuilt += (float) $hsw_order->get_total_fees() - (float) $hsw_order->get_total_discount();
+
+			hsw_check(
+				'the stored total equals its own line items',
+				abs( $hsw_rebuilt - (float) $hsw_order->get_total() ) < 0.01,
+				'lines ' . hsw_money( $hsw_rebuilt ) . ' vs total ' . hsw_money( $hsw_order->get_total() )
+			);
+		}
+
+		hsw_check(
 			'the stale summary was wrong',
 			abs( $hsw_stale_view['shipping'] - $hsw_stale_cost ) > 0.01,
 			'page ' . hsw_money( $hsw_stale_view['shipping'] ) . ' vs rate ' . hsw_money( $hsw_stale_cost )
@@ -744,34 +905,52 @@ if ( is_wp_error( $hsw_placed ) ) {
 
 /* -------------------------------------------------------------------------
  * Cleanup
+ *
+ * One function, called twice: once at the end and once from a shutdown
+ * handler, so a fatal or an early `exit` still puts the store back. A killed
+ * process cannot be caught — which is why the script refuses to run on a
+ * production site in the first place.
  * ---------------------------------------------------------------------- */
 
-hsw_say();
-hsw_say( '== cleanup' );
+/**
+ * Put the store back the way it was found. Safe to call more than once.
+ *
+ * @return void
+ */
+function hsw_sc_restore() {
+	global $hsw_originals, $hsw_zone, $hsw_instance_id, $hsw_product_id, $hsw_keep, $hsw_restored;
 
-if ( $hsw_keep ) {
-	hsw_say( '  HSW_KEEP=1 — fixture and orders left in place' );
-} else {
-	foreach ( $hsw_originals['created'] as $hsw_order_id ) {
-		$hsw_order = wc_get_order( $hsw_order_id );
+	if ( $hsw_restored || $hsw_keep ) {
+		$hsw_restored = true;
+		return;
+	}
+	$hsw_restored = true;
+
+	foreach ( (array) $hsw_originals['created'] as $hsw_order_id ) {
+		$hsw_order = wc_get_order( (int) $hsw_order_id );
 		if ( $hsw_order ) {
 			$hsw_order->delete( true );
 		}
 	}
 
-	if ( null === $hsw_zone['original'] ) {
-		/* The fixture created this method; take it away again. */
-		$hsw_zone_obj = new WC_Shipping_Zone( (int) $hsw_zone['zone_id'] );
-		$hsw_zone_obj->delete_shipping_method( (int) $hsw_instance_id );
-	} else {
-		update_option( 'woocommerce_flat_rate_' . $hsw_instance_id . '_settings', $hsw_zone['original'] );
+	if ( $hsw_zone && ! empty( $hsw_zone['instance_id'] ) ) {
+		if ( null === $hsw_zone['original'] ) {
+			/* The fixture created this method; take it away again. */
+			$hsw_zone_obj = new WC_Shipping_Zone( (int) $hsw_zone['zone_id'] );
+			$hsw_zone_obj->delete_shipping_method( (int) $hsw_instance_id );
+		} else {
+			update_option( 'woocommerce_flat_rate_' . $hsw_instance_id . '_settings', $hsw_zone['original'] );
+		}
 	}
 
-	$hsw_product_obj = wc_get_product( $hsw_product_id );
-	if ( $hsw_product_obj ) {
-		$hsw_product_obj->delete( true );
+	if ( $hsw_product_id ) {
+		$hsw_product_obj = wc_get_product( $hsw_product_id );
+		/* Only the fixture's own product: the SKU is the proof. */
+		if ( $hsw_product_obj && HSW_SC_SKU === (string) $hsw_product_obj->get_sku() ) {
+			$hsw_product_obj->delete( true );
+			delete_option( 'hsw_qa_shipping_product' );
+		}
 	}
-	delete_option( 'hsw_qa_shipping_product' );
 
 	foreach ( array( 'on' => HSW_Free_Shipping::ENABLED, 'min' => HSW_Free_Shipping::OPTION ) as $hsw_key => $hsw_option ) {
 		if ( null === $hsw_originals[ $hsw_key ] ) {
@@ -784,9 +963,21 @@ if ( $hsw_keep ) {
 	update_option( 'woocommerce_enable_guest_checkout', $hsw_originals['guest'] );
 	update_option( 'woocommerce_cod_settings', $hsw_originals['cod'] );
 
-	WC()->cart->empty_cart();
-	WC()->session->set( 'cart_totals', null );
+	if ( WC()->cart ) {
+		WC()->cart->empty_cart();
+	}
+	if ( WC()->session ) {
+		WC()->session->set( 'cart_totals', null );
+	}
+}
 
+hsw_say();
+hsw_say( '== cleanup' );
+
+if ( $hsw_keep ) {
+	hsw_say( '  HSW_KEEP=1 — fixture and orders left in place' );
+} else {
+	hsw_sc_restore();
 	hsw_say( '  fixture, orders and options restored' );
 }
 
