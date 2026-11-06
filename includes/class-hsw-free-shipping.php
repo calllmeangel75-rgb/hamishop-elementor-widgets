@@ -30,11 +30,34 @@ class HSW_Free_Shipping {
 	const ENABLED = 'hsw_free_shipping_on';
 
 	public function __construct() {
+		/*
+		 * Registered before the switch check: turning the feature off has to
+		 * invalidate the rates WooCommerce cached in every session, and that is
+		 * exactly the case where is_enabled() is false.
+		 */
+		add_action( 'update_option_' . self::ENABLED, array( __CLASS__, 'flush_cached_rates' ) );
+		add_action( 'update_option_' . self::OPTION, array( __CLASS__, 'flush_cached_rates' ) );
+
 		if ( ! self::is_enabled() ) {
 			return;
 		}
 
 		add_filter( 'woocommerce_package_rates', array( $this, 'apply' ), 20, 2 );
+	}
+
+	/**
+	 * Drop the shipping rates WooCommerce cached in every session.
+	 *
+	 * `WC_Shipping::calculate_shipping_for_package()` keys its session cache on
+	 * `WC_Cache_Helper::get_transient_version( 'shipping' )`, so bumping that
+	 * version invalidates every visitor's cached rates at once. Without it a
+	 * customer who already had a free rate kept it after the switch went off,
+	 * until something else changed their package.
+	 */
+	public static function flush_cached_rates() {
+		if ( class_exists( 'WC_Cache_Helper' ) ) {
+			WC_Cache_Helper::get_transient_version( 'shipping', true );
+		}
 	}
 
 	/**
@@ -138,11 +161,18 @@ class HSW_Free_Shipping {
 		}
 
 		foreach ( $rates as $rate ) {
-			$rate->cost            = 0;
-			$rate->taxes           = array();
-			$rate->method_id       = 'free_shipping';
-			$rate->label           = __( 'ارسال رایگان', 'hamishop-elementor-widgets' );
-			$rate->meta_data['hsw_free_shipping'] = true;
+			$rate->cost      = 0;
+			$rate->taxes     = array();
+			$rate->method_id = 'free_shipping';
+			$rate->label     = __( 'ارسال رایگان', 'hamishop-elementor-widgets' );
+
+			/*
+			 * `$rate->meta_data[...] = true` did nothing: `meta_data` is
+			 * protected and `__get()` returns `get_meta_data()` by value, so PHP
+			 * wrote to a temporary array and dropped it. The rate still became
+			 * free, but nothing downstream could see the flag.
+			 */
+			$rate->add_meta_data( 'hsw_free_shipping', true );
 		}
 
 		return $rates;

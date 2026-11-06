@@ -8,6 +8,59 @@
 
 ## [Unreleased]
 
+## [1.11.253] — 2026-11-06
+
+### Fixed — the wallet switch and the shipping cache
+
+- **Turning the wallet off left its REST routes answering — tested.** `routes()`
+  only checked the emergency constant, so a shop that switched the wallet off in
+  the panel still served `/account/wallet/topup`, `/pay` and `/convert` to any
+  logged-in session. The three handlers also had no guard of their own, and
+  `points_convert_allowed()` ignored the switch.
+
+  ```
+  wallet off   routes registered: topup false  pay false  convert false
+               direct handler call → 403
+               points_convert_allowed → false
+  wallet on    customer_features_on → true
+  ```
+
+- **The free-shipping meta flag was never stored — tested.** `$rate->meta_data[…]`
+  writes to a temporary array: `meta_data` is protected and `__get()` returns
+  `get_meta_data()` by value. The rate still became free; nothing downstream
+  could see the flag.
+
+  ```
+  before  cost 0  label «ارسال رایگان»  meta []
+  after   cost 0  label «ارسال رایگان»  meta {"hsw_free_shipping":"1"}
+  ```
+
+- **Cached shipping rates survived the switch — fixed at the source.** WooCommerce
+  keys its session rate cache on `WC_Cache_Helper::get_transient_version( 'shipping' )`.
+  The option hooks are registered before the enabled check (turning it off is
+  exactly when `is_enabled()` is false) and bump that version, so every
+  visitor's cached rates are invalidated at once.
+
+  ```
+  shipping transient version changed after flush: true
+  ```
+
+- **The widget panel now says what "off" means.** A widget is removed from
+  Elementor's list, not from PHP — its file still loads, composite widgets keep
+  their own sections, and a widget added in a later update may need to be
+  enabled by hand on a site that already saved a list.
+
+### Not changed, with reasons
+
+- **Settling a top-up or issuing a refund after the wallet is switched off.**
+  Cutting those hooks mid-flight would leave a customer who already paid without
+  credit. This needs a written policy, not a patch.
+- **Every rate renamed to «ارسال رایگان» with `method_id = free_shipping`.** It
+  flattens post / courier / pickup into one name for anything downstream that
+  reads the method. A product decision.
+- **The zone threshold shown in the panel** is the maximum across zones, not the
+  condition for the current visitor.
+
 ## [1.11.252] — 2026-11-06
 
 ### Fixed — the cache purge fix in 1.11.251 did not work

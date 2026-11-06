@@ -217,8 +217,12 @@ class HSW_Wallet {
 	 * ------------------------------------------------------------------ */
 
 	public function routes() {
-		/* Emergency stop: the customer-facing wallet endpoints disappear entirely. */
-		if ( self::disabled() ) {
+		/*
+		 * The emergency constant is not the only switch. A shop that turns the
+		 * wallet off in the panel keeps the endpoints away too: hiding the card
+		 * and the menu while `/account/wallet/*` still answers is not "off".
+		 */
+		if ( ! self::customer_features_on() ) {
 			return;
 		}
 
@@ -278,7 +282,7 @@ class HSW_Wallet {
 	 * @return bool
 	 */
 	public static function points_convert_allowed() {
-		if ( self::disabled() ) {
+		if ( ! self::customer_features_on() ) {
 			return false;
 		}
 
@@ -329,7 +333,31 @@ class HSW_Wallet {
 		);
 	}
 
+	/**
+	 * Refuse a customer wallet call while the wallet is off.
+	 *
+	 * Belt and braces: `routes()` already returns early, but a route registered
+	 * from anywhere else (or a cached route map) must not slip through.
+	 *
+	 * @return WP_REST_Response|null
+	 */
+	private function wallet_off_response() {
+		if ( self::customer_features_on() ) {
+			return null;
+		}
+
+		return new WP_REST_Response(
+			array( 'message' => __( 'کیف پول در این فروشگاه فعال نیست.', 'hamishop-elementor-widgets' ) ),
+			403
+		);
+	}
+
 	public function rest_topup( $request ) {
+		$off = $this->wallet_off_response();
+		if ( $off ) {
+			return $off;
+		}
+
 		$limited = $this->rest_throttle( 'topup', 10, 15 * MINUTE_IN_SECONDS );
 		if ( is_wp_error( $limited ) ) {
 			return $limited;
@@ -355,6 +383,11 @@ class HSW_Wallet {
 	}
 
 	public function rest_pay( $request ) {
+		$off = $this->wallet_off_response();
+		if ( $off ) {
+			return $off;
+		}
+
 		$limited = $this->rest_throttle( 'pay', 10, 5 * MINUTE_IN_SECONDS );
 		if ( is_wp_error( $limited ) ) {
 			return $limited;
@@ -387,6 +420,11 @@ class HSW_Wallet {
 	}
 
 	public function rest_convert( $request ) {
+		$off = $this->wallet_off_response();
+		if ( $off ) {
+			return $off;
+		}
+
 		$limited = $this->rest_throttle( 'convert', 5, 15 * MINUTE_IN_SECONDS );
 		if ( is_wp_error( $limited ) ) {
 			return $limited;

@@ -959,6 +959,15 @@ final class HSW_Widget_Manager {
 				</div>
 			</div>
 
+			<div class="notice notice-info inline" style="margin:0 0 14px">
+				<p>
+					<strong><?php esc_html_e( 'خاموش‌کردن یک ویجت چه معنایی دارد؟', 'hamishop-elementor-widgets' ); ?></strong><br>
+					<?php esc_html_e( '۱) فقط ثبت آن ویجت در پنل المنتور متوقف می‌شود؛ فایل PHP آن همچنان بارگذاری می‌شود و صفحه‌ای که قبلاً از آن استفاده کرده باید در المنتور بررسی شود.', 'hamishop-elementor-widgets' ); ?><br>
+					<?php esc_html_e( '۲) بخش‌های داخل ویجت‌های جامع (مثل خلاصهٔ سبد در «صفحهٔ سبد خرید») با این کلید خاموش نمی‌شوند؛ چیدمان خود ویجت جامع را تنظیم می‌کند.', 'hamishop-elementor-widgets' ); ?><br>
+					<?php esc_html_e( '۳) ویجتی که در به‌روزرسانی‌های بعدی اضافه شود، روی سایتی که فهرست ذخیره‌شده دارد ممکن است تا فعال‌کردن دستی دیده نشود.', 'hamishop-elementor-widgets' ); ?>
+				</p>
+			</div>
+
 			<?php settings_errors(); ?>
 			<?php if ( isset( $_GET['hsw-reset'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only flag after a nonce-protected action. ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'ویجت‌ها به حالت پیش‌فرض برگشتند: ویجت‌های اصلی فعال و بخش‌های ریز غیرفعال شدند.', 'hamishop-elementor-widgets' ); ?></p></div>
