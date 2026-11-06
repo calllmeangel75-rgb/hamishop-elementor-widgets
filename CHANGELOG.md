@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+## [1.11.256] — 2026-11-07 (pre-release)
+
+### Changed
+
+- Resolve encoded taxonomy names and term slugs when displaying cart variation labels, without changing stored variation or order data.
+- Add simulated regression tests and an isolated WordPress taxonomy integration test. A real staging checkout and order remain to be verified.
+
+This pre-release is for isolated staging only; it is not a commercial-ready release.
+
 ## [1.11.255] — 2026-11-06 (pre-release)
 
 ### Changed
