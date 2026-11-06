@@ -8,6 +8,15 @@
 
 ## [Unreleased]
 
+## [1.11.255] — 2026-11-06 (pre-release)
+
+### Changed
+
+- Refresh live cart totals in shipping and summary widgets before display, rather than relying solely on session-restored totals. This includes the change merged in PR #1.
+- Add regression coverage for the refresh guard and the widget totals in the WordPress/WooCommerce integration scenario.
+
+This pre-release is for isolated staging only. The selected-looking shipping method and pending total observed on the test site need browser verification; this release does not claim that scenario is fixed. Payment, tax, HPOS, concurrency and shipping API performance still require testing.
+
 ## [1.11.254] — 2026-11-06
 
 ### Fixed — the first save of the shipping options did not flush anything
