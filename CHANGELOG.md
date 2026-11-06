@@ -8,6 +8,86 @@
 
 ## [Unreleased]
 
+## [1.11.251] — 2026-11-06
+
+### Fixed — security review, first pass
+
+Six issues from the security review. Each one was read in the code, and the
+ones marked *tested* were exercised against the local WordPress install.
+
+- **The REST users guard contradicted its own policy — tested.** `filter_rest_users()`
+  keeps the route for `edit_posts` and its docblock says `/users/me` is left
+  alone; `guard_rest_users()` then answered 401 to anyone without `list_users`.
+  Editors and authors lost `/users/me` (the block editor and the account panel
+  ask for it on every load). The guard now applies the same rule.
+
+  ```
+              /users      /users/5074   /users/me
+  anonymous   404         404           404
+  admin       200         200           200
+  customer    404         404           200
+  ```
+
+- **The admin forms posted to a dead URL when the custom admin path was not
+  actually serving — tested.** The three settings screens built
+  `/slug/options.php` whenever a slug was saved, without checking the emergency
+  constant or whether the rewrite was in place; the guard returns early in both
+  cases, so the save 404'd — including the save that turns the feature off.
+  `HSW_Security::admin_form_action()` now returns the custom path only when the
+  guard is really routing.
+
+  ```
+  slug 2226 + rewrite installed   → http://…/2226/options.php
+  slug set   + rewrite missing    → '' (caller falls back to admin_url)
+  no slug                         → ''
+  ```
+
+- **`has_block( 'woocommerce/' )` never matched anything — tested.** `has_block()`
+  compares a full block name, so the guard that was supposed to keep WooCommerce
+  block styles on pages using them was dead. It now parses the post and checks
+  the `woocommerce/` namespace. Real post with `wp:woocommerce/product-gallery`
+  → true; a paragraph-only post → false.
+
+- **The gateway conflict warning contradicted the allowlist — tested in part.**
+  A detected gateway host is put on the allowlist, and the allowlist is checked
+  before the block list, so the old comparison warned "payments will break"
+  about a host that could never be blocked. It now asks the blocker itself.
+
+- **Any security toggle purged the whole site cache — tested.** `hsw_security`
+  was hooked into the style purge, so changing the REST or XML-RPC switch
+  flushed LiteSpeed / WP Rocket / W3TC for nothing. Only the keys that change
+  front-end markup or CSS trigger a purge now (0 purges for a REST toggle, 1 for
+  `clean_assets`).
+
+- **The author block only set a status code — tested in a browser.** `?author=1`
+  answered 404 while still rendering the author archive: `is_404()` stayed
+  false. It now sets the query to 404, so the 404 template renders.
+
+  ```
+  ?author=1   status 404   body class error404   no author links
+  ```
+
+- **Two UI texts claimed more than the code does.** The XML-RPC row said «خاموش
+  است» with a hard-coded tick; it now reflects the `hsw_disable_xmlrpc` filter
+  and says that `xmlrpc_enabled` disables authenticated methods rather than the
+  endpoint. The login screen no longer claims it loads no extra file — it loads
+  the bundled Vazirmatn woff2.
+
+### Not changed, and why
+
+- **The `logged_in` → `auth` cookie conversion** on the custom admin path. The
+  cookie is validated first and the design is documented in the code, but the
+  boundary it crosses is a security decision, not a bug fix. Changing it needs
+  its own review and a recovery plan.
+- **The `.htaccess` read/modify/write cycle** is not transactional with other
+  writers. A transactional rewrite (keep old rules, verify, roll back) is a
+  design change, not a patch.
+- **The health check accepts any 2xx/3xx.** Tightening it to look for an admin
+  marker risks marking working setups as broken when the loopback cannot
+  authenticate. Left as is, with `unknown` still reported.
+- **`font_swap` buffers the whole page.** The cost is real and unmeasured; a
+  number is needed before touching it.
+
 ## [1.11.250] — 2026-11-06
 
 ### Fixed — the cart CTA override the previous fix could not beat

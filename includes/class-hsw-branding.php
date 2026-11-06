@@ -329,14 +329,7 @@ class HSW_Branding {
 	 * @return string
 	 */
 	protected static function form_action( $page ) {
-		if ( class_exists( 'HSW_Security' ) ) {
-			$security = HSW_Security::get();
-			$slug     = isset( $security['admin_slug'] ) ? trim( (string) $security['admin_slug'] ) : '';
-			if ( '' !== $slug ) {
-				return home_url( '/' . $slug . '/admin.php?page=' . $page );
-			}
-		}
-		return '';
+		return class_exists( 'HSW_Security' ) ? HSW_Security::admin_form_action( 'admin.php?page=' . $page ) : '';
 	}
 
 	public function maybe_save() {

@@ -274,7 +274,31 @@ class HSW_Optimizer {
 	/**
 	 * Option-save wrapper (the hooks pass the new value, which we do not need).
 	 */
-	public function purge_on_style_change() {
+	public function purge_on_style_change( $old = null, $new = null, $option = '' ) {
+		/*
+		 * `hsw_security` is hooked here too, but most of its keys never reach the
+		 * front end: toggling the REST or XML-RPC switches used to purge the
+		 * whole site cache for nothing. Only the keys that change markup or CSS
+		 * are worth a purge.
+		 */
+		if ( 'hsw_security' === $option ) {
+			$visual  = array( 'clean_head', 'clean_assets', 'clean_widgets', 'font_swap', 'hide_wp_logo', 'login_style' );
+			$changed = false;
+
+			foreach ( $visual as $key ) {
+				$before = is_array( $old ) && isset( $old[ $key ] ) ? $old[ $key ] : null;
+				$after  = is_array( $new ) && isset( $new[ $key ] ) ? $new[ $key ] : null;
+				if ( $before !== $after ) {
+					$changed = true;
+					break;
+				}
+			}
+
+			if ( ! $changed ) {
+				return;
+			}
+		}
+
 		self::purge( 'HamiShop: design settings saved' );
 	}
 

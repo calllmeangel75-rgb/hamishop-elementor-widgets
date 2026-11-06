@@ -247,6 +247,40 @@ class HSW_Security {
 	 * The REST API, feeds and the block editor itself keep working: only the
 	 * front-end stylesheet is dequeued, and only outside the account area.
 	 */
+	/**
+	 * Does the current post carry any WooCommerce block?
+	 *
+	 * `has_block()` compares a full block name, so `has_block( 'woocommerce/' )`
+	 * matched nothing at all — the guard was dead and the block stylesheets were
+	 * removed from pages that actually used them. This walks the parsed blocks
+	 * and checks the namespace.
+	 *
+	 * @return bool
+	 */
+	private function post_has_woocommerce_block() {
+		$post = get_post();
+		if ( ! $post instanceof WP_Post || ! function_exists( 'parse_blocks' ) ) {
+			return false;
+		}
+
+		$walk = static function ( $blocks ) use ( &$walk ) {
+			foreach ( (array) $blocks as $block ) {
+				if ( ! is_array( $block ) ) {
+					continue;
+				}
+				if ( ! empty( $block['blockName'] ) && 0 === strpos( (string) $block['blockName'], 'woocommerce/' ) ) {
+					return true;
+				}
+				if ( ! empty( $block['innerBlocks'] ) && $walk( $block['innerBlocks'] ) ) {
+					return true;
+				}
+			}
+			return false;
+		};
+
+		return (bool) $walk( parse_blocks( (string) $post->post_content ) );
+	}
+
 	public function clean_assets() {
 		if ( is_admin() || $this->is_elementor_context() ) {
 			return;
@@ -259,7 +293,7 @@ class HSW_Security {
 		 * WooCommerce block (a product gallery or reviews block in a post, for
 		 * example), not only on the cart / checkout / account screens.
 		 */
-		if ( function_exists( 'has_block' ) && has_block( 'woocommerce/' ) ) {
+		if ( $this->post_has_woocommerce_block() ) {
 			return;
 		}
 
@@ -875,6 +909,29 @@ class HSW_Security {
 	 *
 	 * @return bool
 	 */
+	/**
+	 * The URL an admin form should post to, or '' when the caller's default is
+	 * already correct.
+	 *
+	 * The custom path is returned only when the guard is really serving it.
+	 * With the emergency constant on, or with no rewrite in place, the guard
+	 * returns early and `/slug/options.php` is a dead URL — the settings forms
+	 * would 404, including the save that turns the feature off.
+	 *
+	 * @param string $file Admin file, optionally with a query string.
+	 * @return string
+	 */
+	public static function admin_form_action( $file = 'options.php' ) {
+		$s    = self::get();
+		$slug = trim( (string) $s['admin_slug'] );
+
+		if ( '' === $slug || self::disabled() || ! self::rewrite_installed() ) {
+			return '';
+		}
+
+		return home_url( '/' . trim( $slug, '/' ) . '/' . ltrim( (string) $file, '/' ) );
+	}
+
 	public static function rewrite_installed() {
 		$content = self::htaccess_contents();
 		if ( '' === $content || false === strpos( $content, '# BEGIN ' . self::MARKER ) ) {
@@ -968,14 +1025,21 @@ class HSW_Security {
 	 */
 	public static function gateway_host_conflicts() {
 		$conflicts = array();
+
+		/*
+		 * Ask the blocker itself rather than comparing two raw lists. A detected
+		 * gateway host is put on the allowlist, and the allowlist is checked
+		 * before the block list — so the old comparison warned "payments will
+		 * break" about a host that could never be blocked. This returns only the
+		 * hosts that would really be refused, including when a filter removed
+		 * them from the allowlist.
+		 */
 		foreach ( self::gateway_hosts() as $host ) {
-			foreach ( HSW_Request_Blocker::blocked_hosts() as $blocked ) {
-				if ( $host === $blocked || substr( $host, -strlen( '.' . $blocked ) ) === '.' . $blocked ) {
-					$conflicts[] = $host;
-					break;
-				}
+			if ( HSW_Request_Blocker::host_is_blocked( 'https://' . $host . '/' ) ) {
+				$conflicts[] = $host;
 			}
 		}
+
 		return array_values( array_unique( $conflicts ) );
 	}
 
@@ -1041,11 +1105,27 @@ class HSW_Security {
 		}
 
 		$route = (string) $request->get_route();
-		if ( '/wp/v2/users' !== $route && 0 !== strpos( $route, '/wp/v2/users/' ) ) {
+		if ( ! preg_match( '#^/wp/v2/users(?:/|$)#', $route ) ) {
 			return $result;
 		}
 
-		if ( current_user_can( 'list_users' ) ) {
+		/*
+		 * The same policy filter_rest_users() already applies, and the one its
+		 * docblock describes: `list_users` reads the list, `edit_posts` reads it
+		 * too (media/gallery UIs and Elementor's link picker query users), and
+		 * `/users/me` is the signed-in user's own record.
+		 *
+		 * The two halves used to disagree. The filter kept the route for editors
+		 * — it runs before authentication, so it has to be generous — and this
+		 * guard, which runs after, then answered 401 because it only knew
+		 * `list_users`. The block editor and the account panel ask for
+		 * /users/me on every load.
+		 */
+		if ( current_user_can( 'list_users' ) || current_user_can( 'edit_posts' ) ) {
+			return $result;
+		}
+
+		if ( '/wp/v2/users/me' === $route && is_user_logged_in() ) {
 			return $result;
 		}
 
@@ -1106,6 +1186,25 @@ class HSW_Security {
 	 * URLs in their sitemap and internal links; `hsw_block_author_archive_pretty`
 	 * turns that part on for owners who really want it.
 	 */
+	/**
+	 * Answer as a real 404: status, no-cache, and the 404 template.
+	 *
+	 * `status_header( 404 )` on its own leaves `is_404()` false, so the author
+	 * archive still rendered with its content — a 404 status on a page that
+	 * still lists the author's posts. This runs on `template_redirect`, before
+	 * the template is chosen, so setting the query is enough.
+	 */
+	private function send_404() {
+		global $wp_query;
+
+		if ( $wp_query instanceof WP_Query ) {
+			$wp_query->set_404();
+		}
+
+		status_header( 404 );
+		nocache_headers();
+	}
+
 	public function maybe_block_author_query() {
 		$s = self::get();
 		if ( 'yes' !== $s['block_rest_users'] || is_user_logged_in() || is_admin() ) {
@@ -1116,8 +1215,7 @@ class HSW_Security {
 
 		if ( $by_id >= 1 ) {
 			if ( apply_filters( 'hsw_block_author_archive', true, $by_id, '' ) ) {
-				status_header( 404 );
-				return;
+				$this->send_404();
 			}
 			return;
 		}
@@ -1127,7 +1225,7 @@ class HSW_Security {
 			: '';
 
 		if ( '' !== $by_nicename && apply_filters( 'hsw_block_author_archive_pretty', false, $by_nicename ) ) {
-			status_header( 404 );
+			$this->send_404();
 		}
 	}
 
@@ -1381,12 +1479,19 @@ class HSW_Security {
 					<tr>
 						<th scope="row"><?php esc_html_e( 'XML-RPC', 'hamishop-elementor-widgets' ); ?></th>
 						<td>
+							<?php $hsw_xmlrpc_off = (bool) apply_filters( 'hsw_disable_xmlrpc', true ); ?>
 							<label>
-								<input type="checkbox" checked disabled />
-								<?php esc_html_e( 'XML-RPC خاموش است', 'hamishop-elementor-widgets' ); ?>
+								<input type="checkbox" <?php checked( $hsw_xmlrpc_off ); ?> disabled />
+								<?php
+								echo esc_html(
+									$hsw_xmlrpc_off
+										? __( 'ورود از مسیر XML-RPC بسته است', 'hamishop-elementor-widgets' )
+										: __( 'ورود از مسیر XML-RPC باز است (با فیلتر)', 'hamishop-elementor-widgets' )
+								);
+								?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'از نسخهٔ ۱.۱۱.۱۷۸ خاموش است و این کادر فقط وضعیت را نشان می‌دهد: ورود دوعاملی روی XML-RPC اجرا نمی‌شود، پس هر ورودی از آن مسیر عامل دوم را دور می‌زد. اگر واقعاً به XML-RPC نیاز دارید، فقط از کد بازش کنید: فیلتر hsw_disable_xmlrpc را false کنید.', 'hamishop-elementor-widgets' ); ?>
+								<?php esc_html_e( 'از نسخهٔ ۱.۱۱.۱۷۸ بسته است و این کادر وضعیت فیلتر را نشان می‌دهد، نه یک تنظیم: ورود دوعاملی روی XML-RPC اجرا نمی‌شود، پس هر ورودی از آن مسیر عامل دوم را دور می‌زد. فیلتر xmlrpc_enabled متدهای نیازمند احراز هویت را از کار می‌اندازد؛ خود endpoint و متدهای عمومی با آن بسته نمی‌شوند. اگر واقعاً به XML-RPC نیاز دارید، فقط از کد بازش کنید: فیلتر hsw_disable_xmlrpc را false کنید.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 							<p class="description">
 								<?php esc_html_e( 'روشن‌کردنش از این صفحه امن نیست؛ به همین دلیل چک‌باکس غیرفعال است و مقداری در تنظیمات ذخیره نمی‌کند.', 'hamishop-elementor-widgets' ); ?>
@@ -1458,7 +1563,7 @@ class HSW_Security {
 								<?php esc_html_e( 'استفاده از صفحهٔ ورود شیشه‌ای با گرادیانت آبی', 'hamishop-elementor-widgets' ); ?>
 							</label>
 							<p class="description">
-								<?php esc_html_e( 'لوگوی وردپرس حذف می‌شود و فرم ورود به‌صورت کارت گلس‌مورفیسم روی گرادیانت آبی با انیمیشن ملایم نمایش داده می‌شود. فقط روی صفحهٔ wp-login اثر دارد و هیچ فایل اضافه‌ای لود نمی‌کند.', 'hamishop-elementor-widgets' ); ?>
+								<?php esc_html_e( 'لوگوی وردپرس حذف می‌شود و فرم ورود به‌صورت کارت گلس‌مورفیسم روی گرادیانت آبی با انیمیشن ملایم نمایش داده می‌شود. فقط روی صفحهٔ wp-login اثر دارد؛ فونت وزیرمتن از خود افزونه بارگذاری می‌شود و درخواست دیگری اضافه نمی‌کند.', 'hamishop-elementor-widgets' ); ?>
 							</p>
 						</td>
 					</tr>
