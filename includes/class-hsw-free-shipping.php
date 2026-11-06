@@ -35,8 +35,16 @@ class HSW_Free_Shipping {
 		 * invalidate the rates WooCommerce cached in every session, and that is
 		 * exactly the case where is_enabled() is false.
 		 */
-		add_action( 'update_option_' . self::ENABLED, array( __CLASS__, 'flush_cached_rates' ) );
-		add_action( 'update_option_' . self::OPTION, array( __CLASS__, 'flush_cached_rates' ) );
+		foreach ( array( self::ENABLED, self::OPTION ) as $hsw_option ) {
+			/*
+			 * Both hooks, not just update_option_*: the first save of an option
+			 * that does not exist yet goes through add_option(), which fires
+			 * `add_option_{$option}`. Missing it meant the very first activation
+			 * — or the first threshold — left every cached rate untouched.
+			 */
+			add_action( 'add_option_' . $hsw_option, array( __CLASS__, 'flush_cached_rates' ) );
+			add_action( 'update_option_' . $hsw_option, array( __CLASS__, 'flush_cached_rates' ) );
+		}
 
 		if ( ! self::is_enabled() ) {
 			return;

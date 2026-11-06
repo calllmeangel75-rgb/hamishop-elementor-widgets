@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.253
+Stable tag: 1.11.254
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.254 =
+* Fix: اولین ذخیرهٔ کلید یا سقف ارسال رایگان (وقتی option هنوز ساخته نشده) هم کش نرخ ارسال را باطل می‌کند؛ قبلاً فقط `update_option` وصل بود و `add_option` نه.
+* تست: `tests/qa/free-shipping-cache.php` با هشت بررسی، مسیر واقعی `update_option`/`delete_option` را اجرا می‌کند.
 
 = 1.11.253 =
 * Fix: با خاموش‌کردن کیف پول، مسیرهای REST شارژ/پرداخت/تبدیل امتیاز هم بسته می‌شوند (قبلاً فقط ثابت اضطراری چک می‌شد).

@@ -761,7 +761,7 @@ msgstr ""
 msgid "ارسال دیدگاه یا پرسش درباره این مقاله"
 msgstr ""
 
-#: includes/class-hsw-free-shipping.php:167
+#: includes/class-hsw-free-shipping.php:175
 #: includes/class-hsw-widget-base.php:865
 #: includes/class-hsw-widget-base.php:3107
 #: includes/class-hsw-widget-manager.php:1023

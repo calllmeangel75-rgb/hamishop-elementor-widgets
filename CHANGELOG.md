@@ -8,6 +8,47 @@
 
 ## [Unreleased]
 
+## [1.11.254] — 2026-11-06
+
+### Fixed — the first save of the shipping options did not flush anything
+
+`add_option()` and `update_option()` fire different hooks. 1.11.253 hooked
+`update_option_{$option}`, which only runs when an option **already exists** and
+its value changes; the first save of a missing option goes through
+`add_option()`. So the very first activation of free shipping — and the first
+saved threshold — left every cached rate untouched.
+
+Reproduced through the real WordPress path before the change:
+
+```
+option deleted, first update_option( 'hsw_free_shipping_on', 'yes' )
+  hooks fired   ["add:on"]
+  version bumped  false        ← the gap
+existing option, 'yes' → 'no'
+  hooks fired   ["update:on"]
+  version bumped  true
+```
+
+Both hooks are registered now, and the behaviour is covered by a test that
+drives `update_option()` rather than the invalidation function:
+
+`tests/qa/free-shipping-cache.php` — eight assertions, run with
+
+```
+HSW_WP_LOAD=/path/to/wp-load.php php tests/qa/free-shipping-cache.php
+```
+
+It deletes each option, saves it for the first time, toggles on → off and
+off → on, changes the threshold, saves an unchanged value, and checks that the
+session cache key for a fixed package changes only when it should. Removing the
+`add_option_*` hook makes exactly the two first-save assertions fail.
+
+### Note
+
+The three lines added to the widget panel in 1.11.253 are transparency, not a
+behaviour change: they explain what "off" does, they do not prove that a page
+using a disabled widget still renders correctly.
+
 ## [1.11.253] — 2026-11-06
 
 ### Fixed — the wallet switch and the shipping cache
