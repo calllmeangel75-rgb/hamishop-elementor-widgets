@@ -6,8 +6,8 @@ name: CI
 #   unit           — pure logic, no WordPress
 #   sqlengines     — the wallet DDL on MySQL 8 and MariaDB 11 (services)
 #   wp-integration — a real WordPress + WooCommerce install (services), running
-#                    the QA scripts that need both; currently the free-shipping
-#                    cache invalidation
+#                    the QA scripts that need both: the free-shipping cache
+#                    invalidation and the shipping-session scenario
 #   checks         — version/text-domain/debug/asset/catalog consistency
 #   generated      — .min and .pot are up to date with their sources
 #
@@ -228,6 +228,13 @@ jobs:
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
         run: php tests/qa/free-shipping-cache.php
+
+      # Builds its own product, zone and rate, places a real order through
+      # POST /hsw/v1/checkout/complete, and removes all of it afterwards.
+      - name: Shipping session scenario
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+        run: php tests/qa/shipping-session.php
 
   checks:
     name: structural checks
