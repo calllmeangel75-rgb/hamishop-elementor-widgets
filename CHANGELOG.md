@@ -30,8 +30,11 @@ mobile CTA base     #0f2042 (palette)             #cc0000
 - `:active` was palette-only for both the desktop and the mobile CTA. Both
   controls now emit a derived active shade (`74%` of the picked colour).
 - The mobile CTA's base rule read `var(--hswc-cta)` and never the widget's own
-  variable, so `mcta_bg` did nothing at all once it started writing a variable.
-  It reads `var(--hsw-cs-mcta-bg, …)` now, and the label colour travels through
+  variable. Changing the control to write `--hsw-cs-mcta-bg` (so hover and
+  active could derive from it) therefore made the picked colour do nothing —
+  **but only between two edits inside this release**. 1.11.249 shipped the
+  control writing `background-color` and was not affected; the base reads
+  `var(--hsw-cs-mcta-bg, …)` now and the label travels through
   `--hsw-cs-mcta-tx`.
 - The checkout CTA got the same active shade; its hover already read the token
   the control overrides.
@@ -48,11 +51,33 @@ active color(srgb 0.592 0 0)
 old rule re-injected → rgb(28,53,102)   ← reproduces the reported conflict
 ```
 
+### Verified in a browser — cart and checkout, desktop and mobile
+
+Real Elementor pages (cart-page and checkout-page composites), real generated
+CSS, one item in the cart, widget colour `#cc0000`, palette `#0f2042` /
+`#1c3566` / `#0a1730`:
+
+```
+                    cart desktop   cart mobile   checkout desktop   checkout mobile
+base                rgb(204,0,0)   rgb(204,0,0)  rgb(204,0,0)       rgb(204,0,0)
+hover               srgb .688,0,0  srgb .688,0,0 srgb .688,0,0      srgb .688,0,0
+focus-visible       srgb .688,0,0  —             srgb .688,0,0      —
+active              srgb .592,0,0  srgb .592,0,0 srgb .592,0,0      srgb .592,0,0
+
+override cleared
+base                rgb(15,32,66)  —             rgb(15,32,66)      rgb(15,32,66)
+hover               rgb(28,53,102) —             rgb(28,53,102)     rgb(28,53,102)
+active              —              —             —                  rgb(10,23,48)
+```
+
+Cart mobile hover and active were measured with the sticky-footer overlay of
+the test page hidden; on the real cart page the button is the top element at
+its centre (`elementFromPoint`).
+
 ### Not covered
 
-The checkout CTA was not opened in a browser this round. It uses the same
-chain and the control emits the same variables; the cart measurement proves the
-mechanism, not the checkout page itself.
+`focus-visible` on the mobile buttons, and page/CDN caching with the new
+colours.
 
 ## [1.11.249] — 2026-11-06
 
