@@ -111,6 +111,9 @@ jobs:
       - name: digital checkout recursion guard
         run: php tests/qa/digital-checkout-sim.php
 
+      - name: display cart refresh guard
+        run: php tests/qa/display-cart-refresh.php
+
   sqlengines:
     name: SQL compatibility (MySQL 8 + MariaDB, strict)
     runs-on: ubuntu-latest

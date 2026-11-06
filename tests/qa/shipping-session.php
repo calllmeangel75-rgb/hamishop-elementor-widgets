@@ -57,9 +57,9 @@
  * class-wc-shortcode-cart.php:96 and class-wc-shortcode-checkout.php:364 both
  * say `// Calc totals.` — while the composite widgets do not, which is why the
  * stale number is visible there and not on a shortcode cart. Closing that gap
- * means one calculate_totals() at the top of the composite render, not on
- * wp_loaded: a per-request recalculation would run on every page view and
- * re-run every shipping plugin's rate filter for a number nobody reads.
+ * refreshes the live cart when price-bearing widgets read it, not on
+ * wp_loaded. Multiple price-bearing widgets can each recalculate; measure
+ * shipping integrations on the target installation before deployment.
  *
  * Run:
  *   HSW_WP_LOAD=/path/to/wp-load.php php tests/qa/shipping-session.php
@@ -974,6 +974,59 @@ if ( is_wp_error( $hsw_placed ) ) {
 		);
 
 		$hsw_originals['created'][] = $hsw_order->get_id();
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Phase 4 — real widget totals after an option flip. This calls the same
+ * protected totals methods used by render(), but is not an HTTP/browser test.
+ * ---------------------------------------------------------------------- */
+hsw_head( 'Phase 4 — widget totals after switching shipping' );
+
+if ( ! class_exists( '\Elementor\Widget_Base' ) ) {
+	hsw_check( 'Elementor is available for widget regression', false );
+} else {
+	require_once HSW_DIR . 'includes/class-hsw-widget-base.php';
+	require_once HSW_DIR . 'includes/class-hsw-cart-base.php';
+	require_once HSW_DIR . 'includes/class-hsw-checkout-base.php';
+	require_once HSW_DIR . 'includes/class-hsw-pay-base.php';
+	require_once HSW_DIR . 'widgets/class-hsw-widget-cart-summary.php';
+	require_once HSW_DIR . 'widgets/class-hsw-widget-checkout-summary.php';
+	require_once HSW_DIR . 'widgets/class-hsw-widget-pay-summary.php';
+
+	class HSW_QA_Cart_Summary extends HSW_Widget_Cart_Summary {
+		public function snapshot() { return $this->totals(); }
+	}
+	class HSW_QA_Checkout_Summary extends HSW_Widget_Checkout_Summary {
+		public function snapshot() { return $this->totals(); }
+	}
+	class HSW_QA_Pay_Summary extends HSW_Widget_Pay_Summary {
+		public function snapshot() { return $this->totals(); }
+	}
+
+	foreach ( array( 'HSW_QA_Cart_Summary', 'HSW_QA_Checkout_Summary', 'HSW_QA_Pay_Summary' ) as $hsw_widget_class ) {
+		$hsw_widget = new $hsw_widget_class();
+		hsw_sc_apply( 'off' );
+		hsw_sc_fresh_cart();
+		hsw_sc_new_request();
+		WC()->session->set( 'chosen_shipping_methods', array( $hsw_rate_key ) );
+		hsw_sc_new_request();
+
+		foreach ( array( 'on-low' => 0.0, 'off' => 25000.0 ) as $hsw_action => $hsw_expected_shipping ) {
+			hsw_sc_apply( $hsw_action );
+			hsw_sc_new_request();
+			$hsw_before_widget = hsw_sc_totals();
+			$hsw_widget_totals = $hsw_widget->snapshot();
+			$hsw_widget_shipping = $hsw_widget_totals['shipping'];
+			hsw_check(
+				$hsw_widget_class . ' ' . $hsw_action . ': shipping and total refreshed',
+				abs( (float) $hsw_before_widget['shipping'] - $hsw_expected_shipping ) > 0.01
+					&& abs( (float) $hsw_widget_shipping[1] - $hsw_expected_shipping ) < 0.01
+					&& abs( (float) $hsw_widget_totals['total'] - ( $hsw_price + $hsw_expected_shipping ) ) < 0.01
+					&& $hsw_widget_shipping[0] === ( $hsw_expected_shipping ? 'amount' : 'free' ),
+				'before ' . hsw_money( $hsw_before_widget['shipping'] ) . ', widget ' . hsw_money( $hsw_widget_shipping[1] )
+			);
+		}
 	}
 }
 

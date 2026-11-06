@@ -393,6 +393,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                 if ( $this->is_demo() ) {
                         return $this->demo_totals();
                 }
+                $this->refresh_display_cart();
                 $subtotal = $this->base_subtotal();
                 $total    = $this->cart_total();
                 /* One definition of "free" for the whole checkout flow. */
@@ -460,7 +461,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
         protected function render() {
                 $s       = $this->effective_settings();
                 $t       = $this->totals();
-                $tm      = $this->totals_m();
+                $tm      = $this->is_demo() ? $this->totals_m() : $t;
                 $sticky  = ( 'yes' === ( $s['sticky'] ?? 'yes' ) );
                 $terms   = $this->terms_url();
                 ?>

@@ -334,6 +334,7 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 if ( ! $this->has_cart() || ! WC()->cart->needs_shipping() || ! function_exists( 'WC' ) ) {
                         return array();
                 }
+                $this->refresh_display_cart();
                 $shipping = WC()->shipping();
                 if ( ! $shipping || ! method_exists( $shipping, 'calculate_shipping' ) ) {
                         return array();

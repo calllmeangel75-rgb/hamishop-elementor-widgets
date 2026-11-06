@@ -262,6 +262,9 @@ class HSW_Widget_Pay_Recall extends HSW_Pay_Base {
 
         protected function render() {
                 $is_demo = $this->is_demo();
+                if ( ! $is_demo ) {
+                        $this->refresh_display_cart();
+                }
                 if ( $is_demo ) {
                         $cust   = $this->demo_pay_customer();
                         $name   = $cust['name'];
