@@ -1,6 +1,6 @@
 # تحویل پروژه به ایجنت بعدی (Handoff)
 
-> این فایل را قبل از هر کاری بخوان. برای وضعیت دقیق، شواهد و کارهای باز این دوره، ابتدا `docs/PROJECT-REVIEW-CHECKLIST.md` را ببین. مکمل `docs/DEVELOPMENT.md` است، نه جایگزین آن.
+> این فایل را قبل از هر کاری بخوان. وضعیت و اولویت‌های به‌روز در `docs/COMMERCIAL-READINESS-CHECKLIST.md` و سابقه در `docs/PROJECT-REVIEW-CHECKLIST.md` است. مکمل `docs/DEVELOPMENT.md` است، نه جایگزین آن.
 
 ---
 
@@ -11,8 +11,9 @@
 ```
 مسیر مخزن   : D:\work-webs\0 Build\hamishop-repo
 مخزن        : github.com/calllmeangel75-rgb/hamishop-elementor-widgets
-آخرین Release در زمان تطبیق : 1.11.254 (تگ 0a3b312)
-main هنگام تطبیق           : 0f6ecc0 — شامل PR #1 پس از تگ، هنوز منتشر نشده
+آخرین انتشار پایدار هنگام تطبیق : 1.11.254 (تگ 0a3b312)
+پیش‌انتشار آزمایشی             : 1.11.255 (تگ 189b046؛ برای سایت زنده تأیید نشده)
+main هنگام تطبیق               : 54f048f — PR #4 ادغام شده، merge commit متفاوت از تگ است
 فایل اصلی   : hamishop-elementor-widgets.php  (هدر نسخه + HSW_VERSION)
 تست لوکال   : http://localhost/sks/   (XAMPP، افزونه در wp-content/plugins/hamishop-elementor-widgets)
 سایت‌های زنده: gilaclick.ir · new.mrdastbaaf.com

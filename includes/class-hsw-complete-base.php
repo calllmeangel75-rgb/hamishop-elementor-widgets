@@ -111,6 +111,18 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
         return null;
     }
 
+    /** Whether the completion screen may show the paid badge. */
+    protected function completion_show_paid( $order ) {
+        // WooCommerce can classify a COD order as paid merely because it is
+        // processing. That is not evidence of money received. Suppress the
+        // badge for positive-total core COD orders, even after completion;
+        // the payment method itself remains visible. No order data is changed.
+        if ( 'cod' === $order->get_payment_method() && (float) $order->get_total() > 0 ) {
+            return false;
+        }
+        return (bool) $order->is_paid();
+    }
+
     /**
      * Real-order payload.
      *
@@ -174,7 +186,7 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
             'totals'   => $totals,
             'payment'  => array(
                 'title'         => (string) $order->get_payment_method_title(),
-                'paid'          => (bool) $order->is_paid(),
+                'paid'          => $this->completion_show_paid( $order ),
                 'needs_payment' => (bool) $order->needs_payment(),
             ),
             'address'  => array(
