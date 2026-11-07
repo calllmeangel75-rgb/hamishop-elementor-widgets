@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.258] — 2026-11-07 (pre-release)
+
+### Changed
+
+- Avoid labeling the order total as an amount paid in the customer invoice and account summary; for positive-total core cash-on-delivery orders show order status rather than asserting payment.
+- This is display-only and does not prove cash collection or change stored orders; other offline gateways and payment reconciliation require separate review.
+
 ## [1.11.257] — 2026-11-07 (pre-release)
 
 ### Changed

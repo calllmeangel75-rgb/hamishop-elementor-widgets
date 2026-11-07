@@ -247,6 +247,13 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/completion-paid-indicator-wp.php
 
+      - name: Account invoice payment display (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/account-invoice-cod-wp.php
+
       - name: Free-shipping cache invalidation
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
