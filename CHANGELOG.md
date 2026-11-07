@@ -8,6 +8,29 @@
 
 ## [Unreleased]
 
+## [1.11.258] — 2026-11-07 (pre-release)
+
+### Changed
+
+- Avoid labeling the order total as an amount paid in the customer invoice and account summary; for positive-total core cash-on-delivery orders show order status rather than asserting payment.
+- This is display-only and does not prove cash collection or change stored orders; other offline gateways and payment reconciliation require separate review.
+
+## [1.11.257] — 2026-11-07 (pre-release)
+
+### Changed
+
+- Suppress the paid badge for positive-total WooCommerce cash-on-delivery orders: processing status alone does not establish that cash was collected. This changes the completion display only, not order status, payment or stored data. The badge remains suppressed even after completion because this display cannot independently confirm collection.
+- Add regression coverage; staging re-verification is required. Other offline gateways still require separate review.
+
+## [1.11.256] — 2026-11-07 (pre-release)
+
+### Changed
+
+- Resolve encoded taxonomy names and term slugs when displaying cart variation labels, without changing stored variation or order data.
+- Add simulated regression tests and an isolated WordPress taxonomy integration test. A real staging checkout and order remain to be verified.
+
+This pre-release is for isolated staging only; it is not a commercial-ready release.
+
 ## [1.11.255] — 2026-11-06 (pre-release)
 
 ### Changed

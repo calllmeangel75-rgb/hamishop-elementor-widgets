@@ -114,6 +114,12 @@ jobs:
       - name: display cart refresh guard
         run: php tests/qa/display-cart-refresh.php
 
+      - name: cart variation labels
+        run: php tests/qa/cart-variation-labels.php
+
+      - name: completion payment indicator
+        run: php tests/qa/completion-paid-indicator.php
+
   sqlengines:
     name: SQL compatibility (MySQL 8 + MariaDB, strict)
     runs-on: ubuntu-latest
@@ -226,6 +232,27 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp/wp-content/plugins/hamishop-elementor-widgets
           php /tmp/wp-cli.phar plugin activate hamishop-elementor-widgets --allow-root
           php /tmp/wp-cli.phar plugin list --allow-root
+
+      - name: Cart variation labels (real WordPress terms)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/cart-variation-labels-wp.php
+
+      - name: Completion indicator (real WooCommerce order objects)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/completion-paid-indicator-wp.php
+
+      - name: Account invoice payment display (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/account-invoice-cod-wp.php
 
       - name: Free-shipping cache invalidation
         env:
