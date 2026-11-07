@@ -8,6 +8,13 @@
 
 ## [Unreleased]
 
+## [1.11.257] — 2026-11-07 (pre-release)
+
+### Changed
+
+- Suppress the paid badge for positive-total WooCommerce cash-on-delivery orders: processing status alone does not establish that cash was collected. This changes the completion display only, not order status, payment or stored data. The badge remains suppressed even after completion because this display cannot independently confirm collection.
+- Add regression coverage; staging re-verification is required. Other offline gateways still require separate review.
+
 ## [1.11.256] — 2026-11-07 (pre-release)
 
 ### Changed

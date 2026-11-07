@@ -117,6 +117,9 @@ jobs:
       - name: cart variation labels
         run: php tests/qa/cart-variation-labels.php
 
+      - name: completion payment indicator
+        run: php tests/qa/completion-paid-indicator.php
+
   sqlengines:
     name: SQL compatibility (MySQL 8 + MariaDB, strict)
     runs-on: ubuntu-latest
@@ -236,6 +239,13 @@ jobs:
           HSW_QA_DISPOSABLE: '1'
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/cart-variation-labels-wp.php
+
+      - name: Completion indicator (real WooCommerce order objects)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/completion-paid-indicator-wp.php
 
       - name: Free-shipping cache invalidation
         env:
