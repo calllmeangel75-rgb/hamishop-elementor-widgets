@@ -11,15 +11,23 @@ $wp_load = getenv( 'HSW_WP_LOAD' );
 if ( ! $wp_load || ! is_file( $wp_load ) ) { fwrite( STDERR, "HSW_WP_LOAD required.\n" ); exit( 2 ); }
 require $wp_load;
 if ( ! function_exists( 'wp_get_environment_type' ) || 'production' === wp_get_environment_type() || ! function_exists( 'wc_create_order' ) || ! class_exists( 'HSW_Account' ) ) { fwrite( STDERR, "Missing disposable WP/WC/HamiShop.\n" ); exit( 2 ); }
+if ( '1' === getenv( 'HSW_QA_EXPECT_HPOS' ) && ! \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) { echo "::error::HPOS is not enabled\n"; exit( 2 ); }
 add_filter( 'pre_wp_mail', static function () { return true; } );
 require_once ABSPATH . 'wp-admin/includes/user.php';
 require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
 require_once ABSPATH . 'wp-admin/includes/screen.php';
 set_current_screen( 'shop_order' );
 $user = 0; $order = null;
-register_shutdown_function( static function () use ( &$user, &$order ) {
+$old_wallet_enabled = get_option( 'hsw_wallet_gateway_on', 'no' );
+register_shutdown_function( static function () use ( &$user, &$order, $old_wallet_enabled ) {
+	global $wpdb;
 	if ( $order instanceof WC_Order ) { $order->delete( true ); }
-	if ( $user ) { wp_delete_user( $user ); }
+	if ( $user ) {
+		$wpdb->delete( HSW_Wallet::table(), array( 'user_id' => $user ) );
+		$wpdb->delete( HSW_Wallet::balance_table(), array( 'user_id' => $user ) );
+		wp_delete_user( $user );
+	}
+	update_option( 'hsw_wallet_gateway_on', $old_wallet_enabled );
 } );
 $login = 'hsw_ci_' . strtolower( wp_generate_password( 12, false ) );
 $user = wp_create_user( $login, wp_generate_password( 24 ), $login . '@example.invalid' );
@@ -32,6 +40,11 @@ $fail = 0;
 $check = static function ( $name, $ok ) use ( &$fail ) { echo ( $ok ? 'PASS ' : '::error::FAIL ' ) . $name . PHP_EOL; if ( ! $ok ) { ++$fail; } };
 $check( 'display points remain available separately', 2500 === $account->loyalty_points( $user ) );
 $check( 'unconfirmed COD points cannot be converted', 0 === $account->convertible_loyalty_points( $user ) );
+if ( ! HSW_Wallet::instance()->install_tables() ) { fwrite( STDERR, "Could not create test wallet tables.\n" ); exit( 2 ); }
+update_option( 'hsw_wallet_gateway_on', 'yes' );
+$blocked = HSW_Wallet::convert_points( $user, 1 );
+$check( 'server rejects actual conversion before confirmation', is_wp_error( $blocked ) && 'hsw_points_short' === $blocked->get_error_code() );
+$check( 'blocked conversion leaves wallet and points unchanged', 0.0 === (float) HSW_Wallet::balance( $user ) && 0 === HSW_Wallet::points_used( $user ) );
 wp_set_current_user( $user );
 $_POST['woocommerce_meta_nonce'] = wp_create_nonce( 'woocommerce_save_data' );
 $account->confirm_cod_loyalty( $order );
@@ -44,6 +57,8 @@ $_POST['woocommerce_meta_nonce'] = wp_create_nonce( 'woocommerce_save_data' );
 $account->confirm_cod_loyalty( $order );
 $check( 'manager confirms COD points', 2500 === $account->convertible_loyalty_points( $user ) );
 $check( 'confirmation does not change order status', 'processing' === $order->get_status() );
+$credited = HSW_Wallet::convert_points( $user, 1 );
+$check( 'actual conversion succeeds after confirmation', ! is_wp_error( $credited ) && 1 === HSW_Wallet::points_used( $user ) && (float) $credited > 0 );
 $order->set_total( 26000000 ); $order->save();
 $check( 'changed total invalidates confirmation', 0 === $account->convertible_loyalty_points( $user ) );
 $order->set_total( 25000000 ); $order->save();
