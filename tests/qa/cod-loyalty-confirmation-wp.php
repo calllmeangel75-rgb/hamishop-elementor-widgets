@@ -17,10 +17,11 @@ require_once ABSPATH . 'wp-admin/includes/user.php';
 require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
 require_once ABSPATH . 'wp-admin/includes/screen.php';
 set_current_screen( 'shop_order' );
-$user = 0; $order = null;
+$user = 0; $order = null; $refund = null;
 $old_wallet_enabled = get_option( 'hsw_wallet_gateway_on', 'no' );
-register_shutdown_function( static function () use ( &$user, &$order, $old_wallet_enabled ) {
+register_shutdown_function( static function () use ( &$user, &$order, &$refund, $old_wallet_enabled ) {
 	global $wpdb;
+	if ( $refund instanceof WC_Order_Refund ) { $refund->delete( true ); }
 	if ( $order instanceof WC_Order ) { $order->delete( true ); }
 	if ( $user ) {
 		$wpdb->delete( HSW_Wallet::table(), array( 'user_id' => $user ) );
@@ -53,8 +54,15 @@ wp_set_current_user( 1 );
 $_POST['woocommerce_meta_nonce'] = 'invalid';
 $account->confirm_cod_loyalty( $order );
 $check( 'manager without nonce cannot confirm', ! $order->get_meta( '_hsw_cod_loyalty_confirmation', true ) );
-$_POST['woocommerce_meta_nonce'] = wp_create_nonce( 'woocommerce_save_data' );
-$account->confirm_cod_loyalty( $order );
+if ( '1' === getenv( 'HSW_QA_EXPECT_HPOS' ) ) {
+	unset( $_POST['woocommerce_meta_nonce'] );
+	$_POST['_wpnonce'] = wp_create_nonce( 'update-order_' . $order->get_id() );
+} else {
+	$_POST['woocommerce_meta_nonce'] = wp_create_nonce( 'woocommerce_save_data' );
+}
+$actions = apply_filters( 'woocommerce_order_actions', array(), $order );
+$check( 'manager sees explicit confirmation action', isset( $actions['hsw_confirm_cod_loyalty'] ) );
+do_action( 'woocommerce_order_action_hsw_confirm_cod_loyalty', $order );
 $check( 'manager confirms COD points', 2500 === $account->convertible_loyalty_points( $user ) );
 $check( 'confirmation does not change order status', 'processing' === $order->get_status() );
 $credited = HSW_Wallet::convert_points( $user, 1 );
@@ -62,8 +70,18 @@ $check( 'actual conversion succeeds after confirmation', ! is_wp_error( $credite
 $order->set_total( 26000000 ); $order->save();
 $check( 'changed total invalidates confirmation', 0 === $account->convertible_loyalty_points( $user ) );
 $order->set_total( 25000000 ); $order->save();
+$check( 'restoring the old total does not restore approval', 0 === $account->convertible_loyalty_points( $user ) );
+$account->confirm_cod_loyalty( $order );
+$check( 'manager may reconfirm edited order', 2500 === $account->convertible_loyalty_points( $user ) );
 $order->update_status( 'cancelled' );
 $order->update_status( 'processing' );
 $check( 'reopening cancelled order requires confirmation', 0 === $account->convertible_loyalty_points( $user ) );
-unset( $_POST['woocommerce_meta_nonce'] );
+$account->confirm_cod_loyalty( $order );
+$check( 'manager may confirm reopened order', 2500 === $account->convertible_loyalty_points( $user ) );
+$balance_before_refund = HSW_Wallet::balance( $user );
+$refund = wc_create_refund( array( 'order_id' => $order->get_id(), 'amount' => 1000, 'refund_payment' => false, 'restock_items' => false ) );
+$check( 'partial refund is created in disposable fixture', ! is_wp_error( $refund ) );
+$check( 'partial refund revokes COD approval', 0 === $account->convertible_loyalty_points( $user ) );
+$check( 'refund does not automatically debit existing wallet credit', $balance_before_refund === HSW_Wallet::balance( $user ) );
+unset( $_POST['woocommerce_meta_nonce'], $_POST['_wpnonce'] );
 exit( $fail ? 1 : 0 );
