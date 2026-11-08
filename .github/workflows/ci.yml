@@ -254,6 +254,13 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/account-invoice-cod-wp.php
 
+      - name: Observe COD loyalty calculation (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/loyalty-cod-observation-wp.php
+
       - name: Free-shipping cache invalidation
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
