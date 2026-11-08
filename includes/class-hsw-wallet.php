@@ -2058,7 +2058,7 @@ class HSW_Wallet {
 	 * @return int
 	 */
 	public static function points_available( $user_id ) {
-		$earned = HSW_Account::instance()->loyalty_points( $user_id );
+		$earned = HSW_Account::instance()->convertible_loyalty_points( $user_id );
 		$used   = self::points_used( $user_id );
 
 		return max( 0, $earned - $used );
@@ -2133,7 +2133,7 @@ class HSW_Wallet {
 		}
 		$money     = $points * $per_point;
 		$table     = self::balance_table();
-		$earned    = max( 0, (int) HSW_Account::instance()->loyalty_points( $user_id ) );
+		$earned    = max( 0, (int) HSW_Account::instance()->convertible_loyalty_points( $user_id ) );
 
 		/*
 		 * Claim the points with one conditional UPDATE. The previous version

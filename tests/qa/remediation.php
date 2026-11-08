@@ -470,6 +470,9 @@ class HSW_Account {
 	public function loyalty_points( $user_id = 0, $opts = null ) {
 		return (int) floor( self::$total_spent / max( 1, (int) self::$rate ) );
 	}
+	public function convertible_loyalty_points( $user_id = 0 ) {
+		return $this->loyalty_points( $user_id );
+	}
 }
 
 /* WooCommerce order stub (only what refund/process tests touch). */

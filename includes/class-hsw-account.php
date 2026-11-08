@@ -79,6 +79,11 @@ final class HSW_Account {
 		add_action( 'woocommerce_account_wallet_endpoint', array( $this, 'render_wallet_endpoint' ) );
 
 		add_action( 'woocommerce_order_status_changed', array( $this, 'on_order_status_changed' ), 20, 4 );
+		add_filter( 'woocommerce_order_actions', array( $this, 'cod_loyalty_order_actions' ), 10, 2 );
+		add_action( 'woocommerce_order_action_hsw_confirm_cod_loyalty', array( $this, 'confirm_cod_loyalty' ) );
+		add_action( 'woocommerce_order_status_changed', array( $this, 'invalidate_cod_loyalty_confirmation' ), 10, 4 );
+		add_action( 'woocommerce_before_order_object_save', array( $this, 'invalidate_cod_loyalty_on_edit' ) );
+		add_action( 'woocommerce_order_refunded', array( $this, 'invalidate_cod_loyalty_on_refund' ) );
 		add_action( 'woocommerce_created_customer', array( $this, 'on_customer_created' ), 20, 3 );
 
 		add_action( 'update_option_' . self::OPTION, array( $this, 'on_settings_updated' ) );
@@ -3051,6 +3056,103 @@ final class HSW_Account {
 		/* The wallet table is the only source; the legacy meta is a frozen snapshot. */
 		$balance = class_exists( 'HSW_Wallet' ) ? HSW_Wallet::balance( $user_id ) : 0.0;
 		return (float) apply_filters( 'hsw_account_wallet_balance', $balance, $user_id );
+	}
+
+	/** Order details for which a manager confirmed COD collection. */
+	private function cod_loyalty_snapshot( $order ) {
+		return array(
+			'customer' => (int) $order->get_customer_id(),
+			'method'   => (string) $order->get_payment_method(),
+			'total'    => (string) $order->get_total(),
+			'currency' => (string) $order->get_currency(),
+			'refunded' => (string) $order->get_total_refunded(),
+		);
+	}
+
+	/** Add an explicit action, without interpreting status as payment. */
+	public function cod_loyalty_order_actions( $actions, $order = null ) {
+		if ( current_user_can( 'manage_woocommerce' ) && $order instanceof WC_Order && 'cod' === $order->get_payment_method() && (float) $order->get_total() > 0 && $order->has_status( array( 'processing', 'completed' ) ) ) {
+			$actions['hsw_confirm_cod_loyalty'] = __( 'تأیید دریافت وجه برای امتیاز', 'hamishop-elementor-widgets' );
+		}
+		return $actions;
+	}
+
+	/** Called only from WooCommerce's order edit action. Does not mark an order paid. */
+	public function confirm_cod_loyalty( $order ) {
+		if ( ! is_admin() || ! current_user_can( 'manage_woocommerce' ) || ! $order instanceof WC_Order || 'cod' !== $order->get_payment_method() || (float) $order->get_total() <= 0 || ! $order->has_status( array( 'processing', 'completed' ) ) ) {
+			return;
+		}
+		// Both legacy and HPOS order editors use their own nonce.
+		$legacy_nonce = isset( $_POST['woocommerce_meta_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ) : '';
+		$hpos_nonce   = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $legacy_nonce, 'woocommerce_save_data' ) && ! wp_verify_nonce( $hpos_nonce, 'update-order_' . $order->get_id() ) ) {
+			return;
+		}
+		$snapshot = $this->cod_loyalty_snapshot( $order );
+		if ( $order->get_meta( '_hsw_cod_loyalty_confirmation', true ) === $snapshot ) {
+			return;
+		}
+		$order->update_meta_data( '_hsw_cod_loyalty_confirmation', $snapshot );
+		$order->save();
+		$order->add_order_note( __( 'مدیر دریافت وجه را برای محاسبه امتیاز قابل تبدیل تأیید کرد.', 'hamishop-elementor-widgets' ), false, true );
+	}
+
+	/** A cancelled, failed or refunded order requires a fresh confirmation. */
+	public function invalidate_cod_loyalty_confirmation( $order_id, $old_status, $new_status, $order ) {
+		if ( $order instanceof WC_Order && in_array( $new_status, array( 'cancelled', 'failed', 'refunded', 'pending', 'on-hold' ), true ) && $order->get_meta( '_hsw_cod_loyalty_confirmation', true ) ) {
+			$order->delete_meta_data( '_hsw_cod_loyalty_confirmation' );
+			$order->save();
+		}
+	}
+
+	/** Invalidate before persistence if approved order details are edited. */
+	public function invalidate_cod_loyalty_on_edit( $order ) {
+		if ( $order instanceof WC_Order ) {
+			$approved = $order->get_meta( '_hsw_cod_loyalty_confirmation', true );
+			if ( $approved && $approved !== $this->cod_loyalty_snapshot( $order ) ) {
+				$order->delete_meta_data( '_hsw_cod_loyalty_confirmation' );
+			}
+		}
+	}
+
+	/** Any refund requires a new explicit confirmation. */
+	public function invalidate_cod_loyalty_on_refund( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( $order && $order->get_meta( '_hsw_cod_loyalty_confirmation', true ) ) {
+			$order->delete_meta_data( '_hsw_cod_loyalty_confirmation' );
+			$order->save();
+		}
+	}
+
+	/** COD revenue included by WooCommerce but not explicitly confirmed. */
+	private function unconfirmed_cod_spent( $user_id ) {
+		if ( ! function_exists( 'wc_get_orders' ) || ! function_exists( 'wc_get_is_paid_statuses' ) ) {
+			return PHP_FLOAT_MAX; // Fail closed if eligibility cannot be checked.
+		}
+		$orders = wc_get_orders( array( 'customer_id' => $user_id, 'status' => wc_get_is_paid_statuses(), 'limit' => -1 ) );
+		if ( ! is_array( $orders ) ) {
+			return PHP_FLOAT_MAX;
+		}
+		$sum = 0.0;
+		foreach ( (array) $orders as $order ) {
+			if ( ! $order instanceof WC_Order || 'cod' !== $order->get_payment_method() || (float) $order->get_total() <= 0 || (int) $order->get_meta( '_hsw_wallet_topup_user' ) ) {
+				continue;
+			}
+			if ( $order->get_meta( '_hsw_cod_loyalty_confirmation', true ) !== $this->cod_loyalty_snapshot( $order ) ) {
+				$sum += (float) $order->get_total();
+			}
+		}
+		return $sum;
+	}
+
+	/** Points eligible for wallet conversion, not the display-only club level. */
+	public function convertible_loyalty_points( $user_id = 0 ) {
+		$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
+		$rate = max( 1, (int) $this->setting( 'loyalty.rate', 10000 ) );
+		$spent = function_exists( 'wc_get_customer_total_spent' ) ? (float) wc_get_customer_total_spent( $user_id ) : 0;
+		$spent = max( 0, $spent - $this->wallet_topup_spent( $user_id ) - $this->unconfirmed_cod_spent( $user_id ) );
+		$points = (int) floor( $spent / $rate );
+		return max( 0, (int) apply_filters( 'hsw_account_loyalty_points', $points, $user_id, $spent ) );
 	}
 
 	public function loyalty_points( $user_id = 0, $opts = null ) {

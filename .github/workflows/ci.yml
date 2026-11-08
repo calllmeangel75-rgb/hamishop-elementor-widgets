@@ -261,6 +261,24 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/loyalty-cod-observation-wp.php
 
+      - name: COD loyalty confirmation (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/cod-loyalty-confirmation-wp.php
+
+      - name: COD loyalty confirmation with HPOS (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          HSW_QA_EXPECT_HPOS: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: |
+          php /tmp/wp-cli.phar --path=/tmp/wp option update woocommerce_custom_orders_table_enabled yes --allow-root
+          trap 'php /tmp/wp-cli.phar --path=/tmp/wp option update woocommerce_custom_orders_table_enabled no --allow-root' EXIT
+          php tests/qa/cod-loyalty-confirmation-wp.php
+
       - name: Free-shipping cache invalidation
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
