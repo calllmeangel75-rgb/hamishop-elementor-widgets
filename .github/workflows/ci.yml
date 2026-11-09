@@ -327,6 +327,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Checkout savings DOM patch
+        run: node tests/qa/checkout-savings.js
+
       - name: Install asset minifier
         run: pip install --quiet csscompressor rjsmin
 
