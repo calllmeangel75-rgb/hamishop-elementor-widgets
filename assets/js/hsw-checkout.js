@@ -109,6 +109,12 @@
                 if ( ! totals ) {
                         return;
                 }
+                if ( typeof totals.savings_pay_html === 'string' ) {
+                        var savings = document.querySelectorAll( '[data-hswk-savings="pay"]' );
+                        for ( var s = 0; s < savings.length; s++ ) {
+                                savings[ s ].innerHTML = totals.savings_pay_html;
+                        }
+                }
                 var map = {
                         subtotal: 'subtotal_html',
                         discount: 'discount_html',

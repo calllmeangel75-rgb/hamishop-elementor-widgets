@@ -728,6 +728,7 @@ class HSW_Checkout_Rest {
                         'shipping_free'  => ( HSW_Shipping_State::FREE === $ship_state ),
                         'taxes_html'     => wc_tax_enabled() ? $this->money( (float) $cart->get_taxes_total(), true ) : '',
                         'total_html'     => $this->money( (float) $cart->get_total( 'edit' ), true ),
+                        'savings_pay_html' => HSW_Helpers::savings_html( 'hsw-savings--pay' ),
                 );
         }
 

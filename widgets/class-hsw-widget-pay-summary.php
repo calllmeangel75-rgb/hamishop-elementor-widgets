@@ -512,7 +512,7 @@ class HSW_Widget_Pay_Summary extends HSW_Pay_Base {
                                                         </span>
                                                 </div>
 
-                                                <?php echo HSW_Helpers::savings_html( 'hsw-savings--pay' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?>
+                                                <div data-hswk-savings="pay"><?php echo HSW_Helpers::savings_html( 'hsw-savings--pay' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* inside. ?></div>
 
                                                 <div class="hsw-psum__final">
                                                         <span>

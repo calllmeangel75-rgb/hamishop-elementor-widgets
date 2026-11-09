@@ -1,0 +1,20 @@
+'use strict';
+// Exercise the actual checkout patcher with DOM-like nodes, without external packages.
+const assert = require('assert');
+const fs = require('fs');
+const vm = require('vm');
+const source = fs.readFileSync('assets/js/hsw-checkout.js', 'utf8');
+const match = source.match(/function patchTotals\( totals \) \{[\s\S]*?\n        \}\n\n        \/\* =+/);
+assert(match, 'patchTotals function found');
+const savings = [{innerHTML: 'old'}, {innerHTML: 'old mobile'}];
+const total = [{innerHTML: 'old total'}];
+const document = {querySelectorAll: selector => selector === '[data-hswk-savings="pay"]' ? savings : selector === '[data-hswk="total"]' ? total : []};
+const patch = vm.runInNewContext('(' + match[0].slice(0, match[0].lastIndexOf('\n\n        /*')) + ')', {document});
+patch({savings_pay_html: '<div>244000</div>', total_html: '976000'});
+assert.deepStrictEqual(savings.map(node => node.innerHTML), ['<div>244000</div>', '<div>244000</div>']);
+assert.strictEqual(total[0].innerHTML, '976000');
+patch({savings_pay_html: ''});
+assert.deepStrictEqual(savings.map(node => node.innerHTML), ['', '']);
+patch({total_html: '1220000'});
+assert.strictEqual(savings[0].innerHTML, '');
+console.log('PASS checkout savings updated, cleared, and unchanged when absent');
