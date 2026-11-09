@@ -1899,7 +1899,7 @@ msgstr ""
 msgid "این کد تا %s دقیقه معتبر است. اگر شما درخواست نداده‌اید، این ایمیل را نادیده بگیرید."
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:549
+#: includes/class-hsw-checkout-rest.php:557
 msgid "این کد روی سبد اعمال نشده است."
 msgstr ""
 
@@ -3771,7 +3771,7 @@ msgstr ""
 msgid "تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را غیرفعال کنید."
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:658
+#: includes/class-hsw-checkout-rest.php:666
 msgid "تلاش‌های ناموفق زیاد بود؛ چند دقیقه بعد دوباره امتحان کنید."
 msgstr ""
 
@@ -14580,7 +14580,7 @@ msgstr ""
 msgid "کد تخفیف را وارد کنید"
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:578
+#: includes/class-hsw-checkout-rest.php:586
 #: includes/class-hsw-coupon-messages.php:112
 msgid "کد تخفیف را وارد کنید."
 msgstr ""
@@ -14601,7 +14601,7 @@ msgstr ""
 msgid "کد تخفیف و کارت هدیه پرداخت (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-checkout-rest.php:575
+#: includes/class-hsw-checkout-rest.php:583
 #: widgets/class-hsw-widget-pay-coupon.php:122
 msgid "کد تخفیف وارد شده معتبر نیست."
 msgstr ""

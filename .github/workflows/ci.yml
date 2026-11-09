@@ -233,6 +233,13 @@ jobs:
           php /tmp/wp-cli.phar plugin activate hamishop-elementor-widgets --allow-root
           php /tmp/wp-cli.phar plugin list --allow-root
 
+      - name: Coupon session and removal (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/coupon-session-wp.php
+
       - name: Cart variation labels (real WordPress terms)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
