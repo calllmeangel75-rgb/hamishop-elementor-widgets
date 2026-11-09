@@ -1594,14 +1594,21 @@ class HSW_Wallet {
 				self::transaction_rollback();
 				return new WP_Error( 'hsw_wallet_ledger', __( 'ثبت موجودی ناموفق بود.', 'hamishop-elementor-widgets' ) );
 			}
-			$amount = $target;
-		} else {
+                        $amount = $target;
+                        if ( 0.0 === $target ) {
+                                /* Keep the zero balance row, but do not record a
+                                 * ledger adjustment where no money moved. */
+                                self::transaction_commit();
+                                self::$balance_cache[ $user_id ] = 0.0;
+                                return 0.0;
+                        }
+                } else {
 			$current = round( (float) $current, 2 );
 			if ( null !== $orig && round( (float) $orig, 2 ) !== $current ) {
 				self::transaction_rollback();
 				return new WP_Error( 'hsw_wallet_stale', __( 'موجودی از زمان باز شدن فرم تغییر کرده است؛ صفحه را دوباره بارگذاری کنید.', 'hamishop-elementor-widgets' ) );
 			}
-			if ( null === $orig && $current === $target ) {
+                        if ( $current === $target ) {
 				/* Nothing to change; no adjust row for a no-op. */
 				self::transaction_commit();
 				return $target;
