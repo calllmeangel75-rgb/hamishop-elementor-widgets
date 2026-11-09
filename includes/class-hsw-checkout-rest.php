@@ -532,6 +532,14 @@ class HSW_Checkout_Rest {
                 }
 
                 /*
+                 * REST can initialize WC_Cart after wp_loaded has already fired.
+                 * has_discount() does not load the session itself, so hydrate the
+                 * cart before checking (or applying) a coupon. get_cart() handles
+                 * the lazy load and is a no-op for an already loaded cart.
+                 */
+                $cart->get_cart();
+
+                /*
                  * Coupon guessing: 10 requests/minute per IP+session, plus a lock
                  * after 10 wrong codes in 10 minutes. Thresholds are filterable
                  * through `hsw_checkout_rate_limit` (same filter as /complete).
