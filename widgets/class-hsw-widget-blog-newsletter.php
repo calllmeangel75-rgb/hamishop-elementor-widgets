@@ -110,6 +110,16 @@ class HSW_Widget_Blog_Newsletter extends HSW_Blog_Base {
         protected function render() {
                 $s = $this->effective_settings();
 
+                // A form posting to the blog page does not subscribe anyone.
+                // Do not request an email until a destination or shortcode has
+                // actually been configured by the site administrator.
+                if ( empty( $s['shortcode'] ) && empty( $s['action_url']['url'] ) ) {
+                        if ( current_user_can( 'manage_options' ) ) {
+                                echo '<p class="hsw-bnews__unconfigured">' . esc_html__( 'برای فعال‌شدن خبرنامه، شورت‌کد یا آدرس فرم را تنظیم کنید.', 'hamishop-elementor-widgets' ) . '</p>';
+                        }
+                        return;
+                }
+
                 echo '<div class="' . esc_attr( $this->root_class( 'blog-newsletter', 'hsw-bnews' ) ) . '">';
 
                 if ( ! empty( $s['title'] ) ) {

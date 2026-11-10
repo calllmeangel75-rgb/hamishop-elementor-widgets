@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.263
+Stable tag: 1.11.264
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,9 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.264 =
+* نسخهٔ آزمایشی: بهبود فهرست، رنگ متن، فرم دیدگاه و نمایش قیمت در صفحهٔ نوشته و صفحه‌بندی آرشیو.
 
 = 1.11.263 =
 * نسخهٔ آزمایشی: اصلاح رنگ متن و آیکون دکمه مشاهده همه در لوپ پیشنهاد شگفت‌انگیز.
