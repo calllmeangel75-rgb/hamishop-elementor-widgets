@@ -8,6 +8,7 @@ require_once dirname( __DIR__, 2 ) . '/includes/class-hsw-account-support.php';
 class HSW_QA_Support_Account {
     public function setting( $key, $default = null ) { return $default; }
     public function icon( $name ) { return ''; }
+    public function format_date( $timestamp ) { return (string) $timestamp; }
     public function endpoint_enabled( $name ) { return true; }
 }
 class HSW_QA_Ajax_Die extends Exception {}
