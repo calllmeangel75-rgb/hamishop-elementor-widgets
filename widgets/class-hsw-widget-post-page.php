@@ -140,11 +140,11 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 				'type'        => Controls_Manager::SELECT,
 				'default'     => 'none',
 				'options'     => array(
-					'none'  => __( 'بدون لینک لنگر — فقط اسکرول (پیشنهادی برای حفظ بودجه خزش)', 'hamishop-elementor-widgets' ),
-					'slug'  => __( 'لینک لنگر از متن تیتر (nofollow)', 'hamishop-elementor-widgets' ),
+					'none'  => __( 'بدون لینک لنگر — فقط اسکرول با جاوااسکریپت', 'hamishop-elementor-widgets' ),
+					'slug'  => __( 'لینک لنگر از متن تیتر', 'hamishop-elementor-widgets' ),
 					'index' => __( 'لینک لنگر شماره‌ای (hsw-h-1، hsw-h-2 …)', 'hamishop-elementor-widgets' ),
 				),
-				'description' => __( 'در حالت پیشنهادی «بدون لینک لنگر»، آیتم‌های فهرست مطالب با دکمه (`<button>`) رندر می‌شوند تا هیچ آدرس `#heading` در سورس صفحه تولید نشود و بودجه خزش گوگل مصرف نگردد.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'لینک لنگر به بخش همان صفحه می‌رود و معمولاً خزش جداگانه ایجاد نمی‌کند. حالت دکمه به جاوااسکریپت نیاز دارد؛ حالت لینک برای اشتراک‌گذاری و استفاده بدون جاوااسکریپت مناسب‌تر است.', 'hamishop-elementor-widgets' ),
 				'condition'   => array( 'show_toc' => 'yes' ),
 			)
 		);
@@ -317,7 +317,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			array(
 				'label'     => __( 'رنگ متن مقاله', 'hamishop-elementor-widgets' ),
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .hsw-pp__body' => 'color: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}} .hsw-pp__body, {{WRAPPER}} .hsw-pp__body p' => 'color: {{VALUE}};' ),
 			)
 		);
 
@@ -605,21 +605,30 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		$toc  = array();
 		$used = array();
 
+		// Reserve existing IDs before generating any new ones, including IDs on
+		// later headings and non-heading elements. Never rewrite authored IDs:
+		// those may already be linked from outside this page.
+		if ( preg_match_all( '/\sid\s*=\s*(["\'])(.*?)\1/is', $html, $existing_ids ) ) {
+			foreach ( $existing_ids[2] as $existing_id ) {
+				$used[ html_entity_decode( $existing_id, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ] = true;
+			}
+		}
+
 		$html = preg_replace_callback(
 			'#<h([23])([^>]*)>(.*?)</h\1>#is',
 			static function ( $m ) use ( &$toc, &$used, $mode ) {
 				$level = (int) $m[1];
 				$attrs = $m[2];
 				$inner = $m[3];
-				$text  = trim( wp_strip_all_tags( $inner ) );
+				$text  = trim( html_entity_decode( wp_strip_all_tags( $inner ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 
 				if ( '' === $text ) {
 					return $m[0];
 				}
 
 				$id = '';
-				if ( preg_match( '/\sid=["\']([^"\']+)["\']/i', $attrs, $found ) ) {
-					$id = $found[1];
+				if ( preg_match( '/\sid\s*=\s*["\']([^"\']+)["\']/i', $attrs, $found ) ) {
+					$id = html_entity_decode( $found[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 				}
 				if ( '' === $id ) {
 					$id     = self::heading_id( $text, $mode, $used );
@@ -703,8 +712,8 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		/*
 		 * Sidebar TOC (`hsw-pp__side` / `hsw-pp__sidelink`) and `'none'` mode
 		 * always render `<button type="button">` with `data-target` instead of
-		 * `<a href="#...">` so crawlers never discover or waste crawl budget on
-		 * duplicate `#heading` fragment URLs.
+		 * `<a href="#...">` for backward-compatible scroll-only behavior.
+		 * Fragments generally do not represent separate Google crawl URLs.
 		 */
 		if ( 'none' === $mode || ! $is_main ) {
 			return '<button type="button" class="' . esc_attr( trim( $class . ' hsw-pp__tocbtn' ) ) . '"'
@@ -712,7 +721,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		}
 
 		return '<a' . ( '' !== $class ? ' class="' . esc_attr( $class ) . '"' : '' ) . ''
-			. ' href="#' . esc_attr( $item['id'] ) . '" rel="nofollow" data-hsw-pp-toclink>' . $inner . '</a>';
+			. ' href="#' . esc_attr( $item['id'] ) . '" data-hsw-pp-toclink>' . $inner . '</a>';
 	}
 
 	/**
@@ -1137,7 +1146,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		$cfp     = HSW_Helpers::is_call_for_price( $product );
 		$regular = (float) $product->get_regular_price();
 		$sale    = (float) $product->get_sale_price();
-		$off     = ( $regular > 0 && $sale > 0 && $sale < $regular ) ? (int) round( ( ( $regular - $sale ) / $regular ) * 100 ) : 0;
+		$off     = ( $product->is_type( 'simple' ) && $product->is_on_sale() && $regular > 0 && $sale > 0 && $sale < $regular ) ? (int) round( ( ( $regular - $sale ) / $regular ) * 100 ) : 0;
 		?>
 		<section class="hsw-pp__prod">
 			<div class="hsw-pp__prodlabel"><?php HSW_Helpers::the_icon( 'verified' ); ?><?php echo esc_html( $label ); ?></div>
@@ -1157,10 +1166,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 						<?php if ( $cfp ) : ?>
 							<?php echo HSW_Helpers::cfp_inline_html( $product, true, 'hsw-pp__prodcfp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside the helper. ?>
 						<?php else : ?>
-							<?php if ( $sale > 0 && $regular > $sale ) : ?>
-								<del><?php echo wp_kses_post( wc_price( $regular ) ); ?></del>
-							<?php endif; ?>
-							<ins><?php echo wp_kses_post( $product->get_price_html() ); ?></ins>
+							<?php echo wp_kses_post( $product->get_price_html() ); ?>
 						<?php endif; ?>
 					</div>
 					<?php
@@ -1304,6 +1310,8 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 					$form_html,
 					1
 				);
+				// Supply the admin-post action for the native, non-JavaScript form too.
+				$form_html = preg_replace( '/(<form\b[^>]*>)/i', '$1<input type="hidden" name="action" value="hsw_submit_comment">', $form_html, 1 );
 				echo $form_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native comment_form markup.
 			}
 			?>
@@ -1499,9 +1507,9 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		?>
 		<aside class="hsw-pp__dock">
 			<div class="hsw-pp__dockinner">
-				<button type="button" class="hsw-pp__dockbtn" data-hsw-pp-like aria-pressed="false">
+				<button type="button" class="hsw-pp__dockbtn" data-hsw-pp-like aria-pressed="false" aria-label="<?php esc_attr_e( 'پسندیدن در این مرورگر', 'hamishop-elementor-widgets' ); ?>">
 					<?php HSW_Helpers::the_icon( 'favorite' ); ?>
-					<span class="hsw-pp__docklabel"><?php echo esc_html( HSW_Helpers::fa_num( $comments ) ); ?></span>
+					<span class="hsw-pp__docklabel"><?php esc_html_e( 'پسند', 'hamishop-elementor-widgets' ); ?></span>
 				</button>
 				<?php if ( $link_comments ) : ?>
 					<a class="hsw-pp__dockbtn" href="#hsw-comments">

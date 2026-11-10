@@ -22,16 +22,16 @@ msgstr ""
 msgid "%1$s — پاسخ جدید در گفتگوی «%2$s»"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:934
+#: widgets/class-hsw-widget-post-page.php:943
 msgid "%s بازدید"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:932
-#: widgets/class-hsw-widget-post-page.php:1048
+#: widgets/class-hsw-widget-post-page.php:941
+#: widgets/class-hsw-widget-post-page.php:1057
 msgid "%s دقیقه مطالعه"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:936
+#: widgets/class-hsw-widget-post-page.php:945
 msgid "%s دیدگاه"
 msgstr ""
 
@@ -64,7 +64,7 @@ msgid "%s — کد تأیید ایمیل"
 msgstr ""
 
 #: widgets/class-hsw-widget-cart-items.php:498
-#: widgets/class-hsw-widget-post-page.php:1146
+#: widgets/class-hsw-widget-post-page.php:1155
 msgid "%s٪ تخفیف"
 msgstr ""
 
@@ -757,7 +757,7 @@ msgstr ""
 msgid "ارسال دیدگاه"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1380
+#: widgets/class-hsw-widget-post-page.php:1388
 msgid "ارسال دیدگاه یا پرسش درباره این مقاله"
 msgstr ""
 
@@ -1095,8 +1095,8 @@ msgstr ""
 msgid "اسکیمای سوالات متداول (FAQ JSON-LD)"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:888
-#: widgets/class-hsw-widget-post-page.php:945
+#: widgets/class-hsw-widget-post-page.php:897
+#: widgets/class-hsw-widget-post-page.php:954
 msgid "اشتراک‌گذاری"
 msgstr ""
 
@@ -2145,7 +2145,7 @@ msgstr ""
 msgid "بازگشت به فروشگاه و مشاهده سفارش‌ها."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:874
+#: widgets/class-hsw-widget-post-page.php:883
 msgid "بازگشت به مجله"
 msgstr ""
 
@@ -2283,7 +2283,7 @@ msgid "بدون زیرخط"
 msgstr ""
 
 #: widgets/class-hsw-widget-post-page.php:143
-msgid "بدون لینک لنگر — فقط اسکرول (پیشنهادی برای حفظ بودجه خزش)"
+msgid "بدون لینک لنگر — فقط اسکرول با جاوااسکریپت"
 msgstr ""
 
 #: widgets/class-hsw-widget-header-gc.php:84
@@ -2855,7 +2855,7 @@ msgstr ""
 msgid "برچسب‌های مبالغ"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1007
+#: widgets/class-hsw-widget-post-page.php:1016
 msgid "برچسب‌های مرتبط:"
 msgstr ""
 
@@ -3754,7 +3754,7 @@ msgstr ""
 msgid "تغییر امنیتی حساب در %s"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:939
+#: widgets/class-hsw-widget-post-page.php:948
 msgid "تغییر اندازه قلم"
 msgstr ""
 
@@ -4147,7 +4147,7 @@ msgstr ""
 msgid "ثبت تیکت ناموفق بود. دوباره تلاش کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1521
+#: widgets/class-hsw-widget-post-page.php:1529
 msgid "ثبت دیدگاه"
 msgstr ""
 
@@ -4202,7 +4202,7 @@ msgstr ""
 msgid "ثبت نشده"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1255
+#: widgets/class-hsw-widget-post-page.php:1261
 msgid "ثبت نظر"
 msgstr ""
 
@@ -5087,7 +5087,7 @@ msgstr ""
 
 #: includes/class-hsw-header-base.php:571
 #: widgets/class-hsw-widget-footer-sticky.php:122
-#: widgets/class-hsw-widget-post-page.php:902
+#: widgets/class-hsw-widget-post-page.php:911
 #: widgets/class-hsw-widget-product-breadcrumb.php:177
 msgid "خانه"
 msgstr ""
@@ -5138,11 +5138,11 @@ msgstr ""
 msgid "خرید آنلاین"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1515
+#: widgets/class-hsw-widget-post-page.php:1523
 msgid "خرید این کالا"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1177
+#: widgets/class-hsw-widget-post-page.php:1183
 msgid "خرید سریع و بررسی مشخصات"
 msgstr ""
 
@@ -5427,10 +5427,6 @@ msgstr ""
 
 #: widgets/class-hsw-widget-checkout-schedule.php:146
 msgid "در حالت خودکار، ۴ روز آینده به‌صورت داینامیک با تاریخ شمسی واقعی ساخته می‌شوند و روز جمعه خودکار تعطیل در نظر گرفته می‌شود."
-msgstr ""
-
-#: widgets/class-hsw-widget-post-page.php:147
-msgid "در حالت پیشنهادی «بدون لینک لنگر»، آیتم‌های فهرست مطالب با دکمه (`<button>`) رندر می‌شوند تا هیچ آدرس `#heading` در سورس صفحه تولید نشود و بودجه خزش گوگل مصرف نگردد."
 msgstr ""
 
 #: includes/class-hsw-widget-manager.php:1408
@@ -6107,7 +6103,7 @@ msgid "دیدگاه شما"
 msgstr ""
 
 #: includes/class-hsw-plugin.php:255
-#: widgets/class-hsw-widget-post-page.php:1291
+#: widgets/class-hsw-widget-post-page.php:1297
 msgid "دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده می‌شود."
 msgstr ""
 
@@ -6120,7 +6116,7 @@ msgstr ""
 msgid "دیدگاه شما ثبت شد و پس از تأیید مدیر نمایش داده می‌شود."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1357
+#: widgets/class-hsw-widget-post-page.php:1365
 msgid "دیدگاه شما در انتظار تایید است."
 msgstr ""
 
@@ -6149,7 +6145,7 @@ msgstr ""
 msgid "دیدگاه‌ها و نظرات خریداران"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1250
+#: widgets/class-hsw-widget-post-page.php:1256
 msgid "دیدگاه‌ها و نظرات کاربران (%s)"
 msgstr ""
 
@@ -7551,7 +7547,7 @@ msgstr ""
 msgid "سایر جزئیات"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1463
+#: widgets/class-hsw-widget-post-page.php:1471
 msgid "سایر مقالات نویسنده"
 msgstr ""
 
@@ -9493,7 +9489,7 @@ msgstr ""
 msgid "فهرست سایدبار"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:980
+#: widgets/class-hsw-widget-post-page.php:989
 msgid "فهرست سرفصل‌های این مقاله"
 msgstr ""
 
@@ -9506,7 +9502,7 @@ msgstr ""
 msgid "فهرست مطالب خودکار"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1446
+#: widgets/class-hsw-widget-post-page.php:1454
 msgid "فهرست مطالب مقاله"
 msgstr ""
 
@@ -10006,7 +10002,11 @@ msgid "لینک صفحه قوانین و مقررات"
 msgstr ""
 
 #: widgets/class-hsw-widget-post-page.php:144
-msgid "لینک لنگر از متن تیتر (nofollow)"
+msgid "لینک لنگر از متن تیتر"
+msgstr ""
+
+#: widgets/class-hsw-widget-post-page.php:147
+msgid "لینک لنگر به بخش همان صفحه می‌رود و معمولاً خزش جداگانه ایجاد نمی‌کند. حالت دکمه به جاوااسکریپت نیاز دارد؛ حالت لینک برای اشتراک‌گذاری و استفاده بدون جاوااسکریپت مناسب‌تر است."
 msgstr ""
 
 #: widgets/class-hsw-widget-post-page.php:145
@@ -10498,7 +10498,7 @@ msgstr ""
 msgid "متن دیدگاه"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1384
+#: widgets/class-hsw-widget-post-page.php:1392
 msgid "متن دیدگاه شما"
 msgstr ""
 
@@ -10835,7 +10835,7 @@ msgid "مثلاً: جواد نکویی"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:579
-#: widgets/class-hsw-widget-post-page.php:904
+#: widgets/class-hsw-widget-post-page.php:913
 msgid "مجله"
 msgstr ""
 
@@ -11175,7 +11175,7 @@ msgid "مسیر خرید با ویجت‌های جامع حامی: سبد خری
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-breadcrumb.php:117
-#: widgets/class-hsw-widget-post-page.php:901
+#: widgets/class-hsw-widget-post-page.php:910
 #: widgets/class-hsw-widget-product-breadcrumb.php:134
 #: widgets/class-hsw-widget-product-page.php:220
 msgid "مسیر راهنما"
@@ -11224,7 +11224,7 @@ msgstr ""
 msgid "مشاهده جزئیات"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1227
+#: widgets/class-hsw-widget-post-page.php:1233
 msgid "مشاهده سایر مقالات نویسنده"
 msgstr ""
 
@@ -11274,7 +11274,7 @@ msgstr ""
 #: includes/class-hsw-widget-base.php:1181
 #: includes/class-hsw-widget-base.php:1583
 #: widgets/class-hsw-best-sellers.php:60
-#: widgets/class-hsw-widget-post-page.php:1032
+#: widgets/class-hsw-widget-post-page.php:1041
 #: widgets/class-hsw-widget-product-related.php:121
 msgid "مشاهده همه"
 msgstr ""
@@ -11370,7 +11370,7 @@ msgstr ""
 msgid "مقالات مرتبط"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1031
+#: widgets/class-hsw-widget-post-page.php:1040
 msgid "مقالات پیشنهادی و مرتبط"
 msgstr ""
 
@@ -11814,7 +11814,7 @@ msgstr ""
 msgid "ناموجودها انتهای فهرست"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1408
+#: widgets/class-hsw-widget-post-page.php:1416
 msgid "ناوبری نوشته‌ها"
 msgstr ""
 
@@ -11947,8 +11947,8 @@ msgstr ""
 msgid "نشان‌های نوار پرداخت"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:885
-#: widgets/class-hsw-widget-post-page.php:942
+#: widgets/class-hsw-widget-post-page.php:894
+#: widgets/class-hsw-widget-post-page.php:951
 msgid "نشان‌کردن مقاله"
 msgstr ""
 
@@ -11964,7 +11964,7 @@ msgstr ""
 msgid "نشست یافت نشد."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1509
+#: widgets/class-hsw-widget-post-page.php:1517
 #: widgets/class-hsw-widget-product-title.php:328
 msgid "نظر"
 msgstr ""
@@ -12358,7 +12358,7 @@ msgstr ""
 msgid "نوشتهٔ قبلی / بعدی"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:829
+#: widgets/class-hsw-widget-post-page.php:838
 msgid "نوشته‌ای برای نمایش پیدا نشد."
 msgstr ""
 
@@ -12382,7 +12382,7 @@ msgstr ""
 msgid "نوع فیلتر"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1332
+#: widgets/class-hsw-widget-post-page.php:1340
 msgid "نویسنده"
 msgstr ""
 
@@ -12390,7 +12390,7 @@ msgstr ""
 msgid "نویسنده و آمار (تاریخ، زمان مطالعه، بازدید، دیدگاه)"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1126
+#: widgets/class-hsw-widget-post-page.php:1135
 msgid "نویسندهٔ مجله"
 msgstr ""
 
@@ -12694,7 +12694,7 @@ msgstr ""
 msgid "هنوز دیدگاهی ثبت نشده است."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1287
+#: widgets/class-hsw-widget-post-page.php:1293
 msgid "هنوز دیدگاهی ثبت نشده — اولین نفر باشید."
 msgstr ""
 
@@ -13102,7 +13102,7 @@ msgid "ویژگی‌های کلیدی در نسخه دسکتاپ و موبایل
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-guide.php:65
-#: widgets/class-hsw-widget-post-page.php:1345
+#: widgets/class-hsw-widget-post-page.php:1353
 msgid "پاسخ"
 msgstr ""
 
@@ -13219,7 +13219,7 @@ msgstr ""
 msgid "پربحث‌ترین"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1473
+#: widgets/class-hsw-widget-post-page.php:1481
 msgid "پربحث‌ترین مقالات"
 msgstr ""
 
@@ -13354,12 +13354,20 @@ msgstr ""
 msgid "پست الکترونیکی امور مالی برای پرسش‌های حسابداری خریداران."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1421
+#: widgets/class-hsw-widget-post-page.php:1429
 msgid "پست بعدی"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1413
+#: widgets/class-hsw-widget-post-page.php:1421
 msgid "پست قبلی"
+msgstr ""
+
+#: widgets/class-hsw-widget-post-page.php:1512
+msgid "پسند"
+msgstr ""
+
+#: widgets/class-hsw-widget-post-page.php:1510
+msgid "پسندیدن در این مرورگر"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:1857
@@ -14027,7 +14035,7 @@ msgstr ""
 msgid "پیشنهاد شگفت‌انگیز روز"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1204
+#: widgets/class-hsw-widget-post-page.php:1210
 msgid "پیشنهاد فروشگاه"
 msgstr ""
 
@@ -14451,7 +14459,7 @@ msgid "کالاهای دارای این کلاس ارسال، یادداشت «�
 msgstr ""
 
 #: widgets/class-hsw-widget-post-page.php:252
-#: widgets/class-hsw-widget-post-page.php:1136
+#: widgets/class-hsw-widget-post-page.php:1145
 msgid "کالای معرفی‌شده در این مقاله"
 msgstr ""
 

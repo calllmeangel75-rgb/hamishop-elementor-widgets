@@ -233,6 +233,13 @@ jobs:
           php /tmp/wp-cli.phar plugin activate hamishop-elementor-widgets --allow-root
           php /tmp/wp-cli.phar plugin list --allow-root
 
+      - name: Article rendering and controls (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/post-page-wp.php
+
       - name: Loop button controls (WordPress + Elementor)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
@@ -376,7 +383,9 @@ jobs:
       - name: Verify normal and hover label and icon colors
         env:
           HSW_BROWSER_PATH: /usr/bin/google-chrome
-        run: node tests/loop-lead-color-probe.js
+        run: |
+          node tests/loop-lead-color-probe.js
+          node tests/post-page-probe.js
 
   package:
     # Tagging v* produces the distributable ZIP as a workflow artifact, using the

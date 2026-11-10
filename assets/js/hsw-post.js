@@ -2,7 +2,8 @@
  * HamiShop — single post page interactions.
  *
  * Vanilla JS, no dependencies. Everything is progressive: with JS off the
- * article, TOC links, comments and the comment form all still work.
+ * article and native fragment links still work without JavaScript; button-only
+ * TOC entries require JavaScript.
  *
  *  - reading progress bar
  *  - active state for TOC links (IntersectionObserver)
@@ -124,7 +125,15 @@
 		Array.prototype.forEach.call(tocLinks, function (link) {
 			link.addEventListener('click', function (event) {
 				var id = tocTargetId(link);
-				var target = id ? document.getElementById(id) : null;
+				// Restrict lookup to this article; another widget can reuse an ID.
+				var target = null;
+				if (id && body) {
+					Array.prototype.some.call(body.querySelectorAll('h2[id], h3[id]'), function (heading) {
+						if (heading.id !== id) { return false; }
+						target = heading;
+						return true;
+					});
+				}
 				if (!target) {
 					return;
 				}
@@ -250,8 +259,6 @@
 		 * -------------------------------------------------------------- */
 		Array.prototype.forEach.call(root.querySelectorAll('[data-hsw-pp-like]'), function (button) {
 			var key = 'hswPpLike:' + postId;
-			var label = button.querySelector('.hsw-pp__docklabel');
-			var base = label ? parseInt(label.textContent, 10) || 0 : 0;
 			var liked = false;
 
 			try {
@@ -261,9 +268,6 @@
 			var paint = function (on) {
 				button.classList.toggle('is-on', on);
 				button.setAttribute('aria-pressed', on ? 'true' : 'false');
-				if (label) {
-					label.textContent = String(base + (on ? 1 : 0));
-				}
 			};
 
 			paint(liked);

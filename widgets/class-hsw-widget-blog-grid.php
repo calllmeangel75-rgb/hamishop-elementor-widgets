@@ -156,7 +156,7 @@ class HSW_Widget_Blog_Grid extends HSW_Blog_Base {
                 $s        = $this->effective_settings();
                 $f        = $this->blog_filters();
                 $per_page = max( 2, (int) ( $s['per_page'] ?? 6 ) );
-                $skip     = 'yes' === ( $s['skip_first'] ?? 'yes' ) && $f['page'] === 1 && '' === $f['s'];
+                $skip     = 'yes' === ( $s['skip_first'] ?? 'yes' ) && '' === $f['s'];
 
                 $q = $this->blog_query(
                         array(
