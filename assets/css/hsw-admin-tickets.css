@@ -239,3 +239,38 @@
 .post-type-hsw_ticket .row-actions {
 	font-size: 12px;
 }
+
+/* Ticket screens only; keep WordPress save, priority and accessibility controls. */
+.post-type-hsw_ticket #wpbody-content > .wrap { max-width: 1600px; }
+.post-type-hsw_ticket #poststuff .postbox {
+    border: 1px solid #dce5f0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(20, 43, 78, .06);
+}
+.post-type-hsw_ticket #poststuff .postbox-header {
+    padding: 3px 8px;
+    background: #f8fafd;
+    border-bottom: 1px solid #e8edf4;
+}
+.post-type-hsw_ticket #poststuff .postbox-header h2 { color: #183456; font-weight: 700; }
+.post-type-hsw_ticket #titlediv #title {
+    border: 1px solid #dce5f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    min-height: 50px;
+    box-shadow: 0 6px 24px rgba(20, 43, 78, .04);
+}
+.post-type-hsw_ticket .hsw-ticket-toolbar { padding: 14px 16px; background: #f3f7fc; }
+.post-type-hsw_ticket .hsw-ticket-thread { padding: 20px; background: #f1f5fa; }
+.post-type-hsw_ticket .hsw-ticket-msg { max-width: 85%; padding: 14px 16px; }
+.post-type-hsw_ticket .hsw-ticket-msg.is-staff { margin-inline-start: auto; }
+.post-type-hsw_ticket .hsw-ticket-reply { background: #f8fafd; }
+.post-type-hsw_ticket .hsw-ticket-reply-label { display: block; margin-bottom: 8px; font-weight: 700; color: #183456; }
+.post-type-hsw_ticket .hsw-ticket-closed-notice { margin: 0; color: #7b4b0a; line-height: 1.9; }
+.post-type-hsw_ticket .wp-list-table { border: 1px solid #dce5f0; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 24px rgba(20, 43, 78, .04); }
+.post-type-hsw_ticket .wp-list-table th, .post-type-hsw_ticket .wp-list-table td { padding-top: 12px; padding-bottom: 12px; }
+@media (max-width: 782px) {
+    .post-type-hsw_ticket .hsw-ticket-thread { padding: 12px; }
+    .post-type-hsw_ticket .hsw-ticket-msg { max-width: 100%; }
+}
