@@ -1355,7 +1355,7 @@ final class HSW_Account_Support {
 			return '';
 		}
 
-		return '<a class="hsw-ticket-attach" href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . $img . '</a>';
+		return '<a class="hsw-ticket-attach" href="' . esc_url( $url ) . '" target="_blank" rel="noopener" aria-label="' . esc_attr__( 'نمایش تصویر پیوست', 'hamishop-elementor-widgets' ) . '">' . $img . '</a>';
 	}
 
 	/* ---------------------------------------------------------------------

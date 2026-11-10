@@ -129,6 +129,15 @@ class HSW_Assets {
                                 array( 'hsw-fonts' ),
                                 HSW_VERSION
                         );
+                        if ( 'post' === $screen->base ) {
+                                wp_enqueue_script(
+                                        'hsw-admin-ticket-lightbox',
+                                        $this->asset( 'assets/js/hsw-admin-ticket-lightbox.js' ),
+                                        array(),
+                                        HSW_VERSION,
+                                        true
+                                );
+                        }
                 }
         }
 
