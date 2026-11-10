@@ -93,7 +93,29 @@ set_transient( 'hsw_cap_qanoimage', 8, 60 ); $_POST['captcha_token'] = 'qanoimag
 ob_start(); try { $support->ajax_create_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $plain = json_decode( ob_get_clean(), true );
 $plain_id = (int) ( $plain['data']['ticket'] ?? 0 );
 $check( 'ticket without an image has no upload warning', ! empty( $plain['success'] ) && $plain_id && empty( $plain['data']['image_warning'] ) );
+// Exercise ownership, close and closed-reply behaviour with two customers.
+$action = static function ( $method, $id, $nonce, $message = 'A customer reply' ) use ( $support ) {
+    $_POST = array( 'ticket_id' => $id, 'nonce' => $nonce, 'message' => $message ); $_REQUEST = $_POST;
+    ob_start(); try { $support->$method(); } catch ( HSW_QA_Ajax_Die $e ) {} return json_decode( ob_get_clean(), true );
+};
+wp_set_current_user( $user_b ); $nonce_b = wp_create_nonce( 'hsw_ticket_ajax' );
+$other_close = $action( 'ajax_close_ticket', $plain_id, $nonce_b );
+$other_reply = $action( 'ajax_reply_ticket', $plain_id, $nonce_b );
+$check( 'another customer cannot close or reply to ticket', empty( $other_close['success'] ) && empty( $other_reply['success'] ) && 'open' === get_post_meta( $plain_id, HSW_Account_Support::STATUS_META, true ) && 0 === count( get_comments( array( 'post_id' => $plain_id, 'type' => 'hsw_ticket_reply' ) ) ) );
+wp_set_current_user( $user_a ); $nonce_a = wp_create_nonce( 'hsw_ticket_ajax' );
+$draft_close = $action( 'ajax_close_ticket', $draft, $nonce_a );
+$check( 'unpublished ticket cannot be closed by AJAX', empty( $draft_close['success'] ) && '' === get_post_meta( $draft, HSW_Account_Support::STATUS_META, true ) );
+$bad_nonce = $action( 'ajax_close_ticket', $plain_id, 'invalid-nonce' );
+$check( 'invalid nonce cannot close ticket', 'open' === get_post_meta( $plain_id, HSW_Account_Support::STATUS_META, true ) );
+$closed = $action( 'ajax_close_ticket', $plain_id, $nonce_a );
+$reply_closed = $action( 'ajax_reply_ticket', $plain_id, $nonce_a );
+$check( 'owner closes ticket and cannot reply while closed', ! empty( $closed['success'] ) && empty( $reply_closed['success'] ) && 'closed' === get_post_meta( $plain_id, HSW_Account_Support::STATUS_META, true ) );
+// Document default WordPress role behaviour; site-specific roles may differ.
+$editor = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_editor', 'user_pass' => wp_generate_password(), 'role' => 'editor' ) );
+$author = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_author', 'user_pass' => wp_generate_password(), 'role' => 'author' ) );
+$check( 'default editor can edit customer ticket via generic post capabilities', user_can( $editor, 'edit_post', $plain_id ) );
+$check( 'default author and subscriber cannot edit another customer ticket in admin', ! user_can( $author, 'edit_post', $plain_id ) && ! user_can( $user_b, 'edit_post', $plain_id ) );
 foreach ( array( $own, $other, $draft, $ordinary, $created_id, $plain_id ) as $id ) { if ( $id ) { wp_delete_post( $id, true ); } }
 require_once ABSPATH . 'wp-admin/includes/user.php';
-wp_delete_user( $user_a ); wp_delete_user( $user_b );
+wp_delete_user( $user_a ); wp_delete_user( $user_b ); wp_delete_user( $editor ); wp_delete_user( $author );
 exit( $failed ? 1 : 0 );

@@ -1267,7 +1267,7 @@ final class HSW_Account_Support {
 		$ticket_id = isset( $_POST['ticket_id'] ) ? absint( $_POST['ticket_id'] ) : 0;
 		$ticket    = $ticket_id ? get_post( $ticket_id ) : null;
 
-		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id ) {
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id || 'publish' !== $ticket->post_status ) {
 			wp_send_json_error( array( 'message' => __( 'گفتگو پیدا نشد.', 'hamishop-elementor-widgets' ) ), 404 );
 		}
 
