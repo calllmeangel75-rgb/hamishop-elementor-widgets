@@ -41,5 +41,6 @@ $html = $widget->product_probe( $product );
 $check( 'sale price markup has no extra old price', substr_count( $html, '<del' ) === 1 );
 $controls = $widget->get_controls();
 $check( 'body color also targets paragraphs', false !== strpos( implode( ' ', array_keys( $controls['body_c']['selectors'] ?? array() ) ), '.hsw-pp__body p' ) );
+$check( 'bookmark and share visibility controls exist and default on', 'yes' === ( $controls['show_bookmark']['default'] ?? '' ) && 'yes' === ( $controls['show_share']['default'] ?? '' ) );
 wp_delete_post( $post_id, true ); $product->delete( true ); wp_reset_postdata();
 exit( $failed ? 1 : 0 );

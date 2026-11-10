@@ -115,6 +115,26 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		);
 
 		$this->add_control(
+			'show_bookmark',
+			array(
+				'label'       => __( 'دکمهٔ نشان‌کردن در مرورگر', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'وضعیت فقط در همین مرورگر نگه‌داری می‌شود؛ فهرست ذخیره‌شده یا همگام‌سازی حساب ندارد.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
+			'show_share',
+			array(
+				'label'       => __( 'دکمهٔ اشتراک‌گذاری', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'اشتراک‌گذاری با امکانات مرورگر، یا کپی آدرس مقاله.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
 			'show_hero',
 			array(
 				'label'   => __( 'تصویر شاخص', 'hamishop-elementor-widgets' ),
@@ -890,12 +910,16 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 						</span>
 					</div>
 					<div class="hsw-pp__topacts">
+						<?php if ( $on( 'show_bookmark' ) ) : ?>
 						<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-bookmark aria-label="<?php esc_attr_e( 'نشان‌کردن در همین مرورگر', 'hamishop-elementor-widgets' ); ?>" aria-pressed="false">
 							<?php HSW_Helpers::the_icon( 'bookmark' ); ?>
 						</button>
+						<?php endif; ?>
+						<?php if ( $on( 'show_share' ) ) : ?>
 						<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-share aria-label="<?php esc_attr_e( 'اشتراک‌گذاری', 'hamishop-elementor-widgets' ); ?>">
 							<?php HSW_Helpers::the_icon( 'share' ); ?>
 						</button>
+						<?php endif; ?>
 					</div>
 				</header>
 			<?php endif; ?>
@@ -947,12 +971,16 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-font aria-pressed="false" aria-label="<?php esc_attr_e( 'تغییر اندازه قلم', 'hamishop-elementor-widgets' ); ?>">
 										<?php HSW_Helpers::the_icon( 'format_size' ); ?>
 									</button>
+									<?php if ( $on( 'show_bookmark' ) ) : ?>
 									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-bookmark aria-label="<?php esc_attr_e( 'نشان‌کردن در همین مرورگر', 'hamishop-elementor-widgets' ); ?>" aria-pressed="false">
 										<?php HSW_Helpers::the_icon( 'bookmark' ); ?>
 									</button>
+									<?php endif; ?>
+									<?php if ( $on( 'show_share' ) ) : ?>
 									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-share aria-label="<?php esc_attr_e( 'اشتراک‌گذاری', 'hamishop-elementor-widgets' ); ?>">
 										<?php HSW_Helpers::the_icon( 'share' ); ?>
 									</button>
+									<?php endif; ?>
 								</div>
 							</div>
 						<?php endif; ?>
