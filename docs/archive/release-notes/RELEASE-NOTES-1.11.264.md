@@ -1,0 +1,3 @@
+# 1.11.264 — staging pre-release
+
+First set of article-page corrections: clarify fragment SEO, avoid generated ID collisions within the article, scope TOC navigation, apply explicit Elementor body text color to paragraphs, label the browser-local like honestly, supply the native comment action, fix duplicate price markup and archive pagination, and hide an unconfigured newsletter form. WordPress integration and representative browser fixtures passed. Existing duplicate authored IDs, no-JavaScript button TOCs, typography precedence, high-comment-volume performance, real comment submission/security and additional price cases remain open. Test on a disposable staging site only; this is not approved for production.
