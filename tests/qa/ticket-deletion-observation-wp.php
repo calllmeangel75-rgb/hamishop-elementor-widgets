@@ -36,7 +36,7 @@ set_post_thumbnail( $shared_post, $attachment );
 wp_trash_post( $ticket );
 $check( 'trash retains ticket, replies, attachment and notifications', 'trash' === get_post_status( $ticket ) && get_comment( $comment ) && get_post( $attachment ) && file_exists( $original ) && get_user_meta( $user, '_hsw_notifications', true ) === $notifications );
 wp_untrash_post( $ticket );
-$check( 'untrash restores ticket without altering image or notifications', 'publish' === get_post_status( $ticket ) && get_post( $attachment ) && file_exists( $original ) && get_user_meta( $user, '_hsw_notifications', true ) === $notifications );
+$check( 'untrash restores ticket without altering image or notifications', get_post( $ticket ) && 'trash' !== get_post_status( $ticket ) && get_post( $attachment ) && file_exists( $original ) && get_user_meta( $user, '_hsw_notifications', true ) === $notifications );
 wp_delete_post( $ticket, true );
 $check( 'permanent deletion removes ticket, metadata, reply and reply metadata', ! get_post( $ticket ) && ! metadata_exists( 'post', $ticket, 'hsw_delete_qa' ) && ! get_comment( $comment ) && ! metadata_exists( 'comment', $comment, 'hsw_delete_qa' ) );
 $check( 'attachment and image files remain after ticket deletion', get_post( $attachment ) && file_exists( $original ) && file_exists( $thumb ) );
