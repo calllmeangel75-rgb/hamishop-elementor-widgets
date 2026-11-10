@@ -1228,11 +1228,18 @@ final class HSW_Account_Support {
 	public function ajax_view_ticket() {
 		$user_id   = $this->ajax_user();
 		$ticket_id = isset( $_POST['ticket_id'] ) ? absint( $_POST['ticket_id'] ) : 0;
+		$ticket    = $ticket_id ? get_post( $ticket_id ) : null;
+
+		// Validate before constructing either the thread OR the list row. The
+		// row contains the subject, message excerpt, department and order ID.
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type || (int) $ticket->post_author !== (int) $user_id || 'publish' !== $ticket->post_status ) {
+			wp_send_json_error( array( 'message' => __( 'گفتگو پیدا نشد.', 'hamishop-elementor-widgets' ) ), 404 );
+		}
 
 		wp_send_json_success(
 			array(
 				'html'   => $this->chat_thread_html( $user_id, $ticket_id ),
-				'row'    => $this->chat_row_html( get_post( $ticket_id ) ),
+				'row'    => $this->chat_row_html( $ticket ),
 				'ticket' => (int) $ticket_id,
 			)
 		);
