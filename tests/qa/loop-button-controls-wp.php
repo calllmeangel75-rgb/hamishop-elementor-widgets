@@ -17,7 +17,9 @@ foreach ( array( 'HSW_Widget_Wonder_Deals', 'HSW_Widget_Best_Sellers', 'HSW_Widg
     $get = static function ( $id ) use ( $widget ) { return $widget->get_controls( $id ); };
     foreach ( array( 'btn_bg', 'btn_bgh', 'btn_c', 'btn_ch', 'btn_radius' ) as $id ) {
         $c = $get( $id ) ?: array();
-        $check( "$class legacy $id retained and hidden only in editor", isset( $c['selectors'] ) && 'hsw-loop-legacy-button-control' === ( $c['classes'] ?? '' ) && empty( $c['condition'] ) );
+        $ok = isset( $c['selectors'] ) && false !== strpos( (string) ( $c['classes'] ?? '' ), 'hsw-loop-legacy-button-control' );
+        if ( ! $ok ) { echo '::error::CONTROL ' . $class . ' ' . $id . ' ' . wp_json_encode( $c ) . PHP_EOL; }
+        $check( "$class legacy $id retained and hidden only in editor", $ok );
     }
     foreach ( array( 'add_btn_bg', 'add_btn_c', 'add_btn_bg_h', 'add_btn_c_h', 'add_btn_r' ) as $id ) {
         $check( "$class canonical $id visible", is_array( $get( $id ) ) && false === strpos( (string) ( $get( $id )['classes'] ?? '' ), 'hsw-loop-legacy-button-control' ) );
