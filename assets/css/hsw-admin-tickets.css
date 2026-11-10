@@ -298,3 +298,21 @@
 .post-type-hsw_ticket .hsw-ticket-facts dt { color: #64748b; }
 .post-type-hsw_ticket .hsw-ticket-facts dd { margin: 0; text-align: end; overflow-wrap: anywhere; }
 @media (max-width: 782px) { .post-type-hsw_ticket .hsw-ticket-msg { max-width: 100%; } }
+
+/* Native-dialog image preview, only on ticket admin screens. */
+.post-type-hsw_ticket .hsw-ticket-lightbox {
+	box-sizing: border-box;
+	width: fit-content;
+	max-width: min(94vw, 1200px);
+	max-height: 92vh;
+	padding: 48px 14px 14px;
+	border: 0;
+	border-radius: 14px;
+	background: #fff;
+	box-shadow: 0 18px 60px rgba(0, 0, 0, .3);
+	overflow: auto;
+}
+.post-type-hsw_ticket .hsw-ticket-lightbox::backdrop { background: rgba(8, 18, 34, .82); }
+.post-type-hsw_ticket .hsw-ticket-lightbox img { display: block; max-width: 100%; max-height: calc(92vh - 64px); width: auto; height: auto; object-fit: contain; }
+.post-type-hsw_ticket .hsw-ticket-lightbox__close { position: absolute; top: 6px; inset-inline-end: 10px; width: 36px; height: 36px; border: 0; border-radius: 8px; background: #edf2f8; color: #182c46; font-size: 28px; line-height: 1; cursor: pointer; }
+.post-type-hsw_ticket .hsw-ticket-lightbox__close:focus-visible { outline: 2px solid #2271b1; outline-offset: 2px; }
