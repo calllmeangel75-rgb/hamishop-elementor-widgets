@@ -6744,12 +6744,7 @@ msgid "رنگ دوم گرادیان هدر پنل حساب کاربری"
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:2663
-#: includes/class-hsw-widget-base.php:2771
 msgid "رنگ دکمه"
-msgstr ""
-
-#: includes/class-hsw-widget-base.php:2772
-msgid "رنگ دکمه (هاور)"
 msgstr ""
 
 #: includes/class-hsw-palette.php:64
@@ -7094,6 +7089,14 @@ msgstr ""
 
 #: widgets/class-hsw-widget-product-gallery.php:180
 msgid "رنگ متن و آیکون"
+msgstr ""
+
+#: includes/class-hsw-widget-base.php:2771
+msgid "رنگ متن و آیکون دکمه"
+msgstr ""
+
+#: includes/class-hsw-widget-base.php:2772
+msgid "رنگ متن و آیکون دکمه (هاور)"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:999
