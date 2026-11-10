@@ -602,6 +602,11 @@ final class HSW_Account_Support {
 		}
 
 		$customer_reply = $is_author && ! $is_staff;
+		// Staff must explicitly reopen a closed ticket before replying, including
+		// via inbound email. Preserve the existing customer-email reopen policy.
+		if ( ! $customer_reply && 'closed' === $this->get_status( $ticket_id ) ) {
+			return new WP_Error( 'hsw_inbound_closed', 'ticket is closed', array( 'status' => 409 ) );
+		}
 		$reply_user_id  = $customer_reply ? (int) $author->ID : ( $sender ? (int) $sender->ID : 0 );
 		if ( ! $this->insert_reply( $ticket_id, $reply_user_id, $message, ! $customer_reply ) ) {
 			return new WP_Error( 'hsw_inbound_save', 'could not save reply', array( 'status' => 500 ) );
@@ -1537,6 +1542,10 @@ final class HSW_Account_Support {
 	 * ------------------------------------------------------------------ */
 
 	public function add_meta_boxes() {
+		// Ticket replies are already shown in the conversation; the generic
+		// WordPress comments boxes duplicate them and expose blog-oriented UI.
+		remove_meta_box( 'commentsdiv', self::POST_TYPE, 'normal' );
+		remove_meta_box( 'commentstatusdiv', self::POST_TYPE, 'normal' );
 		add_meta_box( 'hsw_ticket_details', 'اطلاعات تیکت', array( $this, 'render_details_box' ), self::POST_TYPE, 'side', 'high' );
 		add_meta_box( 'hsw_ticket_thread', 'گفتگوی تیکت', array( $this, 'render_thread_box' ), self::POST_TYPE, 'normal', 'high' );
 	}
@@ -1649,8 +1658,13 @@ final class HSW_Account_Support {
 			<?php endforeach; ?>
 		</div>
 		<div class="hsw-ticket-reply">
-			<textarea form="hsw-ticket-reply-form" name="message" rows="5" class="widefat" required placeholder="پاسخ خود را بنویسید…"></textarea>
-			<p><button type="submit" form="hsw-ticket-reply-form" class="button button-primary">ارسال پاسخ به کاربر</button></p>
+			<?php if ( 'closed' === $status ) : ?>
+				<p class="hsw-ticket-closed-notice">این تیکت بسته است. برای ارسال پاسخ، ابتدا آن را بازگشایی کنید.</p>
+			<?php else : ?>
+				<label for="hsw-ticket-reply-message" class="hsw-ticket-reply-label">پاسخ به مشتری</label>
+				<textarea id="hsw-ticket-reply-message" form="hsw-ticket-reply-form" name="message" rows="5" class="widefat" required placeholder="پاسخ خود را بنویسید…"></textarea>
+				<p><button type="submit" form="hsw-ticket-reply-form" class="button button-primary">ارسال پاسخ به کاربر</button></p>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -1692,8 +1706,11 @@ final class HSW_Account_Support {
 	public function admin_reply() {
 		$ticket_id = isset( $_POST['ticket_id'] ) ? absint( $_POST['ticket_id'] ) : 0;
 		$nonce     = isset( $_POST['hsw_ticket_reply_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['hsw_ticket_reply_nonce'] ) ) : '';
-		if ( ! $ticket_id || ! current_user_can( 'edit_post', $ticket_id ) || ! wp_verify_nonce( $nonce, 'hsw_admin_ticket_reply_' . $ticket_id ) ) {
+		if ( ! $ticket_id || self::POST_TYPE !== get_post_type( $ticket_id ) || ! current_user_can( 'edit_post', $ticket_id ) || ! wp_verify_nonce( $nonce, 'hsw_admin_ticket_reply_' . $ticket_id ) ) {
 			wp_die( 'درخواست نامعتبر است.' );
+		}
+		if ( 'closed' === $this->get_status( $ticket_id ) ) {
+			wp_die( esc_html__( 'این تیکت بسته است. ابتدا آن را بازگشایی کنید.', 'hamishop-elementor-widgets' ), '', array( 'response' => 409, 'back_link' => true ) );
 		}
 		$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 		if ( '' === trim( $message ) ) {

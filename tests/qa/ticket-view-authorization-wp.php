@@ -110,6 +110,25 @@ $check( 'invalid nonce cannot close ticket', 'open' === get_post_meta( $plain_id
 $closed = $action( 'ajax_close_ticket', $plain_id, $nonce_a );
 $reply_closed = $action( 'ajax_reply_ticket', $plain_id, $nonce_a );
 $check( 'owner closes ticket and cannot reply while closed', ! empty( $closed['success'] ) && empty( $reply_closed['success'] ) && 'closed' === get_post_meta( $plain_id, HSW_Account_Support::STATUS_META, true ) );
+// Closed state must be enforced by the server, not just by hiding the composer.
+ob_start(); $support->render_thread_box( get_post( $plain_id ) ); $closed_html = ob_get_clean();
+$check( 'closed admin thread asks to reopen and omits reply textarea', false !== strpos( $closed_html, 'بازگشایی' ) && false === strpos( $closed_html, 'name="message"' ) );
+$admin = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_admin', 'user_pass' => wp_generate_password(), 'role' => 'administrator' ) );
+wp_set_current_user( $admin );
+$_POST = array( 'ticket_id' => $plain_id, 'hsw_ticket_reply_nonce' => wp_create_nonce( 'hsw_admin_ticket_reply_' . $plain_id ), 'message' => 'A staff reply' ); $_REQUEST = $_POST;
+$comments_before = count( get_comments( array( 'post_id' => $plain_id, 'type' => 'hsw_ticket_reply' ) ) ); $mail_before = $mail_count;
+ob_start(); try { $support->admin_reply(); } catch ( HSW_QA_Ajax_Die $e ) {} ob_end_clean();
+$check( 'staff direct POST cannot reply to closed ticket or send mail', 'closed' === get_post_meta( $plain_id, HSW_Account_Support::STATUS_META, true ) && $comments_before === count( get_comments( array( 'post_id' => $plain_id, 'type' => 'hsw_ticket_reply' ) ) ) && $mail_before === $mail_count );
+$request->set_param( 'to', 'support+' . $token_method->invoke( $support, $plain_id ) . '@example.com' );
+$request->set_param( 'from', get_option( 'admin_email' ) );
+$staff_closed = $support->handle_inbound_email( $request );
+$check( 'staff inbound cannot reply to closed ticket', is_wp_error( $staff_closed ) && 'hsw_inbound_closed' === $staff_closed->get_error_code() && 'closed' === get_post_meta( $plain_id, HSW_Account_Support::STATUS_META, true ) && $comments_before === count( get_comments( array( 'post_id' => $plain_id, 'type' => 'hsw_ticket_reply' ) ) ) );
+update_post_meta( $plain_id, HSW_Account_Support::STATUS_META, 'open' );
+ob_start(); $support->render_thread_box( get_post( $plain_id ) ); $open_html = ob_get_clean();
+$check( 'reopened admin thread restores reply textarea', false !== strpos( $open_html, 'name="message"' ) );
+// Restore customer identity and original inbound request for subsequent tests.
+wp_set_current_user( $user_a );
+$request->set_param( 'to', 'support+' . $token_method->invoke( $support, $own ) . '@example.com' ); $request->set_param( 'from', get_userdata( $user_a )->user_email );
 // Document default WordPress role behaviour; site-specific roles may differ.
 $editor = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_editor', 'user_pass' => wp_generate_password(), 'role' => 'editor' ) );
 $author = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_author', 'user_pass' => wp_generate_password(), 'role' => 'author' ) );
@@ -132,5 +151,5 @@ $check( 'foreign related order is rejected before ticket creation', isset( $fore
 $order->delete( true );
 foreach ( array( $own, $other, $draft, $ordinary, $created_id, $plain_id ) as $id ) { if ( $id ) { wp_delete_post( $id, true ); } }
 require_once ABSPATH . 'wp-admin/includes/user.php';
-wp_delete_user( $user_a ); wp_delete_user( $user_b ); wp_delete_user( $editor ); wp_delete_user( $author );
+wp_delete_user( $user_a ); wp_delete_user( $user_b ); wp_delete_user( $editor ); wp_delete_user( $author ); wp_delete_user( $admin );
 exit( $failed ? 1 : 0 );
