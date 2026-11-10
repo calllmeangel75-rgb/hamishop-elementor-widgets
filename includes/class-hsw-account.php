@@ -2962,6 +2962,9 @@ final class HSW_Account {
 				'read'  => false,
 			)
 		);
+		if ( 'ticket' === $list[0]['type'] && ! empty( $args['ticket_id'] ) ) {
+			$list[0]['ticket_id'] = absint( $args['ticket_id'] );
+		}
 		$max  = max( 10, absint( $this->setting( 'notifications.max', 50 ) ) );
 		$list = array_slice( $list, 0, $max );
 		update_user_meta( $user_id, '_hsw_notifications', $list );

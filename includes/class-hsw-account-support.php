@@ -35,6 +35,7 @@ final class HSW_Account_Support {
 
 		add_action( 'init', array( $this, 'register_post_type' ), 5 );
 		add_action( 'hsw_ticket_cleanup', array( $this, 'cleanup_old_tickets' ) );
+		add_action( 'deleted_post', array( $this, 'cleanup_deleted_ticket_notifications' ), 10, 2 );
 		add_action( 'init', array( $this, 'schedule_cleanup' ), 20 );
 		add_action( 'rest_api_init', array( $this, 'register_inbound_route' ) );
 		add_action( 'template_redirect', array( $this, 'handle_frontend_actions' ) );
@@ -62,6 +63,37 @@ final class HSW_Account_Support {
 			add_filter( 'enter_title_here', array( $this, 'admin_title_placeholder' ), 10, 2 );
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 			add_action( 'admin_footer', array( $this, 'render_ticket_action_forms' ) );
+		}
+	}
+
+	/** Remove only this owner's matching ticket notifications after permanent deletion.
+	 * Trash is deliberately untouched. Older notifications are matched only by
+	 * their exact current ticket URL; changed site URLs are left alone.
+	 * Compare-and-swap avoids overwriting a concurrently updated list.
+	 */
+	public function cleanup_deleted_ticket_notifications( $post_id, $post ) {
+		if ( ! $post || self::POST_TYPE !== $post->post_type || ! $post->post_author ) {
+			return;
+		}
+		$user_id = (int) $post->post_author;
+		$url = esc_url_raw( $this->ticket_url( $post_id ) );
+		for ( $attempt = 0; $attempt < 3; $attempt++ ) {
+			$list = get_user_meta( $user_id, '_hsw_notifications', true );
+			if ( ! is_array( $list ) || ! $list ) {
+				return;
+			}
+			$kept = array_values( array_filter( $list, static function ( $item ) use ( $post_id, $url ) {
+				if ( ! is_array( $item ) || ! isset( $item['type'] ) || 'ticket' !== $item['type'] ) {
+					return true;
+				}
+				if ( isset( $item['ticket_id'] ) ) {
+					return (int) $item['ticket_id'] !== (int) $post_id;
+				}
+				return ! isset( $item['url'] ) || $item['url'] !== $url;
+			} ) );
+			if ( count( $kept ) === count( $list ) || update_user_meta( $user_id, '_hsw_notifications', $kept, $list ) ) {
+				return;
+			}
 		}
 	}
 
@@ -302,6 +334,7 @@ final class HSW_Account_Support {
 				'title' => 'تیکت شما ثبت شد',
 				'text'  => sprintf( 'تیکت «%s» با موفقیت ثبت شد و در انتظار پاسخ تیم پشتیبانی است.', $subject ),
 				'url'   => $this->ticket_url( $ticket_id ),
+				'ticket_id' => (int) $ticket_id,
 			)
 		);
 
@@ -1173,6 +1206,7 @@ final class HSW_Account_Support {
 				'title' => __( 'تیکت شما ثبت شد', 'hamishop-elementor-widgets' ),
 				'text'  => sprintf( 'گفتگوی «%s» ثبت شد و در انتظار پاسخ تیم پشتیبانی است.', $subject ),
 				'url'   => $this->ticket_url( $ticket_id ),
+				'ticket_id' => (int) $ticket_id,
 			)
 		);
 
@@ -1743,6 +1777,7 @@ final class HSW_Account_Support {
 					'title' => 'پاسخ جدید در تیکت شما',
 					'text'  => sprintf( 'تیم پشتیبانی به تیکت «%s» پاسخ داد.', $ticket->post_title ),
 					'url'   => $this->ticket_url( $ticket_id ),
+					'ticket_id' => (int) $ticket_id,
 				)
 			);
 		}
