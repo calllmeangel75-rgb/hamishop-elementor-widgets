@@ -11,6 +11,7 @@ class HSW_QA_Support_Account {
     public function format_date( $timestamp ) { return (string) $timestamp; }
     public function endpoint_enabled( $name ) { return true; }
     public function inbound_secret() { return 'qa-inbound-secret'; }
+    public function add_notification( $user_id, $notification ) {}
 }
 class HSW_QA_Ajax_Die extends Exception {}
 add_filter( 'wp_die_ajax_handler', static function () { return static function () { throw new HSW_QA_Ajax_Die(); }; } );
@@ -75,7 +76,24 @@ $old_suppress = $wpdb->suppress_errors( true ); add_filter( 'query', $fail_inser
 $inbound = $support->handle_inbound_email( $request );
 remove_filter( 'query', $fail_insert ); $wpdb->suppress_errors( $old_suppress );
 $check( 'inbound insertion failure returns error without reopening or mail', is_wp_error( $inbound ) && 'hsw_inbound_save' === $inbound->get_error_code() && 'closed' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) && '12345' === get_post_meta( $own, HSW_Account_Support::UPDATED_META, true ) && $mail_count === $mail_before );
-foreach ( array( $own, $other, $draft, $ordinary ) as $id ) { wp_delete_post( $id, true ); }
+// Failed upload is a partial success: one ticket exists and a visible warning
+// is returned, so a client should not retry and create a duplicate.
+set_transient( 'hsw_cap_qaimage', 7, 60 );
+$_POST = array( 'nonce' => wp_create_nonce( 'hsw_ticket_ajax' ), 'subject' => 'Image upload QA', 'message' => 'This is a test ticket message.', 'captcha_token' => 'qaimage', 'captcha' => '7' ); $_REQUEST = $_POST;
+$_FILES['image'] = array( 'name' => 'example.jpg', 'tmp_name' => '', 'size' => 0, 'error' => UPLOAD_ERR_INI_SIZE );
+ob_start(); try { $support->ajax_create_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $created = json_decode( ob_get_clean(), true );
+unset( $_FILES['image'] );
+$created_id = (int) ( $created['data']['ticket'] ?? 0 );
+$check( 'failed upload creates one ticket and reports partial success', ! empty( $created['success'] ) && $created_id && ! empty( $created['data']['image_warning'] ) && get_post( $created_id ) && ! get_post_meta( $created_id, HSW_Account_Support::IMAGE_META, true ) );
+$upload_method = new ReflectionMethod( $support, 'handle_image_upload' ); $upload_method->setAccessible( true );
+$check( 'absent image is optional', 0 === $upload_method->invoke( $support, $own ) );
+$_FILES['image'] = array( 'name' => 'large.jpg', 'tmp_name' => '/tmp/nonexistent', 'size' => 5 * MB_IN_BYTES, 'error' => UPLOAD_ERR_OK );
+$check( 'oversized image reports an error', is_wp_error( $upload_method->invoke( $support, $own ) ) ); unset( $_FILES['image'] );
+set_transient( 'hsw_cap_qanoimage', 8, 60 ); $_POST['captcha_token'] = 'qanoimage'; $_POST['captcha'] = '8'; $_REQUEST = $_POST;
+ob_start(); try { $support->ajax_create_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $plain = json_decode( ob_get_clean(), true );
+$plain_id = (int) ( $plain['data']['ticket'] ?? 0 );
+$check( 'ticket without an image has no upload warning', ! empty( $plain['success'] ) && $plain_id && empty( $plain['data']['image_warning'] ) );
+foreach ( array( $own, $other, $draft, $ordinary, $created_id, $plain_id ) as $id ) { if ( $id ) { wp_delete_post( $id, true ); } }
 require_once ABSPATH . 'wp-admin/includes/user.php';
 wp_delete_user( $user_a ); wp_delete_user( $user_b );
 exit( $failed ? 1 : 0 );
