@@ -4,6 +4,8 @@ if ( PHP_SAPI !== 'cli' || '1' !== getenv( 'HSW_QA_DISPOSABLE' ) ) { fwrite( STD
 register_shutdown_function( static function () { $e = error_get_last(); if ( $e && in_array( $e['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR ), true ) ) { echo '::error::' . str_replace( "\n", ' ', $e['message'] ) . PHP_EOL; } } );
 $path = getenv( 'HSW_WP_LOAD' );
 if ( ! $path || ! is_file( $path ) ) { fwrite( STDERR, "HSW_WP_LOAD required.\n" ); exit( 2 ); }
+// Elementor strips editor-only control metadata in frontend-optimized mode.
+define( 'WP_ADMIN', true );
 require $path;
 if ( ! function_exists( 'wp_get_environment_type' ) || 'production' === wp_get_environment_type() || ! class_exists( '\\Elementor\\Plugin' ) ) { exit( 2 ); }
 $root = dirname( __DIR__, 2 );
