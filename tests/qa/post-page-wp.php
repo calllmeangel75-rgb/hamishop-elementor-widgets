@@ -29,6 +29,9 @@ $check( 'decoded headings are safely escaped once', false !== strpos( $widget->t
 $check( 'legacy none remains a button', false !== strpos( $widget->toc_probe( $content['toc'][0], 'none' ), '<button' ) );
 $link = $widget->toc_probe( $content['toc'][0], 'index' );
 $check( 'fragment is a working anchor without unnecessary nofollow', false !== strpos( $link, 'href="#hsw-h-3"' ) && false === strpos( $link, 'nofollow' ) );
+$side = $widget->toc_probe( $content['toc'][0], 'index', 'side' );
+$check( 'sidebar uses real fragment links in link mode', false !== strpos( $side, '<a ' ) && false !== strpos( $side, 'href="#hsw-h-3"' ) );
+$check( 'sidebar preserves scroll-only mode', false !== strpos( $widget->toc_probe( $content['toc'][0], 'none', 'side' ), '<button' ) );
 $form = $widget->comment_probe( $post );
 $check( 'no-JS comment form supplies admin-post action', false !== strpos( $form, 'name="action" value="hsw_submit_comment"' ) && false !== strpos( $form, 'admin-post.php' ) );
 $dock = $widget->dock_probe( $post );

@@ -526,9 +526,6 @@
 	line-height: 2;
 }
 
-.hsw-pp__body.is-large {
-	--hsw-pp-fs: 17px;
-}
 
 .hsw-pp__body > *:first-child {
 	margin-top: 0;
@@ -1701,4 +1698,12 @@
 .hsw-pp--locked .post-password-form input[type="password"] {
 	width: 100%;
 	margin-bottom: 10px;
+}
+
+/* Feedback is visible and announced, including when clipboard access fails. */
+.hsw-pp__share-status {
+	display: block;
+	padding: 4px 12px;
+	color: var(--hsw-pp-ink);
+	font-size: 12px;
 }
