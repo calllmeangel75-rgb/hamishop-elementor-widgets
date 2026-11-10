@@ -313,6 +313,10 @@
 	overflow: auto;
 }
 .post-type-hsw_ticket .hsw-ticket-lightbox::backdrop { background: rgba(8, 18, 34, .82); }
+.post-type-hsw_ticket .hsw-ticket-lightbox__viewport { max-width: min(calc(94vw - 28px), 1172px); max-height: calc(92vh - 64px); overflow: auto; }
 .post-type-hsw_ticket .hsw-ticket-lightbox img { display: block; max-width: 100%; max-height: calc(92vh - 64px); width: auto; height: auto; object-fit: contain; }
+.post-type-hsw_ticket .hsw-ticket-lightbox img.is-zoomed { max-width: none; max-height: none; }
+.post-type-hsw_ticket .hsw-ticket-lightbox__zoom { position: absolute; top: 6px; inset-inline-start: 10px; height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: #edf2f8; color: #182c46; cursor: pointer; }
+.post-type-hsw_ticket .hsw-ticket-lightbox__zoom:focus-visible { outline: 2px solid #2271b1; outline-offset: 2px; }
 .post-type-hsw_ticket .hsw-ticket-lightbox__close { position: absolute; top: 6px; inset-inline-end: 10px; width: 36px; height: 36px; border: 0; border-radius: 8px; background: #edf2f8; color: #182c46; font-size: 28px; line-height: 1; cursor: pointer; }
 .post-type-hsw_ticket .hsw-ticket-lightbox__close:focus-visible { outline: 2px solid #2271b1; outline-offset: 2px; }
