@@ -1293,7 +1293,11 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 				echo '<p class="hsw-pp__noComments">' . esc_html__( 'هنوز دیدگاهی ثبت نشده — اولین نفر باشید.', 'hamishop-elementor-widgets' ) . '</p>';
 			}
 
-			if ( isset( $_GET['unapproved'] ) && absint( $_GET['unapproved'] ) > 0 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display flag from WordPress.
+			// A bare ?unapproved=1 is not evidence that a comment was submitted.
+			$pending_id = isset( $_GET['unapproved'] ) ? absint( $_GET['unapproved'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- WordPress moderation redirect.
+			$pending_hash = isset( $_GET['moderation-hash'] ) ? sanitize_text_field( wp_unslash( $_GET['moderation-hash'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$pending = $pending_id && $pending_hash ? get_comment( $pending_id ) : null;
+			if ( $pending && (int) $pending->comment_post_ID === (int) $post->ID && '0' === (string) $pending->comment_approved && hash_equals( wp_hash( $pending->comment_date_gmt ), $pending_hash ) ) {
 				echo '<p class="hsw-pp__form-msg is-ok" role="status">' . esc_html__( 'دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده می‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
 			}
 

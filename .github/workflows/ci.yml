@@ -233,6 +233,13 @@ jobs:
           php /tmp/wp-cli.phar plugin activate hamishop-elementor-widgets --allow-root
           php /tmp/wp-cli.phar plugin list --allow-root
 
+      - name: Article archive pagination (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/blog-pagination-wp.php
+
       - name: Article rendering and controls (disposable WordPress)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php

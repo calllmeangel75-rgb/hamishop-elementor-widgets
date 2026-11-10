@@ -757,7 +757,7 @@ msgstr ""
 msgid "ارسال دیدگاه"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1388
+#: widgets/class-hsw-widget-post-page.php:1392
 msgid "ارسال دیدگاه یا پرسش درباره این مقاله"
 msgstr ""
 
@@ -1724,7 +1724,7 @@ msgstr ""
 
 #: includes/class-hsw-email-verify.php:214
 #: widgets/class-hsw-widget-blog-newsletter.php:57
-#: widgets/class-hsw-widget-blog-newsletter.php:129
+#: widgets/class-hsw-widget-blog-newsletter.php:139
 msgid "ایمیل شما"
 msgstr ""
 
@@ -2427,6 +2427,10 @@ msgstr ""
 
 #: includes/class-hsw-account-auth.php:1619
 msgid "برای فعال‌سازی، شماره موبایل خود را وارد کنید."
+msgstr ""
+
+#: widgets/class-hsw-widget-blog-newsletter.php:118
+msgid "برای فعال‌شدن خبرنامه، شورت‌کد یا آدرس فرم را تنظیم کنید."
 msgstr ""
 
 #: includes/class-hsw-account.php:2719
@@ -4147,7 +4151,7 @@ msgstr ""
 msgid "ثبت تیکت ناموفق بود. دوباره تلاش کنید."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1529
+#: widgets/class-hsw-widget-post-page.php:1533
 msgid "ثبت دیدگاه"
 msgstr ""
 
@@ -5138,7 +5142,7 @@ msgstr ""
 msgid "خرید آنلاین"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1523
+#: widgets/class-hsw-widget-post-page.php:1527
 msgid "خرید این کالا"
 msgstr ""
 
@@ -6103,7 +6107,7 @@ msgid "دیدگاه شما"
 msgstr ""
 
 #: includes/class-hsw-plugin.php:255
-#: widgets/class-hsw-widget-post-page.php:1297
+#: widgets/class-hsw-widget-post-page.php:1301
 msgid "دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده می‌شود."
 msgstr ""
 
@@ -6116,7 +6120,7 @@ msgstr ""
 msgid "دیدگاه شما ثبت شد و پس از تأیید مدیر نمایش داده می‌شود."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1365
+#: widgets/class-hsw-widget-post-page.php:1369
 msgid "دیدگاه شما در انتظار تایید است."
 msgstr ""
 
@@ -7547,7 +7551,7 @@ msgstr ""
 msgid "سایر جزئیات"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1471
+#: widgets/class-hsw-widget-post-page.php:1475
 msgid "سایر مقالات نویسنده"
 msgstr ""
 
@@ -9502,7 +9506,7 @@ msgstr ""
 msgid "فهرست مطالب خودکار"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1454
+#: widgets/class-hsw-widget-post-page.php:1458
 msgid "فهرست مطالب مقاله"
 msgstr ""
 
@@ -10498,7 +10502,7 @@ msgstr ""
 msgid "متن دیدگاه"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1392
+#: widgets/class-hsw-widget-post-page.php:1396
 msgid "متن دیدگاه شما"
 msgstr ""
 
@@ -11814,7 +11818,7 @@ msgstr ""
 msgid "ناموجودها انتهای فهرست"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1416
+#: widgets/class-hsw-widget-post-page.php:1420
 msgid "ناوبری نوشته‌ها"
 msgstr ""
 
@@ -11964,7 +11968,7 @@ msgstr ""
 msgid "نشست یافت نشد."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1517
+#: widgets/class-hsw-widget-post-page.php:1521
 #: widgets/class-hsw-widget-product-title.php:328
 msgid "نظر"
 msgstr ""
@@ -12382,7 +12386,7 @@ msgstr ""
 msgid "نوع فیلتر"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1340
+#: widgets/class-hsw-widget-post-page.php:1344
 msgid "نویسنده"
 msgstr ""
 
@@ -13102,7 +13106,7 @@ msgid "ویژگی‌های کلیدی در نسخه دسکتاپ و موبایل
 msgstr ""
 
 #: widgets/class-hsw-widget-archive-guide.php:65
-#: widgets/class-hsw-widget-post-page.php:1353
+#: widgets/class-hsw-widget-post-page.php:1357
 msgid "پاسخ"
 msgstr ""
 
@@ -13219,7 +13223,7 @@ msgstr ""
 msgid "پربحث‌ترین"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1481
+#: widgets/class-hsw-widget-post-page.php:1485
 msgid "پربحث‌ترین مقالات"
 msgstr ""
 
@@ -13354,19 +13358,19 @@ msgstr ""
 msgid "پست الکترونیکی امور مالی برای پرسش‌های حسابداری خریداران."
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1429
+#: widgets/class-hsw-widget-post-page.php:1433
 msgid "پست بعدی"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1421
+#: widgets/class-hsw-widget-post-page.php:1425
 msgid "پست قبلی"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1512
+#: widgets/class-hsw-widget-post-page.php:1516
 msgid "پسند"
 msgstr ""
 
-#: widgets/class-hsw-widget-post-page.php:1510
+#: widgets/class-hsw-widget-post-page.php:1514
 msgid "پسندیدن در این مرورگر"
 msgstr ""
 
