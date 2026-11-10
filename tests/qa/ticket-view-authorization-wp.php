@@ -10,12 +10,13 @@ class HSW_QA_Support_Account {
     public function icon( $name ) { return ''; }
     public function format_date( $timestamp ) { return (string) $timestamp; }
     public function endpoint_enabled( $name ) { return true; }
+    public function inbound_secret() { return 'qa-inbound-secret'; }
 }
 class HSW_QA_Ajax_Die extends Exception {}
 add_filter( 'wp_die_ajax_handler', static function () { return static function () { throw new HSW_QA_Ajax_Die(); }; } );
 $support = new HSW_Account_Support( new HSW_QA_Support_Account() );
 $support->register_post_type();
-$user_a = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_a', 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
+$user_a = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_a', 'user_email' => 'hsw-ticket-qa-a@example.test', 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
 $user_b = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_b', 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
 $own = wp_insert_post( array( 'post_type' => HSW_Account_Support::POST_TYPE, 'post_status' => 'publish', 'post_author' => $user_a, 'post_title' => 'Own subject', 'post_content' => 'Own private message' ) );
 $other = wp_insert_post( array( 'post_type' => HSW_Account_Support::POST_TYPE, 'post_status' => 'publish', 'post_author' => $user_b, 'post_title' => 'Secret subject', 'post_content' => 'Secret private message' ) );
@@ -60,6 +61,20 @@ $check( 'failed reply leaves status, timestamp, unread and mail unchanged', 'ans
 $check( 'failed reply creates no comment', 0 === count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) ) );
 ob_start(); try { $support->ajax_reply_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $result = json_decode( ob_get_clean(), true );
 $check( 'successful reply is stored and opens ticket', ! empty( $result['success'] ) && ! empty( $result['data']['comment'] ) && 'open' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) && 1 === count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) ) );
+// Inbound must also surface the storage error without reopening a closed ticket.
+update_post_meta( $own, HSW_Account_Support::STATUS_META, 'closed' );
+update_post_meta( $own, HSW_Account_Support::UPDATED_META, 12345 );
+$token_method = new ReflectionMethod( $support, 'reply_token' ); $token_method->setAccessible( true );
+$request = new WP_REST_Request( 'POST', '/hsw/v1/ticket-inbound' );
+$request->set_param( 'secret', 'qa-inbound-secret' );
+$request->set_param( 'to', 'support+' . $token_method->invoke( $support, $own ) . '@example.com' );
+$request->set_param( 'from', get_userdata( $user_a )->user_email );
+$request->set_param( 'text', 'Inbound QA reply' );
+$mail_before = $mail_count;
+$old_suppress = $wpdb->suppress_errors( true ); add_filter( 'query', $fail_insert );
+$inbound = $support->handle_inbound_email( $request );
+remove_filter( 'query', $fail_insert ); $wpdb->suppress_errors( $old_suppress );
+$check( 'inbound insertion failure returns error without reopening or mail', is_wp_error( $inbound ) && 'hsw_inbound_save' === $inbound->get_error_code() && 'closed' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) && '12345' === get_post_meta( $own, HSW_Account_Support::UPDATED_META, true ) && $mail_count === $mail_before );
 foreach ( array( $own, $other, $draft, $ordinary ) as $id ) { wp_delete_post( $id, true ); }
 require_once ABSPATH . 'wp-admin/includes/user.php';
 wp_delete_user( $user_a ); wp_delete_user( $user_b );
