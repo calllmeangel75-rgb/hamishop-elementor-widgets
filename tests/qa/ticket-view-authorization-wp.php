@@ -37,6 +37,29 @@ foreach ( array( 'another customer' => $other, 'draft ticket' => $draft, 'other 
     $result = $call( $id );
     $check( "$name rejected without row or content", isset( $result['success'] ) && false === $result['success'] && empty( $result['data']['row'] ) && false === strpos( wp_json_encode( $result ), 'Secret' ) );
 }
+// Simulate a database insert failure, without changing any real site's data.
+update_post_meta( $own, HSW_Account_Support::STATUS_META, 'answered' );
+update_post_meta( $own, HSW_Account_Support::UPDATED_META, 12345 );
+update_post_meta( $own, HSW_Account_Support::UNREAD_ADMIN, 0 );
+$mail_count = 0;
+add_filter( 'pre_wp_mail', static function ( $result ) use ( &$mail_count ) { ++$mail_count; return true; } );
+$fail_insert = static function ( $query ) use ( $wpdb ) {
+    if ( preg_match( '/^\s*INSERT\s+INTO\s+`?' . preg_quote( $wpdb->comments, '/' ) . '`?\s/i', $query ) ) {
+        return 'INSERT INTO hsw_qa_missing_table VALUES (1)';
+    }
+    return $query;
+};
+$old_suppress = $wpdb->suppress_errors( true );
+add_filter( 'query', $fail_insert );
+$_POST = array( 'ticket_id' => $own, 'nonce' => wp_create_nonce( 'hsw_ticket_ajax' ), 'message' => 'QA reply text' ); $_REQUEST = $_POST;
+ob_start(); try { $support->ajax_reply_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $result = json_decode( ob_get_clean(), true );
+remove_filter( 'query', $fail_insert );
+$wpdb->suppress_errors( $old_suppress );
+$check( 'failed reply returns error', isset( $result['success'] ) && false === $result['success'] );
+$check( 'failed reply leaves status, timestamp, unread and mail unchanged', 'answered' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) && '12345' === get_post_meta( $own, HSW_Account_Support::UPDATED_META, true ) && '0' === get_post_meta( $own, HSW_Account_Support::UNREAD_ADMIN, true ) && 0 === $mail_count );
+$check( 'failed reply creates no comment', 0 === count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) ) );
+ob_start(); try { $support->ajax_reply_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $result = json_decode( ob_get_clean(), true );
+$check( 'successful reply is stored and opens ticket', ! empty( $result['success'] ) && ! empty( $result['data']['comment'] ) && 'open' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) && 1 === count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) ) );
 foreach ( array( $own, $other, $draft, $ordinary ) as $id ) { wp_delete_post( $id, true ); }
 require_once ABSPATH . 'wp-admin/includes/user.php';
 wp_delete_user( $user_a ); wp_delete_user( $user_b );

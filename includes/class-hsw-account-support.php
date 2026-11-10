@@ -327,7 +327,9 @@ final class HSW_Account_Support {
 			$this->redirect_with_notice( $this->ticket_url( $ticket_id ), 'error', 'متن پاسخ خالی یا بیش از حد بلند است.' );
 		}
 
-		$this->insert_reply( $ticket_id, $user_id, $message, false );
+		if ( ! $this->insert_reply( $ticket_id, $user_id, $message, false ) ) {
+			$this->redirect_with_notice( $this->ticket_url( $ticket_id ), 'error', 'ثبت پاسخ ناموفق بود. دوباره تلاش کنید.' );
+		}
 		update_post_meta( $ticket_id, self::STATUS_META, 'open' );
 		update_post_meta( $ticket_id, self::UPDATED_META, time() );
 		update_post_meta( $ticket_id, self::UNREAD_ADMIN, 1 );
@@ -353,7 +355,7 @@ final class HSW_Account_Support {
 
 	private function insert_reply( $ticket_id, $user_id, $message, $is_staff ) {
 		$user = get_user_by( 'id', $user_id );
-		return (int) wp_insert_comment(
+		$comment_id = wp_insert_comment(
 			array(
 				'comment_post_ID'      => $ticket_id,
 				'comment_author'       => $user ? $user->display_name : ( $is_staff ? 'پشتیبانی' : 'کاربر' ),
@@ -364,6 +366,7 @@ final class HSW_Account_Support {
 				'user_id'              => $user_id,
 			)
 		);
+		return is_wp_error( $comment_id ) ? 0 : (int) $comment_id;
 	}
 
 	private function notify_admin( $ticket_id, $is_reply ) {
@@ -598,16 +601,18 @@ final class HSW_Account_Support {
 			return new WP_Error( 'hsw_inbound_empty', 'empty message', array( 'status' => 400 ) );
 		}
 
-		if ( $is_author && ! $is_staff ) {
-			/* The customer answered from their inbox: it belongs in the thread
-			 * exactly like a reply typed in the account panel. */
-			$this->insert_reply( $ticket_id, (int) $author->ID, $message, false );
+		$customer_reply = $is_author && ! $is_staff;
+		$reply_user_id  = $customer_reply ? (int) $author->ID : ( $sender ? (int) $sender->ID : 0 );
+		if ( ! $this->insert_reply( $ticket_id, $reply_user_id, $message, ! $customer_reply ) ) {
+			return new WP_Error( 'hsw_inbound_save', 'could not save reply', array( 'status' => 500 ) );
+		}
+
+		if ( $customer_reply ) {
 			update_post_meta( $ticket_id, self::STATUS_META, 'open' );
 			update_post_meta( $ticket_id, self::UNREAD_ADMIN, 1 );
 			update_post_meta( $ticket_id, self::UNREAD_USER, 0 );
 			$this->notify_admin( $ticket_id, true );
 		} else {
-			$this->insert_reply( $ticket_id, $sender ? (int) $sender->ID : 0, $message, true );
 			update_post_meta( $ticket_id, self::STATUS_META, 'answered' );
 			update_post_meta( $ticket_id, self::UNREAD_ADMIN, 0 );
 			update_post_meta( $ticket_id, self::UNREAD_USER, 1 );
@@ -1194,6 +1199,9 @@ final class HSW_Account_Support {
 		}
 
 		$comment_id = $this->insert_reply( $ticket_id, $user_id, $message, false );
+		if ( ! $comment_id ) {
+			wp_send_json_error( array( 'message' => __( 'ثبت پاسخ ناموفق بود. دوباره تلاش کنید.', 'hamishop-elementor-widgets' ) ), 500 );
+		}
 
 		update_post_meta( $ticket_id, self::STATUS_META, 'open' );
 		update_post_meta( $ticket_id, self::UPDATED_META, time() );
@@ -1685,7 +1693,9 @@ final class HSW_Account_Support {
 			exit;
 		}
 
-		$this->insert_reply( $ticket_id, get_current_user_id(), $message, true );
+		if ( ! $this->insert_reply( $ticket_id, get_current_user_id(), $message, true ) ) {
+			wp_die( esc_html__( 'ثبت پاسخ ناموفق بود. لطفاً بازگردید و دوباره تلاش کنید.', 'hamishop-elementor-widgets' ), '', array( 'response' => 500, 'back_link' => true ) );
+		}
 		update_post_meta( $ticket_id, self::STATUS_META, 'answered' );
 		update_post_meta( $ticket_id, self::UPDATED_META, time() );
 		update_post_meta( $ticket_id, self::UNREAD_ADMIN, 0 );
