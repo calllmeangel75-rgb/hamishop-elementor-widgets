@@ -14,11 +14,11 @@ msgstr ""
 "X-Generator: HamiShop build-pot.py\n"
 "X-Domain: hamishop-elementor-widgets\n"
 
-#: includes/class-hsw-account-support.php:1439
+#: includes/class-hsw-account-support.php:1446
 msgid "%1$s — تیکت شما ثبت شد (#T-%2$s)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1491
+#: includes/class-hsw-account-support.php:1498
 msgid "%1$s — پاسخ جدید در گفتگوی «%2$s»"
 msgstr ""
 
@@ -2412,8 +2412,8 @@ msgstr ""
 msgid "برای دریافت کد ورود، ابتدا شماره موبایل خود را با دکمهٔ زیر ارسال کنید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1460
-#: includes/class-hsw-account-support.php:1507
+#: includes/class-hsw-account-support.php:1467
+#: includes/class-hsw-account-support.php:1514
 msgid "برای دیدن و ادامهٔ گفتگو:"
 msgstr ""
 
@@ -3012,7 +3012,7 @@ msgstr ""
 msgid "به‌صورت پیش‌فرض همان لوگویی می‌آید که در «سفارشی‌سازی ← هویت سایت ← لوگو» گذاشته‌ای؛ لازم نیست دوباره انتخابش کنی. اگر سایت لوگو نداشته باشد، نشان مدار GC جای آن را می‌گیرد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1459
+#: includes/class-hsw-account-support.php:1466
 msgid "به‌محض دریافت پاسخ، همین‌جا به شما اطلاع می‌دهیم."
 msgstr ""
 
@@ -4100,7 +4100,7 @@ msgstr ""
 msgid "تیرگی پردهٔ گرادیان (پیشنهاد شگفت‌انگیز)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1503
+#: includes/class-hsw-account-support.php:1510
 msgid "تیم پشتیبانی به گفتگوی «%s» پاسخ داد:"
 msgstr ""
 
@@ -4118,7 +4118,7 @@ msgstr ""
 msgid "تیکت جدید"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1451
+#: includes/class-hsw-account-support.php:1458
 msgid "تیکت شما با موضوع «%s» ثبت شد و در صف بررسی قرار گرفت."
 msgstr ""
 
@@ -7845,8 +7845,8 @@ msgstr ""
 msgid "سقف خرید برای ارسال رایگان (تومان)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1446
-#: includes/class-hsw-account-support.php:1498
+#: includes/class-hsw-account-support.php:1453
+#: includes/class-hsw-account-support.php:1505
 msgid "سلام %s،"
 msgstr ""
 
@@ -8131,7 +8131,7 @@ msgstr ""
 msgid "شمارهٔ پشتیبانی"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1456
+#: includes/class-hsw-account-support.php:1463
 msgid "شمارهٔ پیگیری: #T-%s"
 msgstr ""
 
@@ -15153,12 +15153,13 @@ msgstr ""
 msgid "گزینه‌های پیش‌فرض (و ویرایشگر)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1258
+#: includes/class-hsw-account-support.php:1265
 msgid "گفتگو بسته شد."
 msgstr ""
 
 #: includes/class-hsw-account-support.php:1183
-#: includes/class-hsw-account-support.php:1250
+#: includes/class-hsw-account-support.php:1236
+#: includes/class-hsw-account-support.php:1257
 msgid "گفتگو پیدا نشد."
 msgstr ""
 
