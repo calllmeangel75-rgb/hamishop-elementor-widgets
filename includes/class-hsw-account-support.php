@@ -1593,9 +1593,11 @@ final class HSW_Account_Support {
 		wp_nonce_field( 'hsw_ticket_meta_' . $post->ID, 'hsw_ticket_meta_nonce' );
 		?>
 		<div class="hsw-ticket-meta">
+			<div class="hsw-ticket-customer-card">
+				<span class="hsw-ticket-customer-icon" aria-hidden="true"><span class="dashicons dashicons-admin-users"></span></span>
+				<div><span class="hsw-ticket-meta-caption">مشتری</span><strong><?php echo $user ? '<a href="' . esc_url( get_edit_user_link( $user_id ) ) . '">' . esc_html( $user->display_name ) . '</a>' : 'نامشخص'; ?></strong><span class="hsw-ticket-customer-email" dir="ltr"><?php echo $user ? esc_html( $user->user_email ) : '—'; ?></span></div>
+			</div>
 			<?php if ( $unread ) : ?><p class="hsw-ticket-unread">پاسخ جدید خوانده‌نشده</p><?php endif; ?>
-			<p><strong>کاربر:</strong> <?php echo $user ? '<a href="' . esc_url( get_edit_user_link( $user_id ) ) . '">' . esc_html( $user->display_name ) . '</a>' : 'نامشخص'; ?><br>
-			<strong>ایمیل:</strong> <span dir="ltr"><?php echo $user ? esc_html( $user->user_email ) : '—'; ?></span></p>
 			<p><label for="hsw-ticket-status"><strong>وضعیت:</strong></label><br>
 			<select name="hsw_ticket_status" id="hsw-ticket-status">
 				<option value="open" <?php selected( $status, 'open' ); ?>>در انتظار پاسخ</option>
@@ -1608,10 +1610,12 @@ final class HSW_Account_Support {
 					<option value="<?php echo esc_attr( $pkey ); ?>" <?php selected( $priority, $pkey ); ?>><?php echo esc_html( $plabel ); ?></option>
 				<?php endforeach; ?>
 			</select></p>
-			<p><br>
-			<strong>دپارتمان:</strong> <?php echo esc_html( $dept ? $dept : '—' ); ?><br>
-			<strong>ایجاد:</strong> <?php echo esc_html( $this->format_date( $this->timestamp_from_local( $post->post_date ) ) ); ?><br>
-			<strong>آخرین به‌روزرسانی:</strong> <?php echo esc_html( $updated ? $this->format_date( $updated ) : '—' ); ?></p>
+			<p class="hsw-ticket-save-hint">برای ذخیرهٔ وضعیت و اولویت، دکمهٔ «به‌روزرسانی» را بزنید.</p>
+			<dl class="hsw-ticket-facts">
+				<div><dt>دپارتمان</dt><dd><?php echo esc_html( $dept ? $dept : '—' ); ?></dd></div>
+				<div><dt>ایجاد</dt><dd><?php echo esc_html( $this->format_date( $this->timestamp_from_local( $post->post_date ) ) ); ?></dd></div>
+				<div><dt>آخرین به‌روزرسانی</dt><dd><?php echo esc_html( $updated ? $this->format_date( $updated ) : '—' ); ?></dd></div>
+			</dl>
 			<div class="hsw-ticket-admin-actions">
 				<?php if ( 'closed' !== $status ) : ?>
 					<button type="submit" form="hsw-ticket-status-form" class="button">بستن تیکت</button>
@@ -1636,6 +1640,7 @@ final class HSW_Account_Support {
 		$order_id = absint( get_post_meta( $post->ID, self::ORDER_META, true ) );
 		?>
 		<div class="hsw-ticket-toolbar">
+			<div class="hsw-ticket-toolbar-title"><span class="hsw-ticket-toolbar-icon dashicons dashicons-format-chat" aria-hidden="true"></span><div><strong>گفتگو با مشتری</strong><span>شناسه #T-<?php echo esc_html( HSW_Helpers::fa_num( $post->ID ) ); ?></span></div></div>
 			<span class="hsw-admin-badge is-<?php echo esc_attr( $this->status_tone( $status ) ); ?>"><?php echo esc_html( $this->status_label( $status ) ); ?></span>
 			<?php if ( $order_id ) : ?>
 				<a href="<?php echo esc_url( admin_url( 'post.php?post=' . $order_id . '&action=edit' ) ); ?>">سفارش #<?php echo esc_html( HSW_Helpers::fa_num( $order_id ) ); ?></a>
@@ -1644,7 +1649,7 @@ final class HSW_Account_Support {
 				<?php echo 'closed' === $status ? 'بازگشایی تیکت' : 'بستن تیکت'; ?>
 			</button>
 		</div>
-		<div class="hsw-ticket-thread">
+		<div class="hsw-ticket-thread" role="region" aria-label="پیام‌های گفتگو" tabindex="0">
 			<div class="hsw-ticket-msg is-customer">
 				<div class="hsw-ticket-msg-head"><strong><?php echo esc_html( get_the_author_meta( 'display_name', $post->post_author ) ); ?></strong><span><?php echo esc_html( $this->format_date( $this->timestamp_from_local( $post->post_date ) ) ); ?></span></div>
 				<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $post->post_content ) ); ?><?php echo $this->attachment_html( absint( get_post_meta( $post->ID, self::IMAGE_META, true ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url + wp_get_attachment_image. ?></div>

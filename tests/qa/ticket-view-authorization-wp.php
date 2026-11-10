@@ -126,6 +126,9 @@ $check( 'staff inbound cannot reply to closed ticket', is_wp_error( $staff_close
 update_post_meta( $plain_id, HSW_Account_Support::STATUS_META, 'open' );
 ob_start(); $support->render_thread_box( get_post( $plain_id ) ); $open_html = ob_get_clean();
 $check( 'reopened admin thread restores reply textarea', false !== strpos( $open_html, 'name="message"' ) );
+$check( 'thread controls keep external form associations and accessible label', false !== strpos( $open_html, 'form="hsw-ticket-reply-form"' ) && false !== strpos( $open_html, 'form="hsw-ticket-status-form"' ) && false !== strpos( $open_html, 'for="hsw-ticket-reply-message"' ) && false !== strpos( $open_html, 'role="region"' ) );
+ob_start(); $support->render_details_box( get_post( $plain_id ) ); $details_html = ob_get_clean();
+$check( 'details retain nonce, editable status and priority', false !== strpos( $details_html, 'name="hsw_ticket_meta_nonce"' ) && false !== strpos( $details_html, 'name="hsw_ticket_status"' ) && false !== strpos( $details_html, 'name="hsw_ticket_priority"' ) && false !== strpos( $details_html, 'hsw-ticket-save-hint' ) );
 // Restore customer identity and original inbound request for subsequent tests.
 wp_set_current_user( $user_a );
 $request->set_param( 'to', 'support+' . $token_method->invoke( $support, $own ) . '@example.com' ); $request->set_param( 'from', get_userdata( $user_a )->user_email );

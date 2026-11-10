@@ -400,6 +400,7 @@ jobs:
         run: |
           node tests/loop-lead-color-probe.js
           node tests/post-page-probe.js
+          node tests/ticket-admin-layout-probe.js
 
   package:
     # Tagging v* produces the distributable ZIP as a workflow artifact, using the
