@@ -24,3 +24,7 @@
 ## برنامهٔ آزمون امن روی staging
 
 ۱. تأیید نسخه و بکاپ و تنظیمات ایمیل/نگهداری؛ پیش از ایجاد تیکت از عدم ارسال ایمیل واقعی اطمینان حاصل شود. ۲. با مشتری اول تیکت متنی ساختگی بساز، مدیر آن را پاسخ دهد، مشتری پاسخ و اعلان پنل را ببیند، سپس ببندد و ممنوعیت پاسخ بسته را بررسی کند. ۳. با حساب دوم و کاربر ناشناس، صفحه و AJAX نمایش/پاسخ/بستن تیکت اول و سفارش متعلق به دیگری باید بدون افشای اطلاعات رد شود؛ nonce مفقود/نامعتبر نیز رد شود. ۴. وضعیت خوانده‌نشده، رفرش، موبایل و خطای شبکه و ایمیل را با شرایط جداگانه ثبت کن. ۵. بعد از تأمین محرمانگی فایل، فرمت/حجم/خطا با فایل غیرحساس؛ تست inbound و کران فقط در محیط دورریختنی با بکاپ و سرویس ایزوله. هیچ نتیجه‌ای از این آزمون‌ها هنوز ثبت نشده است.
+
+### Permanent deletion: account notifications
+
+On successful permanent deletion of a ticket, including scheduled retention cleanup, the owner's matching ticket notifications are removed; trashing does not change them. New notifications carry a ticket ID, while older ones are matched only against the exact current ticket URL. Notifications with unknown/changed legacy URLs are intentionally retained. The update uses a bounded compare-and-swap retry; concurrent writers that don't use compare-and-swap can still race. No historical sweep is performed. Ticket attachments and their files are **not** automatically removed: an attachment can be reused by other posts, plugins or external URLs, and attachment parentage alone does not prove exclusivity. Backups, email and exports are unaffected. Do not describe this as complete deletion.
