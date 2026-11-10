@@ -451,11 +451,13 @@
 		var fileInput = modal ? modal.querySelector('[data-hsw-image-input]') : null;
 		var preview = modal ? modal.querySelector('[data-hsw-image-preview]') : null;
 		var picked = null;
+		var imagePending = false;
 
 		if (fileInput) {
 			fileInput.addEventListener('change', function () {
 				var file = fileInput.files && fileInput.files[0];
 				picked = null;
+				imagePending = !!file;
 				if (preview) {
 					preview.innerHTML = '';
 				}
@@ -464,6 +466,8 @@
 				}
 				compressImage(file, 1600, 0.82)
 					.then(function (blob) {
+						if (!fileInput.files || fileInput.files[0] !== file) { return; }
+						imagePending = false;
 						if (!blob) {
 							return;
 						}
@@ -476,7 +480,9 @@
 							preview.appendChild(img);
 						}
 					})
-					.catch(function () {});
+					.catch(function () {
+						if (fileInput.files && fileInput.files[0] === file) { imagePending = false; }
+					});
 			});
 		}
 
@@ -493,6 +499,7 @@
 				var url = URL.createObjectURL(file);
 				var img = new Image();
 				img.onload = function () {
+					try {
 					var scale = Math.min(1, maxSize / Math.max(img.width, img.height));
 					var canvas = document.createElement('canvas');
 					canvas.width = Math.round(img.width * scale);
@@ -505,6 +512,10 @@
 					canvas.toBlob(function (blob) {
 						resolve(blob);
 					}, 'image/jpeg', quality);
+					} catch (error) {
+						URL.revokeObjectURL(url);
+						resolve(null);
+					}
 				};
 				img.onerror = function () {
 					URL.revokeObjectURL(url);
@@ -534,6 +545,14 @@
 
 				if (!subject.value.trim() || !message.value.trim()) {
 					showError(data().ticketEmpty || 'موضوع و متن پیام را کامل کنید.');
+					return;
+				}
+				if (imagePending) {
+					showError('لطفاً تا آماده شدن عکس صبر کنید.');
+					return;
+				}
+				if (fileInput && fileInput.files && fileInput.files.length && !picked) {
+					showError('آماده‌سازی عکس ناموفق بود؛ عکس دیگری انتخاب کنید یا آن را حذف کنید.');
 					return;
 				}
 
@@ -574,6 +593,13 @@
 						}
 
 						main.innerHTML = response.data.html;
+						if (response.data.image_warning) {
+							var warning = document.createElement('p');
+							warning.className = 'hsw-ac__modal-msg is-error';
+							warning.setAttribute('role', 'alert');
+							warning.textContent = response.data.image_warning;
+							main.insertBefore(warning, main.firstChild);
+						}
 						if (response.data.row) {
 							setRow(wrapRow(response.data.row, response.data.ticket));
 						}

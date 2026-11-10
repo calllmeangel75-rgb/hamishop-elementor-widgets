@@ -967,7 +967,7 @@ final class HSW_Account_Support {
 		$html .= '<div class="hsw-ac-field"><label for="hsw-ac-t-image">' . esc_html__( 'عکس', 'hamishop-elementor-widgets' ) . ' <span class="hsw-ac__optional">(' . esc_html__( 'اختیاری', 'hamishop-elementor-widgets' ) . ')</span></label>';
 		$html .= '<label class="hsw-ac__upload" data-hsw-upload><input type="file" id="hsw-ac-t-image" name="image" accept="image/*" data-hsw-image-input hidden>';
 		$html .= '<span class="hsw-ac__upload-ic" aria-hidden="true">' . $this->account->icon( 'image' ) . '</span>';
-		$html .= '<span class="hsw-ac__upload-copy"><strong>' . esc_html__( 'یه عکس اضافه کن', 'hamishop-elementor-widgets' ) . '</strong><small>' . esc_html__( 'خودکار فشرده می‌شه', 'hamishop-elementor-widgets' ) . '</small></span>';
+		$html .= '<span class="hsw-ac__upload-copy"><strong>' . esc_html__( 'یه عکس اضافه کن', 'hamishop-elementor-widgets' ) . '</strong><small>' . esc_html__( 'خودکار فشرده می‌شود. لینک عکس ممکن است عمومی باشد؛ اطلاعات حساس نفرستید.', 'hamishop-elementor-widgets' ) . '</small></span>';
 		$html .= '<span class="hsw-ac__upload-preview" data-hsw-image-preview></span></label></div>';
 
 		$html .= '<div class="hsw-ac-field hsw-ac__captcha"><label for="hsw-ac-t-captcha">' . esc_html__( 'یه سوال کوچیک', 'hamishop-elementor-widgets' ) . ' <span class="required">*</span></label>';
@@ -1149,7 +1149,12 @@ final class HSW_Account_Support {
 		}
 
 		$image = $this->handle_image_upload( $ticket_id );
-		if ( $image ) {
+		$image_warning = '';
+		if ( is_wp_error( $image ) ) {
+			// The ticket already exists: report partial success, not a failure that
+			// might cause the customer to create an accidental duplicate.
+			$image_warning = __( 'تیکت ثبت شد، اما عکس بارگذاری نشد. لطفاً به پشتیبانی اطلاع دهید.', 'hamishop-elementor-widgets' );
+		} elseif ( $image ) {
 			update_post_meta( $ticket_id, self::IMAGE_META, $image );
 		}
 
@@ -1169,6 +1174,7 @@ final class HSW_Account_Support {
 		wp_send_json_success(
 			array(
 				'message' => __( 'تیکت شما ثبت شد.', 'hamishop-elementor-widgets' ),
+				'image_warning' => $image_warning,
 				'ticket'  => (int) $ticket_id,
 				'html'    => $this->chat_thread_html( $user_id, $ticket_id ),
 				'row'     => $this->chat_row_html( get_post( $ticket_id ) ),
@@ -1381,20 +1387,22 @@ final class HSW_Account_Support {
 	 * Store the screenshot the customer attached to the modal.
 	 *
 	 * The browser already downscaled it, so this only guards against a wrong
-	 * type or a runaway size. Returns 0 when there is nothing usable.
+	 * type or a runaway size. A missing file is optional, but an attempted
+	 * upload that fails must be reported to the customer.
 	 *
 	 * @param int $ticket_id Parent ticket.
-	 * @return int Attachment ID.
+	 * @return int|WP_Error Attachment ID, 0 if absent, or upload error.
 	 */
 	private function handle_image_upload( $ticket_id ) {
-		if ( empty( $_FILES['image'] ) || ! isset( $_FILES['image']['tmp_name'] ) ) {
+		if ( ! isset( $_FILES['image'] ) ) {
 			return 0;
 		}
-		if ( UPLOAD_ERR_OK !== (int) $_FILES['image']['error'] ) {
+		$file = $_FILES['image']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- validated below and by WordPress.
+		if ( isset( $file['error'] ) && UPLOAD_ERR_NO_FILE === (int) $file['error'] ) {
 			return 0;
 		}
-		if ( (int) $_FILES['image']['size'] > 4 * MB_IN_BYTES ) {
-			return 0;
+		if ( ! is_array( $file ) || ! isset( $file['error'], $file['tmp_name'], $file['size'], $file['name'] ) || UPLOAD_ERR_OK !== (int) $file['error'] || (int) $file['size'] <= 0 || (int) $file['size'] > 4 * MB_IN_BYTES ) {
+			return new WP_Error( 'hsw_ticket_image_upload', 'Invalid image upload.' );
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -1414,12 +1422,12 @@ final class HSW_Account_Support {
 		$check = wp_check_filetype_and_ext( $_FILES['image']['tmp_name'], $_FILES['image']['name'], $mimes ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- validated by WordPress.
 
 		if ( empty( $check['type'] ) || ! in_array( $check['type'], array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
-			return 0;
+			return new WP_Error( 'hsw_ticket_image_type', 'Invalid image type.' );
 		}
 
 		$attachment_id = media_handle_upload( 'image', $ticket_id, array(), array( 'test_form' => false ) );
 
-		return is_wp_error( $attachment_id ) ? 0 : (int) $attachment_id;
+		return is_wp_error( $attachment_id ) ? $attachment_id : (int) $attachment_id;
 	}
 
 	/**
