@@ -35,6 +35,16 @@ $check( 'attachment and image files remain after ticket deletion', get_post( $at
 $check( 'only matching ticket notifications removed', get_user_meta( $user, '_hsw_notifications', true ) === array_slice( $notifications, 2 ) );
 wp_delete_attachment( $attachment, true );
 $check( 'explicit attachment deletion removes attachment, original and thumbnail', ! get_post( $attachment ) && ! file_exists( $original ) && ! file_exists( $thumb ) );
+$other_post = wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_author' => $user ) );
+$before = get_user_meta( $user, '_hsw_notifications', true );
+wp_delete_post( $other_post, true );
+$check( 'other post deletion does not alter notifications', get_user_meta( $user, '_hsw_notifications', true ) === $before );
+$old_ticket = wp_insert_post( array( 'post_type' => HSW_Account_Support::POST_TYPE, 'post_status' => 'publish', 'post_author' => $user ) );
+update_post_meta( $old_ticket, HSW_Account_Support::STATUS_META, 'closed' );
+update_post_meta( $old_ticket, HSW_Account_Support::UPDATED_META, time() - 400 * DAY_IN_SECONDS );
+update_user_meta( $user, '_hsw_notifications', array( array( 'type' => 'ticket', 'ticket_id' => $old_ticket ) ) );
+$support->cleanup_old_tickets();
+$check( 'retention cleanup also removes matching notifications', ! get_post( $old_ticket ) && array() === get_user_meta( $user, '_hsw_notifications', true ) );
 if ( is_dir( $folder ) ) { rmdir( $folder ); }
 require_once ABSPATH . 'wp-admin/includes/user.php'; wp_delete_user( $user );
 exit( $failed ? 1 : 0 );
