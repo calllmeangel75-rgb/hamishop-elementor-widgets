@@ -1038,6 +1038,28 @@ display: none;
 	color: var(--hsw-loop-lead-btn-c-h);
 }
 
+/* Keep the label and sprite in sync with this button, even when a theme
+   supplies separate link, span or SVG colours. Elementor's saved variables
+   remain the source of truth for normal and hover states. */
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn > span,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn > svg.hsw-ic {
+	color: var(--hsw-loop-lead-btn-c, var(--hsw-loop-primary));
+}
+
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn:hover,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn:focus-visible,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn:hover > span,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn:focus-visible > span,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn:hover > svg.hsw-ic,
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn:focus-visible > svg.hsw-ic {
+	color: var(--hsw-loop-lead-btn-c-h, var(--hsw-loop-on-accent));
+}
+
+.hsw-loop--hsw-wonder-deals .hsw-loop__lead a.hsw-loop__lead-btn > svg.hsw-ic {
+	fill: currentColor;
+}
+
 .hsw-loop__lead-btn .hsw-ic {
 	inline-size: 1rem;
 	block-size: 1rem;

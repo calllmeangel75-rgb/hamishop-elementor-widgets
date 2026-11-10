@@ -2768,8 +2768,8 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 );
 
                 $this->add_control( 'lead_btn_bg', array( 'label' => __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__lead' => '--hsw-loop-lead-btn-bg: {{VALUE}};' ) ) );
-                $this->add_control( 'lead_btn_c', array( 'label' => __( 'رنگ دکمه', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__lead' => '--hsw-loop-lead-btn-c: {{VALUE}};' ) ) );
-                $this->add_control( 'lead_btn_ch', array( 'label' => __( 'رنگ دکمه (هاور)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__lead' => '--hsw-loop-lead-btn-c-h: {{VALUE}};' ) ) );
+                $this->add_control( 'lead_btn_c', array( 'label' => __( 'رنگ متن و آیکون دکمه', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__lead' => '--hsw-loop-lead-btn-c: {{VALUE}};' ) ) );
+                $this->add_control( 'lead_btn_ch', array( 'label' => __( 'رنگ متن و آیکون دکمه (هاور)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__lead' => '--hsw-loop-lead-btn-c-h: {{VALUE}};' ) ) );
                 $this->add_control( 'lead_btn_bgh', array( 'label' => __( 'پس‌زمینه دکمه (هاور)', 'hamishop-elementor-widgets' ), 'type' => Controls_Manager::COLOR, 'selectors' => array( '{{WRAPPER}} .hsw-loop__lead' => '--hsw-loop-lead-btn-bg-h: {{VALUE}};' ) ) );
 
                 $this->add_control(
