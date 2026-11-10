@@ -1,0 +1,3 @@
+# 1.11.265 — staging pre-release
+
+Improves article sharing and clipboard fallback; adds independent visibility controls for sharing and browser-local bookmarks; scales computed article text for the reading-size toggle; uses real fragment links in the sidebar when a link mode is selected; clarifies product selection. CI browser fixtures and disposable WordPress checks passed. Verify with the actual site and Elementor. Scroll-only TOC still needs JS, bookmarks are browser-local, no per-post product-selection UI was added, and broader article, checkout, and financial checks remain open. Not for production.

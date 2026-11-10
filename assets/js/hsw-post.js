@@ -158,29 +158,41 @@
 		/* -----------------------------------------------------------------
 		 * Font size toggle
 		 * -------------------------------------------------------------- */
-		Array.prototype.forEach.call(root.querySelectorAll('[data-hsw-pp-font]'), function (button) {
-			button.addEventListener('click', function () {
-				if (!body) {
-					return;
-				}
-				var large = body.classList.toggle('is-large');
-				button.classList.toggle('is-on', large);
-				button.setAttribute('aria-pressed', large ? 'true' : 'false');
-				try {
-					window.localStorage.setItem('hswPpLarge', large ? '1' : '0');
-				} catch (e) {}
+		var fontButtons = root.querySelectorAll('[data-hsw-pp-font]');
+		var fontOriginals = [];
+		var setLarge = function (large) {
+			if (!body) { return; }
+			// Restore the previous inline declarations before measuring again.
+			fontOriginals.forEach(function (item) {
+				if (item.value) { item.el.style.setProperty('font-size', item.value, item.priority); }
+				else { item.el.style.removeProperty('font-size'); }
 			});
-		});
-
-		try {
-			if (body && window.localStorage.getItem('hswPpLarge') === '1') {
-				body.classList.add('is-large');
-				Array.prototype.forEach.call(root.querySelectorAll('[data-hsw-pp-font]'), function (button) {
-					button.classList.add('is-on');
-					button.setAttribute('aria-pressed', 'true');
+			fontOriginals = [];
+			body.classList.toggle('is-large', large);
+			if (large) {
+				var targets = [body].concat([].slice.call(body.querySelectorAll('p, li')));
+				// Measure before applying any change so descendants are not scaled twice.
+				fontOriginals = targets.map(function (el) {
+					return { el: el, value: el.style.getPropertyValue('font-size'), priority: el.style.getPropertyPriority('font-size'), size: parseFloat(window.getComputedStyle(el).fontSize) };
+				});
+				fontOriginals.forEach(function (item) {
+					if (item.size > 0) { item.el.style.setProperty('font-size', (item.size * 1.15) + 'px', item.priority); }
 				});
 			}
-		} catch (e) {}
+			Array.prototype.forEach.call(fontButtons, function (button) {
+				button.classList.toggle('is-on', large);
+				button.setAttribute('aria-pressed', large ? 'true' : 'false');
+			});
+		};
+		Array.prototype.forEach.call(fontButtons, function (button) {
+			button.addEventListener('click', function () {
+				var large = !body.classList.contains('is-large');
+				setLarge(large);
+				try { window.localStorage.setItem('hswPpLarge', large ? '1' : '0'); } catch (e) {}
+			});
+		});
+		try { if (body && window.localStorage.getItem('hswPpLarge') === '1') { setLarge(true); } } catch (e) {}
+		window.addEventListener('resize', function () { if (body && body.classList.contains('is-large')) { setLarge(true); } });
 
 		/* -----------------------------------------------------------------
 		 * Bookmark (per post, local only)
@@ -193,9 +205,9 @@
 				button.classList.toggle('is-on', on);
 				button.setAttribute('aria-pressed', on ? 'true' : 'false');
 				var icon = button.querySelector('.hsw-ic');
-				if (icon) {
+				if (icon && typeof window.hswSetIcon === 'function') {
 					window.hswSetIcon(icon, on ? 'bookmark_added' : 'bookmark');
-					window.hswFill(icon, on);
+					if (typeof window.hswFill === 'function') { window.hswFill(icon, on); }
 				}
 			});
 		};
@@ -225,34 +237,39 @@
 		/* -----------------------------------------------------------------
 		 * Share
 		 * -------------------------------------------------------------- */
+		var shareNotice = function (text) {
+			var notice = root.querySelector('[data-hsw-pp-share-status]');
+			if (!notice) {
+				notice = document.createElement('span');
+				notice.className = 'hsw-pp__share-status';
+				notice.setAttribute('data-hsw-pp-share-status', '');
+				notice.setAttribute('role', 'status');
+				root.appendChild(notice);
+			}
+			notice.textContent = text;
+		};
 		Array.prototype.forEach.call(root.querySelectorAll('[data-hsw-pp-share]'), function (button) {
 			button.addEventListener('click', function () {
-				var title = document.title;
-				var url = window.location.href;
 				var heading = root.querySelector('.hsw-pp__title');
-				if (heading) {
-					title = heading.textContent.trim() || title;
-				}
-
-				if (navigator.share) {
-					navigator.share({ title: title, url: url }).catch(function () {});
-					return;
-				}
-
-				if (navigator.clipboard && navigator.clipboard.writeText) {
+				var title = heading ? heading.textContent.trim() : document.title;
+				var url = root.getAttribute('data-post-url') || window.location.href;
+				var manual = function () {
+					shareNotice('کپی خودکار در دسترس نیست؛ آدرس را از کادر کپی کنید.');
+					window.prompt('آدرس مقاله را کپی کنید:', url);
+				};
+				var copy = function () {
+					if (!navigator.clipboard || !navigator.clipboard.writeText) { manual(); return; }
 					navigator.clipboard.writeText(url).then(function () {
-						flash(button);
-					}).catch(function () {});
-				}
+						shareNotice('آدرس مقاله کپی شد.');
+					}).catch(manual);
+				};
+				if (navigator.share) {
+					navigator.share({ title: title, url: url }).catch(function (err) {
+						if (!err || err.name !== 'AbortError') { copy(); }
+					});
+				} else { copy(); }
 			});
 		});
-
-		var flash = function (button) {
-			button.classList.add('is-on');
-			window.setTimeout(function () {
-				button.classList.remove('is-on');
-			}, 1400);
-		};
 
 		/* -----------------------------------------------------------------
 		 * Like + comment jump

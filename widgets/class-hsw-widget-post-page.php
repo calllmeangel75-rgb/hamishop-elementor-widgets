@@ -115,6 +115,26 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 		);
 
 		$this->add_control(
+			'show_bookmark',
+			array(
+				'label'       => __( 'دکمهٔ نشان‌کردن در مرورگر', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'وضعیت فقط در همین مرورگر نگه‌داری می‌شود؛ فهرست ذخیره‌شده یا همگام‌سازی حساب ندارد.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
+			'show_share',
+			array(
+				'label'       => __( 'دکمهٔ اشتراک‌گذاری', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'description' => __( 'اشتراک‌گذاری با امکانات مرورگر، یا کپی آدرس مقاله.', 'hamishop-elementor-widgets' ),
+			)
+		);
+
+		$this->add_control(
 			'show_hero',
 			array(
 				'label'   => __( 'تصویر شاخص', 'hamishop-elementor-widgets' ),
@@ -240,7 +260,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 				'type'        => Controls_Manager::NUMBER,
 				'min'         => 1,
 				'condition'   => array( 'show_product' => 'yes' ),
-				'description' => __( 'اگر خالی بماند، اولین محصولِ دستهٔ همین نوشته پیشنهاد می‌شود.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'این شناسه در همهٔ نوشته‌هایی که از این قالب استفاده می‌کنند یکسان است. اگر خالی باشد، ابتدا محصول اختصاصی نوشته و سپس تطبیق نام دسته یا برچسب بررسی می‌شود؛ اگر تطبیقی نباشد کارتی نمایش داده نمی‌شود.', 'hamishop-elementor-widgets' ),
 			)
 		);
 
@@ -710,12 +730,11 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			: esc_html( $item['text'] );
 
 		/*
-		 * Sidebar TOC (`hsw-pp__side` / `hsw-pp__sidelink`) and `'none'` mode
-		 * always render `<button type="button">` with `data-target` instead of
-		 * `<a href="#...">` for backward-compatible scroll-only behavior.
+		 * The saved 'none' mode retains its scroll-only buttons. Link modes use
+		 * real fragment links in both lists, including the desktop sidebar.
 		 * Fragments generally do not represent separate Google crawl URLs.
 		 */
-		if ( 'none' === $mode || ! $is_main ) {
+		if ( 'none' === $mode ) {
 			return '<button type="button" class="' . esc_attr( trim( $class . ' hsw-pp__tocbtn' ) ) . '"'
 				. ' data-hsw-pp-toclink data-target="' . esc_attr( $item['id'] ) . '">' . $inner . '</button>';
 		}
@@ -872,7 +891,7 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 			. $this->hsw_font_class()
 			. ( $on( 'show_dock' ) ? ' hsw-pp--dock' : '' );
 		?>
-		<div class="<?php echo esc_attr( $classes ); ?>" data-hsw-pp data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
+		<div class="<?php echo esc_attr( $classes ); ?>" data-hsw-pp data-post-id="<?php echo esc_attr( (string) $post->ID ); ?>" data-post-url="<?php echo esc_url( get_permalink( $post ) ); ?>" data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
 
 			<?php if ( $on( 'show_progress' ) ) : ?>
 				<div class="hsw-pp__progress" aria-hidden="true"><span data-hsw-pp-progress></span></div>
@@ -891,12 +910,16 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 						</span>
 					</div>
 					<div class="hsw-pp__topacts">
-						<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-bookmark aria-label="<?php esc_attr_e( 'نشان‌کردن مقاله', 'hamishop-elementor-widgets' ); ?>">
+						<?php if ( $on( 'show_bookmark' ) ) : ?>
+						<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-bookmark aria-label="<?php esc_attr_e( 'نشان‌کردن در همین مرورگر', 'hamishop-elementor-widgets' ); ?>" aria-pressed="false">
 							<?php HSW_Helpers::the_icon( 'bookmark' ); ?>
 						</button>
+						<?php endif; ?>
+						<?php if ( $on( 'show_share' ) ) : ?>
 						<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-share aria-label="<?php esc_attr_e( 'اشتراک‌گذاری', 'hamishop-elementor-widgets' ); ?>">
 							<?php HSW_Helpers::the_icon( 'share' ); ?>
 						</button>
+						<?php endif; ?>
 					</div>
 				</header>
 			<?php endif; ?>
@@ -945,15 +968,19 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 									<li><?php HSW_Helpers::the_icon( 'chat_bubble' ); ?><span><?php echo esc_html( sprintf( /* translators: %s: comments. */ __( '%s دیدگاه', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( $comments ) ) ); ?></span></li>
 								</ul>
 								<div class="hsw-pp__tools">
-									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-font aria-label="<?php esc_attr_e( 'تغییر اندازه قلم', 'hamishop-elementor-widgets' ); ?>">
+									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-font aria-pressed="false" aria-label="<?php esc_attr_e( 'تغییر اندازه قلم', 'hamishop-elementor-widgets' ); ?>">
 										<?php HSW_Helpers::the_icon( 'format_size' ); ?>
 									</button>
-									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-bookmark aria-label="<?php esc_attr_e( 'نشان‌کردن مقاله', 'hamishop-elementor-widgets' ); ?>">
+									<?php if ( $on( 'show_bookmark' ) ) : ?>
+									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-bookmark aria-label="<?php esc_attr_e( 'نشان‌کردن در همین مرورگر', 'hamishop-elementor-widgets' ); ?>" aria-pressed="false">
 										<?php HSW_Helpers::the_icon( 'bookmark' ); ?>
 									</button>
+									<?php endif; ?>
+									<?php if ( $on( 'show_share' ) ) : ?>
 									<button type="button" class="hsw-pp__iconbtn" data-hsw-pp-share aria-label="<?php esc_attr_e( 'اشتراک‌گذاری', 'hamishop-elementor-widgets' ); ?>">
 										<?php HSW_Helpers::the_icon( 'share' ); ?>
 									</button>
+									<?php endif; ?>
 								</div>
 							</div>
 						<?php endif; ?>

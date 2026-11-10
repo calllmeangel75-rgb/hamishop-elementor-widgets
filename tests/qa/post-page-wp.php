@@ -29,6 +29,9 @@ $check( 'decoded headings are safely escaped once', false !== strpos( $widget->t
 $check( 'legacy none remains a button', false !== strpos( $widget->toc_probe( $content['toc'][0], 'none' ), '<button' ) );
 $link = $widget->toc_probe( $content['toc'][0], 'index' );
 $check( 'fragment is a working anchor without unnecessary nofollow', false !== strpos( $link, 'href="#hsw-h-3"' ) && false === strpos( $link, 'nofollow' ) );
+$side = $widget->toc_probe( $content['toc'][0], 'index', 'side' );
+$check( 'sidebar uses real fragment links in link mode', false !== strpos( $side, '<a ' ) && false !== strpos( $side, 'href="#hsw-h-3"' ) );
+$check( 'sidebar preserves scroll-only mode', false !== strpos( $widget->toc_probe( $content['toc'][0], 'none', 'side' ), '<button' ) );
 $form = $widget->comment_probe( $post );
 $check( 'no-JS comment form supplies admin-post action', false !== strpos( $form, 'name="action" value="hsw_submit_comment"' ) && false !== strpos( $form, 'admin-post.php' ) );
 $dock = $widget->dock_probe( $post );
@@ -38,5 +41,6 @@ $html = $widget->product_probe( $product );
 $check( 'sale price markup has no extra old price', substr_count( $html, '<del' ) === 1 );
 $controls = $widget->get_controls();
 $check( 'body color also targets paragraphs', false !== strpos( implode( ' ', array_keys( $controls['body_c']['selectors'] ?? array() ) ), '.hsw-pp__body p' ) );
+$check( 'bookmark and share visibility controls exist and default on', 'yes' === ( $controls['show_bookmark']['default'] ?? '' ) && 'yes' === ( $controls['show_share']['default'] ?? '' ) );
 wp_delete_post( $post_id, true ); $product->delete( true ); wp_reset_postdata();
 exit( $failed ? 1 : 0 );
