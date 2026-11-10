@@ -11,17 +11,44 @@
 	close.className = 'hsw-ticket-lightbox__close';
 	close.setAttribute('aria-label', 'بستن تصویر');
 	close.textContent = '×';
+	var zoom = document.createElement('button');
+	zoom.type = 'button';
+	zoom.className = 'hsw-ticket-lightbox__zoom';
+	zoom.textContent = 'بزرگ‌نمایی';
+	zoom.setAttribute('aria-pressed', 'false');
+	var viewport = document.createElement('div');
+	viewport.className = 'hsw-ticket-lightbox__viewport';
 	var image = document.createElement('img');
 	image.alt = 'تصویر پیوست تیکت';
 	dialog.appendChild(close);
-	dialog.appendChild(image);
+	dialog.appendChild(zoom);
+	viewport.appendChild(image);
+	dialog.appendChild(viewport);
 	document.body.appendChild(dialog);
 	var trigger = null;
+	function resetZoom() {
+		image.style.width = '';
+		image.classList.remove('is-zoomed');
+		zoom.setAttribute('aria-pressed', 'false');
+		zoom.textContent = 'بزرگ‌نمایی';
+		viewport.scrollTop = 0;
+		viewport.scrollLeft = 0;
+	}
+	zoom.addEventListener('click', function () {
+		if (image.classList.contains('is-zoomed')) { resetZoom(); return; }
+		if (!image.naturalWidth) { return; }
+		var width = image.getBoundingClientRect().width;
+		image.style.width = (width * 2) + 'px';
+		image.classList.add('is-zoomed');
+		zoom.setAttribute('aria-pressed', 'true');
+		zoom.textContent = 'اندازه عادی';
+	});
 	close.addEventListener('click', function () { dialog.close(); });
 	dialog.addEventListener('click', function (event) {
 		if (event.target === dialog) { dialog.close(); }
 	});
 	dialog.addEventListener('close', function () {
+		resetZoom();
 		image.removeAttribute('src');
 		if (trigger && trigger.isConnected) { trigger.focus(); }
 		trigger = null;
