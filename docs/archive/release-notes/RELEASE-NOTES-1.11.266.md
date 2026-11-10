@@ -1,0 +1,5 @@
+# 1.11.266 — staging pre-release
+
+Customer ticket view validates ticket ownership before rendering the thread and list row. Reply storage failures are reported instead of showing success or changing status; upload failure reports partial success and client image processing is checked. Closing unpublished tickets is rejected. Disposable WordPress integration tests cover customer isolation, reply storage failure, status, selected order ownership, and inbound validation. Actual site, successful HTTP image upload, role customizations, mail delivery and browser flow still need testing.
+
+**Privacy warning:** ticket attachments are still stored in the standard uploads directory and may be publicly accessible by URL; do not upload sensitive images. Existing files have not been moved or protected. Default editors can edit tickets; review permissions. Closed ticket retention may delete data; verify the configured policy and backup. Inbound security depends on provider authentication and its configuration. Not a production release; wallet remains out of scope.
