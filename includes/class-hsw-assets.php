@@ -20,6 +20,7 @@ class HSW_Assets {
                 add_action( 'wp_head', array( $this, 'print_js_flag' ), 2 );
                 add_action( 'wp_footer', array( $this, 'print_sheet_boot' ), 5 );
                 add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
+                add_action( 'elementor/editor/after_enqueue_styles', array( $this, 'loop_editor_legacy_controls' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
                 add_action( 'elementor/element/after_section_end', array( $this, 'append_common_section' ), 10, 3 );
@@ -1033,6 +1034,13 @@ class HSW_Assets {
                         'wp-admin',
                         '.elementor-widget-hsw-wonder-deals .elementor-widget-container:before{content:"";display:block;height:0}'
                 );
+        }
+
+        /** Keep legacy loop settings active for old pages, but use one button editor. */
+        public function loop_editor_legacy_controls() {
+                wp_register_style( 'hsw-loop-editor-controls', false, array(), HSW_VERSION );
+                wp_enqueue_style( 'hsw-loop-editor-controls' );
+                wp_add_inline_style( 'hsw-loop-editor-controls', '.elementor-control.hsw-loop-legacy-button-control{display:none!important}' );
         }
 
         /**
