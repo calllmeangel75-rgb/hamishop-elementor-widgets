@@ -371,11 +371,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install Playwright and Chromium
-        run: |
-          npm install --no-save --no-package-lock playwright@1.50.1
-          npx playwright install --with-deps chromium
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock playwright@1.50.1
       - name: Verify normal and hover label and icon colors
+        env:
+          HSW_BROWSER_PATH: /usr/bin/google-chrome
         run: node tests/loop-lead-color-probe.js
 
   package:

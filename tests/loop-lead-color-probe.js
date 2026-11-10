@@ -6,7 +6,7 @@ const path = require('path');
 const assert = require('assert');
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true, ...(process.env.HSW_BROWSER_PATH ? { executablePath: process.env.HSW_BROWSER_PATH } : {}) });
   try {
     const page = await browser.newPage();
     const css = fs.readFileSync(path.join(__dirname, '../assets/css/hsw-loop.css'), 'utf8');
