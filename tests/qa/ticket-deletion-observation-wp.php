@@ -27,19 +27,29 @@ file_put_contents( $original, 'qa-original' ); file_put_contents( $thumb, 'qa-th
 $attachment = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg', 'post_title' => 'QA image', 'post_status' => 'inherit' ), $original, $ticket );
 wp_update_attachment_metadata( $attachment, array( 'file' => basename( $folder ) . '/qa.jpg', 'sizes' => array( 'thumbnail' => array( 'file' => basename( $thumb ), 'width' => 150, 'height' => 150, 'mime-type' => 'image/jpeg' ) ) ) );
 update_post_meta( $ticket, HSW_Account_Support::IMAGE_META, $attachment );
+update_comment_meta( $comment, HSW_Account_Support::IMAGE_META, $attachment );
 // Parentage alone is not exclusive ownership: another ticket and a regular
 // post can both reuse the exact same media attachment.
 $shared_ticket = wp_insert_post( array( 'post_type' => HSW_Account_Support::POST_TYPE, 'post_status' => 'publish', 'post_author' => $user ) );
 update_post_meta( $shared_ticket, HSW_Account_Support::IMAGE_META, $attachment );
 $shared_post = wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_author' => $user, 'post_content' => '<img src="' . esc_url( wp_get_attachment_url( $attachment ) ) . '">' ) );
 set_post_thumbnail( $shared_post, $attachment );
+$cancel_delete = static function ( $result, $post ) use ( $ticket ) { return (int) $post->ID === (int) $ticket ? false : $result; };
+add_filter( 'pre_delete_post', $cancel_delete, 10, 2 );
+wp_delete_post( $ticket, true );
+remove_filter( 'pre_delete_post', $cancel_delete, 10 );
+$check( 'blocked deletion does not queue attachment', get_post( $ticket ) && ! metadata_exists( 'post', $attachment, HSW_Account_Support::IMAGE_REVIEW_META ) );
 wp_trash_post( $ticket );
 $check( 'trash retains ticket, replies, attachment and notifications', 'trash' === get_post_status( $ticket ) && get_comment( $comment ) && get_post( $attachment ) && file_exists( $original ) && get_user_meta( $user, '_hsw_notifications', true ) === $notifications );
+$check( 'trash does not flag attachment for review', ! metadata_exists( 'post', $attachment, HSW_Account_Support::IMAGE_REVIEW_META ) );
 wp_untrash_post( $ticket );
 $check( 'untrash restores ticket without altering image or notifications', get_post( $ticket ) && 'trash' !== get_post_status( $ticket ) && get_post( $attachment ) && file_exists( $original ) && get_user_meta( $user, '_hsw_notifications', true ) === $notifications );
 wp_delete_post( $ticket, true );
 $check( 'permanent deletion removes ticket, metadata, reply and reply metadata', ! get_post( $ticket ) && ! metadata_exists( 'post', $ticket, 'hsw_delete_qa' ) && ! get_comment( $comment ) && ! metadata_exists( 'comment', $comment, 'hsw_delete_qa' ) );
 $check( 'attachment and image files remain after ticket deletion', get_post( $attachment ) && file_exists( $original ) && file_exists( $thumb ) );
+$check( 'deleted ticket image is queued once for review', get_post_meta( $attachment, HSW_Account_Support::IMAGE_REVIEW_META, false ) === array( (string) $ticket ) );
+$review = new WP_Query( array( 'post_type' => 'attachment', 'post_status' => array( 'inherit', 'private', 'publish', 'trash' ), 'meta_query' => array( array( 'key' => HSW_Account_Support::IMAGE_REVIEW_META, 'compare' => 'EXISTS' ) ) ) );
+$check( 'review queue finds candidate attachment', in_array( $attachment, wp_list_pluck( $review->posts, 'ID' ), true ) );
 $check( 'shared attachment remains usable by other ticket and post', (int) get_post_meta( $shared_ticket, HSW_Account_Support::IMAGE_META, true ) === $attachment && (int) get_post_thumbnail_id( $shared_post ) === $attachment && get_post( $attachment ) && file_exists( $original ) );
 $check( 'only matching ticket notifications removed', get_user_meta( $user, '_hsw_notifications', true ) === array_slice( $notifications, 2 ) );
 wp_delete_post( $shared_ticket, true );
@@ -61,6 +71,7 @@ update_user_meta( $user, '_hsw_notifications', array( array( 'type' => 'ticket',
 $support->cleanup_old_tickets();
 $check( 'retention cleanup also removes matching notifications', ! get_post( $old_ticket ) && array() === get_user_meta( $user, '_hsw_notifications', true ) );
 $check( 'retention cleanup leaves attachment and file untouched', get_post( $retained_attachment ) && file_exists( $retained_file ) );
+$check( 'retention cleanup queues image for review', get_post_meta( $retained_attachment, HSW_Account_Support::IMAGE_REVIEW_META, false ) === array( (string) $old_ticket ) );
 wp_delete_attachment( $retained_attachment, true );
 if ( is_dir( $folder ) ) { rmdir( $folder ); }
 require_once ABSPATH . 'wp-admin/includes/user.php'; wp_delete_user( $user );

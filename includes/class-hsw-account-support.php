@@ -27,6 +27,12 @@ final class HSW_Account_Support {
 	/** Attachment ID of the screenshot the customer attached. */
 	const IMAGE_META = '_hsw_ticket_image';
 
+	/** Deleted ticket IDs whose attachments need a human reuse review. */
+	const IMAGE_REVIEW_META = '_hsw_deleted_ticket_image_review';
+
+	/** Captured before WordPress removes post and comment metadata. */
+	private $deleted_ticket_images = array();
+
 	/** @var HSW_Account */
 	private $account;
 
@@ -35,6 +41,8 @@ final class HSW_Account_Support {
 
 		add_action( 'init', array( $this, 'register_post_type' ), 5 );
 		add_action( 'hsw_ticket_cleanup', array( $this, 'cleanup_old_tickets' ) );
+		add_action( 'before_delete_post', array( $this, 'capture_deleted_ticket_images' ), 10, 2 );
+		add_action( 'after_delete_post', array( $this, 'flag_deleted_ticket_images' ), 10, 2 );
 		add_action( 'deleted_post', array( $this, 'cleanup_deleted_ticket_notifications' ), 10, 2 );
 		add_action( 'init', array( $this, 'schedule_cleanup' ), 20 );
 		add_action( 'rest_api_init', array( $this, 'register_inbound_route' ) );
@@ -49,6 +57,7 @@ final class HSW_Account_Support {
 		add_action( 'wp_ajax_hsw_orders_search', array( $this, 'ajax_orders_search' ) );
 
 		if ( is_admin() ) {
+			add_action( 'admin_menu', array( $this, 'register_image_review_page' ), 30 );
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 			add_action( 'save_post_' . self::POST_TYPE, array( $this, 'save_ticket' ), 10, 2 );
 			add_action( 'admin_post_hsw_admin_ticket_reply', array( $this, 'admin_reply' ) );
@@ -64,6 +73,68 @@ final class HSW_Account_Support {
 			add_action( 'admin_notices', array( $this, 'admin_notices' ) );
 			add_action( 'admin_footer', array( $this, 'render_ticket_action_forms' ) );
 		}
+	}
+
+	/** Capture image references only for permanent deletion, before meta is lost. */
+	public function capture_deleted_ticket_images( $post_id, $post ) {
+		if ( ! $post || self::POST_TYPE !== $post->post_type ) {
+			return;
+		}
+		$images = array( absint( get_post_meta( $post_id, self::IMAGE_META, true ) ) );
+		$comments = get_comments( array( 'post_id' => $post_id, 'status' => 'all', 'fields' => 'ids', 'number' => 0 ) );
+		foreach ( $comments as $comment_id ) {
+			$images[] = absint( get_comment_meta( $comment_id, self::IMAGE_META, true ) );
+		}
+		$this->deleted_ticket_images[ $post_id ] = array_unique( array_filter( $images ) );
+	}
+
+	/** Mark candidates only after deletion completed; never delete media here. */
+	public function flag_deleted_ticket_images( $post_id, $post ) {
+		if ( ! $post || self::POST_TYPE !== $post->post_type || ! isset( $this->deleted_ticket_images[ $post_id ] ) ) {
+			return;
+		}
+		foreach ( $this->deleted_ticket_images[ $post_id ] as $image_id ) {
+			if ( 'attachment' === get_post_type( $image_id ) && ! in_array( (string) $post_id, get_post_meta( $image_id, self::IMAGE_REVIEW_META, false ), true ) ) {
+				add_post_meta( $image_id, self::IMAGE_REVIEW_META, (int) $post_id );
+			}
+		}
+		unset( $this->deleted_ticket_images[ $post_id ] );
+	}
+
+	public function register_image_review_page() {
+		add_submenu_page( 'hamishop', 'بررسی عکس‌های تیکت حذف‌شده', 'بررسی عکس تیکت', 'manage_options', 'hsw-ticket-image-review', array( $this, 'render_image_review_page' ) );
+	}
+
+	/** A review queue, not a declaration that the files are safe to delete. */
+	public function render_image_review_page() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'دسترسی غیرمجاز است.', 'hamishop-elementor-widgets' ) );
+		}
+		$page = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1;
+		$query = new WP_Query( array(
+			'post_type' => 'attachment', 'post_status' => array( 'inherit', 'private', 'publish', 'trash' ), 'posts_per_page' => 25,
+			'paged' => $page, 'orderby' => 'ID', 'order' => 'DESC',
+			'meta_query' => array( array( 'key' => self::IMAGE_REVIEW_META, 'compare' => 'EXISTS' ) ),
+		) );
+		echo '<div class="wrap"><h1>' . esc_html__( 'بررسی عکس‌های تیکت حذف‌شده', 'hamishop-elementor-widgets' ) . '</h1>';
+		echo '<p>' . esc_html__( 'این فهرست فقط عکس‌های ثبت‌شده پس از نصب این قابلیت را نشان می‌دهد؛ وجود عکس در فهرست به معنی بی‌استفاده بودن آن نیست. پیش از حذف از رسانه، استفاده در تیکت‌ها، نوشته‌ها، محصولات و سایر بخش‌ها را بررسی و نسخه پشتیبان تهیه کنید. لینک‌های بیرونی، ایمیل‌ها و نسخه‌های پشتیبان نیز ممکن است از عکس استفاده کنند.', 'hamishop-elementor-widgets' ) . '</p>';
+		if ( ! $query->posts ) {
+			echo '<p>' . esc_html__( 'موردی برای بررسی ثبت نشده است.', 'hamishop-elementor-widgets' ) . '</p>';
+		} else {
+			echo '<table class="widefat striped"><thead><tr><th>' . esc_html__( 'تصویر', 'hamishop-elementor-widgets' ) . '</th><th>' . esc_html__( 'شناسه رسانه', 'hamishop-elementor-widgets' ) . '</th><th>' . esc_html__( 'تیکت‌های حذف‌شده', 'hamishop-elementor-widgets' ) . '</th><th>' . esc_html__( 'بررسی', 'hamishop-elementor-widgets' ) . '</th></tr></thead><tbody>';
+			foreach ( $query->posts as $attachment ) {
+				$ids = array_map( 'absint', get_post_meta( $attachment->ID, self::IMAGE_REVIEW_META, false ) );
+				echo '<tr><td>' . wp_get_attachment_image( $attachment->ID, 'thumbnail' ) . '</td><td>' . esc_html( $attachment->ID ) . '</td><td>' . esc_html( implode( ', ', $ids ) ) . '</td><td>';
+				if ( current_user_can( 'edit_post', $attachment->ID ) ) {
+					echo '<a href="' . esc_url( get_edit_post_link( $attachment->ID ) ) . '">' . esc_html__( 'بررسی در رسانه', 'hamishop-elementor-widgets' ) . '</a>';
+				}
+				echo '</td></tr>';
+			}
+			echo '</tbody></table>';
+			$base = add_query_arg( array( 'page' => 'hsw-ticket-image-review', 'paged' => '%#%' ), admin_url( 'admin.php' ) );
+			echo wp_kses_post( paginate_links( array( 'base' => $base, 'format' => '', 'current' => $page, 'total' => $query->max_num_pages ) ) );
+		}
+		echo '</div>';
 	}
 
 	/** Remove only this owner's matching ticket notifications after permanent deletion.
