@@ -115,6 +115,21 @@ $editor = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_editor', 'user_p
 $author = wp_insert_user( array( 'user_login' => 'hsw_ticket_qa_author', 'user_pass' => wp_generate_password(), 'role' => 'author' ) );
 $check( 'default editor can edit customer ticket via generic post capabilities', user_can( $editor, 'edit_post', $plain_id ) );
 $check( 'default author and subscriber cannot edit another customer ticket in admin', ! user_can( $author, 'edit_post', $plain_id ) && ! user_can( $user_b, 'edit_post', $plain_id ) );
+// Inbound authentication and successful reopening, with intercepted mail.
+$inbound_before = count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) );
+$request->set_param( 'secret', 'wrong' ); $denied_secret = $support->handle_inbound_email( $request );
+$request->set_param( 'secret', 'qa-inbound-secret' ); $request->set_param( 'from', 'stranger@example.test' ); $denied_sender = $support->handle_inbound_email( $request );
+$request->set_param( 'from', get_userdata( $user_a )->user_email ); $request->set_param( 'to', 'support+t' . $own . '.0000000000@example.com' ); $denied_tag = $support->handle_inbound_email( $request );
+$check( 'inbound rejects bad secret, sender and tag without recording replies', is_wp_error( $denied_secret ) && is_wp_error( $denied_sender ) && is_wp_error( $denied_tag ) && $inbound_before === count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) ) && 'closed' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) );
+$request->set_param( 'to', 'support+' . $token_method->invoke( $support, $own ) . '@example.com' ); $accepted = $support->handle_inbound_email( $request );
+$check( 'authenticated customer inbound reopens and stores reply', ! is_wp_error( $accepted ) && 'open' === get_post_meta( $own, HSW_Account_Support::STATUS_META, true ) && $inbound_before + 1 === count( get_comments( array( 'post_id' => $own, 'type' => 'hsw_ticket_reply' ) ) ) );
+// Related order must belong to the ticket creator.
+$order = wc_create_order( array( 'customer_id' => $user_b ) );
+set_transient( 'hsw_cap_qaorder', 4, 60 );
+$_POST = array( 'nonce' => $nonce_a, 'subject' => 'Order QA subject', 'message' => 'Order related QA message.', 'captcha_token' => 'qaorder', 'captcha' => '4', 'order_id' => $order->get_id() ); $_REQUEST = $_POST;
+ob_start(); try { $support->ajax_create_ticket(); } catch ( HSW_QA_Ajax_Die $e ) {} $foreign_order_result = json_decode( ob_get_clean(), true );
+$check( 'foreign related order is rejected before ticket creation', isset( $foreign_order_result['success'] ) && false === $foreign_order_result['success'] && empty( $foreign_order_result['data']['ticket'] ) );
+$order->delete( true );
 foreach ( array( $own, $other, $draft, $ordinary, $created_id, $plain_id ) as $id ) { if ( $id ) { wp_delete_post( $id, true ); } }
 require_once ABSPATH . 'wp-admin/includes/user.php';
 wp_delete_user( $user_a ); wp_delete_user( $user_b ); wp_delete_user( $editor ); wp_delete_user( $author );
