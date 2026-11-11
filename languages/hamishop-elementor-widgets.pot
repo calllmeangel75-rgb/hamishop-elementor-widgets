@@ -2201,7 +2201,7 @@ msgstr ""
 msgid "باشگاه مشتریان"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:1115
+#: includes/class-hsw-helpers.php:1143
 msgid "باقی‌مانده: %s عدد"
 msgstr ""
 
@@ -3471,7 +3471,7 @@ msgstr ""
 msgid "تخفیف شگفت‌انگیز کالاها"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:198
+#: includes/class-hsw-helpers.php:226
 #: widgets/class-hsw-widget-cart-summary.php:153
 #: widgets/class-hsw-widget-cart-summary.php:516
 #: widgets/class-hsw-widget-cart-summary.php:625
@@ -3852,8 +3852,8 @@ msgstr ""
 msgid "تماس با پشتیبانی"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:1372
-#: includes/class-hsw-helpers.php:1378
+#: includes/class-hsw-helpers.php:1400
+#: includes/class-hsw-helpers.php:1406
 msgid "تماس بگیرید"
 msgstr ""
 
@@ -4055,7 +4055,7 @@ msgid "توضیحی ثبت نشده است."
 msgstr ""
 
 #: includes/class-hsw-account.php:2280
-#: includes/class-hsw-helpers.php:1291
+#: includes/class-hsw-helpers.php:1319
 #: includes/class-hsw-invoice.php:421
 #: includes/class-hsw-widget-base.php:862
 #: includes/class-hsw-widget-base.php:3143
@@ -8453,7 +8453,7 @@ msgstr ""
 msgid "صفحه‌های نبود ساخته و به مسیر خرید وصل شوند؟ صفحه‌های موجود دست نمی‌خورند."
 msgstr ""
 
-#: includes/class-hsw-helpers.php:247
+#: includes/class-hsw-helpers.php:275
 msgid "صفر"
 msgstr ""
 
@@ -9373,7 +9373,7 @@ msgstr ""
 msgid "فرم ورود و ثبت‌نام"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:1112
+#: includes/class-hsw-helpers.php:1140
 msgid "فروش رفته: %s٪"
 msgstr ""
 
@@ -9435,7 +9435,7 @@ msgstr ""
 msgid "فقط %s امتیاز قابل تبدیل دارید."
 msgstr ""
 
-#: includes/class-hsw-helpers.php:1103
+#: includes/class-hsw-helpers.php:1131
 msgid "فقط %s عدد در انبار"
 msgstr ""
 
@@ -11611,7 +11611,7 @@ msgstr ""
 msgid "موجود"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:1106
+#: includes/class-hsw-helpers.php:1134
 #: widgets/class-hsw-widget-archive-grid.php:48
 #: widgets/class-hsw-widget-archive-grid.php:328
 #: widgets/class-hsw-widget-product-title.php:279
@@ -14607,7 +14607,7 @@ msgstr ""
 msgid "کد تأیید ۶ رقمی"
 msgstr ""
 
-#: includes/class-hsw-helpers.php:201
+#: includes/class-hsw-helpers.php:229
 #: widgets/class-hsw-widget-cart-coupon.php:204
 #: widgets/class-hsw-widget-cart-coupon.php:230
 #: widgets/class-hsw-widget-cart-summary.php:163

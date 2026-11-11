@@ -46,6 +46,34 @@ class HSW_Helpers {
         }
 
         /**
+         * One cell of a CSV export, safe to open in a spreadsheet.
+         *
+         * Excel, LibreOffice and Google Sheets run a cell that starts with
+         * `=`, `+`, `-` or `@` (also behind leading blanks, a tab or a
+         * carriage return) as a formula. Exports carry text typed by customers
+         * — a ticket subject like `=HYPERLINK(...)` would run on the computer
+         * of whoever opens the file. Such a cell gets a leading apostrophe,
+         * the convention spreadsheets (and WooCommerce's own exporter) use for
+         * "this is text". Plain numbers, negative ones included, are untouched.
+         *
+         * @param mixed $value Cell value.
+         * @return string
+         */
+        public static function csv_cell( $value ) {
+                $value = (string) $value;
+                if ( '' === $value || is_numeric( $value ) ) {
+                        return $value;
+                }
+
+                $first = ltrim( $value, " \n\0\x0B" );
+                if ( '' !== $first && false !== strpos( "=+-@\t\r", $first[0] ) ) {
+                        return "'" . $value;
+                }
+
+                return $value;
+        }
+
+        /**
          * Format a price number with thousands separator (+ optional Persian digits).
          */
         public static function price_num( $number, $persian = true ) {
