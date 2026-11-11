@@ -2,7 +2,8 @@
 /**
  * Disposable WP/WC regression: paying a wallet top-up, and what the pay step
  * may show and charge. Creates a user, a product, orders and wallet rows and
- * changes payment options. Never run on a real shop.
+ * changes payment options. Never run on a real shop. Elementor must be active:
+ * what the pay widgets show is part of what is checked.
  *
  * Covers four defects that were live together:
  *  1. a top-up settled with Cash on Delivery credited the wallet for free;
@@ -68,6 +69,15 @@ register_shutdown_function( static function () use ( $user, $other, $product, $s
 	remove_filter( 'woocommerce_payment_gateways', $add_bank );
 } );
 
+/*
+ * A die() inside the code under test (wp_die(), wp_send_json(), a redirect
+ * followed by exit) ends the script with status 0, and the step would read as
+ * a pass with half of the assertions never reached. Registered after the
+ * clean-up above, so that one still runs first.
+ */
+$done = false;
+register_shutdown_function( static function () use ( &$done ) { if ( ! $done ) { echo '::error::FAIL the script stopped before its last assertion' . PHP_EOL; exit( 1 ); } } );
+
 /* Become the customer BEFORE WooCommerce builds the session, cart and customer. */
 wp_set_current_user( $user );
 WC()->session = null; WC()->cart = null; WC()->customer = null;
@@ -80,7 +90,8 @@ foreach ( array( 'first_name' => 'QA', 'last_name' => 'Tester', 'country' => 'IR
 $customer->save();
 
 $failed = 0;
-$check  = static function ( $name, $ok, $detail = '' ) use ( &$failed ) { echo ( $ok ? 'PASS ' : '::error::FAIL ' ) . $name . ( $ok || '' === $detail ? '' : ' — ' . $detail ) . PHP_EOL; if ( ! $ok ) { ++$failed; } };
+$ran    = 0;
+$check  = static function ( $name, $ok, $detail = '' ) use ( &$failed, &$ran ) { ++$ran; echo ( $ok ? 'PASS ' : '::error::FAIL ' ) . $name . ( $ok || '' === $detail ? '' : ' — ' . $detail ) . PHP_EOL; if ( ! $ok ) { ++$failed; } };
 $rest   = static function ( $route, $params ) {
 	$request = new WP_REST_Request( 'POST', $route );
 	$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
@@ -187,7 +198,8 @@ if ( $view ) {
 	$check( 'pay widgets do not show a foreign order left in the session', null === $view() );
 	WC()->session->set( 'order_awaiting_payment', null );
 } else {
-	echo 'SKIP widget display checks (Elementor widgets unavailable)' . PHP_EOL;
+	/* What the pay widgets show is half of defect 4: not looking is not a pass. */
+	echo '::error::FAIL the pay widgets could not be loaded (Elementor must be active)' . PHP_EOL; ++$failed;
 }
 
 $wp->query_vars['order-pay'] = (string) $mine->get_id(); unset( $_GET['key'] );
@@ -202,4 +214,7 @@ if ( $view ) {
 }
 unset( $wp->query_vars['order-pay'], $_GET['key'] );
 
+/* A skipped block must not read as a pass either. */
+if ( 23 !== $ran ) { echo '::error::FAIL expected 23 assertions, ' . $ran . ' ran' . PHP_EOL; ++$failed; }
+$done = true;
 exit( $failed ? 1 : 0 );

@@ -102,8 +102,18 @@ register_shutdown_function( static function () use ( &$users, &$logins, $saved, 
 	$account->settings( true );
 } );
 
+/*
+ * A die() inside the code under test (wp_die(), wp_send_json(), a redirect
+ * followed by exit) ends the script with status 0, and the step would read as
+ * a pass with half of the assertions never reached. Registered after the
+ * clean-up above, so that one still runs first.
+ */
+$done = false;
+register_shutdown_function( static function () use ( &$done ) { if ( ! $done ) { echo '::error::FAIL the script stopped before its last assertion' . PHP_EOL; exit( 1 ); } } );
+
 $failed = 0;
-$check  = static function ( $name, $ok ) use ( &$failed ) { echo ( $ok ? 'PASS ' : '::error::FAIL ' ) . $name . PHP_EOL; if ( ! $ok ) { ++$failed; } };
+$ran    = 0;
+$check  = static function ( $name, $ok ) use ( &$failed, &$ran ) { ++$ran; echo ( $ok ? 'PASS ' : '::error::FAIL ' ) . $name . PHP_EOL; if ( ! $ok ) { ++$failed; } };
 $ajax   = static function ( $method, $nonce, $post = array() ) use ( $auth ) {
 	$_POST          = $post;
 	$_POST['nonce'] = wp_create_nonce( $nonce );
@@ -238,4 +248,7 @@ remove_filter( 'transient_hsw_tgl_' . $sid, $interleave );
 $check( 'telegram login: twelve interleaved wrong codes were all issued', 11 === $depth );
 $check( 'telegram login: the limit holds when requests interleave', 0 === $try( $sid, $code ) );
 
+/* A skipped block must not read as a pass either. */
+if ( 16 !== $ran ) { echo '::error::FAIL expected 16 assertions, ' . $ran . ' ran' . PHP_EOL; ++$failed; }
+$done = true;
 exit( $failed ? 1 : 0 );
