@@ -275,6 +275,15 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/wallet-noop-wp.php
 
+      # Money path: a top-up must never be settled by COD or by the wallet, and
+      # the pay step must charge (and show) only what this visitor may pay.
+      - name: Top-up payment guard (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/topup-payment-guard-wp.php
+
       - name: Coupon session and removal (disposable WordPress)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php

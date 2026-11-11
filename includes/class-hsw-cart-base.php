@@ -68,7 +68,8 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
 
                 global $wp;
 
-                $id = isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
+                $id       = isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
+                $from_url = ( 0 < $id );
 
                 /*
                  * After «ادامه و ورود به مرحله پرداخت» the URL is the pay page, not
@@ -91,7 +92,30 @@ abstract class HSW_Cart_Base extends HSW_Widget_Base {
 
                 $order = wc_get_order( $id );
 
-                return $order instanceof WC_Order ? $order : null;
+                if ( ! $order instanceof WC_Order ) {
+                        return null;
+                }
+
+                /*
+                 * An order is only shown to someone who may pay it. The id in
+                 * the URL proves nothing — `/order-pay/<any id>/` used to print
+                 * that order's lines and totals — so it needs the order key and
+                 * the owner, exactly like WooCommerce's own pay form. The
+                 * session id was put there by this site for this visitor; it
+                 * still must not cross accounts on a shared browser.
+                 */
+                if ( $from_url ) {
+                        if ( class_exists( 'HSW_Wallet_Topup' ) && ! HSW_Wallet_Topup::visitor_may_pay( $order ) ) {
+                                return null;
+                        }
+                } else {
+                        $owner = (int) $order->get_customer_id();
+                        if ( $owner && get_current_user_id() !== $owner ) {
+                                return null;
+                        }
+                }
+
+                return $order;
         }
 
         /**

@@ -1752,7 +1752,7 @@ msgstr ""
 msgid "ایمیل معتبر وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:702
+#: includes/class-hsw-checkout-complete.php:731
 msgid "ایمیل وارد شده معتبر نیست."
 msgstr ""
 
@@ -2358,7 +2358,7 @@ msgstr ""
 msgid "برای انجام این کار دسترسی مدیریت لازم است."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:715
+#: includes/class-hsw-checkout-complete.php:744
 msgid "برای این آدرس روش ارسال در دسترس نیست؛ آدرس را بررسی کنید."
 msgstr ""
 
@@ -2399,7 +2399,7 @@ msgid "برای ثبت دیدگاه باید %1$sوارد حساب کاربری 
 msgstr ""
 
 #: includes/class-hsw-checkout-complete.php:171
-#: includes/class-hsw-checkout-complete.php:374
+#: includes/class-hsw-checkout-complete.php:394
 msgid "برای ثبت سفارش باید قوانین و شرایط فروشگاه را بپذیرید."
 msgstr ""
 
@@ -4773,7 +4773,7 @@ msgstr ""
 msgid "حداقل قیمت برای نشان «ارسال رایگان»"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:479
+#: includes/class-hsw-wallet-pay.php:621
 #: includes/class-hsw-wallet.php:1900
 msgid "حداقل مبلغ شارژ %s تومان است."
 msgstr ""
@@ -5416,7 +5416,7 @@ msgstr ""
 msgid "در انتظار پرداخت"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:539
+#: includes/class-hsw-wallet-pay.php:681
 msgid "در انتظار پرداخت شارژ کیف پول"
 msgstr ""
 
@@ -5453,7 +5453,7 @@ msgstr ""
 msgid "در حال تکمیل"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:500
+#: includes/class-hsw-wallet-pay.php:642
 msgid "در حال حاضر هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید."
 msgstr ""
 
@@ -5550,7 +5550,7 @@ msgstr ""
 msgid "درخواست صدور فاکتور رسمی حقوقی (ویژه شرکت‌ها و اشخاص حقوقی)"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:771
+#: includes/class-hsw-checkout-complete.php:800
 msgid "درخواست فاکتور رسمی از سوی مشتری ثبت شد."
 msgstr ""
 
@@ -5626,7 +5626,7 @@ msgstr ""
 msgid "درگاه پرداخت امن شاپرک"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:516
+#: includes/class-hsw-wallet-pay.php:658
 msgid "درگاه پرداخت انتخاب‌شده در دسترس نیست. لطفاً درگاه دیگری انتخاب کنید."
 msgstr ""
 
@@ -7417,8 +7417,10 @@ msgid "روش پرداخت"
 msgstr ""
 
 #: includes/class-hsw-checkout-complete.php:266
-#: includes/class-hsw-checkout-complete.php:386
-#: includes/class-hsw-checkout-complete.php:725
+#: includes/class-hsw-checkout-complete.php:406
+#: includes/class-hsw-checkout-complete.php:415
+#: includes/class-hsw-checkout-complete.php:754
+#: includes/class-hsw-wallet-pay.php:1038
 msgid "روش پرداخت انتخاب‌شده در دسترس نیست؛ روش دیگری را انتخاب کنید."
 msgstr ""
 
@@ -7480,7 +7482,7 @@ msgstr ""
 msgid "زمان باقی‌مانده:"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:637
+#: includes/class-hsw-checkout-complete.php:666
 msgid "زمان تحویل: %s"
 msgstr ""
 
@@ -7839,7 +7841,7 @@ msgstr ""
 msgid "سفارش شما ثبت شد و برای بررسی و تأیید نهایی در صف پردازش قرار گرفت."
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:450
+#: includes/class-hsw-checkout-complete.php:479
 msgid "سفارش شما در حال ثبت است؛ چند ثانیه صبر کنید و صفحه را دوباره بارگذاری نکنید."
 msgstr ""
 
@@ -7973,15 +7975,15 @@ msgstr ""
 
 #: includes/class-hsw-account.php:2757
 #: includes/class-hsw-account.php:2889
-#: includes/class-hsw-wallet-pay.php:526
+#: includes/class-hsw-wallet-pay.php:668
 msgid "شارژ کیف پول"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:473
+#: includes/class-hsw-wallet-pay.php:615
 msgid "شارژ کیف پول موقتاً غیرفعال است."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:612
+#: includes/class-hsw-wallet-pay.php:766
 msgid "شارژ کیف پول — سفارش #%s"
 msgstr ""
 
@@ -9472,7 +9474,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:917
 #: includes/class-hsw-blog-base.php:53
-#: includes/class-hsw-cart-base.php:744
+#: includes/class-hsw-cart-base.php:768
 #: includes/class-hsw-header-base.php:779
 #: includes/class-hsw-product-base.php:1517
 #: widgets/class-hsw-widget-checkout-schedule.php:51
@@ -9501,7 +9503,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:918
 #: includes/class-hsw-blog-base.php:54
-#: includes/class-hsw-cart-base.php:745
+#: includes/class-hsw-cart-base.php:769
 #: includes/class-hsw-header-base.php:780
 #: includes/class-hsw-product-base.php:1518
 #: widgets/class-hsw-widget-checkout-schedule.php:52
@@ -11464,7 +11466,7 @@ msgstr ""
 msgid "مقدار"
 msgstr ""
 
-#: includes/class-hsw-checkout-complete.php:695
+#: includes/class-hsw-checkout-complete.php:724
 msgid "مقدار «%s» را کامل کنید."
 msgstr ""
 
@@ -11642,11 +11644,11 @@ msgstr ""
 msgid "موجودی کیف پول"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:884
+#: includes/class-hsw-wallet-pay.php:1068
 msgid "موجودی کیف پول برای این سفارش کافی نیست."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:845
+#: includes/class-hsw-wallet-pay.php:1020
 msgid "موجودی کیف پول شما %1$s است. پس از پرداخت، %2$s باقی می‌ماند."
 msgstr ""
 
@@ -12155,7 +12157,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:912
 #: includes/class-hsw-blog-base.php:48
-#: includes/class-hsw-cart-base.php:739
+#: includes/class-hsw-cart-base.php:763
 #: includes/class-hsw-header-base.php:774
 #: includes/class-hsw-product-base.php:1512
 msgid "نمایش در"
@@ -13070,7 +13072,7 @@ msgstr ""
 msgid "ووکامرس شماره پیش‌فاکتور ندارد؛ متن دلخواه وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:485
+#: includes/class-hsw-wallet-pay.php:627
 msgid "ووکامرس فعال نیست."
 msgstr ""
 
@@ -13308,11 +13310,11 @@ msgid "پرداخت"
 msgstr ""
 
 #: includes/class-hsw-account.php:2892
-#: includes/class-hsw-wallet-pay.php:694
+#: includes/class-hsw-wallet-pay.php:870
 msgid "پرداخت از کیف پول"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:936
+#: includes/class-hsw-wallet-pay.php:1120
 msgid "پرداخت از کیف پول: %s"
 msgstr ""
 
@@ -13325,7 +13327,7 @@ msgid "پرداخت امن و رمزنگاری‌شده"
 msgstr ""
 
 #: includes/class-hsw-checkout-complete.php:286
-#: includes/class-hsw-checkout-complete.php:407
+#: includes/class-hsw-checkout-complete.php:436
 msgid "پرداخت انجام نشد؛ دوباره تلاش کنید یا روش پرداخت دیگری انتخاب کنید."
 msgstr ""
 
@@ -13340,7 +13342,7 @@ msgstr ""
 msgid "پرداخت سفارش"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:903
+#: includes/class-hsw-wallet-pay.php:1087
 msgid "پرداخت سفارش #%s"
 msgstr ""
 
@@ -13391,7 +13393,7 @@ msgstr ""
 msgid "پرداخت و شارژ"
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:690
+#: includes/class-hsw-wallet-pay.php:866
 msgid "پرداخت کامل سفارش از موجودی کیف پول. فقط وقتی نمایش داده می‌شود که موجودی مشتری کافی باشد."
 msgstr ""
 
@@ -14187,7 +14189,7 @@ msgstr ""
 
 #: includes/class-hsw-archive-base.php:916
 #: includes/class-hsw-blog-base.php:52
-#: includes/class-hsw-cart-base.php:743
+#: includes/class-hsw-cart-base.php:767
 #: includes/class-hsw-header-base.php:778
 #: includes/class-hsw-product-base.php:1516
 #: widgets/class-hsw-widget-checkout-schedule.php:50
@@ -14915,7 +14917,7 @@ msgstr ""
 msgid "کیف پول %s مشتری شارژ شد."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:689
+#: includes/class-hsw-wallet-pay.php:865
 msgid "کیف پول HamiShop"
 msgstr ""
 
@@ -14923,7 +14925,11 @@ msgstr ""
 msgid "کیف پول در این فروشگاه فعال نیست."
 msgstr ""
 
-#: includes/class-hsw-wallet-pay.php:632
+#: includes/class-hsw-wallet-pay.php:808
+msgid "کیف پول شارژ نشد: روش پرداخت این سفارش (%s) دریافت وجه را تأیید نمی‌کند. اگر مبلغ واقعاً دریافت شده است، اعتبار را دستی از صفحهٔ کیف پول اضافه کنید."
+msgstr ""
+
+#: includes/class-hsw-wallet-pay.php:786
 msgid "کیف پول مشتری به مبلغ %s شارژ شد."
 msgstr ""
 
