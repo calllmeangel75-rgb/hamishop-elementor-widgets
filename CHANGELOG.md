@@ -8,6 +8,32 @@
 
 ## [Unreleased]
 
+## [1.11.272] — 2026-11-11 (pre-release)
+
+### Security
+
+- A wallet top-up can no longer be settled with Cash on Delivery or with the wallet itself. The blocklist (`hsw_wallet_topup_blocked_gateways`, default `cod`; `hsw_wallet` always) used to apply only when the top-up order was created. It now also applies to the gateway list while a top-up is being paid (WooCommerce's own order-pay form and the HamiShop pay step), to `POST /hsw/v1/checkout/complete`, to the wallet gateway and to the credit step. A top-up that reaches a paid status with a blocked method earns no credit and gets one private order note.
+- The pay widgets show an order named in an order-pay URL only with its order key and to its owner, and an order left in the session only to its owner.
+- Enabling Telegram two-factor no longer stores a typed phone number as the account's verified login number unless the Telegram contact map ties that number to the same chat. Numbers stored this way before are not migrated.
+- The five-tries limit of the Telegram deep-link login is counted in the atomic throttle table, with a single-use claim for the right answer.
+- The ticket CSV export neutralises cells that a spreadsheet would run as a formula.
+- The mobile "added to cart" sheet escapes the product name, link and image it receives from `/hsw/v1/related`.
+
+### Fixed
+
+- With products in the cart, the pay step sends that cart to the gateway instead of an older pending order left in the session. A pending top-up or pay-link order is paid from its own order-pay screen, or from the pay step once the cart is empty.
+- The currency symbol in the mobile "added to cart" sheet is readable when WooCommerce prints it as HTML entities.
+- The state, city and unit icons of the checkout address form are drawn.
+- `fputcsv()` is called with an explicit escape character (deprecation on PHP 8.4+).
+- Deactivation clears the `hsw_ticket_cleanup` event; uninstall removes eight leftover options and the `hsw_upgrader_tick` event.
+
+### Notes
+
+- Wallet arithmetic and the ledger are unchanged.
+- Regression coverage: `tests/qa/topup-payment-guard-wp.php`, `tests/qa/auth-code-proof-wp.php`, new unit assertions for `HSW_Helpers::csv_cell()`, and the icon audit in CI.
+- Tested on disposable installs and in CI, not with a real bank gateway. This pre-release is for staging; verify the money path there before production.
+- Versions 1.11.259 to 1.11.271 are listed in `readme.txt` and `docs/archive/release-notes/`.
+
 ## [1.11.258] — 2026-11-07 (pre-release)
 
 ### Changed
