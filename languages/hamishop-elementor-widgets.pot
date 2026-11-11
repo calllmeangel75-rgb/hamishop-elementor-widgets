@@ -11277,7 +11277,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:2681
 #: includes/class-hsw-header-cascade.php:573
-#: includes/class-hsw-rest.php:816
+#: includes/class-hsw-rest.php:835
 msgid "مشاهده"
 msgstr ""
 
