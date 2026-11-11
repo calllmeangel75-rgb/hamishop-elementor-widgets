@@ -346,6 +346,25 @@ class HSW_Rest {
                 return new WP_REST_Response( array( 'nonce' => wp_create_nonce( 'hsw-cart-qty' ) ), 200 );
         }
 
+        /**
+         * A price as plain text with Persian digits, for JSON.
+         *
+         * `wc_price()` writes the currency symbol as numeric HTML entities for
+         * many currencies (stock WooCommerce prints تومان as
+         * `&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;`). Converting digits before
+         * decoding rewrote the digits inside those entities, and the browser
+         * showed `&#x۰۶۲A;&#x۰۶۴۸;…` instead of the symbol. Same order as
+         * HSW_Helpers::price_html_fa(): decode first, then convert.
+         *
+         * @param float $amount Amount.
+         * @return string
+         */
+        private function plain_price( $amount ) {
+                $text = html_entity_decode( (string) wc_price( $amount ), ENT_QUOTES, 'UTF-8' );
+
+                return HSW_Helpers::fa_num( wp_strip_all_tags( $text ) );
+        }
+
         public function related( $request ) {
                 $id    = (int) $request['product'];
                 $limit = (int) $request['limit'];
@@ -381,8 +400,8 @@ class HSW_Rest {
                                 'id'       => (int) $pid,
                                 'name'     => $product->get_name(),
                                 /* Clean price only: get_price_html() adds «قیمت اصلی … بود» for sales. */
-                                'price'    => HSW_Helpers::fa_num( wp_strip_all_tags( wc_price( (float) $product->get_price() ) ) ),
-                                'regular'  => $regular > 0 ? HSW_Helpers::fa_num( wp_strip_all_tags( wc_price( $regular ) ) ) : '',
+                                'price'    => $this->plain_price( (float) $product->get_price() ),
+                                'regular'  => $regular > 0 ? $this->plain_price( $regular ) : '',
                                 'off'      => $off,
                                 'rating'   => (float) $product->get_average_rating(),
                                 'reviews'  => (int) $product->get_review_count(),

@@ -357,6 +357,26 @@ class HSW_Checkout_Complete {
 			return null;
 		}
 
+		/*
+		 * With products in the cart, the cart is what the pay page shows and
+		 * what the customer agreed to pay. The session id can be much older
+		 * than that cart: an abandoned wallet top-up, or a retried payment the
+		 * customer walked away from. Paying it here sent the customer to the
+		 * gateway for THAT order's amount — a 500,000 top-up instead of the
+		 * 230,000 basket on the screen — and the basket never became an order.
+		 *
+		 * The awaiting order is only resumed when it was built from this very
+		 * cart (same contents, same total — WooCommerce's own cart hash, the
+		 * rule `WC_Checkout::create_order()` uses). Otherwise the normal path
+		 * below creates the order the customer is looking at.
+		 */
+		if ( WC()->cart && ! WC()->cart->is_empty() ) {
+			WC()->cart->calculate_totals();
+			if ( ! $order->has_cart_hash( (string) WC()->cart->get_cart_hash() ) ) {
+				return null;
+			}
+		}
+
 		return $order;
 	}
 
@@ -383,6 +403,15 @@ class HSW_Checkout_Complete {
 		}
 
 		if ( ! isset( $gateways[ $method ] ) ) {
+			return new WP_Error( 'hsw_bad_gateway', __( 'روش پرداخت انتخاب‌شده در دسترس نیست؛ روش دیگری را انتخاب کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
+		}
+
+		/*
+		 * A wallet top-up may only be paid with a gateway that confirms the
+		 * money. The gateway list is already filtered for the pay step; this
+		 * keeps a hand-written request (`method=cod`) from walking past it.
+		 */
+		if ( class_exists( 'HSW_Wallet_Topup' ) && HSW_Wallet_Topup::is_topup_order( $order ) && ! HSW_Wallet_Topup::gateway_allowed( $method ) ) {
 			return new WP_Error( 'hsw_bad_gateway', __( 'روش پرداخت انتخاب‌شده در دسترس نیست؛ روش دیگری را انتخاب کنید.', 'hamishop-elementor-widgets' ), array( 'status' => 400 ) );
 		}
 

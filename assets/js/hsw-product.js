@@ -943,6 +943,21 @@
 		return !!(D.sheet && D.relatedUrl) && window.matchMedia('(max-width: 767.98px)').matches;
 	}
 
+	/*
+	 * What the /related endpoint sends is data, not markup: a product name is
+	 * whatever was typed into the title field, and it was written into the
+	 * sheet with innerHTML as is. Same rule as esc_html() on the PHP side —
+	 * entities that are already there are kept, everything else is escaped.
+	 */
+	function sheetEsc(s) {
+		return String(s == null ? '' : s)
+			.replace(/&(?!(?:#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});)/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
 	function buildSheet() {
 		if (sheetEl) { return sheetEl; }
 
@@ -1028,13 +1043,13 @@
 				 * sheet.
 				 */
 				list.innerHTML = items.map(function (p) {
-					return '<a class="hsw-sheet__card" href="' + p.url + '">' +
+					return '<a class="hsw-sheet__card" href="' + sheetEsc(p.url) + '">' +
 						'<span class="hsw-sheet__media">' +
-							(p.image ? '<img src="' + p.image + '" alt="" loading="lazy">' : '') +
+							(p.image ? '<img src="' + sheetEsc(p.image) + '" alt="" loading="lazy">' : '') +
 						'</span>' +
 						'<span class="hsw-sheet__body">' +
-							'<span class="hsw-sheet__name">' + p.name + '</span>' +
-							'<span class="hsw-sheet__price">' + p.price + '</span>' +
+							'<span class="hsw-sheet__name">' + sheetEsc(p.name) + '</span>' +
+							'<span class="hsw-sheet__price">' + sheetEsc(p.price) + '</span>' +
 						'</span>' +
 					'</a>';
 				}).join('');

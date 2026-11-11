@@ -1989,8 +1989,19 @@ final class HSW_Account_Support {
 		$out = fopen( 'php://output', 'w' );
 		fwrite( $out, "\xEF\xBB\xBF" ); // UTF-8 BOM so Excel reads Persian correctly.
 
-		fputcsv(
-			$out,
+		/*
+		 * Every cell goes through HSW_Helpers::csv_cell(): subjects, names and
+		 * messages are typed by customers, and a cell that starts with `=` runs
+		 * as a formula when the file is opened. Delimiter, enclosure and escape
+		 * are passed explicitly (the values PHP has always used): relying on the
+		 * default escape is deprecated since PHP 8.4 and the notice would be
+		 * printed into the file on a site that displays errors.
+		 */
+		$put = static function ( array $cells ) use ( $out ) {
+			fputcsv( $out, array_map( array( 'HSW_Helpers', 'csv_cell' ), $cells ), ',', '"', '\\' );
+		};
+
+		$put(
 			array( 'شناسه', 'موضوع', 'کاربر', 'ایمیل', 'وضعیت', 'اولویت', 'دپارتمان', 'سفارش', 'تاریخ ایجاد', 'آخرین به‌روزرسانی', 'تعداد پاسخ', 'متن', 'پیوست' )
 		);
 
@@ -2011,8 +2022,7 @@ final class HSW_Account_Support {
 			$updated  = absint( get_post_meta( $id, self::UPDATED_META, true ) );
 			$created  = $this->timestamp_from_local( $ticket->post_date );
 
-			fputcsv(
-				$out,
+			$put(
 				array(
 					$id,
 					$ticket->post_title,

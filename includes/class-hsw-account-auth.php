@@ -447,6 +447,29 @@ final class HSW_Account_Auth {
 	}
 
 	/**
+	 * Did Telegram itself tie this number to this chat?
+	 *
+	 * True only for a `phone => chat` pair in the contact map: it is written when
+	 * the customer shares their own contact with the bot (Telegram vouches for the
+	 * number) or when an account links a chat to a number it has already proved.
+	 *
+	 * @param string $phone Phone number.
+	 * @param string $chat  Telegram chat id.
+	 * @return bool
+	 */
+	private function telegram_contact_bound( $phone, $chat ) {
+		$phone = $this->normalize_phone( $phone );
+		$chat  = (string) $chat;
+		if ( ! $phone || '' === $chat ) {
+			return false;
+		}
+
+		$contacts = get_option( 'hsw_telegram_contacts', array() );
+
+		return is_array( $contacts ) && isset( $contacts[ $phone ] ) && (string) $contacts[ $phone ] === $chat;
+	}
+
+	/**
 	 * Public deep link to the shop bot (`?start=` carries a one-time token).
 	 *
 	 * @param string $token Optional link token.
@@ -1578,8 +1601,9 @@ final class HSW_Account_Auth {
 				wp_send_json_error( array( 'message' => __( 'برای این حساب ایمیل معتبری ثبت نشده است.', 'hamishop-elementor-widgets' ) ), 400 );
 			}
 		} elseif ( 'telegram' === $channel ) {
-			$phone = $this->user_phone( $user_id );
-			$typed = isset( $_POST['phone'] ) ? $this->normalize_phone( wp_unslash( $_POST['phone'] ) ) : '';
+			$verified = $this->user_phone( $user_id );
+			$phone    = $verified;
+			$typed    = isset( $_POST['phone'] ) ? $this->normalize_phone( wp_unslash( $_POST['phone'] ) ) : '';
 			if ( ! $phone && $typed ) {
 				$owner = $this->phone_owner( $typed );
 				if ( $owner && $owner !== (int) $user_id ) {
@@ -1598,6 +1622,17 @@ final class HSW_Account_Auth {
 					),
 					400
 				);
+			}
+			/*
+			 * A code that lands in a Telegram chat proves the chat, never a typed
+			 * number. An account with a linked chat could type anybody's number,
+			 * read the code in its own chat and have that number stored as its
+			 * verified login number (reproduced): the real owner could no longer
+			 * register it, and an SMS login with it opened the stranger's account.
+			 * A typed number is kept only when Telegram tied it to this very chat.
+			 */
+			if ( $phone && $phone !== $verified && ! $this->telegram_contact_bound( $phone, $chat ) ) {
+				$phone = '';
 			}
 			if ( ! $phone ) {
 				$contacts = get_option( 'hsw_telegram_contacts', array() );
@@ -1691,6 +1726,12 @@ final class HSW_Account_Auth {
 		 */
 		if ( 'email' !== $data['channel'] ) {
 			$setup_phone = (string) $data['phone'];
+			/* Same rule as the send step, for a code that was issued before it applied. */
+			if ( 'telegram' === $data['channel'] && '' !== $setup_phone && 0 !== strpos( $setup_phone, 'tg:' )
+				&& $setup_phone !== $this->user_phone( $user_id )
+				&& ! $this->telegram_contact_bound( $setup_phone, $this->telegram_chat_id( $user_id, $setup_phone, false ) ) ) {
+				$setup_phone = '';
+			}
 			if ( '' !== $setup_phone && 0 !== strpos( $setup_phone, 'tg:' ) ) {
 				$claim = $this->claim_phone( $user_id, $setup_phone );
 				if ( is_wp_error( $claim ) ) {
@@ -2157,14 +2198,27 @@ final class HSW_Account_Auth {
 			wp_send_json_error( $fail, 400 );
 		}
 
-		$row['tries'] = isset( $row['tries'] ) ? (int) $row['tries'] + 1 : 1;
-		if ( $row['tries'] > 5 ) {
+		/*
+		 * Five tries per session, counted in the atomic throttle table — the same
+		 * reasoning as check_code(). The counter used to be read from the session
+		 * transient and written back, so requests that had all read "0 tries"
+		 * each got a guess (twelve interleaved wrong codes were all processed and
+		 * the right one was still accepted afterwards — reproduced). A session
+		 * carries exactly one code, so the session id is the binding.
+		 */
+		$att = HSW_Throttle::hit( 'tg_attempt:' . $sid, 5, $this->tg_ttl() );
+		if ( ! $att['allowed'] ) {
 			delete_transient( $key );
 			wp_send_json_error( $fail, 400 );
 		}
-		set_transient( $key, $row, $this->tg_ttl() );
 
 		if ( ! hash_equals( (string) $row['hash'], $this->tg_hash( $sid, $code ) ) ) {
+			wp_send_json_error( $fail, 400 );
+		}
+
+		/* Atomic single-use claim: two parallel right answers must not both sign in. */
+		$claim = HSW_Throttle::hit( 'tg_claim:' . $sid, 1, $this->tg_ttl() );
+		if ( ! $claim['allowed'] ) {
 			wp_send_json_error( $fail, 400 );
 		}
 		delete_transient( $key ); // single use.

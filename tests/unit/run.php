@@ -300,6 +300,23 @@ same( 'relax_fields keeps billing_first_name', isset( $relaxed['billing']['billi
 same( 'relax_fields unsets shipping section', isset( $relaxed['shipping'] ), false );
 
 /* --------------------------------------------------------------------- */
+group( 'HSW_Helpers::csv_cell (spreadsheet formula injection)' );
+
+same( 'plain text is untouched', HSW_Helpers::csv_cell( 'مشکل در پرداخت' ), 'مشکل در پرداخت' );
+same( 'empty stays empty', HSW_Helpers::csv_cell( '' ), '' );
+same( 'an id stays a number', HSW_Helpers::csv_cell( 1284 ), '1284' );
+same( 'a negative number stays a number', HSW_Helpers::csv_cell( '-250000' ), '-250000' );
+same( 'a date is untouched', HSW_Helpers::csv_cell( '2026-11-11 09:30' ), '2026-11-11 09:30' );
+same( 'an e-mail address is untouched', HSW_Helpers::csv_cell( 'ali@example.com' ), 'ali@example.com' );
+same( 'a formula is neutralised', HSW_Helpers::csv_cell( '=HYPERLINK("http://evil.test","x")' ), "'" . '=HYPERLINK("http://evil.test","x")' );
+same( 'a plus formula is neutralised', HSW_Helpers::csv_cell( '+1+cmd|\' /C calc\'!A0' ), "'" . '+1+cmd|\' /C calc\'!A0' );
+same( 'a minus formula is neutralised', HSW_Helpers::csv_cell( '-1+1' ), "'-1+1" );
+same( 'an @ function is neutralised', HSW_Helpers::csv_cell( '@SUM(A1:A9)' ), "'@SUM(A1:A9)" );
+same( 'a formula behind blanks is neutralised', HSW_Helpers::csv_cell( "  \n=1+1" ), "'  \n=1+1" );
+same( 'a tab-led cell is neutralised', HSW_Helpers::csv_cell( "\t=1+1" ), "'\t=1+1" );
+same( 'a dash-led sentence is kept readable', HSW_Helpers::csv_cell( '- سلام' ), "'- سلام" );
+
+/* --------------------------------------------------------------------- */
 echo "\n" . str_repeat( '-', 60 ) . "\n";
 printf( "assertions: %d passed, %d failed\n", $pass, $fail );
 exit( $fail > 0 ? 1 : 0 );

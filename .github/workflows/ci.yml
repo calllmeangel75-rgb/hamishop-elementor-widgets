@@ -275,6 +275,24 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/wallet-noop-wp.php
 
+      # Money path: a top-up must never be settled by COD or by the wallet, and
+      # the pay step must charge (and show) only what this visitor may pay.
+      - name: Top-up payment guard (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/topup-payment-guard-wp.php
+
+      # Sign-in path: a code proves only the channel it was delivered to, and the
+      # five-tries limit of the Telegram login holds when requests interleave.
+      - name: One-time code proof (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/auth-code-proof-wp.php
+
       - name: Coupon session and removal (disposable WordPress)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
@@ -358,6 +376,11 @@ jobs:
 
       - name: Version, text domain, debug leftovers, assets, catalog, docs
         run: php tools/ci-checks.php
+
+      # Every icon named in a literal call must have an outline: a name the
+      # sprite does not know is drawn as a neutral dot on the page.
+      - name: Icon names have outlines
+        run: python3 tools/audit-icons.py
 
   generated:
     name: generated files in sync

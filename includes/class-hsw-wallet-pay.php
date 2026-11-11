@@ -365,6 +365,136 @@ class HSW_Wallet_Topup {
 		add_action( 'woocommerce_order_status_processing', array( $this, 'settle' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'settle' ) );
 		add_action( 'template_redirect', array( $this, 'remember_order_pay' ), 1 );
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'filter_gateways' ), 100 );
+	}
+
+	/**
+	 * Is this order a wallet top-up?
+	 *
+	 * @param mixed $order Order (anything else answers false).
+	 * @return bool
+	 */
+	public static function is_topup_order( $order ) {
+		return $order instanceof WC_Order && (int) $order->get_meta( self::META_USER ) > 0;
+	}
+
+	/**
+	 * Gateways that must never settle a top-up.
+	 *
+	 * COD moves the order straight to `processing`, and `settle()` reads that
+	 * status as "paid" — so a top-up settled with COD credited the wallet for
+	 * free. The wallet itself is circular (the credit would come out of the
+	 * balance it is meant to raise). The list used to be applied only when the
+	 * top-up order was CREATED; the customer could still pick any gateway on
+	 * the pay step. It is now the single source for creation, for the gateway
+	 * list on the pay step, for the pay endpoint and for `settle()`.
+	 *
+	 * Sites with a custom "pay later" gateway extend it with the
+	 * `hsw_wallet_topup_blocked_gateways` filter.
+	 *
+	 * @return string[]
+	 */
+	public static function blocked_gateways() {
+		$blocked   = (array) apply_filters( 'hsw_wallet_topup_blocked_gateways', array( 'cod' ) );
+		$blocked[] = 'hsw_wallet';
+
+		return array_values( array_unique( array_filter( array_map( 'strval', $blocked ), 'strlen' ) ) );
+	}
+
+	/**
+	 * May this gateway pay for a top-up order?
+	 *
+	 * @param string $gateway_id Gateway id.
+	 * @return bool
+	 */
+	public static function gateway_allowed( $gateway_id ) {
+		return ! in_array( (string) $gateway_id, self::blocked_gateways(), true );
+	}
+
+	/**
+	 * WooCommerce's own rule for an order-pay link: the order key must match
+	 * and the order must belong to the visitor (or to nobody — a guest order).
+	 *
+	 * @param WC_Order    $order Order.
+	 * @param string|null $key   Order key (defaults to `?key=`).
+	 * @return bool
+	 */
+	public static function visitor_may_pay( $order, $key = null ) {
+		if ( ! $order instanceof WC_Order ) {
+			return false;
+		}
+
+		if ( null === $key ) {
+			$key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the order key is the auth.
+		}
+
+		$key = is_string( $key ) ? $key : '';
+		if ( '' === $key || ! $order->key_is_valid( $key ) ) {
+			return false;
+		}
+
+		$owner = (int) $order->get_customer_id();
+
+		return ! $owner || get_current_user_id() === $owner;
+	}
+
+	/**
+	 * The order the visitor is paying right now, when it is not the cart.
+	 *
+	 * `/order-pay/<id>/` names it in the URL; on the pay step it only lives in
+	 * the session, and only counts while the cart is empty — the same rule the
+	 * summary widgets use to decide what they show.
+	 *
+	 * @return WC_Order|null
+	 */
+	public static function order_in_payment() {
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return null;
+		}
+
+		$id = 0;
+		if ( isset( $GLOBALS['wp'] ) && is_object( $GLOBALS['wp'] ) && ! empty( $GLOBALS['wp']->query_vars['order-pay'] ) ) {
+			$id = absint( $GLOBALS['wp']->query_vars['order-pay'] );
+		}
+
+		if ( ! $id && function_exists( 'WC' ) && WC()->session ) {
+			if ( ! WC()->cart || WC()->cart->is_empty() ) {
+				$id = absint( WC()->session->get( 'order_awaiting_payment' ) );
+			}
+		}
+
+		if ( ! $id ) {
+			return null;
+		}
+
+		$order = wc_get_order( $id );
+
+		return $order instanceof WC_Order ? $order : null;
+	}
+
+	/**
+	 * Hide the gateways that cannot fund a wallet while a top-up is being paid.
+	 *
+	 * Covers WooCommerce's own order-pay form and the HamiShop pay step alike:
+	 * both list `get_available_payment_gateways()`.
+	 *
+	 * @param array $gateways Available gateways (id => gateway).
+	 * @return array
+	 */
+	public function filter_gateways( $gateways ) {
+		if ( ! is_array( $gateways ) || ! $gateways ) {
+			return $gateways;
+		}
+
+		if ( ! self::is_topup_order( self::order_in_payment() ) ) {
+			return $gateways;
+		}
+
+		foreach ( self::blocked_gateways() as $id ) {
+			unset( $gateways[ $id ] );
+		}
+
+		return $gateways;
 	}
 
 	/**
@@ -391,9 +521,23 @@ class HSW_Wallet_Topup {
 		}
 
 		$id = absint( $wp->query_vars['order-pay'] );
-		if ( $id ) {
-			WC()->session->set( 'order_awaiting_payment', $id );
+		if ( ! $id ) {
+			return;
 		}
+
+		/*
+		 * Any id used to be stored, key or no key. The pay step then rendered
+		 * that order's lines and totals from the session — so opening
+		 * `/order-pay/<someone else's id>/` and then the pay page showed a
+		 * stranger what another customer had bought. Only an order this
+		 * visitor is allowed to pay is remembered.
+		 */
+		$order = function_exists( 'wc_get_order' ) ? wc_get_order( $id ) : null;
+		if ( ! self::visitor_may_pay( $order ) ) {
+			return;
+		}
+
+		WC()->session->set( 'order_awaiting_payment', $id );
 	}
 
 	/**
@@ -436,10 +580,8 @@ class HSW_Wallet_Topup {
 		 * available because they wait for the shop owner to confirm receipt.
 		 * Sites with a custom offline gateway can extend the blocklist.
 		 */
-		$blocked = (array) apply_filters( 'hsw_wallet_topup_blocked_gateways', array( 'cod' ) );
-
 		foreach ( WC()->payment_gateways()->payment_gateways() as $id => $gateway ) {
-			if ( 'hsw_wallet' === $id || in_array( $id, $blocked, true ) ) {
+			if ( ! self::gateway_allowed( $id ) ) {
 				continue;
 			}
 			if ( 'yes' !== ( $gateway->enabled ?? '' ) ) {
@@ -583,6 +725,18 @@ class HSW_Wallet_Topup {
 			return;
 		}
 
+		/*
+		 * The last line of defence, and the only one that cannot be walked
+		 * around: whatever page or endpoint moved this order to a paid status,
+		 * a method that never confirms the money (COD → `processing` on the
+		 * spot) or the wallet itself does not earn a credit.
+		 */
+		$method = (string) $order->get_payment_method();
+		if ( ! self::gateway_allowed( $method ) ) {
+			self::note_blocked( $order, $method );
+			return;
+		}
+
 		$paid = (float) $order->get_total();
 
 		/*
@@ -631,6 +785,28 @@ class HSW_Wallet_Topup {
 				/* translators: %s: formatted amount. */
 				__( 'کیف پول مشتری به مبلغ %s شارژ شد.', 'hamishop-elementor-widgets' ),
 				wp_strip_all_tags( wc_price( $amount ) )
+			)
+		);
+		$order->save();
+	}
+
+	/**
+	 * Tell the shop manager, once, why a "paid" top-up did not credit.
+	 *
+	 * @param WC_Order $order  Top-up order.
+	 * @param string   $method Payment method id.
+	 */
+	private static function note_blocked( $order, $method ) {
+		if ( (string) $order->get_meta( '_hsw_wallet_topup_blocked' ) === (string) $method ) {
+			return;
+		}
+
+		$order->update_meta_data( '_hsw_wallet_topup_blocked', (string) $method );
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s: payment method id. */
+				__( 'کیف پول شارژ نشد: روش پرداخت این سفارش (%s) دریافت وجه را تأیید نمی‌کند. اگر مبلغ واقعاً دریافت شده است، اعتبار را دستی از صفحهٔ کیف پول اضافه کنید.', 'hamishop-elementor-widgets' ),
+				$method
 			)
 		);
 		$order->save();
@@ -791,13 +967,12 @@ function hsw_register_wallet_gateway() {
 			 * @return bool
 			 */
 			private function is_topup_order_context() {
-				if ( ! isset( $GLOBALS['wp']->query_vars['order-pay'] ) || ! function_exists( 'wc_get_order' ) ) {
-					return false;
-				}
-
-				$order = wc_get_order( (int) $GLOBALS['wp']->query_vars['order-pay'] );
-
-				return $order && '' !== (string) $order->get_meta( \HSW_Wallet_Topup::META_USER );
+				/*
+				 * The URL alone is not enough: on the HamiShop pay step (and in
+				 * its REST calls) there is no `order-pay` query var, the top-up
+				 * only lives in the session — and the wallet was offered for it.
+				 */
+				return \HSW_Wallet_Topup::is_topup_order( \HSW_Wallet_Topup::order_in_payment() );
 			}
 
 			public function is_available() {
@@ -852,6 +1027,15 @@ function hsw_register_wallet_gateway() {
 			public function process_payment( $order_id ) {
 				$order = wc_get_order( $order_id );
 				if ( ! $order ) {
+					return array( 'result' => 'failure' );
+				}
+
+				/*
+				 * A top-up is never paid from the wallet, whoever asks: the
+				 * availability check hides the method, this refuses the charge.
+				 */
+				if ( \HSW_Wallet_Topup::is_topup_order( $order ) ) {
+					wc_add_notice( __( 'روش پرداخت انتخاب‌شده در دسترس نیست؛ روش دیگری را انتخاب کنید.', 'hamishop-elementor-widgets' ), 'error' );
 					return array( 'result' => 'failure' );
 				}
 
