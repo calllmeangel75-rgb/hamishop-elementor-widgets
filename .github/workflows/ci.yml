@@ -377,6 +377,11 @@ jobs:
       - name: Version, text domain, debug leftovers, assets, catalog, docs
         run: php tools/ci-checks.php
 
+      # Every icon named in a literal call must have an outline: a name the
+      # sprite does not know is drawn as a neutral dot on the page.
+      - name: Icon names have outlines
+        run: python3 tools/audit-icons.py
+
   generated:
     name: generated files in sync
     runs-on: ubuntu-latest
