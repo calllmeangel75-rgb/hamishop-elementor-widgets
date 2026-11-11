@@ -38,6 +38,7 @@ function hsw_uninstall_site() {
 		'hsw_complete_page_id',
 		'hsw_custom_404_enabled',
 		'hsw_db_version',
+		'hsw_digital_checkout',
 		'hsw_enabled_widgets',
 		'hsw_express_slug',
 		'hsw_free_shipping_min',
@@ -52,6 +53,7 @@ function hsw_uninstall_site() {
 		'hsw_last_error',
 		'hsw_loop_version',
 		'hsw_oos_last',
+		'hsw_optimizer_notice_dismissed',
 		'hsw_palette',
 		'hsw_post_widget_migrated',
 		'hsw_security',
@@ -59,13 +61,19 @@ function hsw_uninstall_site() {
 		'hsw_tg_offset',
 		'hsw_tg_poll_ready',
 		'hsw_tg_poll_ready_hash',
+		'hsw_tg_webhook_hash',
 		'hsw_throttle_db',
 		'hsw_upgrader_state',
 		'hsw_upgrader_lock',
 		'hsw_upgrader_last',
 		'hsw_upgrader_log',
+		'hsw_wallet_autoinstall',
 		'hsw_wallet_db',
+		'hsw_wallet_gateway_on',
+		'hsw_wallet_install_failed',
 		'hsw_wallet_migration',
+		'hsw_wallet_missing_tables',
+		'hsw_wallet_not_innodb',
 		'hsw_points_migrated',
 		'hsw_404_cta',
 		'hsw_404_home',
@@ -138,7 +146,7 @@ function hsw_uninstall_site() {
 	/* ------------------------------------------------------------------
 	 * Scheduled events (if any were registered by an older version).
 	 * --------------------------------------------------------------- */
-	$crons = array( 'hsw_daily_cleanup', 'hsw_ticket_cleanup', 'hsw_tg_poll', 'hsw_throttle_prune' );
+	$crons = array( 'hsw_daily_cleanup', 'hsw_ticket_cleanup', 'hsw_tg_poll', 'hsw_throttle_prune', 'hsw_upgrader_tick' );
 	foreach ( $crons as $cron ) {
 		wp_clear_scheduled_hook( $cron );
 	}

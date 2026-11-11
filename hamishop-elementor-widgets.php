@@ -321,6 +321,8 @@ if ( ! function_exists( 'hsw_deactivation_cleanup' ) ) {
                 /* Never leave a polling schedule behind once the plugin is off. */
                 wp_clear_scheduled_hook( 'hsw_tg_poll' );
                 wp_clear_scheduled_hook( 'hsw_throttle_prune' );
+                /* The daily ticket clean-up is re-armed on `init` whenever the plugin runs. */
+                wp_clear_scheduled_hook( 'hsw_ticket_cleanup' );
                 /* Background upgrade ticks must not outlive the plugin. */
                 if ( class_exists( 'HSW_Upgrader' ) ) {
                         HSW_Upgrader::unschedule();
