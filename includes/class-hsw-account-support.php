@@ -24,8 +24,12 @@ final class HSW_Account_Support {
 	/** Related WooCommerce order ID (0 when none). */
 	const ORDER_META = '_hsw_ticket_order';
 
-	/** Attachment ID of the screenshot the customer attached. */
+	/** Attachment ID of the screenshot the customer attached (0 now: images are
+	 * stored outside the public Media Library, see IMAGE_PATH_META). */
 	const IMAGE_META = '_hsw_ticket_image';
+
+	/** Relative path (under wp-content/uploads) of the protected ticket image. */
+	const IMAGE_PATH_META = '_hsw_ticket_image_path';
 
 	/** Deleted ticket IDs whose attachments need a human reuse review. */
 	const IMAGE_REVIEW_META = '_hsw_deleted_ticket_image_review';
@@ -46,6 +50,7 @@ final class HSW_Account_Support {
 		add_action( 'deleted_post', array( $this, 'cleanup_deleted_ticket_notifications' ), 10, 2 );
 		add_action( 'init', array( $this, 'schedule_cleanup' ), 20 );
 		add_action( 'rest_api_init', array( $this, 'register_inbound_route' ) );
+		add_action( 'rest_api_init', array( $this, 'register_image_route' ) );
 		add_action( 'template_redirect', array( $this, 'handle_frontend_actions' ) );
 		add_action( 'woocommerce_account_support_endpoint', array( $this, 'render_endpoint' ) );
 
@@ -507,9 +512,9 @@ final class HSW_Account_Support {
 			$lines[] = 'سفارش مرتبط: #' . $order_id;
 		}
 
-		$image_id = absint( get_post_meta( $ticket_id, self::IMAGE_META, true ) );
-		if ( $image_id ) {
-			$lines[] = 'عکس پیوست: ' . (string) wp_get_attachment_url( $image_id );
+		$image_path = (string) get_post_meta( $ticket_id, self::IMAGE_PATH_META, true );
+		if ( '' !== $image_path ) {
+			$lines[] = 'عکس پیوست: ' . (string) $this->ticket_image_url( $ticket_id, $image_path );
 		}
 
 		$lines[] = '';
@@ -569,6 +574,148 @@ final class HSW_Account_Support {
 				'permission_callback' => '__return_true',
 			)
 		);
+	}
+
+	/**
+	 * Signed, capability-guarded endpoint that serves a protected ticket image.
+	 *
+	 * `GET hsw/v1/tickets/{ticket_id}/image?ts={unix}&sig={hmac}`.
+	 *
+	 * @return void
+	 */
+	public function register_image_route() {
+		register_rest_route(
+			'hsw/v1',
+			'/tickets/(?P<ticket_id>\d+)/image',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'serve_ticket_image' ),
+				'permission_callback' => array( $this, 'image_route_permission' ),
+			)
+		);
+	}
+
+	/**
+	 * Only the ticket author or a staff member may view a ticket's image.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool|WP_Error
+	 */
+	public function image_route_permission( $request ) {
+		$ticket_id = (int) $request->get_param( 'ticket_id' );
+		$ticket    = get_post( $ticket_id );
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type ) {
+			return new WP_Error( 'hsw_image_ticket', 'ticket not found', array( 'status' => 404 ) );
+		}
+		$user_id = get_current_user_id();
+		if ( $user_id && (int) $ticket->post_author === $user_id ) {
+			return true;
+		}
+		if ( $user_id && ( user_can( $user_id, 'edit_posts' ) || user_can( $user_id, 'manage_woocommerce' ) ) ) {
+			return true;
+		}
+		return new WP_Error( 'hsw_image_forbidden', 'forbidden', array( 'status' => 403 ) );
+	}
+
+	/**
+	 * Serve a protected ticket image after validating the signed URL.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function serve_ticket_image( $request ) {
+		$ticket_id = (int) $request->get_param( 'ticket_id' );
+		$ts        = (int) $request->get_param( 'ts' );
+		$sig       = (string) $request->get_param( 'sig' );
+
+		if ( ! $ts || ! $sig || ! $this->verify_ticket_image_sign( $ticket_id, $ts, $sig ) ) {
+			return new WP_Error( 'hsw_image_bad_sign', 'invalid or expired image link', array( 'status' => 403 ) );
+		}
+		if ( time() - $ts > 7 * DAY_IN_SECONDS ) {
+			return new WP_Error( 'hsw_image_expired', 'image link expired', array( 'status' => 403 ) );
+		}
+
+		$path = (string) get_post_meta( $ticket_id, self::IMAGE_PATH_META, true );
+		if ( ! $path ) {
+			return new WP_Error( 'hsw_image_missing', 'no image attached', array( 'status' => 404 ) );
+		}
+
+		$file = WP_CONTENT_DIR . '/uploads/' . ltrim( $path, '/' );
+		if ( ! is_file( $file ) || ! is_readable( $file ) ) {
+			return new WP_Error( 'hsw_image_missing', 'image file not found', array( 'status' => 404 ) );
+		}
+
+		$mime = wp_check_filetype( $file );
+		$mime = empty( $mime['type'] ) ? 'application/octet-stream' : $mime['type'];
+
+		header( 'Content-Type: ' . $mime );
+		header( 'Content-Length: ' . filesize( $file ) );
+		header( 'Cache-Control: private, max-age=' . ( 7 * DAY_IN_SECONDS ) );
+		header( 'X-Content-Type-Options: nosniff' );
+		header( 'Content-Disposition: inline; filename="' . esc_html( wp_basename( $path ) ) . '"' );
+		readfile( $file ); // phpcs:ignore WordPress.Security.SafeIO -- path validated above and comes from post meta.
+		exit;
+	}
+
+	/**
+	 * Build a signed URL for a ticket image, valid for seven days.
+	 *
+	 * @param int    $ticket_id Ticket.
+	 * @param string $path      Protected relative upload path.
+	 * @return string
+	 */
+	public function ticket_image_url( $ticket_id, $path ) {
+		if ( ! $path ) {
+			return '';
+		}
+		$ts   = time();
+		$sig  = $this->ticket_image_sign( $ticket_id, $ts );
+		$url  = add_query_arg( array( 'ts' => $ts, 'sig' => $sig ), rest_url( 'hsw/v1/tickets/' . (int) $ticket_id . '/image' ) );
+
+		return $url;
+	}
+
+	/**
+	 * HMAC signature for an image link.
+	 *
+	 * @param int    $ticket_id Ticket.
+	 * @param int    $ts        Unix timestamp.
+	 * @return string
+	 */
+	private function ticket_image_sign( $ticket_id, $ts ) {
+		return hash_hmac( 'sha256', 'hsw-ticket-image|' . (int) $ticket_id . '|' . (int) $ts, wp_salt( 'auth' ) );
+	}
+
+	/**
+	 * Verify an image-link signature.
+	 *
+	 * @param int    $ticket_id Ticket.
+	 * @param int    $ts        Unix timestamp.
+	 * @param string $sig       Supplied signature.
+	 * @return bool
+	 */
+	private function verify_ticket_image_sign( $ticket_id, $ts, $sig ) {
+		return $ts > 0 && $sig === $this->ticket_image_sign( $ticket_id, $ts );
+	}
+
+	/**
+	 * Markup for a ticket image: a signed, capability-guarded link instead of a
+	 * public Media Library URL.
+	 *
+	 * @param int    $ticket_id Ticket.
+	 * @param string $path      Protected relative upload path.
+	 * @return string HTML, empty when there is no image.
+	 */
+	private function ticket_image_markup( $ticket_id, $path ) {
+		if ( ! $path ) {
+			return '';
+		}
+		$url  = esc_url( $this->ticket_image_url( (int) $ticket_id, $path ) );
+		$name = esc_html( wp_basename( $path ) );
+
+		return '<a class="hsw-ticket-attach" href="' . $url . '" target="_blank" rel="noopener" aria-label="' . esc_attr__( 'نمایش تصویر پیوست', 'hamishop-elementor-widgets' ) . '">'
+			. '<img src="' . $url . '" alt="' . $name . '" style="max-width:220px;height:auto;display:block;margin-top:4px;">'
+			. '</a>';
 	}
 
 	/**
@@ -657,9 +804,17 @@ final class HSW_Account_Support {
 		}
 
 		$secret = (string) $this->account->inbound_secret();
-		$given  = (string) $request->get_param( 'secret' );
+		if ( '' === $secret ) {
+			return new WP_Error( 'hsw_inbound_forbidden', 'forbidden', array( 'status' => 403 ) );
+		}
+		/* The secret is sent either as a header (safer, never in access logs) or
+		   as a request parameter for mail providers that can't set headers. */
+		$given = (string) $request->get_header( 'X-HSW-Inbound-Secret' );
+		if ( '' === $given ) {
+			$given = (string) $request->get_param( 'secret' );
+		}
 
-		if ( '' === $secret || ! hash_equals( $secret, $given ) ) {
+		if ( ! hash_equals( $secret, $given ) ) {
 			return new WP_Error( 'hsw_inbound_forbidden', 'forbidden', array( 'status' => 403 ) );
 		}
 
@@ -693,7 +848,8 @@ final class HSW_Account_Support {
 		$support_box = sanitize_email( (string) $this->account->setting( 'support.support_email', '' ) );
 		$admin_box   = sanitize_email( (string) get_option( 'admin_email' ) );
 
-		$is_staff = ( '' !== $from && ( $from === $support_box || $from === $admin_box ) )
+		$from_lower = strtolower( $from );
+		$is_staff = ( '' !== $from && ( $from_lower === strtolower( $support_box ) || $from_lower === strtolower( $admin_box ) ) )
 			|| ( $sender && ( user_can( $sender, 'manage_options' ) || user_can( $sender, 'manage_woocommerce' ) ) );
 
 		if ( ! $is_author && ! $is_staff ) {
@@ -946,7 +1102,7 @@ final class HSW_Account_Support {
 		$html .= '</header>';
 
 		$html .= '<div class="hsw-ac__thread-scroll" data-hsw-thread-scroll>';
-		$html .= $this->bubble_html( $user_id, $ticket->post_content, $this->timestamp_from_local( $ticket->post_date ), false, absint( get_post_meta( $ticket_id, self::IMAGE_META, true ) ) );
+		$html .= $this->bubble_html( $user_id, $ticket->post_content, $this->timestamp_from_local( $ticket->post_date ), false, (string) get_post_meta( $ticket_id, self::IMAGE_PATH_META, true ), $ticket_id );
 
 		$comments = get_comments(
 			array(
@@ -959,13 +1115,13 @@ final class HSW_Account_Support {
 		foreach ( $comments as $comment ) {
 			$author   = get_user_by( 'id', (int) $comment->user_id );
 			$is_staff = $author && ( user_can( $author, 'manage_woocommerce' ) || user_can( $author, 'manage_options' ) );
-			$html    .= $this->bubble_html(
-				(int) $comment->user_id,
-				$comment->comment_content,
-				$this->timestamp_from_local( $comment->comment_date ),
-				$is_staff,
-				absint( get_comment_meta( $comment->comment_ID, self::IMAGE_META, true ) )
-			);
+		$html .= $this->bubble_html(
+			(int) $comment->user_id,
+			$comment->comment_content,
+			$this->timestamp_from_local( $comment->comment_date ),
+			$is_staff,
+			''
+		);
 		}
 		$html .= '</div>';
 
@@ -993,18 +1149,13 @@ final class HSW_Account_Support {
 	 * @param int    $image_id   Attachment ID, 0 for none.
 	 * @return string
 	 */
-	private function bubble_html( $author_id, $content, $timestamp, $is_staff, $image_id = 0 ) {
+	private function bubble_html( $author_id, $content, $timestamp, $is_staff, $image_path = '', $ticket_id = 0 ) {
 		$author  = get_user_by( 'id', $author_id );
 		$name    = $author ? $author->display_name : ( $is_staff ? 'پشتیبانی' : 'کاربر' );
 		$staff   = class_exists( 'HSW_Branding' ) ? sprintf( 'پشتیبانی %s', HSW_Branding::name() ) : $name;
 		$initial = function_exists( 'mb_substr' ) ? mb_substr( $name, 0, 1, 'UTF-8' ) : substr( $name, 0, 1 );
 
-		$image = '';
-		if ( $image_id ) {
-			$image = '<a class="hsw-ac__bubble-img" href="' . esc_url( (string) wp_get_attachment_url( $image_id ) ) . '" target="_blank" rel="noopener">'
-				. wp_get_attachment_image( $image_id, 'medium', false, array( 'loading' => 'lazy', 'alt' => '' ) )
-				. '</a>';
-		}
+		$image = $this->ticket_image_markup( (int) $ticket_id, $image_path );
 
 		return '<article class="hsw-ac__bubble' . ( $is_staff ? ' is-staff' : ' is-user' ) . '">'
 			. '<div class="hsw-ac__bubble-avatar" aria-hidden="true">' . ( $is_staff ? $this->account->icon( 'support' ) : esc_html( $initial ) ) . '</div>'
@@ -1263,9 +1414,9 @@ final class HSW_Account_Support {
 			// The ticket already exists: report partial success, not a failure that
 			// might cause the customer to create an accidental duplicate.
 			$image_warning = __( 'تیکت ثبت شد، اما عکس بارگذاری نشد. لطفاً به پشتیبانی اطلاع دهید.', 'hamishop-elementor-widgets' );
-		} elseif ( $image ) {
-			update_post_meta( $ticket_id, self::IMAGE_META, $image );
 		}
+		// The image path is already stored under IMAGE_PATH_META by
+		// handle_image_upload(); no public Media Library attachment is created.
 
 		$this->notify_admin( $ticket_id, false );
 		$this->notify_customer_created( $ticket_id );
@@ -1447,20 +1598,12 @@ final class HSW_Account_Support {
 	 * @param int $attachment_id Attachment ID.
 	 * @return string
 	 */
-	private function attachment_html( $attachment_id ) {
-		$attachment_id = absint( $attachment_id );
-		if ( ! $attachment_id ) {
+	private function attachment_html( $image_path = '', $ticket_id = 0 ) {
+		if ( ! $image_path ) {
 			return '';
 		}
 
-		$url = wp_get_attachment_url( $attachment_id );
-		$img = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'alt' => '' ) );
-
-		if ( ! $url || ! $img ) {
-			return '';
-		}
-
-		return '<a class="hsw-ticket-attach" href="' . esc_url( $url ) . '" target="_blank" rel="noopener" aria-label="' . esc_attr__( 'نمایش تصویر پیوست', 'hamishop-elementor-widgets' ) . '">' . $img . '</a>';
+		return $this->ticket_image_markup( (int) $ticket_id, $image_path );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -1503,6 +1646,19 @@ final class HSW_Account_Support {
 	 * @param int $ticket_id Parent ticket.
 	 * @return int|WP_Error Attachment ID, 0 if absent, or upload error.
 	 */
+	/**
+	 * Store the screenshot the customer attached to the modal outside the public
+	 * Media Library.
+	 *
+	 * Images used to go through `media_handle_upload()`, which publishes them in
+	 * `wp-content/uploads/{year}/{month}/` with a guessable URL and no access
+	 * control. They now land in `wp-content/uploads/hsw-ticket-images/<ticket>/`
+	 * behind an `.htaccess` `deny from all` rule and are only served through the
+	 * signed `hsw/v1/tickets/{id}/image` endpoint after a capability check.
+	 *
+	 * @param int $ticket_id Parent ticket.
+	 * @return string|int|WP_Error Relative upload path, 0 if absent, or upload error.
+	 */
 	private function handle_image_upload( $ticket_id ) {
 		if ( ! isset( $_FILES['image'] ) ) {
 			return 0;
@@ -1517,7 +1673,6 @@ final class HSW_Account_Support {
 
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
 
 		/*
 		 * `wp_check_filetype_and_ext()` takes an `ext => mime` map (the same shape
@@ -1535,9 +1690,63 @@ final class HSW_Account_Support {
 			return new WP_Error( 'hsw_ticket_image_type', 'Invalid image type.' );
 		}
 
-		$attachment_id = media_handle_upload( 'image', $ticket_id, array(), array( 'test_form' => false ) );
+		$dir   = WP_CONTENT_DIR . '/uploads/hsw-ticket-images/' . (int) $ticket_id . '/';
+		$name  = wp_unique_filename( $dir, wp_basename( (string) $file['name'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- name validated above.
+		if ( ! @mkdir( $dir, 0750, true ) && ! is_dir( $dir ) ) {
+			return new WP_Error( 'hsw_ticket_image_upload', __( 'Could not create the upload directory.', 'hamishop-elementor-widgets' ) );
+		}
+		$bits = file_get_contents( (string) $file['tmp_name'] );
+		if ( false === $bits || false === file_put_contents( $dir . $name, $bits ) ) {
+			return new WP_Error( 'hsw_ticket_image_upload', __( 'Could not write the image file.', 'hamishop-elementor-widgets' ) );
+		}
+		@chmod( $dir . $name, 0640 );
 
-		return is_wp_error( $attachment_id ) ? $attachment_id : (int) $attachment_id;
+		/* Direct access is denied by the .htaccess dropped in the parent directory. */
+		$this->protect_image_dir();
+
+		$path = 'hsw-ticket-images/' . (int) $ticket_id . '/' . $name;
+
+		update_post_meta( $ticket_id, self::IMAGE_PATH_META, $path );
+		delete_post_meta( $ticket_id, self::IMAGE_META );
+
+		return $path;
+	}
+
+	/**
+	 * Make the protected ticket-image directory un-reachable directly and only
+	 * servable through the signed endpoint.
+	 *
+	 * @return void
+	 */
+	private function protect_image_dir() {
+		static $done = false;
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+
+		$dir = WP_CONTENT_DIR . '/uploads/hsw-ticket-images';
+		if ( ! @mkdir( $dir, 0750, true ) && ! is_dir( $dir ) ) {
+			return;
+		}
+		@chmod( $dir, 0750 );
+
+		$htaccess = $dir . '/.htaccess';
+		if ( ! file_exists( $htaccess ) ) {
+			$content = <<<'HTACCESS'
+# HamiShop: ticket images are not public. Served only through hsw/v1/tickets/{id}/image
+# after a capability + signature check. Deny direct access.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+Options -Indexes
+HTACCESS;
+			@file_put_contents( $htaccess, $content );
+		}
 	}
 
 	/**
@@ -1757,13 +1966,13 @@ final class HSW_Account_Support {
 		<div class="hsw-ticket-thread" role="region" aria-label="پیام‌های گفتگو" tabindex="0">
 			<div class="hsw-ticket-msg is-customer">
 				<div class="hsw-ticket-msg-head"><strong><?php echo esc_html( get_the_author_meta( 'display_name', $post->post_author ) ); ?></strong><span><?php echo esc_html( $this->format_date( $this->timestamp_from_local( $post->post_date ) ) ); ?></span></div>
-				<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $post->post_content ) ); ?><?php echo $this->attachment_html( absint( get_post_meta( $post->ID, self::IMAGE_META, true ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url + wp_get_attachment_image. ?></div>
+				<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $post->post_content ) ); ?><?php echo $this->attachment_html( (string) get_post_meta( $post->ID, self::IMAGE_PATH_META, true ), (int) $post->ID ); ?></div>
 			</div>
 			<?php foreach ( $comments as $comment ) : ?>
 				<?php $is_staff = user_can( (int) $comment->user_id, 'edit_posts' ); ?>
 				<div class="hsw-ticket-msg <?php echo $is_staff ? 'is-staff' : 'is-customer'; ?>">
 					<div class="hsw-ticket-msg-head"><strong><?php echo esc_html( $comment->comment_author ); ?></strong><span><?php echo esc_html( $this->format_date( $this->timestamp_from_local( $comment->comment_date ) ) ); ?></span></div>
-					<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $comment->comment_content ) ); ?><?php echo $this->attachment_html( absint( get_comment_meta( $comment->comment_ID, self::IMAGE_META, true ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url + wp_get_attachment_image. ?></div>
+					<div class="hsw-ticket-msg-text"><?php echo nl2br( esc_html( $comment->comment_content ) ); ?><?php echo $this->attachment_html( '' ); ?></div>
 				</div>
 			<?php endforeach; ?>
 		</div>
@@ -2018,8 +2227,8 @@ final class HSW_Account_Support {
 				continue;
 			}
 			$user     = get_user_by( 'id', (int) $ticket->post_author );
-			$image_id = absint( get_post_meta( $id, self::IMAGE_META, true ) );
-			$updated  = absint( get_post_meta( $id, self::UPDATED_META, true ) );
+		$image_path = (string) get_post_meta( $id, self::IMAGE_PATH_META, true );
+		$updated    = absint( get_post_meta( $id, self::UPDATED_META, true ) );
 			$created  = $this->timestamp_from_local( $ticket->post_date );
 
 			$put(
@@ -2035,8 +2244,8 @@ final class HSW_Account_Support {
 					$created ? gmdate( 'Y-m-d H:i', $created ) : '',
 					$updated ? gmdate( 'Y-m-d H:i', $updated ) : '',
 					(int) ( $reply_counts[ $id ] ?? 0 ),
-					wp_strip_all_tags( (string) $ticket->post_content ),
-					$image_id ? (string) wp_get_attachment_url( $image_id ) : '',
+		wp_strip_all_tags( (string) $ticket->post_content ),
+		'' !== $image_path ? (string) $this->ticket_image_url( $id, $image_path ) : '',
 				)
 			);
 		}
