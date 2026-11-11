@@ -342,7 +342,7 @@ msgstr ""
 msgid "آدرس وب‌هوک پیامک را در «حساب کاربری ← کیف پول» تنظیم کنید. بدون آدرس، پیامکی ارسال نمی‌شود و بقیهٔ کار انجام می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:892
+#: includes/class-hsw-account-auth.php:915
 msgid "آدرس پل واتساپ تنظیم نشده است."
 msgstr ""
 
@@ -607,7 +607,7 @@ msgstr ""
 msgid "آیکون‌های هدر و هدر پنل حساب"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1595
+#: includes/class-hsw-account-auth.php:1619
 msgid "ابتدا ربات تلگرام را باز کنید، دکمه Start (و ارسال شماره موبایل) را بزنید و سپس دوباره روی فعال‌سازی کلیک کنید."
 msgstr ""
 
@@ -627,8 +627,8 @@ msgstr ""
 msgid "اتصال امن شاپرک SSL"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1597
-#: includes/class-hsw-account-auth.php:2379
+#: includes/class-hsw-account-auth.php:1621
+#: includes/class-hsw-account-auth.php:2433
 msgid "اتصال به ربات تلگرام"
 msgstr ""
 
@@ -734,7 +734,7 @@ msgstr ""
 msgid "ارسال اکسپرس امروز"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:826
+#: includes/class-hsw-account-auth.php:849
 msgid "ارسال ایمیل انجام نشد؛ تنظیمات SMTP سایت را بررسی کنید."
 msgstr ""
 
@@ -746,9 +746,9 @@ msgstr ""
 msgid "ارسال بالای %s تومان رایگان است"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2311
-#: includes/class-hsw-account-auth.php:2390
-#: includes/class-hsw-account-auth.php:2407
+#: includes/class-hsw-account-auth.php:2365
+#: includes/class-hsw-account-auth.php:2444
+#: includes/class-hsw-account-auth.php:2461
 #: includes/class-hsw-email-verify.php:222
 msgid "ارسال دوباره"
 msgstr ""
@@ -778,8 +778,8 @@ msgstr ""
 msgid "ارسال رایگان سفارش شما فعال شد!"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1913
-#: includes/class-hsw-account-auth.php:2243
+#: includes/class-hsw-account-auth.php:1954
+#: includes/class-hsw-account-auth.php:2297
 msgid "ارسال شماره موبایل"
 msgstr ""
 
@@ -809,8 +809,8 @@ msgstr ""
 msgid "ارسال و تحویل"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:915
-#: includes/class-hsw-account-auth.php:945
+#: includes/class-hsw-account-auth.php:938
+#: includes/class-hsw-account-auth.php:968
 msgid "ارسال پیام واتساپ ناموفق بود."
 msgstr ""
 
@@ -818,7 +818,7 @@ msgstr ""
 msgid "ارسال پیامک اطلاع‌رسانی به هر مشتری"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:857
+#: includes/class-hsw-account-auth.php:880
 msgid "ارسال پیامک انجام نشد."
 msgstr ""
 
@@ -1276,7 +1276,7 @@ msgstr ""
 msgid "افزونه ورود پیامکی فعال است؛ فرم ورود و ثبت‌نام این پنل نمایش داده نمی‌شود و ورود به‌صورت کامل توسط افزونه پیامکی مدیریت می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:870
+#: includes/class-hsw-account-auth.php:893
 msgid "افزونهٔ پیامکی فعالی پیدا نشد. کانال ایمیل یا تلگرام را انتخاب کنید."
 msgstr ""
 
@@ -1379,7 +1379,7 @@ msgstr ""
 msgid "امنیت"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2340
+#: includes/class-hsw-account-auth.php:2394
 msgid "امنیت حساب"
 msgstr ""
 
@@ -1659,7 +1659,7 @@ msgstr ""
 msgid "اگر حداقل یک فیلتر یا جستجو فعال باشد، این عنوان جای عنوان بالا نمایش داده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1090
+#: includes/class-hsw-account-auth.php:1113
 msgid "اگر حسابی با این مشخصات وجود داشته باشد و کانال انتخاب‌شده متصل باشد، کد تأیید ارسال شد."
 msgstr ""
 
@@ -1703,8 +1703,8 @@ msgstr ""
 
 #: includes/class-hsw-account-auth.php:230
 #: includes/class-hsw-account-auth.php:244
-#: includes/class-hsw-account-auth.php:2302
-#: includes/class-hsw-account-auth.php:2305
+#: includes/class-hsw-account-auth.php:2356
+#: includes/class-hsw-account-auth.php:2359
 #: includes/class-hsw-account.php:2189
 #: includes/class-hsw-account.php:2201
 #: includes/class-hsw-account.php:3648
@@ -1760,8 +1760,8 @@ msgstr ""
 msgid "ایمیل واردشده معتبر نیست."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:691
-#: includes/class-hsw-account-auth.php:768
+#: includes/class-hsw-account-auth.php:714
+#: includes/class-hsw-account-auth.php:791
 msgid "ایمیل وارد‌شده معتبر نیست."
 msgstr ""
 
@@ -1773,7 +1773,7 @@ msgstr ""
 msgid "این اطلاعات در ستون «فروشنده» فاکتور چاپی چاپ می‌شود. اگر خالی بگذارید، نشانی از تنظیمات ووکامرس و ایمیل از آدرس فرستندهٔ فروشگاه خوانده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1191
+#: includes/class-hsw-account-auth.php:1214
 msgid "این ایمیل قبلاً در سایت ثبت شده است."
 msgstr ""
 
@@ -1809,7 +1809,7 @@ msgstr ""
 msgid "این تیکت بسته است. ابتدا آن را بازگشایی کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1188
+#: includes/class-hsw-account-auth.php:1211
 msgid "این حساب قبلاً ثبت‌نام کرده است."
 msgstr ""
 
@@ -1822,7 +1822,7 @@ msgstr ""
 msgid "این رنگ‌ها به همهٔ ویجت‌های HamiShop اعمال می‌شوند. بخش «پالت رنگ ویجت» از تنظیمات المنتور حذف شده است تا این صفحه تنها منبع رنگ باشد؛ کنترل‌های رنگی عنصربه‌عنصر (مثل بج تخفیف و دکمه‌ها) همچنان اولویت دارند."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2055
+#: includes/class-hsw-account-auth.php:2096
 msgid "این روش ورود فعال نیست."
 msgstr ""
 
@@ -1846,17 +1846,17 @@ msgstr ""
 msgid "این سفارش پیدا نشد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2369
+#: includes/class-hsw-account-auth.php:2423
 msgid "این شماره با کد تأیید می‌شود و به‌عنوان شمارهٔ ورود حساب ثبت می‌گردد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1945
+#: includes/class-hsw-account-auth.php:1986
 msgid "این شماره قبلاً به حساب دیگری متصل شده است. اگر مالک آن هستید، از پنل حساب کاربری دوباره وارد شوید و ربات را از همان‌جا وصل کنید."
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:388
-#: includes/class-hsw-account-auth.php:1586
-#: includes/class-hsw-account-auth.php:1623
+#: includes/class-hsw-account-auth.php:1610
+#: includes/class-hsw-account-auth.php:1658
 msgid "این شماره قبلاً روی حساب دیگری تأیید شده است. با پشتیبانی تماس بگیرید."
 msgstr ""
 
@@ -1876,7 +1876,7 @@ msgstr ""
 msgid "این فهرست فقط عکس‌های ثبت‌شده پس از نصب این قابلیت را نشان می‌دهد؛ وجود عکس در فهرست به معنی بی‌استفاده بودن آن نیست. پیش از حذف از رسانه، استفاده در تیکت‌ها، نوشته‌ها، محصولات و سایر بخش‌ها را بررسی و نسخه پشتیبان تهیه کنید. لینک‌های بیرونی، ایمیل‌ها و نسخه‌های پشتیبان نیز ممکن است از عکس استفاده کنند."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2125
+#: includes/class-hsw-account-auth.php:2166
 msgid "این لینک منقضی شده یا قبلاً استفاده شده است. از سایت دوباره روی دکمهٔ تلگرام بزنید."
 msgstr ""
 
@@ -1898,12 +1898,12 @@ msgstr ""
 msgid "این پیشنهاد به پایان رسید"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1567
+#: includes/class-hsw-account-auth.php:1590
 msgid "این کانال فعال نیست."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:977
-#: includes/class-hsw-account-auth.php:1127
+#: includes/class-hsw-account-auth.php:1000
+#: includes/class-hsw-account-auth.php:1150
 msgid "این کانال ورود فعال نیست."
 msgstr ""
 
@@ -1911,7 +1911,7 @@ msgstr ""
 msgid "این کد %s دقیقه اعتبار دارد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:800
+#: includes/class-hsw-account-auth.php:823
 msgid "این کد تا %s دقیقه معتبر است. اگر شما درخواست نداده‌اید، این ایمیل را نادیده بگیرید."
 msgstr ""
 
@@ -2030,8 +2030,8 @@ msgstr ""
 msgid "باز کردن جستجو"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1010
-#: includes/class-hsw-account-auth.php:1048
+#: includes/class-hsw-account-auth.php:1033
+#: includes/class-hsw-account-auth.php:1071
 msgid "باز کردن ربات تلگرام"
 msgstr ""
 
@@ -2161,7 +2161,7 @@ msgstr ""
 msgid "بازگشت به مجله"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2408
+#: includes/class-hsw-account-auth.php:2462
 #: includes/class-hsw-account.php:3493
 msgid "بازگشت به ورود"
 msgstr ""
@@ -2302,7 +2302,7 @@ msgstr ""
 msgid "بدون نشان (فقط متن)"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2308
+#: includes/class-hsw-account-auth.php:2362
 msgid "بدون نیاز به شماره یا ایمیل: روی دکمه بزنید، در ربات تلگرام Start را بزنید و کد ۶ رقمی را همین‌جا وارد کنید. اگر حسابی با این تلگرام نباشد، ساخته می‌شود."
 msgstr ""
 
@@ -2322,11 +2322,11 @@ msgstr ""
 msgid "بر اساس علایق و تازه‌ترین ورودی‌های انبار"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1997
+#: includes/class-hsw-account-auth.php:2038
 msgid "برای اتصال شماره موبایل، دکمهٔ زیر را بزنید و شماره خود را ارسال کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1930
+#: includes/class-hsw-account-auth.php:1971
 msgid "برای اتصال، شمارهٔ خودتان را با دکمهٔ «ارسال شماره موبایل» و در گفتگوی خصوصی با ربات بفرستید."
 msgstr ""
 
@@ -2362,7 +2362,7 @@ msgstr ""
 msgid "برای این آدرس روش ارسال در دسترس نیست؛ آدرس را بررسی کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1578
+#: includes/class-hsw-account-auth.php:1601
 msgid "برای این حساب ایمیل معتبری ثبت نشده است."
 msgstr ""
 
@@ -2370,27 +2370,27 @@ msgstr ""
 msgid "برای این سفارش فقط نام و شماره تماس لازم است؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:618
+#: includes/class-hsw-account-auth.php:641
 msgid "برای این شماره امروز بیش از حد کد فرستاده شده است. فردا دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1529
+#: includes/class-hsw-account-auth.php:1552
 msgid "برای این ورود به اندازهٔ کافی کد فرستاده شده است؛ دوباره وارد شوید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1758
+#: includes/class-hsw-account-auth.php:1799
 msgid "برای تغییر ورود دوعاملی، رمز عبور حساب را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2388
+#: includes/class-hsw-account-auth.php:2442
 msgid "برای تغییر، رمز عبور فعلی"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2377
+#: includes/class-hsw-account-auth.php:2431
 msgid "برای تلگرام، ابتدا ربات را باز کنید و شماره خود را ارسال کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1549
+#: includes/class-hsw-account-auth.php:1572
 msgid "برای تنظیم ورود دوعاملی باید وارد حساب شوید."
 msgstr ""
 
@@ -2407,16 +2407,16 @@ msgstr ""
 msgid "برای ثبت سفارش، وارد حساب کاربری شوید و آدرس تحویل را ذخیره کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1152
+#: includes/class-hsw-account-auth.php:1175
 msgid "برای ثبت‌نام، نام و ایمیل معتبر را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:702
-#: includes/class-hsw-account-auth.php:1008
+#: includes/class-hsw-account-auth.php:725
+#: includes/class-hsw-account-auth.php:1031
 msgid "برای دریافت کد در تلگرام، ابتدا ربات فروشگاه را باز کنید و شماره موبایل خود را ارسال کنید، سپس دوباره روی دریافت کد کلیک کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2004
+#: includes/class-hsw-account-auth.php:2045
 msgid "برای دریافت کد ورود، ابتدا شماره موبایل خود را با دکمهٔ زیر ارسال کنید."
 msgstr ""
 
@@ -2429,15 +2429,15 @@ msgstr ""
 msgid "برای روش‌های واقعی، روی گزینه انتخاب‌شده نشان داده می‌شود؛ برای دمو روی گزینه اول."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2349
+#: includes/class-hsw-account-auth.php:2403
 msgid "برای غیرفعال‌سازی، رمز عبور فعلی"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1807
+#: includes/class-hsw-account-auth.php:1848
 msgid "برای غیرفعال‌سازی، رمز عبور فعلی یا کد تأیید را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1619
+#: includes/class-hsw-account-auth.php:1654
 msgid "برای فعال‌سازی، شماره موبایل خود را وارد کنید."
 msgstr ""
 
@@ -2979,7 +2979,7 @@ msgstr ""
 msgid "به حروف:"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1473
+#: includes/class-hsw-account-auth.php:1496
 msgid "به دلیل تلاش‌های ناموفق، ورود دوعاملی تا %s دقیقه قفل است."
 msgstr ""
 
@@ -3068,7 +3068,7 @@ msgstr ""
 msgid "تأیید دریافت وجه برای امتیاز"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2406
+#: includes/class-hsw-account-auth.php:2460
 msgid "تأیید دوعاملی"
 msgstr ""
 
@@ -3076,12 +3076,12 @@ msgstr ""
 msgid "تأیید شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2390
+#: includes/class-hsw-account-auth.php:2444
 msgid "تأیید و فعال‌سازی"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2311
-#: includes/class-hsw-account-auth.php:2407
+#: includes/class-hsw-account-auth.php:2365
+#: includes/class-hsw-account-auth.php:2461
 msgid "تأیید و ورود"
 msgstr ""
 
@@ -3657,15 +3657,15 @@ msgstr ""
 msgid "تعداد تلاش‌ها بیش از حد شد. دوباره درخواست کد بدهید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1680
+#: includes/class-hsw-account-auth.php:1715
 msgid "تعداد تلاش‌ها بیش از حد مجاز است. دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1464
+#: includes/class-hsw-account-auth.php:1487
 msgid "تعداد تلاش‌ها بیش از حد مجاز است. دوباره وارد شوید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:549
+#: includes/class-hsw-account-auth.php:572
 msgid "تعداد تلاش‌ها بیش از حد مجاز است. کد جدید بگیرید."
 msgstr ""
 
@@ -3685,7 +3685,7 @@ msgstr ""
 msgid "تعداد در هر صفحه"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:609
+#: includes/class-hsw-account-auth.php:632
 msgid "تعداد درخواست کد از این اتصال زیاد بوده است. کمی بعد دوباره تلاش کنید."
 msgstr ""
 
@@ -3693,7 +3693,7 @@ msgstr ""
 msgid "تعداد درخواستی مجاز نیست."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2066
+#: includes/class-hsw-account-auth.php:2107
 msgid "تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کنید."
 msgstr ""
 
@@ -3782,7 +3782,7 @@ msgstr ""
 msgid "تغییر اطلاعات یا آدرس"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1828
+#: includes/class-hsw-account-auth.php:1869
 msgid "تغییر امنیتی حساب در %s"
 msgstr ""
 
@@ -3806,11 +3806,11 @@ msgstr ""
 msgid "تقویم شمسی"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1748
+#: includes/class-hsw-account-auth.php:1789
 msgid "تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را تغییر دهید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1783
+#: includes/class-hsw-account-auth.php:1824
 msgid "تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را غیرفعال کنید."
 msgstr ""
 
@@ -3834,7 +3834,7 @@ msgstr ""
 msgid "تلگرام"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:750
+#: includes/class-hsw-account-auth.php:773
 msgid "تلگرام پیام را نپذیرفت؛ توکن و اتصال ربات را بررسی کنید."
 msgstr ""
 
@@ -3922,7 +3922,7 @@ msgstr ""
 msgid "تنظیمات"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:921
+#: includes/class-hsw-account-auth.php:944
 msgid "تنظیمات WhatsApp Cloud API کامل نیست."
 msgstr ""
 
@@ -3934,7 +3934,7 @@ msgstr ""
 msgid "تنظیمات امنیتی ذخیره شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:724
+#: includes/class-hsw-account-auth.php:747
 msgid "تنظیمات ربات تلگرام کامل نیست."
 msgstr ""
 
@@ -4271,7 +4271,7 @@ msgstr ""
 msgid "ثبت‌نام"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2307
+#: includes/class-hsw-account-auth.php:2361
 msgid "ثبت‌نام با تلگرام"
 msgstr ""
 
@@ -4279,8 +4279,8 @@ msgstr ""
 msgid "ثبت‌نام با رمز عبور ثابت"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:980
-#: includes/class-hsw-account-auth.php:1133
+#: includes/class-hsw-account-auth.php:1003
+#: includes/class-hsw-account-auth.php:1156
 msgid "ثبت‌نام با کد یکبارمصرف غیرفعال است."
 msgstr ""
 
@@ -4288,7 +4288,7 @@ msgstr ""
 msgid "ثبت‌نام در این فروشگاه غیرفعال است."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2292
+#: includes/class-hsw-account-auth.php:2346
 #: includes/class-hsw-account.php:3536
 msgid "ثبت‌نام سریع با کد یکبارمصرف"
 msgstr ""
@@ -4894,16 +4894,16 @@ msgstr ""
 msgid "حساب تلگرام متصل‌شده"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1991
+#: includes/class-hsw-account-auth.php:2032
 msgid "حساب شما به ربات متصل شد. برای تکمیل اتصال شماره موبایل، دکمهٔ «ارسال شماره موبایل» را هم بزنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1264
-#: includes/class-hsw-account-auth.php:2251
+#: includes/class-hsw-account-auth.php:1287
+#: includes/class-hsw-account-auth.php:2305
 msgid "حساب شما ساخته شد و وارد شدید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2247
+#: includes/class-hsw-account-auth.php:2301
 msgid "حساب شما ساخته شد و وارد شدید. برای اتصال شماره موبایل به حساب، دکمهٔ زیر را بزنید (اختیاری)."
 msgstr ""
 
@@ -4931,7 +4931,7 @@ msgstr ""
 msgid "حساب کاربری من"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1496
+#: includes/class-hsw-account-auth.php:1519
 msgid "حساب کاربری پیدا نشد."
 msgstr ""
 
@@ -4939,7 +4939,7 @@ msgstr ""
 msgid "حساب، سبد و پشتیبانی"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2191
+#: includes/class-hsw-account-auth.php:2245
 msgid "حسابی به این تلگرام متصل نیست و ثبت‌نام غیرفعال است. با رمز عبور وارد شوید."
 msgstr ""
 
@@ -5558,9 +5558,9 @@ msgstr ""
 msgid "درخواست نامعتبر است."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1451
-#: includes/class-hsw-account-auth.php:1491
-#: includes/class-hsw-account-auth.php:1515
+#: includes/class-hsw-account-auth.php:1474
+#: includes/class-hsw-account-auth.php:1514
+#: includes/class-hsw-account-auth.php:1538
 msgid "درخواست ورود منقضی شده است. دوباره وارد شوید."
 msgstr ""
 
@@ -5646,7 +5646,7 @@ msgstr ""
 msgid "درگاه‌های پرداخت و پرداخت با کیف پول."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2310
+#: includes/class-hsw-account-auth.php:2364
 msgid "دریافت کد تأیید"
 msgstr ""
 
@@ -5663,8 +5663,8 @@ msgstr ""
 msgid "دسترسی غیرمجاز است."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1658
-#: includes/class-hsw-account-auth.php:1714
+#: includes/class-hsw-account-auth.php:1693
+#: includes/class-hsw-account-auth.php:1755
 msgid "دسترسی غیرمجاز."
 msgstr ""
 
@@ -6316,11 +6316,11 @@ msgstr ""
 msgid "رایگان"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2085
+#: includes/class-hsw-account-auth.php:2126
 msgid "ربات تلگرام را باز کنید و روی Start بزنید؛ کد ۶ رقمی همان‌جا ارسال می‌شود. سپس کد را اینجا وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2377
+#: includes/class-hsw-account-auth.php:2431
 msgid "ربات تلگرام متصل است."
 msgstr ""
 
@@ -7402,11 +7402,11 @@ msgstr ""
 msgid "روش دریافت کد را انتخاب کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2355
+#: includes/class-hsw-account-auth.php:2409
 msgid "روش دریافت کد را انتخاب کنید؛ پس از تأیید کد، ورود دوعاملی فعال می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2371
+#: includes/class-hsw-account-auth.php:2425
 msgid "روش ورود دوعاملی"
 msgstr ""
 
@@ -7470,7 +7470,7 @@ msgstr ""
 msgid "زاویه گرادیانت (deg)"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2098
+#: includes/class-hsw-account-auth.php:2139
 msgid "زمان این درخواست تمام شد. دوباره روی دکمهٔ تلگرام بزنید."
 msgstr ""
 
@@ -7597,7 +7597,7 @@ msgstr ""
 msgid "سازگاری با قالب (فونت)"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:628
+#: includes/class-hsw-account-auth.php:651
 msgid "سامانهٔ واتساپ شلوغ است. یک دقیقهٔ دیگر تلاش کنید."
 msgstr ""
 
@@ -8109,7 +8109,7 @@ msgstr ""
 msgid "شماره سفارش را بنویس یا از فهرست انتخاب کن."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1966
+#: includes/class-hsw-account-auth.php:2007
 msgid "شماره شما با موفقیت به حساب فروشگاه متصل شد."
 msgstr ""
 
@@ -8118,12 +8118,12 @@ msgstr ""
 msgid "شماره فاکتور"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2304
-#: includes/class-hsw-account-auth.php:2367
+#: includes/class-hsw-account-auth.php:2358
+#: includes/class-hsw-account-auth.php:2421
 msgid "شماره موبایل"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:971
+#: includes/class-hsw-account-auth.php:994
 msgid "شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید."
 msgstr ""
 
@@ -8132,7 +8132,7 @@ msgid "شماره موبایل را وارد کنید."
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:383
-#: includes/class-hsw-account-auth.php:885
+#: includes/class-hsw-account-auth.php:908
 msgid "شماره موبایل معتبر نیست."
 msgstr ""
 
@@ -8185,7 +8185,7 @@ msgstr ""
 msgid "شماره‌های تماس اداری یا پشتیبانی مشتریان روی فاکتورها."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1136
+#: includes/class-hsw-account-auth.php:1159
 msgid "شناسه (موبایل یا ایمیل) و کد تأیید را کامل وارد کنید."
 msgstr ""
 
@@ -8998,7 +8998,7 @@ msgstr ""
 msgid "غیرفعال (عدم نمایش بخش زمان‌بندی)"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2350
+#: includes/class-hsw-account-auth.php:2404
 msgid "غیرفعال کردن"
 msgstr ""
 
@@ -9421,7 +9421,7 @@ msgstr ""
 msgid "فعال‌سازی همه"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2391
+#: includes/class-hsw-account-auth.php:2445
 msgid "فعال‌سازی ورود دوعاملی"
 msgstr ""
 
@@ -10896,7 +10896,7 @@ msgstr ""
 msgid "مثلاً 0912... یا name@example.com"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2301
+#: includes/class-hsw-account-auth.php:2355
 msgid "مثلاً: جواد نکویی"
 msgstr ""
 
@@ -11848,7 +11848,7 @@ msgstr ""
 msgid "نام و لوگوی فروشگاه شما در پنل حساب کاربری، صفحهٔ ورود و اعلان‌های داخل افزونه استفاده می‌شود. اگر خالی بگذارید، نام و لوگوی خود قالب وردپرس نمایش داده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2301
+#: includes/class-hsw-account-auth.php:2355
 msgid "نام و نام خانوادگی"
 msgstr ""
 
@@ -11856,7 +11856,7 @@ msgstr ""
 msgid "نام کاربری"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2058
+#: includes/class-hsw-account-auth.php:2099
 msgid "نام کاربری ربات تلگرام در تنظیمات افزونه وارد نشده است."
 msgstr ""
 
@@ -12886,12 +12886,12 @@ msgstr ""
 msgid "ورود / مشاهدهٔ سفارش‌ها"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2307
+#: includes/class-hsw-account-auth.php:2361
 msgid "ورود با تلگرام"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2050
-#: includes/class-hsw-account-auth.php:2147
+#: includes/class-hsw-account-auth.php:2091
+#: includes/class-hsw-account-auth.php:2188
 msgid "ورود با تلگرام فعال نیست."
 msgstr ""
 
@@ -12899,22 +12899,22 @@ msgstr ""
 msgid "ورود با رمز عبور ثابت"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1180
-#: includes/class-hsw-account-auth.php:2183
+#: includes/class-hsw-account-auth.php:1203
+#: includes/class-hsw-account-auth.php:2237
 msgid "ورود با موفقیت انجام شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2292
+#: includes/class-hsw-account-auth.php:2346
 msgid "ورود با کد یکبارمصرف"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:983
-#: includes/class-hsw-account-auth.php:1130
+#: includes/class-hsw-account-auth.php:1006
+#: includes/class-hsw-account-auth.php:1153
 msgid "ورود با کد یکبارمصرف غیرفعال است."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:955
-#: includes/class-hsw-account-auth.php:1112
+#: includes/class-hsw-account-auth.php:978
+#: includes/class-hsw-account-auth.php:1135
 msgid "ورود با کد یکبارمصرف فعال نیست."
 msgstr ""
 
@@ -12932,35 +12932,35 @@ msgstr ""
 msgid "ورود دوباره"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1728
+#: includes/class-hsw-account-auth.php:1769
 msgid "ورود دوعاملی برای حساب شما غیرفعال شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1707
+#: includes/class-hsw-account-auth.php:1748
 msgid "ورود دوعاملی برای حساب شما فعال شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1504
+#: includes/class-hsw-account-auth.php:1527
 msgid "ورود دوعاملی تأیید شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1729
+#: includes/class-hsw-account-auth.php:1770
 msgid "ورود دوعاملی غیرفعال شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2344
+#: includes/class-hsw-account-auth.php:2398
 msgid "ورود دوعاملی فعال است"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1708
+#: includes/class-hsw-account-auth.php:1749
 msgid "ورود دوعاملی فعال شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2340
+#: includes/class-hsw-account-auth.php:2394
 msgid "ورود دوعاملی، امنیت حساب شما را بیشتر می‌کند."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2292
+#: includes/class-hsw-account-auth.php:2346
 msgid "ورود سریع"
 msgstr ""
 
@@ -14408,7 +14408,7 @@ msgstr ""
 msgid "کاربر"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2206
+#: includes/class-hsw-account-auth.php:2260
 msgid "کاربر تلگرام"
 msgstr ""
 
@@ -14546,11 +14546,11 @@ msgstr ""
 msgid "کامل داخل کادر"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:717
+#: includes/class-hsw-account-auth.php:740
 msgid "کانال ارسال کد پشتیبانی نمی‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2293
+#: includes/class-hsw-account-auth.php:2347
 msgid "کانال دریافت کد"
 msgstr ""
 
@@ -14562,11 +14562,11 @@ msgstr ""
 msgid "کاهش تعداد"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2390
+#: includes/class-hsw-account-auth.php:2444
 msgid "کد تأیید"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1652
+#: includes/class-hsw-account-auth.php:1687
 #: includes/class-hsw-assets.php:885
 msgid "کد تأیید ارسال شد."
 msgstr ""
@@ -14579,11 +14579,11 @@ msgstr ""
 msgid "کد تأیید به %s ارسال شد."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2269
+#: includes/class-hsw-account-auth.php:2323
 msgid "کد تأیید به %s شما ارسال می‌شود؛ نیازی به رمز عبور نیست."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2406
+#: includes/class-hsw-account-auth.php:2460
 msgid "کد تأیید را وارد کنید"
 msgstr ""
 
@@ -14595,15 +14595,15 @@ msgstr ""
 msgid "کد تأیید نامعتبر است."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:785
+#: includes/class-hsw-account-auth.php:808
 msgid "کد تأیید ورود به %s"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:795
+#: includes/class-hsw-account-auth.php:818
 msgid "کد تأیید ورود شما:"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2311
+#: includes/class-hsw-account-auth.php:2365
 msgid "کد تأیید ۶ رقمی"
 msgstr ""
 
@@ -14731,7 +14731,7 @@ msgstr ""
 msgid "کد تخفیف..."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1543
+#: includes/class-hsw-account-auth.php:1566
 msgid "کد جدید ارسال شد."
 msgstr ""
 
@@ -14744,11 +14744,11 @@ msgstr ""
 msgid "کد رهگیری:"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:580
+#: includes/class-hsw-account-auth.php:603
 msgid "کد قبلی هنوز معتبر است. کمی بعد دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1664
+#: includes/class-hsw-account-auth.php:1699
 msgid "کد منقضی شده است. دوباره تلاش کنید."
 msgstr ""
 
@@ -14764,22 +14764,22 @@ msgstr ""
 msgid "کد هدیه یا کوپن ویژه خود را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1796
+#: includes/class-hsw-account-auth.php:1837
 msgid "کد وارد شده صحیح نیست یا منقضی شده است."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:1106
+#: includes/class-hsw-account-auth.php:1129
 msgid "کد وارد شده صحیح نیست یا منقضی شده است. اگر کدی دریافت نکردید، دوباره درخواست کنید."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:553
-#: includes/class-hsw-account-auth.php:1482
-#: includes/class-hsw-account-auth.php:1683
+#: includes/class-hsw-account-auth.php:576
+#: includes/class-hsw-account-auth.php:1505
+#: includes/class-hsw-account-auth.php:1718
 msgid "کد وارد شده صحیح نیست."
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:522
-#: includes/class-hsw-account-auth.php:570
+#: includes/class-hsw-account-auth.php:545
+#: includes/class-hsw-account-auth.php:593
 msgid "کد وارد شده منقضی شده است. لطفاً کد جدید بگیرید."
 msgstr ""
 
@@ -14819,7 +14819,7 @@ msgstr ""
 msgid "کد کالا:"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2407
+#: includes/class-hsw-account-auth.php:2461
 msgid "کد ۶ رقمی"
 msgstr ""
 
@@ -15237,7 +15237,7 @@ msgstr ""
 msgid "گیرنده"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:2266
+#: includes/class-hsw-account-auth.php:2320
 msgid "یا"
 msgstr ""
 
@@ -15322,7 +15322,7 @@ msgstr ""
 msgid "یک %s موجود با همین آدرس"
 msgstr ""
 
-#: includes/class-hsw-account-auth.php:968
+#: includes/class-hsw-account-auth.php:991
 msgid "یک ایمیل معتبر وارد کنید."
 msgstr ""
 
