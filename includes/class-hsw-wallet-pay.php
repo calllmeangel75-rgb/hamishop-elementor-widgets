@@ -390,7 +390,9 @@ class HSW_Wallet_Topup {
 	 * list on the pay step, for the pay endpoint and for `settle()`.
 	 *
 	 * Sites with a custom "pay later" gateway extend it with the
-	 * `hsw_wallet_topup_blocked_gateways` filter.
+	 * `hsw_wallet_topup_blocked_gateways` filter. For a stricter policy, set
+	 * `hsw_wallet_topup_allowed_gateways` to a non-empty list — then only
+	 * those gateways can fund a top-up and the blocklist is ignored.
 	 *
 	 * @return string[]
 	 */
@@ -402,13 +404,37 @@ class HSW_Wallet_Topup {
 	}
 
 	/**
+	 * Gateways allowed to fund a wallet top-up (allowlist).
+	 *
+	 * Empty = fall back to the blocklist above (backward compatible). When
+	 * non-empty, only listed gateways pass `gateway_allowed()` and the
+	 * blocklist is ignored. Extend with `hsw_wallet_topup_allowed_gateways`.
+	 *
+	 * @return string[]
+	 */
+	public static function allowed_gateways() {
+		$allowed = (array) apply_filters( 'hsw_wallet_topup_allowed_gateways', array() );
+
+		return array_values( array_unique( array_filter( array_map( 'strval', $allowed ), 'strlen' ) ) );
+	}
+
+	/**
 	 * May this gateway pay for a top-up order?
 	 *
 	 * @param string $gateway_id Gateway id.
 	 * @return bool
 	 */
 	public static function gateway_allowed( $gateway_id ) {
-		return ! in_array( (string) $gateway_id, self::blocked_gateways(), true );
+		$id   = (string) $gateway_id;
+		$list = self::allowed_gateways();
+
+		if ( $list ) {
+			/* Allowlist mode: only listed gateways may fund a top-up. */
+			return in_array( $id, $list, true );
+		}
+
+		/* Blocklist mode (default): everything except the blocked ones. */
+		return ! in_array( $id, self::blocked_gateways(), true );
 	}
 
 	/**

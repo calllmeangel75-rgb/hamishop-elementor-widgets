@@ -177,10 +177,17 @@ final class HSW_Plugin {
                         }
                 }
 
-                /* Catch any third-party preprocess_comment wp_die() call during AJAX. */
+                /* Catch any third-party preprocess_comment wp_die() call during AJAX.
+                 *
+                 * The handler removes itself before answering: wp_send_json_error()
+                 * ends with wp_die(), which would otherwise call this same handler
+                 * again and recurse until PHP runs out of memory.
+                 */
                 $die_filter = null;
                 if ( $is_ajax ) {
-                        $die_filter = static function () use ( $send_error ) {
+                        $die_filter = static function () use ( $send_error, &$die_filter ) {
+                                remove_filter( 'wp_die_ajax_handler', $die_filter, 999 );
+                                remove_filter( 'wp_die_handler', $die_filter, 999 );
                                 return static function ( $message = '', $title = '', $args = array() ) use ( $send_error ) {
                                         $code = is_array( $args ) && isset( $args['response'] ) ? (int) $args['response'] : 400;
                                         $send_error( is_scalar( $message ) ? (string) $message : '', $code ? $code : 400 );

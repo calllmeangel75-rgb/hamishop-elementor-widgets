@@ -8,6 +8,18 @@
 
 ## [Unreleased]
 
+### Security
+
+- AJAX comment submission: the `wp_die_ajax_handler` and `wp_die_handler` filters are removed before answering (`wp_send_json_error()`), so a third-party `wp_die()` can no longer recurse until PHP memory is exhausted.
+- OTP/IP throttle behind non-Cloudflare proxies: ArvanCloud edge ranges (Iran / Middle East) added to the default `hsw_trusted_proxies` list, so each visitor behind a CDN/IP proxy gets a distinct bucket instead of sharing the 20-requests-per-hour cap with every other visitor behind the same proxy. Extensible via the `hsw_trusted_proxies` filter.
+- Wallet top-up gateway allowlist: new `hsw_wallet_topup_allowed_gateways` filter. When empty (default), the previous blocklist-only behavior applies (`cod` and `hsw_wallet` always blocked). When set, only listed gateways may fund a top-up.
+- Ticket images outside the public Media Library: uploads are stored under `wp-content/uploads/hsw-ticket-images/<ticket>/` with `.htaccess` denying direct access, and served only through the signed, capability-guarded `GET hsw/v1/tickets/{id}/image?ts&sig` endpoint (HMAC signature, valid 7 days).
+- Inbound email webhook: the secret is read from the `X-HSW-Inbound-Secret` header (`secret` query param kept as a fallback), and the `$from` sender comparison is now case-insensitive via `strtolower`.
+
+### Fixed
+
+- Product review from a non-buyer with "verified owners only" enabled returns a single clean JSON error and saves no review (previously exhausted PHP memory).
+
 ## [1.11.272] — 2026-11-11 (pre-release)
 
 ### Security
