@@ -77,7 +77,7 @@ if ( defined( 'HSW_VERSION' ) ) {
         return; // another copy is already running — this file exits silently.
 }
 
-define( 'HSW_VERSION', '1.11.272' );
+define( 'HSW_VERSION', '1.11.273' );
 define( 'HSW_FILE', __FILE__ );
 define( 'HSW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'HSW_URL', plugin_dir_url( __FILE__ ) );
