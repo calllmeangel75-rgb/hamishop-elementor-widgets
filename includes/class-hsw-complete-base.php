@@ -357,35 +357,14 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
         if ( ! $order instanceof WC_Order ) {
             return '';
         }
-        $method = (string) $order->get_payment_method();
-        if ( '' === $method ) {
-            return '';
-        }
-        ob_start();
-        do_action( 'woocommerce_thankyou_' . $method, $order->get_id() );
-        self::do_thankyou_once( $order->get_id() );
-        return trim( (string) ob_get_clean() );
-    }
 
-    /**
-     * Fire the public woocommerce_thankyou hook exactly once per request.
-     *
-     * Analytics plugins (GA4, Meta Pixel, …) listen on the public hook, not
-     * only on woocommerce_thankyou_{method}. A static guard ensures it fires
-     * once even when gateway_notes() is reached more than once, and it does
-     * not double-fire on WooCommerce's native order-received page (core
-     * already fires it there).
-     *
-     * @param int $order_id Order.
-     * @return void
-     */
-    private static function do_thankyou_once( $order_id ) {
-        static $done = array();
-        if ( isset( $done[ $order_id ] ) ) {
-            return;
-        }
-        $done[ $order_id ] = true;
-        do_action( 'woocommerce_thankyou', $order_id );
+        /* HSW_Thankyou fires the gateway hook and the public hook together, once
+           per request for this order, and keeps out of the way when WooCommerce's
+           own thank-you template is rendering the same request. Analytics
+           plugins listen on the public hook, gateways on the method one. */
+        ob_start();
+        HSW_Thankyou::fire( $order );
+        return trim( (string) ob_get_clean() );
     }
 
     /**

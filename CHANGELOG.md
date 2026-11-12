@@ -6,14 +6,40 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
-## [Unreleased]
+## [1.11.276] — 2026-11-12 (pre-release)
+
+### Fixed
+
+- Thank-you hooks (`woocommerce_before_thankyou`, `woocommerce_thankyou_{method}`, `woocommerce_thankyou`) now go through one shared, order-keyed guard (`HSW_Thankyou`). The complete page and the checkout card can both render in the same request without double-counting a purchase, and the guard stands down when the thank-you block already started or when WooCommerce's own checkout owns the native `order-received` page.
+- An order with no payment method still fires the public `woocommerce_thankyou` hook; only the gateway hook is skipped.
+- Ticket images are stored with `wp_upload_dir()`, so a custom uploads location is respected, while images written by 1.11.273–1.11.275 under `wp-content/uploads/` are still found. New file names carry a random prefix and are sanitized; `Content-Disposition` no longer uses `esc_html()`, and image responses use `nocache_headers()`.
+- Release notes: 1.11.273's REST-route sentence is marked as superseded, and the seven-item accounting is consistent.
+
+### Added
+
+- `tests/qa/ticket-image-wp.php`, `tests/qa/thankyou-hook-wp.php` (both in the `wp-integration` CI job) and `tests/qa/ticket-image-browser-probe.js` for live-role checks.
+
+## [1.11.275] — 2026-11-12
+
+### Changed
+
+- Version bump only; no code changes beyond the version header and release notes.
+
+## [1.11.274] — 2026-11-12 (pre-release)
+
+### Fixed
+
+- Ticket images returned 403 for every role: serving moved from REST (`hsw/v1/tickets/{id}/image`) to `admin-post.php?action=hsw_ticket_image`, where WordPress cookie authentication works without a nonce. Owner and `manage_woocommerce` may view; everyone else gets 403. Signature comparison uses `hash_equals`; the link expires after seven days.
+- The public `woocommerce_thankyou` hook now fires on `/complete/` as well as the method-specific hook. The cross-class and native-page cases were completed in 1.11.276.
+
+## [1.11.273] — 2026-11-12 (pre-release)
 
 ### Security
 
 - AJAX comment submission: the `wp_die_ajax_handler` and `wp_die_handler` filters are removed before answering (`wp_send_json_error()`), so a third-party `wp_die()` can no longer recurse until PHP memory is exhausted.
 - OTP/IP throttle behind non-Cloudflare proxies: ArvanCloud edge ranges (Iran / Middle East) added to the default `hsw_trusted_proxies` list, so each visitor behind a CDN/IP proxy gets a distinct bucket instead of sharing the 20-requests-per-hour cap with every other visitor behind the same proxy. Extensible via the `hsw_trusted_proxies` filter.
 - Wallet top-up gateway allowlist: new `hsw_wallet_topup_allowed_gateways` filter. When empty (default), the previous blocklist-only behavior applies (`cod` and `hsw_wallet` always blocked). When set, only listed gateways may fund a top-up.
-- Ticket images outside the public Media Library: uploads are stored under `wp-content/uploads/hsw-ticket-images/<ticket>/` with `.htaccess` denying direct access, and served only through the signed, capability-guarded `GET hsw/v1/tickets/{id}/image?ts&sig` endpoint (HMAC signature, valid 7 days).
+- Ticket images outside the public Media Library: uploads are stored under `wp-content/uploads/hsw-ticket-images/<ticket>/` with `.htaccess` denying direct access, and served only through a signed, capability-guarded link (HMAC signature, valid 7 days). The REST route used here was replaced in 1.11.274 by `admin-post.php`.
 - Inbound email webhook: the secret is read from the `X-HSW-Inbound-Secret` header (`secret` query param kept as a fallback), and the `$from` sender comparison is now case-insensitive via `strtolower`.
 
 ### Fixed

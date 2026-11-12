@@ -14,11 +14,11 @@ msgstr ""
 "X-Generator: HamiShop build-pot.py\n"
 "X-Domain: hamishop-elementor-widgets\n"
 
-#: includes/class-hsw-account-support.php:1781
+#: includes/class-hsw-account-support.php:1863
 msgid "%1$s — تیکت شما ثبت شد (#T-%2$s)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1833
+#: includes/class-hsw-account-support.php:1915
 msgid "%1$s — پاسخ جدید در گفتگوی «%2$s»"
 msgstr ""
 
@@ -85,11 +85,11 @@ msgstr ""
 msgid "CTA مراحل خرید (کلیک)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1696
+#: includes/class-hsw-account-support.php:1776
 msgid "Could not create the upload directory."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1700
+#: includes/class-hsw-account-support.php:1780
 msgid "Could not write the image file."
 msgstr ""
 
@@ -619,7 +619,7 @@ msgstr ""
 msgid "ابتدا ربات تلگرام را باز کنید، دکمه Start (و ارسال شماره موبایل) را بزنید و سپس دوباره روی فعال‌سازی کلیک کنید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1308
+#: includes/class-hsw-account-support.php:1394
 #: includes/class-hsw-account.php:3282
 #: includes/class-hsw-email-verify.php:253
 #: includes/class-hsw-email-verify.php:325
@@ -661,8 +661,8 @@ msgstr ""
 msgid "اجزای کارت محصول"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1216
-#: includes/class-hsw-account-support.php:1227
+#: includes/class-hsw-account-support.php:1302
+#: includes/class-hsw-account-support.php:1313
 #: includes/class-hsw-branding.php:585
 msgid "اختیاری"
 msgstr ""
@@ -728,7 +728,7 @@ msgstr ""
 msgid "ارزان‌ترین"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1133
+#: includes/class-hsw-account-support.php:1219
 #: includes/class-hsw-palette.php:941
 msgid "ارسال"
 msgstr ""
@@ -862,7 +862,7 @@ msgstr ""
 msgid "از صفتی که نامش «گارانتی/ضمانت/warranty» دارد خوانده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1062
+#: includes/class-hsw-account-support.php:1148
 msgid "از فهرست کنار یک گفتگو را باز کنید یا گفتگوی تازه‌ای بسازید."
 msgstr ""
 
@@ -1627,7 +1627,7 @@ msgstr ""
 msgid "اول"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1209
+#: includes/class-hsw-account-support.php:1295
 msgid "اولویت"
 msgstr ""
 
@@ -1813,7 +1813,7 @@ msgstr ""
 msgid "این تنظیمات روی کارت آمار، کارت سفارش و کارت‌های اطلاعات (آدرس/پروفایل) با هم اعمال می‌شود تا پنل شلوغ نشود."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:2032
+#: includes/class-hsw-account-support.php:2114
 msgid "این تیکت بسته است. ابتدا آن را بازگشایی کنید."
 msgstr ""
 
@@ -1838,7 +1838,7 @@ msgstr ""
 msgid "این سایت لوگویی ندارد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1359
+#: includes/class-hsw-account-support.php:1445
 msgid "این سفارش به حساب شما تعلق ندارد."
 msgstr ""
 
@@ -1935,11 +1935,11 @@ msgstr ""
 msgid "این گزینهٔ قدیمی مقادیر بنر و دکمه را با هم بازنشانی می‌کند."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1458
+#: includes/class-hsw-account-support.php:1544
 msgid "این گفتگو بسته شده است."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1129
+#: includes/class-hsw-account-support.php:1215
 msgid "این گفتگو بسته شده است. برای موضوع جدید یک گفتگوی تازه بسازید."
 msgstr ""
 
@@ -1947,7 +1947,7 @@ msgstr ""
 msgid "این گفتگو بسته شود؟ بعد از بستن نمی‌توانید پیام بفرستید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1078
+#: includes/class-hsw-account-support.php:1164
 msgid "این گفتگو وجود ندارد یا به حساب شما تعلق ندارد."
 msgstr ""
 
@@ -2428,8 +2428,8 @@ msgstr ""
 msgid "برای دریافت کد ورود، ابتدا شماره موبایل خود را با دکمهٔ زیر ارسال کنید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1802
-#: includes/class-hsw-account-support.php:1849
+#: includes/class-hsw-account-support.php:1884
+#: includes/class-hsw-account-support.php:1931
 msgid "برای دیدن و ادامهٔ گفتگو:"
 msgstr ""
 
@@ -2903,8 +2903,8 @@ msgstr ""
 msgid "بزرگ‌نمایی تصویر"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1100
 #: includes/class-hsw-account-support.php:1186
+#: includes/class-hsw-account-support.php:1272
 #: includes/class-hsw-archive-base.php:690
 #: includes/class-hsw-assets.php:934
 #: includes/class-hsw-assets.php:955
@@ -3040,7 +3040,7 @@ msgstr ""
 msgid "به‌صورت پیش‌فرض همان لوگویی می‌آید که در «سفارشی‌سازی ← هویت سایت ← لوگو» گذاشته‌ای؛ لازم نیست دوباره انتخابش کنی. اگر سایت لوگو نداشته باشد، نشان مدار GC جای آن را می‌گیرد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1801
+#: includes/class-hsw-account-support.php:1883
 msgid "به‌محض دریافت پاسخ، همین‌جا به شما اطلاع می‌دهیم."
 msgstr ""
 
@@ -3063,7 +3063,7 @@ msgstr ""
 msgid "بیمه مرسوله"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1240
+#: includes/class-hsw-account-support.php:1326
 msgid "بی‌خیال"
 msgstr ""
 
@@ -4132,7 +4132,7 @@ msgstr ""
 msgid "تیرگی پردهٔ گرادیان (پیشنهاد شگفت‌انگیز)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1845
+#: includes/class-hsw-account-support.php:1927
 msgid "تیم پشتیبانی به گفتگوی «%s» پاسخ داد:"
 msgstr ""
 
@@ -4144,25 +4144,25 @@ msgstr ""
 msgid "تیک ویژگی‌ها، خطوط گارانتی، تب‌ها و آکاردئون. خالی = رنگ پیش‌فرض هر بخش."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1416
+#: includes/class-hsw-account-support.php:1502
 msgid "تیکت ثبت شد، اما عکس بارگذاری نشد. لطفاً به پشتیبانی اطلاع دهید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:991
-#: includes/class-hsw-account-support.php:991
-#: includes/class-hsw-account-support.php:1063
+#: includes/class-hsw-account-support.php:1077
+#: includes/class-hsw-account-support.php:1077
+#: includes/class-hsw-account-support.php:1149
 msgid "تیکت جدید"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1793
+#: includes/class-hsw-account-support.php:1875
 msgid "تیکت شما با موضوع «%s» ثبت شد و در صف بررسی قرار گرفت."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1428
+#: includes/class-hsw-account-support.php:1514
 msgid "تیکت شما ثبت شد"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1437
+#: includes/class-hsw-account-support.php:1523
 #: includes/class-hsw-assets.php:869
 msgid "تیکت شما ثبت شد."
 msgstr ""
@@ -4187,11 +4187,11 @@ msgstr ""
 msgid "ثبت تراکنش کیف پول ناموفق بود؛ مبلغی جابه‌جا نشد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1241
+#: includes/class-hsw-account-support.php:1327
 msgid "ثبت تیکت"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1397
+#: includes/class-hsw-account-support.php:1483
 msgid "ثبت تیکت ناموفق بود. دوباره تلاش کنید."
 msgstr ""
 
@@ -4266,11 +4266,11 @@ msgstr ""
 msgid "ثبت و بررسی"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1470
+#: includes/class-hsw-account-support.php:1556
 msgid "ثبت پاسخ ناموفق بود. دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:2041
+#: includes/class-hsw-account-support.php:2123
 msgid "ثبت پاسخ ناموفق بود. لطفاً بازگردید و دوباره تلاش کنید."
 msgstr ""
 
@@ -4456,7 +4456,7 @@ msgstr ""
 msgid "جستجوی دسته‌بندی"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1218
+#: includes/class-hsw-account-support.php:1304
 msgid "جستجوی سفارش…"
 msgstr ""
 
@@ -4476,11 +4476,11 @@ msgstr ""
 msgid "جستجوی ویجت"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:995
+#: includes/class-hsw-account-support.php:1081
 msgid "جستجوی گفتگو"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:995
+#: includes/class-hsw-account-support.php:1081
 msgid "جستجوی گفتگو…"
 msgstr ""
 
@@ -4555,7 +4555,7 @@ msgstr ""
 msgid "جهت متن"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1235
+#: includes/class-hsw-account-support.php:1321
 msgid "جواب رو بنویس…"
 msgstr ""
 
@@ -4563,7 +4563,7 @@ msgstr ""
 msgid "جواب سؤال امنیتی درست نیست."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1350
+#: includes/class-hsw-account-support.php:1436
 msgid "جواب سؤال امنیتی درست نیست. دوباره حساب کن."
 msgstr ""
 
@@ -4741,35 +4741,35 @@ msgstr ""
 msgid "حالت‌های ویژه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:520
+#: includes/class-hsw-plugin.php:521
 msgid "حامی — هدر و ناوبری"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:524
+#: includes/class-hsw-plugin.php:525
 msgid "حامی — ویجت‌های آرشیو محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:523
+#: includes/class-hsw-plugin.php:524
 msgid "حامی — ویجت‌های سبد خرید و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:521
+#: includes/class-hsw-plugin.php:522
 msgid "حامی — ویجت‌های صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:522
+#: includes/class-hsw-plugin.php:523
 msgid "حامی — ویجت‌های لوپ محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:526
+#: includes/class-hsw-plugin.php:527
 msgid "حامی — ویجت‌های مجله و وبلاگ"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:525
+#: includes/class-hsw-plugin.php:526
 msgid "حامی — پنل حساب کاربری"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1364
+#: includes/class-hsw-account-support.php:1450
 msgid "حد مجاز گفتگوهای باز تکمیل است. یکی را ببندید و دوباره تلاش کنید."
 msgstr ""
 
@@ -5375,7 +5375,7 @@ msgstr ""
 msgid "خودکار بر اساس تنظیم سیستم کاربر"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1230
+#: includes/class-hsw-account-support.php:1316
 msgid "خودکار فشرده می‌شود. لینک عکس ممکن است عمومی باشد؛ اطلاعات حساس نفرستید."
 msgstr ""
 
@@ -5797,7 +5797,7 @@ msgstr ""
 msgid "دوم"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1200
+#: includes/class-hsw-account-support.php:1286
 msgid "دپارتمان"
 msgstr ""
 
@@ -7820,7 +7820,7 @@ msgstr ""
 msgid "سفارش"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1216
+#: includes/class-hsw-account-support.php:1302
 msgid "سفارش / سرویس مرتبط"
 msgstr ""
 
@@ -7899,8 +7899,8 @@ msgstr ""
 msgid "سقف خرید برای ارسال رایگان (تومان)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1788
-#: includes/class-hsw-account-support.php:1840
+#: includes/class-hsw-account-support.php:1870
+#: includes/class-hsw-account-support.php:1922
 msgid "سلام %s،"
 msgstr ""
 
@@ -8113,7 +8113,7 @@ msgstr ""
 msgid "شماره سفارش"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1221
+#: includes/class-hsw-account-support.php:1307
 msgid "شماره سفارش را بنویس یا از فهرست انتخاب کن."
 msgstr ""
 
@@ -8185,7 +8185,7 @@ msgstr ""
 msgid "شمارهٔ پشتیبانی"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1798
+#: includes/class-hsw-account-support.php:1880
 msgid "شمارهٔ پیگیری: #T-%s"
 msgstr ""
 
@@ -8989,7 +8989,7 @@ msgstr ""
 msgid "عنوان، جستجو و دسته‌های مجله."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1227
+#: includes/class-hsw-account-support.php:1313
 msgid "عکس"
 msgstr ""
 
@@ -10779,7 +10779,7 @@ msgstr ""
 msgid "متن پاسخ"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1465
+#: includes/class-hsw-account-support.php:1551
 msgid "متن پاسخ خالی یا بیش از حد بلند است."
 msgstr ""
 
@@ -10807,7 +10807,7 @@ msgstr ""
 msgid "متن پنل تب"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1224
+#: includes/class-hsw-account-support.php:1310
 #: widgets/class-hsw-widget-account.php:521
 msgid "متن پیام"
 msgstr ""
@@ -10820,7 +10820,7 @@ msgstr ""
 msgid "متن پیام را بنویسید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1356
+#: includes/class-hsw-account-support.php:1442
 msgid "متن پیام کوتاه یا بیش از حد بلند است."
 msgstr ""
 
@@ -11424,7 +11424,7 @@ msgstr ""
 msgid "مشخصاتی ثبت نشده است."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1185
+#: includes/class-hsw-account-support.php:1271
 msgid "مشکل یا سؤالتو بنویس، سریع بهت جواب می‌دیم."
 msgstr ""
 
@@ -11680,15 +11680,15 @@ msgstr ""
 msgid "موردی برای بررسی ثبت نشده است."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1353
+#: includes/class-hsw-account-support.php:1439
 msgid "موضوع باید بین ۳ تا ۱۲۰ کاراکتر باشد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1190
+#: includes/class-hsw-account-support.php:1276
 msgid "موضوع تیکت"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1191
+#: includes/class-hsw-account-support.php:1277
 msgid "موضوع تیکتو بنویس…"
 msgstr ""
 
@@ -12129,7 +12129,7 @@ msgstr ""
 msgid "نمایش تب‌ها"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:716
+#: includes/class-hsw-account-support.php:802
 msgid "نمایش تصویر پیوست"
 msgstr ""
 
@@ -12792,7 +12792,7 @@ msgstr ""
 msgid "هنوز محصولی به سبد خرید اضافه نکرده‌اید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1004
+#: includes/class-hsw-account-support.php:1090
 msgid "هنوز گفتگویی ندارید."
 msgstr ""
 
@@ -13196,11 +13196,11 @@ msgstr ""
 msgid "پاسخ به پرسش‌ها و پیگیری"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1035
+#: includes/class-hsw-account-support.php:1121
 msgid "پاسخ خوانده‌نشده"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1489
+#: includes/class-hsw-account-support.php:1575
 msgid "پاسخ شما ارسال شد."
 msgstr ""
 
@@ -14074,11 +14074,11 @@ msgstr ""
 msgid "پیام موفقیت"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1132
+#: includes/class-hsw-account-support.php:1218
 msgid "پیامت رو بنویس…"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1225
+#: includes/class-hsw-account-support.php:1311
 msgid "پیامتو بنویس…"
 msgstr ""
 
@@ -15223,21 +15223,21 @@ msgstr ""
 msgid "گزینه‌های پیش‌فرض (و ویرایشگر)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1540
+#: includes/class-hsw-account-support.php:1626
 msgid "گفتگو بسته شد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1455
-#: includes/class-hsw-account-support.php:1511
-#: includes/class-hsw-account-support.php:1532
+#: includes/class-hsw-account-support.php:1541
+#: includes/class-hsw-account-support.php:1597
+#: includes/class-hsw-account-support.php:1618
 msgid "گفتگو پیدا نشد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:989
+#: includes/class-hsw-account-support.php:1075
 msgid "گفتگوها"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1129
+#: includes/class-hsw-account-support.php:1215
 msgid "گفتگوی جدید"
 msgstr ""
 
@@ -15314,15 +15314,15 @@ msgstr ""
 msgid "یادداشت کنار عنوان (موبایل)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1185
+#: includes/class-hsw-account-support.php:1271
 msgid "یه تیکت جدید بزن"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1233
+#: includes/class-hsw-account-support.php:1319
 msgid "یه سوال کوچیک"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1230
+#: includes/class-hsw-account-support.php:1316
 msgid "یه عکس اضافه کن"
 msgstr ""
 
@@ -15351,7 +15351,7 @@ msgstr ""
 msgid "یک نوشتهٔ مشخص"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:1061
+#: includes/class-hsw-account-support.php:1147
 msgid "یک گفتگو انتخاب کنید"
 msgstr ""
 

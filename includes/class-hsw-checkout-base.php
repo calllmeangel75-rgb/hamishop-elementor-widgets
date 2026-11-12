@@ -138,10 +138,10 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                         echo '</div>';
 
                         /* Gateway thank-you output (e.g. bank-transfer instructions),
-                         * exactly like WooCommerce's own thank-you template. */
+                         * exactly like WooCommerce's own thank-you template. The
+                         * shared guard fires the method and public hooks once. */
                         ob_start();
-                        do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() );
-                        self::do_thankyou_once( $order->get_id() );
+                        HSW_Thankyou::fire( $order );
                         $extra = trim( (string) ob_get_clean() );
                         if ( '' !== $extra ) {
                                 echo '<div class="hsw-done-final__extra">' . $extra . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- gateway markup, mirrors WooCommerce core.
@@ -159,27 +159,6 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 echo '<a class="hsw-done-final__btn is-ghost" href="' . esc_url( $shop ) . '">' . esc_html__( 'ادامه خرید', 'hamishop-elementor-widgets' ) . '</a>';
                 echo '</div>';
                 echo '</div></section>';
-        }
-
-        /**
-         * Fire the public woocommerce_thankyou hook exactly once per request.
-         *
-         * Analytics plugins (GA4, Meta Pixel, …) listen on the public hook,
-         * not only on woocommerce_thankyou_{method}. A static guard ensures it
-         * fires once even when render_order_received() is reached more than
-         * once, and it does not double-fire on WooCommerce's native
-         * order-received page (core already fires it there).
-         *
-         * @param int $order_id Order.
-         * @return void
-         */
-        private static function do_thankyou_once( $order_id ) {
-                static $done = array();
-                if ( isset( $done[ $order_id ] ) ) {
-                        return;
-                }
-                $done[ $order_id ] = true;
-                do_action( 'woocommerce_thankyou', $order_id );
         }
 
         /* =========================================================================

@@ -582,71 +582,157 @@ final class HSW_Account_Support {
 	 *
 	 * Served via admin-post.php (not REST) so WordPress cookie authentication
 	 * is respected: a logged-in ticket author or staff member is recognized
-	 * without a nonce, which an  tag or an emailed link cannot provide.
+	 * without a nonce, which an <img> tag or an emailed link cannot provide.
 	 * The ts+sig signature authorizes the link itself (7-day expiry) and the
 	 * logged-in user check authorizes *who* may view it.
 	 *
 	 * @return void
 	 */
 	public function serve_ticket_image() {
-		$ticket_id = (int) ( $_REQUEST['ticket_id'] ?? 0 );
-		$ts        = (int) ( $_REQUEST['ts'] ?? 0 );
-		$sig       = (string) ( $_REQUEST['sig'] ?? '' );
+		$file = $this->validate_ticket_image_request(
+			(int) ( $_REQUEST['ticket_id'] ?? 0 ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- signed URL.
+			(int) ( $_REQUEST['ts'] ?? 0 ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			(string) ( $_REQUEST['sig'] ?? '' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		);
 
-		if ( ! $ts || ! $sig || ! $this->verify_ticket_image_sign( $ticket_id, $ts, $sig ) ) {
-			status_header( 403 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_bad_sign', 'message' => 'invalid or expired image link', 'data' => array( 'status' => 403 ) ) );
+		if ( is_wp_error( $file ) ) {
+			$status = (int) ( $file->get_error_data()['status'] ?? 403 );
+			status_header( $status );
+			nocache_headers();
+			header( 'Content-Type: application/json; charset=UTF-8' );
+			echo wp_json_encode(
+				array(
+					'code'    => $file->get_error_code(),
+					'message' => $file->get_error_message(),
+					'data'    => array( 'status' => $status ),
+				)
+			);
 			exit;
 		}
+
+		$this->stream_ticket_image( (string) $file );
+		exit;
+	}
+
+	/**
+	 * Decide whether a signed image request may be answered.
+	 *
+	 * Keeping the checks here (instead of inline in the response) is what makes
+	 * them testable without a browser: `tests/qa/ticket-image-wp.php` asserts
+	 * every allow and deny path.
+	 *
+	 * @param int    $ticket_id Ticket.
+	 * @param int    $ts        Timestamp from the link.
+	 * @param string $sig       Signature from the link.
+	 * @return string|WP_Error Absolute image path, or why it may not be served.
+	 */
+	private function validate_ticket_image_request( $ticket_id, $ts, $sig ) {
+		if ( ! $ts || '' === $sig || ! $this->verify_ticket_image_sign( $ticket_id, $ts, $sig ) ) {
+			return new WP_Error( 'hsw_image_bad_sign', 'invalid or expired image link', array( 'status' => 403 ) );
+		}
 		if ( time() - $ts > 7 * DAY_IN_SECONDS ) {
-			status_header( 403 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_expired', 'message' => 'image link expired', 'data' => array( 'status' => 403 ) ) );
-			exit;
+			return new WP_Error( 'hsw_image_expired', 'image link expired', array( 'status' => 403 ) );
 		}
 
 		$ticket = get_post( $ticket_id );
 		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type ) {
-			status_header( 404 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_ticket', 'message' => 'ticket not found', 'data' => array( 'status' => 404 ) ) );
-			exit;
+			return new WP_Error( 'hsw_image_ticket', 'ticket not found', array( 'status' => 404 ) );
 		}
 
+		/* Owner or shop staff only. `edit_posts` is not enough: it would let any
+		   author read every customer's screenshot. */
 		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			status_header( 403 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_forbidden', 'message' => 'forbidden', 'data' => array( 'status' => 403 ) ) );
-			exit;
-		}
-		if ( (int) $ticket->post_author !== $user_id && ! user_can( $user_id, 'manage_woocommerce' ) ) {
-			status_header( 403 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_forbidden', 'message' => 'forbidden', 'data' => array( 'status' => 403 ) ) );
-			exit;
+		if ( ! $user_id || ( (int) $ticket->post_author !== $user_id && ! user_can( $user_id, 'manage_woocommerce' ) ) ) {
+			return new WP_Error( 'hsw_image_forbidden', 'forbidden', array( 'status' => 403 ) );
 		}
 
 		$path = (string) get_post_meta( $ticket_id, self::IMAGE_PATH_META, true );
-		if ( ! $path ) {
-			status_header( 404 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_missing', 'message' => 'no image attached', 'data' => array( 'status' => 404 ) ) );
-			exit;
+		if ( '' === $path ) {
+			return new WP_Error( 'hsw_image_missing', 'no image attached', array( 'status' => 404 ) );
 		}
 
-		$file = WP_CONTENT_DIR . '/uploads/' . ltrim( $path, '/' );
-		if ( ! is_file( $file ) || ! is_readable( $file ) ) {
-			status_header( 404 );
-			echo wp_json_encode( array( 'code' => 'hsw_image_missing', 'message' => 'image file not found', 'data' => array( 'status' => 404 ) ) );
-			exit;
+		$file = $this->ticket_image_file( $path );
+		if ( '' === $file ) {
+			return new WP_Error( 'hsw_image_missing', 'image file not found', array( 'status' => 404 ) );
 		}
 
-		$mime = wp_check_filetype( $file );
-		$mime = empty( $mime['type'] ) ? 'application/octet-stream' : $mime['type'];
+		return $file;
+	}
 
+	/**
+	 * Send the image bytes. The link is private, so every cache must skip it.
+	 *
+	 * @param string $file Absolute path.
+	 * @return void
+	 */
+	private function stream_ticket_image( $file ) {
+		$type = wp_check_filetype( $file );
+		$mime = empty( $type['type'] ) ? 'application/octet-stream' : $type['type'];
+		$name = str_replace( '"', '', sanitize_file_name( wp_basename( $file ) ) );
+
+		nocache_headers();
 		header( 'Content-Type: ' . $mime );
-		header( 'Content-Length: ' . filesize( $file ) );
-		header( 'Cache-Control: private, max-age=' . ( 7 * DAY_IN_SECONDS ) );
+		header( 'Content-Length: ' . (string) filesize( $file ) );
 		header( 'X-Content-Type-Options: nosniff' );
-		header( 'Content-Disposition: inline; filename="' . esc_html( wp_basename( $path ) ) . '"' );
-		readfile( $file ); // phpcs:ignore WordPress.Security.SafeIO -- path validated above and comes from post meta.
-		exit;
+		header( 'Content-Disposition: inline; filename="' . $name . '"' );
+		readfile( $file ); // phpcs:ignore WordPress.Security.SafeIO -- path comes from post meta through ticket_image_file().
+	}
+
+	/**
+	 * Absolute path of a ticket image, newest storage first.
+	 *
+	 * `wp_upload_dir()` is used because the uploads folder is configurable;
+	 * sites that move it (this shop keeps it outside wp-content) would otherwise
+	 * store screenshots where no backup and no retention job looks. The legacy
+	 * `wp-content/uploads` location is still searched so images stored by
+	 * 1.11.273 and earlier keep working.
+	 *
+	 * @param string $path Relative path stored in post meta.
+	 * @return string Absolute path, empty when the file is missing.
+	 */
+	private function ticket_image_file( $path ) {
+		$path = ltrim( (string) $path, '/' );
+		if ( '' === $path || false !== strpos( $path, '..' ) ) {
+			return '';
+		}
+
+		foreach ( $this->ticket_image_bases() as $base ) {
+			$file = trailingslashit( $base ) . $path;
+			if ( is_file( $file ) && is_readable( $file ) ) {
+				return $file;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Uploads roots that may hold ticket images.
+	 *
+	 * @return string[]
+	 */
+	private function ticket_image_bases() {
+		$bases = array( $this->ticket_image_base() );
+		$legacy = untrailingslashit( WP_CONTENT_DIR ) . '/uploads';
+		if ( ! in_array( $legacy, $bases, true ) ) {
+			$bases[] = $legacy;
+		}
+
+		return $bases;
+	}
+
+	/**
+	 * Uploads root for new ticket images.
+	 *
+	 * @return string
+	 */
+	private function ticket_image_base() {
+		$uploads = wp_upload_dir( null, false );
+		if ( empty( $uploads['error'] ) && ! empty( $uploads['basedir'] ) ) {
+			return untrailingslashit( $uploads['basedir'] );
+		}
+
+		return untrailingslashit( WP_CONTENT_DIR ) . '/uploads';
 	}
 
 	/**
@@ -1637,24 +1723,18 @@ final class HSW_Account_Support {
 	}
 
 	/**
-	 * Store the screenshot the customer attached to the modal.
-	 *
-	 * The browser already downscaled it, so this only guards against a wrong
-	 * type or a runaway size. A missing file is optional, but an attempted
-	 * upload that fails must be reported to the customer.
-	 *
-	 * @param int $ticket_id Parent ticket.
-	 * @return int|WP_Error Attachment ID, 0 if absent, or upload error.
-	 */
-	/**
 	 * Store the screenshot the customer attached to the modal outside the public
 	 * Media Library.
 	 *
-	 * Images used to go through `media_handle_upload()`, which publishes them in
-	 * `wp-content/uploads/{year}/{month}/` with a guessable URL and no access
-	 * control. They now land in `wp-content/uploads/hsw-ticket-images/<ticket>/`
-	 * behind an `.htaccess` `deny from all` rule and are only served through the
-	 * signed `hsw/v1/tickets/{id}/image` endpoint after a capability check.
+	 * Images used to go through `media_handle_upload()`, which publishes them
+	 * with a guessable URL and no access control. They now land in
+	 * `<uploads>/hsw-ticket-images/<ticket>/` (resolved with `wp_upload_dir()`)
+	 * behind an Apache `deny from all` rule, and are only served through the
+	 * signed admin-post endpoint after a capability check.
+	 *
+	 * The browser already downscaled the file, so this only guards against a
+	 * wrong type or a runaway size. A missing file is optional, but an attempted
+	 * upload that fails must be reported to the customer.
 	 *
 	 * @param int $ticket_id Parent ticket.
 	 * @return string|int|WP_Error Relative upload path, 0 if absent, or upload error.
@@ -1690,8 +1770,8 @@ final class HSW_Account_Support {
 			return new WP_Error( 'hsw_ticket_image_type', 'Invalid image type.' );
 		}
 
-		$dir   = WP_CONTENT_DIR . '/uploads/hsw-ticket-images/' . (int) $ticket_id . '/';
-		$name  = wp_unique_filename( $dir, wp_basename( (string) $file['name'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- name validated above.
+		$dir   = trailingslashit( $this->ticket_image_base() ) . 'hsw-ticket-images/' . (int) $ticket_id . '/';
+		$name  = wp_unique_filename( $dir, wp_generate_password( 12, false ) . '-' . sanitize_file_name( wp_basename( (string) $file['name'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- name sanitized above.
 		if ( ! @mkdir( $dir, 0750, true ) && ! is_dir( $dir ) ) {
 			return new WP_Error( 'hsw_ticket_image_upload', __( 'Could not create the upload directory.', 'hamishop-elementor-widgets' ) );
 		}
@@ -1701,7 +1781,8 @@ final class HSW_Account_Support {
 		}
 		@chmod( $dir . $name, 0640 );
 
-		/* Direct access is denied by the .htaccess dropped in the parent directory. */
+		/* Apache-only extra fence; the real gate is the signed link plus the
+		   unguessable file name, because nginx ignores .htaccess. */
 		$this->protect_image_dir();
 
 		$path = 'hsw-ticket-images/' . (int) $ticket_id . '/' . $name;
@@ -1713,8 +1794,7 @@ final class HSW_Account_Support {
 	}
 
 	/**
-	 * Make the protected ticket-image directory un-reachable directly and only
-	 * servable through the signed endpoint.
+	 * Make the protected ticket-image directory un-reachable directly on Apache.
 	 *
 	 * @return void
 	 */
@@ -1725,7 +1805,7 @@ final class HSW_Account_Support {
 		}
 		$done = true;
 
-		$dir = WP_CONTENT_DIR . '/uploads/hsw-ticket-images';
+		$dir = trailingslashit( $this->ticket_image_base() ) . 'hsw-ticket-images';
 		if ( ! @mkdir( $dir, 0750, true ) && ! is_dir( $dir ) ) {
 			return;
 		}
@@ -1734,8 +1814,10 @@ final class HSW_Account_Support {
 		$htaccess = $dir . '/.htaccess';
 		if ( ! file_exists( $htaccess ) ) {
 			$content = <<<'HTACCESS'
-# HamiShop: ticket images are not public. Served only through hsw/v1/tickets/{id}/image
-# after a capability + signature check. Deny direct access.
+# HamiShop: ticket images are not public. Served only through
+# admin-post.php?action=hsw_ticket_image after a capability + signature check.
+# Deny direct access. nginx ignores this file: on nginx the host must also deny
+# the folder, e.g.  location ~ ^/(wp-content/)?uploads/hsw-ticket-images/ { deny all; }
 <IfModule mod_authz_core.c>
     Require all denied
 </IfModule>
