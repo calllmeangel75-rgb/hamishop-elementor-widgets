@@ -247,6 +247,24 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/ticket-view-authorization-wp.php
 
+      # The image must reach the owner and staff through admin-post.php (REST
+      # cannot authenticate an <img>) and stop everyone else at 403.
+      - name: Ticket image authorization (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/ticket-image-wp.php
+
+      # Analytics plugins listen on the public woocommerce_thankyou hook, which
+      # HamiShop's own confirmation card has to fire exactly once per order.
+      - name: Thank-you hook once per order (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/thankyou-hook-wp.php
+
       - name: Article archive pagination (disposable WordPress)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php
