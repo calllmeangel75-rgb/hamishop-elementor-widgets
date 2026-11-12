@@ -22,6 +22,10 @@ require getenv( 'HSW_WP_LOAD' );
 if ( 'production' === wp_get_environment_type() ) {
 	exit( 2 );
 }
+if ( ! class_exists( '\\Elementor\\Widget_Base' ) ) {
+	fwrite( STDERR, "Elementor is not active; this test needs it.\n" );
+	exit( 2 );
+}
 
 if ( ! class_exists( 'HSW_Order_Auth' ) ) {
 	require_once dirname( __DIR__, 2 ) . '/includes/class-hsw-order-auth.php';
@@ -29,8 +33,30 @@ if ( ! class_exists( 'HSW_Order_Auth' ) ) {
 if ( ! class_exists( 'HSW_Thankyou' ) ) {
 	require_once dirname( __DIR__, 2 ) . '/includes/class-hsw-thankyou.php';
 }
+
+/*
+ * The widget base classes are normally required lazily from
+ * HSW_Plugin::register_widgets() (only when Elementor registers widgets).
+ * This CLI test does not trigger that hook, so load the full inheritance
+ * chain explicitly, in order: Widget_Base -> Cart_Base -> Checkout_Base ->
+ * Pay_Base -> Complete_Base. Requiring only the last file fatals with
+ * "Class HSW_Pay_Base not found".
+ */
+require_once dirname( __DIR__, 2 ) . '/includes/trait-hsw-style-kit.php';
+
+$hsw_chain = array(
+	'class-hsw-widget-base.php',
+	'class-hsw-cart-base.php',
+	'class-hsw-checkout-base.php',
+	'class-hsw-pay-base.php',
+	'class-hsw-complete-base.php',
+);
+foreach ( $hsw_chain as $hsw_file ) {
+	require_once dirname( __DIR__, 2 ) . '/includes/' . $hsw_file;
+}
 if ( ! class_exists( 'HSW_Complete_Base' ) ) {
-	require_once dirname( __DIR__, 2 ) . '/includes/class-hsw-complete-base.php';
+	echo '::error::FAIL HSW_Complete_Base did not load' . PHP_EOL;
+	exit( 1 );
 }
 
 $failed = 0;
