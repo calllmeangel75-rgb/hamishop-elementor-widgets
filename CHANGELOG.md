@@ -6,6 +6,15 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.277] - 2026-11-12
+
+### Fixed
+- **Order access control on `/complete/` and order-received (`HSW_Order_Auth`):** Prevented sensitive order details of registered customers from being viewed by unauthorized key holders. Non-owner visitors must log in or verify the billing email address. Other logged-in customers are strictly forbidden. Guest orders remain viewable with valid order key.
+- **Thankyou hooks security:** `woocommerce_thankyou`, `woocommerce_before_thankyou`, and gateway hooks only execute after order access authorization is confirmed.
+
+### Added
+- `includes/class-hsw-order-auth.php` and `tests/qa/order-auth-wp.php`.
+
 ## [1.11.276] — 2026-11-12 (pre-release)
 
 ### Fixed

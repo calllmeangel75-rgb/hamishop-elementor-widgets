@@ -67,27 +67,64 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                 return $this->checkout_url();
         }
 
+        /** @var string|null Cached auth status for order-received. */
+        private $order_received_status_cache = null;
+
+        /** @var WC_Order|false|null Cached raw order. */
+        private $order_received_raw_cache = null;
+
         /**
-         * The order behind WooCommerce's order-received endpoint — only when the
-         * visitor may see it (the logged-in owner or a valid order key).
+         * Resolve the raw order on order-received before authorization.
          *
          * @return WC_Order|false
          */
-        protected function order_received_order() {
+        protected function raw_order_received_order() {
+                if ( null !== $this->order_received_raw_cache ) {
+                        return $this->order_received_raw_cache;
+                }
                 if ( ! function_exists( 'is_wc_endpoint_url' ) || ! is_wc_endpoint_url( 'order-received' ) || ! function_exists( 'wc_get_order' ) ) {
+                        $this->order_received_raw_cache = false;
                         return false;
                 }
                 $order_id = absint( get_query_var( 'order-received' ) );
                 $order    = $order_id ? wc_get_order( $order_id ) : false;
-                if ( ! $order instanceof WC_Order ) {
+                $this->order_received_raw_cache = ( $order instanceof WC_Order ) ? $order : false;
+                return $this->order_received_raw_cache;
+        }
+
+        /**
+         * Auth status on order-received.
+         *
+         * @return string
+         */
+        protected function order_received_auth_status() {
+                if ( null !== $this->order_received_status_cache ) {
+                        return $this->order_received_status_cache;
+                }
+                $raw = $this->raw_order_received_order();
+                if ( ! $raw instanceof WC_Order ) {
+                        $this->order_received_status_cache = class_exists( 'HSW_Order_Auth' ) ? HSW_Order_Auth::STATUS_DENIED : 'denied';
+                        return $this->order_received_status_cache;
+                }
+                $this->order_received_status_cache = class_exists( 'HSW_Order_Auth' )
+                        ? HSW_Order_Auth::check_order_access( $raw )
+                        : 'granted';
+                return $this->order_received_status_cache;
+        }
+
+        /**
+         * The order behind WooCommerce's order-received endpoint — only when the
+         * visitor is authorized (valid key for guest, logged-in owner, or verified).
+         *
+         * @return WC_Order|false
+         */
+        protected function order_received_order() {
+                $raw = $this->raw_order_received_order();
+                if ( ! $raw instanceof WC_Order ) {
                         return false;
                 }
-                $key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                if ( '' !== $key ) {
-                        return $order->key_is_valid( $key ) ? $order : false;
-                }
-                if ( is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id() ) {
-                        return $order;
+                if ( 'granted' === $this->order_received_auth_status() ) {
+                        return $raw;
                 }
                 return false;
         }
@@ -98,10 +135,47 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
          * @param WC_Order|false $order Order.
          */
         protected function render_order_received( $order ) {
-                $shop = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+                $shop   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+                $status = $this->order_received_auth_status();
 
                 echo '<section class="hsw-done-final">';
                 echo '<div class="hsw-done-final__card">';
+
+                if ( 'need_verification' === $status ) {
+                        $raw      = $this->raw_order_received_order();
+                        $order_id = $raw instanceof WC_Order ? (int) $raw->get_id() : 0;
+                        $account  = function_exists( 'wc_get_page_permalink' ) && function_exists( 'wc_get_page_id' ) && 0 < (int) wc_get_page_id( 'myaccount' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/' );
+                        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+                                $current_url = home_url( add_query_arg( array() ) );
+                                $account     = add_query_arg( array( 'redirect_to' => $current_url, 'redirect' => $current_url ), $account );
+                        }
+                        $error = class_exists( 'HSW_Order_Auth' ) ? HSW_Order_Auth::get_submission_error() : null;
+
+                        echo HSW_Helpers::icon( 'mail', 'hsw-done-final__ic is-verify', true );
+                        echo '<h2 class="hsw-done-final__t">' . esc_html__( 'تأیید دسترسی به سفارش', 'hamishop-elementor-widgets' ) . '</h2>';
+                        echo '<p class="hsw-done-final__s">' . esc_html__( 'این سفارش متعلق به یک حساب کاربری ثبت‌شده است. برای مشاهدهٔ جزئیات سفارش، لطفاً نشانی ایمیل صورتحساب سفارش را وارد کنید یا وارد حساب خود شوید.', 'hamishop-elementor-widgets' ) . '</p>';
+
+                        if ( ! empty( $error ) ) {
+                                echo '<div class="hsw-cdhero__verify-error" role="alert">' . esc_html( $error ) . '</div>';
+                        }
+
+                        echo '<form method="post" class="hsw-cdhero__verify-form">';
+                        wp_nonce_field( 'hsw_verify_order_' . $order_id, 'hsw_order_nonce' );
+                        echo '<div class="hsw-cdhero__verify-row">';
+                        echo '<input type="email" name="hsw_verify_email" class="hsw-cdhero__input" placeholder="' . esc_attr__( 'نشانی ایمیل صورتحساب (مثلاً user@example.com)', 'hamishop-elementor-widgets' ) . '" required autocomplete="email" />';
+                        echo '<button type="submit" class="hsw-done-final__btn is-primary">' . esc_html__( 'تأیید و مشاهدهٔ سفارش', 'hamishop-elementor-widgets' ) . '</button>';
+                        echo '</div>';
+                        echo '</form>';
+
+                        echo '<div class="hsw-done-final__acts">';
+                        echo '<a class="hsw-done-final__btn is-ghost" href="' . esc_url( $account ) . '">' . esc_html__( 'ورود به حساب کاربری', 'hamishop-elementor-widgets' ) . '</a>';
+                        echo '<a class="hsw-done-final__btn is-ghost" href="' . esc_url( $shop ) . '">' . esc_html__( 'ادامه خرید', 'hamishop-elementor-widgets' ) . '</a>';
+                        echo '</div>';
+                        echo '</div>';
+                        echo '</section>';
+                        return;
+                }
+
                 echo HSW_Helpers::icon( 'check_circle', 'hsw-done-final__ic', true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                 echo '<h2 class="hsw-done-final__t">' . esc_html__( 'سفارش شما ثبت شد', 'hamishop-elementor-widgets' ) . '</h2>';
 

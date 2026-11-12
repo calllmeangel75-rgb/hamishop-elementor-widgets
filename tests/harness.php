@@ -48,6 +48,7 @@ if ( ! function_exists( 'add_filter' ) ) {
 $files = array(
 	/* ---- plugins_loaded: pure WP/WC classes ---- */
 	'includes/class-hsw-helpers.php',
+	'includes/class-hsw-order-auth.php',
 	'includes/class-hsw-composite.php',
 	'includes/class-hsw-products.php',
 	'includes/class-hsw-rest.php',

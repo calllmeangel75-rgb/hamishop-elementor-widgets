@@ -674,11 +674,13 @@ msgstr ""
 #: includes/class-hsw-assets.php:933
 #: includes/class-hsw-assets.php:954
 #: includes/class-hsw-assets.php:982
-#: includes/class-hsw-checkout-base.php:159
+#: includes/class-hsw-checkout-base.php:172
+#: includes/class-hsw-checkout-base.php:233
 #: widgets/class-hsw-widget-complete-actions.php:95
 #: widgets/class-hsw-widget-complete-actions.php:260
 #: widgets/class-hsw-widget-complete-hero.php:222
-#: widgets/class-hsw-widget-complete-hero.php:348
+#: widgets/class-hsw-widget-complete-hero.php:307
+#: widgets/class-hsw-widget-complete-hero.php:396
 msgid "ادامه خرید"
 msgstr ""
 
@@ -850,7 +852,7 @@ msgstr ""
 msgid "از حساب خود خارج شده‌اید. %s"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:109
+#: includes/class-hsw-checkout-base.php:183
 msgid "از خرید شما سپاسگزاریم؛ جزئیات سفارش برای شما ثبت شد."
 msgstr ""
 
@@ -1846,6 +1848,11 @@ msgstr ""
 msgid "این سفارش در حساب شما وجود ندارد."
 msgstr ""
 
+#: includes/class-hsw-checkout-base.php:156
+#: widgets/class-hsw-widget-complete-hero.php:291
+msgid "این سفارش متعلق به یک حساب کاربری ثبت‌شده است. برای مشاهدهٔ جزئیات سفارش، لطفاً نشانی ایمیل صورتحساب سفارش را وارد کنید یا وارد حساب خود شوید."
+msgstr ""
+
 #: widgets/class-hsw-widget-checkout-address.php:420
 msgid "این سفارش محصول دانلودی است و ارسال فیزیکی ندارد؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود."
 msgstr ""
@@ -2362,7 +2369,7 @@ msgstr ""
 msgid "برای انتخاب دقیق‌تر می‌توانید با فیلترهای همین صفحه، نتایج را بر اساس ویژگی‌های واقعی محصولات محدود کنید:"
 msgstr ""
 
-#: includes/class-hsw-setup-pages.php:237
+#: includes/class-hsw-setup-pages.php:238
 msgid "برای انجام این کار دسترسی مدیریت لازم است."
 msgstr ""
 
@@ -2946,7 +2953,7 @@ msgstr ""
 msgid "بعد از متن"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:463
+#: includes/class-hsw-complete-route.php:466
 msgid "بعد از پرداخت (و بازگشت از درگاه)، مشتری به این صفحه هدایت می‌شود و شماره و جزئیات سفارش را می‌بیند. خالی = رفتار پیش‌فرض ووکامرس."
 msgstr ""
 
@@ -3076,6 +3083,11 @@ msgstr ""
 msgid "تأیید دریافت وجه برای امتیاز"
 msgstr ""
 
+#: includes/class-hsw-checkout-base.php:155
+#: widgets/class-hsw-widget-complete-hero.php:290
+msgid "تأیید دسترسی به سفارش"
+msgstr ""
+
 #: includes/class-hsw-account-auth.php:2460
 msgid "تأیید دوعاملی"
 msgstr ""
@@ -3086,6 +3098,11 @@ msgstr ""
 
 #: includes/class-hsw-account-auth.php:2444
 msgid "تأیید و فعال‌سازی"
+msgstr ""
+
+#: includes/class-hsw-checkout-base.php:166
+#: widgets/class-hsw-widget-complete-hero.php:301
+msgid "تأیید و مشاهدهٔ سفارش"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:2365
@@ -3144,7 +3161,7 @@ msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:131
 #: widgets/class-hsw-widget-complete-hero.php:143
-#: widgets/class-hsw-widget-complete-hero.php:301
+#: widgets/class-hsw-widget-complete-hero.php:349
 msgid "تاریخ ثبت"
 msgstr ""
 
@@ -4741,31 +4758,31 @@ msgstr ""
 msgid "حالت‌های ویژه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:521
+#: includes/class-hsw-plugin.php:522
 msgid "حامی — هدر و ناوبری"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:525
+#: includes/class-hsw-plugin.php:526
 msgid "حامی — ویجت‌های آرشیو محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:524
+#: includes/class-hsw-plugin.php:525
 msgid "حامی — ویجت‌های سبد خرید و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:522
+#: includes/class-hsw-plugin.php:523
 msgid "حامی — ویجت‌های صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:523
+#: includes/class-hsw-plugin.php:524
 msgid "حامی — ویجت‌های لوپ محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:527
+#: includes/class-hsw-plugin.php:528
 msgid "حامی — ویجت‌های مجله و وبلاگ"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:526
+#: includes/class-hsw-plugin.php:527
 msgid "حامی — پنل حساب کاربری"
 msgstr ""
 
@@ -4935,7 +4952,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:1340
 #: includes/class-hsw-account.php:1356
-#: includes/class-hsw-checkout-base.php:157
+#: includes/class-hsw-checkout-base.php:231
 msgid "حساب کاربری من"
 msgstr ""
 
@@ -7418,7 +7435,7 @@ msgstr ""
 msgid "روش ورود دوعاملی"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:129
+#: includes/class-hsw-checkout-base.php:203
 #: widgets/class-hsw-widget-complete-order.php:157
 #: widgets/class-hsw-widget-complete-order.php:342
 msgid "روش پرداخت"
@@ -7837,11 +7854,11 @@ msgid "سفارش شما از سقف خرید {threshold} تومان عبور ک
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:66
-#: widgets/class-hsw-widget-complete-hero.php:279
+#: widgets/class-hsw-widget-complete-hero.php:327
 msgid "سفارش شما با موفقیت ثبت شد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:106
+#: includes/class-hsw-checkout-base.php:180
 msgid "سفارش شما ثبت شد"
 msgstr ""
 
@@ -7858,11 +7875,11 @@ msgid "سفارش پیدا نشد"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:184
-#: widgets/class-hsw-widget-complete-hero.php:344
+#: widgets/class-hsw-widget-complete-hero.php:392
 msgid "سفارش یافت نشد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:150
+#: includes/class-hsw-checkout-base.php:224
 msgid "سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است."
 msgstr ""
 
@@ -8170,10 +8187,10 @@ msgstr ""
 msgid "شمارهٔ تماس"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:113
+#: includes/class-hsw-checkout-base.php:187
 #: widgets/class-hsw-widget-complete-hero.php:111
 #: widgets/class-hsw-widget-complete-hero.php:123
-#: widgets/class-hsw-widget-complete-hero.php:293
+#: widgets/class-hsw-widget-complete-hero.php:341
 msgid "شمارهٔ سفارش"
 msgstr ""
 
@@ -8368,7 +8385,7 @@ msgstr ""
 msgid "صفحهٔ تکمیل خرید"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:462
+#: includes/class-hsw-complete-route.php:465
 msgid "صفحهٔ تکمیل خرید (مرحلهٔ ۴)"
 msgstr ""
 
@@ -8396,7 +8413,7 @@ msgstr ""
 msgid "صفحهٔ پرداخت"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:452
+#: includes/class-hsw-complete-route.php:455
 msgid "صفحهٔ پرداخت (مرحلهٔ ۳)"
 msgstr ""
 
@@ -8417,7 +8434,7 @@ msgstr ""
 msgid "صفحه‌ای که دنبالش بودید پیدا نشد!"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:453
+#: includes/class-hsw-complete-route.php:456
 msgid "صفحه‌ای که ویجت «صفحه کامل پرداخت — حامی» دارد. دکمهٔ «ادامه و ورود به مرحله پرداخت» در صفحهٔ تسویه به این صفحه می‌رود. خالی = همان صفحهٔ تسویه ووکامرس."
 msgstr ""
 
@@ -10234,7 +10251,7 @@ msgid "مبلغ کالاها ({count} قلم)"
 msgstr ""
 
 #: includes/class-hsw-account.php:2212
-#: includes/class-hsw-checkout-base.php:121
+#: includes/class-hsw-checkout-base.php:195
 #: includes/class-hsw-invoice.php:328
 #: includes/class-hsw-invoice.php:377
 #: widgets/class-hsw-widget-complete-order.php:136
@@ -11240,11 +11257,11 @@ msgstr ""
 msgid "مسیر خانه، فروشگاه و دسته‌بندی محصول."
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:446
+#: includes/class-hsw-complete-route.php:449
 msgid "مسیر خرید (حامی)"
 msgstr ""
 
-#: includes/class-hsw-complete-route.php:449
+#: includes/class-hsw-complete-route.php:452
 msgid "مسیر خرید با ویجت‌های جامع حامی: سبد خرید → تسویه حساب (اطلاعات ارسال) → پرداخت → تکمیل خرید. برای هر مرحله یک صفحه بسازید و ویجت جامع همان مرحله را داخل آن قرار دهید."
 msgstr ""
 
@@ -11353,7 +11370,7 @@ msgstr ""
 msgid "مشاهده همه"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:155
+#: includes/class-hsw-checkout-base.php:229
 msgid "مشاهدهٔ سفارش"
 msgstr ""
 
@@ -11976,6 +11993,15 @@ msgstr ""
 msgid "نشانی /%1$s/ در اختیار صفحهٔ دیگری است؛ صفحه با نشانی /%2$s/ ساخته می‌شود تا آن صفحه دست‌نخورده بماند."
 msgstr ""
 
+#: includes/class-hsw-checkout-base.php:165
+#: widgets/class-hsw-widget-complete-hero.php:300
+msgid "نشانی ایمیل صورتحساب (مثلاً user@example.com)"
+msgstr ""
+
+#: includes/class-hsw-order-auth.php:246
+msgid "نشانی ایمیل وارد شده با ایمیل صورتحساب این سفارش مطابقت ندارد."
+msgstr ""
+
 #: widgets/class-hsw-widget-complete-delivery.php:103
 #: widgets/class-hsw-widget-complete-delivery.php:181
 msgid "نشانی تحویل"
@@ -12028,6 +12054,10 @@ msgstr ""
 #: widgets/class-hsw-widget-post-page.php:914
 #: widgets/class-hsw-widget-post-page.php:975
 msgid "نشان‌کردن در همین مرورگر"
+msgstr ""
+
+#: includes/class-hsw-order-auth.php:233
+msgid "نشست امنیتی منقضی شده است. لطفاً صفحه را تازه‌سازی و دوباره امتحان کنید."
 msgstr ""
 
 #: includes/class-hsw-checkout-complete.php:56
@@ -12890,7 +12920,7 @@ msgid "ورود / حساب کاربری"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:203
-#: widgets/class-hsw-widget-complete-hero.php:347
+#: widgets/class-hsw-widget-complete-hero.php:395
 msgid "ورود / مشاهدهٔ سفارش‌ها"
 msgstr ""
 
@@ -12929,6 +12959,11 @@ msgstr ""
 #: includes/class-hsw-account.php:3626
 #: includes/class-hsw-invoice.php:146
 msgid "ورود به حساب"
+msgstr ""
+
+#: includes/class-hsw-checkout-base.php:171
+#: widgets/class-hsw-widget-complete-hero.php:306
+msgid "ورود به حساب کاربری"
 msgstr ""
 
 #: includes/class-hsw-widget-manager.php:1466
@@ -13021,10 +13056,10 @@ msgstr ""
 msgid "وضعیت باز شدن شاخه‌ها"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:117
+#: includes/class-hsw-checkout-base.php:191
 #: widgets/class-hsw-widget-complete-hero.php:151
 #: widgets/class-hsw-widget-complete-hero.php:163
-#: widgets/class-hsw-widget-complete-hero.php:309
+#: widgets/class-hsw-widget-complete-hero.php:357
 msgid "وضعیت سفارش"
 msgstr ""
 

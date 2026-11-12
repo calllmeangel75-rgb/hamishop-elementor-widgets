@@ -29,14 +29,69 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
         return array();
     }
 
+    /** @var string|null Cached auth status ('granted', 'need_verification', 'denied', 'forbidden'). */
+    private $auth_status_cache = null;
+
+    /** @var WC_Order|false|null Cached raw order before auth check. */
+    private $raw_order_cache = null;
+
     /* =========================================================================
      *  ORDER RESOLUTION
      * ====================================================================== */
 
     /**
+     * Resolve the raw WC_Order from the request before access evaluation.
+     *
+     * @return WC_Order|false
+     */
+    public function raw_completion_order() {
+        if ( null !== $this->raw_order_cache ) {
+            return $this->raw_order_cache;
+        }
+        if ( ! function_exists( 'wc_get_order' ) ) {
+            $this->raw_order_cache = false;
+            return false;
+        }
+
+        $order = false;
+        if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) ) {
+            /* Classic flow: checkout page + order-received endpoint. */
+            $order_id = absint( get_query_var( 'order-received' ) );
+            if ( $order_id ) {
+                $order = wc_get_order( $order_id );
+            }
+        } elseif ( isset( $_GET['order'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            /* Standalone completion page: ?order={id}&key={key}. */
+            $order = wc_get_order( absint( wp_unslash( $_GET['order'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        }
+
+        $this->raw_order_cache = ( $order instanceof WC_Order ) ? $order : false;
+        return $this->raw_order_cache;
+    }
+
+    /**
+     * Auth status for this completion view.
+     *
+     * @return string One of HSW_Order_Auth::STATUS_* constants.
+     */
+    public function completion_auth_status() {
+        if ( null !== $this->auth_status_cache ) {
+            return $this->auth_status_cache;
+        }
+        $raw = $this->raw_completion_order();
+        if ( ! $raw instanceof WC_Order ) {
+            $this->auth_status_cache = class_exists( 'HSW_Order_Auth' ) ? HSW_Order_Auth::STATUS_DENIED : 'denied';
+            return $this->auth_status_cache;
+        }
+        $this->auth_status_cache = class_exists( 'HSW_Order_Auth' )
+            ? HSW_Order_Auth::check_order_access( $raw )
+            : 'granted';
+        return $this->auth_status_cache;
+    }
+
+    /**
      * The order this completion view must show, or false.
-     * Same access rules as WooCommerce's own thank-you: a valid order key
-     * (guests included) or the logged-in owner.
+     * Only returns the order when access is GRANTED (passed auth / verification).
      *
      * @return WC_Order|false
      */
@@ -54,42 +109,26 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
      * @return WC_Order|false
      */
     private function resolve_completion_order() {
-        if ( ! function_exists( 'wc_get_order' ) ) {
-            return false;
-        }
-
-        $order = false;
-        if ( function_exists( 'is_wc_endpoint_url' ) && is_wc_endpoint_url( 'order-received' ) ) {
-            /* Classic flow: checkout page + order-received endpoint. */
-            $order_id = absint( get_query_var( 'order-received' ) );
-            if ( $order_id ) {
-                $order = wc_get_order( $order_id );
-            }
-        } elseif ( isset( $_GET['order'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- order key is the auth.
-            /* Standalone completion page: ?order={id}&key={key}. */
-            $order = wc_get_order( absint( wp_unslash( $_GET['order'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        }
-
+        $order = $this->raw_completion_order();
         if ( ! $order instanceof WC_Order ) {
             return false;
         }
-
-        $key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if ( '' !== $key ) {
-            return $order->key_is_valid( $key ) ? $order : false;
-        }
-        if ( is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id() ) {
+        $status = $this->completion_auth_status();
+        if ( 'granted' === $status ) {
             return $order;
         }
         return false;
     }
 
     /**
-     * View state of this completion render: 'order' | 'demo' | 'none'.
+     * View state of this completion render: 'order' | 'verify' | 'demo' | 'none'.
      */
     protected function complete_state() {
         if ( false !== $this->completion_order() ) {
             return 'order';
+        }
+        if ( 'need_verification' === $this->completion_auth_status() ) {
+            return 'verify';
         }
         return $this->is_editing() ? 'demo' : 'none';
     }

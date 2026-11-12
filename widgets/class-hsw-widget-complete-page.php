@@ -91,7 +91,8 @@ class HSW_Widget_Complete_Page extends HSW_Complete_Base {
             $this->print_part( 'hero_', '\HSW_Widget_Complete_Hero' );
         }
 
-        echo '<div class="hsw-cp__body">';
+        if ( false !== $this->completion_order() || 'demo' === $this->complete_state() ) {
+            echo '<div class="hsw-cp__body">';
 
         echo '<div class="hsw-cp__col hsw-cp__col--main">';
         if ( $this->part_on( 'cord_' ) ) {
@@ -112,6 +113,7 @@ class HSW_Widget_Complete_Page extends HSW_Complete_Base {
         echo '</div>';
 
         echo '</div>'; // .hsw-cp__body
+        }
         echo '</div>';
     }
 }

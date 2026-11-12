@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.276
+Stable tag: 1.11.277
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.277 =
+* امنیت و حریم خصوصی: کنترل دسترسی در /complete/ و order-received بر اساس استاندارد ووکامرس؛ سفارش مشتری ثبت‌نام‌شده برای بازدیدکنندهٔ مهمان نیازمند ورود یا تأیید ایمیل صورتحساب است و مشتریان دیگر مسدود می‌شوند.
+* هوک‌های woocommerce_thankyou فقط پس از تأیید موفقیت‌آمیز دسترسی اجرا می‌شوند.
+* تست‌های رگرسیون کامل برای مالک، مهمان با کلید، مشتری دیگر و لینک ایمیل پس از logout در tests/qa/order-auth-wp.php اضافه شد.
 
 = 1.11.276 =
 * تکمیل رفع باگ: هوک‌های تشکر (woocommerce_before_thankyou، woocommerce_thankyou_{method} و woocommerce_thankyou) حالا از یک گارد مشترک و بر اساس شمارهٔ سفارش اجرا می‌شوند؛ در یک درخواست، حتی وقتی کارت تکمیل سفارش و کارت پرداخت هر دو رندر شوند، هر هوک دقیقاً یک بار اجرا می‌شود و روی صفحهٔ بومی order-received ووکامرس دوباره اجرا نمی‌شود.

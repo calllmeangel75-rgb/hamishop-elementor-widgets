@@ -442,6 +442,7 @@ final class HSW_Plugin {
                  */
                 require_once HSW_DIR . 'includes/class-hsw-icon-set.php';
                 require_once HSW_DIR . 'includes/class-hsw-helpers.php';
+		require_once HSW_DIR . 'includes/class-hsw-order-auth.php';
                 require_once HSW_DIR . 'includes/class-hsw-thankyou.php';
                 require_once HSW_DIR . 'includes/class-hsw-header-cascade.php';
                 require_once HSW_DIR . 'includes/class-hsw-cart-drawer.php';

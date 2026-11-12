@@ -392,14 +392,17 @@ final class HSW_Complete_Route {
     }
 
     /**
-     * WooCommerce's own access rules: a valid order key (guests included)
-     * or the logged-in owner.
+     * Order routing check: guests with valid keys and logged-in owners are routed.
+     * Other logged-in customers are not routed (forbidden).
      *
      * @param WC_Order $order Order.
      * @return bool
      */
     private function may_view( $order ) {
-        $key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- order key is the auth.
+        if ( class_exists( 'HSW_Order_Auth' ) ) {
+            return HSW_Order_Auth::can_route( $order );
+        }
+        $key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if ( '' !== $key ) {
             return $order->key_is_valid( $key );
         }

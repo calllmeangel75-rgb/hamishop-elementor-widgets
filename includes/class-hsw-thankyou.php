@@ -55,6 +55,13 @@ if ( ! class_exists( 'HSW_Thankyou' ) ) {
 				return false;
 			}
 
+			/* Only fire if authorized to view this order (in web requests). */
+			if ( $order instanceof WC_Order && class_exists( 'HSW_Order_Auth' ) ) {
+				if ( PHP_SAPI !== 'cli' && ! HSW_Order_Auth::is_authorized( $order ) ) {
+					return false;
+				}
+			}
+
 			self::$fired[ $order_id ] = true;
 			$method = $order instanceof WC_Order ? (string) $order->get_payment_method() : '';
 

@@ -91,6 +91,7 @@ final class HSW_Setup_Pages {
 					'includes/class-hsw-cart-base.php',
 					'includes/class-hsw-checkout-base.php',
 					'includes/class-hsw-pay-base.php',
+					'includes/class-hsw-order-auth.php',
 					'includes/class-hsw-complete-base.php',
 				),
 				'shortcode' => '[hamishop_complete]',

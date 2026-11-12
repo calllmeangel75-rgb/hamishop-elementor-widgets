@@ -253,12 +253,60 @@ class HSW_Widget_Complete_Hero extends HSW_Complete_Base {
         echo '<section class="' . esc_attr( $this->root_class( 'cdhero' ) ) . '">';
 
         if ( null === $data ) {
-            $this->render_not_found();
+            if ( 'verify' === $this->complete_state() ) {
+                $this->render_verification_prompt();
+            } else {
+                $this->render_not_found();
+            }
         } else {
             $this->render_success( $data );
         }
 
         echo '</section>';
+    }
+
+    /**
+     * Billing email verification / login prompt for registered customer orders.
+     */
+    protected function render_verification_prompt() {
+        $order = $this->raw_completion_order();
+        if ( ! $order instanceof WC_Order ) {
+            $this->render_not_found();
+            return;
+        }
+
+        $order_id = (int) $order->get_id();
+        $account  = $this->account_url();
+
+        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+            $current_url = home_url( add_query_arg( array() ) );
+            $account     = add_query_arg( array( 'redirect_to' => $current_url, 'redirect' => $current_url ), $account );
+        }
+
+        $error = class_exists( 'HSW_Order_Auth' ) ? HSW_Order_Auth::get_submission_error() : null;
+
+        echo '<div class="hsw-cdhero__card is-verify">';
+        echo '<span class="hsw-cdhero__ring is-verify">' . HSW_Helpers::icon( 'mail', 'is-fill' ) . '</span>';
+        echo '<h2 class="hsw-cdhero__t">' . esc_html__( 'تأیید دسترسی به سفارش', 'hamishop-elementor-widgets' ) . '</h2>';
+        echo '<p class="hsw-cdhero__s">' . esc_html__( 'این سفارش متعلق به یک حساب کاربری ثبت‌شده است. برای مشاهدهٔ جزئیات سفارش، لطفاً نشانی ایمیل صورتحساب سفارش را وارد کنید یا وارد حساب خود شوید.', 'hamishop-elementor-widgets' ) . '</p>';
+
+        if ( ! empty( $error ) ) {
+            echo '<div class="hsw-cdhero__verify-error" role="alert">' . esc_html( $error ) . '</div>';
+        }
+
+        echo '<form method="post" class="hsw-cdhero__verify-form">';
+        wp_nonce_field( 'hsw_verify_order_' . $order_id, 'hsw_order_nonce' );
+        echo '<div class="hsw-cdhero__verify-row">';
+        echo '<input type="email" name="hsw_verify_email" class="hsw-cdhero__input" placeholder="' . esc_attr__( 'نشانی ایمیل صورتحساب (مثلاً user@example.com)', 'hamishop-elementor-widgets' ) . '" required autocomplete="email" />';
+        echo '<button type="submit" class="hsw-cdhero__btn is-primary">' . esc_html__( 'تأیید و مشاهدهٔ سفارش', 'hamishop-elementor-widgets' ) . '</button>';
+        echo '</div>';
+        echo '</form>';
+
+        echo '<div class="hsw-cdhero__acts">';
+        echo '<a class="hsw-cdhero__btn is-ghost" href="' . esc_url( $account ) . '">' . esc_html__( 'ورود به حساب کاربری', 'hamishop-elementor-widgets' ) . '</a>';
+        echo '<a class="hsw-cdhero__btn is-ghost" href="' . esc_url( $this->shop_url() ) . '">' . esc_html__( 'ادامه خرید', 'hamishop-elementor-widgets' ) . '</a>';
+        echo '</div>';
+        echo '</div>';
     }
 
     /**
