@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.273
+Stable tag: 1.11.274
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,11 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.274 =
+* رفع باگ (بحرانی): تصویر تیکت برای هیچ کاربری نمایش داده نمی‌شد؛ سرویس تصویر از مسیر REST به admin-post.php منتقل شد تا صاحب تیکت و ادمین تصویر را ببینند و سایرین ۴۰۳ بگیرند؛ compares امضا با hash_equals.
+* رفع باگ: هوک عمومی woocommerce_thankyou در صفحه‌ی /complete/ اجرا نمی‌شد؛ فقط woocommerce_thankyou_{method} اجرا می‌شد؛ حالا هوک عمومی دقیقاً یک بار برای هر سفارش اجرا می‌شود (گارد static).
+* تمیزی کاراکترهای ناخواسته در Changelog؛ توضیح استمرت notes (claims ۱–۵ از ۷).
 
 = 1.11.273 =
 * نسخه آزمایشی (اصلاح امنیتی): گارد تکرار wp_die در ثبت دیدگاه AJAX؛ محدوده‌های اروانکلود در لیست proxyهای معتبر throttle OTP/IP؛ لیست مجاز (allowlist) برای درگاه‌های شارژ کیف پول؛ عکس‌های تیکت خارج از رسانه عمومی با لینک امضا شده؛ وب‌هوک ایمیل: رمز از هدر X-HSW-Inbound-Secret و مقایسه case-insensitive فرستنده.
