@@ -674,7 +674,7 @@ msgstr ""
 #: includes/class-hsw-assets.php:933
 #: includes/class-hsw-assets.php:954
 #: includes/class-hsw-assets.php:982
-#: includes/class-hsw-checkout-base.php:158
+#: includes/class-hsw-checkout-base.php:159
 #: widgets/class-hsw-widget-complete-actions.php:95
 #: widgets/class-hsw-widget-complete-actions.php:260
 #: widgets/class-hsw-widget-complete-hero.php:222
@@ -1880,7 +1880,7 @@ msgstr ""
 msgid "این فاکتور به‌صورت الکترونیکی و بدون ذخیره‌سازی روی سرور صادر شده است."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:125
+#: includes/class-hsw-account-support.php:126
 msgid "این فهرست فقط عکس‌های ثبت‌شده پس از نصب این قابلیت را نشان می‌دهد؛ وجود عکس در فهرست به معنی بی‌استفاده بودن آن نیست. پیش از حذف از رسانه، استفاده در تیکت‌ها، نوشته‌ها، محصولات و سایر بخش‌ها را بررسی و نسخه پشتیبان تهیه کنید. لینک‌های بیرونی، ایمیل‌ها و نسخه‌های پشتیبان نیز ممکن است از عکس استفاده کنند."
 msgstr ""
 
@@ -2494,7 +2494,7 @@ msgstr ""
 msgid "بردکرامب آرشیو (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:129
+#: includes/class-hsw-account-support.php:130
 msgid "بررسی"
 msgstr ""
 
@@ -2503,7 +2503,7 @@ msgstr ""
 msgid "بررسی تخصصی کالا"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:134
+#: includes/class-hsw-account-support.php:135
 msgid "بررسی در رسانه"
 msgstr ""
 
@@ -2512,7 +2512,7 @@ msgstr ""
 msgid "بررسی سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:124
+#: includes/class-hsw-account-support.php:125
 msgid "بررسی عکس‌های تیکت حذف‌شده"
 msgstr ""
 
@@ -3602,7 +3602,7 @@ msgstr ""
 msgid "تصاویر قبلی"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:129
+#: includes/class-hsw-account-support.php:130
 msgid "تصویر"
 msgstr ""
 
@@ -4167,7 +4167,7 @@ msgstr ""
 msgid "تیکت شما ثبت شد."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:129
+#: includes/class-hsw-account-support.php:130
 msgid "تیکت‌های حذف‌شده"
 msgstr ""
 
@@ -4935,7 +4935,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:1340
 #: includes/class-hsw-account.php:1356
-#: includes/class-hsw-checkout-base.php:156
+#: includes/class-hsw-checkout-base.php:157
 msgid "حساب کاربری من"
 msgstr ""
 
@@ -5667,7 +5667,7 @@ msgstr ""
 msgid "دسترسی سریع"
 msgstr ""
 
-#: includes/class-hsw-account-support.php:116
+#: includes/class-hsw-account-support.php:117
 msgid "دسترسی غیرمجاز است."
 msgstr ""
 
@@ -7862,7 +7862,7 @@ msgstr ""
 msgid "سفارش یافت نشد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:149
+#: includes/class-hsw-checkout-base.php:150
 msgid "سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است."
 msgstr ""
 
@@ -8197,7 +8197,7 @@ msgstr ""
 msgid "شناسه (موبایل یا ایمیل) و کد تأیید را کامل وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:129
+#: includes/class-hsw-account-support.php:130
 msgid "شناسه رسانه"
 msgstr ""
 
@@ -11353,7 +11353,7 @@ msgstr ""
 msgid "مشاهده همه"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:154
+#: includes/class-hsw-checkout-base.php:155
 msgid "مشاهدهٔ سفارش"
 msgstr ""
 
@@ -11676,7 +11676,7 @@ msgstr ""
 msgid "مودال: پنجرهٔ شیشه‌ای با محتوای سبد. نوار: یک خط بالای صفحه با لینک «مشاهده سبد خرید». غیرفعال: هیچ بازخوردی نمایش داده نمی‌شود."
 msgstr ""
 
-#: includes/class-hsw-account-support.php:127
+#: includes/class-hsw-account-support.php:128
 msgid "موردی برای بررسی ثبت نشده است."
 msgstr ""
 
