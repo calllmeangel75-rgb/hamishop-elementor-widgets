@@ -55,9 +55,15 @@ if ( ! class_exists( 'HSW_Thankyou' ) ) {
 				return false;
 			}
 
-			/* Only fire if authorized to view this order (in web requests). */
+			/*
+			 * Only fire when the current request may view this order. The check is
+			 * unconditional: a CLI/cron caller has no viewer, so it must present the
+			 * order key (or be the owner) just like an HTTP caller would. A dashboard
+			 * or analytics plugin listening on these hooks must never learn about an
+			 * order the page itself refused to show.
+			 */
 			if ( $order instanceof WC_Order && class_exists( 'HSW_Order_Auth' ) ) {
-				if ( PHP_SAPI !== 'cli' && ! HSW_Order_Auth::is_authorized( $order ) ) {
+				if ( ! HSW_Order_Auth::is_authorized( $order ) ) {
 					return false;
 				}
 			}

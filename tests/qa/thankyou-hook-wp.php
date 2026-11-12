@@ -21,7 +21,20 @@ $check  = static function ( $name, $ok ) use ( &$failed ) {
 };
 
 /* WooCommerce prints the order-details table on the public hook. */
+/*
+ * HSW_Thankyou::fire() authorizes the order from the current request, exactly
+ * like the order-received page: a guest order needs its key in the URL, an
+ * owned order needs the owner (or staff). Every call here is made as a real
+ * order-received render, so put the key of the order being fired into $_GET.
+ */
 $fire = static function ( $order ) {
+    $obj = $order instanceof WC_Order ? $order : ( function_exists( 'wc_get_order' ) ? wc_get_order( (int) $order ) : false );
+    if ( $obj instanceof WC_Order ) {
+        $_GET = array(
+            'order' => (string) $obj->get_id(),
+            'key'   => (string) $obj->get_order_key(),
+        );
+    }
     ob_start();
     $result = HSW_Thankyou::fire( $order );
     ob_end_clean();

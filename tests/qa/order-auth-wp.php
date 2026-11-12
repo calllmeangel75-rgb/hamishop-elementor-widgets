@@ -26,6 +26,10 @@ if ( ! class_exists( '\\Elementor\\Widget_Base' ) ) {
 	fwrite( STDERR, "Elementor is not active; this test needs it.\n" );
 	exit( 2 );
 }
+/* wp_delete_user() lives in the admin includes, not in wp-load.php. */
+if ( ! function_exists( 'wp_delete_user' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/user.php';
+}
 
 if ( ! class_exists( 'HSW_Order_Auth' ) ) {
 	require_once dirname( __DIR__, 2 ) . '/includes/class-hsw-order-auth.php';
