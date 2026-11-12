@@ -1,6 +1,6 @@
 # HamiShop Elementor Widgets — Release 1.11.273
 
-**Security hardening release** — fixes for the seven claims reported by the shop owner.
+**Security hardening release** — fixes for claims 1–5 of the 7 claims reported by the shop owner (claim 6: QA scripts, pending execution on a disposable WP install).
 
 ## Security
 

@@ -50,7 +50,8 @@ final class HSW_Account_Support {
 		add_action( 'deleted_post', array( $this, 'cleanup_deleted_ticket_notifications' ), 10, 2 );
 		add_action( 'init', array( $this, 'schedule_cleanup' ), 20 );
 		add_action( 'rest_api_init', array( $this, 'register_inbound_route' ) );
-		add_action( 'rest_api_init', array( $this, 'register_image_route' ) );
+		add_action( 'admin_post_hsw_ticket_image', array( $this, 'serve_ticket_image' ) );
+		add_action( 'admin_post_nopriv_hsw_ticket_image', array( $this, 'serve_ticket_image' ) );
 		add_action( 'template_redirect', array( $this, 'handle_frontend_actions' ) );
 		add_action( 'woocommerce_account_support_endpoint', array( $this, 'render_endpoint' ) );
 
@@ -577,72 +578,63 @@ final class HSW_Account_Support {
 	}
 
 	/**
-	 * Signed, capability-guarded endpoint that serves a protected ticket image.
+	 * Serve a protected ticket image after validating the signed URL.
 	 *
-	 * `GET hsw/v1/tickets/{ticket_id}/image?ts={unix}&sig={hmac}`.
+	 * Served via admin-post.php (not REST) so WordPress cookie authentication
+	 * is respected: a logged-in ticket author or staff member is recognized
+	 * without a nonce, which an  tag or an emailed link cannot provide.
+	 * The ts+sig signature authorizes the link itself (7-day expiry) and the
+	 * logged-in user check authorizes *who* may view it.
 	 *
 	 * @return void
 	 */
-	public function register_image_route() {
-		register_rest_route(
-			'hsw/v1',
-			'/tickets/(?P<ticket_id>\d+)/image',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'serve_ticket_image' ),
-				'permission_callback' => array( $this, 'image_route_permission' ),
-			)
-		);
-	}
-
-	/**
-	 * Only the ticket author or a staff member may view a ticket's image.
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @return bool|WP_Error
-	 */
-	public function image_route_permission( $request ) {
-		$ticket_id = (int) $request->get_param( 'ticket_id' );
-		$ticket    = get_post( $ticket_id );
-		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type ) {
-			return new WP_Error( 'hsw_image_ticket', 'ticket not found', array( 'status' => 404 ) );
-		}
-		$user_id = get_current_user_id();
-		if ( $user_id && (int) $ticket->post_author === $user_id ) {
-			return true;
-		}
-		if ( $user_id && ( user_can( $user_id, 'edit_posts' ) || user_can( $user_id, 'manage_woocommerce' ) ) ) {
-			return true;
-		}
-		return new WP_Error( 'hsw_image_forbidden', 'forbidden', array( 'status' => 403 ) );
-	}
-
-	/**
-	 * Serve a protected ticket image after validating the signed URL.
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function serve_ticket_image( $request ) {
-		$ticket_id = (int) $request->get_param( 'ticket_id' );
-		$ts        = (int) $request->get_param( 'ts' );
-		$sig       = (string) $request->get_param( 'sig' );
+	public function serve_ticket_image() {
+		$ticket_id = (int) ( $_REQUEST['ticket_id'] ?? 0 );
+		$ts        = (int) ( $_REQUEST['ts'] ?? 0 );
+		$sig       = (string) ( $_REQUEST['sig'] ?? '' );
 
 		if ( ! $ts || ! $sig || ! $this->verify_ticket_image_sign( $ticket_id, $ts, $sig ) ) {
-			return new WP_Error( 'hsw_image_bad_sign', 'invalid or expired image link', array( 'status' => 403 ) );
+			status_header( 403 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_bad_sign', 'message' => 'invalid or expired image link', 'data' => array( 'status' => 403 ) ) );
+			exit;
 		}
 		if ( time() - $ts > 7 * DAY_IN_SECONDS ) {
-			return new WP_Error( 'hsw_image_expired', 'image link expired', array( 'status' => 403 ) );
+			status_header( 403 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_expired', 'message' => 'image link expired', 'data' => array( 'status' => 403 ) ) );
+			exit;
+		}
+
+		$ticket = get_post( $ticket_id );
+		if ( ! $ticket || self::POST_TYPE !== $ticket->post_type ) {
+			status_header( 404 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_ticket', 'message' => 'ticket not found', 'data' => array( 'status' => 404 ) ) );
+			exit;
+		}
+
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			status_header( 403 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_forbidden', 'message' => 'forbidden', 'data' => array( 'status' => 403 ) ) );
+			exit;
+		}
+		if ( (int) $ticket->post_author !== $user_id && ! user_can( $user_id, 'manage_woocommerce' ) ) {
+			status_header( 403 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_forbidden', 'message' => 'forbidden', 'data' => array( 'status' => 403 ) ) );
+			exit;
 		}
 
 		$path = (string) get_post_meta( $ticket_id, self::IMAGE_PATH_META, true );
 		if ( ! $path ) {
-			return new WP_Error( 'hsw_image_missing', 'no image attached', array( 'status' => 404 ) );
+			status_header( 404 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_missing', 'message' => 'no image attached', 'data' => array( 'status' => 404 ) ) );
+			exit;
 		}
 
 		$file = WP_CONTENT_DIR . '/uploads/' . ltrim( $path, '/' );
 		if ( ! is_file( $file ) || ! is_readable( $file ) ) {
-			return new WP_Error( 'hsw_image_missing', 'image file not found', array( 'status' => 404 ) );
+			status_header( 404 );
+			echo wp_json_encode( array( 'code' => 'hsw_image_missing', 'message' => 'image file not found', 'data' => array( 'status' => 404 ) ) );
+			exit;
 		}
 
 		$mime = wp_check_filetype( $file );
@@ -670,7 +662,15 @@ final class HSW_Account_Support {
 		}
 		$ts   = time();
 		$sig  = $this->ticket_image_sign( $ticket_id, $ts );
-		$url  = add_query_arg( array( 'ts' => $ts, 'sig' => $sig ), rest_url( 'hsw/v1/tickets/' . (int) $ticket_id . '/image' ) );
+		$url  = add_query_arg(
+			array(
+				'action' => 'hsw_ticket_image',
+				'ticket_id' => (int) $ticket_id,
+				'ts'       => $ts,
+				'sig'      => $sig,
+			),
+			admin_url( 'admin-post.php' )
+		);
 
 		return $url;
 	}
@@ -695,7 +695,7 @@ final class HSW_Account_Support {
 	 * @return bool
 	 */
 	private function verify_ticket_image_sign( $ticket_id, $ts, $sig ) {
-		return $ts > 0 && $sig === $this->ticket_image_sign( $ticket_id, $ts );
+		return $ts > 0 && hash_equals( $this->ticket_image_sign( $ticket_id, $ts ), $sig );
 	}
 
 	/**
