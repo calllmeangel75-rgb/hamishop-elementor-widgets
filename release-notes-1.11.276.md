@@ -11,4 +11,6 @@
 - `tests/qa/ticket-image-browser-probe.js`, a Chromium probe for owner/staff/other/guest roles on a live site.
 
 ### ZIP
-Built by the release workflow on the `v1.11.276` tag (`release-downloads/hamishop-elementor-widgets-1.11.276.zip`).
+Built with `tools/build-release.py` (197 files, 1.28 MB) and committed as
+`release-downloads/hamishop-elementor-widgets-1.11.276.zip`; the release
+workflow produces the same file on the `v1.11.276` tag.
