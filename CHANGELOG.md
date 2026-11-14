@@ -6,6 +6,18 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.281] - 2026-11-14
+
+### Added
+- **«آفر حامی‌شاپ» (`hsw-offer`)** — a standalone campaign widget with its own `hsw-offer.css` / `hsw-offer.js`. It does not reuse the loop card markup or styles, so the existing loop widgets are unaffected.
+  - Campaign lead card with countdown and CTA.
+  - Up to 8 products per instance; automatic sale-product source or manual product IDs.
+  - Discounts use the **lowest variation** regular/price pair.
+  - Per-card countdown and campaign countdown from one interval; cached pages print only the end timestamp.
+  - Stock/sold meter from managed stock plus total sales; low-stock and note badges from real product signals.
+  - Sorting by discount, nearest sale end, newest, best-selling or random.
+  - `HSW_Widget_Manager` catalog, `register_widgets()`, asset registration, POT and docs updated.
+
 ## [1.11.280] - 2026-11-14
 
 ### Fixed

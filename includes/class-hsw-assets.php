@@ -769,6 +769,27 @@ class HSW_Assets {
                 );
                 wp_script_add_data( 'hsw-loop', 'strategy', 'defer' );
 
+                /*
+                 * «آفر حامی‌شاپ» is a standalone campaign widget. Its sheet is
+                 * not layered over hsw-loop.css, so the existing loop widgets
+                 * cannot inherit its card/grid rules.
+                 */
+                wp_register_style(
+                        'hsw-offer',
+                        $this->asset( 'assets/css/hsw-offer.css' ),
+                        array( 'hsw-fonts' ),
+                        HSW_VERSION
+                );
+
+                wp_register_script(
+                        'hsw-offer',
+                        $this->asset( 'assets/js/hsw-offer.js' ),
+                        array(),
+                        HSW_VERSION,
+                        true
+                );
+                wp_script_add_data( 'hsw-offer', 'strategy', 'defer' );
+
                 wp_register_style(
                         'hsw-product',
                         $this->asset( 'assets/css/hsw-product.css' ),

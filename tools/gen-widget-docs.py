@@ -27,7 +27,7 @@ HEAD = """# کاتالوگ ویجت‌ها
 
 این فایل از روی کد ساخته می‌شود (`tools/gen-widget-docs.py`) و منبع رسمی فهرست ویجت‌هاست. اگر ویجتی اضافه یا حذف شد، اول کاتالوگ `includes/class-hsw-widget-manager.php` را به‌روز کنید و بعد این فایل را بازتولید کنید.
 
-**۶۲ ویجت در ۷ خانواده:** ۱۵ ویجت «اصلی» که پیش‌فرض در پنل المنتور دیده می‌شوند و ۴۷ «بخش مستقل» که پیش‌فرض خاموش‌اند و از **HamiShop ← کنترل ویجت‌ها** روشن می‌شوند.
+**۶۴ ویجت در ۷ خانواده:** ۱۷ ویجت «اصلی» که پیش‌فرض در پنل المنتور دیده می‌شوند و ۴۷ «بخش مستقل» که پیش‌فرض خاموش‌اند و از **HamiShop ← کنترل ویجت‌ها** روشن می‌شوند.
 
 ## قاعده‌های ثابت
 
@@ -90,7 +90,7 @@ def load_catalog():
     """Run the PHP dumper and parse its JSON."""
     try:
         raw = subprocess.run(
-            ["php", DUMP], capture_output=True, text=True, check=True
+            ["php", DUMP], capture_output=True, text=True, encoding="utf-8", errors="replace", check=True
         ).stdout
     except (OSError, subprocess.CalledProcessError) as exc:
         sys.exit("could not run php tools/dump-catalog.php: %s" % exc)

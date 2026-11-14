@@ -577,6 +577,7 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-wonder-deals.php',
                         HSW_DIR . 'widgets/class-hsw-best-sellers.php',
                         HSW_DIR . 'widgets/class-hsw-popular.php',
+                        HSW_DIR . 'widgets/class-hsw-offer.php',
 
                         HSW_DIR . 'widgets/class-hsw-widget-product-breadcrumb.php',
                         HSW_DIR . 'widgets/class-hsw-widget-product-gallery.php',
@@ -669,6 +670,7 @@ final class HSW_Plugin {
                         '\HSW_Widget_Wonder_Deals',
                         '\HSW_Widget_Best_Sellers',
                         '\HSW_Widget_Popular',
+                        '\HSW_Widget_Offer',
                         '\HSW_Widget_Product_Breadcrumb',
                         '\HSW_Widget_Product_Gallery',
                         '\HSW_Widget_Product_Trust',

@@ -8,7 +8,7 @@
 |---|---|
 | پیشوند | کلاس‌ها `HSW_` · ویجت‌ها `hsw-` · آپشن‌ها `hsw_` · توکن‌ها `--hsw-` |
 | نیازمندی‌ها | WordPress ≥ ۶.۰ · PHP ≥ ۷.۴ · WooCommerce · Elementor |
-| کد | ۱۲۹ فایل PHP زمان اجرا (۲ ریشه + ۶۳ includes + ۶۳ widgets + ۱ template) · حدود ۶۶٬۰۰۰ خط · ۱۱۷ کلاس · ۶ trait |
+| کد | ۱۳۰ فایل PHP زمان اجرا (۲ ریشه + ۶۳ includes + ۶۴ widgets + ۱ template) · حدود ۶۶٬۰۰۰ خط · ۱۱۹ کلاس · ۶ trait |
 | دارایی‌ها | ۱۹ فایل CSS (۴۸۸ KB کمینه از ۶۷۵ KB سورس) · ۹ فایل JS (۱۷۵ KB کمینه از ۲۸۰ KB) |
 | REST | ۱۹ مسیر در namespace `hsw/v1` |
 | دامنهٔ ترجمه | `hamishop-elementor-widgets` · POT با ۳٬۳۴۸ رشته |
@@ -40,7 +40,7 @@ includes/
   class-hsw-archive-base.php     پایهٔ آرشیو (پارامترها، filter_url، ترم‌ها)
   class-hsw-product-base.php     پایهٔ صفحهٔ محصول
   class-hsw-{cart,checkout,pay,complete,blog}-base.php
-  class-hsw-widget-manager.php   کاتالوگ ۶۳ ویجت + صفحهٔ روشن/خاموش + مهاجرت
+  class-hsw-widget-manager.php   کاتالوگ ۶۴ ویجت + صفحهٔ روشن/خاموش + مهاجرت
   class-hsw-palette.php          تنها منبع توکن رنگ
   class-hsw-assets.php           ثبت شرطی CSS/JS، نسخه‌گذاری، min/dev
   class-hsw-upgrader.php         کار پس‌زمینهٔ آپدیت (کش المنتور + مهاجرت)
@@ -51,7 +51,7 @@ includes/
   class-hsw-wallet*.php          کیف پول و درگاه داخلی
   class-hsw-invoice.php          فاکتور چاپی A4
   trait-hsw-style-kit.php        helperهای کنترل استایل
-widgets/                          ۶۳ ویجت، هر فایل یک کلاس
+widgets/                          ۶۴ ویجت، هر فایل یک کلاس
 assets/css|js|fonts|img/          دارایی‌ها + نسخهٔ .min
 tools/                            ساخت دارایی، POT، اسپرایت، فونت، ZIP، تولید مستند
 tests/                            هارنس PHP + پروب‌های مرورگری

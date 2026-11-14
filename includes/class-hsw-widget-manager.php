@@ -39,6 +39,7 @@ final class HSW_Widget_Manager {
 		$this->maybe_add_header_widgets();
 		$this->maybe_add_gc_header();
 		$this->maybe_add_post_widget();
+		$this->maybe_add_offer_widget();
 	}
 
 	/**
@@ -96,6 +97,32 @@ final class HSW_Widget_Manager {
 
 		update_option( 'hsw_header_widgets_migrated', 1, false );
 	}
+	/**
+	 * Enable «آفر حامی‌شاپ» once on sites that already saved the widget option.
+	 *
+	 * New general widgets are enabled by default on fresh installs, but an
+	 * existing saved array predates this slug. The migration adds it once; a
+	 * later deliberate opt-out is preserved because the guard never runs again.
+	 */
+	private function maybe_add_offer_widget() {
+		if ( get_option( 'hsw_offer_widget_migrated' ) ) {
+			return;
+		}
+
+		$saved = get_option( self::OPTION, null );
+		if ( is_array( $saved ) ) {
+			$valid = array_keys( self::all_widgets() );
+			$saved = array_values( array_unique( array_intersect( array_map( 'sanitize_key', $saved ), $valid ) ) );
+			if ( isset( self::all_widgets()['hsw-offer'] ) && ! in_array( 'hsw-offer', $saved, true ) ) {
+				$saved[] = 'hsw-offer';
+			}
+			update_option( self::OPTION, $saved );
+			self::$enabled_cache = null;
+		}
+
+		update_option( 'hsw_offer_widget_migrated', 1, false );
+	}
+
 	/**
 	 * Enable the single-post template widget on sites that already saved the
 	 * widget option (it shipped in 1.11.7, after most installs were configured).
@@ -171,7 +198,7 @@ final class HSW_Widget_Manager {
 				'category'    => 'hamishop-loop',
 				'icon'        => 'dashicons-grid-view',
 				'accent'      => '#1d4ed8',
-				'description' => __( 'ویجت‌های مستقل صفحه اصلی برای نمایش پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها و محصولات منتخب. هر سه پیش‌فرض فعال‌اند.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'ویجت‌های مستقل صفحه اصلی برای نمایش پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محصولات منتخب و کمپین آفر. هر چهار پیش‌فرض فعال‌اند.', 'hamishop-elementor-widgets' ),
 				'general'     => array(
 					'hsw-wonder-deals' => array(
 						'label' => __( 'پیشنهاد شگفت‌انگیز', 'hamishop-elementor-widgets' ),
@@ -184,6 +211,10 @@ final class HSW_Widget_Manager {
 					'hsw-popular'      => array(
 						'label' => __( 'محبوب‌ترین‌ها / منتخب', 'hamishop-elementor-widgets' ),
 						'desc'  => __( 'تب‌های محبوب، جدید و تخفیف‌دار با محصولات منتخب.', 'hamishop-elementor-widgets' ),
+					),
+					'hsw-offer'        => array(
+						'label' => __( 'آفر حامی‌شاپ', 'hamishop-elementor-widgets' ),
+						'desc'  => __( 'کمپین تخفیف با کارت کمپین، تایمر کمپین و تایمر هر محصول.', 'hamishop-elementor-widgets' ),
 					),
 				),
 				'parts'       => array(),
