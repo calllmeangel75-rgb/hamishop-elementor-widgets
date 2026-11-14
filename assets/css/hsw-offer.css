@@ -644,7 +644,6 @@
 	line-height: 1.6;
 	text-align: center;
 	text-decoration: none;
-	backdrop-filter: blur(6px);
 }
 
 .hsw-offer__more-icon {
