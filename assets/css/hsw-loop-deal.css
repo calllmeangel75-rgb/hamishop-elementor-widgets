@@ -48,3 +48,18 @@
 .hsw-loop--deal .hsw-loop__more {
 	color: var(--hsw-loop-fg);
 }
+
+/*
+ * Full-bleed wonder-deals shell needs a real gutter.
+ *
+ * The Elementor shell padding control defaults to 0 on the inline sides, so a
+ * stretched («تمام عرض») instance put the header and the first/last card hard
+ * against the shell edge. A percentage gutter keeps the content aligned with
+ * the page container at every width while the gradient still reaches the
+ * section edges. This is scoped to the wonder-deals variant; the shared loop
+ * and the box variants keep their own padding untouched.
+ */
+.hsw-loop.hsw-loop--deal.hsw-loop--hsw-wonder-deals {
+	--hsw-loop-deal-gutter: clamp(16px, 5%, 96px);
+	padding-inline: var(--hsw-loop-deal-gutter);
+}
