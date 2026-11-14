@@ -176,7 +176,7 @@ def main():
         "قرارداد markup و data-attributeهای JS در `docs/archive/WIDGET-GUIDE.md` نگه‌داری می‌شود.\n"
     )
 
-    io.open(OUT, "w", encoding="utf-8").write("\n".join(out).rstrip() + "\n")
+    io.open(OUT, "w", encoding="utf-8", newline="\n").write("\n".join(out).rstrip() + "\n")
     print("wrote", OUT)
 
 
