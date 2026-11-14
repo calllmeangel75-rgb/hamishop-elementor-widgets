@@ -63,7 +63,7 @@ msgstr ""
 msgid "%s — کد تأیید ایمیل"
 msgstr ""
 
-#: widgets/class-hsw-offer.php:872
+#: widgets/class-hsw-offer.php:879
 #: widgets/class-hsw-widget-cart-items.php:498
 #: widgets/class-hsw-widget-post-page.php:1182
 msgid "%s٪ تخفیف"
@@ -9554,7 +9554,7 @@ msgid "فرم ورود و ثبت‌نام"
 msgstr ""
 
 #: includes/class-hsw-helpers.php:1140
-#: widgets/class-hsw-offer.php:898
+#: widgets/class-hsw-offer.php:905
 msgid "فروش رفته: %s٪"
 msgstr ""
 
@@ -11194,12 +11194,12 @@ msgstr ""
 msgid "محصولات (جستجو بر اساس نام)"
 msgstr ""
 
-#: widgets/class-hsw-offer.php:978
+#: widgets/class-hsw-offer.php:985
 msgid "محصولات آفر"
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:1007
-#: widgets/class-hsw-offer.php:984
+#: widgets/class-hsw-offer.php:991
 msgid "محصولات بعدی"
 msgstr ""
 
@@ -11216,7 +11216,7 @@ msgid "محصولات فقط وقتی بارگذاری می‌شوند که کا
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:1006
-#: widgets/class-hsw-offer.php:983
+#: widgets/class-hsw-offer.php:990
 msgid "محصولات قبلی"
 msgstr ""
 
@@ -11253,7 +11253,7 @@ msgstr ""
 msgid "محصولی با این فیلترها یافت نشد"
 msgstr ""
 
-#: widgets/class-hsw-offer.php:929
+#: widgets/class-hsw-offer.php:936
 msgid "محصولی با تخفیف برای این کمپین پیدا نشد."
 msgstr ""
 
