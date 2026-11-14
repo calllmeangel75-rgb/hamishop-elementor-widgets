@@ -712,7 +712,7 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 	 * @param int        $percent Discount percent.
 	 * @return array{text:string,class:string,icon:string}
 	 */
-	private function card_note( $product, $percent ) {
+	private function card_note( $product, $percent, $default_note = '' ) {
 		$qty = $product->managing_stock() ? $product->get_stock_quantity() : null;
 
 		if ( null !== $qty && $qty > 0 && $qty <= 3 ) {
@@ -744,7 +744,7 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		}
 
 		return array(
-			'text'  => __( 'ضمانت اصالت', 'hamishop-elementor-widgets' ),
+			'text'  => '' !== trim( (string) $default_note ) ? (string) $default_note : __( 'ضمانت اصالت', 'hamishop-elementor-widgets' ),
 			'class' => 'is-green',
 			'icon'  => 'verified',
 		);
@@ -847,7 +847,7 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		$url     = $product->get_permalink();
 		$name    = $product->get_name();
 		$image   = $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy', 'alt' => $name ) );
-		$note    = $this->card_note( $product, $percent );
+		$note    = $this->card_note( $product, $percent, $this->opt( 'offer_default_note' ) );
 		$stock   = $this->stock_data( $product );
 		$end     = $this->product_sale_end( $product );
 		if ( ! $end ) {
