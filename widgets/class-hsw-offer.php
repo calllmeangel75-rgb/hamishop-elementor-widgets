@@ -1075,6 +1075,9 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		$icon         = $this->opt( 'offer_icon', 'redeem' );
 		$cta_text     = $this->opt( 'offer_cta_text' );
 		$cta_url      = (string) ( $s['offer_cta_url']['url'] ?? '' );
+		if ( '' === $cta_url ) {
+			$cta_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '';
+		}
 		$show_timer   = 'yes' === ( $s['offer_show_campaign_timer'] ?? 'yes' ) && $campaign_end > time();
 
 		echo '<section class="hsw-offer' . esc_attr( $this->preset_class( $s ) . $this->hsw_font_class() ) . '" data-hsw-offer>';
@@ -1109,8 +1112,7 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 			}
 		}
 		if ( '' !== $cta_text ) {
-			$url = '' !== $cta_url ? $cta_url : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '' );
-			echo '<a class="hsw-offer__cta" href="' . esc_url( $url ) . '"><span>' . esc_html( $cta_text ) . '</span>' . HSW_Helpers::icon( 'arrow_back' ) . '</a>';
+			echo '<a class="hsw-offer__cta" href="' . esc_url( $cta_url ) . '"><span>' . esc_html( $cta_text ) . '</span>' . HSW_Helpers::icon( 'arrow_back' ) . '</a>';
 		}
 		echo '</div></aside>';
 
@@ -1120,9 +1122,15 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		foreach ( $products as $index => $product ) {
 			echo $this->offer_card_html( $product, $s, $campaign_end, (int) $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
+		if ( '' !== $cta_text ) {
+			echo '<a class="hsw-offer__more" href="' . esc_url( $cta_url ) . '">' .
+				'<span class="hsw-offer__more-icon">' . HSW_Helpers::icon( 'arrow_back' ) . '</span>' .
+				'<span>' . esc_html( $cta_text ) . '</span>' .
+				'</a>';
+		}
 		echo '</div>';
-		echo '<button type="button" class="hsw-offer__arrow hsw-offer__arrow--prev" data-hsw-offer-dir="-1" aria-label="' . esc_attr__( 'محصولات قبلی', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'chevron_right' ) . '</button>';
-		echo '<button type="button" class="hsw-offer__arrow hsw-offer__arrow--next" data-hsw-offer-dir="1" aria-label="' . esc_attr__( 'محصولات بعدی', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'chevron_left' ) . '</button>';
+		echo '<button type="button" class="hsw-offer__arrow hsw-offer__arrow--prev" data-hsw-offer-dir="-1" aria-label="' . esc_attr__( 'محصولات قبلی', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'chevron_right' ) . HSW_Helpers::icon( 'chevron_right' ) . '</button>';
+		echo '<button type="button" class="hsw-offer__arrow hsw-offer__arrow--next" data-hsw-offer-dir="1" aria-label="' . esc_attr__( 'محصولات بعدی', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'chevron_left' ) . HSW_Helpers::icon( 'chevron_left' ) . '</button>';
 		echo '</div>';
 
 		echo '</div></div></section>';

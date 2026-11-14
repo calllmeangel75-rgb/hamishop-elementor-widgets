@@ -11308,12 +11308,12 @@ msgstr ""
 msgid "محصولات (جستجو بر اساس نام)"
 msgstr ""
 
-#: widgets/class-hsw-offer.php:1119
+#: widgets/class-hsw-offer.php:1121
 msgid "محصولات آفر"
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:1007
-#: widgets/class-hsw-offer.php:1125
+#: widgets/class-hsw-offer.php:1133
 msgid "محصولات بعدی"
 msgstr ""
 
@@ -11330,7 +11330,7 @@ msgid "محصولات فقط وقتی بارگذاری می‌شوند که کا
 msgstr ""
 
 #: includes/class-hsw-widget-base.php:1006
-#: widgets/class-hsw-offer.php:1124
+#: widgets/class-hsw-offer.php:1132
 msgid "محصولات قبلی"
 msgstr ""
 

@@ -6,6 +6,13 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.284] - 2026-11-14
+
+### Changed
+- **Offer rail arrows:** double-chevron pill buttons (`»` / `«`) with a soft blinking second chevron; the animation is disabled under `prefers-reduced-motion`.
+- **Mobile offer layout:** the campaign card becomes a compact header (title/subtitle on the right, timer on the left), the large CTA is hidden on mobile, and a «مشاهده همه» card is appended to the end of the rail. Card width is capped at 240px.
+- **Campaign timer icon size:** the countdown SVG now has an explicit 14px box; without it the browser's default SVG width could stretch the lead card.
+
 ## [1.11.283] - 2026-11-14
 
 ### Added
