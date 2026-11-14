@@ -80,9 +80,9 @@
 
 **اصلی** · کمپین تخفیف با کارت کمپین، تایمر کمپین و تایمر هر محصول.
 
-گروه‌های کنترل مشترک: `controls_offer_lead`، `controls_offer_products`، `controls_offer_style`
+گروه‌های کنترل مشترک: `controls_offer_lead`، `controls_offer_products`، `controls_offer_style`، `controls_offer_colors`
 
-نمونهٔ کنترل‌ها: برچسب بالای کارت، عنوان اصلی، زیرعنوان، آیکن وسط، متن دکمه، لینک دکمه
+نمونهٔ کنترل‌ها: برچسب بالای کارت، عنوان اصلی، تگ عنوان، زیرعنوان، آیکن وسط، متن دکمه
 
 
 ## صفحه محصول

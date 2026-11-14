@@ -26,9 +26,48 @@
 	--hsw-offer-success: #047857;
 	--hsw-offer-warning: #b45309;
 	--hsw-offer-info: #1d4ed8;
+	--hsw-offer-lead-title: #ffffff;
+	--hsw-offer-lead-sub: rgb(255 241 242 / 90%);
+	--hsw-offer-lead-badge-bg: rgb(255 255 255 / 15%);
+	--hsw-offer-lead-badge-text: #ffffff;
+	--hsw-offer-lead-badge-icon: #fde047;
+	--hsw-offer-lead-icon-bg: rgb(255 255 255 / 15%);
+	--hsw-offer-lead-icon-color: #ffffff;
+	--hsw-offer-timer-bg: rgb(0 0 0 / 35%);
+	--hsw-offer-timer-text: #ffffff;
+	--hsw-offer-timer-label: rgb(255 241 242 / 80%);
+	--hsw-offer-cta-bg: #ffffff;
+	--hsw-offer-cta-text: var(--hsw-offer-accent);
+	--hsw-offer-cta-bg-hover: #fff1f2;
+	--hsw-offer-cta-text-hover: var(--hsw-offer-accent);
+	--hsw-offer-card-border: #f1f5f9;
+	--hsw-offer-media-bg: #f8fafc;
+	--hsw-offer-media-bg-hover: #f1f5f9;
+	--hsw-offer-old: #94a3b8;
+	--hsw-offer-discount-bg: var(--hsw-offer-accent);
+	--hsw-offer-discount-text: #ffffff;
+	--hsw-offer-stock-track: #f1f5f9;
+	--hsw-offer-stock-from: #ef4444;
+	--hsw-offer-stock-to: #e11d48;
+	--hsw-offer-note-green-bg: #ecfdf5;
+	--hsw-offer-note-green-text: var(--hsw-offer-success);
+	--hsw-offer-note-amber-bg: #fffbeb;
+	--hsw-offer-note-amber-text: var(--hsw-offer-warning);
+	--hsw-offer-note-blue-bg: #eff6ff;
+	--hsw-offer-note-blue-text: var(--hsw-offer-info);
+	--hsw-offer-note-red-bg: #fff1f2;
+	--hsw-offer-note-red-text: var(--hsw-offer-accent);
+	--hsw-offer-arrow-bg: #ffffff;
+	--hsw-offer-arrow-text: #334155;
+	--hsw-offer-arrow-border: #e2e8f0;
+	--hsw-offer-arrow-bg-hover: #f8fafc;
+	--hsw-offer-arrow-text-hover: var(--hsw-offer-accent);
+	--hsw-offer-shell-text: #ffffff;
+	--hsw-offer-divider: #f1f5f9;
+	--hsw-offer-empty-text: #ffffff;
 	display: block;
 	inline-size: 100%;
-	color: #fff;
+	color: var(--hsw-offer-shell-text);
 	font-family: var(--hsw-font, 'Vazirmatn HSW'), Tahoma, sans-serif;
 }
 
@@ -97,7 +136,7 @@
 	border-radius: 18px;
 	background: linear-gradient(180deg, rgb(255 255 255 / 10%), rgb(0 0 0 / 10%));
 	text-align: center;
-	color: #fff;
+	color: var(--hsw-offer-shell-text);
 }
 
 .hsw-offer__lead-badge {
@@ -107,8 +146,8 @@
 	padding: 4px 12px;
 	border: 1px solid rgb(255 255 255 / 20%);
 	border-radius: 999px;
-	background: rgb(255 255 255 / 15%);
-	color: #fff;
+	background: var(--hsw-offer-lead-badge-bg);
+	color: var(--hsw-offer-lead-badge-text);
 	font-size: 11px;
 	font-weight: 700;
 	line-height: 1.8;
@@ -117,12 +156,13 @@
 .hsw-offer__lead-badge .hsw-ic {
 	inline-size: 14px;
 	block-size: 14px;
-	color: #fde047;
+	color: var(--hsw-offer-lead-badge-icon);
 }
 
 .hsw-offer__lead-title {
 	margin: 10px 0 4px;
-	color: #fff;
+	color: var(--hsw-offer-lead-title);
+	display: block;
 	font-size: clamp(26px, 2.4vw, 34px);
 	font-weight: 900;
 	line-height: 1.25;
@@ -133,7 +173,7 @@
 .hsw-offer__lead-sub {
 	max-inline-size: 220px;
 	margin: 0;
-	color: rgb(255 241 242 / 90%);
+	color: var(--hsw-offer-lead-sub);
 	font-size: 12px;
 	line-height: 1.9;
 }
@@ -148,7 +188,7 @@
 	margin-block: 18px;
 	border: 1px solid rgb(255 255 255 / 25%);
 	border-radius: 18px;
-	background: rgb(255 255 255 / 15%);
+	background: var(--hsw-offer-lead-icon-bg);
 	box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
 	transition: transform .25s ease;
 }
@@ -160,7 +200,7 @@
 .hsw-offer__lead-icon .hsw-ic {
 	inline-size: 40px;
 	block-size: 40px;
-	color: #fff;
+	color: var(--hsw-offer-lead-icon-color);
 }
 
 .hsw-offer__lead-icon::after {
@@ -196,8 +236,8 @@
 	padding: 6px 8px;
 	border: 1px solid rgb(255 255 255 / 20%);
 	border-radius: 8px;
-	background: rgb(0 0 0 / 35%);
-	color: #fff;
+	background: var(--hsw-offer-timer-bg);
+	color: var(--hsw-offer-timer-text);
 	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	font-size: 16px;
 	font-weight: 800;
@@ -206,7 +246,7 @@
 }
 
 .hsw-offer__time-sep {
-	color: #fff;
+	color: var(--hsw-offer-timer-text);
 	font-size: 16px;
 	font-weight: 800;
 	animation: hsw-offer-pulse 1.4s ease-in-out infinite;
@@ -214,7 +254,7 @@
 
 .hsw-offer__countdown-label {
 	margin: 6px 0 0;
-	color: rgb(255 241 242 / 80%);
+	color: var(--hsw-offer-timer-label);
 	font-size: 11px;
 	font-weight: 500;
 	line-height: 1.8;
@@ -230,8 +270,8 @@
 	margin-block-start: 10px;
 	padding: 8px 14px;
 	border-radius: 12px;
-	background: #fff;
-	color: var(--hsw-offer-accent);
+	background: var(--hsw-offer-cta-bg);
+	color: var(--hsw-offer-cta-text);
 	font-size: 13px;
 	font-weight: 800;
 	text-decoration: none;
@@ -241,9 +281,9 @@
 
 .hsw-offer__cta:hover,
 .hsw-offer__cta:focus-visible {
-	background: #fff1f2;
+	background: var(--hsw-offer-cta-bg-hover);
 	box-shadow: 0 8px 18px rgb(0 0 0 / 12%);
-	color: var(--hsw-offer-accent);
+	color: var(--hsw-offer-cta-text-hover);
 }
 
 .hsw-offer__cta:active {
@@ -298,9 +338,9 @@
 	inline-size: var(--hsw-offer-card-w);
 	min-inline-size: 0;
 	padding: var(--hsw-offer-card-pad);
-	border: 1px solid #f1f5f9;
+	border: 1px solid var(--hsw-offer-card-border);
 	border-radius: var(--hsw-offer-card-radius);
-	background: #fff;
+	background: var(--hsw-offer-card-bg);
 	color: var(--hsw-offer-text);
 	text-decoration: none;
 	box-shadow: 0 8px 24px -4px rgb(0 0 0 / 8%), 0 2px 6px -1px rgb(0 0 0 / 4%);
@@ -344,31 +384,31 @@
 }
 
 .hsw-offer__note.is-green {
-	background: #ecfdf5;
-	color: var(--hsw-offer-success);
+	background: var(--hsw-offer-note-green-bg);
+	color: var(--hsw-offer-note-green-text);
 }
 
 .hsw-offer__note.is-amber {
-	background: #fffbeb;
-	color: var(--hsw-offer-warning);
+	background: var(--hsw-offer-note-amber-bg);
+	color: var(--hsw-offer-note-amber-text);
 }
 
 .hsw-offer__note.is-blue {
-	background: #eff6ff;
-	color: var(--hsw-offer-info);
+	background: var(--hsw-offer-note-blue-bg);
+	color: var(--hsw-offer-note-blue-text);
 }
 
 .hsw-offer__note.is-red {
-	background: #fff1f2;
-	color: var(--hsw-offer-accent);
+	background: var(--hsw-offer-note-red-bg);
+	color: var(--hsw-offer-note-red-text);
 }
 
 .hsw-offer__discount {
 	flex: 0 0 auto;
 	padding: 2px 8px;
 	border-radius: 999px;
-	background: var(--hsw-offer-accent);
-	color: #fff;
+	background: var(--hsw-offer-discount-bg);
+	color: var(--hsw-offer-discount-text);
 	font-size: 11px;
 	font-weight: 800;
 	line-height: 1.8;
@@ -382,13 +422,13 @@
 	block-size: 176px;
 	padding: 8px;
 	border-radius: 12px;
-	background: #f8fafc;
+	background: var(--hsw-offer-media-bg);
 	overflow: hidden;
 	transition: background-color .2s ease;
 }
 
 .hsw-offer__card:hover .hsw-offer__media {
-	background: #f1f5f9;
+	background: var(--hsw-offer-media-bg-hover);
 }
 
 .hsw-offer__media img {
@@ -425,7 +465,7 @@
 .hsw-offer__bottom {
 	margin-block-start: 14px;
 	padding-block-start: 8px;
-	border-block-start: 1px solid #f1f5f9;
+	border-block-start: 1px solid var(--hsw-offer-divider);
 }
 
 .hsw-offer__prices {
@@ -437,7 +477,7 @@
 }
 
 .hsw-offer__old {
-	color: #94a3b8;
+	color: var(--hsw-offer-old);
 	font-size: 11px;
 	line-height: 1.6;
 	text-decoration: line-through;
@@ -467,7 +507,7 @@
 	inline-size: 100%;
 	block-size: 6px;
 	border-radius: 999px;
-	background: #f1f5f9;
+	background: var(--hsw-offer-stock-track);
 	overflow: hidden;
 	direction: rtl;
 }
@@ -476,7 +516,7 @@
 	display: block;
 	block-size: 100%;
 	border-radius: inherit;
-	background: linear-gradient(90deg, #ef4444, #e11d48);
+	background: linear-gradient(90deg, var(--hsw-offer-stock-from), var(--hsw-offer-stock-to));
 }
 
 .hsw-offer__stockmeta {
@@ -529,10 +569,10 @@
 	inline-size: 36px;
 	block-size: 36px;
 	padding: 0;
-	border: 1px solid #e2e8f0;
+	border: 1px solid var(--hsw-offer-arrow-border);
 	border-radius: 50%;
-	background: #fff;
-	color: #334155;
+	background: var(--hsw-offer-arrow-bg);
+	color: var(--hsw-offer-arrow-text);
 	box-shadow: 0 8px 20px rgb(0 0 0 / 18%);
 	cursor: pointer;
 	transition: background-color .2s ease, color .2s ease, transform .2s ease;
@@ -540,8 +580,8 @@
 
 .hsw-offer__arrow:hover,
 .hsw-offer__arrow:focus-visible {
-	background: #f8fafc;
-	color: var(--hsw-offer-accent);
+	background: var(--hsw-offer-arrow-bg-hover);
+	color: var(--hsw-offer-arrow-text-hover);
 }
 
 .hsw-offer__arrow:active {
@@ -569,7 +609,7 @@
 	padding: 28px 18px;
 	border: 1px dashed rgb(255 255 255 / 35%);
 	border-radius: 14px;
-	color: #fff;
+	color: var(--hsw-offer-empty-text);
 	font-size: 14px;
 	text-align: center;
 }

@@ -6,6 +6,16 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.283] - 2026-11-14
+
+### Added
+- **Full colour controls for «آفر حامی‌شاپ»:** campaign title/subtitle, badge background/text/icon, lead icon background/colour, timer background/text/label, CTA normal/hover, shell text, empty state, card border, media background normal/hover, old price, discount badge, divider, stock track and gradient, four note variants (green/amber/blue/red), and arrow normal/hover. Every control maps to a CSS custom property; defaults preserve the original design.
+- **Heading tag control:** the campaign title can be `h2`, `h3`, `div` or `span`; default remains `h2` for a correct document outline.
+
+### Notes
+- Decorative translucent glows and shadow alpha remain stylesheet-owned; they are not brand colours and are intentionally kept stable.
+- No new external assets; CSS/JS stay conditional and the widget remains isolated from the loop styles.
+
 ## [1.11.282] - 2026-11-14
 
 ### Performance

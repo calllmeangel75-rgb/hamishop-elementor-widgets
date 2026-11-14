@@ -84,6 +84,21 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		);
 
 		$this->add_control(
+			'offer_title_tag',
+			array(
+				'label'   => __( 'تگ عنوان', 'hamishop-elementor-widgets' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'h2',
+				'options' => array(
+					'h2'   => 'H2',
+					'h3'   => 'H3',
+					'div'  => 'div',
+					'span' => 'span',
+				),
+			)
+		);
+
+		$this->add_control(
 			'offer_sub',
 			array(
 				'label'       => __( 'زیرعنوان', 'hamishop-elementor-widgets' ),
@@ -316,6 +331,119 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		$this->end_controls_section();
 	}
 
+	/**
+	 * One color control mapped to a CSS custom property on the widget root.
+	 *
+	 * @param string $id      Control id.
+	 * @param string $label   Label.
+	 * @param string $var     CSS custom property.
+	 * @param string $default Default value.
+	 * @param bool   $alpha   Allow alpha channel.
+	 * @return void
+	 */
+	private function offer_color_control( $id, $label, $var, $default, $alpha = false ) {
+		$this->add_control(
+			$id,
+			array(
+				'label'     => $label,
+				'type'      => Controls_Manager::COLOR,
+				'default'   => $default,
+				'alpha'     => $alpha,
+				'selectors' => array( '{{WRAPPER}} .hsw-offer' => $var . ': {{VALUE}};' ),
+			)
+		);
+	}
+
+	/**
+	 * Every brand colour exposed by the offer widget.
+	 *
+	 * The decorative translucent glows stay in the stylesheet; these controls
+	 * cover the text, backgrounds, borders, badges, stock meter and arrows.
+	 */
+	private function controls_offer_colors() {
+		$groups = array(
+			array(
+				'label' => __( 'رنگ‌های کارت کمپین', 'hamishop-elementor-widgets' ),
+				'items' => array(
+					'offer_lead_title_color' => array( __( 'عنوان', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-title', '#ffffff', false ),
+					'offer_lead_sub_color'   => array( __( 'زیرعنوان', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-sub', 'rgba(255, 241, 242, 0.9)', true ),
+					'offer_lead_badge_bg'    => array( __( 'پس‌زمینه بج', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-badge-bg', 'rgba(255, 255, 255, 0.15)', true ),
+					'offer_lead_badge_text'  => array( __( 'متن بج', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-badge-text', '#ffffff', false ),
+					'offer_lead_badge_icon'  => array( __( 'آیکن بج', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-badge-icon', '#fde047', false ),
+					'offer_lead_icon_bg'     => array( __( 'پس‌زمینه آیکن وسط', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-icon-bg', 'rgba(255, 255, 255, 0.15)', true ),
+					'offer_lead_icon_color'  => array( __( 'آیکن وسط', 'hamishop-elementor-widgets' ), '--hsw-offer-lead-icon-color', '#ffffff', false ),
+					'offer_timer_bg'         => array( __( 'پس‌زمینه تایمر', 'hamishop-elementor-widgets' ), '--hsw-offer-timer-bg', 'rgba(0, 0, 0, 0.35)', true ),
+					'offer_timer_text'       => array( __( 'متن تایمر', 'hamishop-elementor-widgets' ), '--hsw-offer-timer-text', '#ffffff', false ),
+					'offer_timer_label'      => array( __( 'زیرنویس تایمر', 'hamishop-elementor-widgets' ), '--hsw-offer-timer-label', 'rgba(255, 241, 242, 0.8)', true ),
+					'offer_cta_bg'           => array( __( 'پس‌زمینه دکمه', 'hamishop-elementor-widgets' ), '--hsw-offer-cta-bg', '#ffffff', false ),
+					'offer_cta_text'         => array( __( 'متن دکمه', 'hamishop-elementor-widgets' ), '--hsw-offer-cta-text', '#d91238', false ),
+					'offer_cta_bg_hover'     => array( __( 'پس‌زمینه دکمه (هاور)', 'hamishop-elementor-widgets' ), '--hsw-offer-cta-bg-hover', '#fff1f2', false ),
+					'offer_cta_text_hover'  => array( __( 'متن دکمه (هاور)', 'hamishop-elementor-widgets' ), '--hsw-offer-cta-text-hover', '#d91238', false ),
+					'offer_shell_text'       => array( __( 'متن پوسته', 'hamishop-elementor-widgets' ), '--hsw-offer-shell-text', '#ffffff', false ),
+					'offer_empty_text'       => array( __( 'متن حالت خالی', 'hamishop-elementor-widgets' ), '--hsw-offer-empty-text', '#ffffff', false ),
+				),
+			),
+			array(
+				'label' => __( 'رنگ‌های کارت محصول', 'hamishop-elementor-widgets' ),
+				'items' => array(
+					'offer_card_border_color' => array( __( 'حاشیه کارت', 'hamishop-elementor-widgets' ), '--hsw-offer-card-border', '#f1f5f9', false ),
+					'offer_media_bg'          => array( __( 'پس‌زمینه تصویر', 'hamishop-elementor-widgets' ), '--hsw-offer-media-bg', '#f8fafc', false ),
+					'offer_media_bg_hover'    => array( __( 'پس‌زمینه تصویر (هاور)', 'hamishop-elementor-widgets' ), '--hsw-offer-media-bg-hover', '#f1f5f9', false ),
+					'offer_old_price'         => array( __( 'قیمت قدیمی', 'hamishop-elementor-widgets' ), '--hsw-offer-old', '#94a3b8', false ),
+					'offer_discount_bg'       => array( __( 'پس‌زمینه بج تخفیف', 'hamishop-elementor-widgets' ), '--hsw-offer-discount-bg', '#d91238', false ),
+					'offer_discount_text'     => array( __( 'متن بج تخفیف', 'hamishop-elementor-widgets' ), '--hsw-offer-discount-text', '#ffffff', false ),
+					'offer_divider'           => array( __( 'خط جداکننده', 'hamishop-elementor-widgets' ), '--hsw-offer-divider', '#f1f5f9', false ),
+				),
+			),
+			array(
+				'label' => __( 'نوار موجودی', 'hamishop-elementor-widgets' ),
+				'items' => array(
+					'offer_stock_track' => array( __( 'ریل نوار', 'hamishop-elementor-widgets' ), '--hsw-offer-stock-track', '#f1f5f9', false ),
+					'offer_stock_from'  => array( __( 'شروع رنگ نوار', 'hamishop-elementor-widgets' ), '--hsw-offer-stock-from', '#ef4444', false ),
+					'offer_stock_to'    => array( __( 'پایان رنگ نوار', 'hamishop-elementor-widgets' ), '--hsw-offer-stock-to', '#e11d48', false ),
+				),
+			),
+			array(
+				'label' => __( 'برچسب‌های کارت', 'hamishop-elementor-widgets' ),
+				'items' => array(
+					'offer_note_green_bg'    => array( __( 'برچسب سبز — پس‌زمینه', 'hamishop-elementor-widgets' ), '--hsw-offer-note-green-bg', '#ecfdf5', false ),
+					'offer_note_green_text'  => array( __( 'برچسب سبز — متن', 'hamishop-elementor-widgets' ), '--hsw-offer-note-green-text', '#047857', false ),
+					'offer_note_amber_bg'    => array( __( 'برچسب کهربایی — پس‌زمینه', 'hamishop-elementor-widgets' ), '--hsw-offer-note-amber-bg', '#fffbeb', false ),
+					'offer_note_amber_text'  => array( __( 'برچسب کهربایی — متن', 'hamishop-elementor-widgets' ), '--hsw-offer-note-amber-text', '#b45309', false ),
+					'offer_note_blue_bg'     => array( __( 'برچسب آبی — پس‌زمینه', 'hamishop-elementor-widgets' ), '--hsw-offer-note-blue-bg', '#eff6ff', false ),
+					'offer_note_blue_text'   => array( __( 'برچسب آبی — متن', 'hamishop-elementor-widgets' ), '--hsw-offer-note-blue-text', '#1d4ed8', false ),
+					'offer_note_red_bg'      => array( __( 'برچسب قرمز — پس‌زمینه', 'hamishop-elementor-widgets' ), '--hsw-offer-note-red-bg', '#fff1f2', false ),
+					'offer_note_red_text'    => array( __( 'برچسب قرمز — متن', 'hamishop-elementor-widgets' ), '--hsw-offer-note-red-text', '#d91238', false ),
+				),
+			),
+			array(
+				'label' => __( 'فلش‌ها', 'hamishop-elementor-widgets' ),
+				'items' => array(
+					'offer_arrow_bg'         => array( __( 'پس‌زمینه فلش', 'hamishop-elementor-widgets' ), '--hsw-offer-arrow-bg', '#ffffff', false ),
+					'offer_arrow_text'       => array( __( 'آیکن فلش', 'hamishop-elementor-widgets' ), '--hsw-offer-arrow-text', '#334155', false ),
+					'offer_arrow_border'     => array( __( 'حاشیه فلش', 'hamishop-elementor-widgets' ), '--hsw-offer-arrow-border', '#e2e8f0', false ),
+					'offer_arrow_bg_hover'   => array( __( 'پس‌زمینه فلش (هاور)', 'hamishop-elementor-widgets' ), '--hsw-offer-arrow-bg-hover', '#f8fafc', false ),
+					'offer_arrow_text_hover' => array( __( 'آیکن فلش (هاور)', 'hamishop-elementor-widgets' ), '--hsw-offer-arrow-text-hover', '#d91238', false ),
+				),
+			),
+		);
+
+		foreach ( $groups as $index => $group ) {
+			$this->add_control(
+				'offer_colors_group_' . (int) $index . '_h',
+				array(
+					'label'     => $group['label'],
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+				)
+			);
+
+			foreach ( $group['items'] as $id => $item ) {
+				$this->offer_color_control( $id, $item[0], $item[1], $item[2], ! empty( $item[3] ) );
+			}
+		}
+	}
+
 	private function controls_offer_style() {
 		$this->start_controls_section(
 			'sec_offer_style',
@@ -394,6 +522,8 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 				'selectors' => array( '{{WRAPPER}} .hsw-offer' => '--hsw-offer-muted: {{VALUE}};' ),
 			)
 		);
+
+		$this->controls_offer_colors();
 
 		$this->add_control(
 			'offer_max_width',
@@ -956,7 +1086,11 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		if ( '' !== $badge ) {
 			echo '<span class="hsw-offer__lead-badge">' . HSW_Helpers::icon( 'bolt' ) . '<span>' . esc_html( $badge ) . '</span></span>';
 		}
-		echo '<h2 class="hsw-offer__lead-title">' . wp_kses_post( nl2br( esc_html( $title ) ) ) . '</h2>';
+		$title_tag = (string) ( $s['offer_title_tag'] ?? 'h2' );
+		if ( ! in_array( $title_tag, array( 'h2', 'h3', 'div', 'span' ), true ) ) {
+			$title_tag = 'h2';
+		}
+		echo '<' . $title_tag . ' class="hsw-offer__lead-title">' . wp_kses_post( nl2br( esc_html( $title ) ) ) . '</' . $title_tag . '>';
 		if ( '' !== $sub ) {
 			echo '<p class="hsw-offer__lead-sub">' . esc_html( $sub ) . '</p>';
 		}
