@@ -2383,7 +2383,7 @@ msgstr ""
 msgid "برای این حساب ایمیل معتبری ثبت نشده است."
 msgstr ""
 
-#: includes/class-hsw-order-auth.php:368
+#: includes/class-hsw-order-auth.php:392
 msgid "برای این سفارش ایمیل صورتحساب ثبت نشده است. برای مشاهدهٔ جزئیات، وارد حساب کاربری خود شوید."
 msgstr ""
 
@@ -3851,7 +3851,8 @@ msgstr ""
 msgid "تلاش بیش از حد"
 msgstr ""
 
-#: includes/class-hsw-order-auth.php:396
+#: includes/class-hsw-order-auth.php:375
+#: includes/class-hsw-order-auth.php:420
 msgid "تلاش‌های ناموفق بیش از حد مجاز بود. لطفاً کمی بعد دوباره امتحان کنید."
 msgstr ""
 
@@ -12022,8 +12023,8 @@ msgstr ""
 msgid "نشانی ایمیل صورتحساب (مثلاً user@example.com)"
 msgstr ""
 
-#: includes/class-hsw-order-auth.php:386
-#: includes/class-hsw-order-auth.php:404
+#: includes/class-hsw-order-auth.php:410
+#: includes/class-hsw-order-auth.php:428
 msgid "نشانی ایمیل وارد شده با ایمیل صورتحساب این سفارش مطابقت ندارد."
 msgstr ""
 
