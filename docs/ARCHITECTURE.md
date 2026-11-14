@@ -40,7 +40,7 @@ includes/
   class-hsw-archive-base.php     پایهٔ آرشیو (پارامترها، filter_url، ترم‌ها)
   class-hsw-product-base.php     پایهٔ صفحهٔ محصول
   class-hsw-{cart,checkout,pay,complete,blog}-base.php
-  class-hsw-widget-manager.php   کاتالوگ ۶۲ ویجت + صفحهٔ روشن/خاموش + مهاجرت
+  class-hsw-widget-manager.php   کاتالوگ ۶۳ ویجت + صفحهٔ روشن/خاموش + مهاجرت
   class-hsw-palette.php          تنها منبع توکن رنگ
   class-hsw-assets.php           ثبت شرطی CSS/JS، نسخه‌گذاری، min/dev
   class-hsw-upgrader.php         کار پس‌زمینهٔ آپدیت (کش المنتور + مهاجرت)
@@ -51,7 +51,7 @@ includes/
   class-hsw-wallet*.php          کیف پول و درگاه داخلی
   class-hsw-invoice.php          فاکتور چاپی A4
   trait-hsw-style-kit.php        helperهای کنترل استایل
-widgets/                          ۶۲ ویجت، هر فایل یک کلاس
+widgets/                          ۶۳ ویجت، هر فایل یک کلاس
 assets/css|js|fonts|img/          دارایی‌ها + نسخهٔ .min
 tools/                            ساخت دارایی، POT، اسپرایت، فونت، ZIP، تولید مستند
 tests/                            هارنس PHP + پروب‌های مرورگری
@@ -148,7 +148,7 @@ hamishop-elementor-widgets.php
 
 **چطور کار می‌کند:**
 - `catalog()` هفت گروه را تعریف می‌کند؛ هر گروه `general` (ویجت اصلی) و `parts` (بخش‌های مستقل) دارد.
-- `defaults()` همهٔ `general`ها را برمی‌گرداند (۱۵ مورد)؛ `parts` (۴۷ مورد) پیش‌فرض خاموش‌اند.
+- `defaults()` همهٔ `general`ها را برمی‌گرداند (۱۶ مورد)؛ `parts` (۴۷ مورد) پیش‌فرض خاموش‌اند.
 - دو مهاجرت یک‌باره وجود دارد: `maybe_add_header_widgets()` دو هدر را به نصب‌های قدیمی اضافه می‌کند و `maybe_add_post_widget()` ویجت نوشتهٔ تکی را. هر دو با آپشن پرچم محافظت شده‌اند و **فقط یک‌بار** اجرا می‌شوند.
 
 **تله‌ها:**
@@ -222,6 +222,7 @@ HSW_Palette::css()  →  html:root { --hsw-primary, --hsw-accent, --hsw-pal-surf
 | کش | `DONOTCACHEPAGE` روی مسیرهای اختصاصی (فاکتور، ورکر تلگرام، وبهوک) |
 
 **تله‌ها:**
+- **IP واقعی پشت پروکسی:** `HSW_Throttle::ip()` مقدار `REMOTE_ADDR` را تنها وقتی با هدرهای `CF-Connecting-IP` / `X-Real-IP` / `X-Forwarded-For` جایگزین می‌کند که آدرس اتصال در فهرست پروکسی‌های مورد اعتماد باشد. لوپ‌بک (`127.0.0.0/8` و `::1/128`) پیش‌فرض مورد اعتماد است تا Nginx هم‌میزبان → LiteSpeed/PHP-FPM IP کلاینت را از `X-Forwarded-For` بگیرد؛ بدون آن همهٔ مشتری‌ها یک باکت مشترک داشتند و پنج تلاش ناموفق یک نفر کل فروشگاه را قفل می‌کرد. اگر پروکسی روی ماشین دیگری است، محدودهٔ آن را با فیلتر `hsw_trusted_proxies` اضافه کنید؛ هدرهای forwarding را از آدرس‌های ناشناس باور نکنید. فرم تأیید ایمیل سفارش با باکت `verify_order:{order_id}:{ip}` (۵ خطا / ۶۰۰ ثانیه) و سقف سراسری `verify_order_all:{order_id}` (۲۵ خطا / ۶۰۰ ثانیه) محافظت می‌شود و فقط خطاها شمرده می‌شوند.
 - `guard_admin_url()` روی `init:1` اجرا می‌شود ولی برای مسیرهای معمولی **قبل از** خواندن `.htaccess` خارج می‌شود؛ اگر شرط‌ها را جابه‌جا کنید، هر درخواست یک خواندن فایل اضافه می‌گیرد.
 - قاعدهٔ `.htaccess` فقط با فعال/غیرفعال‌سازی افزونه نوشته و پاک می‌شود؛ تغییر اسلاگ بدون ذخیرهٔ مجدد تنظیمات، قاعده را به‌روز نمی‌کند.
 

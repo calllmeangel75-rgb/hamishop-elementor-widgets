@@ -1,1 +1,18 @@
+# Keep the working tree identical to the repository blobs on every platform.
+# The 1.11.277 ZIP was built from a CRLF checkout and could not be reproduced.
+* text=auto eol=lf
+
+# Generated/binary assets must never be line-ending converted.
+*.zip binary
+*.woff2 binary
+*.woff binary
+*.ttf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+
 tests/ export-ignore

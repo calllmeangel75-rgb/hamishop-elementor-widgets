@@ -18,3 +18,7 @@ tests/qa/out/
 
 # playwright-cli snapshots from local visual checks
 .playwright-cli/
+
+# Python bytecode from local build scripts
+__pycache__/
+*.pyc

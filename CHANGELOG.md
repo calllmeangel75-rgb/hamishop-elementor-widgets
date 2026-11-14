@@ -6,6 +6,21 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.278] - 2026-11-14
+
+### Fixed
+- **Private route pages are never cached:** `HSW_Cache_Guard` now recognizes the shortcodes the setup screen writes (`[hamishop_complete]`, `[hamishop_payment]`, `[hamishop_pay]`, `[hamishop_account]`, `[hsw_account]`), and a request carrying both `?order=` and `?key=` is marked private even before page content is inspected. `/complete/` previously served cached HTML to guests because only Elementor widget names were matched.
+- **Order e-mail verification moved to `template_redirect`:** success sets the HttpOnly/SameSite=Lax cookie (Secure on HTTPS) and redirects with 303 (PRG); failure renders the error without a cookie.
+- **Verification throttle:** five failed attempts per order + IP in 600 seconds, plus a 25-attempt per-order ceiling; the sixth failure answers 429 with `Retry-After`. Only failures increment; a correct e-mail clears the shared and current-IP buckets.
+- **Real client IP behind Nginx → LiteSpeed:** loopback addresses are trusted by default so `X-Forwarded-For` yields the client IP; remote proxies are added with `hsw_trusted_proxies`.
+- **Only `hsw_verify_email` activates verification:** the generic `email` field no longer authorizes the order.
+- **Empty billing e-mail:** the completion card explains that e-mail verification is impossible and offers the account login instead of a form that always fails.
+- **Widget count:** documentation now consistently says 63 widgets (16 main + 47 parts).
+
+### Build
+- `tools/build-release.py` normalizes text files to LF and writes deterministic ZIP entries, so the archive is reproducible from a checkout. The release ZIP is committed under `release-downloads/`.
+- Release notes from 1.11.274 and 1.11.276 were moved from the repository root to `docs/archive/release-notes/`.
+
 ## [1.11.277] - 2026-11-12
 
 ### Fixed

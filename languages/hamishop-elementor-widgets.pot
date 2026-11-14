@@ -674,13 +674,15 @@ msgstr ""
 #: includes/class-hsw-assets.php:933
 #: includes/class-hsw-assets.php:954
 #: includes/class-hsw-assets.php:982
-#: includes/class-hsw-checkout-base.php:172
-#: includes/class-hsw-checkout-base.php:233
+#: includes/class-hsw-checkout-base.php:164
+#: includes/class-hsw-checkout-base.php:189
+#: includes/class-hsw-checkout-base.php:250
 #: widgets/class-hsw-widget-complete-actions.php:95
 #: widgets/class-hsw-widget-complete-actions.php:260
 #: widgets/class-hsw-widget-complete-hero.php:222
-#: widgets/class-hsw-widget-complete-hero.php:307
-#: widgets/class-hsw-widget-complete-hero.php:396
+#: widgets/class-hsw-widget-complete-hero.php:300
+#: widgets/class-hsw-widget-complete-hero.php:325
+#: widgets/class-hsw-widget-complete-hero.php:414
 msgid "ادامه خرید"
 msgstr ""
 
@@ -852,7 +854,7 @@ msgstr ""
 msgid "از حساب خود خارج شده‌اید. %s"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:183
+#: includes/class-hsw-checkout-base.php:200
 msgid "از خرید شما سپاسگزاریم؛ جزئیات سفارش برای شما ثبت شد."
 msgstr ""
 
@@ -1848,8 +1850,8 @@ msgstr ""
 msgid "این سفارش در حساب شما وجود ندارد."
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:156
-#: widgets/class-hsw-widget-complete-hero.php:291
+#: includes/class-hsw-checkout-base.php:173
+#: widgets/class-hsw-widget-complete-hero.php:309
 msgid "این سفارش متعلق به یک حساب کاربری ثبت‌شده است. برای مشاهدهٔ جزئیات سفارش، لطفاً نشانی ایمیل صورتحساب سفارش را وارد کنید یا وارد حساب خود شوید."
 msgstr ""
 
@@ -2381,6 +2383,15 @@ msgstr ""
 msgid "برای این حساب ایمیل معتبری ثبت نشده است."
 msgstr ""
 
+#: includes/class-hsw-order-auth.php:368
+msgid "برای این سفارش ایمیل صورتحساب ثبت نشده است. برای مشاهدهٔ جزئیات، وارد حساب کاربری خود شوید."
+msgstr ""
+
+#: includes/class-hsw-checkout-base.php:161
+#: widgets/class-hsw-widget-complete-hero.php:297
+msgid "برای این سفارش ایمیل صورتحساب ثبت نشده است؛ تأیید با ایمیل ممکن نیست. برای مشاهدهٔ جزئیات، ابتدا وارد حساب کاربری خود شوید."
+msgstr ""
+
 #: widgets/class-hsw-widget-checkout-address.php:561
 msgid "برای این سفارش فقط نام و شماره تماس لازم است؛ لینک دانلود پس از پرداخت به ایمیل شما ارسال می‌شود."
 msgstr ""
@@ -2466,6 +2477,11 @@ msgstr ""
 
 #: includes/class-hsw-invoice.php:138
 msgid "برای مشاهدهٔ این فاکتور دسترسی ندارید."
+msgstr ""
+
+#: includes/class-hsw-checkout-base.php:160
+#: widgets/class-hsw-widget-complete-hero.php:296
+msgid "برای مشاهدهٔ سفارش وارد شوید"
 msgstr ""
 
 #: widgets/class-hsw-widget-account.php:92
@@ -3083,8 +3099,8 @@ msgstr ""
 msgid "تأیید دریافت وجه برای امتیاز"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:155
-#: widgets/class-hsw-widget-complete-hero.php:290
+#: includes/class-hsw-checkout-base.php:172
+#: widgets/class-hsw-widget-complete-hero.php:308
 msgid "تأیید دسترسی به سفارش"
 msgstr ""
 
@@ -3100,8 +3116,8 @@ msgstr ""
 msgid "تأیید و فعال‌سازی"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:166
-#: widgets/class-hsw-widget-complete-hero.php:301
+#: includes/class-hsw-checkout-base.php:183
+#: widgets/class-hsw-widget-complete-hero.php:319
 msgid "تأیید و مشاهدهٔ سفارش"
 msgstr ""
 
@@ -3161,7 +3177,7 @@ msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:131
 #: widgets/class-hsw-widget-complete-hero.php:143
-#: widgets/class-hsw-widget-complete-hero.php:349
+#: widgets/class-hsw-widget-complete-hero.php:367
 msgid "تاریخ ثبت"
 msgstr ""
 
@@ -3831,6 +3847,14 @@ msgstr ""
 msgid "تقویم شمسی"
 msgstr ""
 
+#: includes/class-hsw-order-auth.php:105
+msgid "تلاش بیش از حد"
+msgstr ""
+
+#: includes/class-hsw-order-auth.php:396
+msgid "تلاش‌های ناموفق بیش از حد مجاز بود. لطفاً کمی بعد دوباره امتحان کنید."
+msgstr ""
+
 #: includes/class-hsw-account-auth.php:1789
 msgid "تلاش‌های ناموفق زیاد بود؛ تا %s دقیقه دیگر نمی‌توانید ورود دوعاملی را تغییر دهید."
 msgstr ""
@@ -4059,7 +4083,7 @@ msgstr ""
 msgid "توضیحات دسته‌بندی"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:421
+#: includes/class-hsw-plugin.php:422
 msgid "توضیحات محصول"
 msgstr ""
 
@@ -4216,11 +4240,11 @@ msgstr ""
 msgid "ثبت دیدگاه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:131
+#: includes/class-hsw-plugin.php:132
 msgid "ثبت دیدگاه انجام نشد. لطفاً دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:153
+#: includes/class-hsw-plugin.php:154
 msgid "ثبت دیدگاه برای این بخش فعال نیست."
 msgstr ""
 
@@ -4758,31 +4782,31 @@ msgstr ""
 msgid "حالت‌های ویژه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:522
+#: includes/class-hsw-plugin.php:523
 msgid "حامی — هدر و ناوبری"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:526
+#: includes/class-hsw-plugin.php:527
 msgid "حامی — ویجت‌های آرشیو محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:525
+#: includes/class-hsw-plugin.php:526
 msgid "حامی — ویجت‌های سبد خرید و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:523
+#: includes/class-hsw-plugin.php:524
 msgid "حامی — ویجت‌های صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:524
+#: includes/class-hsw-plugin.php:525
 msgid "حامی — ویجت‌های لوپ محصولات"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:528
+#: includes/class-hsw-plugin.php:529
 msgid "حامی — ویجت‌های مجله و وبلاگ"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:527
+#: includes/class-hsw-plugin.php:528
 msgid "حامی — پنل حساب کاربری"
 msgstr ""
 
@@ -4952,7 +4976,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:1340
 #: includes/class-hsw-account.php:1356
-#: includes/class-hsw-checkout-base.php:231
+#: includes/class-hsw-checkout-base.php:248
 msgid "حساب کاربری من"
 msgstr ""
 
@@ -4969,7 +4993,7 @@ msgid "حسابی به این تلگرام متصل نیست و ثبت‌نام 
 msgstr ""
 
 #: includes/class-hsw-header-base.php:420
-#: includes/class-hsw-plugin.php:401
+#: includes/class-hsw-plugin.php:402
 msgid "خالی"
 msgstr ""
 
@@ -5283,7 +5307,7 @@ msgstr ""
 msgid "خطا در بروزرسانی روش ارسال"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:138
+#: includes/class-hsw-plugin.php:139
 msgid "خطا در ثبت دیدگاه"
 msgstr ""
 
@@ -5579,7 +5603,7 @@ msgstr ""
 msgid "درخواست فاکتور رسمی از سوی مشتری ثبت شد."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:147
+#: includes/class-hsw-plugin.php:148
 msgid "درخواست نامعتبر است."
 msgstr ""
 
@@ -6175,7 +6199,7 @@ msgstr ""
 msgid "دیدگاه"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:210
+#: includes/class-hsw-plugin.php:211
 msgid "دیدگاه تکراری شناسایی شد؛ به نظر می‌رسد این دیدگاه را قبلاً ارسال کرده‌اید."
 msgstr ""
 
@@ -6187,12 +6211,12 @@ msgstr ""
 msgid "دیدگاه شما"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:262
+#: includes/class-hsw-plugin.php:263
 #: widgets/class-hsw-widget-post-page.php:1328
 msgid "دیدگاه شما با موفقیت ثبت شد و پس از تأیید مدیر نمایش داده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:261
+#: includes/class-hsw-plugin.php:262
 msgid "دیدگاه شما با موفقیت ثبت شد."
 msgstr ""
 
@@ -6219,7 +6243,7 @@ msgstr ""
 msgid "دیدگاه‌ها و فرم ثبت نظر"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:423
+#: includes/class-hsw-plugin.php:424
 msgid "دیدگاه‌ها و نظرات"
 msgstr ""
 
@@ -7435,7 +7459,7 @@ msgstr ""
 msgid "روش ورود دوعاملی"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:203
+#: includes/class-hsw-checkout-base.php:220
 #: widgets/class-hsw-widget-complete-order.php:157
 #: widgets/class-hsw-widget-complete-order.php:342
 msgid "روش پرداخت"
@@ -7854,11 +7878,11 @@ msgid "سفارش شما از سقف خرید {threshold} تومان عبور ک
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:66
-#: widgets/class-hsw-widget-complete-hero.php:327
+#: widgets/class-hsw-widget-complete-hero.php:345
 msgid "سفارش شما با موفقیت ثبت شد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:180
+#: includes/class-hsw-checkout-base.php:197
 msgid "سفارش شما ثبت شد"
 msgstr ""
 
@@ -7875,11 +7899,11 @@ msgid "سفارش پیدا نشد"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:184
-#: widgets/class-hsw-widget-complete-hero.php:392
+#: widgets/class-hsw-widget-complete-hero.php:410
 msgid "سفارش یافت نشد"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:224
+#: includes/class-hsw-checkout-base.php:241
 msgid "سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است."
 msgstr ""
 
@@ -8090,7 +8114,7 @@ msgstr ""
 msgid "شفافیت غیرفعال"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:211
+#: includes/class-hsw-plugin.php:212
 msgid "شما با سرعت زیادی در حال ارسال دیدگاه هستید. لطفاً کمی صبر کنید."
 msgstr ""
 
@@ -8187,10 +8211,10 @@ msgstr ""
 msgid "شمارهٔ تماس"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:187
+#: includes/class-hsw-checkout-base.php:204
 #: widgets/class-hsw-widget-complete-hero.php:111
 #: widgets/class-hsw-widget-complete-hero.php:123
-#: widgets/class-hsw-widget-complete-hero.php:341
+#: widgets/class-hsw-widget-complete-hero.php:359
 msgid "شمارهٔ سفارش"
 msgstr ""
 
@@ -9942,22 +9966,22 @@ msgstr ""
 msgid "لطفاً %s ثانیه دیگر دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:160
+#: includes/class-hsw-plugin.php:161
 msgid "لطفاً امتیاز خود را (از ۱ تا ۵ ستاره) انتخاب کنید."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:166
-#: includes/class-hsw-plugin.php:214
+#: includes/class-hsw-plugin.php:167
+#: includes/class-hsw-plugin.php:215
 msgid "لطفاً متن دیدگاه خود را بنویسید."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:173
-#: includes/class-hsw-plugin.php:212
+#: includes/class-hsw-plugin.php:174
+#: includes/class-hsw-plugin.php:213
 msgid "لطفاً نام و نشانی ایمیل خود را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-plugin.php:176
-#: includes/class-hsw-plugin.php:213
+#: includes/class-hsw-plugin.php:177
+#: includes/class-hsw-plugin.php:214
 msgid "لطفاً یک نشانی ایمیل معتبر وارد کنید."
 msgstr ""
 
@@ -10251,7 +10275,7 @@ msgid "مبلغ کالاها ({count} قلم)"
 msgstr ""
 
 #: includes/class-hsw-account.php:2212
-#: includes/class-hsw-checkout-base.php:195
+#: includes/class-hsw-checkout-base.php:212
 #: includes/class-hsw-invoice.php:328
 #: includes/class-hsw-invoice.php:377
 #: widgets/class-hsw-widget-complete-order.php:136
@@ -11370,7 +11394,7 @@ msgstr ""
 msgid "مشاهده همه"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:229
+#: includes/class-hsw-checkout-base.php:246
 msgid "مشاهدهٔ سفارش"
 msgstr ""
 
@@ -11410,7 +11434,7 @@ msgstr ""
 msgid "مشخصات تحویل سفارش (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-plugin.php:422
+#: includes/class-hsw-plugin.php:423
 #: widgets/class-hsw-widget-product-tabs.php:70
 #: widgets/class-hsw-widget-product-tabs.php:303
 msgid "مشخصات فنی"
@@ -11993,12 +12017,13 @@ msgstr ""
 msgid "نشانی /%1$s/ در اختیار صفحهٔ دیگری است؛ صفحه با نشانی /%2$s/ ساخته می‌شود تا آن صفحه دست‌نخورده بماند."
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:165
-#: widgets/class-hsw-widget-complete-hero.php:300
+#: includes/class-hsw-checkout-base.php:182
+#: widgets/class-hsw-widget-complete-hero.php:318
 msgid "نشانی ایمیل صورتحساب (مثلاً user@example.com)"
 msgstr ""
 
-#: includes/class-hsw-order-auth.php:246
+#: includes/class-hsw-order-auth.php:386
+#: includes/class-hsw-order-auth.php:404
 msgid "نشانی ایمیل وارد شده با ایمیل صورتحساب این سفارش مطابقت ندارد."
 msgstr ""
 
@@ -12056,7 +12081,7 @@ msgstr ""
 msgid "نشان‌کردن در همین مرورگر"
 msgstr ""
 
-#: includes/class-hsw-order-auth.php:233
+#: includes/class-hsw-order-auth.php:357
 msgid "نشست امنیتی منقضی شده است. لطفاً صفحه را تازه‌سازی و دوباره امتحان کنید."
 msgstr ""
 
@@ -12920,7 +12945,7 @@ msgid "ورود / حساب کاربری"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-hero.php:203
-#: widgets/class-hsw-widget-complete-hero.php:395
+#: widgets/class-hsw-widget-complete-hero.php:413
 msgid "ورود / مشاهدهٔ سفارش‌ها"
 msgstr ""
 
@@ -12961,8 +12986,10 @@ msgstr ""
 msgid "ورود به حساب"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:171
-#: widgets/class-hsw-widget-complete-hero.php:306
+#: includes/class-hsw-checkout-base.php:163
+#: includes/class-hsw-checkout-base.php:188
+#: widgets/class-hsw-widget-complete-hero.php:299
+#: widgets/class-hsw-widget-complete-hero.php:324
 msgid "ورود به حساب کاربری"
 msgstr ""
 
@@ -13056,10 +13083,10 @@ msgstr ""
 msgid "وضعیت باز شدن شاخه‌ها"
 msgstr ""
 
-#: includes/class-hsw-checkout-base.php:191
+#: includes/class-hsw-checkout-base.php:208
 #: widgets/class-hsw-widget-complete-hero.php:151
 #: widgets/class-hsw-widget-complete-hero.php:163
-#: widgets/class-hsw-widget-complete-hero.php:357
+#: widgets/class-hsw-widget-complete-hero.php:375
 msgid "وضعیت سفارش"
 msgstr ""
 

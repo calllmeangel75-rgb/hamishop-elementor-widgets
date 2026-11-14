@@ -25,6 +25,18 @@ class HSW_Order_Auth {
 
 	const COOKIE_PREFIX            = 'hsw_verify_order_';
 
+	/** Wrong billing-email attempts allowed per order + IP inside the window. */
+	const THROTTLE_LIMIT  = 5;
+
+	/** One shared window for both verification buckets, in seconds. */
+	const THROTTLE_WINDOW = 600;
+
+	/** Ceiling for all IPs trying one order, so the per-IP bucket cannot be farmed. */
+	const ORDER_THROTTLE_LIMIT = 25;
+
+	/** @var bool Guard against registering the request hook twice. */
+	private static $hooked = false;
+
 	/** @var array<int,string> Runtime memory cache of evaluated auth status per order id. */
 	private static $status_cache = array();
 
@@ -33,6 +45,113 @@ class HSW_Order_Auth {
 
 	/** @var string|null Last error message from email submission. */
 	private static $submission_error = null;
+
+	/**
+	 * Register the request-time verification handler.
+	 *
+	 * The form used to be processed while the widget rendered, which is too late
+	 * to set a cookie reliably (output may already have started) and impossible
+	 * to answer with a real 429. `template_redirect` runs before the template is
+	 * selected and before any output.
+	 */
+	public static function init() {
+		if ( self::$hooked ) {
+			return;
+		}
+		self::$hooked = true;
+		add_action( 'template_redirect', array( __CLASS__, 'handle_verification_request' ), 99 );
+	}
+
+	/**
+	 * Process a POSTed verification form on template_redirect.
+	 *
+	 * Success: set the cookie, then redirect (PRG) to the same URL so a refresh
+	 * does not resubmit the email. Failure: keep the request and let the widget
+	 * render the stored error. Over the limit: a real 429 with Retry-After.
+	 *
+	 * @return void
+	 */
+	public static function handle_verification_request() {
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) : '';
+		if ( 'POST' !== $method || ! isset( $_POST['hsw_verify_email'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- presence only; process_submission() verifies the nonce.
+			return;
+		}
+
+		$order = self::request_order();
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		$result = self::process_submission( $order );
+
+		if ( 'success' === $result['status'] ) {
+			$url = self::current_url();
+			if ( '' !== $url && ! headers_sent() ) {
+				wp_safe_redirect( $url, 303 );
+				exit;
+			}
+			return;
+		}
+
+		if ( 'throttled' === $result['status'] ) {
+			status_header( 429 );
+			header( 'Retry-After: ' . (int) $result['retry_after'] );
+			if ( function_exists( 'nocache_headers' ) ) {
+				nocache_headers();
+			}
+			if ( function_exists( 'wp_die' ) ) {
+				wp_die(
+					esc_html( $result['message'] ),
+					esc_html__( 'تلاش بیش از حد', 'hamishop-elementor-widgets' ),
+					array( 'response' => 429 )
+				);
+			}
+			exit;
+		}
+	}
+
+	/**
+	 * Resolve the order named by the current request.
+	 *
+	 * The verification form posts back to its own URL, so the order id is in
+	 * `?order=` on the standalone page or in the `order-received` query var on
+	 * WooCommerce's endpoint.
+	 *
+	 * @return WC_Order|false
+	 */
+	private static function request_order() {
+		if ( ! function_exists( 'wc_get_order' ) ) {
+			return false;
+		}
+
+		$order_id = 0;
+		if ( isset( $_GET['order'] ) && is_scalar( $_GET['order'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$order_id = absint( wp_unslash( $_GET['order'] ) );
+		} elseif ( function_exists( 'get_query_var' ) ) {
+			$order_id = absint( get_query_var( 'order-received' ) );
+		}
+
+		$order = $order_id > 0 ? wc_get_order( $order_id ) : false;
+
+		return $order instanceof WC_Order ? $order : false;
+	}
+
+	/**
+	 * Current front-end URL, without the POST body.
+	 *
+	 * @return string
+	 */
+	private static function current_url() {
+		$host = isset( $_SERVER['HTTP_HOST'] ) ? (string) wp_unslash( $_SERVER['HTTP_HOST'] ) : '';
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		if ( '' === $host || '' === $uri ) {
+			return '';
+		}
+
+		$scheme = ( function_exists( 'is_ssl' ) && is_ssl() ) ? 'https' : 'http';
+
+		return esc_url_raw( $scheme . '://' . $host . $uri );
+	}
 
 	/**
 	 * Evaluate access authorization for viewing an order.
@@ -116,13 +235,9 @@ class HSW_Order_Auth {
 		}
 
 		// Check if already verified in session, recent checkout, or secure cookie.
+		// The POST itself is handled earlier, on template_redirect, and redirects
+		// here with the cookie already set.
 		if ( self::is_verified( $order ) ) {
-			return self::STATUS_GRANTED;
-		}
-
-		// Check if submitting the verification form in this request.
-		$post_check = self::check_submission( $order );
-		if ( true === $post_check ) {
 			return self::STATUS_GRANTED;
 		}
 
@@ -202,24 +317,33 @@ class HSW_Order_Auth {
 	}
 
 	/**
-	 * Process verification form submission if present.
+	 * Validate and process the verification form for one order.
+	 *
+	 * Only the dedicated `hsw_verify_email` field is accepted. A generic
+	 * `email` field belongs to unrelated forms that can share the same URL
+	 * (newsletter, comments) and must never activate this path.
 	 *
 	 * @param WC_Order $order Order.
-	 * @return bool|null True if verified, false if failed, null if no submission.
+	 * @return array{status:string,message:string,retry_after:int} status is
+	 *         `success`, `error`, `ignored`, or `throttled`.
 	 */
-	public static function check_submission( $order ) {
-		$submitted_email = '';
-		if ( isset( $_POST['hsw_verify_email'] ) ) {
-			$submitted_email = sanitize_email( wp_unslash( $_POST['hsw_verify_email'] ) );
-		} elseif ( isset( $_POST['email'] ) ) {
-			$submitted_email = sanitize_email( wp_unslash( $_POST['email'] ) );
+	public static function process_submission( $order ) {
+		$result = array(
+			'status'      => 'ignored',
+			'message'     => '',
+			'retry_after' => 0,
+		);
+
+		if ( ! $order instanceof WC_Order ) {
+			return $result;
 		}
 
-		if ( '' === $submitted_email ) {
-			return null;
+		if ( ! isset( $_POST['hsw_verify_email'] ) ) {
+			return $result;
 		}
 
-		$order_id = (int) $order->get_id();
+		$submitted_email = sanitize_email( wp_unslash( $_POST['hsw_verify_email'] ) );
+		$order_id        = (int) $order->get_id();
 
 		// Check nonces (support both HamiShop nonce and WC core nonce).
 		$nonce_ok = false;
@@ -230,21 +354,102 @@ class HSW_Order_Auth {
 		}
 
 		if ( ! $nonce_ok ) {
-			self::$submission_error = __( 'نشست امنیتی منقضی شده است. لطفاً صفحه را تازه‌سازی و دوباره امتحان کنید.', 'hamishop-elementor-widgets' );
-			return false;
+			return self::fail( __( 'نشست امنیتی منقضی شده است. لطفاً صفحه را تازه‌سازی و دوباره امتحان کنید.', 'hamishop-elementor-widgets' ) );
 		}
 
 		$order_email = strtolower( trim( (string) $order->get_billing_email() ) );
-		$input_email = strtolower( trim( $submitted_email ) );
+		$input_email = strtolower( trim( (string) $submitted_email ) );
 
-		if ( '' !== $order_email && hash_equals( $order_email, $input_email ) ) {
-			self::mark_verified( $order );
-			self::$submission_error = null;
-			return true;
+		/*
+		 * An order with no billing email can never be verified. Say so plainly
+		 * instead of showing a form that is guaranteed to fail.
+		 */
+		if ( '' === $order_email ) {
+			return self::fail( __( 'برای این سفارش ایمیل صورتحساب ثبت نشده است. برای مشاهدهٔ جزئیات، وارد حساب کاربری خود شوید.', 'hamishop-elementor-widgets' ) );
 		}
 
-		self::$submission_error = __( 'نشانی ایمیل وارد شده با ایمیل صورتحساب این سفارش مطابقت ندارد.', 'hamishop-elementor-widgets' );
-		return false;
+		/*
+		 * A correct email is the proof itself; it is never blocked by the wrong-
+		 * guess counter (otherwise a customer who mistyped six times could not
+		 * open their own order for ten minutes). Only failures are counted.
+		 */
+		if ( hash_equals( $order_email, $input_email ) ) {
+			self::clear_throttles( $order );
+			self::mark_verified( $order );
+			self::$submission_error = null;
+
+			$result['status'] = 'success';
+			return $result;
+		}
+
+		if ( ! class_exists( 'HSW_Throttle' ) ) {
+			return self::fail( __( 'نشانی ایمیل وارد شده با ایمیل صورتحساب این سفارش مطابقت ندارد.', 'hamishop-elementor-widgets' ) );
+		}
+
+		$ip     = HSW_Throttle::ip();
+		$bucket = 'verify_order:' . $order_id . ':' . $ip;
+		$per_ip = HSW_Throttle::hit( $bucket, self::THROTTLE_LIMIT, self::THROTTLE_WINDOW );
+		$all    = HSW_Throttle::hit( 'verify_order_all:' . $order_id, self::ORDER_THROTTLE_LIMIT, self::THROTTLE_WINDOW );
+
+		if ( empty( $per_ip['allowed'] ) || empty( $all['allowed'] ) ) {
+			$retry = max( (int) $per_ip['retry_after'], (int) $all['retry_after'], 1 );
+			self::$submission_error = __( 'تلاش‌های ناموفق بیش از حد مجاز بود. لطفاً کمی بعد دوباره امتحان کنید.', 'hamishop-elementor-widgets' );
+
+			$result['status']      = 'throttled';
+			$result['message']     = self::$submission_error;
+			$result['retry_after'] = $retry;
+			return $result;
+		}
+
+		return self::fail( __( 'نشانی ایمیل وارد شده با ایمیل صورتحساب این سفارش مطابقت ندارد.', 'hamishop-elementor-widgets' ) );
+	}
+
+	/**
+	 * Record a non-throttled failure and return its result.
+	 *
+	 * @param string $message Error message.
+	 * @return array{status:string,message:string,retry_after:int}
+	 */
+	private static function fail( $message ) {
+		self::$submission_error = $message;
+
+		return array(
+			'status'      => 'error',
+			'message'     => $message,
+			'retry_after' => 0,
+		);
+	}
+
+	/**
+	 * Remove both verification buckets for an order after a correct email.
+	 *
+	 * @param WC_Order $order Order.
+	 * @return void
+	 */
+	private static function clear_throttles( $order ) {
+		if ( ! class_exists( 'HSW_Throttle' ) ) {
+			return;
+		}
+
+		$order_id = (int) $order->get_id();
+		HSW_Throttle::clear( 'verify_order_all:' . $order_id );
+
+		/*
+		 * The per-IP bucket key includes the IP. Clearing the current IP's bucket
+		 * is enough for the customer who just proved the email; other addresses
+		 * keep their own counters and cannot use this success to reset theirs.
+		 */
+		HSW_Throttle::clear( 'verify_order:' . $order_id . ':' . HSW_Throttle::ip() );
+	}
+
+	/**
+	 * Does this order have a billing email that can be verified?
+	 *
+	 * @param WC_Order $order Order.
+	 * @return bool
+	 */
+	public static function has_billing_email( $order ) {
+		return $order instanceof WC_Order && '' !== trim( (string) $order->get_billing_email() );
 	}
 
 	/**
@@ -262,23 +467,31 @@ class HSW_Order_Auth {
 			WC()->session->set( 'wc_verify_email_' . $order_id, true );
 		}
 
-		if ( ! headers_sent() ) {
-			$hash   = self::verification_hash( $order );
-			$expire = time() + ( 2 * DAY_IN_SECONDS );
-			$secure = is_ssl();
-			setcookie(
-				self::COOKIE_PREFIX . $order_id,
-				$hash,
-				array(
-					'expires'  => $expire,
-					'path'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
-					'domain'   => defined( 'COOKIE_DOMAIN' ) ? COOKIE_DOMAIN : '',
-					'secure'   => $secure,
-					'httponly' => true,
-					'samesite' => 'Lax',
-				)
-			);
+		$hash = self::verification_hash( $order );
+
+		/* Make the cookie visible to the rest of this request as well. */
+		$_COOKIE[ self::COOKIE_PREFIX . $order_id ] = $hash;
+
+		if ( headers_sent( $file, $line ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( sprintf( 'HamiShop: verification cookie not sent, output started at %s:%d', $file, $line ) );
+			return;
 		}
+
+		$expire = time() + ( 2 * DAY_IN_SECONDS );
+		$secure = is_ssl();
+		setcookie(
+			self::COOKIE_PREFIX . $order_id,
+			$hash,
+			array(
+				'expires'  => $expire,
+				'path'     => defined( 'COOKIEPATH' ) && COOKIEPATH ? COOKIEPATH : '/',
+				'domain'   => defined( 'COOKIE_DOMAIN' ) ? COOKIE_DOMAIN : '',
+				'secure'   => $secure,
+				'httponly' => true,
+				'samesite' => 'Lax',
+			)
+		);
 	}
 
 	/**

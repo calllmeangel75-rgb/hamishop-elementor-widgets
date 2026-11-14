@@ -40,6 +40,7 @@ final class HSW_Plugin {
                 HSW_Branding::instance();
                 HSW_Security::instance();
                 HSW_Cache_Guard::instance();
+                HSW_Order_Auth::init();
                 HSW_Optimizer::instance();
                 HSW_Throttle::instance();
                 HSW_Wallet::instance();

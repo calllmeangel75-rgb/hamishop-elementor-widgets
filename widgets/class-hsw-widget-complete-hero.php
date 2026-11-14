@@ -285,6 +285,24 @@ class HSW_Widget_Complete_Hero extends HSW_Complete_Base {
 
         $error = class_exists( 'HSW_Order_Auth' ) ? HSW_Order_Auth::get_submission_error() : null;
 
+        /*
+         * A registered order with no billing email cannot be verified by email at
+         * all. Showing the form would promise something that can never succeed;
+         * send the visitor to the account login instead.
+         */
+        if ( class_exists( 'HSW_Order_Auth' ) && ! HSW_Order_Auth::has_billing_email( $order ) ) {
+            echo '<div class="hsw-cdhero__card is-verify">';
+            echo '<span class="hsw-cdhero__ring is-verify">' . HSW_Helpers::icon( 'lock', 'is-fill' ) . '</span>';
+            echo '<h2 class="hsw-cdhero__t">' . esc_html__( 'برای مشاهدهٔ سفارش وارد شوید', 'hamishop-elementor-widgets' ) . '</h2>';
+            echo '<p class="hsw-cdhero__s">' . esc_html__( 'برای این سفارش ایمیل صورتحساب ثبت نشده است؛ تأیید با ایمیل ممکن نیست. برای مشاهدهٔ جزئیات، ابتدا وارد حساب کاربری خود شوید.', 'hamishop-elementor-widgets' ) . '</p>';
+            echo '<div class="hsw-cdhero__acts">';
+            echo '<a class="hsw-cdhero__btn is-primary" href="' . esc_url( $account ) . '">' . esc_html__( 'ورود به حساب کاربری', 'hamishop-elementor-widgets' ) . '</a>';
+            echo '<a class="hsw-cdhero__btn is-ghost" href="' . esc_url( $this->shop_url() ) . '">' . esc_html__( 'ادامه خرید', 'hamishop-elementor-widgets' ) . '</a>';
+            echo '</div>';
+            echo '</div>';
+            return;
+        }
+
         echo '<div class="hsw-cdhero__card is-verify">';
         echo '<span class="hsw-cdhero__ring is-verify">' . HSW_Helpers::icon( 'mail', 'is-fill' ) . '</span>';
         echo '<h2 class="hsw-cdhero__t">' . esc_html__( 'تأیید دسترسی به سفارش', 'hamishop-elementor-widgets' ) . '</h2>';

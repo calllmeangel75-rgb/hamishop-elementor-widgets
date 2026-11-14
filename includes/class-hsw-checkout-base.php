@@ -151,6 +151,23 @@ abstract class HSW_Checkout_Base extends HSW_Cart_Base {
                         }
                         $error = class_exists( 'HSW_Order_Auth' ) ? HSW_Order_Auth::get_submission_error() : null;
 
+                        /*
+                         * No billing email means email verification is impossible.
+                         * Show the login route instead of a form that always fails.
+                         */
+                        if ( class_exists( 'HSW_Order_Auth' ) && ! HSW_Order_Auth::has_billing_email( $raw ) ) {
+                                echo HSW_Helpers::icon( 'lock', 'hsw-done-final__ic is-verify', true );
+                                echo '<h2 class="hsw-done-final__t">' . esc_html__( 'برای مشاهدهٔ سفارش وارد شوید', 'hamishop-elementor-widgets' ) . '</h2>';
+                                echo '<p class="hsw-done-final__s">' . esc_html__( 'برای این سفارش ایمیل صورتحساب ثبت نشده است؛ تأیید با ایمیل ممکن نیست. برای مشاهدهٔ جزئیات، ابتدا وارد حساب کاربری خود شوید.', 'hamishop-elementor-widgets' ) . '</p>';
+                                echo '<div class="hsw-done-final__acts">';
+                                echo '<a class="hsw-done-final__btn is-primary" href="' . esc_url( $account ) . '">' . esc_html__( 'ورود به حساب کاربری', 'hamishop-elementor-widgets' ) . '</a>';
+                                echo '<a class="hsw-done-final__btn is-ghost" href="' . esc_url( $shop ) . '">' . esc_html__( 'ادامه خرید', 'hamishop-elementor-widgets' ) . '</a>';
+                                echo '</div>';
+                                echo '</div>';
+                                echo '</section>';
+                                return;
+                        }
+
                         echo HSW_Helpers::icon( 'mail', 'hsw-done-final__ic is-verify', true );
                         echo '<h2 class="hsw-done-final__t">' . esc_html__( 'تأیید دسترسی به سفارش', 'hamishop-elementor-widgets' ) . '</h2>';
                         echo '<p class="hsw-done-final__s">' . esc_html__( 'این سفارش متعلق به یک حساب کاربری ثبت‌شده است. برای مشاهدهٔ جزئیات سفارش، لطفاً نشانی ایمیل صورتحساب سفارش را وارد کنید یا وارد حساب خود شوید.', 'hamishop-elementor-widgets' ) . '</p>';

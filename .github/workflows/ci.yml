@@ -274,6 +274,15 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/order-auth-wp.php
 
+      # The setup screen creates the route pages with shortcodes, not Elementor
+      # data; the cache guard has to recognize both forms and ?order=&key=.
+      - name: Private route pages are not cached (disposable WordPress)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/cache-guard-private-wp.php
+
       - name: Article archive pagination (disposable WordPress)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php

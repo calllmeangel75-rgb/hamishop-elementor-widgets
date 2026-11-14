@@ -278,9 +278,11 @@ class HSW_Throttle {
 	/**
 	 * Is this address a CDN / reverse-proxy we accept headers from?
 	 *
-	 * Defaults to Cloudflare's published IPv4 AND IPv6 ranges (stable, published
-	 * at cloudflare.com/ips). Extend with the `hsw_trusted_proxies` filter —
-	 * for example ArvanCloud's ranges on an Iranian shop behind their CDN:
+	 * Defaults to loopback (a same-host Nginx → LiteSpeed/PHP-FPM proxy), plus
+	 * Cloudflare's published IPv4 AND IPv6 ranges (stable, published at
+	 * cloudflare.com/ips). Extend with the `hsw_trusted_proxies` filter — for
+	 * example a private load-balancer range, or ArvanCloud's ranges on an
+	 * Iranian shop behind their CDN:
 	 *
 	 *     add_filter( 'hsw_trusted_proxies', function ( $r ) {
 	 *         return array_merge( $r, array( 'x.x.x.x/y' ) );
@@ -301,6 +303,14 @@ class HSW_Throttle {
 		$ranges = (array) apply_filters(
 			'hsw_trusted_proxies',
 			array(
+				/*
+				 * Same-host reverse proxies. Nginx forwarding to LiteSpeed/PHP-FPM on
+				 * the same machine connects from 127.0.0.1, so without this every client
+				 * shared one throttle bucket and five bad guesses locked the whole shop.
+				 * A remote proxy must be added explicitly through hsw_trusted_proxies.
+				 */
+				'127.0.0.0/8',
+				'::1/128',
 				'173.245.48.0/20',
 				'103.21.244.0/22',
 				'103.22.200.0/22',

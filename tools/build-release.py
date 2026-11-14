@@ -35,6 +35,18 @@ TOP_LEVEL_DIRS = ("assets", "includes", "widgets", "templates", "languages")
 EXCLUDED_NAMES = {".DS_Store", "Thumbs.db", "__pycache__"}
 EXCLUDED_SUFFIXES = (".pyc", ".log", ".zip", ".bak", ".tmp")
 
+# Text files are normalized to LF before they enter the ZIP. A Windows checkout
+# with core.autocrlf=true otherwise produces a CRLF archive that cannot be
+# reproduced from the repository blobs (the 1.11.277 ZIP had this problem).
+TEXT_SUFFIXES = (
+    ".php", ".txt", ".md", ".css", ".js", ".json", ".pot", ".po",
+    ".html", ".svg", ".xml", ".map",
+)
+
+# One fixed timestamp for every entry makes the archive byte-identical between
+# builds. 1980-01-01 is the earliest ZIP timestamp.
+FIXED_ZIP_TIME = (1980, 1, 1, 0, 0, 0)
+
 
 def version_from_header():
     text = open(MAIN, encoding="utf-8").read()
@@ -47,7 +59,19 @@ def version_from_header():
 def add_file(archive, path, arcname):
     if not os.path.isfile(path):
         raise SystemExit("Missing required release file: " + path)
-    archive.write(path, arcname, compress_type=zipfile.ZIP_DEFLATED)
+
+    with open(path, "rb") as handle:
+        data = handle.read()
+
+    is_text = path.lower().endswith(TEXT_SUFFIXES) or os.path.basename(path) == "LICENSE"
+    if is_text:
+        data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+    info = zipfile.ZipInfo(arcname, date_time=FIXED_ZIP_TIME)
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.create_system = 3  # Unix, so permissions are stable across platforms.
+    info.external_attr = 0o644 << 16
+    archive.writestr(info, data)
 
 
 def release_files(version):

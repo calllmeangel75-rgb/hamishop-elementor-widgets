@@ -34,6 +34,17 @@ class HSW_Cache_Guard {
 		'hsw-complete-',
 		'hsw-cart-',
 		'hsw-account',
+		/*
+		 * Shortcode-rendered route pages. The setup screen creates these pages
+		 * with a shortcode rather than Elementor data, so the widget needles
+		 * above never matched them and /complete/ was cached for guests.
+		 * Keep every shortcode the setup screen or account page can render.
+		 */
+		'[hamishop_complete',
+		'[hamishop_payment',
+		'[hamishop_pay',
+		'[hamishop_account',
+		'[hsw_account',
 	);
 
 	/** @var HSW_Cache_Guard|null */
@@ -132,6 +143,18 @@ class HSW_Cache_Guard {
 			return true;
 		}
 		if ( get_query_var( 'order-received' ) ) {
+			return true;
+		}
+
+		/*
+		 * A completion URL always carries both values. Treat it as private even
+		 * before the page-content check, because the order key itself is private
+		 * and a cached copy of the page can be served with another visitor's key
+		 * still in the URL.
+		 */
+		$request_order = isset( $_GET['order'] ) && is_scalar( $_GET['order'] ) ? trim( (string) wp_unslash( $_GET['order'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$request_key   = isset( $_GET['key'] ) && is_scalar( $_GET['key'] ) ? trim( (string) wp_unslash( $_GET['key'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( '' !== $request_order && '' !== $request_key ) {
 			return true;
 		}
 
