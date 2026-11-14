@@ -6,6 +6,12 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.279] - 2026-11-14
+
+### Fixed
+- **Throttle is checked before the email comparison:** `HSW_Order_Auth::process_submission()` now peeks at `verify_order:{order_id}:{ip}` and `verify_order_all:{order_id}` before comparing the submitted address. When either bucket is full, the request returns `throttled` (HTTP 429 with `Retry-After`) even if the email is correct. `peek()` is read-only, so blocked requests are not counted; failed attempts still increment the counters, and a correct email inside an open window clears both buckets.
+- **Regression coverage:** after five failures, both the sixth wrong email and the correct email are throttled; another IP remains independent; after the window expires (simulated by expiring the bucket row) the correct email is accepted again.
+
 ## [1.11.278] - 2026-11-14
 
 ### Fixed

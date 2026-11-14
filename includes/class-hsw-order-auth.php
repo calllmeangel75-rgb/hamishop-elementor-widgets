@@ -357,6 +357,30 @@ class HSW_Order_Auth {
 			return self::fail( __( 'نشست امنیتی منقضی شده است. لطفاً صفحه را تازه‌سازی و دوباره امتحان کنید.', 'hamishop-elementor-widgets' ) );
 		}
 
+		/*
+		 * Check the counters before looking at the submitted address. Once the
+		 * bucket is full, every further attempt is 429 — including a correct
+		 * address. Otherwise an attacker could keep guessing through the window,
+		 * and the customer would see a success that the next request loses again.
+		 * `peek()` is read-only: this check does not count as an attempt.
+		 */
+		if ( class_exists( 'HSW_Throttle' ) ) {
+			$ip         = HSW_Throttle::ip();
+			$per_ip_peek = HSW_Throttle::peek( 'verify_order:' . $order_id . ':' . $ip );
+			$all_peek    = HSW_Throttle::peek( 'verify_order_all:' . $order_id );
+
+			if ( ( (int) $per_ip_peek['hits'] >= self::THROTTLE_LIMIT && (int) $per_ip_peek['retry_after'] > 0 )
+				|| ( (int) $all_peek['hits'] >= self::ORDER_THROTTLE_LIMIT && (int) $all_peek['retry_after'] > 0 ) ) {
+				$retry = max( (int) $per_ip_peek['retry_after'], (int) $all_peek['retry_after'], 1 );
+				self::$submission_error = __( 'تلاش‌های ناموفق بیش از حد مجاز بود. لطفاً کمی بعد دوباره امتحان کنید.', 'hamishop-elementor-widgets' );
+
+				$result['status']      = 'throttled';
+				$result['message']     = self::$submission_error;
+				$result['retry_after'] = $retry;
+				return $result;
+			}
+		}
+
 		$order_email = strtolower( trim( (string) $order->get_billing_email() ) );
 		$input_email = strtolower( trim( (string) $submitted_email ) );
 
@@ -369,9 +393,9 @@ class HSW_Order_Auth {
 		}
 
 		/*
-		 * A correct email is the proof itself; it is never blocked by the wrong-
-		 * guess counter (otherwise a customer who mistyped six times could not
-		 * open their own order for ten minutes). Only failures are counted.
+		 * A correct email is the proof itself while the bucket is still open.
+		 * Only failures are counted; success clears both counters so the next
+		 * verification starts from zero.
 		 */
 		if ( hash_equals( $order_email, $input_email ) ) {
 			self::clear_throttles( $order );

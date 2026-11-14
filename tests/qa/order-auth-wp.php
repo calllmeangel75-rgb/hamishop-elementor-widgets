@@ -237,6 +237,17 @@ HSW_Thankyou::fire( $order_reg );
 $check( 'Emailed link unverified: thankyou hook is blocked', array() === $thankyou_fired );
 
 /*
+ * Only hsw_verify_email activates this path. A generic email field belongs to
+ * other forms on the same URL and must be ignored.
+ */
+HSW_Order_Auth::reset();
+$_SERVER['REMOTE_ADDR'] = '203.0.113.11';
+$_POST = array( 'email' => 'customer_a@example.com' );
+$generic = HSW_Order_Auth::process_submission( $order_reg );
+$check( 'Generic email field is ignored', 'ignored' === $generic['status'] );
+$check( 'Generic email field cannot authorize the order', HSW_Order_Auth::STATUS_NEED_VERIFICATION === HSW_Order_Auth::check_order_access( $order_reg, $reg_key ) );
+
+/*
  * Step 4b: failures are counted per order + IP. Five wrong emails answer with
  * an error; the sixth is throttled. A different IP starts from zero.
  */
@@ -263,7 +274,22 @@ $sixth = HSW_Order_Auth::process_submission( $order_reg );
 $check( 'Wrong billing email 6: throttled', 'throttled' === $sixth['status'] );
 $check( 'Wrong billing email 6: Retry-After window is positive', (int) $sixth['retry_after'] > 0 );
 
+/*
+ * The throttle is checked before the address. A correct email on the same,
+ * exhausted bucket must also be 429 rather than slipping through.
+ */
+HSW_Order_Auth::reset();
+$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
+$_POST = array(
+	'hsw_order_nonce'  => $nonce,
+	'hsw_verify_email' => 'customer_a@example.com',
+);
+$correct_locked = HSW_Order_Auth::process_submission( $order_reg );
+$check( 'Correct billing email on an exhausted IP bucket: throttled', 'throttled' === $correct_locked['status'] );
+$check( 'Correct billing email on an exhausted IP bucket: no cookie', ! isset( $_COOKIE[ HSW_Order_Auth::COOKIE_PREFIX . $reg_id ] ) );
+
 /* Another IP is counted independently (the bucket key includes the client IP). */
+HSW_Order_Auth::reset();
 $_SERVER['REMOTE_ADDR'] = '203.0.113.11';
 $_POST = array(
 	'hsw_order_nonce'  => $nonce,
@@ -271,6 +297,59 @@ $_POST = array(
 );
 $other_ip = HSW_Order_Auth::process_submission( $order_reg );
 $check( 'A different IP is not locked by the first IP', 'error' === $other_ip['status'] );
+
+/*
+ * A correct email on the second IP still works while its own bucket is open,
+ * and clears the shared and second-IP buckets. The first IP's per-IP bucket
+ * must remain full.
+ */
+HSW_Order_Auth::reset();
+$_POST = array(
+	'hsw_order_nonce'  => $nonce,
+	'hsw_verify_email' => 'customer_a@example.com',
+);
+$correct_other_ip = HSW_Order_Auth::process_submission( $order_reg );
+$check( 'Correct billing email on the second IP: succeeds', 'success' === $correct_other_ip['status'] );
+
+$global_left = HSW_Throttle::peek( 'verify_order_all:' . $reg_id );
+$second_ip_left = HSW_Throttle::peek( 'verify_order:' . $reg_id . ':203.0.113.11' );
+$first_ip_left  = HSW_Throttle::peek( 'verify_order:' . $reg_id . ':203.0.113.10' );
+$check( 'Correct billing email clears the per-order bucket', 0 === (int) $global_left['hits'] );
+$check( 'Correct billing email clears the second IP bucket', 0 === (int) $second_ip_left['hits'] );
+$check( 'Another IP success does not clear the first IP bucket', 5 === (int) $first_ip_left['hits'] );
+
+/* The first IP stays locked until its window expires. */
+HSW_Order_Auth::reset();
+$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
+unset( $_COOKIE[ HSW_Order_Auth::COOKIE_PREFIX . $reg_id ] );
+$_POST = array(
+	'hsw_order_nonce'  => $nonce,
+	'hsw_verify_email' => 'customer_a@example.com',
+);
+$still_locked = HSW_Order_Auth::process_submission( $order_reg );
+$check( 'First IP is still throttled after another IP succeeds', 'throttled' === $still_locked['status'] );
+
+/*
+ * Simulate the end of the 600-second window by expiring the per-IP row, then
+ * the correct email must be accepted again.
+ */
+$wpdb->query(
+	$wpdb->prepare(
+		"UPDATE {$wpdb->prefix}hsw_throttle SET expires = %d WHERE bucket = %s",
+		time() - 1,
+		'verify_order:' . $reg_id . ':203.0.113.10'
+	)
+);
+$expired_peek = HSW_Throttle::peek( 'verify_order:' . $reg_id . ':203.0.113.10' );
+$check( 'Expired per-IP bucket is no longer counted', 0 === (int) $expired_peek['hits'] );
+
+HSW_Order_Auth::reset();
+$_POST = array(
+	'hsw_order_nonce'  => $nonce,
+	'hsw_verify_email' => 'customer_a@example.com',
+);
+$correct = HSW_Order_Auth::process_submission( $order_reg );
+$check( 'Correct billing email after the window: succeeds', 'success' === $correct['status'] );
 
 /*
  * The signed-in browser behind Nginx -> LiteSpeed connects from loopback and
@@ -285,36 +364,8 @@ $ip_two = HSW_Throttle::ip();
 $check( 'Throttle: loopback proxy forwards real client IP', '198.51.100.7' === $ip_one && '198.51.100.8' === $ip_two );
 $check( 'Throttle: two clients get independent buckets', $ip_one !== $ip_two );
 
-/*
- * Only hsw_verify_email activates this path. A generic email field belongs to
- * other forms on the same URL and must be ignored.
- */
-HSW_Order_Auth::reset();
-$_SERVER['REMOTE_ADDR'] = '203.0.113.11';
-$_POST = array( 'email' => 'customer_a@example.com' );
-$generic = HSW_Order_Auth::process_submission( $order_reg );
-$check( 'Generic email field is ignored', 'ignored' === $generic['status'] );
-$check( 'Generic email field cannot authorize the order', HSW_Order_Auth::STATUS_NEED_VERIFICATION === HSW_Order_Auth::check_order_access( $order_reg, $reg_key ) );
-
-/*
- * Step 4c: the correct email succeeds even after the first IP burned its
- * five attempts, sets the cookie, and clears the shared and per-IP counters.
- */
-HSW_Order_Auth::reset();
-$_SERVER['REMOTE_ADDR'] = '203.0.113.11';
-$_POST = array(
-	'hsw_order_nonce'  => $nonce,
-	'hsw_verify_email' => 'customer_a@example.com',
-);
-$correct = HSW_Order_Auth::process_submission( $order_reg );
-$check( 'Correct billing email: process_submission succeeds', 'success' === $correct['status'] );
 $check( 'Correct billing email: verification cookie is present', isset( $_COOKIE[ HSW_Order_Auth::COOKIE_PREFIX . $reg_id ] ) );
 $check( 'Correct billing email: cookie value matches the order hash', ( $_COOKIE[ HSW_Order_Auth::COOKIE_PREFIX . $reg_id ] ?? '' ) === HSW_Order_Auth::verification_hash( $order_reg ) );
-
-$global_left = HSW_Throttle::peek( 'verify_order_all:' . $reg_id );
-$ip_left     = HSW_Throttle::peek( 'verify_order:' . $reg_id . ':203.0.113.11' );
-$check( 'Correct billing email clears the per-order bucket', 0 === (int) $global_left['hits'] );
-$check( 'Correct billing email clears this IP bucket', 0 === (int) $ip_left['hits'] );
 
 $correct_status = HSW_Order_Auth::check_order_access( $order_reg, $reg_key );
 $check( 'Correct billing email submitted: auth status becomes granted', HSW_Order_Auth::STATUS_GRANTED === $correct_status );

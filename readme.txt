@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.278
+Stable tag: 1.11.279
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.279 =
+* تأیید ایمیل سفارش: بررسی throttle با HSW_Throttle::peek حالا قبل از مقایسهٔ ایمیل انجام می‌شود. وقتی باکت verify_order:{order_id}:{ip} یا verify_order_all:{order_id} پر باشد، حتی ایمیل درست هم 429 با Retry-After می‌گیرد؛ فقط شکست‌ها شمرده می‌شوند و ایمیل درست در حالت عادی باکت‌ها را پاک می‌کند.
+* تست رگرسیون: بعد از پنج خطا، ایمیل غلط ششم و ایمیل درست هر دو 429؛ IP دیگر مستقل؛ و پس از پایان پنجره ایمیل درست دوباره پذیرفته می‌شود.
 
 = 1.11.278 =
 * رفع کش صفحهٔ /complete/ و مسیرهای شورت‌کدی: صفحه‌هایی که setup-pages با [hamishop_complete]، [hamishop_payment] یا [hamishop_account] می‌سازد حالا خصوصی تشخیص داده می‌شوند؛ درخواست دارای order و key هم همیشه no-cache است (Cache-Control: no-store/private و X-HSW-Private: 1).
