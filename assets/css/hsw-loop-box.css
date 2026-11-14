@@ -20,6 +20,5 @@
  */
 .hsw-loop.hsw-loop--box.hsw-loop--hsw-popular,
 .hsw-loop.hsw-loop--box.hsw-loop--hsw-best-sellers {
-	--hsw-loop-box-gutter: clamp(16px, 3%, 32px);
-	padding-inline: var(--hsw-loop-box-gutter);
+	padding-inline: var(--hsw-loop-box-gutter, clamp(16px, 3%, 32px));
 }

@@ -6,6 +6,16 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.285] - 2026-11-14
+
+### Added
+- **Popular/best-sellers box gutter control:** a responsive «گاتر کناری کارت» slider (32px desktop, 16px mobile by default) now drives the boxed loop shell's inline padding through `--hsw-loop-box-gutter`. The CSS fallback remains for existing instances.
+- **Popular empty-state text:** the «محصولی برای نمایش یافت نشد.» message is now editable.
+
+### Notes
+- Header title, tag, subtitle, badge, note and link were already editable under **سربرگ بخش**; tab labels under **تب‌های فیلتر**.
+- The skeleton is only rendered during an AJAX tab switch; initial paint still renders server-side cards. Its shimmer is disabled under `prefers-reduced-motion`.
+
 ## [1.11.284] - 2026-11-14
 
 ### Changed

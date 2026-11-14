@@ -11,6 +11,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Elementor\Controls_Manager;
+
 class HSW_Widget_Popular extends HSW_Widget_Base {
 
 	public function get_name() {
@@ -57,6 +59,15 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
 				'sub'    => __( 'بر اساس علایق و تازه‌ترین ورودی‌های انبار', 'hamishop-elementor-widgets' ),
 				'link_d' => '',
 				'link_m' => '',
+			)
+		);
+		$this->add_control(
+			'empty_text',
+			array(
+				'label'       => __( 'متن حالت خالی', 'hamishop-elementor-widgets' ),
+				'type'        => Controls_Manager::TEXT,
+				'default'     => __( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ),
+				'label_block' => true,
 			)
 		);
 		$this->controls_tabs();
@@ -197,7 +208,7 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
 			}
 
 			if ( empty( $products ) ) {
-				echo '<div class="hsw-loop__empty">' . esc_html__( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ) . '</div>';
+				echo '<div class="hsw-loop__empty">' . esc_html( $this->opt( 'empty_text', __( 'محصولی برای نمایش یافت نشد.', 'hamishop-elementor-widgets' ) ) ) . '</div>';
 			}
 
 			echo '<div class="hsw-loop__row"><div class="hsw-loop__rail" id="' . esc_attr( $rail ) . '" data-hsw-rail data-hsw-src="' . esc_attr( $source ) . '" role="group" aria-label="' . esc_attr( '' !== $title ? $title : __( 'محبوب‌ترین محصولات', 'hamishop-elementor-widgets' ) ) . '" aria-busy="false" tabindex="0">';

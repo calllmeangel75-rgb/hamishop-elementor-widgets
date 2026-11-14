@@ -1926,6 +1926,29 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
 
+                if ( 'box' === $kind ) {
+                        $this->add_responsive_control(
+                                'sec_box_gutter',
+                                array(
+                                        'label'          => __( 'گاتر کناری کارت', 'hamishop-elementor-widgets' ),
+                                        'type'           => Controls_Manager::SLIDER,
+                                        'size_units'     => array( 'px' ),
+                                        'range'          => array(
+                                                'px' => array(
+                                                        'min'  => 0,
+                                                        'max'  => 64,
+                                                        'step' => 1,
+                                                ),
+                                        ),
+                                        'default'        => array( 'size' => 32 ),
+                                        'mobile_default' => array( 'size' => 16 ),
+                                        'selectors'      => array(
+                                                '{{WRAPPER}} .hsw-loop' => '--hsw-loop-box-gutter: {{SIZE}}{{UNIT}};',
+                                        ),
+                                )
+                        );
+                }
+
                 $this->add_responsive_control(
                         'sec_radius',
                         array(

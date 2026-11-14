@@ -76,6 +76,8 @@
 
 گروه‌های کنترل مشترک: `controls_source`، `controls_header`، `controls_tabs`، `controls_card_content`، `controls_theme`، `controls_shell`، `controls_header_style`، `controls_tabs_style`، `controls_card_style`، `controls_badge_style`، `controls_stock_style`، `controls_price_style`، `controls_button_style`، `controls_skeleton_style`
 
+نمونهٔ کنترل‌ها: متن حالت خالی
+
 ### آفر حامی‌شاپ — `hsw-offer`
 
 **اصلی** · کمپین تخفیف با کارت کمپین، تایمر کمپین و تایمر هر محصول.
