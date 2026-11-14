@@ -8,7 +8,7 @@
 |---|---|
 | پیشوند | کلاس‌ها `HSW_` · ویجت‌ها `hsw-` · آپشن‌ها `hsw_` · توکن‌ها `--hsw-` |
 | نیازمندی‌ها | WordPress ≥ ۶.۰ · PHP ≥ ۷.۴ · WooCommerce · Elementor |
-| کد | ۱۲۴ فایل PHP زمان اجرا (۲ ریشه + ۵۹ includes + ۶۲ widgets + ۱ template) · حدود ۶۶٬۰۰۰ خط · ۱۱۳ کلاس · ۶ trait |
+| کد | ۱۲۹ فایل PHP زمان اجرا (۲ ریشه + ۶۳ includes + ۶۳ widgets + ۱ template) · حدود ۶۶٬۰۰۰ خط · ۱۱۷ کلاس · ۶ trait |
 | دارایی‌ها | ۱۹ فایل CSS (۴۸۸ KB کمینه از ۶۷۵ KB سورس) · ۹ فایل JS (۱۷۵ KB کمینه از ۲۸۰ KB) |
 | REST | ۱۹ مسیر در namespace `hsw/v1` |
 | دامنهٔ ترجمه | `hamishop-elementor-widgets` · POT با ۳٬۳۴۸ رشته |
