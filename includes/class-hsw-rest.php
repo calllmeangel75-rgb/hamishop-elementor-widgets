@@ -98,8 +98,8 @@ class HSW_Rest {
                                 'args'                => array(
                                         'type' => array(
                                                 'type'              => 'string',
-                                                'default'           => 'deal',
-                                                'enum'              => array( 'deal', 'best', 'popular' ),
+                                                'default'           => 'best',
+                                                'enum'              => array( 'best', 'popular' ),
                                                 'sanitize_callback' => 'sanitize_key',
                                                 'validate_callback' => 'rest_validate_request_arg',
                                         ),
@@ -444,7 +444,6 @@ class HSW_Rest {
                  * fragment. Match the requested type against the stored widget.
                  */
                 $expected = array(
-                        'deal'    => 'hsw-wonder-deals',
                         'best'    => 'hsw-best-sellers',
                         'popular' => 'hsw-popular',
                 );

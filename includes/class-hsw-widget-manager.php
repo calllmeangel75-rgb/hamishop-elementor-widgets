@@ -198,12 +198,8 @@ final class HSW_Widget_Manager {
 				'category'    => 'hamishop-loop',
 				'icon'        => 'dashicons-grid-view',
 				'accent'      => '#1d4ed8',
-				'description' => __( 'ویجت‌های مستقل صفحه اصلی برای نمایش پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محصولات منتخب و کمپین آفر. هر چهار پیش‌فرض فعال‌اند.', 'hamishop-elementor-widgets' ),
+				'description' => __( 'ویجت‌های مستقل صفحه اصلی برای نمایش پرفروش‌ترین‌ها، محصولات منتخب و کمپین آفر. هر سه پیش‌فرض فعال‌اند.', 'hamishop-elementor-widgets' ),
 				'general'     => array(
-					'hsw-wonder-deals' => array(
-						'label' => __( 'پیشنهاد شگفت‌انگیز', 'hamishop-elementor-widgets' ),
-						'desc'  => __( 'پیشنهاد روز با شمارش معکوس و کاروسل تخفیف.', 'hamishop-elementor-widgets' ),
-					),
 					'hsw-best-sellers' => array(
 						'label' => __( 'پرفروش‌ترین‌ها', 'hamishop-elementor-widgets' ),
 						'desc'  => __( 'کاروسل پرفروش‌ترین‌ها با رتبه‌بندی و دکمه خرید.', 'hamishop-elementor-widgets' ),

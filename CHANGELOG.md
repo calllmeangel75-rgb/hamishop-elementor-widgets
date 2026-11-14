@@ -6,6 +6,15 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.286] - 2026-11-14
+
+### Removed
+- **«پیشنهاد شگفت‌انگیز (HamiShop)» / `hsw-wonder-deals`:** removed the widget file, Elementor registration, widget-manager catalog entry, the dedicated `hsw-loop-deal` stylesheet/asset handle, the editor-only CSS, the REST `deal` loop type, and the obsolete browser probe/test references.
+- Widget count is now **63** (16 general + 47 parts). `hsw-best-sellers`, `hsw-popular` and `hsw-offer` are unchanged.
+
+### Migration note
+- Pages that still contain the removed widget will show Elementor's missing-widget placeholder. Replace it with «پرفروش‌ترین‌ها»، «محبوب‌ترین‌ها / منتخب» or «آفر حامی‌شاپ».
+
 ## [1.11.285] - 2026-11-14
 
 ### Added

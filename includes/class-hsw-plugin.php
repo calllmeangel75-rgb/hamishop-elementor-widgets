@@ -574,7 +574,6 @@ final class HSW_Plugin {
                         HSW_DIR . 'widgets/class-hsw-widget-header-gc.php',
                         HSW_DIR . 'widgets/class-hsw-widget-footer-sticky.php',
 
-                        HSW_DIR . 'widgets/class-hsw-wonder-deals.php',
                         HSW_DIR . 'widgets/class-hsw-best-sellers.php',
                         HSW_DIR . 'widgets/class-hsw-popular.php',
                         HSW_DIR . 'widgets/class-hsw-offer.php',
@@ -667,7 +666,6 @@ final class HSW_Plugin {
                         '\HSW_Widget_Header_Minimal',
                         '\HSW_Widget_Header_GC',
                         '\HSW_Widget_Footer_Sticky',
-                        '\HSW_Widget_Wonder_Deals',
                         '\HSW_Widget_Best_Sellers',
                         '\HSW_Widget_Popular',
                         '\HSW_Widget_Offer',

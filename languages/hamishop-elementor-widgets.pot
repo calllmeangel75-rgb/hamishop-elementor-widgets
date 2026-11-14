@@ -43,15 +43,15 @@ msgstr ""
 msgid "%s رنگ"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1024
+#: includes/class-hsw-widget-manager.php:1020
 msgid "%s صفحه ساخته نشد؛ دسترسی نوشتن را بررسی کنید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1016
+#: includes/class-hsw-widget-manager.php:1012
 msgid "%s صفحه ساخته و به مسیر خرید وصل شد."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1020
+#: includes/class-hsw-widget-manager.php:1016
 msgid "%s صفحهٔ موجود به مسیر خرید وصل شد."
 msgstr ""
 
@@ -94,11 +94,11 @@ msgstr ""
 msgid "Could not write the image file."
 msgstr ""
 
-#: includes/class-hsw-assets.php:1080
+#: includes/class-hsw-assets.php:1072
 msgid "HamiShop (لوکال)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1386
+#: includes/class-hsw-widget-manager.php:1382
 msgid "HamiShop ← برند و لوگو"
 msgstr ""
 
@@ -280,7 +280,7 @@ msgstr ""
 msgid "آدرس باید فقط شامل حروف انگلیسی کوچک، عدد، خط تیره یا زیرخط باشد."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:344
+#: includes/class-hsw-widget-manager.php:340
 #: widgets/class-hsw-widget-checkout-address.php:47
 #: widgets/class-hsw-widget-checkout-address.php:233
 msgid "آدرس تحویل سفارش"
@@ -334,7 +334,7 @@ msgstr ""
 msgid "آدرس لینک"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:407
+#: includes/class-hsw-widget-manager.php:403
 msgid "آدرس و روش تحویل سفارش."
 msgstr ""
 
@@ -384,11 +384,11 @@ msgstr ""
 msgid "آرشیو رسمی محصولات ووکامرس. کلیه کالاها با تضمین اصالت فیزیکی، مهلت تست ۷ روزه و رجیستری معتبر ارائه می‌شوند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:422
+#: includes/class-hsw-widget-manager.php:418
 msgid "آرشیو محصولات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:430
+#: includes/class-hsw-widget-manager.php:426
 msgid "آرشیو یکپارچه با فیلتر، گرید و صفحه‌بندی."
 msgstr ""
 
@@ -400,7 +400,7 @@ msgstr ""
 msgid "آستانهٔ شروع (پیکسل)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:216
+#: includes/class-hsw-widget-manager.php:212
 msgid "آفر حامی‌شاپ"
 msgstr ""
 
@@ -408,7 +408,7 @@ msgstr ""
 msgid "آفر حامی‌شاپ (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1222
+#: includes/class-hsw-widget-manager.php:1218
 msgid "آماده"
 msgstr ""
 
@@ -428,7 +428,7 @@ msgstr ""
 msgid "آکاردئون گارانتی و ارسال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:271
+#: includes/class-hsw-widget-manager.php:267
 msgid "آکاردئون‌ها (موبایل)"
 msgstr ""
 
@@ -666,7 +666,7 @@ msgstr ""
 msgid "اتصال به ربات تلگرام"
 msgstr ""
 
-#: includes/class-hsw-assets.php:881
+#: includes/class-hsw-assets.php:874
 msgid "اتصال را بررسی کنید و صفحه را دوباره باز کنید."
 msgstr ""
 
@@ -697,9 +697,9 @@ msgstr ""
 msgid "اختیاری. اگر خالی باشد، جای مهر در فاکتور خالی می‌ماند."
 msgstr ""
 
-#: includes/class-hsw-assets.php:954
-#: includes/class-hsw-assets.php:975
-#: includes/class-hsw-assets.php:1003
+#: includes/class-hsw-assets.php:947
+#: includes/class-hsw-assets.php:968
+#: includes/class-hsw-assets.php:996
 #: includes/class-hsw-checkout-base.php:164
 #: includes/class-hsw-checkout-base.php:189
 #: includes/class-hsw-checkout-base.php:250
@@ -802,12 +802,12 @@ msgstr ""
 #: includes/class-hsw-free-shipping.php:175
 #: includes/class-hsw-widget-base.php:865
 #: includes/class-hsw-widget-base.php:3169
-#: includes/class-hsw-widget-manager.php:1054
-#: includes/class-hsw-widget-manager.php:1396
+#: includes/class-hsw-widget-manager.php:1050
+#: includes/class-hsw-widget-manager.php:1392
 msgid "ارسال رایگان"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1404
+#: includes/class-hsw-widget-manager.php:1400
 msgid "ارسال رایگان افزونه"
 msgstr ""
 
@@ -869,7 +869,7 @@ msgstr ""
 msgid "ارسال کد دوعاملی ناموفق بود. لطفاً دوباره وارد شوید یا با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:908
+#: includes/class-hsw-assets.php:901
 msgid "ارسال کد ناموفق بود."
 msgstr ""
 
@@ -1110,7 +1110,7 @@ msgstr ""
 msgid "استفاده از صفحهٔ ورود شیشه‌ای با گرادیانت آبی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1461
+#: includes/class-hsw-widget-manager.php:1457
 msgid "استفاده از صفحهٔ ۴۰۴ اختصاصی"
 msgstr ""
 
@@ -1169,7 +1169,7 @@ msgstr ""
 msgid "اطلاعات ارسال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:406
+#: includes/class-hsw-widget-manager.php:402
 #: widgets/class-hsw-widget-complete-delivery.php:46
 #: widgets/class-hsw-widget-complete-delivery.php:196
 msgid "اطلاعات تحویل"
@@ -1256,7 +1256,7 @@ msgstr ""
 msgid "اعمال کد"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:386
+#: includes/class-hsw-widget-manager.php:382
 msgid "اعمال کوپن یا کارت هدیه."
 msgstr ""
 
@@ -1272,7 +1272,7 @@ msgstr ""
 msgid "افزایش تعداد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:987
+#: includes/class-hsw-assets.php:980
 msgid "افزودن"
 msgstr ""
 
@@ -1294,8 +1294,8 @@ msgstr ""
 msgid "افزودن به سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-assets.php:951
-#: includes/class-hsw-assets.php:998
+#: includes/class-hsw-assets.php:944
+#: includes/class-hsw-assets.php:991
 msgid "افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید."
 msgstr ""
 
@@ -1303,11 +1303,11 @@ msgstr ""
 msgid "افزودن به علاقه‌مندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:988
+#: includes/class-hsw-assets.php:981
 msgid "افزوده شد"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1155
+#: includes/class-hsw-widget-manager.php:1151
 msgid "افزونه هیچ صفحه‌ای را خودش نمی‌سازد. دکمهٔ پایین فقط صفحه‌هایی را می‌سازد که وجود ندارند؛ صفحهٔ ساخته‌شدهٔ شما دست‌نخورده می‌ماند و هر دو صفحه noindex می‌شوند."
 msgstr ""
 
@@ -1344,7 +1344,7 @@ msgstr ""
 msgid "اقلام این مرسوله"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:323
+#: includes/class-hsw-widget-manager.php:319
 #: widgets/class-hsw-widget-cart-items.php:59
 #: widgets/class-hsw-widget-cart-items.php:354
 msgid "اقلام سبد خرید"
@@ -1354,7 +1354,7 @@ msgstr ""
 msgid "اقلام سبد خرید (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:360
+#: includes/class-hsw-widget-manager.php:356
 msgid "اقلام مرسوله"
 msgstr ""
 
@@ -1366,7 +1366,7 @@ msgstr ""
 msgid "اقلام گارانتی و ارسال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:403
+#: includes/class-hsw-widget-manager.php:399
 msgid "اقلام، مبلغ و وضعیت سفارش."
 msgstr ""
 
@@ -1451,7 +1451,7 @@ msgstr ""
 msgid "انتخاب دست‌چین از ساعت‌ها و اکسسوری‌های نفیس"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:251
+#: includes/class-hsw-widget-manager.php:247
 msgid "انتخاب رنگ و حافظه"
 msgstr ""
 
@@ -1464,7 +1464,7 @@ msgstr ""
 msgid "انتخاب رنگ:"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:353
+#: includes/class-hsw-widget-manager.php:349
 msgid "انتخاب روز و بازه زمانی تحویل."
 msgstr ""
 
@@ -1477,7 +1477,7 @@ msgstr ""
 msgid "انتخاب روش ارسال (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:349
+#: includes/class-hsw-widget-manager.php:345
 msgid "انتخاب روش ارسال و هزینه آن."
 msgstr ""
 
@@ -1486,11 +1486,11 @@ msgstr ""
 msgid "انتخاب روش پرداخت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1087
+#: includes/class-hsw-widget-manager.php:1083
 msgid "انتخاب سریع"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:252
+#: includes/class-hsw-widget-manager.php:248
 msgid "انتخاب ویژگی‌ها با اتصال زنده به ووکامرس."
 msgstr ""
 
@@ -1523,7 +1523,7 @@ msgstr ""
 msgid "انتقال موجودی از متای قدیمی کیف پول"
 msgstr ""
 
-#: includes/class-hsw-assets.php:900
+#: includes/class-hsw-assets.php:893
 msgid "انجام نشد. دوباره تلاش کنید."
 msgstr ""
 
@@ -1744,7 +1744,7 @@ msgstr ""
 msgid "اگر نوشته‌های بلاگ‌تان را با ویرایشگر بلاک (گوتنبرگ) نوشته‌اید، این گزینه را نزنید؛ استایل بلاک‌ها لازم می‌شود. با فیلتر hsw_keep_block_styles هم می‌توانید فقط استایل بلاک‌ها را نگه دارید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1067
+#: includes/class-hsw-widget-manager.php:1063
 msgid "اگر ویجتی را در یک صفحهٔ ساخته‌شده استفاده کرده‌اید، غیرفعال کردن آن می‌تواند آن بخش را از صفحه حذف کند. ویجت‌های جامع، بخش‌های داخلی خود را مستقل از این تنظیم نمایش می‌دهند."
 msgstr ""
 
@@ -1775,7 +1775,7 @@ msgstr ""
 msgid "ایمیل شما"
 msgstr ""
 
-#: includes/class-hsw-assets.php:899
+#: includes/class-hsw-assets.php:892
 msgid "ایمیل شما تأیید شد."
 msgstr ""
 
@@ -1795,7 +1795,7 @@ msgstr ""
 msgid "ایمیل فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-assets.php:897
+#: includes/class-hsw-assets.php:890
 msgid "ایمیل معتبر وارد کنید."
 msgstr ""
 
@@ -1987,7 +1987,7 @@ msgstr ""
 msgid "این گفتگو بسته شده است. برای موضوع جدید یک گفتگوی تازه بسازید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:894
+#: includes/class-hsw-assets.php:887
 msgid "این گفتگو بسته شود؟ بعد از بستن نمی‌توانید پیام بفرستید."
 msgstr ""
 
@@ -2023,7 +2023,7 @@ msgstr ""
 msgid "با خاموش کردن، نوار در جای خود (static) نمایش داده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1183
+#: includes/class-hsw-widget-manager.php:1179
 msgid "با دکمهٔ پایین ساخته می‌شود و ویجت کامل همین مرحله در آن قرار می‌گیرد."
 msgstr ""
 
@@ -2031,7 +2031,7 @@ msgstr ""
 msgid "با روشن بودن این گزینه به‌روزرسانی خودکار وردپرس و افزونه‌ها متوقف می‌شود."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1335
+#: includes/class-hsw-widget-manager.php:1331
 msgid "با روشن بودن، محصولات ناموجود در همهٔ صفحات فروشگاه و دسته‌بندی‌ها بعد از موجودها نمایش داده می‌شوند؛ ترتیب بقیه (قیمت، جدیدترین، تخفیف) دست‌نخورده می‌ماند."
 msgstr ""
 
@@ -2087,7 +2087,7 @@ msgstr ""
 msgid "باز کردن ربات تلگرام"
 msgstr ""
 
-#: includes/class-hsw-assets.php:911
+#: includes/class-hsw-assets.php:904
 msgid "باز کردن لینک"
 msgstr ""
 
@@ -2097,7 +2097,7 @@ msgstr ""
 msgid "باز کردن منو"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:378
+#: includes/class-hsw-widget-manager.php:374
 msgid "بازبینی آدرس و اطلاعات تحویل."
 msgstr ""
 
@@ -2169,7 +2169,7 @@ msgstr ""
 msgid "بازه‌های ساعت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1071
+#: includes/class-hsw-widget-manager.php:1067
 msgid "بازگردانی پیش‌فرض"
 msgstr ""
 
@@ -2192,7 +2192,7 @@ msgstr ""
 msgid "بازگشت به سفارش‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1507
+#: includes/class-hsw-widget-manager.php:1503
 #: templates/404.php:41
 msgid "بازگشت به صفحهٔ اصلی"
 msgstr ""
@@ -2205,7 +2205,7 @@ msgstr ""
 msgid "بازگشت به فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:415
+#: includes/class-hsw-widget-manager.php:411
 msgid "بازگشت به فروشگاه و مشاهده سفارش‌ها."
 msgstr ""
 
@@ -2265,7 +2265,7 @@ msgstr ""
 msgid "بالا — داخل سربرگ"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1397
+#: includes/class-hsw-widget-manager.php:1393
 msgid "بالای این مبلغ، هزینهٔ ارسال صفر می‌شود و مشتری «ارسال رایگان» می‌بیند."
 msgstr ""
 
@@ -2301,11 +2301,11 @@ msgstr ""
 msgid "بخش (پس‌زمینه و کادر)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1564
+#: includes/class-hsw-widget-manager.php:1560
 msgid "بخش مستقل"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:435
+#: includes/class-hsw-widget-manager.php:431
 msgid "بخش‌های آرشیو"
 msgstr ""
 
@@ -2313,15 +2313,15 @@ msgstr ""
 msgid "بخش‌های زیرهم + نوار چسبان زیر هدر"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:236
+#: includes/class-hsw-widget-manager.php:232
 msgid "بخش‌های صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:487
+#: includes/class-hsw-widget-manager.php:483
 msgid "بخش‌های مجله"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1122
+#: includes/class-hsw-widget-manager.php:1118
 msgid "بخش‌های مستقل صفحه"
 msgstr ""
 
@@ -2390,7 +2390,7 @@ msgstr ""
 msgid "برای ادامه، ابتدا نشانی تحویل را در فرم بالا کامل کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:930
+#: includes/class-hsw-assets.php:923
 msgid "برای ادامه، این موارد را کامل کنید: %s"
 msgstr ""
 
@@ -2610,7 +2610,7 @@ msgstr ""
 msgid "برند/دسته بالای عنوان"
 msgstr ""
 
-#: includes/class-hsw-assets.php:986
+#: includes/class-hsw-assets.php:979
 msgid "برو به سبد خرید"
 msgstr ""
 
@@ -2976,7 +2976,7 @@ msgstr ""
 msgid "برچسب‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:514
+#: includes/class-hsw-widget-manager.php:510
 #: widgets/class-hsw-widget-blog-hero.php:164
 #: widgets/class-hsw-widget-blog-tags.php:42
 msgid "برچسب‌های داغ"
@@ -3005,9 +3005,9 @@ msgstr ""
 #: includes/class-hsw-account-support.php:1186
 #: includes/class-hsw-account-support.php:1272
 #: includes/class-hsw-archive-base.php:690
-#: includes/class-hsw-assets.php:955
-#: includes/class-hsw-assets.php:976
-#: includes/class-hsw-assets.php:1004
+#: includes/class-hsw-assets.php:948
+#: includes/class-hsw-assets.php:969
+#: includes/class-hsw-assets.php:997
 #: includes/class-hsw-invoice.php:181
 #: widgets/class-hsw-widget-archive-filters.php:1431
 #: widgets/class-hsw-widget-archive-guide.php:188
@@ -3033,7 +3033,7 @@ msgstr ""
 msgid "بسته آماده ارسال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1244
+#: includes/class-hsw-widget-manager.php:1240
 msgid "بعد از افزودن محصول، چه چیزی به مشتری نشان داده شود؟"
 msgstr ""
 
@@ -3070,7 +3070,7 @@ msgstr ""
 msgid "بندانگشت‌ها (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:319
+#: includes/class-hsw-widget-manager.php:315
 msgid "بنر ارسال رایگان"
 msgstr ""
 
@@ -3078,7 +3078,7 @@ msgstr ""
 msgid "بنر ارسال رایگان سبد (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1454
+#: includes/class-hsw-widget-manager.php:1450
 msgid "به جای صفحهٔ ۴۰۴ سادهٔ قالب، یک صفحهٔ گلس‌مورفیسم با جستجوی محصول و دکمهٔ بازگشت به فروشگاه نشان داده می‌شود."
 msgstr ""
 
@@ -3090,14 +3090,14 @@ msgstr ""
 msgid "به دلیل تلاش‌های ناموفق، ورود دوعاملی تا %s دقیقه قفل است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:950
-#: includes/class-hsw-assets.php:956
-#: includes/class-hsw-assets.php:977
-#: includes/class-hsw-assets.php:1005
+#: includes/class-hsw-assets.php:943
+#: includes/class-hsw-assets.php:949
+#: includes/class-hsw-assets.php:970
+#: includes/class-hsw-assets.php:998
 msgid "به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:997
+#: includes/class-hsw-assets.php:990
 msgid "به سبد خرید اضافه شد ✓"
 msgstr ""
 
@@ -3188,7 +3188,7 @@ msgstr ""
 msgid "تأیید دوعاملی"
 msgstr ""
 
-#: includes/class-hsw-assets.php:907
+#: includes/class-hsw-assets.php:900
 msgid "تأیید شد."
 msgstr ""
 
@@ -3282,7 +3282,7 @@ msgstr ""
 msgid "تاریخ و نویسنده"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1323
+#: includes/class-hsw-widget-manager.php:1319
 msgid "تاریخ‌ها در سایت به شمسی نمایش داده می‌شوند (تبدیل سمت سرور، بدون فایل یا اسکریپت اضافه). پنل مدیریت گرگوری می‌ماند."
 msgstr ""
 
@@ -3457,7 +3457,7 @@ msgstr ""
 msgid "تب بررسی تخصصی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:494
+#: includes/class-hsw-widget-manager.php:490
 msgid "تب دسته‌ها و مرتب‌سازی"
 msgstr ""
 
@@ -3528,7 +3528,7 @@ msgstr ""
 msgid "تب‌های فیلتر"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:213
+#: includes/class-hsw-widget-manager.php:209
 msgid "تب‌های محبوب، جدید و تخفیف‌دار با محصولات منتخب."
 msgstr ""
 
@@ -3536,7 +3536,7 @@ msgstr ""
 msgid "تب‌های محصول (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:267
+#: includes/class-hsw-widget-manager.php:263
 msgid "تب‌های محصول (دسکتاپ)"
 msgstr ""
 
@@ -3584,10 +3584,6 @@ msgstr ""
 #: widgets/class-hsw-widget-product-gallery.php:284
 #: widgets/class-hsw-widget-product-related.php:250
 msgid "تخفیف"
-msgstr ""
-
-#: widgets/class-hsw-wonder-deals.php:58
-msgid "تخفیف تا ۴۵٪"
 msgstr ""
 
 #: widgets/class-hsw-widget-complete-order.php:92
@@ -3700,8 +3696,8 @@ msgstr ""
 msgid "ترتیب ستون گالری"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1053
-#: includes/class-hsw-widget-manager.php:1314
+#: includes/class-hsw-widget-manager.php:1049
+#: includes/class-hsw-widget-manager.php:1310
 msgid "ترتیب محصولات"
 msgstr ""
 
@@ -3713,7 +3709,7 @@ msgstr ""
 msgid "ترم‌های یک صفت (برند و...)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:337
+#: includes/class-hsw-widget-manager.php:333
 msgid "تسویه حساب"
 msgstr ""
 
@@ -3930,7 +3926,7 @@ msgstr ""
 msgid "تغییر نام‌ها به نام فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1527
+#: includes/class-hsw-widget-manager.php:1523
 msgid "تغییرات ذخیره نشده"
 msgstr ""
 
@@ -3938,7 +3934,7 @@ msgstr ""
 msgid "تغییرات پس از ذخیره، بلافاصله در فروشگاه اعمال می‌شود."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1322
+#: includes/class-hsw-widget-manager.php:1318
 msgid "تقویم شمسی"
 msgstr ""
 
@@ -4083,9 +4079,9 @@ msgstr ""
 msgid "تنظیمات ربات تلگرام کامل نیست."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1049
-#: includes/class-hsw-widget-manager.php:1050
-#: includes/class-hsw-widget-manager.php:1233
+#: includes/class-hsw-widget-manager.php:1045
+#: includes/class-hsw-widget-manager.php:1046
+#: includes/class-hsw-widget-manager.php:1229
 msgid "تنظیمات فروشگاه"
 msgstr ""
 
@@ -4093,7 +4089,7 @@ msgstr ""
 msgid "تنظیمات نام حامی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1072
+#: includes/class-hsw-widget-manager.php:1068
 msgid "تنظیمات پنل حساب کاربری"
 msgstr ""
 
@@ -4159,7 +4155,7 @@ msgstr ""
 msgid "توضیح راهنما"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1483
+#: includes/class-hsw-widget-manager.php:1479
 msgid "توضیح صفحه"
 msgstr ""
 
@@ -4196,7 +4192,7 @@ msgstr ""
 msgid "توضیحات، متادیتا"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:268
+#: includes/class-hsw-widget-manager.php:264
 msgid "توضیحات، مشخصات فنی و دیدگاه‌ها."
 msgstr ""
 
@@ -4237,7 +4233,7 @@ msgid "تکمیل آدرس در حساب کاربری"
 msgstr ""
 
 #: includes/class-hsw-setup-pages.php:86
-#: includes/class-hsw-widget-manager.php:395
+#: includes/class-hsw-widget-manager.php:391
 msgid "تکمیل خرید"
 msgstr ""
 
@@ -4309,7 +4305,7 @@ msgid "تیکت شما ثبت شد"
 msgstr ""
 
 #: includes/class-hsw-account-support.php:1523
-#: includes/class-hsw-assets.php:890
+#: includes/class-hsw-assets.php:883
 msgid "تیکت شما ثبت شد."
 msgstr ""
 
@@ -4527,7 +4523,7 @@ msgstr ""
 msgid "جدیدترین‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:402
+#: includes/class-hsw-widget-manager.php:398
 #: widgets/class-hsw-widget-complete-order.php:46
 #: widgets/class-hsw-widget-complete-order.php:267
 msgid "جزئیات سفارش"
@@ -4622,11 +4618,11 @@ msgstr ""
 msgid "جستجوی محصول، برند یا دسته‌بندی…"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1085
+#: includes/class-hsw-widget-manager.php:1081
 msgid "جستجوی نام یا شناسه ویجت…"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1083
+#: includes/class-hsw-widget-manager.php:1079
 msgid "جستجوی ویجت"
 msgstr ""
 
@@ -4646,7 +4642,7 @@ msgstr ""
 msgid "جعبه خرید"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:259
+#: includes/class-hsw-widget-manager.php:255
 msgid "جعبه خرید و قیمت"
 msgstr ""
 
@@ -4675,7 +4671,7 @@ msgstr ""
 msgid "جمع سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:365
+#: includes/class-hsw-widget-manager.php:361
 msgid "جمع فاکتور و اطلاعات نهایی ارسال."
 msgstr ""
 
@@ -4684,7 +4680,7 @@ msgstr ""
 msgid "جمع قیمت اقلام ({count}):"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:390
+#: includes/class-hsw-widget-manager.php:386
 msgid "جمع نهایی و دکمه پرداخت."
 msgstr ""
 
@@ -4693,7 +4689,7 @@ msgstr ""
 msgid "جمع کل"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:332
+#: includes/class-hsw-widget-manager.php:328
 msgid "جمع، ارسال و دکمه ادامه خرید."
 msgstr ""
 
@@ -4701,7 +4697,7 @@ msgstr ""
 msgid "جمعه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1484
+#: includes/class-hsw-widget-manager.php:1480
 msgid "جملهٔ کوتاه زیر عنوان."
 msgstr ""
 
@@ -4713,7 +4709,7 @@ msgstr ""
 msgid "جواب رو بنویس…"
 msgstr ""
 
-#: includes/class-hsw-assets.php:892
+#: includes/class-hsw-assets.php:885
 msgid "جواب سؤال امنیتی درست نیست."
 msgstr ""
 
@@ -5102,7 +5098,7 @@ msgstr ""
 #: includes/class-hsw-header-base.php:392
 #: includes/class-hsw-header-base.php:583
 #: includes/class-hsw-header-base.php:1138
-#: includes/class-hsw-widget-manager.php:522
+#: includes/class-hsw-widget-manager.php:518
 #: widgets/class-hsw-widget-header-gc.php:679
 msgid "حساب کاربری"
 msgstr ""
@@ -5273,7 +5269,7 @@ msgstr ""
 msgid "خالی بگذارید تا فیلترها به‌صورت خودکار از ویژگی‌ها و دسته‌های همین فروشگاه ساخته شوند. ترتیب ردیف‌ها = ترتیب باکس‌ها."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1474
+#: includes/class-hsw-widget-manager.php:1470
 msgid "خالی بگذارید تا متن پیش‌فرض استفاده شود."
 msgstr ""
 
@@ -5311,7 +5307,7 @@ msgstr ""
 msgid "خاموش (بدون نمایش)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:995
+#: includes/class-hsw-widget-manager.php:991
 msgid "خاموش‌کردن یک ویجت چه معنایی دارد؟"
 msgstr ""
 
@@ -5327,7 +5323,7 @@ msgstr ""
 msgid "خبرم کن"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:510
+#: includes/class-hsw-widget-manager.php:506
 msgid "خبرنامه"
 msgstr ""
 
@@ -5376,7 +5372,7 @@ msgstr ""
 msgid "خرید سریع و بررسی مشخصات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1290
+#: includes/class-hsw-widget-manager.php:1286
 msgid "خرید محصولات دانلودی"
 msgstr ""
 
@@ -5402,7 +5398,7 @@ msgstr ""
 msgid "خریداران پیشنهاد کرده‌اند"
 msgstr ""
 
-#: includes/class-hsw-assets.php:984
+#: includes/class-hsw-assets.php:977
 msgid "خریدت رو کامل‌تر کن"
 msgstr ""
 
@@ -5432,15 +5428,15 @@ msgstr ""
 msgid "خطا / ناموجود"
 msgstr ""
 
-#: includes/class-hsw-assets.php:910
+#: includes/class-hsw-assets.php:903
 msgid "خطا در ارتباط با سرور. دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:880
+#: includes/class-hsw-assets.php:873
 msgid "خطا در بارگذاری علاقه‌مندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:921
+#: includes/class-hsw-assets.php:914
 msgid "خطا در بروزرسانی روش ارسال"
 msgstr ""
 
@@ -5477,7 +5473,7 @@ msgstr ""
 msgid "خلاصه فاکتور"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:331
+#: includes/class-hsw-widget-manager.php:327
 msgid "خلاصه فاکتور سبد"
 msgstr ""
 
@@ -5492,7 +5488,7 @@ msgstr ""
 msgid "خلاصه فاکتور سفارش"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:389
+#: includes/class-hsw-widget-manager.php:385
 msgid "خلاصه فاکتور و پرداخت نهایی"
 msgstr ""
 
@@ -5504,7 +5500,7 @@ msgstr ""
 msgid "خلاصه مطلب"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:364
+#: includes/class-hsw-widget-manager.php:360
 msgid "خلاصه پرداخت"
 msgstr ""
 
@@ -5593,7 +5589,7 @@ msgstr ""
 msgid "در آرشیو «%1$s» تلاش کرده‌ایم بهترین گزینه‌ها را با قیمت مناسب و اطلاعات کامل در اختیار شما بگذاریم. در حال حاضر %2$s کالا در این بخش برای مقایسه و انتخاب موجود است."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1258
+#: includes/class-hsw-widget-manager.php:1254
 msgid "در آرشیو و فهرست محصولات"
 msgstr ""
 
@@ -5618,11 +5614,11 @@ msgstr ""
 msgid "در این بخش کامل‌ترین و متنوع‌ترین آرشیو گوشی‌های موبایل هوشمند از برندهای معتبر جهانی مانند اپل، سامسونگ، شیائومی، آنر و ناتینگ‌فون گردآوری شده است. تمامی محصولات همراه با ضمانت اصالت کالا، ۱۸ ماه گارانتی شرکتی و کد رجیستری معتبر همتا عرضه می‌گردند. برای خریدی آگاهانه می‌توانید از ابزارهای هوشمند فیلتر سایدبار بر اساس بازه قیمت، ظرفیت حافظه رم، نوع تراشه، ظرفیت دوربین و پشتیبانی از شبکه 5G استفاده کنید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1179
+#: includes/class-hsw-widget-manager.php:1175
 msgid "در تنظیمات مسیر خرید صفحهٔ «%s» انتخاب شده، ولی ویجت این مرحله را ندارد. با دکمهٔ پایین یک صفحهٔ تازه ساخته و جایگزین می‌شود؛ خودِ آن صفحه دست نمی‌خورد و noindex نمی‌شود."
 msgstr ""
 
-#: includes/class-hsw-assets.php:904
+#: includes/class-hsw-assets.php:897
 msgid "در حال ارسال کد..."
 msgstr ""
 
@@ -5634,7 +5630,7 @@ msgstr ""
 msgid "در حال بارگذاری علاقه‌مندی‌ها…"
 msgstr ""
 
-#: includes/class-hsw-assets.php:905
+#: includes/class-hsw-assets.php:898
 msgid "در حال بررسی کد..."
 msgstr ""
 
@@ -5647,7 +5643,7 @@ msgstr ""
 msgid "در حال حاضر هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:922
+#: includes/class-hsw-assets.php:915
 msgid "در حال ذخیره روش ارسال…"
 msgstr ""
 
@@ -5667,7 +5663,7 @@ msgstr ""
 msgid "در حالت خودکار، ۴ روز آینده به‌صورت داینامیک با تاریخ شمسی واقعی ساخته می‌شوند و روز جمعه خودکار تعطیل در نظر گرفته می‌شود."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1439
+#: includes/class-hsw-widget-manager.php:1435
 msgid "در روش‌های ارسال ووکامرس، «ارسال رایگان» از %s تومان به بالا فعال است؛ همان عدد در سبد خرید اعمال می‌شود. اگر می‌خواهید سقف این افزونه جای آن را بگیرد، ابتدا آن روش را در ووکامرس حذف کنید."
 msgstr ""
 
@@ -5675,7 +5671,7 @@ msgstr ""
 msgid "در سبک دوم همهٔ بخش‌ها زیر هم می‌آیند و نوار عنوان‌ها هنگام اسکرول زیر هدر اصلی می‌چسبد."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1272
+#: includes/class-hsw-widget-manager.php:1268
 msgid "در صفحهٔ محصول"
 msgstr ""
 
@@ -5836,7 +5832,7 @@ msgstr ""
 msgid "درگاه‌های واقعی ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:382
+#: includes/class-hsw-widget-manager.php:378
 msgid "درگاه‌های پرداخت و پرداخت با کیف پول."
 msgstr ""
 
@@ -5862,7 +5858,7 @@ msgstr ""
 msgid "دسترسی غیرمجاز."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:928
+#: includes/class-hsw-widget-manager.php:924
 msgid "دسترسی لازم برای این کار را ندارید."
 msgstr ""
 
@@ -6144,7 +6140,7 @@ msgstr ""
 msgid "دکمهٔ اقدام (CTA)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1494
+#: includes/class-hsw-widget-manager.php:1490
 msgid "دکمهٔ برجسته که به فروشگاه می‌رود."
 msgstr ""
 
@@ -6218,7 +6214,7 @@ msgstr ""
 msgid "دکمهٔ دوم — متن"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1504
+#: includes/class-hsw-widget-manager.php:1500
 msgid "دکمهٔ شیشه‌ای که به صفحهٔ اصلی برمی‌گردد."
 msgstr ""
 
@@ -6250,7 +6246,7 @@ msgstr ""
 msgid "دکمهٔ پسند، پرش به دیدگاه‌ها و خرید محصول مقاله."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1359
+#: includes/class-hsw-widget-manager.php:1355
 msgid "دکمهٔ چاپ در صفحهٔ ویرایش سفارش (پیشخوان) و در «سفارش‌های من» (پنل مشتری) نمایش داده می‌شود."
 msgstr ""
 
@@ -6279,7 +6275,7 @@ msgstr ""
 msgid "دکمه‌های «ادامه و پرداخت» در سبد خرید، تسویه حساب و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:414
+#: includes/class-hsw-widget-manager.php:410
 msgid "دکمه‌های تکمیل خرید"
 msgstr ""
 
@@ -6415,7 +6411,7 @@ msgstr ""
 msgid "ذخیره برند"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1530
+#: includes/class-hsw-widget-manager.php:1526
 msgid "ذخیره تغییرات"
 msgstr ""
 
@@ -6445,7 +6441,7 @@ msgstr ""
 msgid "راهنما"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:462
+#: includes/class-hsw-widget-manager.php:458
 msgid "راهنما و سوالات متداول"
 msgstr ""
 
@@ -6466,7 +6462,7 @@ msgstr ""
 msgid "راهنمای خرید و سوالات متداول {name}"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:463
+#: includes/class-hsw-widget-manager.php:459
 msgid "راهنمای خرید و پرسش‌های پرتکرار."
 msgstr ""
 
@@ -6487,8 +6483,8 @@ msgstr ""
 msgid "راهنمای ورودی (موبایل)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1051
-#: includes/class-hsw-widget-manager.php:1145
+#: includes/class-hsw-widget-manager.php:1047
+#: includes/class-hsw-widget-manager.php:1141
 msgid "راه‌اندازی مسیر خرید"
 msgstr ""
 
@@ -6636,11 +6632,11 @@ msgstr ""
 msgid "ردیف‌های پیشنهاد شگفت‌انگیز"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1052
+#: includes/class-hsw-widget-manager.php:1048
 msgid "رفتار افزودن به سبد"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1243
+#: includes/class-hsw-widget-manager.php:1239
 msgid "رفتار افزودن به سبد خرید"
 msgstr ""
 
@@ -7593,7 +7589,7 @@ msgstr ""
 msgid "روزها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:348
+#: includes/class-hsw-widget-manager.php:344
 #: widgets/class-hsw-widget-checkout-shipping.php:73
 #: widgets/class-hsw-widget-checkout-shipping.php:296
 #: widgets/class-hsw-widget-complete-delivery.php:130
@@ -7614,7 +7610,7 @@ msgstr ""
 msgid "روش ارسال نامعتبر است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:902
+#: includes/class-hsw-assets.php:895
 msgid "روش دریافت کد را انتخاب کنید."
 msgstr ""
 
@@ -7665,7 +7661,7 @@ msgstr ""
 msgid "روشن‌کردنش از این صفحه امن نیست؛ به همین دلیل چک‌باکس غیرفعال است و مقداری در تنظیمات ذخیره نمی‌کند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:381
+#: includes/class-hsw-widget-manager.php:377
 #: widgets/class-hsw-widget-account.php:113
 msgid "روش‌های پرداخت"
 msgstr ""
@@ -7674,7 +7670,7 @@ msgstr ""
 msgid "روش‌های پرداخت (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:303
+#: includes/class-hsw-widget-manager.php:299
 msgid "روش‌های پرداخت، بازبینی سفارش و پرداخت نهایی."
 msgstr ""
 
@@ -7714,7 +7710,7 @@ msgstr ""
 msgid "زمان دستی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:352
+#: includes/class-hsw-widget-manager.php:348
 msgid "زمان و روز تحویل"
 msgstr ""
 
@@ -7788,7 +7784,7 @@ msgstr ""
 msgid "زیرنویس مبلغ نهایی (خالی = مخفی)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1125
+#: includes/class-hsw-widget-manager.php:1121
 msgid "زیرویجت‌ها"
 msgstr ""
 
@@ -7808,15 +7804,15 @@ msgstr ""
 msgid "ساخت حساب کاربری"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1220
+#: includes/class-hsw-widget-manager.php:1216
 msgid "ساخت صفحه‌های لازم"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1209
+#: includes/class-hsw-widget-manager.php:1205
 msgid "ساخت و اتصال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1182
+#: includes/class-hsw-widget-manager.php:1178
 msgid "ساخته نشده"
 msgstr ""
 
@@ -7892,7 +7888,7 @@ msgstr ""
 #: includes/class-hsw-cart-drawer.php:27
 #: includes/class-hsw-header-base.php:422
 #: includes/class-hsw-header-base.php:1158
-#: includes/class-hsw-widget-manager.php:312
+#: includes/class-hsw-widget-manager.php:308
 #: widgets/class-hsw-widget-cart-top.php:175
 #: widgets/class-hsw-widget-cart-top.php:175
 #: widgets/class-hsw-widget-cart-top.php:187
@@ -7940,11 +7936,11 @@ msgstr ""
 msgid "سبد خرید فعلی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:287
+#: includes/class-hsw-widget-manager.php:283
 msgid "سبد خرید و پرداخت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:295
+#: includes/class-hsw-widget-manager.php:291
 msgid "سبد خرید کامل با مراحل، بنر ارسال و خلاصه فاکتور."
 msgstr ""
 
@@ -7994,7 +7990,7 @@ msgstr ""
 msgid "سربرگ بخش"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:398
+#: includes/class-hsw-widget-manager.php:394
 msgid "سربرگ تکمیل خرید"
 msgstr ""
 
@@ -8002,19 +7998,19 @@ msgstr ""
 msgid "سربرگ تکمیل خرید (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:316
+#: includes/class-hsw-widget-manager.php:312
 msgid "سربرگ سبد و نشانگر مراحل خرید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:490
+#: includes/class-hsw-widget-manager.php:486
 msgid "سربرگ مجله"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:341
+#: includes/class-hsw-widget-manager.php:337
 msgid "سربرگ و مراحل اطلاعات ارسال."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:374
+#: includes/class-hsw-widget-manager.php:370
 msgid "سربرگ پرداخت و مراحل نهایی خرید."
 msgstr ""
 
@@ -8089,7 +8085,7 @@ msgstr ""
 msgid "سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:896
+#: includes/class-hsw-assets.php:889
 msgid "سفارشی پیدا نشد."
 msgstr ""
 
@@ -8114,7 +8110,7 @@ msgstr ""
 msgid "سفارش‌های من"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1416
+#: includes/class-hsw-widget-manager.php:1412
 msgid "سقف ارسال رایگان (تومان)"
 msgstr ""
 
@@ -8135,7 +8131,7 @@ msgstr ""
 msgid "سلام، به حساب کاربری خوش آمدید"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1234
+#: includes/class-hsw-widget-manager.php:1230
 msgid "سه تنظیم سراسری که روی همهٔ ویجت‌ها اثر می‌گذارد."
 msgstr ""
 
@@ -8175,11 +8171,11 @@ msgstr ""
 msgid "سپر (گارانتی)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1370
+#: includes/class-hsw-widget-manager.php:1366
 msgid "سیاه و سفید خالص"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:263
+#: includes/class-hsw-widget-manager.php:259
 #: includes/trait-hsw-product-page-style-parts-4.php:208
 msgid "سیگنال‌های اعتماد"
 msgstr ""
@@ -8230,7 +8226,7 @@ msgstr ""
 msgid "شبکه محصولات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:502
+#: includes/class-hsw-widget-manager.php:498
 msgid "شبکه مقالات"
 msgstr ""
 
@@ -8366,7 +8362,7 @@ msgstr ""
 msgid "شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:901
+#: includes/class-hsw-assets.php:894
 msgid "شماره موبایل را وارد کنید."
 msgstr ""
 
@@ -8508,7 +8504,7 @@ msgstr ""
 msgid "صفحه بعد"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:307
+#: includes/class-hsw-widget-manager.php:303
 msgid "صفحه تشکر با جزئیات سفارش، تحویل و مراحل بعدی."
 msgstr ""
 
@@ -8519,15 +8515,15 @@ msgstr ""
 msgid "صفحه قبل"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:223
+#: includes/class-hsw-widget-manager.php:219
 msgid "صفحه محصول"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:429
+#: includes/class-hsw-widget-manager.php:425
 msgid "صفحه کامل آرشیو"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:426
+#: includes/class-hsw-widget-manager.php:422
 msgid "صفحه کامل آرشیو با هدر، فیلتر، ابزار مرتب‌سازی، گرید و صفحه‌بندی. بخش‌های مستقل برای ساخت دستی آرشیو در پایین قرار دارند."
 msgstr ""
 
@@ -8535,7 +8531,7 @@ msgstr ""
 msgid "صفحه کامل آرشیو — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:298
+#: includes/class-hsw-widget-manager.php:294
 msgid "صفحه کامل تسویه حساب"
 msgstr ""
 
@@ -8543,7 +8539,7 @@ msgstr ""
 msgid "صفحه کامل تسویه حساب — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:306
+#: includes/class-hsw-widget-manager.php:302
 msgid "صفحه کامل تکمیل خرید"
 msgstr ""
 
@@ -8551,7 +8547,7 @@ msgstr ""
 msgid "صفحه کامل تکمیل خرید — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:294
+#: includes/class-hsw-widget-manager.php:290
 msgid "صفحه کامل سبد خرید"
 msgstr ""
 
@@ -8559,11 +8555,11 @@ msgstr ""
 msgid "صفحه کامل سبد خرید — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:477
+#: includes/class-hsw-widget-manager.php:473
 msgid "صفحه کامل مجله"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:474
+#: includes/class-hsw-widget-manager.php:470
 msgid "صفحه کامل مجله با مقاله ویژه، شبکه مقالات، خبرنامه و برچسب‌ها. ویجت جامع پیش‌فرض فعال است و بخش‌های مستقل در پایین قرار دارند."
 msgstr ""
 
@@ -8571,7 +8567,7 @@ msgstr ""
 msgid "صفحه کامل مجله — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:230
+#: includes/class-hsw-widget-manager.php:226
 msgid "صفحه کامل محصول"
 msgstr ""
 
@@ -8579,11 +8575,11 @@ msgstr ""
 msgid "صفحه کامل محصول — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:481
+#: includes/class-hsw-widget-manager.php:477
 msgid "صفحه کامل نوشته"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:302
+#: includes/class-hsw-widget-manager.php:298
 msgid "صفحه کامل پرداخت"
 msgstr ""
 
@@ -8591,11 +8587,11 @@ msgstr ""
 msgid "صفحه کامل پرداخت — حامی (ویجت جامع)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1169
+#: includes/class-hsw-widget-manager.php:1165
 msgid "صفحهٔ «%s» ساخته شده و در مسیر خرید انتخاب شده است."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1174
+#: includes/class-hsw-widget-manager.php:1170
 msgid "صفحهٔ «%s» وجود دارد ولی در تنظیمات مسیر خرید انتخاب نشده؛ با دکمهٔ پایین وصل می‌شود و صفحهٔ تازه‌ای ساخته نمی‌شود."
 msgstr ""
 
@@ -8623,7 +8619,7 @@ msgstr ""
 msgid "صفحهٔ فروشگاه ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1177
+#: includes/class-hsw-widget-manager.php:1173
 msgid "صفحهٔ نامرتبط"
 msgstr ""
 
@@ -8643,15 +8639,15 @@ msgstr ""
 msgid "صفحهٔ کیف پول"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1055
+#: includes/class-hsw-widget-manager.php:1051
 msgid "صفحهٔ ۴۰۴"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1453
+#: includes/class-hsw-widget-manager.php:1449
 msgid "صفحهٔ ۴۰۴ اختصاصی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1477
+#: includes/class-hsw-widget-manager.php:1473
 #: templates/404.php:29
 msgid "صفحه‌ای که دنبالش بودید پیدا نشد!"
 msgstr ""
@@ -8664,7 +8660,7 @@ msgstr ""
 msgid "صفحه‌بندی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:458
+#: includes/class-hsw-widget-manager.php:454
 msgid "صفحه‌بندی آرشیو"
 msgstr ""
 
@@ -8684,19 +8680,19 @@ msgstr ""
 msgid "صفحه‌بندی مقالات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:459
+#: includes/class-hsw-widget-manager.php:455
 msgid "صفحه‌بندی و بارگذاری بیشتر."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:291
+#: includes/class-hsw-widget-manager.php:287
 msgid "صفحه‌های سبد خرید، تسویه حساب، پرداخت و تکمیل سفارش. ویجت جامع هر صفحه فعال است؛ بخش‌های ریز فقط در صورت نیاز نمایش داده می‌شوند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1154
+#: includes/class-hsw-widget-manager.php:1150
 msgid "صفحه‌های مسیر خرید"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1220
+#: includes/class-hsw-widget-manager.php:1216
 msgid "صفحه‌های نبود ساخته و به مسیر خرید وصل شوند؟ صفحه‌های موجود دست نمی‌خورند."
 msgstr ""
 
@@ -8704,7 +8700,7 @@ msgstr ""
 msgid "صفر"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1417
+#: includes/class-hsw-widget-manager.php:1413
 msgid "صفر یعنی غیرفعال. مبلغ بر اساس جمع اقلام سبد سنجیده می‌شود، نه مبلغ نهایی."
 msgstr ""
 
@@ -9124,7 +9120,7 @@ msgstr ""
 msgid "عنوان ستون"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1473
+#: includes/class-hsw-widget-manager.php:1469
 #: widgets/class-hsw-widget-checkout-top.php:57
 msgid "عنوان صفحه"
 msgstr ""
@@ -9140,7 +9136,7 @@ msgstr ""
 msgid "عنوان محصول"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:248
+#: includes/class-hsw-widget-manager.php:244
 msgid "عنوان محصول، امتیاز، دیدگاه و وضعیت موجودی."
 msgstr ""
 
@@ -9228,7 +9224,7 @@ msgstr ""
 msgid "عنوان، امتیاز و دیدگاه‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:247
+#: includes/class-hsw-widget-manager.php:243
 msgid "عنوان، امتیاز و متا"
 msgstr ""
 
@@ -9236,11 +9232,11 @@ msgstr ""
 msgid "عنوان، امتیاز و متای محصول (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:443
+#: includes/class-hsw-widget-manager.php:439
 msgid "عنوان، توضیح و تصویر دسته‌بندی."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:491
+#: includes/class-hsw-widget-manager.php:487
 msgid "عنوان، جستجو و دسته‌های مجله."
 msgstr ""
 
@@ -9248,11 +9244,11 @@ msgstr ""
 msgid "عکس"
 msgstr ""
 
-#: includes/class-hsw-assets.php:895
+#: includes/class-hsw-assets.php:888
 msgid "عکس خیلی بزرگ است. یک عکس دیگر انتخاب کنید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1252
+#: includes/class-hsw-widget-manager.php:1248
 #: widgets/class-hsw-widget-account.php:633
 msgid "غیرفعال"
 msgstr ""
@@ -9269,7 +9265,7 @@ msgstr ""
 msgid "غیرفعال کردن حرکت کارت در هاور"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1298
+#: includes/class-hsw-widget-manager.php:1294
 msgid "غیرفعال‌سازی فیلدهای اضافه هنگام خرید محصولات دانلودی"
 msgstr ""
 
@@ -9564,7 +9560,7 @@ msgstr ""
 msgid "فاکتور HamiShop"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1351
+#: includes/class-hsw-widget-manager.php:1347
 msgid "فاکتور تک‌برگی A4 با لوگو، مشخصات فرستنده/گیرنده به سبک فرم ادارهٔ پست و مبلغ به حروف. همان لحظه در مرورگر ساخته می‌شود؛ فایلی روی هاست ذخیره نمی‌شود و از پنجرهٔ چاپ به‌صورت PDF ذخیره می‌شود."
 msgstr ""
 
@@ -9581,7 +9577,7 @@ msgstr ""
 msgid "فاکتور فروش"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1350
+#: includes/class-hsw-widget-manager.php:1346
 msgid "فاکتور چاپی و برچسب پستی"
 msgstr ""
 
@@ -9609,23 +9605,19 @@ msgstr ""
 msgid "فرستنده"
 msgstr ""
 
-#: widgets/class-hsw-wonder-deals.php:59
-msgid "فرصت طلایی خرید برترین کالاهای دیجیتال با تضمین بهترین قیمت بازار"
-msgstr ""
-
-#: includes/class-hsw-widget-manager.php:299
+#: includes/class-hsw-widget-manager.php:295
 msgid "فرم آدرس، روش ارسال، زمان تحویل و خلاصه پرداخت."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:345
+#: includes/class-hsw-widget-manager.php:341
 msgid "فرم اطلاعات مشتری و آدرس تحویل."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:328
+#: includes/class-hsw-widget-manager.php:324
 msgid "فرم اعمال کوپن روی سبد خرید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:511
+#: includes/class-hsw-widget-manager.php:507
 msgid "فرم عضویت در خبرنامه مجله."
 msgstr ""
 
@@ -9663,8 +9655,8 @@ msgid "فروشگاه اینترنتی"
 msgstr ""
 
 #: includes/class-hsw-security.php:1425
-#: includes/class-hsw-widget-manager.php:987
-#: includes/class-hsw-widget-manager.php:1108
+#: includes/class-hsw-widget-manager.php:983
+#: includes/class-hsw-widget-manager.php:1104
 #: widgets/class-hsw-widget-account.php:632
 msgid "فعال"
 msgstr ""
@@ -9677,12 +9669,12 @@ msgstr ""
 msgid "فعال‌سازی حالت «نت ملی»"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1358
+#: includes/class-hsw-widget-manager.php:1354
 msgid "فعال‌سازی فاکتور چاپی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1089
-#: includes/class-hsw-widget-manager.php:1109
+#: includes/class-hsw-widget-manager.php:1085
+#: includes/class-hsw-widget-manager.php:1105
 msgid "فعال‌سازی همه"
 msgstr ""
 
@@ -9746,7 +9738,7 @@ msgstr ""
 msgid "فقط دسکتاپ"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1212
+#: includes/class-hsw-widget-manager.php:1208
 msgid "فقط صفحه‌های نبود را می‌سازد. اگر صفحه‌ای با نام دیگری دارید، از تنظیمات ووکامرس ← تسویه حساب ← «مسیر خرید (حامی)» انتخابش کنید."
 msgstr ""
 
@@ -9799,7 +9791,7 @@ msgstr ""
 msgid "فقط وقتی هیچ دسته‌ای در «انتخاب دسته‌بندی‌های سربرگ» انتخاب نشده باشد."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1088
+#: includes/class-hsw-widget-manager.php:1084
 msgid "فقط ویجت‌های اصلی"
 msgstr ""
 
@@ -9849,7 +9841,7 @@ msgstr ""
 msgid "فهرست ویژگی‌های دسکتاپ"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:507
+#: includes/class-hsw-widget-manager.php:503
 msgid "فهرست پربازدیدترین مقالات."
 msgstr ""
 
@@ -9914,7 +9906,7 @@ msgstr ""
 msgid "فیلتر HamiShop: ورود از مسیر XML-RPC بسته است"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:495
+#: includes/class-hsw-widget-manager.php:491
 msgid "فیلتر دسته‌ها و ترتیب مقالات."
 msgstr ""
 
@@ -9930,7 +9922,7 @@ msgstr ""
 msgid "فیلتر محصولات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:447
+#: includes/class-hsw-widget-manager.php:443
 msgid "فیلتر ویژگی‌ها، برند و قیمت."
 msgstr ""
 
@@ -9942,7 +9934,7 @@ msgstr ""
 msgid "فیلترهای فعال:"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:446
+#: includes/class-hsw-widget-manager.php:442
 #: widgets/class-hsw-widget-archive-filters.php:61
 #: widgets/class-hsw-widget-archive-filters.php:1334
 #: widgets/class-hsw-widget-archive-filters.php:1427
@@ -9966,7 +9958,7 @@ msgstr ""
 msgid "قالب تخفیف کوپن"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:482
+#: includes/class-hsw-widget-manager.php:478
 msgid "قالب تکی مقاله: سربرگ، فهرست مطالب، بدنه، کارت محصول، دیدگاه‌ها و مقالات مرتبط."
 msgstr ""
 
@@ -10012,7 +10004,7 @@ msgstr ""
 msgid "قالب کد اعمال‌شده"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1066
+#: includes/class-hsw-widget-manager.php:1062
 msgid "قبل از غیرفعال کردن"
 msgstr ""
 
@@ -10170,7 +10162,7 @@ msgstr ""
 msgid "قیمت گزینه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:260
+#: includes/class-hsw-widget-manager.php:256
 msgid "قیمت، تخفیف، تعداد و دکمه افزودن به سبد."
 msgstr ""
 
@@ -10230,7 +10222,7 @@ msgstr ""
 msgid "لوگو با نسبت تصویر خودش نمایش داده می‌شود؛ این مقدار فقط ارتفاع را محدود می‌کند تا لوگوهای افقی و عمودی هر وب‌سایتی بدون فشرده شدن جا شوند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1385
+#: includes/class-hsw-widget-manager.php:1381
 msgid "لوگو، نشانی، تلفن و کد پستی فروشگاه از %s خوانده می‌شود."
 msgstr ""
 
@@ -10258,7 +10250,7 @@ msgstr ""
 msgid "لیست علاقه‌مندی‌های شما خالی است"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:324
+#: includes/class-hsw-widget-manager.php:320
 msgid "لیست محصولات با تعداد، حذف و تصویر."
 msgstr ""
 
@@ -10533,7 +10525,7 @@ msgstr ""
 msgid "مبلغ یا مشتری انتخاب نشده است."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1167
+#: includes/class-hsw-widget-manager.php:1163
 msgid "متصل"
 msgstr ""
 
@@ -10837,7 +10829,7 @@ msgstr ""
 msgid "متن دکمهٔ «ثبت آدرس»"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1493
+#: includes/class-hsw-widget-manager.php:1489
 msgid "متن دکمهٔ اصلی"
 msgstr ""
 
@@ -10849,7 +10841,7 @@ msgstr ""
 msgid "متن دکمهٔ سبد خرید (منوی موبایل)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1503
+#: includes/class-hsw-widget-manager.php:1499
 msgid "متن دکمهٔ فرعی"
 msgstr ""
 
@@ -10887,7 +10879,7 @@ msgstr ""
 msgid "متن راهنمای جستجو"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1514
+#: includes/class-hsw-widget-manager.php:1510
 msgid "متن راهنمای داخل فیلد جستجوی محصول."
 msgstr ""
 
@@ -11114,7 +11106,7 @@ msgstr ""
 msgid "متن پیام ایمیل"
 msgstr ""
 
-#: includes/class-hsw-assets.php:893
+#: includes/class-hsw-assets.php:886
 msgid "متن پیام را بنویسید."
 msgstr ""
 
@@ -11130,7 +11122,7 @@ msgstr ""
 msgid "متن چیپ فعال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1513
+#: includes/class-hsw-widget-manager.php:1509
 msgid "متن کادر جستجو"
 msgstr ""
 
@@ -11224,11 +11216,11 @@ msgstr ""
 msgid "مجله فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:470
+#: includes/class-hsw-widget-manager.php:466
 msgid "مجله و وبلاگ"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:478
+#: includes/class-hsw-widget-manager.php:474
 msgid "مجله کامل با مقاله ویژه، شبکه و خبرنامه."
 msgstr ""
 
@@ -11272,7 +11264,7 @@ msgstr ""
 msgid "محبوب‌ترین‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:212
+#: includes/class-hsw-widget-manager.php:208
 msgid "محبوب‌ترین‌ها / منتخب"
 msgstr ""
 
@@ -11297,7 +11289,7 @@ msgstr ""
 msgid "محصول با موفقیت به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:973
+#: includes/class-hsw-assets.php:966
 msgid "محصول به سبد خرید اضافه شد"
 msgstr ""
 
@@ -11322,7 +11314,7 @@ msgstr ""
 msgid "محصولات تشویقی (Upsells)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:361
+#: includes/class-hsw-widget-manager.php:357
 msgid "محصولات سفارش و تعداد هر کدام."
 msgstr ""
 
@@ -11335,7 +11327,7 @@ msgstr ""
 msgid "محصولات قبلی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:275
+#: includes/class-hsw-widget-manager.php:271
 #: includes/trait-hsw-product-page-style-parts-4.php:80
 #: widgets/class-hsw-widget-product-related.php:56
 #: widgets/class-hsw-widget-product-related.php:76
@@ -11351,7 +11343,7 @@ msgstr ""
 msgid "محصولات مرتبط ووکامرس"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1315
+#: includes/class-hsw-widget-manager.php:1311
 msgid "محصولات ناموجود کجای فهرست فروشگاه بیایند؟"
 msgstr ""
 
@@ -11379,7 +11371,6 @@ msgstr ""
 #: widgets/class-hsw-best-sellers.php:106
 #: widgets/class-hsw-popular.php:69
 #: widgets/class-hsw-popular.php:211
-#: widgets/class-hsw-wonder-deals.php:180
 msgid "محصولی برای نمایش یافت نشد."
 msgstr ""
 
@@ -11437,7 +11428,7 @@ msgstr ""
 msgid "مراحل بعدی تکمیل خرید (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:410
+#: includes/class-hsw-widget-manager.php:406
 msgid "مراحل بعدی خرید"
 msgstr ""
 
@@ -11495,7 +11486,7 @@ msgstr ""
 msgid "مرتب‌سازی:"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:451
+#: includes/class-hsw-widget-manager.php:447
 msgid "مرتب‌سازی، تعداد نمایش و نمایش شبکه‌ای."
 msgstr ""
 
@@ -11555,7 +11546,7 @@ msgstr ""
 msgid "مرکز تماس و پشتیبانی (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:240
+#: includes/class-hsw-widget-manager.php:236
 msgid "مسیر خانه، فروشگاه و دسته‌بندی محصول."
 msgstr ""
 
@@ -11578,11 +11569,11 @@ msgstr ""
 msgid "مسیر راهنما (Breadcrumb)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:239
+#: includes/class-hsw-widget-manager.php:235
 msgid "مسیر راهنما (بردکرامب)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:438
+#: includes/class-hsw-widget-manager.php:434
 msgid "مسیر راهنما آرشیو"
 msgstr ""
 
@@ -11594,17 +11585,17 @@ msgstr ""
 msgid "مسیر صفحه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:439
+#: includes/class-hsw-widget-manager.php:435
 msgid "مسیر فروشگاه و دسته‌بندی جاری."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1146
+#: includes/class-hsw-widget-manager.php:1142
 msgid "مسیر چهارمرحله‌ای حامی به دو صفحهٔ مستقل نیاز دارد: پرداخت و تکمیل خرید. اگر نباشند، دکمهٔ «ادامه و ورود به مرحله پرداخت» جایی برای رفتن ندارد."
 msgstr ""
 
 #: includes/class-hsw-account.php:2681
 #: includes/class-hsw-header-cascade.php:573
-#: includes/class-hsw-rest.php:835
+#: includes/class-hsw-rest.php:834
 msgid "مشاهده"
 msgstr ""
 
@@ -11625,9 +11616,9 @@ msgstr ""
 msgid "مشاهده سبد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:953
-#: includes/class-hsw-assets.php:974
-#: includes/class-hsw-assets.php:1002
+#: includes/class-hsw-assets.php:946
+#: includes/class-hsw-assets.php:967
+#: includes/class-hsw-assets.php:995
 #: includes/class-hsw-cart-drawer.php:31
 #: includes/class-hsw-header-base.php:732
 #: includes/class-hsw-header-base.php:910
@@ -11703,7 +11694,7 @@ msgstr ""
 msgid "مشخصات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:377
+#: includes/class-hsw-widget-manager.php:373
 #: widgets/class-hsw-widget-pay-recall.php:53
 #: widgets/class-hsw-widget-pay-recall.php:318
 msgid "مشخصات تحویل سفارش"
@@ -11768,7 +11759,7 @@ msgstr ""
 msgid "مقالات پیشنهادی و مرتبط"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:499
+#: includes/class-hsw-widget-manager.php:495
 msgid "مقاله شاخص با تصویر بزرگ."
 msgstr ""
 
@@ -11776,7 +11767,7 @@ msgstr ""
 msgid "مقاله منتشرشده"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:498
+#: includes/class-hsw-widget-manager.php:494
 #: widgets/class-hsw-widget-blog-featured.php:42
 msgid "مقاله ویژه"
 msgstr ""
@@ -11818,7 +11809,7 @@ msgstr ""
 msgid "مقدار کارت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1487
+#: includes/class-hsw-widget-manager.php:1483
 msgid "ممکن است آدرس اشتباه باشد یا صفحه جابه‌جا شده باشد."
 msgstr ""
 
@@ -11998,11 +11989,11 @@ msgstr ""
 msgid "موجودی: ۲۵۰,۰۰۰ تومان"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1250
+#: includes/class-hsw-widget-manager.php:1246
 msgid "مودال میان‌صفحه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1259
+#: includes/class-hsw-widget-manager.php:1255
 msgid "مودال: پنجرهٔ شیشه‌ای با محتوای سبد. نوار: یک خط بالای صفحه با لینک «مشاهده سبد خرید». غیرفعال: هیچ بازخوردی نمایش داده نمی‌شود."
 msgstr ""
 
@@ -12022,11 +12013,11 @@ msgstr ""
 msgid "موضوع تیکتو بنویس…"
 msgstr ""
 
-#: includes/class-hsw-assets.php:891
+#: includes/class-hsw-assets.php:884
 msgid "موضوع و متن پیام را کامل کنید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:515
+#: includes/class-hsw-widget-manager.php:511
 msgid "موضوعات و برچسب‌های پرطرفدار."
 msgstr ""
 
@@ -12155,7 +12146,7 @@ msgstr ""
 msgid "نام محصول"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1517
+#: includes/class-hsw-widget-manager.php:1513
 #: templates/404.php:34
 msgid "نام محصول را جستجو کنید…"
 msgstr ""
@@ -12207,7 +12198,7 @@ msgstr ""
 msgid "نام، ایمیل و اطلاعات ورود خود را به‌روز کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:924
+#: includes/class-hsw-assets.php:917
 msgid "نام، شماره تماس، استان، شهر و نشانی را کامل کنید."
 msgstr ""
 
@@ -12219,7 +12210,7 @@ msgstr ""
 msgid "ناموجود"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1334
+#: includes/class-hsw-widget-manager.php:1330
 msgid "ناموجودها انتهای فهرست"
 msgstr ""
 
@@ -12256,7 +12247,7 @@ msgstr ""
 msgid "نسبت تصویر کارت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:272
+#: includes/class-hsw-widget-manager.php:268
 msgid "نسخه موبایل مشخصات، گارانتی و دیدگاه‌ها."
 msgstr ""
 
@@ -12307,7 +12298,7 @@ msgstr ""
 msgid "نشانی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1187
+#: includes/class-hsw-widget-manager.php:1183
 msgid "نشانی /%1$s/ در اختیار صفحهٔ دیگری است؛ صفحه با نشانی /%2$s/ ساخته می‌شود تا آن صفحه دست‌نخورده بماند."
 msgstr ""
 
@@ -12566,7 +12557,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:3616
 #: includes/class-hsw-account.php:3654
-#: includes/class-hsw-assets.php:883
+#: includes/class-hsw-assets.php:876
 msgid "نمایش رمز عبور"
 msgstr ""
 
@@ -12745,11 +12736,11 @@ msgstr ""
 msgid "نوار تب‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1251
+#: includes/class-hsw-widget-manager.php:1247
 msgid "نوار تک‌خطی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:279
+#: includes/class-hsw-widget-manager.php:275
 msgid "نوار خرید چسبان"
 msgstr ""
 
@@ -12761,7 +12752,7 @@ msgstr ""
 msgid "نوار شناور با نشان مدار، پنل‌های کشویی آیکون‌دار و منوی موبایل کشویی."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:450
+#: includes/class-hsw-widget-manager.php:446
 msgid "نوار مرتب‌سازی و ابزار"
 msgstr ""
 
@@ -12773,7 +12764,7 @@ msgstr ""
 msgid "نوار موجودی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:280
+#: includes/class-hsw-widget-manager.php:276
 msgid "نوار همیشه‌درمعرض قیمت و افزودن به سبد."
 msgstr ""
 
@@ -12907,7 +12898,7 @@ msgstr ""
 msgid "هدر مینیمال شیشه‌ای (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:442
+#: includes/class-hsw-widget-manager.php:438
 msgid "هدر و توضیحات آرشیو"
 msgstr ""
 
@@ -12915,7 +12906,7 @@ msgstr ""
 msgid "هدر و توضیحات آرشیو (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1462
+#: includes/class-hsw-widget-manager.php:1458
 msgid "هدر و فوتر سایت حفظ می‌شوند؛ فقط محتوای صفحه عوض می‌شود."
 msgstr ""
 
@@ -12923,11 +12914,11 @@ msgstr ""
 msgid "هدر و مراحل اطلاعات ارسال (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:340
+#: includes/class-hsw-widget-manager.php:336
 msgid "هدر و مراحل تسویه حساب"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:315
+#: includes/class-hsw-widget-manager.php:311
 msgid "هدر و مراحل سبد خرید"
 msgstr ""
 
@@ -12935,7 +12926,7 @@ msgstr ""
 msgid "هدر و مراحل سبد خرید (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:373
+#: includes/class-hsw-widget-manager.php:369
 msgid "هدر و مراحل پرداخت"
 msgstr ""
 
@@ -12975,11 +12966,11 @@ msgstr ""
 msgid "هر دقیقه (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1214
+#: includes/class-hsw-widget-manager.php:1210
 msgid "هر دو صفحه آماده‌اند؛ کار دیگری لازم نیست."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1027
+#: includes/class-hsw-widget-manager.php:1023
 msgid "هر دو صفحه از قبل آماده و متصل بودند."
 msgstr ""
 
@@ -13086,7 +13077,7 @@ msgstr ""
 msgid "همه کالاها با فاکتور رسمی و ضمانت اصالت عرضه می‌شوند. مدت و نوع گارانتی در جدول مشخصات هر محصول درج شده است."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1071
+#: includes/class-hsw-widget-manager.php:1067
 msgid "همهٔ انتخاب‌ها به حالت پیش‌فرض برگردند؟ بخش‌های ریز غیرفعال می‌شوند."
 msgstr ""
 
@@ -13106,7 +13097,7 @@ msgstr ""
 msgid "همهٔ زمان‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:882
+#: includes/class-hsw-assets.php:875
 msgid "همهٔ محصولات از علاقه‌مندی‌ها حذف شوند؟"
 msgstr ""
 
@@ -13311,7 +13302,7 @@ msgstr ""
 msgid "ورود به حساب کاربری"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1497
+#: includes/class-hsw-widget-manager.php:1493
 #: templates/404.php:40
 msgid "ورود به فروشگاه"
 msgstr ""
@@ -13364,7 +13355,7 @@ msgstr ""
 msgid "ورود یا ثبت‌نام"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:530
+#: includes/class-hsw-widget-manager.php:526
 msgid "ورود، سفارش‌ها، پشتیبانی، کیف پول و علاقه‌مندی‌ها."
 msgstr ""
 
@@ -13389,7 +13380,7 @@ msgstr ""
 msgid "وسط‌چین"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1172
+#: includes/class-hsw-widget-manager.php:1168
 msgid "وصل نشده"
 msgstr ""
 
@@ -13440,7 +13431,7 @@ msgstr ""
 msgid "وقتی روشن باشد، در ویرایشگر المنتور به‌جای کارت‌های نمونه همین بلوک نمایش داده می‌شود تا متن و رنگ‌ها را همان‌جا تنظیم کنید. در سایت واقعی هیچ اثری ندارد."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1291
+#: includes/class-hsw-widget-manager.php:1287
 msgid "وقتی سبد خرید فقط محصول مجازی یا دانلودی است، فرم تسویه‌حساب چه شکلی باشد؟"
 msgstr ""
 
@@ -13464,7 +13455,7 @@ msgstr ""
 msgid "ووکامرس فعال نیست."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:988
+#: includes/class-hsw-widget-manager.php:984
 msgid "ویجت"
 msgstr ""
 
@@ -13472,39 +13463,39 @@ msgstr ""
 msgid "ویجت «راهنما و سوالات متداول» را در صفحه بگذارید تا مودال باز شود."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1564
+#: includes/class-hsw-widget-manager.php:1560
 msgid "ویجت اصلی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1526
+#: includes/class-hsw-widget-manager.php:1522
 msgid "ویجت برای پنل المنتور فعال است"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:227
+#: includes/class-hsw-widget-manager.php:223
 msgid "ویجت جامع، کل صفحه محصول را با یک ویجت می‌سازد. بخش‌های مستقل در پایین قرار دارند و فقط با فعال‌سازی در پنل المنتور دیده می‌شوند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:526
+#: includes/class-hsw-widget-manager.php:522
 msgid "ویجت کامل پنل حساب کاربری HamiShop. تنظیمات ظاهر، منو، پشتیبانی و اعلان‌های آن در منوی «پنل حساب کاربری» است."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1094
+#: includes/class-hsw-widget-manager.php:1090
 msgid "ویجتی با این جستجو پیدا نشد."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1004
+#: includes/class-hsw-widget-manager.php:1000
 msgid "ویجت‌ها به حالت پیش‌فرض برگشتند: ویجت‌های اصلی فعال و بخش‌های ریز غیرفعال شدند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1061
+#: includes/class-hsw-widget-manager.php:1057
 msgid "ویجت‌های اصلی و جامع، یک صفحه کامل را با یک ویجت می‌سازند و برای ساخت سریع بهترین انتخاب‌اند. بخش‌های ریز فقط وقتی لازم‌اند که بخواهید صفحه‌ای را دستی و بخش‌به‌بخش بچینید."
 msgstr ""
 
 #: includes/class-hsw-widget-manager.php:201
-msgid "ویجت‌های مستقل صفحه اصلی برای نمایش پیشنهاد شگفت‌انگیز، پرفروش‌ترین‌ها، محصولات منتخب و کمپین آفر. هر چهار پیش‌فرض فعال‌اند."
+msgid "ویجت‌های مستقل صفحه اصلی برای نمایش پرفروش‌ترین‌ها، محصولات منتخب و کمپین آفر. هر سه پیش‌فرض فعال‌اند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1201
+#: includes/class-hsw-widget-manager.php:1197
 #: widgets/class-hsw-widget-checkout-address.php:106
 #: widgets/class-hsw-widget-checkout-address.php:238
 #: widgets/class-hsw-widget-checkout-address.php:405
@@ -13522,7 +13513,7 @@ msgstr ""
 msgid "ویرایش اطلاعات حساب"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1444
+#: includes/class-hsw-widget-manager.php:1440
 msgid "ویرایش روش‌های ارسال"
 msgstr ""
 
@@ -13544,7 +13535,7 @@ msgstr ""
 msgid "ویژگی‌ها و مشخصات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:255
+#: includes/class-hsw-widget-manager.php:251
 msgid "ویژگی‌های شاخص"
 msgstr ""
 
@@ -13563,7 +13554,7 @@ msgstr ""
 msgid "ویژگی‌های کلیدی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:256
+#: includes/class-hsw-widget-manager.php:252
 msgid "ویژگی‌های کلیدی در نسخه دسکتاپ و موبایل."
 msgstr ""
 
@@ -13610,7 +13601,7 @@ msgid "پالت رنگی ذخیره شد."
 msgstr ""
 
 #: includes/class-hsw-account.php:2717
-#: includes/class-hsw-widget-manager.php:1090
+#: includes/class-hsw-widget-manager.php:1086
 msgid "پاک کردن همه"
 msgstr ""
 
@@ -13688,7 +13679,7 @@ msgstr ""
 msgid "پر کردن کادر"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:506
+#: includes/class-hsw-widget-manager.php:502
 #: widgets/class-hsw-widget-post-page.php:362
 msgid "پربازدیدترین‌ها"
 msgstr ""
@@ -13705,7 +13696,7 @@ msgstr ""
 msgid "پربحث‌ترین مقالات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:370
+#: includes/class-hsw-widget-manager.php:366
 #: widgets/class-hsw-widget-cart-top.php:177
 #: widgets/class-hsw-widget-cart-top.php:250
 #: widgets/class-hsw-widget-checkout-top.php:177
@@ -13815,7 +13806,7 @@ msgstr ""
 msgid "پرفروش‌ترین محصولات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:208
+#: includes/class-hsw-widget-manager.php:204
 #: widgets/class-hsw-widget-archive-toolbar.php:38
 #: widgets/class-hsw-widget-product-related.php:99
 msgid "پرفروش‌ترین‌ها"
@@ -14435,7 +14426,7 @@ msgstr ""
 msgid "پنل %s"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:983
+#: includes/class-hsw-widget-manager.php:979
 msgid "پنل المنتور را سبک نگه دارید؛ فقط ویجت‌هایی را فعال کنید که واقعاً لازم دارید."
 msgstr ""
 
@@ -14447,7 +14438,7 @@ msgstr ""
 msgid "پنل توضیحات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:529
+#: includes/class-hsw-widget-manager.php:525
 #: widgets/class-hsw-widget-account.php:25
 msgid "پنل حساب کاربری HamiShop"
 msgstr ""
@@ -14464,7 +14455,7 @@ msgstr ""
 msgid "پنهان با اسکرول پایین — با اسکرول به بالا فوراً برمی‌گردد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:884
+#: includes/class-hsw-assets.php:877
 msgid "پنهان کردن رمز عبور"
 msgstr ""
 
@@ -14484,7 +14475,7 @@ msgstr ""
 msgid "پیام ایمیل تأییدیه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:399
+#: includes/class-hsw-widget-manager.php:395
 msgid "پیام تشکر و شماره سفارش."
 msgstr ""
 
@@ -14526,25 +14517,8 @@ msgstr ""
 msgid "پیشخوان"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:320
+#: includes/class-hsw-widget-manager.php:316
 msgid "پیشرفت سبد تا ارسال رایگان."
-msgstr ""
-
-#: includes/class-hsw-widget-manager.php:205
-msgid "پیشنهاد روز با شمارش معکوس و کاروسل تخفیف."
-msgstr ""
-
-#: includes/class-hsw-widget-manager.php:204
-#: widgets/class-hsw-wonder-deals.php:189
-msgid "پیشنهاد شگفت‌انگیز"
-msgstr ""
-
-#: widgets/class-hsw-wonder-deals.php:39
-msgid "پیشنهاد شگفت‌انگیز (HamiShop)"
-msgstr ""
-
-#: widgets/class-hsw-wonder-deals.php:57
-msgid "پیشنهاد شگفت‌انگیز روز"
 msgstr ""
 
 #: widgets/class-hsw-widget-post-page.php:1237
@@ -14572,7 +14546,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:1969
 #: includes/class-hsw-widget-base.php:3694
-#: includes/class-hsw-widget-manager.php:989
+#: includes/class-hsw-widget-manager.php:985
 #: widgets/class-hsw-widget-account.php:270
 #: widgets/class-hsw-widget-blog-page.php:78
 #: widgets/class-hsw-widget-blog-page.php:263
@@ -14608,7 +14582,7 @@ msgstr ""
 msgid "پیش‌فرض HamiShop (وزیرمتن)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1273
+#: includes/class-hsw-widget-manager.php:1269
 msgid "پیش‌فرض «غیرفعال»: مشتری همان کالا را می‌بیند و مودال روی گالری می‌افتد. اگر بازخورد می‌خواهید، مودال یا نوار را انتخاب کنید."
 msgstr ""
 
@@ -14617,11 +14591,11 @@ msgstr ""
 msgid "پیش‌فرض تنظیمات"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1405
+#: includes/class-hsw-widget-manager.php:1401
 msgid "پیش‌فرض خاموش است. اگر روش ارسال رایگان را در ووکامرس تنظیم کرده‌اید، خاموش بگذارید تا افزونه نرخ‌ها را بازنویسی نکند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1123
+#: includes/class-hsw-widget-manager.php:1119
 msgid "پیش‌فرض خاموش‌اند؛ فقط در صورت نیاز فعال کنید."
 msgstr ""
 
@@ -14646,7 +14620,7 @@ msgstr ""
 msgid "پیش‌فرض: ثبت آدرس و ادامه (یا ثبت و ادامه)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1371
+#: includes/class-hsw-widget-manager.php:1367
 msgid "پیش‌فرض: یک خط و سرستون‌ها از رنگ اصلی پالت رنگ می‌گیرند و بقیه سیاه‌وسفید است. با روشن‌کردن این گزینه همه‌چیز خالص سیاه‌وسفید چاپ می‌شود."
 msgstr ""
 
@@ -14700,7 +14674,7 @@ msgstr ""
 msgid "پیگیری سفارش"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:411
+#: includes/class-hsw-widget-manager.php:407
 msgid "پیگیری سفارش و اقدام‌های بعدی."
 msgstr ""
 
@@ -14748,7 +14722,7 @@ msgstr ""
 msgid "چسبیدن هدر به بالای صفحه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1060
+#: includes/class-hsw-widget-manager.php:1056
 msgid "چطور انتخاب کنیم؟"
 msgstr ""
 
@@ -14779,7 +14753,7 @@ msgstr ""
 msgid "چک‌باکس فاکتور رسمی (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-assets.php:923
+#: includes/class-hsw-assets.php:916
 msgid "چک‌باکس قوانین روی این صفحه نمایش داده نشده؛ با مدیر فروشگاه تماس بگیرید."
 msgstr ""
 
@@ -14922,7 +14896,7 @@ msgstr ""
 msgid "کارت‌های دیدگاه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:455
+#: includes/class-hsw-widget-manager.php:451
 msgid "کارت‌های محصول هماهنگ با بقیه ویجت‌ها."
 msgstr ""
 
@@ -14930,7 +14904,7 @@ msgstr ""
 msgid "کارت‌های مطالب (مشترک)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:503
+#: includes/class-hsw-widget-manager.php:499
 msgid "کارت‌های مقاله با تصویر و دسته."
 msgstr ""
 
@@ -14950,11 +14924,11 @@ msgstr ""
 msgid "کارشناسان ما کالا را بررسی، کنترل کیفی و بسته‌بندی می‌کنند."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:276
+#: includes/class-hsw-widget-manager.php:272
 msgid "کاروسل محصولات مرتبط، هم‌دسته، تشویقی یا پرفروش."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:209
+#: includes/class-hsw-widget-manager.php:205
 msgid "کاروسل پرفروش‌ترین‌ها با رتبه‌بندی و دکمه خرید."
 msgstr ""
 
@@ -14962,7 +14936,7 @@ msgstr ""
 msgid "کالا"
 msgstr ""
 
-#: includes/class-hsw-assets.php:985
+#: includes/class-hsw-assets.php:978
 msgid "کالا اضافه شد!"
 msgstr ""
 
@@ -15009,11 +14983,11 @@ msgid "کد تأیید"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:1687
-#: includes/class-hsw-assets.php:906
+#: includes/class-hsw-assets.php:899
 msgid "کد تأیید ارسال شد."
 msgstr ""
 
-#: includes/class-hsw-assets.php:898
+#: includes/class-hsw-assets.php:891
 msgid "کد تأیید ارسال شد. صندوق ایمیل را بررسی کنید."
 msgstr ""
 
@@ -15029,11 +15003,11 @@ msgstr ""
 msgid "کد تأیید را وارد کنید"
 msgstr ""
 
-#: includes/class-hsw-assets.php:903
+#: includes/class-hsw-assets.php:896
 msgid "کد تأیید را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:909
+#: includes/class-hsw-assets.php:902
 msgid "کد تأیید نامعتبر است."
 msgstr ""
 
@@ -15136,7 +15110,7 @@ msgstr ""
 msgid "کد تخفیف را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:327
+#: includes/class-hsw-widget-manager.php:323
 msgid "کد تخفیف سبد"
 msgstr ""
 
@@ -15144,7 +15118,7 @@ msgstr ""
 msgid "کد تخفیف سبد خرید (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:385
+#: includes/class-hsw-widget-manager.php:381
 msgid "کد تخفیف و کارت هدیه"
 msgstr ""
 
@@ -15253,7 +15227,7 @@ msgstr ""
 msgid "کد پستی:"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1299
+#: includes/class-hsw-widget-manager.php:1295
 msgid "کد پستی، استان، شهر، نشانی، روش ارسال و بازهٔ زمانی تحویل حذف می‌شوند و فقط نام و شماره تماس می‌ماند. اگر سبد ترکیبی باشد (حتی یک کالای فیزیکی) همهٔ فیلدها مثل قبل برمی‌گردند."
 msgstr ""
 
@@ -15322,7 +15296,7 @@ msgstr ""
 msgid "کلیه تراکنش‌ها در بستر شاپرک رمزنگاری می‌شوند"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:217
+#: includes/class-hsw-widget-manager.php:213
 msgid "کمپین تخفیف با کارت کمپین، تایمر کمپین و تایمر هر محصول."
 msgstr ""
 
@@ -15338,10 +15312,10 @@ msgstr ""
 msgid "کنترل تعداد"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:693
-#: includes/class-hsw-widget-manager.php:694
-#: includes/class-hsw-widget-manager.php:919
-#: includes/class-hsw-widget-manager.php:982
+#: includes/class-hsw-widget-manager.php:689
+#: includes/class-hsw-widget-manager.php:690
+#: includes/class-hsw-widget-manager.php:915
+#: includes/class-hsw-widget-manager.php:978
 msgid "کنترل ویجت‌ها"
 msgstr ""
 
@@ -15401,15 +15375,15 @@ msgstr ""
 msgid "گارانتی ۱۸ ماهه همراه با کد فعال‌سازی رجیستری"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:264
+#: includes/class-hsw-widget-manager.php:260
 msgid "گارانتی، ارسال و نشان‌های اطمینان."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:244
+#: includes/class-hsw-widget-manager.php:240
 msgid "گالری با زوم، بندانگشتی و برچسب اصالت."
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:243
+#: includes/class-hsw-widget-manager.php:239
 msgid "گالری تصاویر"
 msgstr ""
 
@@ -15421,7 +15395,7 @@ msgstr ""
 msgid "گالری محصول (HamiShop)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:231
+#: includes/class-hsw-widget-manager.php:227
 msgid "گالری، خرید، تب‌ها و نوار چسبان در یک ویجت جامع."
 msgstr ""
 
@@ -15637,15 +15611,15 @@ msgstr ""
 msgid "گردی گوشه‌های دکمه"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1038
+#: includes/class-hsw-widget-manager.php:1034
 msgid "گروه‌ها"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:1037
+#: includes/class-hsw-widget-manager.php:1033
 msgid "گروه‌های ویجت"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:454
+#: includes/class-hsw-widget-manager.php:450
 msgid "گرید محصولات آرشیو"
 msgstr ""
 
@@ -15721,7 +15695,7 @@ msgstr ""
 msgid "یادداشت سفارش و توضیحات ارسال (اختیاری)"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:356
+#: includes/class-hsw-widget-manager.php:352
 msgid "یادداشت سفارش و فاکتور"
 msgstr ""
 
@@ -15739,7 +15713,7 @@ msgstr ""
 msgid "یادداشت مشتری"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:357
+#: includes/class-hsw-widget-manager.php:353
 msgid "یادداشت مشتری و درخواست فاکتور."
 msgstr ""
 
@@ -15843,7 +15817,7 @@ msgstr ""
 msgid "۱ — سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:996
+#: includes/class-hsw-widget-manager.php:992
 msgid "۱) فقط ثبت آن ویجت در پنل المنتور متوقف می‌شود؛ فایل PHP آن همچنان بارگذاری می‌شود و صفحه‌ای که قبلاً از آن استفاده کرده باید در المنتور بررسی شود."
 msgstr ""
 
@@ -15907,7 +15881,7 @@ msgstr ""
 msgid "۲ — اطلاعات ارسال"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:997
+#: includes/class-hsw-widget-manager.php:993
 msgid "۲) بخش‌های داخل ویجت‌های جامع (مثل خلاصهٔ سبد در «صفحهٔ سبد خرید») با این کلید خاموش نمی‌شوند؛ چیدمان خود ویجت جامع را تنظیم می‌کند."
 msgstr ""
 
@@ -15964,7 +15938,7 @@ msgstr ""
 msgid "۳ — پرداخت نهایی"
 msgstr ""
 
-#: includes/class-hsw-widget-manager.php:998
+#: includes/class-hsw-widget-manager.php:994
 msgid "۳) ویجتی که در به‌روزرسانی‌های بعدی اضافه شود، روی سایتی که فهرست ذخیره‌شده دارد ممکن است تا فعال‌کردن دستی دیده نشود."
 msgstr ""
 

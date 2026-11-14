@@ -464,7 +464,6 @@ jobs:
         env:
           HSW_BROWSER_PATH: /usr/bin/google-chrome
         run: |
-          node tests/loop-lead-color-probe.js
           node tests/post-page-probe.js
           node tests/ticket-admin-layout-probe.js
 

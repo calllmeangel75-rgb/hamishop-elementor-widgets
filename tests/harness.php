@@ -69,7 +69,6 @@ $files = array(
 	'includes/class-hsw-blog-base.php',
 	'includes/class-hsw-complete-base.php',
 	/* ---- widget files ---- */
-	'widgets/class-hsw-wonder-deals.php',
 	'widgets/class-hsw-best-sellers.php',
 	'widgets/class-hsw-popular.php',
 	'widgets/class-hsw-widget-product-breadcrumb.php',

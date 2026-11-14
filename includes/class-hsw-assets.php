@@ -747,13 +747,6 @@ class HSW_Assets {
                  * `hsw-loop`, and a page only downloads the shell it renders.
                  */
                 wp_register_style(
-                        'hsw-loop-deal',
-                        $this->asset( 'assets/css/hsw-loop-deal.css' ),
-                        array( 'hsw-loop' ),
-                        HSW_VERSION
-                );
-
-                wp_register_style(
                         'hsw-loop-box',
                         $this->asset( 'assets/css/hsw-loop-box.css' ),
                         array( 'hsw-loop' ),
@@ -1062,7 +1055,6 @@ class HSW_Assets {
         public function editor_style() {
                 wp_add_inline_style(
                         'wp-admin',
-                        '.elementor-widget-hsw-wonder-deals .elementor-widget-container:before{content:"";display:block;height:0}'
                 );
         }
 
