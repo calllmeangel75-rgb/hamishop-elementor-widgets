@@ -837,7 +837,7 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 	 * @param int        $campaign_end Campaign end.
 	 * @return string
 	 */
-	private function offer_card_html( $product, $s, $campaign_end ) {
+	private function offer_card_html( $product, $s, $campaign_end, $index = 0 ) {
 		$prices = $this->product_prices( $product );
 		if ( $prices['sale'] <= 0 ) {
 			return '';
@@ -846,7 +846,14 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 		$percent = $prices['percent'];
 		$url     = $product->get_permalink();
 		$name    = $product->get_name();
-		$image   = $product->get_image( 'woocommerce_thumbnail', array( 'loading' => 'lazy', 'alt' => $name ) );
+		$image_args = array(
+			'loading' => 0 === $index ? 'eager' : 'lazy',
+			'alt'     => $name,
+		);
+		if ( 0 === $index ) {
+			$image_args['fetchpriority'] = 'high';
+		}
+		$image = $product->get_image( 'woocommerce_thumbnail', $image_args );
 		$note    = $this->card_note( $product, $percent, $this->opt( 'offer_default_note' ) );
 		$stock   = $this->stock_data( $product );
 		$end     = $this->product_sale_end( $product );
@@ -975,9 +982,9 @@ class HSW_Widget_Offer extends HSW_Widget_Base {
 
 		/* Rail. */
 		echo '<div class="hsw-offer__main">';
-		echo '<div class="hsw-offer__rail" data-hsw-offer-rail role="list" aria-label="' . esc_attr__( 'محصولات آفر', 'hamishop-elementor-widgets' ) . '" tabindex="0">';
-		foreach ( $products as $product ) {
-			echo $this->offer_card_html( $product, $s, $campaign_end ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<div class="hsw-offer__rail" data-hsw-offer-rail role="group" aria-label="' . esc_attr__( 'محصولات آفر', 'hamishop-elementor-widgets' ) . '" tabindex="0">';
+		foreach ( $products as $index => $product ) {
+			echo $this->offer_card_html( $product, $s, $campaign_end, (int) $index ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 		echo '</div>';
 		echo '<button type="button" class="hsw-offer__arrow hsw-offer__arrow--prev" data-hsw-offer-dir="-1" aria-label="' . esc_attr__( 'محصولات قبلی', 'hamishop-elementor-widgets' ) . '">' . HSW_Helpers::icon( 'chevron_right' ) . '</button>';

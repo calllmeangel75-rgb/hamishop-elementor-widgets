@@ -109,6 +109,31 @@
 		});
 	}
 
-	window.setInterval(tick, 1000);
+	var timerId = 0;
+
+	function startClock() {
+		if (timerId) {
+			return;
+		}
+		timerId = window.setInterval(tick, 1000);
+	}
+
+	function stopClock() {
+		if (timerId) {
+			window.clearInterval(timerId);
+			timerId = 0;
+		}
+	}
+
+	document.addEventListener('visibilitychange', function () {
+		if (document.hidden) {
+			stopClock();
+		} else {
+			tick();
+			startClock();
+		}
+	});
+
+	startClock();
 	tick();
 })();

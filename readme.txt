@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.281
+Stable tag: 1.11.282
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,10 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.282 =
+* بهینه‌سازی «آفر حامی‌شاپ»: تصویر اولین کارت با `loading="eager"` و `fetchpriority="high"` بارگذاری می‌شود تا LCP بهتر شود؛ بقیه تصاویر lazy می‌مانند.
+* حذف `filter: blur` از هاله‌های پس‌زمینه و جایگزینی با radial-gradient برای کاهش هزینهٔ paint؛ تایمرها وقتی تب مرورگر مخفی است متوقف می‌شوند.
 
 = 1.11.281 =
 * ویجت جدید «آفر حامی‌شاپ» اضافه شد: کمپین تخفیف مستقل با کارت کمپین، تایمر کمپین، تایمر هر محصول، حداکثر ۸ محصول، مبنای تخفیف کمترین قیمت variation و نوار موجودی/فروش.

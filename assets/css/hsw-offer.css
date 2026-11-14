@@ -63,19 +63,18 @@
 	block-size: 20rem;
 	border-radius: 50%;
 	pointer-events: none;
-	filter: blur(48px);
 }
 
 .hsw-offer__shell::before {
 	inset-block-start: -6rem;
 	inset-inline-end: -6rem;
-	background: rgb(255 255 255 / 10%);
+	background: radial-gradient(circle, rgb(255 255 255 / 16%) 0, rgb(255 255 255 / 0%) 70%);
 }
 
 .hsw-offer__shell::after {
 	inset-block-end: -6rem;
 	inset-inline-start: -6rem;
-	background: rgb(0 0 0 / 10%);
+	background: radial-gradient(circle, rgb(0 0 0 / 16%) 0, rgb(0 0 0 / 0%) 70%);
 }
 
 .hsw-offer__layout {

@@ -6,6 +6,13 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.282] - 2026-11-14
+
+### Performance
+- **Offer LCP image:** the first card image is now `loading="eager"` with `fetchpriority="high"`; the rest stay lazy. The first visible card is the likely LCP element in the campaign rail.
+- **Cheaper shell paint:** the decorative glows no longer use `filter: blur(48px)`; they use radial gradients, avoiding a large filtered layer.
+- **Timer idle work:** the shared countdown interval stops while the tab is hidden and resumes on visibility.
+
 ## [1.11.281] - 2026-11-14
 
 ### Added
