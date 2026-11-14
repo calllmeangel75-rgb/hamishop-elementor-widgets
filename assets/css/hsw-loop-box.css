@@ -11,3 +11,15 @@
 	--hsw-loop-shell-shadow: 0 2px 14px rgb(0 0 0 / 5%);
 	--hsw-loop-card-bg: var(--hsw-loop-bg);
 }
+
+/*
+ * Boxed loop widgets (best-sellers and popular) used the shell's default
+ * 0px inline padding, so the header and the rail touched the card border.
+ * Keep a real gutter inside the border; the outer box and its radius are
+ * unchanged. The selector is intentionally limited to these two variants.
+ */
+.hsw-loop.hsw-loop--box.hsw-loop--hsw-popular,
+.hsw-loop.hsw-loop--box.hsw-loop--hsw-best-sellers {
+	--hsw-loop-box-gutter: clamp(16px, 3%, 32px);
+	padding-inline: var(--hsw-loop-box-gutter);
+}

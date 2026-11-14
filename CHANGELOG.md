@@ -6,6 +6,13 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.280] - 2026-11-14
+
+### Fixed
+- **Wonder Deals full-bleed gutter:** the Elementor shell padding control defaults to `0` on the inline sides, so a stretched «پیشنهاد شگفت‌انگیز» put its header and first/last card against the section edge. The wonder-deals shell now uses `padding-inline: clamp(16px, 5%, 96px)` while the gradient still reaches both edges.
+- **Boxed loop gutter:** «محبوب‌ترین‌ها / منتخب» and «پرفروش‌ترین‌ها» had the same `0` inline padding inside their bordered card. Both now use `padding-inline: clamp(16px, 3%, 32px)`.
+- The rules are scoped to `.hsw-loop--hsw-wonder-deals`, `.hsw-loop--hsw-popular` and `.hsw-loop--hsw-best-sellers`; other loop variants are unchanged.
+
 ## [1.11.279] - 2026-11-14
 
 ### Fixed
