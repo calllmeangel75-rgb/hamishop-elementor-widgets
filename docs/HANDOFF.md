@@ -11,9 +11,9 @@
 ```
 مسیر مخزن   : همین ریپو (شاخهٔ main)
 مخزن        : github.com/calllmeangel75-rgb/hamishop-elementor-widgets
-آخرین انتشار پایدار           : 1.11.289 (تگ v1.11.289، کامیت 3c7c0a0)
+آخرین انتشار پایدار           : 1.11.289 (تگ v1.11.289، کامیت b5206f4)
 وضعیت نسخه                   : فریز؛ تا پایان Smoke Test تغییر کد ممنوع
-SHA-256 ریلیز                : 49232d115bb8bd05bebb4148cb6b4393e16f0863ac1c508bf07d5e1e18383820
+SHA-256 ریلیز                : 7f4faff6621a156b268a86ae7d13a7c8b523448b2c4bc5e65e1a76530e9236e3
 فایل اصلی   : hamishop-elementor-widgets.php  (هدر نسخه + HSW_VERSION)
 تست لوکال   : Local/XAMPP یا staging خودت؛ افزونه در wp-content/plugins/hamishop-elementor-widgets
 سایت‌های زنده: gilaclick.ir · new.mrdastbaaf.com
