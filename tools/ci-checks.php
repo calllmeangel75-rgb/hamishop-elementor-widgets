@@ -276,6 +276,31 @@ hsw_ci(
 );
 
 /* -------------------------------------------------------------------------
+ * 6d) Every GC header colour role must be settable from the panel
+ *
+ * `--hsw-gc-cta-*`, `--hsw-gc-mark-*` and `--hsw-gc-badge-*` are roles the
+ * stylesheet reads through a `-user` channel. When one of those channels has no
+ * control, the panel silently loses that colour and the only way to change it
+ * is custom CSS — which is exactly the "why is this colour coming from
+ * somewhere else" confusion this check exists to prevent.
+ * ---------------------------------------------------------------------- */
+$gc_css = (string) file_get_contents( $root . '/assets/css/hsw-header-gc.css' );
+$gc_php = (string) file_get_contents( $root . '/widgets/class-hsw-widget-header-gc.php' );
+preg_match_all( '/var\(\s*(--hsw-gc-[a-z0-9-]+-user)/', $gc_css, $gc_channels );
+$gc_channels = array_unique( $gc_channels[1] );
+$gc_missing  = array();
+foreach ( $gc_channels as $channel ) {
+	if ( false === strpos( $gc_php, "'{$channel}'" ) ) {
+		$gc_missing[] = $channel;
+	}
+}
+hsw_ci(
+	'GC header: every colour role has a control',
+	! $gc_missing,
+	$gc_missing ? implode( ', ', $gc_missing ) : count( $gc_channels ) . ' channels'
+);
+
+/* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */
 foreach ( array( 'README.md', 'CHANGELOG.md', 'docs/WIDGETS.md', 'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PERFORMANCE.md', 'docs/STAGING-CHECKLIST.md', 'docs/MARKETING.md' ) as $doc ) {

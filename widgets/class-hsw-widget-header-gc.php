@@ -483,6 +483,45 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 			);
 		}
 
+		/*
+		 * The three components that only borrowed a colour now get their own
+		 * control. Every one of them is empty by default, which means `{{VALUE}}`
+		 * is empty too and Elementor writes no declaration — so an existing
+		 * header keeps resolving the role from the tokens above, unchanged.
+		 */
+		$this->a_gc_colour_group(
+			'gc_cta_head',
+			__( 'دکمهٔ اصلی (CTA)', 'hamishop-elementor-widgets' ),
+			__( 'دکمهٔ تیرهٔ انتهای نوار و همان دکمه در منوی موبایل. خالی = همان رنگ‌های بالا.', 'hamishop-elementor-widgets' ),
+			array(
+				'gc_cta_bg'       => array( __( 'پس‌زمینه', 'hamishop-elementor-widgets' ), '--hsw-gc-cta-bg-user', __( 'خالی = رنگ تیرهٔ نشان و دکمهٔ اصلی.', 'hamishop-elementor-widgets' ) ),
+				'gc_cta_bg_hover' => array( __( 'پس‌زمینه در هاور', 'hamishop-elementor-widgets' ), '--hsw-gc-cta-bg-hover-user', __( 'خالی = رنگ اصلی تیره.', 'hamishop-elementor-widgets' ) ),
+				'gc_cta_fg'       => array( __( 'رنگ متن', 'hamishop-elementor-widgets' ), '--hsw-gc-cta-fg-user', __( 'خالی = سفید.', 'hamishop-elementor-widgets' ) ),
+				'gc_cta_icon'     => array( __( 'رنگ آیکون', 'hamishop-elementor-widgets' ), '--hsw-gc-cta-icon-user', __( 'خالی = رنگ درخشش.', 'hamishop-elementor-widgets' ) ),
+			)
+		);
+
+		$this->a_gc_colour_group(
+			'gc_mark_head',
+			__( 'نشان مدار GC', 'hamishop-elementor-widgets' ),
+			__( 'فقط روی «G» مدارِ داخلی اثر دارد؛ لوگوی آپلودی و آیکون نشان رنگ خود را نگه می‌دارند.', 'hamishop-elementor-widgets' ),
+			array(
+				'gc_mark_body'  => array( __( 'بدنهٔ نشان', 'hamishop-elementor-widgets' ), '--hsw-gc-mark-body-user', __( 'خالی = رنگ تیرهٔ نشان.', 'hamishop-elementor-widgets' ) ),
+				'gc_mark_trace' => array( __( 'خط مدار', 'hamishop-elementor-widgets' ), '--hsw-gc-mark-trace-user', __( 'خالی = رنگ اصلی.', 'hamishop-elementor-widgets' ) ),
+				'gc_mark_glow'  => array( __( 'نقطه و هاله', 'hamishop-elementor-widgets' ), '--hsw-gc-mark-glow-user', __( 'خالی = رنگ درخشش.', 'hamishop-elementor-widgets' ) ),
+			)
+		);
+
+		$this->a_gc_colour_group(
+			'gc_badge_head',
+			__( 'نشانگر تعداد سبد', 'hamishop-elementor-widgets' ),
+			__( 'حباب کوچک روی آیکون سبد خرید. خالی = رنگ درخشش با متن تیره.', 'hamishop-elementor-widgets' ),
+			array(
+				'gc_badge_bg' => array( __( 'پس‌زمینهٔ نشانگر', 'hamishop-elementor-widgets' ), '--hsw-gc-badge-bg-user', __( 'خالی = رنگ درخشش.', 'hamishop-elementor-widgets' ) ),
+				'gc_badge_fg' => array( __( 'رنگ عدد', 'hamishop-elementor-widgets' ), '--hsw-gc-badge-fg-user', __( 'خالی = رنگ تیرهٔ نشان.', 'hamishop-elementor-widgets' ) ),
+			)
+		);
+
 		$this->add_responsive_control(
 			'bar_height',
 			array(
@@ -567,6 +606,40 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 		);
 
 		$this->end_controls_section();
+	}
+
+	/**
+	 * A heading plus the colour controls of one component group.
+	 *
+	 * @param string $heading_id Control id for the heading.
+	 * @param string $heading    Heading label.
+	 * @param string $intro      One line under the heading, naming the default.
+	 * @param array  $rows       id => array( label, css variable, description ).
+	 */
+	protected function a_gc_colour_group( $heading_id, $heading, $intro, $rows ) {
+		$this->add_control(
+			$heading_id,
+			array(
+				'label'       => $heading,
+				'description' => $intro,
+				'type'        => Controls_Manager::HEADING,
+				'separator'   => 'before',
+			)
+		);
+
+		foreach ( $rows as $id => $row ) {
+			$this->add_control(
+				$id,
+				array(
+					'label'       => $row[0],
+					'description' => $row[2],
+					'type'        => Controls_Manager::COLOR,
+					'selectors'   => array(
+						'{{WRAPPER}} .hsw-gc' => $row[1] . ': {{VALUE}};',
+					),
+				)
+			);
+		}
 	}
 
 	/**

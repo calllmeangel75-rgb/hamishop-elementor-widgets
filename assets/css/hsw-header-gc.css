@@ -12,6 +12,11 @@
  *   2. `--hsw-pal-*`      the site palette (HamiShop → پالت رنگی)
  *   3. a literal          the GC signature value, last resort only
  *
+ * Components never read the palette tokens directly. They read role tokens
+ * (`--hsw-gc-cta-*`, `--hsw-gc-mark-*`, `--hsw-gc-badge-*`) which resolve in
+ * that same order, so CTA, mark and badge each have their own colour settings
+ * without giving up the palette-first default.
+ *
  * Unlike hsw-header.css there is no `!important` here: this widget is new, so
  * no page carries a stale declaration on these property names. Elementor
  * writes only the `-user` channel, which nothing else sets.
@@ -36,9 +41,36 @@
 	--hsw-gc-mint: var(--hsw-gc-mint-user, var(--hsw-pal-primary-50, #f0fbf6));
 	--hsw-gc-line: var(--hsw-gc-line-user, var(--hsw-pal-border, rgb(23 43 37 / 0.1)));
 
-	/* Text on the dark CTA and on the primary fill. */
-	--hsw-gc-on-dark: #e9f7f0;
-	--hsw-gc-on-dark-faint: rgb(233 247 240 / 0.5);
+	/*
+	 * Derived roles — the layer that used to be invisible.
+	 *
+	 * The nine tokens above are the only colours that exist. Every component
+	 * borrows one of them, and these roles name the borrow so it can be read
+	 * instead of reverse-engineered:
+	 *
+	 *   .hsw-gc__cta    solid ink button, glow icon, primary-dark on hover
+	 *   .hsw-gc__mark   ink body, primary trace, glow node + halo
+	 *   .hsw-gc__badge  glow pill, ink number
+	 *   .hsw-gc .hsw-ic currentColor — an icon has no colour of its own; it
+	 *                   takes the text colour of the box around it. The CTA
+	 *                   icon is the single exception: it is explicitly glow.
+	 *
+	 * Every role resolves through its own `-user` channel first, so a widget
+	 * can split one role away from its palette token and nothing else moves.
+	 */
+	--hsw-gc-cta-bg: var(--hsw-gc-cta-bg-user, var(--hsw-gc-ink));
+	--hsw-gc-cta-bg-hover: var(--hsw-gc-cta-bg-hover-user, var(--hsw-gc-primary-dark));
+	--hsw-gc-cta-fg: var(--hsw-gc-cta-fg-user, #fff);
+	--hsw-gc-cta-icon: var(--hsw-gc-cta-icon-user, var(--hsw-gc-glow));
+
+	--hsw-gc-mark-body: var(--hsw-gc-mark-body-user, var(--hsw-gc-ink));
+	--hsw-gc-mark-trace: var(--hsw-gc-mark-trace-user, var(--hsw-gc-primary));
+	--hsw-gc-mark-glow: var(--hsw-gc-mark-glow-user, var(--hsw-gc-glow));
+
+	--hsw-gc-badge-bg: var(--hsw-gc-badge-bg-user, var(--hsw-gc-glow));
+	--hsw-gc-badge-fg: var(--hsw-gc-badge-fg-user, var(--hsw-gc-ink));
+
+	/* Not a palette decision: the fixed tint of the strongest divider. */
 	--hsw-gc-line-strong: rgb(23 43 37 / 0.18);
 
 	/* ---- geometry ---- */
@@ -136,15 +168,18 @@
 
 /*
  * Icons come from the shared Material sprite (`hsw-ic`), so only the box is
- * set here. The sprite's own `1em` default is too coarse for a 66px bar.
+ * set here — the colour is inherited (`currentColor`) from the box that holds
+ * the icon, which is why an icon never needs its own control. The sprite's own
+ * `1em` default is too coarse for a 66px bar, so each slot below caps the box.
  */
 .hsw-gc .hsw-ic {
 	flex-shrink: 0;
 }
 
+/* An icon mark fills the same box as the SVG mark, capped by the bar height. */
 .hsw-gc .hsw-gc__mark.hsw-ic {
-	width: var(--hsw-gc-mark, 2.375rem);
-	height: var(--hsw-gc-mark, 2.375rem);
+	width: min(var(--hsw-gc-mark, 2.375rem), calc(var(--hsw-gc-h, 66px) - 10px));
+	height: min(var(--hsw-gc-mark, 2.375rem), calc(var(--hsw-gc-h, 66px) - 10px));
 }
 
 .hsw-gc__panel-icon .hsw-ic {
@@ -375,12 +410,12 @@ body.admin-bar .hsw-gc__drawer {
 
 /* ---- circuit mark: a «G» drawn as a trace that ends in a node ---- */
 .hsw-gc__body {
-	fill: var(--hsw-gc-ink);
+	fill: var(--hsw-gc-mark-body);
 }
 
 .hsw-gc__trace {
 	fill: none;
-	stroke: var(--hsw-gc-primary);
+	stroke: var(--hsw-gc-mark-trace);
 	stroke-width: 3;
 	stroke-linecap: round;
 	stroke-linejoin: round;
@@ -393,7 +428,7 @@ body.admin-bar .hsw-gc__drawer {
 }
 
 .hsw-gc__halo {
-	fill: var(--hsw-gc-glow);
+	fill: var(--hsw-gc-mark-glow);
 	opacity: 0.18;
 	transform-box: fill-box;
 	transform-origin: center;
@@ -403,7 +438,7 @@ body.admin-bar .hsw-gc__drawer {
 }
 
 .hsw-gc__node {
-	fill: var(--hsw-gc-glow);
+	fill: var(--hsw-gc-mark-glow);
 }
 
 .hsw-gc[data-hsw-gc-ready] .hsw-gc__node,
@@ -753,8 +788,8 @@ body .hsw-gc button.hsw-gc__btn.hsw-gc__btn {
 	height: 1.25rem;
 	padding-inline: 0.3rem;
 	border-radius: 0.7rem;
-	background: var(--hsw-gc-glow);
-	color: var(--hsw-gc-ink);
+	background: var(--hsw-gc-badge-bg);
+	color: var(--hsw-gc-badge-fg);
 	font-size: 0.72rem;
 	font-weight: 800;
 	line-height: 1.25rem;
@@ -773,8 +808,8 @@ body .hsw-gc button.hsw-gc__btn.hsw-gc__btn {
 	height: 2.75rem;
 	padding: 0;
 	border-radius: var(--hsw-gc-r-md);
-	background: var(--hsw-gc-ink);
-	color: #fff;
+	background: var(--hsw-gc-cta-bg);
+	color: var(--hsw-gc-cta-fg);
 	font-size: var(--hsw-gc-fs-sm);
 	font-weight: 700;
 	white-space: nowrap;
@@ -794,7 +829,7 @@ body .hsw-gc button.hsw-gc__btn.hsw-gc__btn {
 }
 
 .hsw-gc__cta .hsw-ic {
-	color: var(--hsw-gc-glow);
+	color: var(--hsw-gc-cta-icon);
 }
 
 /* Light sweep across the CTA on hover. */
@@ -808,7 +843,7 @@ body .hsw-gc button.hsw-gc__btn.hsw-gc__btn {
 }
 
 .hsw-gc__cta:hover {
-	background: var(--hsw-gc-primary-dark);
+	background: var(--hsw-gc-cta-bg-hover);
 	box-shadow:
 		0 0 0 1px color-mix(in srgb, var(--hsw-gc-glow) 35%, transparent),
 		0 10px 26px -12px color-mix(in srgb, var(--hsw-gc-primary) 90%, transparent);
@@ -1084,14 +1119,15 @@ body .hsw-gc button.hsw-gc__btn.hsw-gc__btn {
 	font-weight: 700;
 }
 
+/* The drawer repeats the bar's CTA, so it follows the same role tokens. */
 .hsw-gc .hsw-gc__drawer-btn--dark {
-	background: var(--hsw-gc-ink);
-	border-color: var(--hsw-gc-ink);
-	color: #fff;
+	background: var(--hsw-gc-cta-bg);
+	border-color: var(--hsw-gc-cta-bg);
+	color: var(--hsw-gc-cta-fg);
 }
 
 .hsw-gc__drawer-btn--dark .hsw-ic {
-	color: var(--hsw-gc-glow);
+	color: var(--hsw-gc-cta-icon);
 }
 
 /* The drawer head is smaller than the bar, but an image mark keeps its ratio. */

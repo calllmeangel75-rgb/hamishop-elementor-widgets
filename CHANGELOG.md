@@ -6,6 +6,21 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.290] - 2026-11-14
+
+### Added
+- **GC header colour roles:** `--hsw-gc-cta-*`, `--hsw-gc-mark-*` and `--hsw-gc-badge-*` are now the tokens the stylesheet reads, instead of borrowing `ink`/`glow`/`primary` inline. Each resolves through its own `-user` channel first, then the palette, then its previous literal — so nothing renders differently, but every colour has a name you can follow.
+- **Separate controls** for «دکمهٔ اصلی (CTA)» (background, hover background, text, icon), «نشان مدار GC» (body, trace, node + halo) and «نشانگر تعداد سبد» (background, number). All are empty by default, so an untouched header still follows HamiShop → پالت رنگی exactly as before.
+- `docs/ARCHITECTURE.md` documents the role layer next to the three-step cascade.
+- `tools/ci-checks.php` now fails when a `-user` channel exists in the GC stylesheet without a matching Elementor control.
+
+### Fixed
+- **GC icon mark height:** the icon-based mark (`.hsw-gc__mark.hsw-ic`) was still sized by `--hsw-gc-mark` alone, so a large mark setting could push it outside the bar. It is now capped by the bar height like the uploaded logo.
+- The GC drawer's dark button now follows the CTA role tokens instead of repeating `ink` / `#fff` / `glow`, so one CTA colour change covers both.
+
+### Notes
+- No selector was renamed and no rule moved out of its scope; the only visible change is the icon mark height cap. Verified by rendering the same markup against the 1.11.289 stylesheet and diffing 17 computed colour probes (identical) plus per-channel overrides.
+
 ## [1.11.289] - 2026-11-14
 
 ### Fixed
