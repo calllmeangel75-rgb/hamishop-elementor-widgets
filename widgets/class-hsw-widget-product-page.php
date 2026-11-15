@@ -61,7 +61,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 $this->part_section( 'ptl_', __( '۳. عنوان، امتیاز و متا', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Title', array( 'vis', 'title_en', 'title_tag', 'recommend_mode', 'recommend', 'show_stock', 'rev_url', 'spacing_bottom' ) );
 
-                $this->part_section( 'pvr_', __( '۴. انتخاب رنگ و حافظه', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Variants', array( 'vis', 'attr_color', 'attr_storage', 'label_color_d', 'label_color_m', 'label_storage_d', 'label_storage_m', 'color_map' ) );
+                $this->part_section( 'pvr_', __( '۴. انتخاب ویژگی‌ها (رنگ، سایز، حافظه)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Variants', array( 'vis', 'attr_color', 'attr_storage', 'label_color_d', 'label_color_m', 'label_storage_d', 'label_storage_m', 'color_map' ) );
 
                 $this->part_section( 'pft_', __( '۵. ویژگی‌های کلیدی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Features', array( 'vis', 'desk_title', 'mob_title', 'desk_auto', 'mob_auto', 'desk_items', 'mob_items' ) );
 
@@ -71,10 +71,15 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 $this->part_section( 'ptb_', __( '۸. تب‌ها (دسکتاپ و موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Tabs', array( 'vis', 'tabs_style', 'stk_gap', 'specs_title', 'lbl_specs', 'lbl_review', 'lbl_comments', 'tab_specs', 'tab_review', 'tab_warranty', 'lbl_warranty', 'warranty_title', 'warranty_text', 'tab_comments', 'reviews_count' ) );
 
-                $this->part_section( 'pac_', __( '۹. آکاردئون‌ها (موبایل)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Accordions', array( 'vis', 'acc_specs_title', 'acc_warranty_title', 'acc_reviews_title', 'acc_specs', 'acc_warranty', 'acc_reviews', 'reviews_count2', 'warranty_items' ) );
+                /*
+                 * The mobile accordion is not printed any more: the tab strip
+                 * serves both breakpoints with one set of content. Its controls
+                 * were still registered here, so the panel offered settings that
+                 * changed nothing.
+                 */
 
-                $this->part_section( 'pst_', __( '۱۰. نوار خرید چسبان', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Sticky', array( 'vis', 'sticky_fixed', 'cart_text' ) );
-                $this->part_section( 'prel_', __( '۱۱. محصولات مرتبط', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Related', array( 'vis', 'title', 'sub', 'source', 'count', 'more_text' ) );
+                $this->part_section( 'pst_', __( '۹. نوار خرید چسبان', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Sticky', array( 'vis', 'sticky_fixed', 'cart_text' ) );
+                $this->part_section( 'prel_', __( '۱۰. محصولات مرتبط', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Related', array( 'vis', 'title', 'sub', 'source', 'count', 'more_text' ) );
 
                 /* ------------------- چیدمان ------------------- */
                 $this->start_controls_section(

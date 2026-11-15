@@ -214,8 +214,16 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                         if ( '' === $value ) {
                                                 continue;
                                         }
+                                        /*
+                                         * The value posted with the add-to-cart request is
+                                         * the option as the shop owner typed it, not its
+                                         * slug: a slug of a Persian option is itself
+                                         * percent-encoded (`%d8%a2…`), and
+                                         * sanitize_text_field() strips those octets, so
+                                         * the pick arrived empty and was dropped.
+                                         */
                                         $terms[] = array(
-                                                'slug' => sanitize_title( $value ),
+                                                'slug' => $value,
                                                 'name' => $value,
                                                 'hex'  => '',
                                         );
@@ -318,6 +326,21 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                                 }
 
                                 $attrs[ $key ] = $label;
+                                /*
+                                 * Publish every spelling the picker may use: the
+                                 * stored key (`color`, `%d8%b3…`), the taxonomy
+                                 * when there is one, and the readable name.
+                                 * Without the stored key the JS matcher compared
+                                 * `Color` with `color` and gave up quietly.
+                                 */
+                                $canonical = $this->attr_key( $key );
+                                if ( '' !== $canonical ) {
+                                        $attrs[ $canonical ] = $label;
+                                }
+                                $decoded = rawurldecode( (string) $key );
+                                if ( '' !== $decoded ) {
+                                        $attrs[ $decoded ] = $label;
+                                }
                                 if ( '' !== $real && $real !== $key ) {
                                         $attrs[ $real ] = $label;
                                 }
@@ -349,17 +372,50 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         /**
          * Comparable form of an attribute key.
          *
-         * WooCommerce mixes three spellings for the same attribute:
+         * WooCommerce mixes four spellings for the same attribute:
          * `pa_رنگ` (registered taxonomy), `pa_%d8%b1%d9%86%da%af` (what
-         * `WC_Product_Attribute::get_name()` keeps) and the sanitize_title()
-         * form. Decoding + lowercasing makes them equal.
+         * `WC_Product_Attribute::get_name()` keeps), `رنگ جلد` (the label a shop
+         * owner typed) and `%d8%b1%d9%86%da%af-%d8%ac%d9%84%d8%af` (the
+         * `sanitize_title()` key WooCommerce stores on each variation).
+         *
+         * Comparing the `sanitize_title()` form is what makes the last two the
+         * same attribute. Decoding alone was not enough: it turns the stored key
+         * into `رنگ-جلد` (hyphen) and the typed name into `رنگ جلد` (space), so
+         * the colour picker of any custom attribute with a space in its name
+         * vanished from the page.
          *
          * @param string $key Attribute key.
          * @return string
          */
         protected function normalize_attribute_key( $key ) {
-                $key = strtolower( rawurldecode( (string) $key ) );
-                return (string) preg_replace( '/\s+/u', ' ', trim( $key ) );
+                $key = rawurldecode( (string) $key );
+                $key = strtolower( (string) preg_replace( '/\s+/u', ' ', trim( $key ) ) );
+                $canonical = strtolower( (string) sanitize_title( $key ) );
+                return '' !== $canonical ? $canonical : $key;
+        }
+
+        /**
+         * The key WooCommerce itself uses for this attribute inside a variation.
+         *
+         * `WC_Product_Variation::get_attributes()` is keyed by the
+         * `sanitize_title()` form (`color`, `%d8%b3%d8%a7%db%8c%d8%b2`, …), while
+         * the picker used to publish the typed label (`Color`, `سایز`). The JS
+         * matcher compares the two maps literally, so every custom attribute
+         * (Latin or Persian, taxonomy or not) silently matched no variation and
+         * the first variation was added whatever the customer picked.
+         *
+         * @param string $key Attribute name in any spelling.
+         * @return string
+         */
+        protected function attr_key( $key ) {
+                $taxonomy = (string) $key;
+                $real     = $this->real_taxonomy( $taxonomy );
+                if ( '' !== $real ) {
+                        return $real;
+                }
+                $decoded   = rawurldecode( $taxonomy );
+                $canonical = sanitize_title( $decoded );
+                return '' !== $canonical ? $canonical : $taxonomy;
         }
 
         /**

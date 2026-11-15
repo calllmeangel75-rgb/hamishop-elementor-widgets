@@ -1,6 +1,8 @@
 <?php
 /**
- * Widget: Color & storage picker of the product — the interaction heart.
+ * Widget: attribute picker of the product (colour, size, memory, …) — the
+ * interaction heart. Any variation attribute becomes a group; names that look
+ * like a colour become swatches, everything else becomes chips.
  * Root .hsw-pvar carries the JS engine contract (data-hsw-variants /
  * data-hsw-variations / data-hsw-attrs + data-hsw-color|storage on the
  * buttons + data-hsw-selname spans). Desktop: labeled groups with round
@@ -28,7 +30,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
          * Widget title in the editor panel.
          */
         public function get_title() {
-                return __( 'انتخاب رنگ و حافظه (HamiShop)', 'hamishop-elementor-widgets' );
+                return __( 'انتخاب ویژگی‌ها — رنگ، سایز، حافظه (HamiShop)', 'hamishop-elementor-widgets' );
         }
 
         /**
@@ -296,7 +298,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                 $storages      = wp_list_pluck( $primary, 'name' );
                                 $chip_groups[] = array(
                                         'tax'     => $attr_storage,
-                                        'key'     => $this->real_taxonomy( $attr_storage ) ? $this->real_taxonomy( $attr_storage ) : $attr_storage,
+                                        'key'     => $this->attr_key( $attr_storage ),
                                         'label_d' => rtrim( (string) $lbl_storage_d, ': ' ),
                                         'label_m' => rtrim( (string) $lbl_storage_m, ': ' ),
                                         'terms'   => $storages,
@@ -365,7 +367,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                                 $names = wp_list_pluck( $terms, 'name' );
                                 $chip_groups[] = array(
                                         'tax'     => $tax,
-                                        'key'     => $this->real_taxonomy( $tax ) ? $this->real_taxonomy( $tax ) : $tax,
+                                        'key'     => $this->attr_key( $tax ),
                                         'label_d' => $this->attribute_label( $tax ),
                                         'label_m' => $this->attribute_label( $tax ),
                                         'terms'   => $names,
@@ -395,7 +397,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $first_storage = ! empty( $chip_groups[0]['terms'][0] ) ? $chip_groups[0]['terms'][0] : '';
 
                 $attrs_map = array(
-                        'color'   => ! empty( $colors ) ? ( $this->real_taxonomy( $attr_color ) ? $this->real_taxonomy( $attr_color ) : $attr_color ) : '',
+                        'color'   => ! empty( $colors ) ? $this->attr_key( $attr_color ) : '',
                         'storage' => ! empty( $chip_groups ) ? $chip_groups[0]['key'] : '',
                         'chips'   => array(),
                 );
@@ -407,6 +409,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $pid = $product ? $product->get_id() : 0;
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'pvar' ) ); ?>" data-hsw-variants="<?php echo esc_attr( $pid ); ?>"<?php echo ( $product && HSW_Helpers::is_call_for_price( $product ) ) ? ' data-hsw-cfp="1"' : ''; ?>
+                        data-hsw-no-match="<?php echo esc_attr__( 'این ترکیب از ویژگی‌ها موجود نیست.', 'hamishop-elementor-widgets' ); ?>"
                         <?php if ( $product && $product->is_type( 'variable' ) ) : ?>
                                 data-hsw-variations='<?php echo esc_attr( wp_json_encode( $this->variations_payload( $product ) ) ); ?>'
                                 data-hsw-attrs='<?php echo esc_attr( wp_json_encode( $attrs_map ) ); ?>'

@@ -51,6 +51,11 @@ class HSW_Simple_Attributes {
 	 * Validated picks from the request: only attributes the product really has,
 	 * only terms that belong to it.
 	 *
+	 * `sanitize_text_field()` cannot be used here: it strips percent-encoded
+	 * octets, which is exactly how a Persian term slug looks
+	 * (`%d8%a2%d8%a8%db%8c`), so the colour arrived as an empty string and the
+	 * pick silently disappeared while the next attribute still worked.
+	 *
 	 * @param WC_Product $product Product.
 	 * @return array<string,array{label:string,value:string,slug:string}>
 	 */
@@ -73,14 +78,25 @@ class HSW_Simple_Attributes {
 				continue;
 			}
 
+			/*
+			 * Decode before cleaning: a Persian term slug is stored percent-encoded
+			 * (`%d8%a2…`) and `sanitize_text_field()` drops those octets as an
+			 * obfuscation attempt, which turned the answer into an empty string.
+			 */
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$raw = sanitize_text_field( wp_unslash( $_REQUEST[ $key ] ) );
-			if ( '' === $raw ) {
+			$raw = wc_clean( rawurldecode( (string) wp_unslash( $_REQUEST[ $key ] ) ) );
+			if ( '' === (string) $raw ) {
 				continue;
 			}
 
 			if ( $attribute->is_taxonomy() ) {
 				$term = get_term_by( 'slug', $raw, $taxonomy );
+				if ( ! $term instanceof WP_Term ) {
+					$term = get_term_by( 'slug', sanitize_title( rawurldecode( $raw ) ), $taxonomy );
+				}
+				if ( ! $term instanceof WP_Term ) {
+					$term = get_term_by( 'name', $raw, $taxonomy );
+				}
 				if ( ! $term instanceof WP_Term ) {
 					continue;
 				}
@@ -90,14 +106,22 @@ class HSW_Simple_Attributes {
 					'slug'  => $term->slug,
 				);
 			} else {
-				$allowed = array_map( 'sanitize_title', (array) $attribute->get_options() );
-				if ( ! in_array( sanitize_title( $raw ), $allowed, true ) ) {
+				$probe = sanitize_title( rawurldecode( (string) $raw ) );
+				$match = '';
+				foreach ( (array) $attribute->get_options() as $option ) {
+					$option = (string) $option;
+					if ( sanitize_title( $option ) === $probe || $option === $raw ) {
+						$match = $option;
+						break;
+					}
+				}
+				if ( '' === $match ) {
 					continue;
 				}
 				$picked[ $taxonomy ] = array(
 					'label' => (string) $attribute->get_name(),
-					'value' => $raw,
-					'slug'  => sanitize_title( $raw ),
+					'value' => $match,
+					'slug'  => sanitize_title( $match ),
 				);
 			}
 		}

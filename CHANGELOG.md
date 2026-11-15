@@ -6,6 +6,23 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.291] - 2026-11-15
+
+### Fixed
+- **Custom attributes never matched a variation.** `WC_Product_Variation::get_attributes()` is keyed by `sanitize_title()` (`Color` → `color`, `رنگ جلد` → `%d8%b1…`) while the picker published the typed label. The JS matcher compared the two maps literally, treated every unknown key as a wildcard, and fell back to the first variation: the price never moved and the cart received the first variation whatever the customer picked. The payload now publishes the stored key (plus the taxonomy and the readable name), and the picker builds its keys with the same `attr_key()` helper.
+- **A colour picker with a space in its name disappeared.** Decoding the stored key yields `رنگ-جلد` (hyphen) against the typed `رنگ جلد` (space), so `find_attribute()` missed it and the attribute was dropped without a message. `normalize_attribute_key()` now compares the `sanitize_title()` form.
+- **A simple product with two visible attributes could never be bought.** `paintPick()` cleared every button that was not part of the group being answered, so choosing «نوک» erased «رنگ» and the buy button stayed locked forever.
+- **The simple-product pick was lost in the cart.** The picker posted a `sanitize_title()` slug; for Persian options that is itself percent-encoded, and `sanitize_text_field()`/`wc_clean()` strip percent octets, so the value arrived empty. The picker now posts the option as typed and `read_request()` decodes before cleaning (taxonomy slugs included).
+- **Grouped and external products rendered a dead buy button.** The purchase box now prints WooCommerce's own template for those two types and the sticky bar stays hidden for them.
+- **An impossible combination added the wrong variation.** `matchVariation()` returns nothing instead of `list[0]`; the price shows `—`, the buy button locks and a toast says the combination is unavailable.
+
+### Changed
+- Defaults no longer name a city or a registry programme («گارانتی اصالت و سلامت کالا», «موجود در انبار - آماده ارسال»), the composite's section 4 is «انتخاب ویژگی‌ها (رنگ، سایز، حافظه)» and the picker widget is «انتخاب ویژگی‌ها — رنگ، سایز، حافظه».
+- The mobile accordion controls are removed from the composite: that part has not rendered since the tab strip took over both breakpoints.
+
+### Added
+- `tests/qa/product-attribute-keys-wp.php` (CI): builds a variable product with a Persian attribute containing a space and a Latin custom attribute, then requires the rendered picker keys to exist in the variation payload and the simple picker to survive cart sanitising.
+
 ## [1.11.290] - 2026-11-14
 
 ### Added

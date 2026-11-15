@@ -159,6 +159,16 @@ class HSW_Widget_Product_Sticky extends HSW_Product_Base {
                         return;
                 }
 
+                /*
+                 * A grouped product has no single line to add and an external
+                 * one leaves the site, so a sticky «خرید آنلاین» bar would only
+                 * offer a button the cart refuses. The purchase box renders
+                 * WooCommerce's own UI for these two types instead.
+                 */
+                if ( ! $demo && $product && in_array( $product->get_type(), array( 'grouped', 'external' ), true ) ) {
+                        return;
+                }
+
                 $cfp = ( ! $demo && $product ) ? HSW_Helpers::is_call_for_price( $product ) : false;
 
                 if ( $demo ) {

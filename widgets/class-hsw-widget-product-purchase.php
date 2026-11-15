@@ -54,13 +54,18 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
          * @return array
          */
         protected function default_assure_items( $in_stock ) {
+                /*
+                 * Neutral defaults: a stationery shop, a tool shop and a phone
+                 * shop all sell physical goods, so the wording names no city and
+                 * no registry programme.
+                 */
                 $stock_text = $in_stock
-                        ? __( 'موجود در انبار تهران - آماده پردازش و ارسال', 'hamishop-elementor-widgets' )
+                        ? __( 'موجود در انبار - آماده ارسال', 'hamishop-elementor-widgets' )
                         : __( 'فعلاً ناموجود', 'hamishop-elementor-widgets' );
                 return array(
                         array(
                                 'icon' => 'shield',
-                                'text' => __( 'گارانتی ۱۸ ماهه همراه با کد فعال‌سازی رجیستری', 'hamishop-elementor-widgets' ),
+                                'text' => __( 'گارانتی اصالت و سلامت کالا', 'hamishop-elementor-widgets' ),
                                 'type' => 'shield',
                         ),
                         array(
@@ -279,6 +284,21 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
 
                 // Live front-end outside a single-product context → render nothing (no mock data).
                 if ( ! $product && ! $demo ) {
+                        return;
+                }
+
+                /*
+                 * Grouped and external products have no add-to-cart of their
+                 * own: WooCommerce prints a child table for one and an outbound
+                 * button for the other. Printing our buy button there produced
+                 * a button the cart rejects. Its own template keeps both types
+                 * honest without a second implementation.
+                 */
+                $wc_type = ( ! $demo && $product ) ? $product->get_type() : '';
+                if ( in_array( $wc_type, array( 'grouped', 'external' ), true ) && function_exists( 'woocommerce_template_single_add_to_cart' ) ) {
+                        echo '<div class="hsw-ppurch hsw-ppurch--wc">';
+                        woocommerce_template_single_add_to_cart();
+                        echo '</div>';
                         return;
                 }
 

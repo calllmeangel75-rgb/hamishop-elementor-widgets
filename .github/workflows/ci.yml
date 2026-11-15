@@ -304,6 +304,17 @@ jobs:
           WP_ENVIRONMENT_TYPE: local
         run: php tests/qa/loop-button-controls-wp.php
 
+      # A custom attribute is stored under sanitize_title() while the picker used
+      # to publish the typed label, so no variation ever matched and the first
+      # one was added. This gate keeps the picker and the payload speaking the
+      # same keys, Latin and Persian alike.
+      - name: Product attribute keys (WordPress + WooCommerce)
+        env:
+          HSW_WP_LOAD: /tmp/wp/wp-load.php
+          HSW_QA_DISPOSABLE: '1'
+          WP_ENVIRONMENT_TYPE: local
+        run: php tests/qa/product-attribute-keys-wp.php
+
       - name: Wallet no-op adjustment (disposable WordPress)
         env:
           HSW_WP_LOAD: /tmp/wp/wp-load.php

@@ -56,7 +56,14 @@
 
 	function paintPick(root, tax, value, text) {
 		root.querySelectorAll('[data-hsw-pick]').forEach(function (b) {
-			var on = (b.getAttribute('data-hsw-pick') === tax && b.getAttribute('data-hsw-pick-value') === value);
+			/*
+			 * Only the group being answered is repainted. Clearing every button
+			 * that is not part of this group wiped the other answers, so a
+			 * product with two visible attributes («رنگ» + «نوک») could never
+			 * unlock the buy button: every pick erased the previous one.
+			 */
+			if (b.getAttribute('data-hsw-pick') !== tax) { return; }
+			var on = (b.getAttribute('data-hsw-pick-value') === value);
 			b.classList.toggle('is-active', on);
 			b.setAttribute('aria-pressed', on ? 'true' : 'false');
 		});
@@ -132,19 +139,61 @@
 			if (score > bestScore) { bestScore = score; best = v; }
 			if (score === keys.length) { break; }
 		}
-		return best || list[0] || null;
+		/*
+		 * No silent `list[0]` fallback: it used to show the first variation's
+		 * price and add that variation to the cart even when the customer had
+		 * asked for something the product does not offer. The caller marks the
+		 * combination unavailable instead.
+		 */
+		return best;
+	}
+
+	/* Every picker group answered? Only then can a miss mean "no such combination". */
+	function selectionComplete(map, st) {
+		var need = [];
+		if (map.color) { need.push(st.color); }
+		if (map.storage) { need.push(st.storage); }
+		(map.chips || []).forEach(function (tax) {
+			need.push(st.chips && st.chips[tax]);
+		});
+		return need.length > 0 && need.every(function (v) { return !!v; });
 	}
 
 	/* ---------- render variant-dependent fields ---------- */
-	function applyVariant(pid, variation) {
+	function applyVariant(pid, variation, dead) {
 		var st = state(pid);
 		st.variation = variation || null;
+		st.dead = !!dead;
 		roots(pid).forEach(function (root) {
 			var cfp = root.hasAttribute('data-hsw-cfp') || root.getAttribute('data-hsw-cfp') === '1';
 			var price = root.querySelector('[data-hsw-price]');
 			var old = root.querySelector('[data-hsw-old]');
 			var save = root.querySelector('[data-hsw-save]');
 			var off = root.querySelector('[data-hsw-off]');
+
+			/* The selected combination does not exist: never show a price or
+			 * allow an add that would send the wrong variation. */
+			if (dead) {
+				root.classList.add('is-unavailable');
+				if (price) { price.textContent = '—'; }
+				if (old) { old.style.display = 'none'; }
+				if (save) { save.style.display = 'none'; }
+				if (off) { off.style.display = 'none'; }
+				root.querySelectorAll('[data-hsw-add]').forEach(function (btn) {
+					btn.classList.add('is-locked');
+					btn.setAttribute('aria-disabled', 'true');
+					btn.setAttribute('data-hsw-unavailable', '1');
+				});
+				return;
+			}
+
+			root.classList.remove('is-unavailable');
+			root.querySelectorAll('[data-hsw-add][data-hsw-unavailable]').forEach(function (btn) {
+				btn.classList.remove('is-locked');
+				btn.removeAttribute('aria-disabled');
+				btn.removeAttribute('data-hsw-unavailable');
+			});
+
 			if (variation && !cfp) {
 				if (price) { price.textContent = variation.price; }
 				if (old) {
@@ -196,7 +245,8 @@
 		if (!any) { return; }
 		var list = payload(any);
 		var map = attrMap(any);
-		applyVariant(pid, matchVariation(list, map, st));
+		var match = matchVariation(list, map, st);
+		applyVariant(pid, match, !match && selectionComplete(map, st));
 	}
 
 	/* ---------- reviews ---------- */
@@ -555,6 +605,21 @@
 		var scope3 = addBtn.closest('.hsw-p');
 		if (!scope3 || scope3.hasAttribute('data-hsw-cfp')) { return; }
 		var pid4 = scope3.getAttribute('data-hsw-product');
+
+		/*
+		 * The customer answered every picker but the product has no such
+		 * variation (e.g. «A4» only comes in black). Nothing may be added: the
+		 * old code sent the first variation instead, so the order said one
+		 * thing and the customer had chosen another.
+		 */
+		if (addBtn.getAttribute('data-hsw-unavailable') === '1') {
+			var noMatch = document.querySelector('.hsw-p[data-hsw-variations][data-hsw-product="' + pid4 + '"]');
+			var noMsg = noMatch ? (noMatch.getAttribute('data-hsw-no-match') || '') : '';
+			if (window.HSWFeedback && window.HSWFeedback.toast) {
+				window.HSWFeedback.toast(noMsg || 'این ترکیب موجود نیست.', { tone: 'error' });
+			}
+			return;
+		}
 
 		/* Locked until the colour/size picker has an answer. */
 		if (addBtn.classList.contains('is-locked')) {
