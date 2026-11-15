@@ -1,5 +1,8 @@
 # HamiShop Elementor Widgets
 
+> **نسخهٔ فعلی: `1.11.288`** — وضعیت تست/انتشار: [`docs/STATUS.md`](docs/STATUS.md)
+
+
 [![CI](https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/actions/workflows/ci.yml/badge.svg)](https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/actions/workflows/ci.yml)
 
 مجموعهٔ ۶۳ ویجت المنتور برای ساخت فروشگاه ووکامرس فارسی و راست‌به‌چپ — بدون کدنویسی، بدون فریم‌ورک، با پالت رنگی سراسری و بارگذاری شرطی دارایی‌ها.
@@ -68,6 +71,7 @@
 
 | سند | موضوع |
 |---|---|
+| [`docs/STATUS.md`](docs/STATUS.md) | **وضعیت فعلی، نسخهٔ فریزشده، تست‌ها و Smoke Test تحویل** |
 | [`docs/WIDGETS.md`](docs/WIDGETS.md) | کاتالوگ ۶۳ ویجت: slug، گروه، نقش، کنترل‌های مهم |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | مکانیزم‌های داخلی، هوک‌ها، آپشن‌ها و تله‌ها |
 | [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) | ساخت دارایی‌ها، تست‌ها، افزودن ویجت، فرآیند ریلیز |

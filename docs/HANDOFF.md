@@ -1,6 +1,6 @@
 # تحویل پروژه به ایجنت بعدی (Handoff)
 
-> این فایل را قبل از هر کاری بخوان. وضعیت و اولویت‌های به‌روز در `docs/COMMERCIAL-READINESS-CHECKLIST.md` و سابقه در `docs/PROJECT-REVIEW-CHECKLIST.md` است. مکمل `docs/DEVELOPMENT.md` است، نه جایگزین آن.
+> **وضعیت فعلی (۲۰۲۶-۱۱-۱۴):** نسخهٔ `1.11.288` فریز است. وضعیت تست/انتشار در [`STATUS.md`](STATUS.md) است. این فایل قواعد و سابقهٔ تحویل است؛ مکمل `docs/DEVELOPMENT.md` است، نه جایگزین آن.
 
 ---
 
@@ -9,13 +9,13 @@
 `HamiShop Elementor Widgets` — یک بستهٔ ویجت المنتور برای فروشگاه‌های ووکامرس فارسی‌زبان. شامل آرشیو محصول، سه هدر/فوتر سفارشی، سبد و تسویه، پنل حساب، کیف پول، تیکت پشتیبانی، بلاگ و صفحهٔ نوشته.
 
 ```
-مسیر مخزن   : D:\work-webs\0 Build\hamishop-repo
+مسیر مخزن   : همین ریپو (شاخهٔ main)
 مخزن        : github.com/calllmeangel75-rgb/hamishop-elementor-widgets
-آخرین انتشار پایدار هنگام تطبیق : 1.11.254 (تگ 0a3b312)
-پیش‌انتشار آزمایشی             : 1.11.255 (تگ 189b046؛ برای سایت زنده تأیید نشده)
-main هنگام تطبیق               : 54f048f — PR #4 ادغام شده، merge commit متفاوت از تگ است
+آخرین انتشار پایدار           : 1.11.288 (تگ v1.11.288، کامیت 3c7c0a0)
+وضعیت نسخه                   : فریز؛ تا پایان Smoke Test تغییر کد ممنوع
+SHA-256 ریلیز                : 49232d115bb8bd05bebb4148cb6b4393e16f0863ac1c508bf07d5e1e18383820
 فایل اصلی   : hamishop-elementor-widgets.php  (هدر نسخه + HSW_VERSION)
-تست لوکال   : http://localhost/sks/   (XAMPP، افزونه در wp-content/plugins/hamishop-elementor-widgets)
+تست لوکال   : Local/XAMPP یا staging خودت؛ افزونه در wp-content/plugins/hamishop-elementor-widgets
 سایت‌های زنده: gilaclick.ir · new.mrdastbaaf.com
 ```
 
