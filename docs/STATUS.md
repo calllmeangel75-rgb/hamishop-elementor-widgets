@@ -9,7 +9,7 @@
 |---|---|
 | نسخه | **1.11.290** |
 | تاریخ | 2026-11-14 |
-| کامیت | `pending` |
+| کامیت | `cfefd03` |
 | تگ | `v1.11.290` |
 | ریلیز | <https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases/tag/v1.11.290> |
 | ZIP | `release-downloads/hamishop-elementor-widgets-1.11.290.zip` |
@@ -38,7 +38,7 @@ SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز 
 
 | مورد | وضعیت |
 |---|---|
-| CI main/tag روی 1.11.290 | ⏳ در حال اجرا |
+| CI main/tag روی 1.11.290 | ✅ سبز |
 | `php tools/ci-checks.php` | ✅ ۲۴ چک |
 | `register_controls()` همهٔ کلاس‌های ویجت | ✅ بدون خطا |
 | حذف هوک خراب `editor_style` | ✅ تأییدشده |
