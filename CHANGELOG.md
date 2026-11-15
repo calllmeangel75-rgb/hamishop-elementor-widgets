@@ -6,6 +6,12 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.287] - 2026-11-14
+
+### Fixed
+- **White screen in the popular widget:** `empty_text` was registered after `controls_header()` had closed its section, so Elementor threw `HSW_Widget_Popular::handle_control_position: Cannot add a control outside of a section`. The control now lives in its own `sec_empty_state` section.
+- **Regression coverage:** `tests/qa/loop-button-controls-wp.php` now asserts that `empty_text` belongs to `sec_empty_state`, so an out-of-section control fails the CI job instead of reaching a site.
+
 ## [1.11.286] - 2026-11-14
 
 ### Removed

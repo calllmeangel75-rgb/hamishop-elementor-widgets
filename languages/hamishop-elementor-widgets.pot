@@ -4835,6 +4835,10 @@ msgstr ""
 msgid "حالت تاریخ‌های تحویل"
 msgstr ""
 
+#: widgets/class-hsw-popular.php:67
+msgid "حالت خالی"
+msgstr ""
+
 #: widgets/class-hsw-widget-archive-grid.php:134
 msgid "حالت خالی (بدون محصول)"
 msgstr ""
@@ -10707,7 +10711,7 @@ msgid "متن ثابت زیر"
 msgstr ""
 
 #: widgets/class-hsw-offer.php:383
-#: widgets/class-hsw-popular.php:67
+#: widgets/class-hsw-popular.php:75
 #: widgets/class-hsw-widget-blog-grid.php:90
 msgid "متن حالت خالی"
 msgstr ""
@@ -11255,7 +11259,7 @@ msgstr ""
 msgid "محبوب‌ترین خریدهای مشتریان در هفته گذشته به ترتیب امتیاز"
 msgstr ""
 
-#: widgets/class-hsw-popular.php:214
+#: widgets/class-hsw-popular.php:224
 msgid "محبوب‌ترین محصولات"
 msgstr ""
 
@@ -11369,8 +11373,8 @@ msgid "محصولی برای نمایش در این دسته نیست."
 msgstr ""
 
 #: widgets/class-hsw-best-sellers.php:106
-#: widgets/class-hsw-popular.php:69
-#: widgets/class-hsw-popular.php:211
+#: widgets/class-hsw-popular.php:77
+#: widgets/class-hsw-popular.php:221
 msgid "محصولی برای نمایش یافت نشد."
 msgstr ""
 

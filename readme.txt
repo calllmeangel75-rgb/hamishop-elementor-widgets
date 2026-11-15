@@ -4,7 +4,7 @@ Tags: elementor, woocommerce, widgets, product loop, rtl, persian
 Requires at least: 6.0
 Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.11.286
+Stable tag: 1.11.287
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,9 @@ HamiShop مجموعه‌ای از ویجت‌های المنتور است که �
 نه. ویجت‌ها، تنظیمات صفحه‌ها و پالت رنگی جای دیگری ذخیره می‌شوند و آپدیت فقط کد را عوض می‌کند. پاک‌سازی کش‌ها در پس‌زمینه و مرحله‌ای انجام می‌شود.
 
 == Changelog ==
+
+= 1.11.287 =
+* رفع خطای صفحه سفید «Cannot add a control outside of a section» در ویجت «محبوب‌ترین‌ها / منتخب»: کنترل «متن حالت خالی» داخل بخش مستقل «حالت خالی» قرار گرفت و تست رگرسیون هم اضافه شد.
 
 = 1.11.286 =
 * ویجت «پیشنهاد شگفت‌انگیز (HamiShop)» / `hsw-wonder-deals` به‌طور کامل حذف شد: فایل ویجت، ثبت در المنتور، کاتالوگ کنترل ویجت‌ها، asset اختصاصی `hsw-loop-deal` و CSS آن.

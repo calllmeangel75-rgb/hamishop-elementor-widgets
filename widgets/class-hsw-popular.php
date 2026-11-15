@@ -61,6 +61,14 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
 				'link_m' => '',
 			)
 		);
+		$this->start_controls_section(
+			'sec_empty_state',
+			array(
+				'label' => __( 'حالت خالی', 'hamishop-elementor-widgets' ),
+				'tab'   => Controls_Manager::TAB_CONTENT,
+			)
+		);
+
 		$this->add_control(
 			'empty_text',
 			array(
@@ -70,6 +78,8 @@ class HSW_Widget_Popular extends HSW_Widget_Base {
 				'label_block' => true,
 			)
 		);
+
+		$this->end_controls_section();
 		$this->controls_tabs();
 		$this->controls_card_content(
 			array(

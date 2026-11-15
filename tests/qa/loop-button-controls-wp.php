@@ -26,5 +26,9 @@ foreach ( array( 'HSW_Widget_Best_Sellers', 'HSW_Widget_Popular' ) as $class ) {
     foreach ( array( 'add_btn_bg', 'add_btn_c', 'add_btn_bg_h', 'add_btn_c_h', 'add_btn_r' ) as $id ) {
         $check( "$class canonical $id visible", is_array( $get( $id ) ) && false === strpos( (string) ( $get( $id )['classes'] ?? '' ), 'hsw-loop-legacy-button-control' ) );
     }
+    if ( 'HSW_Widget_Popular' === $class ) {
+        $empty = $get( 'empty_text' );
+        $check( 'Popular empty_text lives inside its own section', is_array( $empty ) && 'sec_empty_state' === ( $empty['section'] ?? '' ) );
+    }
 }
 exit( $failed ? 1 : 0 );
