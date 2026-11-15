@@ -350,8 +350,8 @@ body.admin-bar .hsw-gc__drawer {
 }
 
 .hsw-gc__mark {
-	width: var(--hsw-gc-mark, 2.375rem);
-	height: var(--hsw-gc-mark, 2.375rem);
+	width: min(var(--hsw-gc-mark, 2.375rem), calc(var(--hsw-gc-h, 66px) - 10px));
+	height: min(var(--hsw-gc-mark, 2.375rem), calc(var(--hsw-gc-h, 66px) - 10px));
 	flex-shrink: 0;
 	overflow: visible;
 }
@@ -367,8 +367,9 @@ body.admin-bar .hsw-gc__drawer {
 .hsw-gc__mark--image img {
 	display: block;
 	width: auto;
-	height: var(--hsw-gc-mark, 2.375rem);
-	max-width: calc(var(--hsw-gc-mark, 2.375rem) * 6);
+	height: min(var(--hsw-gc-mark, 2.375rem), calc(var(--hsw-gc-h, 66px) - 10px));
+	max-width: min(calc(var(--hsw-gc-mark, 2.375rem) * 6), 40vw, 260px);
+	max-height: calc(var(--hsw-gc-h, 66px) - 10px);
 	object-fit: contain;
 }
 

@@ -1,6 +1,6 @@
 # HamiShop Elementor Widgets
 
-> **نسخهٔ فعلی: `1.11.288`** — وضعیت تست/انتشار: [`docs/STATUS.md`](docs/STATUS.md)
+> **نسخهٔ فعلی: `1.11.289`** — وضعیت تست/انتشار: [`docs/STATUS.md`](docs/STATUS.md)
 
 
 [![CI](https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/actions/workflows/ci.yml/badge.svg)](https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/actions/workflows/ci.yml)

@@ -6,6 +6,12 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.289] - 2026-11-14
+
+### Fixed
+- **GC header logo overflow:** the image/icon mark is now capped by the header height (`--hsw-gc-h - 10px`) and its width by `min(mark*6, 40vw, 260px)`. Setting «اندازهٔ نشان» to 96px no longer pushes the logo outside the bar.
+- The mark-size control now says the rendered height is capped by the header.
+
 ## [1.11.288] - 2026-11-14
 
 ### Fixed

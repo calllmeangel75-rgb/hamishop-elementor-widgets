@@ -522,7 +522,8 @@ class HSW_Widget_Header_GC extends HSW_Header_Base {
 					'size' => 38,
 					'unit' => 'px',
 				),
-				'selectors'  => array(
+				'description' => __( 'ارتفاع لوگو به ارتفاع هدر محدود می‌شود تا از نوار بیرون نزند.', 'hamishop-elementor-widgets' ),
+				'selectors'   => array(
 					'{{WRAPPER}} .hsw-gc' => '--hsw-gc-mark: {{SIZE}}{{UNIT}};',
 				),
 			)
