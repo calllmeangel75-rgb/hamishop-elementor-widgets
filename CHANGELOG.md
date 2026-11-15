@@ -6,6 +6,11 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.288] - 2026-11-14
+
+### Fixed
+- **Elementor editor white screen:** removing the wonder-deals editor CSS left `HSW_Assets::editor_style()` with a one-argument `wp_add_inline_style( 'wp-admin', )`, which throws an `ArgumentCountError` on `elementor/editor/before_enqueue_scripts`. The method and its hook are removed; no editor CSS is needed after the widget deletion.
+
 ## [1.11.287] - 2026-11-14
 
 ### Fixed

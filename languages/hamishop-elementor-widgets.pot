@@ -94,7 +94,7 @@ msgstr ""
 msgid "Could not write the image file."
 msgstr ""
 
-#: includes/class-hsw-assets.php:1072
+#: includes/class-hsw-assets.php:1063
 msgid "HamiShop (لوکال)"
 msgstr ""
 
@@ -666,7 +666,7 @@ msgstr ""
 msgid "اتصال به ربات تلگرام"
 msgstr ""
 
-#: includes/class-hsw-assets.php:874
+#: includes/class-hsw-assets.php:873
 msgid "اتصال را بررسی کنید و صفحه را دوباره باز کنید."
 msgstr ""
 
@@ -697,9 +697,9 @@ msgstr ""
 msgid "اختیاری. اگر خالی باشد، جای مهر در فاکتور خالی می‌ماند."
 msgstr ""
 
-#: includes/class-hsw-assets.php:947
-#: includes/class-hsw-assets.php:968
-#: includes/class-hsw-assets.php:996
+#: includes/class-hsw-assets.php:946
+#: includes/class-hsw-assets.php:967
+#: includes/class-hsw-assets.php:995
 #: includes/class-hsw-checkout-base.php:164
 #: includes/class-hsw-checkout-base.php:189
 #: includes/class-hsw-checkout-base.php:250
@@ -750,7 +750,7 @@ msgstr ""
 msgid "ارتفاع نوار"
 msgstr ""
 
-#: includes/class-hsw-assets.php:517
+#: includes/class-hsw-assets.php:516
 msgid "ارث‌بری فونت از قالب سایت"
 msgstr ""
 
@@ -869,7 +869,7 @@ msgstr ""
 msgid "ارسال کد دوعاملی ناموفق بود. لطفاً دوباره وارد شوید یا با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:901
+#: includes/class-hsw-assets.php:900
 msgid "ارسال کد ناموفق بود."
 msgstr ""
 
@@ -1272,7 +1272,7 @@ msgstr ""
 msgid "افزایش تعداد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:980
+#: includes/class-hsw-assets.php:979
 msgid "افزودن"
 msgstr ""
 
@@ -1294,8 +1294,8 @@ msgstr ""
 msgid "افزودن به سبد خرید"
 msgstr ""
 
-#: includes/class-hsw-assets.php:944
-#: includes/class-hsw-assets.php:991
+#: includes/class-hsw-assets.php:943
+#: includes/class-hsw-assets.php:990
 msgid "افزودن به سبد خرید ممکن نشد. دوباره تلاش کنید."
 msgstr ""
 
@@ -1303,7 +1303,7 @@ msgstr ""
 msgid "افزودن به علاقه‌مندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:981
+#: includes/class-hsw-assets.php:980
 msgid "افزوده شد"
 msgstr ""
 
@@ -1523,7 +1523,7 @@ msgstr ""
 msgid "انتقال موجودی از متای قدیمی کیف پول"
 msgstr ""
 
-#: includes/class-hsw-assets.php:893
+#: includes/class-hsw-assets.php:892
 msgid "انجام نشد. دوباره تلاش کنید."
 msgstr ""
 
@@ -1775,7 +1775,7 @@ msgstr ""
 msgid "ایمیل شما"
 msgstr ""
 
-#: includes/class-hsw-assets.php:892
+#: includes/class-hsw-assets.php:891
 msgid "ایمیل شما تأیید شد."
 msgstr ""
 
@@ -1795,7 +1795,7 @@ msgstr ""
 msgid "ایمیل فروشگاه"
 msgstr ""
 
-#: includes/class-hsw-assets.php:890
+#: includes/class-hsw-assets.php:889
 msgid "ایمیل معتبر وارد کنید."
 msgstr ""
 
@@ -1987,7 +1987,7 @@ msgstr ""
 msgid "این گفتگو بسته شده است. برای موضوع جدید یک گفتگوی تازه بسازید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:887
+#: includes/class-hsw-assets.php:886
 msgid "این گفتگو بسته شود؟ بعد از بستن نمی‌توانید پیام بفرستید."
 msgstr ""
 
@@ -2087,7 +2087,7 @@ msgstr ""
 msgid "باز کردن ربات تلگرام"
 msgstr ""
 
-#: includes/class-hsw-assets.php:904
+#: includes/class-hsw-assets.php:903
 msgid "باز کردن لینک"
 msgstr ""
 
@@ -2390,7 +2390,7 @@ msgstr ""
 msgid "برای ادامه، ابتدا نشانی تحویل را در فرم بالا کامل کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:923
+#: includes/class-hsw-assets.php:922
 msgid "برای ادامه، این موارد را کامل کنید: %s"
 msgstr ""
 
@@ -2610,7 +2610,7 @@ msgstr ""
 msgid "برند/دسته بالای عنوان"
 msgstr ""
 
-#: includes/class-hsw-assets.php:979
+#: includes/class-hsw-assets.php:978
 msgid "برو به سبد خرید"
 msgstr ""
 
@@ -3005,9 +3005,9 @@ msgstr ""
 #: includes/class-hsw-account-support.php:1186
 #: includes/class-hsw-account-support.php:1272
 #: includes/class-hsw-archive-base.php:690
-#: includes/class-hsw-assets.php:948
-#: includes/class-hsw-assets.php:969
-#: includes/class-hsw-assets.php:997
+#: includes/class-hsw-assets.php:947
+#: includes/class-hsw-assets.php:968
+#: includes/class-hsw-assets.php:996
 #: includes/class-hsw-invoice.php:181
 #: widgets/class-hsw-widget-archive-filters.php:1431
 #: widgets/class-hsw-widget-archive-guide.php:188
@@ -3090,14 +3090,14 @@ msgstr ""
 msgid "به دلیل تلاش‌های ناموفق، ورود دوعاملی تا %s دقیقه قفل است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:943
-#: includes/class-hsw-assets.php:949
-#: includes/class-hsw-assets.php:970
-#: includes/class-hsw-assets.php:998
+#: includes/class-hsw-assets.php:942
+#: includes/class-hsw-assets.php:948
+#: includes/class-hsw-assets.php:969
+#: includes/class-hsw-assets.php:997
 msgid "به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:990
+#: includes/class-hsw-assets.php:989
 msgid "به سبد خرید اضافه شد ✓"
 msgstr ""
 
@@ -3119,7 +3119,7 @@ msgstr ""
 msgid "به‌روزرسانی سبد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:659
+#: includes/class-hsw-assets.php:658
 msgid "به‌روزرسانی سبد خرید انجام نشد. دوباره تلاش کنید."
 msgstr ""
 
@@ -3188,7 +3188,7 @@ msgstr ""
 msgid "تأیید دوعاملی"
 msgstr ""
 
-#: includes/class-hsw-assets.php:900
+#: includes/class-hsw-assets.php:899
 msgid "تأیید شد."
 msgstr ""
 
@@ -4305,7 +4305,7 @@ msgid "تیکت شما ثبت شد"
 msgstr ""
 
 #: includes/class-hsw-account-support.php:1523
-#: includes/class-hsw-assets.php:883
+#: includes/class-hsw-assets.php:882
 msgid "تیکت شما ثبت شد."
 msgstr ""
 
@@ -4709,7 +4709,7 @@ msgstr ""
 msgid "جواب رو بنویس…"
 msgstr ""
 
-#: includes/class-hsw-assets.php:885
+#: includes/class-hsw-assets.php:884
 msgid "جواب سؤال امنیتی درست نیست."
 msgstr ""
 
@@ -5402,7 +5402,7 @@ msgstr ""
 msgid "خریداران پیشنهاد کرده‌اند"
 msgstr ""
 
-#: includes/class-hsw-assets.php:977
+#: includes/class-hsw-assets.php:976
 msgid "خریدت رو کامل‌تر کن"
 msgstr ""
 
@@ -5432,15 +5432,15 @@ msgstr ""
 msgid "خطا / ناموجود"
 msgstr ""
 
-#: includes/class-hsw-assets.php:903
+#: includes/class-hsw-assets.php:902
 msgid "خطا در ارتباط با سرور. دوباره تلاش کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:873
+#: includes/class-hsw-assets.php:872
 msgid "خطا در بارگذاری علاقه‌مندی‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:914
+#: includes/class-hsw-assets.php:913
 msgid "خطا در بروزرسانی روش ارسال"
 msgstr ""
 
@@ -5622,7 +5622,7 @@ msgstr ""
 msgid "در تنظیمات مسیر خرید صفحهٔ «%s» انتخاب شده، ولی ویجت این مرحله را ندارد. با دکمهٔ پایین یک صفحهٔ تازه ساخته و جایگزین می‌شود؛ خودِ آن صفحه دست نمی‌خورد و noindex نمی‌شود."
 msgstr ""
 
-#: includes/class-hsw-assets.php:897
+#: includes/class-hsw-assets.php:896
 msgid "در حال ارسال کد..."
 msgstr ""
 
@@ -5634,7 +5634,7 @@ msgstr ""
 msgid "در حال بارگذاری علاقه‌مندی‌ها…"
 msgstr ""
 
-#: includes/class-hsw-assets.php:898
+#: includes/class-hsw-assets.php:897
 msgid "در حال بررسی کد..."
 msgstr ""
 
@@ -5647,7 +5647,7 @@ msgstr ""
 msgid "در حال حاضر هیچ درگاه پرداخت آنلاینی روی سایت فعال نیست؛ برای شارژ کیف پول با پشتیبانی تماس بگیرید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:915
+#: includes/class-hsw-assets.php:914
 msgid "در حال ذخیره روش ارسال…"
 msgstr ""
 
@@ -5954,7 +5954,7 @@ msgstr ""
 msgid "دسکتاپ: استفاده خودکار از داده محصول"
 msgstr ""
 
-#: includes/class-hsw-assets.php:527
+#: includes/class-hsw-assets.php:526
 msgid "دقیقاً همان نام font-face که قالب لود کرده؛ مثلاً Peyda یا IRANSansX"
 msgstr ""
 
@@ -7614,7 +7614,7 @@ msgstr ""
 msgid "روش ارسال نامعتبر است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:895
+#: includes/class-hsw-assets.php:894
 msgid "روش دریافت کد را انتخاب کنید."
 msgstr ""
 
@@ -7824,7 +7824,7 @@ msgstr ""
 msgid "سازگار با قالب و ویجت‌های المنتور"
 msgstr ""
 
-#: includes/class-hsw-assets.php:502
+#: includes/class-hsw-assets.php:501
 msgid "سازگاری با قالب (فونت)"
 msgstr ""
 
@@ -8089,7 +8089,7 @@ msgstr ""
 msgid "سفارش یافت نشد یا لینک مشاهدهٔ آن منقضی شده است."
 msgstr ""
 
-#: includes/class-hsw-assets.php:889
+#: includes/class-hsw-assets.php:888
 msgid "سفارشی پیدا نشد."
 msgstr ""
 
@@ -8366,7 +8366,7 @@ msgstr ""
 msgid "شماره موبایل را به‌صورت ۰۹xxxxxxxxx وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:894
+#: includes/class-hsw-assets.php:893
 msgid "شماره موبایل را وارد کنید."
 msgstr ""
 
@@ -9248,7 +9248,7 @@ msgstr ""
 msgid "عکس"
 msgstr ""
 
-#: includes/class-hsw-assets.php:888
+#: includes/class-hsw-assets.php:887
 msgid "عکس خیلی بزرگ است. یک عکس دیگر انتخاب کنید."
 msgstr ""
 
@@ -9869,11 +9869,11 @@ msgstr ""
 msgid "فونت آیتم‌های منو"
 msgstr ""
 
-#: includes/class-hsw-assets.php:516
+#: includes/class-hsw-assets.php:515
 msgid "فونت سفارشی"
 msgstr ""
 
-#: includes/class-hsw-assets.php:515
+#: includes/class-hsw-assets.php:514
 msgid "فونت طرح (وزیرمتن لوکال)"
 msgstr ""
 
@@ -9881,11 +9881,11 @@ msgstr ""
 msgid "فونت نام برند"
 msgstr ""
 
-#: includes/class-hsw-assets.php:514
+#: includes/class-hsw-assets.php:513
 msgid "فونت پالت (سراسری)"
 msgstr ""
 
-#: includes/class-hsw-assets.php:510
+#: includes/class-hsw-assets.php:509
 msgid "فونت پایه ویجت"
 msgstr ""
 
@@ -11110,7 +11110,7 @@ msgstr ""
 msgid "متن پیام ایمیل"
 msgstr ""
 
-#: includes/class-hsw-assets.php:886
+#: includes/class-hsw-assets.php:885
 msgid "متن پیام را بنویسید."
 msgstr ""
 
@@ -11293,7 +11293,7 @@ msgstr ""
 msgid "محصول با موفقیت به سبد خرید اضافه شد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:966
+#: includes/class-hsw-assets.php:965
 msgid "محصول به سبد خرید اضافه شد"
 msgstr ""
 
@@ -11620,9 +11620,9 @@ msgstr ""
 msgid "مشاهده سبد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:946
-#: includes/class-hsw-assets.php:967
-#: includes/class-hsw-assets.php:995
+#: includes/class-hsw-assets.php:945
+#: includes/class-hsw-assets.php:966
+#: includes/class-hsw-assets.php:994
 #: includes/class-hsw-cart-drawer.php:31
 #: includes/class-hsw-header-base.php:732
 #: includes/class-hsw-header-base.php:910
@@ -12017,7 +12017,7 @@ msgstr ""
 msgid "موضوع تیکتو بنویس…"
 msgstr ""
 
-#: includes/class-hsw-assets.php:884
+#: includes/class-hsw-assets.php:883
 msgid "موضوع و متن پیام را کامل کنید."
 msgstr ""
 
@@ -12130,7 +12130,7 @@ msgstr ""
 msgid "نام فروشگاه (خالی = بدون نوار برند)"
 msgstr ""
 
-#: includes/class-hsw-assets.php:525
+#: includes/class-hsw-assets.php:524
 msgid "نام فونت سفارشی"
 msgstr ""
 
@@ -12202,7 +12202,7 @@ msgstr ""
 msgid "نام، ایمیل و اطلاعات ورود خود را به‌روز کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:917
+#: includes/class-hsw-assets.php:916
 msgid "نام، شماره تماس، استان، شهر و نشانی را کامل کنید."
 msgstr ""
 
@@ -12561,7 +12561,7 @@ msgstr ""
 
 #: includes/class-hsw-account.php:3616
 #: includes/class-hsw-account.php:3654
-#: includes/class-hsw-assets.php:876
+#: includes/class-hsw-assets.php:875
 msgid "نمایش رمز عبور"
 msgstr ""
 
@@ -13101,7 +13101,7 @@ msgstr ""
 msgid "همهٔ زمان‌ها"
 msgstr ""
 
-#: includes/class-hsw-assets.php:875
+#: includes/class-hsw-assets.php:874
 msgid "همهٔ محصولات از علاقه‌مندی‌ها حذف شوند؟"
 msgstr ""
 
@@ -13796,7 +13796,7 @@ msgstr ""
 msgid "پرداخت کامل سفارش از موجودی کیف پول. فقط وقتی نمایش داده می‌شود که موجودی مشتری کافی باشد."
 msgstr ""
 
-#: includes/class-hsw-assets.php:420
+#: includes/class-hsw-assets.php:419
 msgid "پرش به محتوای اصلی"
 msgstr ""
 
@@ -14459,7 +14459,7 @@ msgstr ""
 msgid "پنهان با اسکرول پایین — با اسکرول به بالا فوراً برمی‌گردد"
 msgstr ""
 
-#: includes/class-hsw-assets.php:877
+#: includes/class-hsw-assets.php:876
 msgid "پنهان کردن رمز عبور"
 msgstr ""
 
@@ -14757,7 +14757,7 @@ msgstr ""
 msgid "چک‌باکس فاکتور رسمی (دسکتاپ)"
 msgstr ""
 
-#: includes/class-hsw-assets.php:916
+#: includes/class-hsw-assets.php:915
 msgid "چک‌باکس قوانین روی این صفحه نمایش داده نشده؛ با مدیر فروشگاه تماس بگیرید."
 msgstr ""
 
@@ -14940,7 +14940,7 @@ msgstr ""
 msgid "کالا"
 msgstr ""
 
-#: includes/class-hsw-assets.php:978
+#: includes/class-hsw-assets.php:977
 msgid "کالا اضافه شد!"
 msgstr ""
 
@@ -14987,11 +14987,11 @@ msgid "کد تأیید"
 msgstr ""
 
 #: includes/class-hsw-account-auth.php:1687
-#: includes/class-hsw-assets.php:899
+#: includes/class-hsw-assets.php:898
 msgid "کد تأیید ارسال شد."
 msgstr ""
 
-#: includes/class-hsw-assets.php:891
+#: includes/class-hsw-assets.php:890
 msgid "کد تأیید ارسال شد. صندوق ایمیل را بررسی کنید."
 msgstr ""
 
@@ -15007,11 +15007,11 @@ msgstr ""
 msgid "کد تأیید را وارد کنید"
 msgstr ""
 
-#: includes/class-hsw-assets.php:896
+#: includes/class-hsw-assets.php:895
 msgid "کد تأیید را وارد کنید."
 msgstr ""
 
-#: includes/class-hsw-assets.php:902
+#: includes/class-hsw-assets.php:901
 msgid "کد تأیید نامعتبر است."
 msgstr ""
 

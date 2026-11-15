@@ -19,7 +19,6 @@ class HSW_Assets {
                 add_action( 'wp_head', array( $this, 'print_layout_guard' ), 2 );
                 add_action( 'wp_head', array( $this, 'print_js_flag' ), 2 );
                 add_action( 'wp_footer', array( $this, 'print_sheet_boot' ), 5 );
-                add_action( 'elementor/editor/before_enqueue_scripts', array( $this, 'editor_style' ) );
                 add_action( 'elementor/editor/after_enqueue_styles', array( $this, 'loop_editor_legacy_controls' ) );
                 add_filter( 'elementor/fonts/groups', array( $this, 'font_groups' ) );
                 add_filter( 'elementor/fonts/additional_fonts', array( $this, 'additional_fonts' ) );
@@ -1049,14 +1048,6 @@ class HSW_Assets {
                 return $print;
         }
 
-        /**
-         * Editor placeholder tweak.
-         */
-        public function editor_style() {
-                wp_add_inline_style(
-                        'wp-admin',
-                );
-        }
 
         /** Keep legacy loop settings active for old pages, but use one button editor. */
         public function loop_editor_legacy_controls() {
