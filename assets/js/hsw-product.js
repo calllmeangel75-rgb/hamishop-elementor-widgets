@@ -210,10 +210,20 @@
 				}
 				root.classList.toggle('is-oos', !variation.in_stock);
 			}
-			/* gallery image swap */
-			if (variation && variation.image) {
-				var img = root.querySelector('.hsw-pgal__img');
-				if (img) { img.src = variation.image; }
+			/*
+			 * Gallery image swap. The gallery is a sibling widget on the page, not
+			 * a child of this root, so the lookup must be document-wide; and a
+			 * variation without its own photo must fall back to the photo the
+			 * visitor is looking at (data-hsw-main), not to the previous
+			 * variation's photo.
+			 */
+			if (variation) {
+				var img = document.querySelector('.hsw-pgal__img');
+				if (img) {
+					var main = img.getAttribute('data-hsw-main') || '';
+					var next = variation.image || main;
+					if (next && img.getAttribute('src') !== next) { img.src = next; }
+				}
 			}
 
 			/*
@@ -468,7 +478,11 @@
 			var src = thumb.getAttribute('data-hsw-src');
 			var img = gal && gal.querySelector('.hsw-pgal__img');
 			gal.querySelectorAll('.hsw-pgal__thumb, .hsw-pgal__dot').forEach(function (b) { b.classList.toggle('is-active', b === thumb); });
-			if (img && src) { img.src = src; }
+			if (img && src) {
+				img.src = src;
+				/* The visitor's own choice is what a photo-less variation returns to. */
+				img.setAttribute('data-hsw-main', src);
+			}
 			/* Keep the chosen thumbnail centred in its own carousel row. */
 			if (thumb.classList.contains('hsw-pgal__thumb') && thumb.scrollIntoView) {
 				thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });

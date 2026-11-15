@@ -6,6 +6,16 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.292] - 2026-11-15
+
+### Fixed
+- **The assurance rows and the trust signals could not be removed, only reworded.** Both render a saved empty repeater with the design defaults, so deleting every row brought the two/three sample lines back. An empty repeater now renders nothing; the defaults appear only when the control was never saved.
+- **A variation photo never reached the gallery.** The swap looked for `.hsw-pgal__img` inside the purchase root, but the gallery is a sibling widget on the page, so the lookup always failed. The swap is document-wide now, and a variation without its own photo returns to the photo the visitor is looking at (`data-hsw-main`, updated by thumbnail clicks).
+- **Every variation repeated the parent product photo.** `WC_Product_Variation::get_image_id()` falls back to the parent image, so the inline JSON carried the same ~95-byte URL on every row. Only a variation's own `_thumbnail_id` is published now — about 3.8 KB less HTML on a 40-variation product.
+
+### Notes
+- No control was renamed; existing widgets keep the values they already save.
+
 ## [1.11.291] - 2026-11-15
 
 ### Fixed

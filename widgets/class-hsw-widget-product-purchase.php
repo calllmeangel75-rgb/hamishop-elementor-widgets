@@ -350,9 +350,15 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                  */
                 $buy_inline = ( isset( $s['buy_mode'] ) && 'inline' === $s['buy_mode'] );
 
-                /* Assurance rows: repeater (type stock follows live stock status). */
-                $assure = array();
-                $raw    = ( isset( $s['assure_items'] ) && is_array( $s['assure_items'] ) ) ? $s['assure_items'] : array();
+                /*
+                 * Assurance rows: repeater (type stock follows live stock status).
+                 * A saved empty repeater means «no rows», not «use the design
+                 * defaults» — otherwise the two sample lines could never be
+                 * removed, only reworded.
+                 */
+                $assure   = array();
+                $has_rows = isset( $s['assure_items'] ) && is_array( $s['assure_items'] );
+                $raw      = $has_rows ? $s['assure_items'] : array();
                 foreach ( $raw as $item ) {
                         $type = ( isset( $item['type'] ) && 'stock' === $item['type'] ) ? 'stock' : 'shield';
                         $icon = isset( $item['icon'] ) ? $item['icon'] : ( 'stock' === $type ? 'inventory_2' : 'shield' );
@@ -365,7 +371,7 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                         }
                         $assure[] = array( 'icon' => $icon, 'text' => $text, 'type' => $type );
                 }
-                if ( empty( $assure ) ) {
+                if ( empty( $assure ) && ! $has_rows ) {
                         $assure = $this->default_assure_items( $in_stock );
                 }
 

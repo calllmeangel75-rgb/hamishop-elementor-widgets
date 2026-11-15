@@ -156,8 +156,13 @@ class HSW_Widget_Product_Trust extends HSW_Product_Base {
                 list( $product, $demo ) = $this->product_or_demo();
                 $s = $this->effective_settings();
 
-                $items = array();
-                if ( ! empty( $s['trust_items'] ) && is_array( $s['trust_items'] ) ) {
+                /*
+                 * A saved empty repeater means «show no signals». Falling back to
+                 * the demo rows made the strip impossible to remove.
+                 */
+                $items    = array();
+                $has_rows = isset( $s['trust_items'] ) && is_array( $s['trust_items'] );
+                if ( $has_rows ) {
                         foreach ( $s['trust_items'] as $item ) {
                                 $items[] = array(
                                         'icon'  => isset( $item['icon'] ) && '' !== $item['icon'] ? $item['icon'] : 'verified',
@@ -166,7 +171,7 @@ class HSW_Widget_Product_Trust extends HSW_Product_Base {
                                 );
                         }
                 }
-                if ( empty( $items ) ) {
+                if ( empty( $items ) && ! $has_rows ) {
                         $items = $this->default_items();
                 }
 

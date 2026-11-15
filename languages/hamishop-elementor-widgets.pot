@@ -795,7 +795,7 @@ msgstr ""
 msgid "ارسال دوباره"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1472
+#: includes/class-hsw-product-base.php:1480
 msgid "ارسال دیدگاه"
 msgstr ""
 
@@ -1271,7 +1271,7 @@ msgstr ""
 #: includes/class-hsw-cart-drawer.php:38
 #: widgets/class-hsw-widget-cart-items.php:458
 #: widgets/class-hsw-widget-cart-items.php:543
-#: widgets/class-hsw-widget-product-purchase.php:442
+#: widgets/class-hsw-widget-product-purchase.php:448
 #: widgets/class-hsw-widget-product-sticky.php:261
 msgid "افزایش تعداد"
 msgstr ""
@@ -1378,7 +1378,7 @@ msgstr ""
 msgid "الگوی عنوان توضیحات دسته‌بندی"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1367
+#: includes/class-hsw-product-base.php:1375
 msgid "امتیاز %s از ۵"
 msgstr ""
 
@@ -1390,7 +1390,7 @@ msgstr ""
 msgid "امتیاز از میانگین دیدگاه‌های واقعی ووکامرس خوانده می‌شود."
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1429
+#: includes/class-hsw-product-base.php:1437
 msgid "امتیاز شما"
 msgstr ""
 
@@ -1536,7 +1536,7 @@ msgid "اندازه"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:2062
-#: includes/class-hsw-product-base.php:1712
+#: includes/class-hsw-product-base.php:1720
 #: includes/class-hsw-widget-base.php:2022
 msgid "اندازه آیکون"
 msgstr ""
@@ -1761,7 +1761,7 @@ msgstr ""
 #: includes/class-hsw-account.php:3648
 #: includes/class-hsw-checkout-rest.php:188
 #: includes/class-hsw-invoice.php:279
-#: includes/class-hsw-product-base.php:1453
+#: includes/class-hsw-product-base.php:1461
 msgid "ایمیل"
 msgstr ""
 
@@ -2467,7 +2467,7 @@ msgstr ""
 msgid "برای تنظیم ورود دوعاملی باید وارد حساب شوید."
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1474
+#: includes/class-hsw-product-base.php:1482
 msgid "برای ثبت دیدگاه باید %1$sوارد حساب کاربری شوید%2$s."
 msgstr ""
 
@@ -3302,7 +3302,7 @@ msgstr ""
 msgid "تاریک"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1680
+#: includes/class-hsw-product-base.php:1688
 #: includes/trait-hsw-product-page-style.php:219
 #: includes/trait-hsw-style-kit.php:201
 #: widgets/class-hsw-widget-account.php:599
@@ -3767,7 +3767,7 @@ msgstr ""
 #: includes/class-hsw-invoice.php:326
 #: includes/trait-hsw-product-page-style-parts-3.php:26
 #: widgets/class-hsw-widget-cart-items.php:467
-#: widgets/class-hsw-widget-product-purchase.php:449
+#: widgets/class-hsw-widget-product-purchase.php:455
 #: widgets/class-hsw-widget-product-sticky.php:264
 msgid "تعداد"
 msgstr ""
@@ -4218,13 +4218,13 @@ msgstr ""
 #: includes/class-hsw-widget-base.php:862
 #: includes/class-hsw-widget-base.php:3166
 #: widgets/class-hsw-widget-archive-grid.php:87
-#: widgets/class-hsw-widget-product-purchase.php:424
+#: widgets/class-hsw-widget-product-purchase.php:430
 #: widgets/class-hsw-widget-product-sticky.php:248
 msgid "تومان"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:366
-#: widgets/class-hsw-widget-product-purchase.php:421
+#: includes/class-hsw-product-base.php:374
+#: widgets/class-hsw-widget-product-purchase.php:427
 msgid "تومان تخفیف"
 msgstr ""
 
@@ -4361,7 +4361,7 @@ msgstr ""
 msgid "ثبت دیدگاه برای این بخش فعال نیست."
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1399
+#: includes/class-hsw-product-base.php:1407
 msgid "ثبت دیدگاه برای این محصول فعال نیست."
 msgstr ""
 
@@ -4369,7 +4369,7 @@ msgstr ""
 msgid "ثبت دیدگاه جدید"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1463
+#: includes/class-hsw-product-base.php:1471
 msgid "ثبت دیدگاه و امتیاز"
 msgstr ""
 
@@ -5045,7 +5045,7 @@ msgstr ""
 msgid "حذف از سبد"
 msgstr ""
 
-#: widgets/class-hsw-widget-product-purchase.php:453
+#: widgets/class-hsw-widget-product-purchase.php:459
 #: widgets/class-hsw-widget-product-sticky.php:268
 msgid "حذف از سبد خرید"
 msgstr ""
@@ -5436,7 +5436,7 @@ msgstr ""
 msgid "خریدار"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1363
+#: includes/class-hsw-product-base.php:1371
 #: widgets/class-hsw-widget-product-tabs.php:471
 msgid "خریدار این کالا"
 msgstr ""
@@ -5576,7 +5576,7 @@ msgstr ""
 msgid "خوانده‌نشده"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1424
+#: includes/class-hsw-product-base.php:1432
 msgid "خوب"
 msgstr ""
 
@@ -5612,7 +5612,7 @@ msgstr ""
 msgid "خودکار: محصولات دارای تخفیف"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1421
+#: includes/class-hsw-product-base.php:1429
 msgid "خیلی ضعیف"
 msgstr ""
 
@@ -6411,7 +6411,7 @@ msgstr ""
 msgid "دیدگاه ثبت شده کاربران"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1445
+#: includes/class-hsw-product-base.php:1453
 msgid "دیدگاه شما"
 msgstr ""
 
@@ -6784,7 +6784,7 @@ msgid "رنگ آیکن‌ها"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:1879
-#: includes/class-hsw-product-base.php:1706
+#: includes/class-hsw-product-base.php:1714
 #: includes/class-hsw-widget-base.php:2018
 #: includes/trait-hsw-product-page-style-parts-1.php:147
 #: includes/trait-hsw-product-page-style-parts-4.php:194
@@ -6957,7 +6957,7 @@ msgid "رنگ جعبه‌های عدد"
 msgstr ""
 
 #: includes/class-hsw-palette.php:77
-#: includes/class-hsw-product-base.php:1638
+#: includes/class-hsw-product-base.php:1646
 #: includes/class-hsw-widget-base.php:1834
 #: includes/class-hsw-widget-base.php:1905
 #: includes/class-hsw-widget-base.php:2294
@@ -7285,7 +7285,7 @@ msgstr ""
 #: includes/class-hsw-header-base.php:1316
 #: includes/class-hsw-header-base.php:1868
 #: includes/class-hsw-palette.php:75
-#: includes/class-hsw-product-base.php:1688
+#: includes/class-hsw-product-base.php:1696
 #: includes/class-hsw-widget-base.php:1816
 #: includes/class-hsw-widget-base.php:3426
 #: includes/class-hsw-widget-base.php:3663
@@ -7313,7 +7313,7 @@ msgstr ""
 
 #: includes/class-hsw-header-base.php:1930
 #: includes/class-hsw-header-base.php:2167
-#: includes/class-hsw-product-base.php:1694
+#: includes/class-hsw-product-base.php:1702
 #: includes/class-hsw-widget-base.php:3531
 #: includes/trait-hsw-product-page-style-parts-2.php:206
 #: includes/trait-hsw-product-page-style-parts-4.php:46
@@ -8781,7 +8781,7 @@ msgstr ""
 msgid "صورت‌حساب"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1643
+#: includes/class-hsw-product-base.php:1651
 #: includes/class-hsw-widget-base.php:1972
 #: includes/class-hsw-widget-base.php:2298
 #: includes/trait-hsw-product-page-style-parts-1.php:247
@@ -8834,7 +8834,7 @@ msgstr ""
 msgid "ضخامت نوار کناری"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1422
+#: includes/class-hsw-product-base.php:1430
 msgid "ضعیف"
 msgstr ""
 
@@ -8900,7 +8900,7 @@ msgstr ""
 msgid "عادی"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1425
+#: includes/class-hsw-product-base.php:1433
 msgid "عالی"
 msgstr ""
 
@@ -9748,7 +9748,7 @@ msgid "فعال‌سازی ورود دوعاملی"
 msgstr ""
 
 #: widgets/class-hsw-widget-product-purchase.php:64
-#: widgets/class-hsw-widget-product-purchase.php:361
+#: widgets/class-hsw-widget-product-purchase.php:367
 msgid "فعلاً ناموجود"
 msgstr ""
 
@@ -9790,7 +9790,7 @@ msgstr ""
 msgid "فقط جدول/متن توضیح کوتاه"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1402
+#: includes/class-hsw-product-base.php:1410
 msgid "فقط خریداران این محصول می‌توانند دیدگاه ثبت کنند."
 msgstr ""
 
@@ -9798,7 +9798,7 @@ msgstr ""
 #: includes/class-hsw-blog-base.php:53
 #: includes/class-hsw-cart-base.php:768
 #: includes/class-hsw-header-base.php:779
-#: includes/class-hsw-product-base.php:1573
+#: includes/class-hsw-product-base.php:1581
 #: widgets/class-hsw-widget-checkout-schedule.php:51
 msgid "فقط دسکتاپ"
 msgstr ""
@@ -9835,7 +9835,7 @@ msgstr ""
 #: includes/class-hsw-blog-base.php:54
 #: includes/class-hsw-cart-base.php:769
 #: includes/class-hsw-header-base.php:780
-#: includes/class-hsw-product-base.php:1574
+#: includes/class-hsw-product-base.php:1582
 #: widgets/class-hsw-widget-checkout-schedule.php:52
 msgid "فقط موبایل"
 msgstr ""
@@ -10164,7 +10164,7 @@ msgstr ""
 #: widgets/class-hsw-widget-archive-grid.php:292
 #: widgets/class-hsw-widget-product-page.php:276
 #: widgets/class-hsw-widget-product-purchase.php:180
-#: widgets/class-hsw-widget-product-purchase.php:407
+#: widgets/class-hsw-widget-product-purchase.php:413
 #: widgets/class-hsw-widget-product-sticky.php:94
 msgid "قیمت"
 msgstr ""
@@ -11240,7 +11240,7 @@ msgstr ""
 msgid "متوجه شدم"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1423
+#: includes/class-hsw-product-base.php:1431
 msgid "متوسط"
 msgstr ""
 
@@ -12142,7 +12142,7 @@ msgstr ""
 #: includes/class-hsw-account.php:2187
 #: includes/class-hsw-account.php:2193
 #: includes/class-hsw-checkout-rest.php:185
-#: includes/class-hsw-product-base.php:1452
+#: includes/class-hsw-product-base.php:1460
 #: widgets/class-hsw-widget-checkout-address.php:571
 msgid "نام"
 msgstr ""
@@ -12600,7 +12600,7 @@ msgstr ""
 #: includes/class-hsw-blog-base.php:48
 #: includes/class-hsw-cart-base.php:763
 #: includes/class-hsw-header-base.php:774
-#: includes/class-hsw-product-base.php:1568
+#: includes/class-hsw-product-base.php:1576
 msgid "نمایش در"
 msgstr ""
 
@@ -13215,7 +13215,7 @@ msgstr ""
 msgid "هنوز داده‌ای برای رتبه‌بندی نیست (جدول آمار ووکامرس خالی است)."
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1343
+#: includes/class-hsw-product-base.php:1351
 #: widgets/class-hsw-widget-product-accordions.php:289
 #: widgets/class-hsw-widget-product-tabs.php:454
 msgid "هنوز دیدگاهی ثبت نشده است."
@@ -13723,7 +13723,7 @@ msgstr ""
 msgid "پایین محصولات (بالای راهنمای خرید)"
 msgstr ""
 
-#: includes/class-hsw-product-base.php:1659
+#: includes/class-hsw-product-base.php:1667
 msgid "پدینگ"
 msgstr ""
 
@@ -13926,7 +13926,7 @@ msgid "پسندیدن در این مرورگر"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:1857
-#: includes/class-hsw-product-base.php:1632
+#: includes/class-hsw-product-base.php:1640
 #: includes/class-hsw-widget-base.php:3632
 #: includes/trait-hsw-product-page-style-parts-1.php:262
 #: includes/trait-hsw-product-page-style-parts-1.php:267
@@ -14693,7 +14693,7 @@ msgstr ""
 #: includes/class-hsw-blog-base.php:52
 #: includes/class-hsw-cart-base.php:767
 #: includes/class-hsw-header-base.php:778
-#: includes/class-hsw-product-base.php:1572
+#: includes/class-hsw-product-base.php:1580
 #: widgets/class-hsw-widget-checkout-schedule.php:50
 msgid "پیش‌فرض طرح"
 msgstr ""
@@ -15063,7 +15063,7 @@ msgstr ""
 #: includes/class-hsw-cart-drawer.php:37
 #: widgets/class-hsw-widget-cart-items.php:468
 #: widgets/class-hsw-widget-cart-items.php:546
-#: widgets/class-hsw-widget-product-purchase.php:450
+#: widgets/class-hsw-widget-product-purchase.php:456
 #: widgets/class-hsw-widget-product-sticky.php:265
 msgid "کاهش تعداد"
 msgstr ""
@@ -15683,7 +15683,7 @@ msgid "گردی گوشهٔ کارت‌ها"
 msgstr ""
 
 #: includes/class-hsw-header-base.php:1425
-#: includes/class-hsw-product-base.php:1651
+#: includes/class-hsw-product-base.php:1659
 #: includes/class-hsw-widget-base.php:1955
 #: includes/class-hsw-widget-base.php:3570
 #: includes/class-hsw-widget-base.php:3641
