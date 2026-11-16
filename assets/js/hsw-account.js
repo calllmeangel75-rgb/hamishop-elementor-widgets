@@ -1771,6 +1771,13 @@ document.addEventListener('click', function (event) {
 	var target = link ? link.getAttribute('href') : (item.getAttribute('data-hsw-notif-url') || '');
 
 	/*
+	 * Cancel the anchor first: assigning `location.href` does not stop the
+	 * default action, and the anchor's own navigation ran last and replaced the
+	 * URL — which is why the `hsw_read` marker never reached the next page.
+	 */
+	event.preventDefault();
+
+	/*
 	 * One REST round trip takes about two seconds on a busy host. The customer
 	 * clicked «go to the order», not «wait for a badge»: mark it with `keepalive`
 	 * and leave immediately. The next page is rendered from the updated meta, so
@@ -1791,11 +1798,16 @@ document.addEventListener('click', function (event) {
 	});
 
 	if (target) {
-		window.location.href = target;
+		/*
+		 * Carry the id to the destination instead of waiting for the request: the
+		 * page the customer lands on marks it read before printing the bell, so
+		 * the badge is already one lower. (Waiting here showed the old number on
+		 * the next page whenever the REST call was slower than the navigation.)
+		 */
+		window.location.href = target + (target.indexOf('?') === -1 ? '?' : '&') + 'hsw_read=' + encodeURIComponent(id);
 		return;
 	}
 
-	event.preventDefault();
 	markRead
 		.then(function (json) {
 			if (json && json.ok) {

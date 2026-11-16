@@ -36,6 +36,16 @@ class HSW_Invoice {
 		add_action( 'add_meta_boxes', array( $this, 'legacy_meta_box' ) );
 	}
 
+	/**
+	 * Is the orders table (HPOS) the active storage?
+	 *
+	 * @return bool
+	 */
+	private static function hpos_enabled() {
+		return class_exists( 'Automattic\WooCommerce\Utilities\OrderUtil' )
+			&& \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+	}
+
 	public static function enabled() {
 		return 'yes' === get_option( self::ENABLED, 'yes' );
 	}
@@ -490,7 +500,16 @@ class HSW_Invoice {
 		if ( ! self::enabled() ) {
 			return;
 		}
-		$screen = class_exists( 'Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
+		/*
+		 * HPOS screens already print the two buttons through
+		 * `woocommerce_admin_order_data_after_billing_address`, and the same
+		 * metabox also registers on the HPOS screen — the order view showed four
+		 * identical links. The box is only needed by the posts-based order screen.
+		 */
+		if ( self::hpos_enabled() ) {
+			return;
+		}
+		$screen = 'shop_order';
 		add_meta_box(
 			'hsw-invoice-box',
 			__( 'فاکتور HamiShop', 'hamishop-elementor-widgets' ),

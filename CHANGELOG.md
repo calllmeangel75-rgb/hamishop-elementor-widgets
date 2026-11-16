@@ -6,6 +6,15 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.300] - 2026-11-16
+
+### Fixed
+- **An opened notification still counted.** The click navigated before the read request finished, so the destination page rendered the old bell. The link now carries `hsw_read=<id>` and the account class marks it on `template_redirect`, before anything renders. The click handler also cancels the anchor (`preventDefault`) — without it the anchor's URL replaced the marked one.
+- **Duplicate invoice buttons on HPOS order screens.** The legacy metabox was registered on the HPOS screen as well; it is now posts-only.
+
+### Added
+- CI check 6f: the notification marker must exist on both sides.
+
 ## [1.11.299] - 2026-11-16
 
 ### Fixed

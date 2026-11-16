@@ -70,6 +70,13 @@ final class HSW_Account {
 		add_action( 'init', array( $this, 'maybe_flush_rewrites' ), 99 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ), 20 );
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		/*
+		 * A notification link carries `hsw_read=<id>`, so the destination request
+		 * itself records the read before the bell is printed. The REST call alone
+		 * lost that race: the click navigated immediately and the new page was
+		 * rendered (bell still one higher) before the request finished.
+		 */
+		add_action( 'template_redirect', array( $this, 'mark_opened_notification' ), 5 );
 
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'query_vars' ) );
 		add_filter( 'woocommerce_account_menu_items', array( $this, 'filter_native_menu' ), 30, 2 );
@@ -2973,6 +2980,51 @@ final class HSW_Account {
 		return true;
 	}
 
+	/**
+	 * Set the read flag on one notification (or on every one).
+	 *
+	 * @param int    $user_id User.
+	 * @param string $id      Notification id; empty means all.
+	 * @return bool True when the stored list changed.
+	 */
+	public function mark_notifications_read( $user_id, $id = '' ) {
+		$list = get_user_meta( $user_id, '_hsw_notifications', true );
+		if ( ! is_array( $list ) ) {
+			return false;
+		}
+		$changed = false;
+		foreach ( $list as $index => $item ) {
+			if ( ! is_array( $item ) || ! empty( $item['read'] ) ) {
+				continue;
+			}
+			if ( '' !== $id && (string) ( $item['id'] ?? '' ) !== $id ) {
+				continue;
+			}
+			$list[ $index ]['read'] = true;
+			$changed               = true;
+		}
+		if ( $changed ) {
+			update_user_meta( $user_id, '_hsw_notifications', $list );
+		}
+		return $changed;
+	}
+
+	/**
+	 * `?hsw_read=<id>` on a customer page marks that notification read before
+	 * anything renders. Removing the parameter afterwards would need a redirect
+	 * (a second page load), so it is simply ignored on the next request: marking
+	 * an already-read item is a no-op.
+	 */
+	public function mark_opened_notification() {
+		if ( empty( $_GET['hsw_read'] ) || ! is_user_logged_in() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- idempotent, own-user only.
+			return;
+		}
+		$id = sanitize_text_field( wp_unslash( (string) $_GET['hsw_read'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( '' !== $id ) {
+			$this->mark_notifications_read( get_current_user_id(), $id );
+		}
+	}
+
 	public function unread_notifications_count( $user_id ) {
 		$count = 0;
 		foreach ( $this->notifications( $user_id ) as $item ) {
@@ -3297,20 +3349,7 @@ final class HSW_Account {
 		 */
 		$id = ( $request && method_exists( $request, 'get_param' ) ) ? sanitize_text_field( (string) $request->get_param( 'id' ) ) : '';
 
-		$list = get_user_meta( $user_id, '_hsw_notifications', true );
-		$list = is_array( $list ) ? $list : array();
-
-		foreach ( $list as $index => $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-			if ( '' !== $id && (string) ( $item['id'] ?? '' ) !== $id ) {
-				continue;
-			}
-			$list[ $index ]['read'] = true;
-		}
-
-		update_user_meta( $user_id, '_hsw_notifications', $list );
+		$this->mark_notifications_read( $user_id, $id );
 
 		return rest_ensure_response(
 			array(

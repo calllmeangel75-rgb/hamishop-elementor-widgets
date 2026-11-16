@@ -320,6 +320,26 @@ hsw_ci(
 	( $dead_ok ? '' : 'miss does not lock ' ) . ( $refuse_ok ? '' : 'refusal not handled ' ) . ( $redirect ? 'silent redirect present' : '' )
 );
 
+/* ---------------------------------------------------------------------
+ * 6f) Opening a notification marks it read on arrival
+ *
+ * The click cannot wait for the REST round trip: the destination page rendered
+ * first and printed the old badge, so the customer saw the notification still
+ * counted after opening it. Both halves must exist — the link carries
+ * `hsw_read=<id>` and the account class reads it before rendering.
+ * ------------------------------------------------------------------- */
+$account_php = (string) file_get_contents( $root . '/includes/class-hsw-account.php' );
+$account_js  = (string) file_get_contents( $root . '/assets/js/hsw-account.js' );
+$marker_ok   = false !== strpos( $account_php, 'mark_opened_notification' ) && false !== strpos( $account_php, "'hsw_read'" );
+$js_ok       = false !== strpos( $account_js, "hsw_read=" );
+$prevent_ok  = (bool) preg_match( "/var target = link[^\n]*\n\s*\n?\s*\/\*?[\s\S]{0,400}?event\.preventDefault\(\);/", $account_js )
+	|| false !== strpos( $account_js, 'event.preventDefault();' );
+hsw_ci(
+	'notifications: opening one is marked on arrival',
+	$marker_ok && $js_ok && $prevent_ok,
+	( $marker_ok ? '' : 'server marker missing ' ) . ( $js_ok ? '' : 'link marker missing ' ) . ( $prevent_ok ? '' : 'anchor default not cancelled' )
+);
+
 /* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */
