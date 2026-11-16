@@ -742,9 +742,10 @@ abstract class HSW_Widget_Base extends Widget_Base {
                 }
 
                 if ( ! $product->is_in_stock() ) {
+                        /* No «خبرم کن» feature exists: an out-of-stock card is simply disabled. */
                         return '<div class="hsw-loop__actions">' .
-                                '<a class="hsw-loop__btn hsw-loop__btn--notify" href="' . esc_url( $product->get_permalink() ) . '" aria-label="' . esc_attr( $args['txt_notify'] ) . '">' .
-                                HSW_Helpers::icon( 'notifications' ) . '<span class="hsw-loop__btn-label">' . esc_html( $args['txt_notify'] ) . '</span></a>' .
+                                '<span class="hsw-loop__btn hsw-loop__btn--oos" aria-disabled="true">' .
+                                HSW_Helpers::icon( 'inventory_2' ) . '<span class="hsw-loop__btn-label">' . esc_html( $args['txt_oos'] ) . '</span></span>' .
                                 '</div>';
                 }
 
@@ -864,7 +865,6 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'txt_feat'          => __( 'ویژه', 'hamishop-elementor-widgets' ),
                         'txt_ship'          => __( 'ارسال رایگان', 'hamishop-elementor-widgets' ),
                         'txt_oos'           => __( 'اتمام موجودی', 'hamishop-elementor-widgets' ),
-                        'txt_notify'        => __( 'خبرم کن', 'hamishop-elementor-widgets' ),
                         'txt_add'           => __( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ),
                         'txt_buy'           => __( 'خرید', 'hamishop-elementor-widgets' ),
                         'ico_add'           => 'shopping_cart',
@@ -1620,7 +1620,6 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         'txt_feat'          => array( __( 'متن نشان ویژه', 'hamishop-elementor-widgets' ), 'ویژه' ),
                         'txt_ship'          => array( __( 'متن نشان ارسال رایگان', 'hamishop-elementor-widgets' ), 'ارسال رایگان' ),
                         'txt_oos'           => array( __( 'متن اتمام موجودی', 'hamishop-elementor-widgets' ), 'اتمام موجودی' ),
-                        'txt_notify'        => array( __( 'متن دکمه خبرم کن', 'hamishop-elementor-widgets' ), 'خبرم کن' ),
                         'txt_buy'           => array( __( 'متن دکمه خرید', 'hamishop-elementor-widgets' ), 'خرید' ),
                         'txt_add'           => array( __( 'متن دکمه افزودن به سبد', 'hamishop-elementor-widgets' ), 'افزودن به سبد خرید' ),
                         'ico_add'           => array( __( 'آیکون دکمه', 'hamishop-elementor-widgets' ), 'shopping_cart' ),
@@ -2967,6 +2966,35 @@ abstract class HSW_Widget_Base extends Widget_Base {
                         )
                 );
 
+                $this->add_responsive_control(
+                        'tabs_box_pad',
+                        array(
+                                'label'      => __( 'پدینگ کانتینر تب‌ها', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px', 'em', 'rem' ),
+                                'range'      => array(
+                                        'px'  => array( 'min' => 0, 'max' => 24 ),
+                                        'em'  => array( 'min' => 0, 'max' => 1.5, 'step' => 0.05 ),
+                                        'rem' => array( 'min' => 0, 'max' => 1.5, 'step' => 0.05 ),
+                                ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-loop__tabs' => '--hsw-loop-tabs-pad: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+                $this->add_responsive_control(
+                        'tabs_gap',
+                        array(
+                                'label'      => __( 'فاصله بین تب‌ها', 'hamishop-elementor-widgets' ),
+                                'type'       => Controls_Manager::SLIDER,
+                                'size_units' => array( 'px', 'em', 'rem' ),
+                                'range'      => array(
+                                        'px'  => array( 'min' => 0, 'max' => 20 ),
+                                        'em'  => array( 'min' => 0, 'max' => 1.2, 'step' => 0.05 ),
+                                        'rem' => array( 'min' => 0, 'max' => 1.2, 'step' => 0.05 ),
+                                ),
+                                'selectors'  => array( '{{WRAPPER}} .hsw-loop__tabs' => '--hsw-loop-tabs-gap: {{SIZE}}{{UNIT}};' ),
+                        )
+                );
+
                 $this->add_control(
                         'tabs_reset',
                         array(
@@ -2974,7 +3002,7 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'type'        => Controls_Manager::SWITCHER,
                                 'separator'   => 'before',
                                 'selectors'   => array(
-                                        '{{WRAPPER}} .hsw-loop__tabs' => '--hsw-loop-tabs-bg: initial; --hsw-loop-tabs-border: initial; --hsw-loop-tab-active-bg: initial; --hsw-loop-tab-active-c: initial; --hsw-loop-tab-c: initial; --hsw-loop-tab-hover-c: initial; --hsw-loop-tab-pad: initial; --hsw-loop-tab-radius: initial;',
+                                        '{{WRAPPER}} .hsw-loop__tabs' => '--hsw-loop-tabs-bg: initial; --hsw-loop-tabs-border: initial; --hsw-loop-tab-active-bg: initial; --hsw-loop-tab-active-c: initial; --hsw-loop-tab-c: initial; --hsw-loop-tab-hover-c: initial; --hsw-loop-tab-pad: initial; --hsw-loop-tab-radius: initial; --hsw-loop-tabs-pad: initial; --hsw-loop-tabs-gap: initial;',
                                 ),
                         )
                 );
@@ -3168,7 +3196,6 @@ abstract class HSW_Widget_Base extends Widget_Base {
                                 'txt_feat'          => $s['txt_feat'] ?? __( 'ویژه', 'hamishop-elementor-widgets' ),
                                 'txt_ship'          => $s['txt_ship'] ?? __( 'ارسال رایگان', 'hamishop-elementor-widgets' ),
                                 'txt_oos'           => $s['txt_oos'] ?? __( 'اتمام موجودی', 'hamishop-elementor-widgets' ),
-                                'txt_notify'        => $s['txt_notify'] ?? __( 'خبرم کن', 'hamishop-elementor-widgets' ),
                                 'txt_add'           => $s['txt_add'] ?? __( 'افزودن به سبد خرید', 'hamishop-elementor-widgets' ),
                                 'txt_buy'           => $s['txt_buy'] ?? __( 'خرید', 'hamishop-elementor-widgets' ),
                                 'ico_add'           => $s['ico_add'] ?? 'shopping_cart',

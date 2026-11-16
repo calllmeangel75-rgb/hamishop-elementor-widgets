@@ -6,6 +6,15 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.302] - 2026-11-16
+
+### Changed
+- **Loop widgets: «خبرم کن» removed.** A disabled «اتمام موجودی» chip replaces the notify link on out-of-stock cards, and the now-meaningless «متن دکمه خبرم کن» control is gone.
+- **Availability wording.** «این ترکیب … موجود نیست» → «این محصول در حال حاضر موجود نیست» in the product note, the no-match toast and the out-of-stock toast.
+
+### Added
+- **Tab spacing controls** in the loop widgets: container padding (`--hsw-loop-tabs-pad`) and gap between tabs (`--hsw-loop-tabs-gap`), both responsive.
+
 ## [1.11.301] - 2026-11-16
 
 ### Fixed

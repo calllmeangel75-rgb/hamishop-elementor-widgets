@@ -409,7 +409,7 @@ class HSW_Widget_Product_Variants extends HSW_Product_Base {
                 $pid = $product ? $product->get_id() : 0;
                 ?>
                 <div class="<?php echo esc_attr( $this->root_class( 'pvar' ) ); ?>" data-hsw-variants="<?php echo esc_attr( $pid ); ?>"<?php echo ( $product && HSW_Helpers::is_call_for_price( $product ) ) ? ' data-hsw-cfp="1"' : ''; ?>
-                        data-hsw-no-match="<?php echo esc_attr__( 'این ترکیب از ویژگی‌ها موجود نیست.', 'hamishop-elementor-widgets' ); ?>"
+                        data-hsw-no-match="<?php echo esc_attr__( 'این محصول در حال حاضر موجود نیست.', 'hamishop-elementor-widgets' ); ?>"
                         <?php if ( $product && $product->is_type( 'variable' ) ) : ?>
                                 data-hsw-variations='<?php echo esc_attr( wp_json_encode( $this->variations_payload( $product ) ) ); ?>'
                                 data-hsw-attrs='<?php echo esc_attr( wp_json_encode( $attrs_map ) ); ?>'

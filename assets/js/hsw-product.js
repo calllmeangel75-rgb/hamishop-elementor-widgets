@@ -649,7 +649,7 @@
 			var oosMsg = scope3.querySelector('[data-hsw-oos]');
 			var oosText = oosMsg ? oosMsg.textContent.trim() : '';
 			if (window.HSWFeedback && window.HSWFeedback.toast) {
-				window.HSWFeedback.toast(oosText || 'این ترکیب فعلاً موجود نیست.', { tone: 'error' });
+				window.HSWFeedback.toast(oosText || 'این محصول در حال حاضر موجود نیست.', { tone: 'error' });
 			}
 			return;
 		}
@@ -673,7 +673,7 @@
 			var noMatch = document.querySelector('.hsw-p[data-hsw-variations][data-hsw-product="' + pid4 + '"], .hsw-p[data-hsw-variations][data-hsw-variants="' + pid4 + '"]');
 			var noMsg = noMatch ? (noMatch.getAttribute('data-hsw-no-match') || '') : '';
 			if (window.HSWFeedback && window.HSWFeedback.toast) {
-				window.HSWFeedback.toast(noMsg || 'این ترکیب موجود نیست.', { tone: 'error' });
+				window.HSWFeedback.toast(noMsg || 'این محصول در حال حاضر موجود نیست.', { tone: 'error' });
 			}
 			return;
 		}

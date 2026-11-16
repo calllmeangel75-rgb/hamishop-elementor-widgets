@@ -492,7 +492,7 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                          * variation's stock state and the click still answers.
                          */
                         ?>
-                        <p class="hsw-ppurch__oos" data-hsw-oos hidden><?php esc_html_e( 'این ترکیب از ویژگی‌ها فعلاً موجود نیست.', 'hamishop-elementor-widgets' ); ?></p>
+                        <p class="hsw-ppurch__oos" data-hsw-oos hidden><?php esc_html_e( 'این محصول در حال حاضر موجود نیست.', 'hamishop-elementor-widgets' ); ?></p>
                         <?php if ( 'yes' === ( $s['show_assure'] ?? 'yes' ) ) : ?>
                         <div class="hsw-ppurch__assure">
                                 <?php foreach ( $assure as $item ) : ?>

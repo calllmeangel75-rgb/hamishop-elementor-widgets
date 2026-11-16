@@ -471,9 +471,9 @@ display: none;
 /* Tabs -------------------------------------------------------------------- */
 .hsw-loop__tabs {
 	display: flex;
-	gap: 2px;
+	gap: var(--hsw-loop-tabs-gap, 2px);
 	max-inline-size: 100%;
-	padding: 4px;
+	padding: var(--hsw-loop-tabs-pad, 4px);
 	border: 1px solid var(--hsw-loop-tabs-border);
 	border-radius: calc(var(--hsw-loop-tab-radius) + 4px);
 	background: var(--hsw-loop-tabs-bg);
@@ -915,6 +915,15 @@ display: none;
 	white-space: nowrap;
 	cursor: pointer;
 	transition: background-color 0.18s, color 0.18s, opacity 0.18s;
+}
+
+/* Out-of-stock: a disabled chip. There is no «خبرم کن» feature. */
+.hsw-loop__btn--oos,
+.hsw-loop__btn[aria-disabled="true"] {
+	background: var(--hsw-loop-oos-bg);
+	color: var(--hsw-loop-oos-c);
+	cursor: default;
+	pointer-events: none;
 }
 
 .hsw-loop__btn:hover,
