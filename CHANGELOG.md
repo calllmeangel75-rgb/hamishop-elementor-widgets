@@ -6,6 +6,13 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.296] - 2026-11-16
+
+### Fixed
+- **A shop's reply was printed as a separate review.** Comments are threaded in WooCommerce, but every approved comment became its own card — the «Support» answer showed above the review it answered, with its own avatar and no reply marker. `review_tree()` nests answers inside the review card, with a thread line and a «پاسخ پشتیبانی» / «پاسخ» tag.
+- **The review count included replies.** «بر اساس N بازخورد» and «(N نظر)» now count top-level reviews only.
+- The accordion widget shares the same renderer, so it gets the same threading.
+
 ## [1.11.295] - 2026-11-16
 
 ### Fixed

@@ -1341,7 +1341,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         return array( 'count' => $count, 'average' => $average );
                 }
 
-                $comments = $this->review_comments( $product, 0 );
+                $comments = $this->top_level_reviews( $product );
                 if ( empty( $comments ) ) {
                         return array( 'count' => 0, 'average' => 0.0 );
                 }
@@ -1370,7 +1370,24 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          * @return int
          */
         protected function approved_reviews_count( $product ) {
-                return count( $this->review_comments( $product, 0 ) );
+                return count( $this->top_level_reviews( $product ) );
+        }
+
+        /**
+         * Approved reviews only — replies are answers, not reviews.
+         *
+         * @param WC_Product|null $product Product.
+         * @param string          $status  Comment status.
+         * @return WP_Comment[]
+         */
+        protected function top_level_reviews( $product, $status = 'approve' ) {
+                $out = array();
+                foreach ( $this->review_comments( $product, 0, $status ) as $comment ) {
+                        if ( 0 === (int) $comment->comment_parent ) {
+                                $out[] = $comment;
+                        }
+                }
+                return $out;
         }
 
         /**
@@ -1459,9 +1476,135 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          * @param int             $limit   Max reviews, 0 = all.
          * @return string
          */
+        /**
+         * Reviews with their replies, newest review first and replies oldest first.
+         *
+         * WooCommerce threads a shop's answer under the customer's review, but a
+         * flat comment list printed the answer as a separate review — usually
+         * above the review it answered, with its own avatar and no sign that it
+         * was a reply. The tree keeps one card per review and nests the answers.
+         *
+         * @param WC_Product|null $product Product.
+         * @param int             $limit   Max top-level reviews (0 = all).
+         * @return array<int,array{comment:WP_Comment,replies:WP_Comment[]}>
+         */
+        protected function review_tree( $product, $limit = 0 ) {
+                $all = $this->review_comments( $product, 0 );
+                if ( empty( $all ) ) {
+                        return array();
+                }
+
+                $by_id = array();
+                foreach ( $all as $comment ) {
+                        $by_id[ (int) $comment->comment_ID ] = $comment;
+                }
+
+                /* Attach every reply to the top-level review it belongs to. */
+                $children = array();
+                foreach ( $all as $comment ) {
+                        $parent = (int) $comment->comment_parent;
+                        if ( ! $parent ) {
+                                continue;
+                        }
+                        $root = $parent;
+                        $hops = 0;
+                        while ( isset( $by_id[ $root ] ) && (int) $by_id[ $root ]->comment_parent > 0 && $hops < 20 ) {
+                                $root = (int) $by_id[ $root ]->comment_parent;
+                                $hops++;
+                        }
+                        $children[ $root ][] = $comment;
+                }
+
+                $out = array();
+                foreach ( $all as $comment ) {
+                        if ( (int) $comment->comment_parent > 0 ) {
+                                continue;
+                        }
+                        $replies = isset( $children[ (int) $comment->comment_ID ] ) ? $children[ (int) $comment->comment_ID ] : array();
+                        usort(
+                                $replies,
+                                static function ( $a, $b ) {
+                                        return strcmp( (string) $a->comment_date_gmt, (string) $b->comment_date_gmt );
+                                }
+                        );
+                        $out[] = array(
+                                'comment' => $comment,
+                                'replies' => $replies,
+                        );
+                        if ( $limit > 0 && count( $out ) >= $limit ) {
+                                break;
+                        }
+                }
+
+                return $out;
+        }
+
+        /**
+         * Is this comment written by the shop team (admin / shop manager)?
+         *
+         * @param WP_Comment $comment Comment.
+         * @return bool
+         */
+        protected function is_staff_comment( $comment ) {
+                $user_id = (int) $comment->user_id;
+                if ( $user_id <= 0 ) {
+                        return false;
+                }
+                $user = get_userdata( $user_id );
+                if ( ! $user || empty( $user->roles ) ) {
+                        return false;
+                }
+                return (bool) array_intersect( array( 'administrator', 'shop_manager' ), (array) $user->roles );
+        }
+
+        /**
+         * One review card or one nested reply row.
+         *
+         * @param WP_Comment $comment  Comment.
+         * @param bool       $is_reply Reply row.
+         * @param string     $inner    Extra markup printed inside the card (nested replies).
+         * @return string
+         */
+        protected function review_card_html( $comment, $is_reply = false, $inner = '' ) {
+                $name     = (string) $comment->comment_author;
+                $initials = $this->initials( $name );
+                $text     = wp_strip_all_tags( (string) $comment->comment_content );
+                $rating   = max( 0, min( 5, (int) get_comment_meta( $comment->comment_ID, 'rating', true ) ) );
+                $verified = ! $is_reply && wc_customer_bought_product( '', $comment->comment_author_email, (int) $comment->comment_post_ID );
+                $staff    = $is_reply && $this->is_staff_comment( $comment );
+
+                ob_start();
+                ?>
+                <div class="hsw-ptabs__<?php echo $is_reply ? 'rveply' : 'rvitem'; ?><?php echo $staff ? ' hsw-ptabs__rveply--staff' : ''; ?>">
+                        <div class="hsw-ptabs__rvtop">
+                                <div class="hsw-ptabs__rvwho">
+                                        <span class="hsw-ptabs__rvav"><?php echo esc_html( $initials ); ?></span>
+                                        <span class="hsw-ptabs__rvname"><?php echo esc_html( $name ); ?></span>
+                                        <?php if ( $is_reply ) : ?>
+                                                <span class="hsw-ptabs__rvtag"><?php echo esc_html( $staff ? __( 'پاسخ پشتیبانی', 'hamishop-elementor-widgets' ) : __( 'پاسخ', 'hamishop-elementor-widgets' ) ); ?></span>
+                                        <?php elseif ( $verified ) : ?>
+                                                <span class="hsw-ptabs__rvtag"><?php esc_html_e( 'خریدار این کالا', 'hamishop-elementor-widgets' ); ?></span>
+                                        <?php endif; ?>
+                                </div>
+                                <?php if ( $rating > 0 ) : ?>
+                                        <div class="hsw-ptabs__rvstars" aria-label="<?php echo esc_attr( sprintf( __( 'امتیاز %s از ۵', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( $rating ) ) ); ?>">
+                                                <?php for ( $star = 1; $star <= 5; $star++ ) : ?>
+                                                        <?php echo HSW_Helpers::icon( 'star', $star <= $rating ? 'hsw-ic--fill' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
+                                                <?php endfor; ?>
+                                                <span class="hsw-ptabs__rvval"><?php echo esc_html( HSW_Helpers::fa_num( $rating ) . '.۰' ); ?></span>
+                                        </div>
+                                <?php endif; ?>
+                        </div>
+                        <p class="hsw-ptabs__rvtext"><?php echo esc_html( $text ); ?></p>
+                        <?php echo $inner; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built by review_card_html(). ?>
+                </div>
+                <?php
+                return (string) ob_get_clean();
+        }
+
         protected function review_cards_html( $product, $limit = 0 ) {
-                $reviews = $this->reviews_list( $product, $limit );
-                if ( empty( $reviews ) ) {
+                $tree = $this->review_tree( $product, $limit );
+                if ( empty( $tree ) ) {
                         /*
                          * «هنوز دیدگاهی ثبت نشده» is the wrong sentence when the
                          * shop has reviews sitting in moderation: the owner then
@@ -1473,41 +1616,25 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         return '<p class="hsw-ptabs__rvtext">' . esc_html__( 'هنوز دیدگاهی ثبت نشده است.', 'hamishop-elementor-widgets' ) . '</p>';
                 }
 
-                ob_start();
-                ?>
-                <div class="hsw-ptabs__rvlist">
-                        <?php foreach ( $reviews as $rv ) : ?>
-                                <?php
-                                $name     = isset( $rv['name'] ) ? $rv['name'] : '';
-                                $initials = isset( $rv['initials'] ) ? $rv['initials'] : '';
-                                $text     = isset( $rv['text'] ) ? $rv['text'] : '';
-                                $verified = ! empty( $rv['verified'] );
-                                $rating   = max( 0, min( 5, (int) ( isset( $rv['rating'] ) ? $rv['rating'] : 0 ) ) );
-                                ?>
-                                <div class="hsw-ptabs__rvitem">
-                                        <div class="hsw-ptabs__rvtop">
-                                                <div class="hsw-ptabs__rvwho">
-                                                        <span class="hsw-ptabs__rvav"><?php echo esc_html( $initials ); ?></span>
-                                                        <span class="hsw-ptabs__rvname"><?php echo esc_html( $name ); ?></span>
-                                                        <?php if ( $verified ) : ?>
-                                                                <span class="hsw-ptabs__rvtag"><?php esc_html_e( 'خریدار این کالا', 'hamishop-elementor-widgets' ); ?></span>
-                                                        <?php endif; ?>
-                                                </div>
-                                                <?php if ( $rating > 0 ) : ?>
-                                                        <div class="hsw-ptabs__rvstars" aria-label="<?php echo esc_attr( sprintf( __( 'امتیاز %s از ۵', 'hamishop-elementor-widgets' ), HSW_Helpers::fa_num( $rating ) ) ); ?>">
-                                                                <?php for ( $star = 1; $star <= 5; $star++ ) : ?>
-                                                                        <?php echo HSW_Helpers::icon( 'star', $star <= $rating ? 'hsw-ic--fill' : '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- icon() escapes internally. ?>
-                                                                <?php endfor; ?>
-                                                                <span class="hsw-ptabs__rvval"><?php echo esc_html( HSW_Helpers::fa_num( $rating ) . '.۰' ); ?></span>
-                                                        </div>
-                                                <?php endif; ?>
-                                        </div>
-                                        <p class="hsw-ptabs__rvtext"><?php echo esc_html( $text ); ?></p>
-                                </div>
-                        <?php endforeach; ?>
-                </div>
-                <?php
-                return (string) ob_get_clean();
+                $out = '<div class="hsw-ptabs__rvlist">';
+                foreach ( $tree as $node ) {
+                        /*
+                         * Replies go *inside* the review they answer: as siblings they
+                         * read as two unrelated reviews that happen to be adjacent.
+                         */
+                        $replies = '';
+                        if ( ! empty( $node['replies'] ) ) {
+                                $replies = '<div class="hsw-ptabs__rveplies">';
+                                foreach ( $node['replies'] as $reply ) {
+                                        $replies .= $this->review_card_html( $reply, true );
+                                }
+                                $replies .= '</div>';
+                        }
+                        $out .= $this->review_card_html( $node['comment'], false, $replies );
+                }
+                $out .= '</div>';
+
+                return $out;
         }
 
         /**

@@ -1290,6 +1290,38 @@ body.admin-bar .hsw-ptabs--stack { --hsw-stk-top: 32px; }
 .hsw-ptabs__rvval { font-size: 11px; line-height: 16px; font-weight: 700; margin-inline-start: 4px; }
 .hsw-ptabs__rvtext { font-size: 14px; line-height: 24px; color: var(--hsw-on-surface-variant); margin: 0; }
 
+/*
+ * Shop replies are nested under the review they answer, not printed as their own
+ * review: a right-hand thread line keeps the conversation readable and the
+ * smaller card says «this is an answer».
+ */
+.hsw-ptabs__rveplies {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+        padding-inline-start: 12px;
+        border-inline-start: 2px solid var(--hsw-surface-variant);
+}
+.hsw-ptabs__rveply {
+        padding: 8px 10px;
+        border-radius: 7px;
+        background: var(--hsw-surface-c);
+        border: 1px solid var(--hsw-surface-variant);
+}
+.hsw-ptabs__rveply .hsw-ptabs__rvname { font-size: 13px; line-height: 20px; font-weight: 600; }
+.hsw-ptabs__rveply .hsw-ptabs__rvav { width: 28px; height: 28px; font-size: 12px; }
+.hsw-ptabs__rveply .hsw-ptabs__rvtext { font-size: 13px; line-height: 22px; margin-top: 4px; }
+.hsw-ptabs__rveply--staff {
+        border-color: color-mix(in srgb, var(--hsw-primary, #19c58b) 35%, var(--hsw-surface-variant));
+        background: color-mix(in srgb, var(--hsw-primary, #19c58b) 7%, var(--hsw-surface-c));
+}
+.hsw-ptabs__rveply--staff .hsw-ptabs__rvtag {
+        background: color-mix(in srgb, var(--hsw-primary, #19c58b) 16%, transparent);
+        color: var(--hsw-primary-dark, #0b4435);
+        font-weight: 700;
+}
+
 /* ----- real review form (native comment_form, Persian labels) ----- */
 .hsw-ptabs__rvform {
         margin-top: 24px;
