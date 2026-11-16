@@ -9,7 +9,7 @@
 |---|---|
 | نسخه | **1.11.296** |
 | تاریخ | 2026-11-15 |
-| کامیت | `pending` |
+| کامیت | `62001cf` |
 | تگ | `v1.11.296` |
 | ریلیز | <https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases/tag/v1.11.296> |
 | ZIP | `release-downloads/hamishop-elementor-widgets-1.11.296.zip` |
@@ -44,7 +44,7 @@ SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز 
 
 | مورد | وضعیت |
 |---|---|
-| CI main/tag روی 1.11.296 | ⏳ در حال اجرا |
+| CI main/tag روی 1.11.296 | ✅ سبز |
 | `php tools/ci-checks.php` | ✅ ۲۴ چک |
 | `tests/qa/product-attribute-keys-wp.php` | ✅ ۱۰ چک (استیجینگ محلی) |
 | `register_controls()` همهٔ کلاس‌های ویجت | ✅ بدون خطا |
