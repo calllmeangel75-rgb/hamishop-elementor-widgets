@@ -181,7 +181,8 @@ $simple->set_status( 'publish' );
 $simple->set_regular_price( '35000' );
 $pick = new WC_Product_Attribute();
 $pick->set_id( 0 );
-$pick->set_name( 'رنگ' );
+/* A space in the name is the interesting case: PHP rewrites it to «_» in $_POST. */
+$pick->set_name( 'رنگ جلد' );
 $pick->set_options( array( 'آبی', 'مشکی' ) );
 $pick->set_visible( true );
 $pick->set_variation( false );
@@ -195,13 +196,19 @@ $check( 'simple picker posts the option, not a percent-encoded slug', 'آبی' =
 
 if ( class_exists( 'HSW_Simple_Attributes' ) ) {
 	$picker = new HSW_Simple_Attributes();
-	$_REQUEST = array( 'attribute_رنگ' => $slug );
-	$read = $call( $picker, 'read_request', array( $simple ) );
-	$check( 'cart data accepts a Persian option', isset( $read['رنگ'] ) && 'آبی' === $read['رنگ']['value'], wp_json_encode( $read, JSON_UNESCAPED_UNICODE ) );
 
-	$_REQUEST = array( 'attribute_رنگ' => sanitize_title( 'آبی' ) );
+	/* PHP turns the space into an underscore before the code sees the request. */
+	$_REQUEST = array( 'attribute_رنگ_جلد' => $slug );
 	$read     = $call( $picker, 'read_request', array( $simple ) );
-	$check( 'cart data still accepts the encoded slug', isset( $read['رنگ'] ) && 'آبی' === $read['رنگ']['value'], wp_json_encode( $read, JSON_UNESCAPED_UNICODE ) );
+	$check( 'cart data accepts an attribute name with a space', isset( $read['رنگ جلد'] ) && 'آبی' === $read['رنگ جلد']['value'], wp_json_encode( $read, JSON_UNESCAPED_UNICODE ) );
+
+	$_REQUEST = array( 'attribute_رنگ جلد' => $slug );
+	$read     = $call( $picker, 'read_request', array( $simple ) );
+	$check( 'cart data accepts the typed name too', isset( $read['رنگ جلد'] ) && 'آبی' === $read['رنگ جلد']['value'], wp_json_encode( $read, JSON_UNESCAPED_UNICODE ) );
+
+	$_REQUEST = array( 'attribute_رنگ_جلد' => sanitize_title( 'آبی' ) );
+	$read     = $call( $picker, 'read_request', array( $simple ) );
+	$check( 'cart data still accepts the encoded slug', isset( $read['رنگ جلد'] ) && 'آبی' === $read['رنگ جلد']['value'], wp_json_encode( $read, JSON_UNESCAPED_UNICODE ) );
 	$_REQUEST = array();
 }
 

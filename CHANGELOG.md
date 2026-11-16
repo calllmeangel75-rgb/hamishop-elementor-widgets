@@ -6,6 +6,12 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.293] - 2026-11-15
+
+### Fixed
+- **A simple-product choice was dropped when the attribute name contains a space** («رنگ جلد», «سایز کاغذ»). PHP rewrites a space in an incoming variable name to `_`, so the request carried `attribute_رنگ_جلد` while `HSW_Simple_Attributes::read_request()` looked up `attribute_رنگ جلد` and found nothing: the colour never reached the cart line or the order. Both spellings (and the percent-encoded one) are accepted now.
+- Regression coverage: the QA test now builds a simple product with a spaced attribute name and asserts the underscore key, the typed key and the encoded slug all resolve.
+
 ## [1.11.292] - 2026-11-15
 
 ### Fixed

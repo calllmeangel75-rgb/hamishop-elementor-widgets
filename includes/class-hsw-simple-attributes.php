@@ -71,10 +71,28 @@ class HSW_Simple_Attributes {
 			}
 
 			$taxonomy = (string) $attribute->get_name();
-			$key      = 'attribute_' . $taxonomy;
 
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only, validated below.
-			if ( ! isset( $_REQUEST[ $key ] ) ) {
+			/*
+			 * PHP rewrites a space in an incoming variable name to an underscore:
+			 * «رنگ جلد» posts as `attribute_رنگ_جلد`, so looking up the typed name
+			 * verbatim found nothing and the answer was dropped. Try every spelling
+			 * the request may hold before giving up.
+			 */
+			$key = '';
+			foreach ( array_unique(
+				array(
+					'attribute_' . $taxonomy,
+					'attribute_' . str_replace( ' ', '_', $taxonomy ),
+					'attribute_' . rawurldecode( $taxonomy ),
+				)
+			) as $candidate ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only, validated below.
+				if ( isset( $_REQUEST[ $candidate ] ) ) {
+					$key = $candidate;
+					break;
+				}
+			}
+			if ( '' === $key ) {
 				continue;
 			}
 
