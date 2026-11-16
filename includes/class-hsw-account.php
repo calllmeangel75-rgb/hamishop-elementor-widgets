@@ -2314,7 +2314,7 @@ final class HSW_Account {
 		 * never drags the account shell into the paper.
 		 */
 		if ( class_exists( 'HSW_Invoice' ) && HSW_Invoice::enabled() ) {
-			$html .= '<a class="hsw-inv__print" data-hsw-print-link target="_blank" rel="noopener" href="' . esc_url( HSW_Invoice::url( $order->get_id() ) ) . '">' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور / برچسب پستی', 'hamishop-elementor-widgets' ) . '</a>';
+			$html .= '<a class="hsw-inv__print" data-hsw-print-link target="_blank" rel="noopener" href="' . esc_url( HSW_Invoice::url( $order->get_id() ) ) . '">' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</a>';
 		} else {
 			$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
 		}

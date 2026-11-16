@@ -51,10 +51,11 @@ class HSW_Invoice {
 	 * @param bool $autoprint Open the print dialog on load.
 	 * @return string
 	 */
-	public static function url( $order_id, $autoprint = false ) {
+	public static function url( $order_id, $autoprint = false, $part = 'invoice' ) {
 		$args = array(
 			'hsw_invoice' => (int) $order_id,
 			'key'         => wp_create_nonce( 'hsw_invoice_' . (int) $order_id ),
+			'part'        => in_array( $part, array( 'invoice', 'postal' ), true ) ? $part : 'invoice',
 		);
 		if ( $autoprint ) {
 			$args['autoprint'] = 1;
@@ -92,8 +93,24 @@ class HSW_Invoice {
 			);
 		}
 
-		$is_owner  = is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id();
-		$is_staff  = current_user_can( 'edit_shop_orders' ) || current_user_can( 'manage_woocommerce' );
+		$is_owner = is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id();
+		$is_staff = current_user_can( 'edit_shop_orders' ) || current_user_can( 'manage_woocommerce' );
+
+		/*
+		 * The postal chart is an internal fulfillment document (sender, recipient,
+		 * the ten-box postcode the counter reads). It is not part of what a
+		 * customer prints: the account panel shows the invoice, the shop prints the
+		 * shipping label.
+		 */
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- part is sanitised below.
+		$part = isset( $_GET['part'] ) ? sanitize_key( wp_unslash( (string) $_GET['part'] ) ) : 'invoice';
+		if ( 'postal' === $part && ! $is_staff ) {
+			return array(
+				'order' => null,
+				'error' => 'forbidden',
+			);
+		}
+
 		if ( ! $is_owner && ! $is_staff ) {
 			return array(
 				'order' => null,
@@ -128,8 +145,11 @@ class HSW_Invoice {
 		}
 
 		$autoprint = ! empty( $_GET['autoprint'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- 'postal' access is checked in authorize().
+		$part = isset( $_GET['part'] ) ? sanitize_key( wp_unslash( (string) $_GET['part'] ) ) : 'invoice';
+		$part = in_array( $part, array( 'invoice', 'postal' ), true ) ? $part : 'invoice';
 
-		echo $this->standalone( $check['order'], $autoprint ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
+		echo $this->standalone( $check['order'], $autoprint, $part ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts.
 		exit;
 	}
 
@@ -161,12 +181,18 @@ class HSW_Invoice {
 	 * @param bool     $autoprint Open the print dialog on load.
 	 * @return string
 	 */
-	private function standalone( $order, $autoprint ) {
-		$title = sprintf(
-			/* translators: %s: order number. */
-			__( 'فاکتور سفارش %s', 'hamishop-elementor-widgets' ),
-			$order->get_order_number()
-		);
+	private function standalone( $order, $autoprint, $part = 'invoice' ) {
+		$title = 'postal' === $part
+			? sprintf(
+				/* translators: %s: order number. */
+				__( 'برچسب پستی سفارش %s', 'hamishop-elementor-widgets' ),
+				$order->get_order_number()
+			)
+			: sprintf(
+				/* translators: %s: order number. */
+				__( 'فاکتور سفارش %s', 'hamishop-elementor-widgets' ),
+				$order->get_order_number()
+			);
 
 		$html  = '<!doctype html><html dir="rtl" lang="fa-IR"><head><meta charset="utf-8">';
 		$html .= '<meta name="viewport" content="width=device-width,initial-scale=1">';
@@ -181,7 +207,7 @@ class HSW_Invoice {
 		$html .= '<button type="button" class="hsw-sheetbar__close" onclick="window.close()">' . esc_html__( 'بستن', 'hamishop-elementor-widgets' ) . '</button>';
 		$html .= '</div>';
 
-		$html .= $this->document( $order );
+		$html .= $this->document( $order, $part );
 		$html .= $autoprint ? '<script>window.addEventListener("load",function(){window.print();});</script>' : '';
 		$html .= '</body></html>';
 
@@ -198,7 +224,7 @@ class HSW_Invoice {
 	 * @param WC_Order $order Order.
 	 * @return string
 	 */
-	public function document( $order ) {
+	public function document( $order, $part = 'invoice' ) {
 		$brand    = class_exists( 'HSW_Branding' ) ? HSW_Branding::get() : array();
 		$name     = class_exists( 'HSW_Branding' ) ? HSW_Branding::name() : get_bloginfo( 'name' );
 		$logo     = class_exists( 'HSW_Branding' ) ? HSW_Branding::logo_html( 'hsw-inv__logo' ) : '';
@@ -240,16 +266,18 @@ class HSW_Invoice {
 		$html .= '</div></div>';
 
 		$html .= '<div class="hsw-inv__title-block">';
-		$html .= '<h1 class="hsw-inv__title">' . esc_html__( 'فاکتور فروش', 'hamishop-elementor-widgets' ) . '</h1>';
-		$html .= '<dl class="hsw-inv__meta">';
+		$html .= '<h1 class="hsw-inv__title">' . esc_html( 'postal' === $part ? __( 'برچسب پستی', 'hamishop-elementor-widgets' ) : __( 'فاکتور فروش', 'hamishop-elementor-widgets' ) ) . '</h1>';
+		$html .= 'postal' === $part ? '' : '<dl class="hsw-inv__meta">';
 		$html .= '<div><dt>' . esc_html__( 'شماره فاکتور', 'hamishop-elementor-widgets' ) . '</dt><dd dir="ltr">' . esc_html( HSW_Helpers::fa_num( ( '' !== $year ? $year . '-' : '' ) . $number ) ) . '</dd></div>';
 		$html .= '<div><dt>' . esc_html__( 'تاریخ صدور', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( HSW_Helpers::fa_num( $date ) ) . '</dd></div>';
 		$html .= '<div><dt>' . esc_html__( 'شماره سفارش', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( HSW_Helpers::fa_num( $number ) ) . '</dd></div>';
 		$html .= '<div><dt>' . esc_html__( 'وضعیت', 'hamishop-elementor-widgets' ) . '</dt><dd>' . esc_html( wc_get_order_status_name( $order->get_status() ) ) . '</dd></div>';
-		$html .= '</dl></div>';
+		$html .= 'postal' === $part ? '' : '</dl>';
+		$html .= '</div>';
 		$html .= '</header>';
 
-		/* ---------- postal chart: sender / recipient ---------- */
+		/* ---------- postal chart: sender / recipient (staff print only) ---------- */
+		if ( 'postal' === $part ) {
 		$html .= '<section class="hsw-inv__postal" aria-label="' . esc_attr__( 'مشخصات مرسولهٔ پستی', 'hamishop-elementor-widgets' ) . '">';
 		$html .= '<header class="hsw-inv__posthead"><span>' . esc_html__( 'مشخصات مرسولهٔ پستی', 'hamishop-elementor-widgets' ) . '</span>';
 		$html .= '<small>' . esc_html__( 'چسباندن روی بسته؛ گیرنده و فرستنده مطابق فرم ادارهٔ پست.', 'hamishop-elementor-widgets' ) . '</small></header>';
@@ -323,6 +351,11 @@ class HSW_Invoice {
 		$html .= '</dl></div>';
 
 		$html .= '</div></section>';
+		}
+
+		if ( 'postal' === $part ) {
+			return $html . '</article>';
+		}
 
 		/* ---------- items ---------- */
 		$html .= '<table class="hsw-inv__items"><thead><tr>';
@@ -442,8 +475,12 @@ class HSW_Invoice {
 		if ( ! self::enabled() || ! $order instanceof WC_Order ) {
 			return;
 		}
-		echo '<p class="hsw-inv-btnrow"><a class="button button-primary hsw-inv-live" target="_blank" rel="noopener" href="'
-			. esc_url( self::url( $order->get_id() ) ) . '">' . esc_html__( 'چاپ فاکتور و برچسب پستی', 'hamishop-elementor-widgets' ) . '</a></p>';
+		echo '<p class="hsw-inv-btnrow">'
+			. '<a class="button button-primary hsw-inv-live" target="_blank" rel="noopener" href="'
+			. esc_url( self::url( $order->get_id(), false, 'invoice' ) ) . '">' . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</a> '
+			. '<a class="button hsw-inv-live" target="_blank" rel="noopener" href="'
+			. esc_url( self::url( $order->get_id(), false, 'postal' ) ) . '">' . esc_html__( 'برچسب پستی', 'hamishop-elementor-widgets' ) . '</a>'
+			. '</p>';
 	}
 
 	/**
@@ -469,8 +506,10 @@ class HSW_Invoice {
 		if ( ! $order ) {
 			return;
 		}
-		echo '<p><a class="button button-primary" target="_blank" rel="noopener" href="' . esc_url( self::url( $order->get_id() ) ) . '">'
-			. esc_html__( 'چاپ فاکتور و برچسب پستی', 'hamishop-elementor-widgets' ) . '</a></p>';
+		echo '<p><a class="button button-primary" target="_blank" rel="noopener" href="' . esc_url( self::url( $order->get_id(), false, 'invoice' ) ) . '">'
+			. esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</a> '
+			. '<a class="button" target="_blank" rel="noopener" href="' . esc_url( self::url( $order->get_id(), false, 'postal' ) ) . '">'
+			. esc_html__( 'برچسب پستی', 'hamishop-elementor-widgets' ) . '</a></p>';
 		echo '<p class="description">' . esc_html__( 'در پنجرهٔ چاپ مقصد را «Save as PDF» بگذارید؛ فایلی روی هاست ذخیره نمی‌شود.', 'hamishop-elementor-widgets' ) . '</p>';
 	}
 }

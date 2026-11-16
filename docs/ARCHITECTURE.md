@@ -52,7 +52,7 @@ includes/
   class-hsw-{security,throttle,request-blocker,cache-guard,login}.php
   class-hsw-account*.php         پنل مشتری (پوسته، احراز هویت، پشتیبانی، ادمین)
   class-hsw-wallet*.php          کیف پول و درگاه داخلی
-  class-hsw-invoice.php          فاکتور چاپی A4
+  class-hsw-invoice.php          فاکتور چاپی A4 + برچسب پستی (کارمند)
   trait-hsw-style-kit.php        helperهای کنترل استایل
 widgets/                          ۶۳ ویجت، هر فایل یک کلاس
 assets/css|js|fonts|img/          دارایی‌ها + نسخهٔ .min

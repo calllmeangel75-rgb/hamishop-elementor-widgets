@@ -6,6 +6,15 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.298] - 2026-11-16
+
+### Changed
+- **The postal label is no longer part of the customer invoice.** The account panel prints a plain invoice; the ten-box postcode chart, sender/recipient boxes and weight are a fulfillment document for the shop.
+- **The order screen offers two documents:** «چاپ فاکتور» and «برچسب پستی», each rendered on its own sheet (the label no longer carries items, totals or the invoice meta).
+
+### Fixed
+- **A customer could open the postal label** from the invoice URL. `/part=postal` now requires `edit_shop_orders` / `manage_woocommerce`; anyone else gets 403.
+
 ## [1.11.297] - 2026-11-16
 
 ### Fixed
