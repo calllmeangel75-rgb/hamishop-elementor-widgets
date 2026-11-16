@@ -1714,6 +1714,105 @@ document.addEventListener('click', function (event) {
 });
 
 /* ---------------------------------------------------------------------------
+ * Notifications: opening one marks it read
+ *
+ * The list lives in user-meta; the «خواندن همه» button already existed, but a
+ * customer who clicks a single notification was navigated away with the badge
+ * still showing. Mark that one server-side (keepalive, so a navigation does not
+ * cancel it), then patch the bell, the sidebar badge and the unread pill before
+ * following the link.
+ * ------------------------------------------------------------------------ */
+function hswNotificationCounts(unread) {
+	var count = Math.max(0, parseInt(unread, 10) || 0);
+
+	document.querySelectorAll('.hsw-ac__bell-count, [data-hsw-bell-count]').forEach(function (el) {
+		if (count > 0) {
+			el.textContent = faNum(count);
+			el.hidden = false;
+		} else {
+			el.remove();
+		}
+	});
+
+	document.querySelectorAll('.hsw-ac__menu a[href*="/notifications"] .hsw-ac__badge').forEach(function (badge) {
+		if (count > 0) {
+			badge.textContent = faNum(count);
+		} else {
+			badge.remove();
+		}
+	});
+
+	var pill = document.querySelector('[data-hsw-unread-pill]');
+	if (pill) {
+		if (count > 0) {
+			pill.textContent = faNum(count) + ' خوانده‌نشده';
+		} else {
+			pill.remove();
+			var readall = document.querySelector('[data-hsw-readall]');
+			if (readall) {
+				readall.remove();
+			}
+		}
+	}
+}
+
+document.addEventListener('click', function (event) {
+	var item = event.target.closest ? event.target.closest('[data-hsw-notif]') : null;
+	if (!item || !item.classList.contains('is-unread')) {
+		return;
+	}
+	var cfg = data();
+	var id = item.getAttribute('data-hsw-notif') || '';
+	if (!cfg.rest || !id) {
+		return;
+	}
+
+	var link = event.target.closest('a');
+	var target = link ? link.getAttribute('href') : (item.getAttribute('data-hsw-notif-url') || '');
+
+	/*
+	 * One REST round trip takes about two seconds on a busy host. The customer
+	 * clicked «go to the order», not «wait for a badge»: mark it with `keepalive`
+	 * and leave immediately. The next page is rendered from the updated meta, so
+	 * the bell is already one lower; the in-page patch only runs when there is
+	 * nowhere to navigate (a notification without a link).
+	 */
+	var markRead = fetch(cfg.rest + '/account/notifications/read', {
+		method: 'POST',
+		credentials: 'same-origin',
+		keepalive: true,
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': cfg.nonce || ''
+		},
+		body: JSON.stringify({ id: id })
+	}).then(function (response) {
+		return response.json();
+	});
+
+	if (target) {
+		window.location.href = target;
+		return;
+	}
+
+	event.preventDefault();
+	markRead
+		.then(function (json) {
+			if (json && json.ok) {
+				item.classList.remove('is-unread');
+				var dot = item.querySelector('.hsw-ac__unread-dot');
+				if (dot) {
+					dot.remove();
+				}
+				hswNotificationCounts(json.unread);
+			}
+		})
+		.catch(function () {
+			/* leave the badge as-is; the server did not record the read */
+		});
+});
+
+/* ---------------------------------------------------------------------------
  * Invoice printing
  *
  * A delegated listener rather than a per-widget init: the invoice markup is

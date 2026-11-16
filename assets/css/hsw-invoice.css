@@ -276,6 +276,8 @@ body {
 .hsw-inv__zipdigits {
 	display: flex;
 	gap: .8mm;
+	/* Ten boxes fill left → right; a postal code is never read backwards. */
+	direction: ltr;
 }
 
 .hsw-inv__zipdigits b {

@@ -299,7 +299,12 @@ class HSW_Invoice {
 		/* postal code as ten boxes, the way the counter writes it */
 		$zip   = preg_replace( '/\D/', '', (string) ( $to['postcode'] ?? '' ) );
 		$html .= '<div class="hsw-inv__zip" aria-label="' . esc_attr__( 'کد پستی گیرنده', 'hamishop-elementor-widgets' ) . '">';
-		$html .= '<span class="hsw-inv__ziplabel">' . esc_html__( 'کد پستی', 'hamishop-elementor-widgets' ) . '</span><span class="hsw-inv__zipdigits">';
+		/*
+		 * `dir="ltr"`: a postal code is read left to right even on a Persian
+		 * invoice. Without it the ten boxes are laid out RTL, so a counter clerk
+		 * (or the customer) reads 1234567899 as 9987654321.
+		 */
+		$html .= '<span class="hsw-inv__ziplabel">' . esc_html__( 'کد پستی', 'hamishop-elementor-widgets' ) . '</span><span class="hsw-inv__zipdigits" dir="ltr">';
 		for ( $d = 0; $d < 10; $d++ ) {
 			$digit = isset( $zip[ $d ] ) ? $zip[ $d ] : '';
 			$html .= '<b' . ( '' === $digit ? ' class="is-empty"' : '' ) . '>' . esc_html( '' !== $digit ? HSW_Helpers::fa_num( $digit ) : '&nbsp;' ) . '</b>';

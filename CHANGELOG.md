@@ -6,6 +6,14 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.297] - 2026-11-16
+
+### Fixed
+- **Invoice postal code printed reversed.** The ten digit boxes inherited RTL, so `1234567899` read `9987654321`. The strip is `dir="ltr"` (and `direction: ltr`).
+- **Clicking a notification did not clear it.** The REST route now takes an optional `id`; the click handler marks that row read with a `keepalive` request and navigates immediately, and the bell/sidebar/pill follow on the next page.
+- **The notifications page marked everything read after rendering,** leaving «۲ خوانده‌نشده» on screen over rows the server had already cleared. Reads happen on open (one) or «خواندن همه».
+- **A «مجله» breadcrumb pointed at the shop front** on sites without a posts page; the step is printed only when it has its own URL.
+
 ## [1.11.296] - 2026-11-16
 
 ### Fixed

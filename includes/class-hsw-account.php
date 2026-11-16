@@ -1071,9 +1071,12 @@ final class HSW_Account {
 		$content = $this->render_endpoint_content( $ctx );
 		$html    = $this->render_shell( $ctx, $content );
 
-		if ( 'notifications' === $ctx['endpoint'] ) {
-			$this->mark_all_notifications_read( $ctx['user_id'] );
-		}
+		/*
+		 * Opening the page no longer marks everything read. Doing it after the
+		 * HTML was built left the page showing «۲ خوانده‌نشده» over notifications
+		 * that were already marked, and the bell kept its count until a reload.
+		 * A notification is now marked read when it is opened, or by «خواندن همه».
+		 */
 		return $html;
 	}
 
@@ -1418,7 +1421,7 @@ final class HSW_Account {
 			$html .= '<ul class="hsw-ac__bell-list">';
 			foreach ( $items as $item ) {
 				$url = $item['url'] ? $item['url'] : $ctx['notifications_url'];
-				$html .= '<li' . ( $item['read'] ? '' : ' class="is-unread"' ) . '>'
+				$html .= '<li' . ( $item['read'] ? '' : ' class="is-unread"' ) . ' data-hsw-notif="' . esc_attr( $item['id'] ) . '" data-hsw-notif-url="' . esc_url( $url ) . '">'
 					. '<a href="' . esc_url( $url ) . '">'
 					. '<span class="hsw-ac__bell-ic">' . $this->icon( $this->notification_icon( $item['type'] ) ) . '</span>'
 					. '<span class="hsw-ac__bell-txt"><strong>' . esc_html( $item['title'] ) . '</strong><small>' . esc_html( $item['text'] ) . '</small></span>'
@@ -2593,7 +2596,6 @@ final class HSW_Account {
 		$ctx = $this->build_context( $this->resolve_args( array() ) );
 		echo $this->notices_html();
 		echo $this->notifications_content( $ctx );
-		$this->mark_all_notifications_read( get_current_user_id() );
 	}
 
 	public function render_wishlist_endpoint( $value = '' ) {
@@ -2672,7 +2674,7 @@ final class HSW_Account {
 			$html .= '<ul class="hsw-ac__notif-list">';
 			foreach ( $items as $item ) {
 				$url = $item['url'] ? $item['url'] : '';
-				$html .= '<li class="hsw-ac__notif' . ( $item['read'] ? '' : ' is-unread' ) . '">'
+				$html .= '<li class="hsw-ac__notif' . ( $item['read'] ? '' : ' is-unread' ) . '" data-hsw-notif="' . esc_attr( $item['id'] ) . '" data-hsw-notif-url="' . esc_url( $url ) . '">'
 					. '<span class="hsw-ac__notif-ic is-' . esc_attr( $item['type'] ) . '">' . $this->icon( $this->notification_icon( $item['type'] ) ) . '</span>'
 					. '<div class="hsw-ac__notif-body"><div class="hsw-ac__notif-title"><strong>' . esc_html( $item['title'] ) . '</strong>' . ( $item['read'] ? '' : '<span class="hsw-ac__unread-dot" aria-label="' . esc_attr__( 'خوانده‌نشده', 'hamishop-elementor-widgets' ) . '"></span>' ) . '</div>'
 					. '<p>' . esc_html( $item['text'] ) . '</p>'
@@ -3264,6 +3266,12 @@ final class HSW_Account {
 				'permission_callback' => function () {
 					return is_user_logged_in();
 				},
+				'args'                => array(
+					'id' => array(
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 			)
 		);
 	}
@@ -3276,19 +3284,30 @@ final class HSW_Account {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function rest_notifications_read() {
+	public function rest_notifications_read( $request = null ) {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return new WP_Error( 'hsw_auth', __( 'ابتدا وارد حساب خود شوید.', 'hamishop-elementor-widgets' ), array( 'status' => 401 ) );
 		}
 
+		/*
+		 * Opening one notification must clear that notification and its badge, not
+		 * wait for «خواندن همه». The `id` is optional so the old bulk call keeps
+		 * working (and older clients keep posting an empty body).
+		 */
+		$id = ( $request && method_exists( $request, 'get_param' ) ) ? sanitize_text_field( (string) $request->get_param( 'id' ) ) : '';
+
 		$list = get_user_meta( $user_id, '_hsw_notifications', true );
 		$list = is_array( $list ) ? $list : array();
 
 		foreach ( $list as $index => $item ) {
-			if ( is_array( $item ) ) {
-				$list[ $index ]['read'] = true;
+			if ( ! is_array( $item ) ) {
+				continue;
 			}
+			if ( '' !== $id && (string) ( $item['id'] ?? '' ) !== $id ) {
+				continue;
+			}
+			$list[ $index ]['read'] = true;
 		}
 
 		update_user_meta( $user_id, '_hsw_notifications', $list );
@@ -3296,7 +3315,7 @@ final class HSW_Account {
 		return rest_ensure_response(
 			array(
 				'ok'     => true,
-				'unread' => 0,
+				'unread' => $this->unread_notifications_count( $user_id ),
 			)
 		);
 	}

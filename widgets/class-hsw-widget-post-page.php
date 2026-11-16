@@ -932,8 +932,19 @@ class HSW_Widget_Post_Page extends HSW_Blog_Base {
 							<div class="hsw-pp__crumbs">
 								<nav class="hsw-pp__trail" aria-label="<?php esc_attr_e( 'مسیر راهنما', 'hamishop-elementor-widgets' ); ?>">
 									<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'خانه', 'hamishop-elementor-widgets' ); ?></a>
-									<?php HSW_Helpers::the_icon( 'chevron_left' ); ?>
-									<a href="<?php echo esc_url( $this->blog_url() ); ?>"><?php esc_html_e( 'مجله', 'hamishop-elementor-widgets' ); ?></a>
+									<?php
+									/*
+									 * A site without a «posts page» has no magazine index to
+									 * point at: blog_url() falls back to the home page, and a
+									 * «مجله» crumb that opens the shop front is a wrong trail.
+									 * Show it only when it leads somewhere else.
+									 */
+									$hsw_blog_crumb = $this->blog_url();
+									if ( '' !== $hsw_blog_crumb && untrailingslashit( $hsw_blog_crumb ) !== untrailingslashit( home_url( '/' ) ) ) :
+										?>
+										<?php HSW_Helpers::the_icon( 'chevron_left' ); ?>
+										<a href="<?php echo esc_url( $hsw_blog_crumb ); ?>"><?php esc_html_e( 'مجله', 'hamishop-elementor-widgets' ); ?></a>
+									<?php endif; ?>
 									<?php if ( $category ) : ?>
 										<?php HSW_Helpers::the_icon( 'chevron_left' ); ?>
 										<a href="<?php echo esc_url( $category['url'] ); ?>"><?php echo esc_html( $category['name'] ); ?></a>
