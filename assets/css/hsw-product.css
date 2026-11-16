@@ -906,13 +906,23 @@
         .hsw-ppurch__qty--inline .hsw-ppurch__stepper { height: 48px; }
         .hsw-ppurch__qty--inline .hsw-ppurch__qbtn { width: 36px; height: 42px; }
 }
-/* OOS (out of stock) state */
+/* OOS (out of stock) state — still clickable so the reason can be shown. */
 .hsw-ppurch.is-oos .hsw-ppurch__cart,
 .hsw-psticky.is-oos .hsw-psticky__cart {
         background: var(--hsw-surface-high);
         color: var(--hsw-on-surface-variant);
-        pointer-events: none;
+        cursor: not-allowed;
+        box-shadow: none;
 }
+/* Inline reason under the buy row for an out-of-stock variation. */
+.hsw-ppurch__oos {
+        margin: 8px 0 0;
+        font-size: 12.5px;
+        line-height: 1.8;
+        font-weight: 600;
+        color: var(--hsw-error, #b3261e);
+}
+.hsw-ppurch__oos[hidden] { display: none; }
 /* CFP contact actions must stay clickable even when stock is zero. */
 .hsw-ppurch.is-oos .hsw-ppurch__cart--cfp,
 .hsw-psticky.is-oos .hsw-psticky__cart--cfp {

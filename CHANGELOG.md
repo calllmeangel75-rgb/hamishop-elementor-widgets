@@ -6,6 +6,15 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.294] - 2026-11-16
+
+### Fixed
+- **Out-of-stock variation gave no feedback.** `pointer-events: none` on the disabled buy button swallowed the click, so choosing an unavailable colour looked broken. The button is still shown as unavailable but stays clickable: an inline note appears with the selected variation's stock state and a click answers with a toast. No request is sent.
+- **Silver (and every joined Persian colour name) rendered as text.** `normalize_color_key()` did not treat ZWNJ/ZWJ/NBSP/LRM/RLM as spaces, so «نقره‌ای» and «نقره ای» missed the colour map; the matcher also compares the space-free form now.
+- **Variation photos were absent from the gallery carousel.** `gallery_ids()` now appends each variation's own `_thumbnail_id`, so shops that upload photos only on variations get them in the thumbnails, the zoom list and the swap.
+- **The assurance strip had no off switch.** New «نمایش خطوط اطمینان» switcher («حذف کامل») removes the strip entirely in both the purchase widget and the composite.
+- **The composite's «عنوان محصول» colour and typography did nothing.** They targeted `.hsw-ptitle__h`; the markup uses `.hsw-ptitle__h1` / `.hsw-ptitle__h2`.
+
 ## [1.11.293] - 2026-11-15
 
 ### Fixed

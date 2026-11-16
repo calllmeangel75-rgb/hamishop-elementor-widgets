@@ -154,6 +154,23 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                 ),
                         )
                 );
+                /*
+                 * A shop with no assurance lines at all should not have to keep an
+                 * empty repeater: this switch removes the strip (and its margin)
+                 * outright in both the single widget and the full-page composite.
+                 */
+                $this->add_control(
+                        'show_assure',
+                        array(
+                                'label'        => __( 'نمایش خطوط اطمینان', 'hamishop-elementor-widgets' ),
+                                'type'         => Controls_Manager::SWITCHER,
+                                'default'      => 'yes',
+                                'label_on'     => __( 'نمایش', 'hamishop-elementor-widgets' ),
+                                'label_off'    => __( 'حذف کامل', 'hamishop-elementor-widgets' ),
+                                'return_value' => 'yes',
+                        )
+                );
+
                 $this->add_control(
                         'assure_items',
                         array(
@@ -467,6 +484,16 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                         </button>
                                 <?php endif; ?>
                         </div>
+                        <?php
+                        /*
+                         * The button is disabled while the chosen combination is out
+                         * of stock. A disabled button that says nothing is the support
+                         * ticket this line removes; JS shows it with the selected
+                         * variation's stock state and the click still answers.
+                         */
+                        ?>
+                        <p class="hsw-ppurch__oos" data-hsw-oos hidden><?php esc_html_e( 'این ترکیب از ویژگی‌ها فعلاً موجود نیست.', 'hamishop-elementor-widgets' ); ?></p>
+                        <?php if ( 'yes' === ( $s['show_assure'] ?? 'yes' ) ) : ?>
                         <div class="hsw-ppurch__assure">
                                 <?php foreach ( $assure as $item ) : ?>
                                         <div class="hsw-ppurch__as hsw-ppurch__as--<?php echo esc_attr( $item['type'] ); ?>">
@@ -475,6 +502,7 @@ class HSW_Widget_Product_Purchase extends HSW_Product_Base {
                                         </div>
                                 <?php endforeach; ?>
                         </div>
+                <?php endif; ?>
                 </div>
                 <?php
         }

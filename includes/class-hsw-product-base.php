@@ -898,8 +898,13 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 if ( isset( $map[ $key ] ) ) {
                         return $map[ $key ];
                 }
+                $compact = str_replace( ' ', '', $key );
                 foreach ( $map as $needle => $hex ) {
-                        if ( '' !== $needle && false !== strpos( $key, $needle ) ) {
+                        if ( '' === $needle ) {
+                                continue;
+                        }
+                        $plain = $this->normalize_color_key( $needle );
+                        if ( false !== strpos( $key, $plain ) || ( '' !== $compact && str_replace( ' ', '', $plain ) === $compact ) ) {
                                 return $hex;
                         }
                 }
@@ -915,7 +920,17 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         protected function normalize_color_key( $name ) {
                 $key = trim( wp_strip_all_tags( (string) $name ) );
                 $key = function_exists( 'mb_strtolower' ) ? mb_strtolower( $key, 'UTF-8' ) : strtolower( $key );
-                $key = str_replace( array( '_', '-', 'ـ' ), ' ', $key );
+                /*
+                 * «نقره‌ای» with a ZWNJ, «نقره ای» with a space, «نقره_ای» and
+                 * «نقره-ای» are the same colour to a shop owner but four
+                 * different strings to a hash lookup — silver then rendered as a
+                 * text chip instead of a swatch. Every joiner becomes a space.
+                 */
+                $key = str_replace(
+                        array( '_', '-', 'ـ', "\u{200c}", "\u{200d}", "\u{00a0}", "\u{200e}", "\u{200f}" ),
+                        ' ',
+                        $key
+                );
                 $key = preg_replace( '/\s+/u', ' ', $key );
                 return trim( (string) $key );
         }
@@ -1506,8 +1521,27 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 if ( ! $product ) {
                         return array();
                 }
-                $ids = array_filter( array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() ) );
-                return array_values( $ids );
+                $ids = array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() );
+
+                /*
+                 * A shop that uploads one photo per variation usually leaves the
+                 * product gallery empty, so the carousel only held the featured
+                 * image even though every colour had a picture. Append the
+                 * variation photos (once each) so the thumbnails and the zoom
+                 * viewer include them; the variation swap then shows the photo
+                 * the visitor just picked from the same list.
+                 */
+                if ( $product->is_type( 'variable' ) ) {
+                        foreach ( $product->get_children() as $child_id ) {
+                                $own = (int) get_post_meta( $child_id, '_thumbnail_id', true );
+                                if ( $own > 0 ) {
+                                        $ids[] = $own;
+                                }
+                        }
+                }
+
+                $ids = array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
+                return $ids;
         }
 
         /**

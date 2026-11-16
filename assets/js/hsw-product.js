@@ -188,6 +188,8 @@
 			}
 
 			root.classList.remove('is-unavailable');
+			var clearedNote = root.querySelector('[data-hsw-oos]');
+			if (clearedNote) { clearedNote.hidden = true; }
 			root.querySelectorAll('[data-hsw-add][data-hsw-unavailable]').forEach(function (btn) {
 				btn.classList.remove('is-locked');
 				btn.removeAttribute('aria-disabled');
@@ -209,6 +211,8 @@
 					off.style.display = (variation.discount > 0) ? '' : 'none';
 				}
 				root.classList.toggle('is-oos', !variation.in_stock);
+				var oosNote = root.querySelector('[data-hsw-oos]');
+				if (oosNote) { oosNote.hidden = !!variation.in_stock; }
 			}
 			/*
 			 * Gallery image swap. The gallery is a sibling widget on the page, not
@@ -619,6 +623,20 @@
 		var scope3 = addBtn.closest('.hsw-p');
 		if (!scope3 || scope3.hasAttribute('data-hsw-cfp')) { return; }
 		var pid4 = scope3.getAttribute('data-hsw-product');
+
+		/*
+		 * Out of stock: the button is intentionally disabled, but a silent
+		 * disabled button is a support ticket («چرا هیچی نمیشه؟»). Answer with
+		 * the reason and keep the request off the wire.
+		 */
+		if (scope3.classList.contains('is-oos')) {
+			var oosMsg = scope3.querySelector('[data-hsw-oos]');
+			var oosText = oosMsg ? oosMsg.textContent.trim() : '';
+			if (window.HSWFeedback && window.HSWFeedback.toast) {
+				window.HSWFeedback.toast(oosText || 'این ترکیب فعلاً موجود نیست.', { tone: 'error' });
+			}
+			return;
+		}
 
 		/*
 		 * The customer answered every picker but the product has no such

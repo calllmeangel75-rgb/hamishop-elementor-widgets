@@ -65,7 +65,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
 
                 $this->part_section( 'pft_', __( '۵. ویژگی‌های کلیدی', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Features', array( 'vis', 'desk_title', 'mob_title', 'desk_auto', 'mob_auto', 'desk_items', 'mob_items' ) );
 
-                $this->part_section( 'ppu_', __( '۶. جعبه خرید (قیمت و دکمه‌ها)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Purchase', array( 'vis', 'type', 'cart_text', 'buy_mode', 'qty_max', 'assure_items' ) );
+                $this->part_section( 'ppu_', __( '۶. جعبه خرید (قیمت و دکمه‌ها)', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Purchase', array( 'vis', 'type', 'cart_text', 'buy_mode', 'qty_max', 'show_assure', 'assure_items' ) );
 
                 $this->part_section( 'ptr_', __( '۷. سیگنال‌های اعتماد', 'hamishop-elementor-widgets' ), '\HSW_Widget_Product_Trust', array( 'vis', 'trust_items' ) );
 
@@ -215,7 +215,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                 );
 
                 $colors = array(
-                        'c_title'      => array( __( 'عنوان محصول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptitle__h' ),
+                        'c_title'      => array( __( 'عنوان محصول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptitle__h1, {{WRAPPER}} .hsw-ptitle__h2' ),
                         'c_price'      => array( __( 'قیمت اصلی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ppurch__main' ),
                         'c_old'        => array( __( 'قیمت قبل از تخفیف', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ppurch__old' ),
                         'c_body'       => array( __( 'متن توضیحات، ویژگی‌ها و اعتماد', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__panel, {{WRAPPER}} .hsw-pfeat__item, {{WRAPPER}} .hsw-ptrust__t' ),
@@ -272,7 +272,7 @@ class HSW_Widget_Product_Page extends HSW_Product_Base {
                 );
 
                 /* ---- typography ---- */
-                $this->a_typo( 't_title', __( 'عنوان محصول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptitle__h', array( 'size' => 24, 'lh' => 1.5 ) );
+                $this->a_typo( 't_title', __( 'عنوان محصول', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptitle__h1, {{WRAPPER}} .hsw-ptitle__h2', array( 'size' => 24, 'lh' => 1.5 ) );
                 $this->a_typo( 't_price', __( 'قیمت', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ppurch__main', array( 'size' => 24 ) );
                 $this->a_typo( 't_body', __( 'متن توضیحات و تب‌ها', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-ptabs__panel', array( 'size' => 14, 'weight' => false, 'lh' => 1.9 ) );
                 $this->a_typo( 't_feat', __( 'ویژگی‌های کلیدی', 'hamishop-elementor-widgets' ), '{{WRAPPER}} .hsw-pfeat__item', array( 'size' => 13, 'weight' => false ) );
