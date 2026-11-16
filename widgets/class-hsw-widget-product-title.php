@@ -253,8 +253,9 @@ class HSW_Widget_Product_Title extends HSW_Product_Base {
                 } else {
                         $name     = $product->get_name();
                         $sku      = $product->get_sku();
-                        $rating   = HSW_Helpers::fa_num( number_format( (float) $product->get_average_rating(), 1 ) );
-                        $reviews  = HSW_Helpers::fa_num( $product->get_review_count() );
+                        $r_stats  = $this->review_stats( $product );
+                        $rating   = HSW_Helpers::fa_num( number_format( (float) $r_stats['average'], 1 ) );
+                        $reviews  = HSW_Helpers::fa_num( $r_stats['count'] );
                         $in_stock = (bool) $product->is_in_stock();
 
                         if ( $in_stock && $product->managing_stock() ) {

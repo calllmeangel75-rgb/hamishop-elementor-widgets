@@ -297,7 +297,8 @@ class HSW_Widget_Product_Tabs extends HSW_Product_Base {
                 } else {
                         $specs        = $this->specs_rows( $product );
                         $reviews      = $this->reviews_list( $product, ! empty( $s['reviews_count'] ) ? (int) $s['reviews_count'] : 5 );
-                        $review_count = (int) $product->get_review_count();
+                        /* Same query the cards use: WooCommerce's stored counter lags after imports. */
+                        $review_count = $this->approved_reviews_count( $product );
                 }
 
                 $lbl_specs    = isset( $s['lbl_specs'] ) && '' !== trim( (string) $s['lbl_specs'] ) ? $s['lbl_specs'] : __( 'مشخصات فنی', 'hamishop-elementor-widgets' );

@@ -6,6 +6,13 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.295] - 2026-11-16
+
+### Fixed
+- **Migrated reviews were invisible.** The review list filtered `comment_type = 'review'`, while a review imported from an older WooCommerce keeps an empty type; the list was empty even though the header counted those reviews. `review_comments()` now reads the product's approved comments and keeps `review`, `comment` and empty types, skipping order notes.
+- **Rating chips and «درصد رضایت» used WooCommerce's stored counters,** which an import can leave at zero. They now share the same query (with a cheap fallback only when the stored count is zero).
+- **The empty state blamed the shop for missing reviews.** When reviews are waiting for moderation the panel says «در انتظار تأیید مدیر هستند» instead of «هنوز دیدگاهی ثبت نشده است».
+
 ## [1.11.294] - 2026-11-16
 
 ### Fixed

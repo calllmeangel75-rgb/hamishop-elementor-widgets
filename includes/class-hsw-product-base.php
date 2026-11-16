@@ -1274,22 +1274,121 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
          * @param int             $limit   Max reviews, 0 = all.
          * @return array
          */
+        /**
+         * Approved comments that are reviews for this product.
+         *
+         * The `type => 'review'` filter looked correct but silently dropped every
+         * review migrated from an older WooCommerce (or imported by a plugin):
+         * those rows carry an empty `comment_type` while WooCommerce counts them
+         * as reviews. The list was then empty while «بر اساس ۲ بازخورد» said two.
+         * Ask for the product's approved comments and keep the review-ish types.
+         *
+         * @param WC_Product|null $product Product.
+         * @param int             $limit   Max rows (0 = all).
+         * @param string          $status  Comment status: approve|hold.
+         * @return WP_Comment[]
+         */
+        protected function review_comments( $product, $limit = 5, $status = 'approve' ) {
+                if ( ! $product ) {
+                        return array();
+                }
+
+                $args = array(
+                        'post_id' => $product->get_id(),
+                        'status'  => $status,
+                        'orderby' => 'comment_date',
+                        'order'   => 'DESC',
+                );
+                if ( $limit > 0 ) {
+                        /* Over-fetch, because order notes and other types are dropped below. */
+                        $args['number'] = max( 20, (int) $limit * 3 );
+                }
+
+                $out = array();
+                foreach ( (array) get_comments( $args ) as $comment ) {
+                        $type = (string) $comment->comment_type;
+                        if ( '' !== $type && 'review' !== $type && 'comment' !== $type ) {
+                                continue;
+                        }
+                        $out[] = $comment;
+                        if ( $limit > 0 && count( $out ) >= (int) $limit ) {
+                                break;
+                        }
+                }
+
+                return $out;
+        }
+
+        /**
+         * Review count + average for the title/rating chips.
+         *
+         * WooCommerce keeps both in the product lookup table; an import or a
+         * migration can leave them at zero while the reviews are all there. When
+         * that happens, count the comments we would actually render instead of
+         * printing «۰ دیدگاه» over a list of reviews.
+         *
+         * @param WC_Product|null $product Product.
+         * @return array{count:int,average:float}
+         */
+        protected function review_stats( $product ) {
+                if ( ! $product ) {
+                        return array( 'count' => 0, 'average' => 0.0 );
+                }
+
+                $count   = (int) $product->get_review_count();
+                $average = (float) $product->get_average_rating();
+                if ( $count > 0 ) {
+                        return array( 'count' => $count, 'average' => $average );
+                }
+
+                $comments = $this->review_comments( $product, 0 );
+                if ( empty( $comments ) ) {
+                        return array( 'count' => 0, 'average' => 0.0 );
+                }
+
+                $sum   = 0;
+                $rated = 0;
+                foreach ( $comments as $comment ) {
+                        $rating = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
+                        if ( $rating > 0 ) {
+                                $sum += $rating;
+                                $rated++;
+                        }
+                }
+
+                return array(
+                        'count'   => count( $comments ),
+                        'average' => $rated > 0 ? round( $sum / $rated, 1 ) : 0.0,
+                );
+        }
+
+        /**
+         * Count of approved reviews, computed the same way the list is rendered
+         * (WooCommerce's stored counter can lag behind an import).
+         *
+         * @param WC_Product|null $product Product.
+         * @return int
+         */
+        protected function approved_reviews_count( $product ) {
+                return count( $this->review_comments( $product, 0 ) );
+        }
+
+        /**
+         * Count of reviews waiting for moderation, for the empty-state message.
+         *
+         * @param WC_Product|null $product Product.
+         * @return int
+         */
+        protected function pending_reviews_count( $product ) {
+                return count( $this->review_comments( $product, 0, 'hold' ) );
+        }
+
         protected function reviews_list( $product, $limit = 5 ) {
                 if ( ! $product ) {
                         return array();
                 }
-                $comments = get_comments(
-                        array(
-                                'post_id' => $product->get_id(),
-                                'status'  => 'approve',
-                                'number'  => $limit > 0 ? (int) $limit : 0,
-                                'type'    => 'review',
-                                'orderby' => 'comment_date',
-                                'order'   => 'DESC',
-                        )
-                );
                 $out = array();
-                foreach ( $comments as $c ) {
+                foreach ( $this->review_comments( $product, $limit ) as $c ) {
                         $name = $c->comment_author;
                         $ini  = $this->initials( $name );
                         $out[] = array(
@@ -1363,6 +1462,14 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
         protected function review_cards_html( $product, $limit = 0 ) {
                 $reviews = $this->reviews_list( $product, $limit );
                 if ( empty( $reviews ) ) {
+                        /*
+                         * «هنوز دیدگاهی ثبت نشده» is the wrong sentence when the
+                         * shop has reviews sitting in moderation: the owner then
+                         * thinks the widget cannot show reviews at all.
+                         */
+                        if ( $this->pending_reviews_count( $product ) > 0 ) {
+                                return '<p class="hsw-ptabs__rvtext">' . esc_html__( 'دیدگاه‌ها ثبت شده‌اند و در انتظار تأیید مدیر هستند.', 'hamishop-elementor-widgets' ) . '</p>';
+                        }
                         return '<p class="hsw-ptabs__rvtext">' . esc_html__( 'هنوز دیدگاهی ثبت نشده است.', 'hamishop-elementor-widgets' ) . '</p>';
                 }
 
@@ -1641,7 +1748,8 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                 if ( ! $product ) {
                         return 0;
                 }
-                $total = (int) $product->get_review_count();
+                $stats = $this->review_stats( $product );
+                $total = (int) $stats['count'];
                 if ( $total <= 0 ) {
                         return 0;
                 }
@@ -1649,7 +1757,7 @@ abstract class HSW_Product_Base extends HSW_Widget_Base {
                         array(
                                 'post_id'    => $product->get_id(),
                                 'status'     => 'approve',
-                                'type'       => 'review',
+                                'type__in'   => array( 'review', 'comment', '' ),
                                 'count'      => true,
                                 'meta_query' => array(
                                         array(
