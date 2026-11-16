@@ -300,6 +300,26 @@ hsw_ci(
 	$gc_missing ? implode( ', ', $gc_missing ) : count( $gc_channels ) . ' channels'
 );
 
+/* ---------------------------------------------------------------------
+ * 6e) The buy button never swallows a refused add
+ *
+ * `wc-ajax=add_to_cart` answers a variable product without a valid variation
+ * with `{error, product_url}`. The product page used to follow `product_url`,
+ * so the customer saw a page reload and no reason — and a miss that unlocked
+ * the button (a duplicate mobile chip could do that) posted an add the shop
+ * refused while a success toast was already on screen. Both paths are asserted
+ * here: the refusal is shown as an error toast and no redirect happens.
+ * ------------------------------------------------------------------- */
+$product_js = (string) file_get_contents( $root . '/assets/js/hsw-product.js' );
+$dead_ok    = (bool) preg_match( "/applyVariant\(\s*pid,\s*match,\s*match\s*\?\s*false\s*:\s*\(\s*selectionComplete/", $product_js );
+$refuse_ok  = false !== strpos( $product_js, 'res.error || res.success === false' );
+$redirect   = false !== strpos( $product_js, 'window.location = res.product_url' );
+hsw_ci(
+	'product page: a refused add is explained, never redirected',
+	$dead_ok && $refuse_ok && ! $redirect,
+	( $dead_ok ? '' : 'miss does not lock ' ) . ( $refuse_ok ? '' : 'refusal not handled ' ) . ( $redirect ? 'silent redirect present' : '' )
+);
+
 /* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */

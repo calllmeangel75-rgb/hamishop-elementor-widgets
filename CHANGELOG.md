@@ -6,6 +6,16 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.299] - 2026-11-16
+
+### Fixed
+- **A variant that does not exist could be "added".** Two copies of the picker (desktop and mobile) could disagree about completeness, which unlocked the buy button while the price still read «—»; the click then posted an add without `variation_id`.
+- **A refused add was hidden by a redirect.** `addToCart()` followed WooCommerce's `product_url` on `res.error`, so the customer saw a reload instead of the reason, and a success toast could sit on screen over an empty cart. The refusal is now shown as an error toast and nothing is flashed as added.
+- The no-match toast reads the product's own message again (the lookup missed `data-hsw-variants`).
+
+### Added
+- CI check 6e: a refused add must be explained, never redirected.
+
 ## [1.11.298] - 2026-11-16
 
 ### Changed

@@ -164,6 +164,7 @@
 		var st = state(pid);
 		st.variation = variation || null;
 		st.dead = !!dead;
+		var deadKind = ('incomplete' === dead) ? 'incomplete' : 'nomatch';
 		roots(pid).forEach(function (root) {
 			var cfp = root.hasAttribute('data-hsw-cfp') || root.getAttribute('data-hsw-cfp') === '1';
 			var price = root.querySelector('[data-hsw-price]');
@@ -182,7 +183,7 @@
 				root.querySelectorAll('[data-hsw-add]').forEach(function (btn) {
 					btn.classList.add('is-locked');
 					btn.setAttribute('aria-disabled', 'true');
-					btn.setAttribute('data-hsw-unavailable', '1');
+					btn.setAttribute('data-hsw-unavailable', 'incomplete' === deadKind ? 'incomplete' : '1');
 				});
 				return;
 			}
@@ -260,7 +261,15 @@
 		var list = payload(any);
 		var map = attrMap(any);
 		var match = matchVariation(list, map, st);
-		applyVariant(pid, match, !match && selectionComplete(map, st));
+		/*
+		 * Every miss locks the buy button. `selectionComplete()` used to decide
+		 * whether a miss was "no such combination" or "still choosing", and the
+		 * two copies of the picker (desktop + mobile) could disagree: clicking
+		 * the mobile chip cleared the lock while the price still read «—», so
+		 * the click posted an add without variation_id and answered with a
+		 * success toast while the cart stayed empty.
+		 */
+		applyVariant(pid, match, match ? false : (selectionComplete(map, st) ? 'nomatch' : 'incomplete'));
 	}
 
 	/* ---------- reviews ---------- */
@@ -644,8 +653,17 @@
 		 * old code sent the first variation instead, so the order said one
 		 * thing and the customer had chosen another.
 		 */
+		if (addBtn.getAttribute('data-hsw-unavailable') === 'incomplete') {
+			if (window.HSWFeedback && window.HSWFeedback.toast) {
+				window.HSWFeedback.toast('ابتدا همهٔ ویژگی‌های محصول را انتخاب کنید.', { tone: 'error' });
+			}
+			var vr3 = document.querySelector('.hsw-pvar[data-hsw-variants="' + pid4 + '"], .hsw-pvar[data-hsw-product="' + pid4 + '"]');
+			if (vr3 && vr3.scrollIntoView) { vr3.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+			return;
+		}
+
 		if (addBtn.getAttribute('data-hsw-unavailable') === '1') {
-			var noMatch = document.querySelector('.hsw-p[data-hsw-variations][data-hsw-product="' + pid4 + '"]');
+			var noMatch = document.querySelector('.hsw-p[data-hsw-variations][data-hsw-product="' + pid4 + '"], .hsw-p[data-hsw-variations][data-hsw-variants="' + pid4 + '"]');
 			var noMsg = noMatch ? (noMatch.getAttribute('data-hsw-no-match') || '') : '';
 			if (window.HSWFeedback && window.HSWFeedback.toast) {
 				window.HSWFeedback.toast(noMsg || 'این ترکیب موجود نیست.', { tone: 'error' });
@@ -951,7 +969,19 @@
 			body: body.toString()
 		}).then(function (r) { return r.json(); }).then(function (res) {
 			btn.classList.remove('is-busy');
-			if (res && res.error && res.product_url) { window.location = res.product_url; return; }
+			/*
+			 * WooCommerce refused the line (no variation, stock, plugin rule).
+			 * The old branch redirected to `product_url`, so the customer saw a
+			 * reload and never the reason — and a stale success toast could
+			 * still be on screen. Answer with the reason and add nothing.
+			 */
+			if (res && (res.error || res.success === false)) {
+				var why = (res && res.error) ? String(res.error) : 'این محصول به سبد اضافه نشد.';
+				if (window.HSWFeedback && window.HSWFeedback.toast) {
+					window.HSWFeedback.toast(why, { tone: 'error' });
+				}
+				return;
+			}
 			flashAdded(btn);
 			showAdded(btn, pid, res);
 			/* Same event the loop and archive widgets fire, so the header badge
@@ -1369,7 +1399,8 @@
 				if (map.storage === tax) { st.storage = val; }
 			});
 
-			applyVariant(pid, matchVariation(st.data, map, st));
+			var first = matchVariation(st.data, map, st);
+			applyVariant(pid, first, first ? false : (selectionComplete(map, st) ? 'nomatch' : 'incomplete'));
 		});
 
 		/* Carousels (related products, gallery thumbs). init() runs on load and
