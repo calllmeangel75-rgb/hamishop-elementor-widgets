@@ -1707,6 +1707,8 @@ document.addEventListener('click', function (event) {
 			});
 
 			btn.remove();
+			/* The bell in the header is not part of the list, so it kept its number. */
+			hswNotificationCounts(0);
 		})
 		.catch(function () {
 			btn.disabled = false;

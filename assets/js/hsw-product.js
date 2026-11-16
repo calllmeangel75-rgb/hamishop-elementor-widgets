@@ -228,6 +228,13 @@
 					var main = img.getAttribute('data-hsw-main') || '';
 					var next = variation.image || main;
 					if (next && img.getAttribute('src') !== next) { img.src = next; }
+					/*
+					 * Remember what is on screen now: the next variation without a
+					 * photo falls back to this image, so «نارنجی/۱TB → نارنجی/۵۱۲»
+					 * keeps the photo the customer is looking at instead of jumping
+					 * back to the product's first gallery image.
+					 */
+					if (next) { img.setAttribute('data-hsw-main', next); }
 				}
 			}
 

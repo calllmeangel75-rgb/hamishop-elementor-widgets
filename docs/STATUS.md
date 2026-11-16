@@ -7,19 +7,19 @@
 
 | مورد | مقدار |
 |---|---|
-| نسخه | **1.11.300** |
+| نسخه | **1.11.301** |
 | تاریخ | 2026-11-15 |
-| کامیت | `e012994` |
-| تگ | `v1.11.300` |
-| ریلیز | <https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases/tag/v1.11.300> |
-| ZIP | `release-downloads/hamishop-elementor-widgets-1.11.300.zip` |
-| SHA-256 | `95e46775c698b2c53b68a04ef982426872adaccee25abd245092341c10d7c51c` |
+| کامیت | `pending` |
+| تگ | `v1.11.301` |
+| ریلیز | <https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases/tag/v1.11.301> |
+| ZIP | `release-downloads/hamishop-elementor-widgets-1.11.301.zip` |
+| SHA-256 | `d529cfc300a065077aba34288bc86e3d5a79d0622ec329927bd834403d043309` |
 | تعداد ویجت | **۶۳** (۱۶ اصلی + ۴۷ بخش مستقل) |
 | CI | main و tag سبز |
 
 SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز یکسان است (`cmp`).
 
-## تغییرات از 1.11.279 تا 1.11.300
+## تغییرات از 1.11.279 تا 1.11.301
 
 - **1.11.279:** throttle تأیید ایمیل قبل از مقایسهٔ ایمیل.
 - **1.11.280:** گاتر loop برای Wonder Deals / Popular / Best Sellers.
@@ -48,7 +48,7 @@ SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز 
 
 | مورد | وضعیت |
 |---|---|
-| CI main/tag روی 1.11.300 | ✅ سبز |
+| CI main/tag روی 1.11.301 | ⏳ در حال اجرا |
 | `php tools/ci-checks.php` | ✅ ۲۴ چک |
 | `tests/qa/product-attribute-keys-wp.php` | ✅ ۱۰ چک (استیجینگ محلی) |
 | `register_controls()` همهٔ کلاس‌های ویجت | ✅ بدون خطا |
@@ -73,9 +73,9 @@ SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز 
 
 ## فریز نسخه
 
-نسخهٔ **1.11.300 فریز است**. تا پایان Smoke Test هیچ تغییر کدی روی آن انجام نمی‌شود. اگر تغییری لازم شد:
+نسخهٔ **1.11.301 فریز است**. تا پایان Smoke Test هیچ تغییر کدی روی آن انجام نمی‌شود. اگر تغییری لازم شد:
 
-- نسخهٔ بعدی `1.11.301`
+- نسخهٔ بعدی `1.11.302`
 - فقط همان بخش + تست هدفمند
 - ZIP جدید، تگ جدید، SHA جدید
 
@@ -89,7 +89,7 @@ SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز 
 
 ## نصب / آپدیت
 
-1. ZIP `1.11.300` را از ریلیز بردار.
+1. ZIP `1.11.301` را از ریلیز بردار.
 2. اگر صفحه سفید است، پوشهٔ افزونه را از `wp-content/plugins/` موقتاً تغییر نام بده.
 3. ZIP را نصب و افزونه را فعال کن.
 4. کش LiteSpeed / WP Rocket / Elementor را پاک کن.

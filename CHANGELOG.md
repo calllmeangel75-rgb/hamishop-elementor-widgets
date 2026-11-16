@@ -6,6 +6,12 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.301] - 2026-11-16
+
+### Fixed
+- **«خواندن همه» did not clear the bell.** The bulk handler patched the list, the sidebar badge and the pill but not `.hsw-ac__bell-count`, which only disappeared after a reload.
+- **A photo-less variation reset the gallery.** `data-hsw-main` was updated on thumbnail clicks only, so a variation image did not become the photo a later image-less variation returns to.
+
 ## [1.11.300] - 2026-11-16
 
 ### Fixed
