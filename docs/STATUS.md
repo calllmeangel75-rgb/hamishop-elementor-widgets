@@ -7,13 +7,13 @@
 
 | مورد | مقدار |
 |---|---|
-| نسخه | **1.11.302** |
+| نسخه | **1.11.303** |
 | تاریخ | 2026-11-15 |
 | کامیت | `pending` |
-| تگ | `v1.11.302` |
-| ریلیز | <https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases/tag/v1.11.302> |
-| ZIP | `release-downloads/hamishop-elementor-widgets-1.11.302.zip` |
-| SHA-256 | `07921847799a2bebafbb8f6f0c722f1cafba6e2dd14ae7b1a5c6ee95cbe37cae` |
+| تگ | `v1.11.303` |
+| ریلیز | <https://github.com/calllmeangel75-rgb/hamishop-elementor-widgets/releases/tag/v1.11.303> |
+| ZIP | `release-downloads/hamishop-elementor-widgets-1.11.303.zip` |
+| SHA-256 | `e595f906cd21d8b60ade7e2f17e95b732be723487638947a6b09940dfefa4a26` |
 | تعداد ویجت | **۶۳** (۱۶ اصلی + ۴۷ بخش مستقل) |
 | CI | main و tag سبز |
 
@@ -48,7 +48,7 @@ SHA فایل commit‌شده و فایل دانلودشده از URL ریلیز 
 
 | مورد | وضعیت |
 |---|---|
-| CI main/tag روی 1.11.302 | ⏳ در حال اجرا |
+| CI main/tag روی 1.11.303 | ⏳ در حال اجرا |
 | `php tools/ci-checks.php` | ✅ ۲۴ چک |
 | `tests/qa/product-attribute-keys-wp.php` | ✅ ۱۰ چک (استیجینگ محلی) |
 | `register_controls()` همهٔ کلاس‌های ویجت | ✅ بدون خطا |

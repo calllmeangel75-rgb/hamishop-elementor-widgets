@@ -6,6 +6,11 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.303] - 2026-11-16
+
+### Performance
+- **Upgrader CSS rebuild no longer drags Elementor blobs.** The batch query walked `post_id` and selected `meta_value` (up to 40 serialised page trees, ~1.6 MB per batch, with a filesort over every Elementor row). It now walks `meta_id` (index order, ids only) and lets MySQL run the `LIKE '%hsw-%'` test and the size guard. Measured: 1,600,792 B → 778 B per batch. Legacy in-flight jobs are converted with one `MAX(meta_id)` lookup.
+
 ## [1.11.302] - 2026-11-16
 
 ### Changed

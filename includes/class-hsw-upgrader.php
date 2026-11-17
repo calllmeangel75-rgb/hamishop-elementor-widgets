@@ -479,16 +479,45 @@ final class HSW_Upgrader {
 			return true; // Elementor too old / not loaded: nothing to rebuild.
 		}
 
-		$cursor = (int) $state['cursor'];
+		/*
+		 * The cursor is `meta_id`, not `post_id`.
+		 *
+		 * The old query was
+		 *   SELECT post_id, meta_value … WHERE meta_key = '_elementor_data'
+		 *   AND post_id > X ORDER BY post_id LIMIT 40
+		 * which made MySQL sort every Elementor row on the site for each batch
+		 * and then hand PHP up to 40 serialised page trees at once — megabytes
+		 * of LONGTEXT per tick, and a filesort per tick on a big shop.
+		 *
+		 * `meta_id` arrives in index order inside the `meta_key` index
+		 * (InnoDB appends the primary key to a secondary index), so the batch
+		 * query is a plain range scan that never touches a blob, and the
+		 * «does this page use HamiShop?» test is done by MySQL with LIKE —
+		 * only the ids of matching pages travel back.
+		 */
+		$mcid = (int) ( $state['mcid'] ?? 0 );
+
+		/* A job already running before 1.11.303 carried a post_id in `cursor`. */
+		if ( 0 === $mcid && (int) $state['cursor'] > 0 ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
+			$mcid = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COALESCE(MAX(meta_id), 0) FROM {$wpdb->postmeta}
+					 WHERE meta_key = '_elementor_data' AND post_id <= %d",
+					(int) $state['cursor']
+				)
+			);
+			$state['mcid'] = $mcid;
+		}
 
 		while ( microtime( true ) < $deadline ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT post_id, meta_value FROM {$wpdb->postmeta}
-					 WHERE meta_key = '_elementor_data' AND post_id > %d
-					 ORDER BY post_id ASC LIMIT %d",
-					$cursor,
+					"SELECT meta_id, post_id FROM {$wpdb->postmeta}
+					 WHERE meta_key = '_elementor_data' AND meta_id > %d
+					 ORDER BY meta_id ASC LIMIT %d",
+					$mcid,
 					self::POSTS_PER_QUERY
 				)
 			);
@@ -497,20 +526,31 @@ final class HSW_Upgrader {
 				return true;
 			}
 
-			foreach ( $rows as $row ) {
-				$post_id = (int) $row->post_id;
-				$cursor  = $post_id;
+			/* Advance past this batch even if nothing in it uses HamiShop. */
+			$last = end( $rows );
+			$mcid = (int) $last->meta_id;
+			$state['mcid'] = $mcid;
 
-				/* Cheap substring test: a false positive only costs one rebuild. */
-				if ( false === strpos( (string) $row->meta_value, 'hsw-' ) ) {
-					$state['cursor'] = $cursor;
-					continue;
-				}
+			$ids          = array_map( 'intval', wp_list_pluck( $rows, 'post_id' ) );
+			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			$args         = array_merge( $ids, array( '%hsw-%' ) );
 
-				if ( strlen( (string) $row->meta_value ) > self::MAX_META_BYTES ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.NotPrepared
+			$matches = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT post_id, LENGTH(meta_value) AS bytes FROM {$wpdb->postmeta}
+					 WHERE meta_id IN ( {$placeholders} ) AND meta_value LIKE %s
+					 ORDER BY meta_id ASC",
+					$args
+				)
+			);
+
+			foreach ( (array) $matches as $match ) {
+				$post_id = (int) $match->post_id;
+
+				if ( (int) $match->bytes > self::MAX_META_BYTES ) {
 					/* Too big to parse safely here; leave its CSS as it is. */
 					self::log( 'post_css', 'skipped oversized page #' . $post_id, false );
-					$state['cursor'] = $cursor;
 					continue;
 				}
 
@@ -518,24 +558,19 @@ final class HSW_Upgrader {
 
 				/*
 				 * Rebuilding is far heavier than deleting was, so the budget has
-				 * to be enforced per post, not per query: one query of 40 posts
+				 * to be enforced per post, not per query: one batch of 40 pages
 				 * could otherwise run for ten seconds in a single tick.
 				 */
-				$state['cursor'] = $cursor;
-
 				if ( microtime( true ) >= $deadline ) {
-					return false; // Resume after this post on the next tick.
+					return false; // Resume with the next batch on the next tick.
 				}
 			}
-
-			$state['cursor'] = $cursor;
 
 			if ( count( $rows ) < self::POSTS_PER_QUERY ) {
 				return true;
 			}
 		}
 
-		$state['cursor'] = $cursor;
 		return false;
 	}
 
@@ -648,6 +683,7 @@ final class HSW_Upgrader {
 			'version'     => HSW_VERSION,
 			'step'        => 'element_cache',
 			'cursor'      => 0,
+			'mcid'        => 0,
 			'watermark'   => 0,
 			'runs'        => 0,
 			'errors'      => 0,

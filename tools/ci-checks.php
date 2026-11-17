@@ -340,6 +340,25 @@ hsw_ci(
 	( $marker_ok ? '' : 'server marker missing ' ) . ( $js_ok ? '' : 'link marker missing ' ) . ( $prevent_ok ? '' : 'anchor default not cancelled' )
 );
 
+/* ---------------------------------------------------------------------
+ * 6g) The CSS rebuild walks meta_id, never drags Elementor blobs in batches
+ *
+ * `SELECT post_id, meta_value … WHERE meta_key = '_elementor_data' ORDER BY
+ * post_id LIMIT 40` made MySQL sort every Elementor row on the site for each
+ * batch and handed PHP up to 40 serialised page trees at a time (Query Monitor
+ * caught it during an update). The batch query must stay index-only and the
+ * «does this page use HamiShop?» test must stay in SQL.
+ * ------------------------------------------------------------------- */
+$upgrader_php = (string) file_get_contents( $root . '/includes/class-hsw-upgrader.php' );
+$blob_batch   = (bool) preg_match( "/SELECT\s+post_id,\s*meta_value\s+FROM[^;]*ORDER BY post_id/si", $upgrader_php );
+$idx_ok       = (bool) preg_match( "/WHERE meta_key = '_elementor_data' AND meta_id > %d\s+ORDER BY meta_id ASC/si", $upgrader_php );
+$sql_like_ok  = false !== strpos( $upgrader_php, 'meta_value LIKE %s' ) && false !== strpos( $upgrader_php, "'%hsw-%'" );
+hsw_ci(
+	'upgrader: CSS rebuild scans meta_id, not Elementor blobs',
+	! $blob_batch && $idx_ok && $sql_like_ok,
+	( $blob_batch ? 'blob batch query present ' : '' ) . ( $idx_ok ? '' : 'meta_id cursor missing ' ) . ( $sql_like_ok ? '' : 'SQL LIKE test missing' )
+);
+
 /* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */
