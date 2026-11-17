@@ -359,6 +359,42 @@ hsw_ci(
 	( $blob_batch ? 'blob batch query present ' : '' ) . ( $idx_ok ? '' : 'meta_id cursor missing ' ) . ( $sql_like_ok ? '' : 'SQL LIKE test missing' )
 );
 
+/* ---------------------------------------------------------------------
+ * 6h) Invoice and postal label are staff documents
+ *
+ * The owner found «چاپ فاکتور» inside the customer's own order view. Both
+ * sheets carry the letterhead, stamp and shipment chart, so the key in the URL
+ * must not be enough — `edit_shop_orders` (or `manage_woocommerce`) is. The
+ * account panel must not render the button for a customer either.
+ * ------------------------------------------------------------------- */
+$invoice_php = (string) file_get_contents( $root . '/includes/class-hsw-invoice.php' );
+$staff_only  = false !== strpos( $invoice_php, 'if ( ! $is_staff ) {' )
+	&& false !== strpos( $invoice_php, "'error' => 'forbidden'" );
+$no_owner    = false === strpos( $invoice_php, '! $is_owner && ! $is_staff' );
+$account_guarded = false !== strpos( $account_php, "\$may_print = current_user_can( 'edit_shop_orders' )" );
+hsw_ci(
+	'invoice: printable only with order access',
+	$staff_only && $no_owner && $account_guarded,
+	( $staff_only ? '' : 'authorize() still allows owners ' ) . ( $no_owner ? '' : 'owner branch present ' ) . ( $account_guarded ? '' : 'account button not guarded' )
+);
+
+/* ---------------------------------------------------------------------
+ * 6i) Paying an existing order empties the cart it was built from
+ *
+ * `pay_awaiting_order()` is reached only when the order matches the cart hash,
+ * yet it never emptied the cart: the customer paid, saw «ثبت شد», and the same
+ * product was still counted in the header. The normal checkout path always
+ * emptied it; the resumed-payment path must too.
+ * ------------------------------------------------------------------- */
+$checkout_php = (string) file_get_contents( $root . '/includes/class-hsw-checkout-complete.php' );
+$pay_pos      = strpos( $checkout_php, 'protected function pay_awaiting_order' );
+$pay_body     = false !== $pay_pos ? substr( $checkout_php, $pay_pos, 6000 ) : '';
+hsw_ci(
+	'checkout: a resumed payment empties its cart',
+	'' !== $pay_body && false !== strpos( $pay_body, 'empty_cart()' ),
+	false !== $pay_pos ? ( false !== strpos( $pay_body, 'empty_cart()' ) ? 'cart cleared' : 'cart kept after payment' ) : 'pay_awaiting_order not found'
+);
+
 /* -------------------------------------------------------------------------
  * 7) Documentation set
  * ---------------------------------------------------------------------- */

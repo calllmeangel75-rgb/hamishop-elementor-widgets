@@ -2320,9 +2320,16 @@ final class HSW_Account {
 		 * sheet is a one-page A4 document with the postal block, and printing it
 		 * never drags the account shell into the paper.
 		 */
-		if ( class_exists( 'HSW_Invoice' ) && HSW_Invoice::enabled() ) {
+		/*
+		 * «چاپ فاکتور» is staff-only: the invoice sheet is the seller's document
+		 * (letterhead, stamp, postal block) and the customer has the order page
+		 * itself. Anyone who may fulfil orders — administrator, shop manager,
+		 * any role with `edit_shop_orders` — still sees it here.
+		 */
+		$may_print = current_user_can( 'edit_shop_orders' ) || current_user_can( 'manage_woocommerce' );
+		if ( $may_print && class_exists( 'HSW_Invoice' ) && HSW_Invoice::enabled() ) {
 			$html .= '<a class="hsw-inv__print" data-hsw-print-link target="_blank" rel="noopener" href="' . esc_url( HSW_Invoice::url( $order->get_id() ) ) . '">' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</a>';
-		} else {
+		} elseif ( $may_print ) {
 			$html .= '<button type="button" class="hsw-inv__print" data-hsw-print>' . $this->icon( 'print' ) . esc_html__( 'چاپ فاکتور', 'hamishop-elementor-widgets' ) . '</button>';
 		}
 		$html .= '<a class="hsw-ac__btn hsw-ac__btn--ghost" href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">' . esc_html__( 'بازگشت به سفارش‌ها', 'hamishop-elementor-widgets' ) . '</a>';

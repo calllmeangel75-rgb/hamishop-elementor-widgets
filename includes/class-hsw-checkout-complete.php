@@ -444,6 +444,18 @@ class HSW_Checkout_Complete {
 		/* One order, one payment: nothing may be paid twice from this session. */
 		WC()->session->set( 'order_awaiting_payment', null );
 
+		/*
+		 * This path is chosen only when the awaiting order was built from the
+		 * cart that is still on screen (`has_cart_hash()` above), so paying it
+		 * buys exactly those lines. The normal checkout empties the cart in
+		 * `complete()`; this branch used to skip it, and the customer paid,
+		 * landed on «سفارش شما ثبت شد» and still found the same product counted
+		 * in the header — one refresh away from paying twice.
+		 */
+		if ( WC()->cart && ! WC()->cart->is_empty() ) {
+			WC()->cart->empty_cart();
+		}
+
 		return rest_ensure_response(
 			array(
 				'ok'       => true,

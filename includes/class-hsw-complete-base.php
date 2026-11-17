@@ -115,6 +115,7 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
         }
         $status = $this->completion_auth_status();
         if ( 'granted' === $status ) {
+            $this->maybe_clear_cart_for( $order );
             return $order;
         }
         return false;
@@ -245,6 +246,52 @@ abstract class HSW_Complete_Base extends HSW_Pay_Base {
                 'pay_url'  => $order->needs_payment() ? (string) $order->get_checkout_payment_url() : '',
             ),
         );
+    }
+
+    /**
+     * Drop the cart lines this order already bought.
+     *
+     * Opening the completion page for an order whose items are still in the
+     * session cart means checkout finished without emptying it — a gateway that
+     * returns `success` without touching the cart, a payment retried from the
+     * account page, or a browser that came back to an older cart page. The
+     * customer then sees «۱» again on the home page and can pay twice.
+     *
+     * The clear is deliberately narrow: only when EVERY cart line belongs to
+     * this order and no line has a larger quantity than was ordered. A customer
+     * who finished an order and then added something else keeps their new cart.
+     * Staff opening a customer's order never touch their own cart.
+     *
+     * @param WC_Order $order Order just completed.
+     * @return bool True when the cart was emptied.
+     */
+    protected function maybe_clear_cart_for( $order ) {
+        if ( current_user_can( 'edit_shop_orders' ) || ! function_exists( 'WC' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+            return false;
+        }
+
+        $ordered = array();
+        foreach ( $order->get_items() as $item ) {
+            if ( ! $item instanceof WC_Order_Item_Product ) {
+                continue;
+            }
+            $key             = $item->get_variation_id() ? 'v' . (int) $item->get_variation_id() : 'p' . (int) $item->get_product_id();
+            $ordered[ $key ] = (int) ( $ordered[ $key ] ?? 0 ) + (int) $item->get_quantity();
+        }
+        if ( ! $ordered ) {
+            return false;
+        }
+
+        foreach ( WC()->cart->get_cart() as $line ) {
+            $variation = (int) ( $line['variation_id'] ?? 0 );
+            $key       = $variation ? 'v' . $variation : 'p' . (int) ( $line['product_id'] ?? 0 );
+            if ( ! isset( $ordered[ $key ] ) || (int) ( $line['quantity'] ?? 0 ) > $ordered[ $key ] ) {
+                return false;
+            }
+        }
+
+        WC()->cart->empty_cart();
+        return true;
     }
 
     /**

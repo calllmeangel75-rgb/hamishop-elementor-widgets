@@ -6,6 +6,12 @@
 
 > **دربارهٔ تاریخ‌ها:** تاریخ انتشار نسخه‌ها تا پیش از این پاک‌سازی در پروژه ثبت نشده بود و هیچ تاریخی حدس زده نشده است. از نسخهٔ ۱.۱۱.۲۲۳ به بعد، هر نسخه با تاریخ منتشر می‌شود.
 
+## [1.11.304] - 2026-11-16
+
+### Fixed
+- **The cart kept the order it had just paid.** The retried-payment path (`pay_awaiting_order()`) cleared `order_awaiting_payment` but never emptied the cart, although it only runs when the order matches the cart hash. It now empties the cart after the gateway accepts; the completion page also clears a cart whose every line belongs to that order (staff and unrelated new carts untouched).
+- **Invoice is printable only with order access.** `HSW_Invoice::authorize()` accepted the order owner for `part=invoice`; both invoice and postal label now require `edit_shop_orders` / `manage_woocommerce`, and the account panel no longer renders «چاپ فاکتور» for customers.
+
 ## [1.11.303] - 2026-11-16
 
 ### Performance

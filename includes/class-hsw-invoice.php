@@ -103,30 +103,30 @@ class HSW_Invoice {
 			);
 		}
 
-		$is_owner = is_user_logged_in() && (int) $order->get_customer_id() === get_current_user_id();
 		$is_staff = current_user_can( 'edit_shop_orders' ) || current_user_can( 'manage_woocommerce' );
 
 		/*
-		 * The postal chart is an internal fulfillment document (sender, recipient,
-		 * the ten-box postcode the counter reads). It is not part of what a
-		 * customer prints: the account panel shows the invoice, the shop prints the
-		 * shipping label.
+		 * Both documents are shop paperwork, not customer pages.
+		 *
+		 * The invoice and the postal label print the seller's letterhead, the
+		 * stamp and the shipment chart; they are produced by whoever fulfils the
+		 * order (administrator, shop manager, any role WooCommerce gives
+		 * `edit_shop_orders`). The customer's own copy of the order lives on the
+		 * account page — the key in the URL alone must never print a document.
+		 *
+		 * The owner asked for this explicitly after finding the link in the
+		 * customer area: «باید مخصوص ادمین و ادمین فروشگاه و … دسترسی به سفارشها
+		 * باشد».
 		 */
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- part is sanitised below.
-		$part = isset( $_GET['part'] ) ? sanitize_key( wp_unslash( (string) $_GET['part'] ) ) : 'invoice';
-		if ( 'postal' === $part && ! $is_staff ) {
+		if ( ! $is_staff ) {
 			return array(
 				'order' => null,
 				'error' => 'forbidden',
 			);
 		}
 
-		if ( ! $is_owner && ! $is_staff ) {
-			return array(
-				'order' => null,
-				'error' => 'forbidden',
-			);
-		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- part is sanitised below.
+		$part = isset( $_GET['part'] ) ? sanitize_key( wp_unslash( (string) $_GET['part'] ) ) : 'invoice';
 
 		return array(
 			'order' => $order,
